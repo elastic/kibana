@@ -90,7 +90,7 @@ describe('context variables', () => {
           };
           layer.columnOrder = ['col2', 'col1'];
           expect(
-            intervalOperation.toExpression(layer, 'col1', createMockedIndexPattern(), {
+            intervalOperation.toExpression(layer, 'col1', createMockedIndexPattern(), [], {
               dateRange: {
                 fromDate: new Date().toISOString(),
                 toDate: new Date().toISOString(),
@@ -124,6 +124,72 @@ describe('context variables', () => {
           ]);
         }
       );
+
+      it('should not forward the interval override if date histogram column is used as breakdown dimension', () => {
+        const layer = createLayer('interval');
+        layer.columns = {
+          col2: {
+            label: 'Date histogram',
+            dataType: 'date',
+            operationType: 'date_histogram',
+            sourceField: '@timestamp',
+            isBucketed: true,
+            scale: 'interval',
+            params: {
+              interval: '1w',
+              includeEmptyRows: true,
+              dropPartials: false,
+            },
+          } as DateHistogramIndexPatternColumn,
+          ...layer.columns,
+        };
+        layer.columnOrder = ['col1', 'col2'];
+        expect(
+          intervalOperation.toExpression(
+            layer,
+            'col1',
+            createMockedIndexPattern(),
+            // map the date histogram dimension visually as breakdown by
+            [
+              {
+                isBreakdownDimension: true,
+                accessors: [{ columnId: 'col2' }],
+                filterOperations: jest.fn(),
+                groupLabel: 'Breakdown by',
+                groupId: 'breakdownDimension',
+                supportsMoreColumns: false,
+              },
+            ],
+            {
+              dateRange: {
+                fromDate: new Date().toISOString(),
+                toDate: new Date().toISOString(),
+              },
+            }
+          )
+        ).toEqual([
+          {
+            arguments: {
+              expression: [
+                {
+                  chain: [
+                    {
+                      arguments: {},
+                      function: 'formula_interval',
+                      type: 'function',
+                    },
+                  ],
+                  type: 'expression',
+                },
+              ],
+              id: ['col1'],
+              name: ['Constant: interval'],
+            },
+            function: 'mathColumn',
+            type: 'function',
+          },
+        ]);
+      });
     });
     describe('getErrorMessages', () => {
       it('should return error if no date_histogram is configured', () => {
