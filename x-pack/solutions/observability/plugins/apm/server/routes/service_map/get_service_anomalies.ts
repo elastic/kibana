@@ -136,7 +136,7 @@ export async function getServiceAnomalies({
           serviceName: bucket.key.serviceName as string,
           jobId: bucket.key.jobId as string,
           transactionType: metrics.by_field_value as string,
-          actualValue: metrics.actual as number | null,
+          actualValue: metrics.actual as number,
           anomalyScore,
           healthStatus,
         };

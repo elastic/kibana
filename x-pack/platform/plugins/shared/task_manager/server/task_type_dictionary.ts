@@ -27,6 +27,9 @@ export const REMOVED_TYPES: string[] = [
 
   'cleanup_failed_action_executions',
   'reports:monitor',
+
+  // deprecated in https://github.com/elastic/kibana/pull/216916
+  'obs-ai-assistant:knowledge-base-migration',
 ];
 
 /**
