@@ -179,7 +179,7 @@ export const testUsers: {
     permissions: {
       feature: {
         fleet: ['read'],
-        siemV2: [
+        siemV3: [
           'minimal_all',
           'trusted_applications_read',
           'host_isolation_exceptions_read',
@@ -200,7 +200,7 @@ export const testUsers: {
     permissions: {
       feature: {
         fleet: ['all'],
-        siemV2: ['minimal_all', 'policy_management_all'],
+        siemV3: ['minimal_all', 'policy_management_all'],
         securitySolutionNotes: ['all'],
         securitySolutionTimeline: ['all'],
       },
@@ -214,7 +214,7 @@ export const testUsers: {
     permissions: {
       feature: {
         fleet: ['all'],
-        siemV2: ['minimal_all', 'policy_management_read'],
+        siemV3: ['minimal_all', 'policy_management_read'],
         securitySolutionNotes: ['all'],
         securitySolutionTimeline: ['all'],
       },
@@ -228,7 +228,7 @@ export const testUsers: {
     permissions: {
       feature: {
         fleet: ['read'],
-        siemV2: ['minimal_all'],
+        siemV3: ['minimal_all'],
         securitySolutionNotes: ['all'],
         securitySolutionTimeline: ['all'],
       },
@@ -241,7 +241,7 @@ export const testUsers: {
   endpoint_integr_read_only_fleet_none: {
     permissions: {
       feature: {
-        siemV2: ['minimal_all'],
+        siemV3: ['minimal_all'],
         securitySolutionNotes: ['all'],
         securitySolutionTimeline: ['all'],
       },

@@ -17,7 +17,7 @@ export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => 
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV2: [
+          siemV3: [
             'minimal_all',
 
             'policy_management_all',
@@ -46,7 +46,7 @@ export const getEndpointSecurityPolicyManagementReadRole: () => Omit<Role, 'name
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV2: ['minimal_all', 'policy_management_read'],
+          siemV3: ['minimal_all', 'policy_management_read'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

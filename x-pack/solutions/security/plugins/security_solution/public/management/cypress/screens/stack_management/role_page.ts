@@ -66,12 +66,12 @@ export const getSecuritySolutionCategoryKibanaPrivileges = (): Cypress.Chainable
  */
 export const expandEndpointSecurityFeaturePrivileges = (): Cypress.Chainable => {
   return cy
-    .getByTestSubj('featurePrivilegeControls_securitySolution_siemV2_accordionToggle')
+    .getByTestSubj('featurePrivilegeControls_securitySolution_siemV3_accordionToggle')
     .click();
 };
 
 export const getEndpointSecurityFeaturePrivileges = () => {
-  return cy.getByTestSubj('featureCategory_securitySolution_siemV2');
+  return cy.getByTestSubj('featureCategory_securitySolution_siemV3');
 };
 
 /**
@@ -104,7 +104,7 @@ export const setSecuritySolutionEndpointGroupPrivilege = (
   privilege: 'all' | 'read' | 'none'
 ): Cypress.Chainable<JQuery<HTMLElement>> => {
   return getSecuritySolutionCategoryKibanaPrivileges()
-    .findByTestSubj(`siemV2_${privilege}`)
+    .findByTestSubj(`siemV3_${privilege}`)
     .click();
 };
 
@@ -148,7 +148,7 @@ export const setEndpointSubFeaturePrivilege = (
   privilege: 'all' | 'read' | 'none'
 ): Cypress.Chainable<JQuery<HTMLElement>> => {
   return getEndpointSecurityFeaturePrivileges()
-    .findByTestSubj(`securitySolution_siemV2_${feature}_privilegeGroup`)
+    .findByTestSubj(`securitySolution_siemV3_${feature}_privilegeGroup`)
     .find(`button[title="${privilegeMapToTitle[privilege]}"]`)
     .click();
 };

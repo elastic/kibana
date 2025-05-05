@@ -108,7 +108,7 @@ describe('take action dropdown', () => {
             isOsqueryAvailable: jest.fn().mockReturnValue(true),
           },
           application: {
-            capabilities: { siemV2: { crud_alerts: true, read_alerts: true }, osquery: true },
+            capabilities: { siemV3: { crud_alerts: true, read_alerts: true }, osquery: true },
           },
         },
       };

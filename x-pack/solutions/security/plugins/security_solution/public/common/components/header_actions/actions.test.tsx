@@ -72,7 +72,7 @@ jest.mock('../../lib/kibana', () => {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
           capabilities: {
-            siemV2: { crud_alerts: true, read_alerts: true },
+            siemV3: { crud_alerts: true, read_alerts: true },
           },
         },
         cases: mockCasesContract(),

@@ -100,7 +100,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'securitySolutionSiemMigrations',
         'securitySolutionTimeline',
         'siem',
-        'siemV2',
+        'siemV3',
         'slo',
         'streams',
         'uptime',

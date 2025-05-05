@@ -57,7 +57,7 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
           osquery: ['all'],
           securitySolutionCasesV3: ['all'],
           builtinAlerts: ['all'],
-          siemV2: [
+          siemV3: [
             'all',
             'read_alerts',
             'policy_management_all',

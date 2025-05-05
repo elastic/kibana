@@ -88,7 +88,7 @@ export const secTimelineAllV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siemV3: ['all'],
           securitySolutionTimeline: ['all'],
         },
         spaces: ['*'],
@@ -111,7 +111,7 @@ export const secTimelineReadV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          siemV3: ['read'],
           securitySolutionTimeline: ['read'],
         },
         spaces: ['*'],
@@ -134,7 +134,7 @@ export const secTimelineNoneV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          siemV3: ['read'],
           securitySolutionTimeline: ['none'],
         },
         spaces: ['*'],
@@ -157,7 +157,7 @@ export const secNotesAllV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siemV3: ['all'],
           securitySolutionNotes: ['all'],
         },
         spaces: ['*'],
@@ -180,7 +180,7 @@ export const secNotesReadV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          siemV3: ['read'],
           securitySolutionNotes: ['read'],
         },
         spaces: ['*'],
@@ -203,7 +203,7 @@ export const secNotesNoneV2: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['none'],
+          siemV3: ['none'],
           securitySolutionNotes: ['none'],
         },
         spaces: ['*'],

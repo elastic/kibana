@@ -76,7 +76,7 @@ jest.mock('../../../../common/lib/kibana', () => {
       services: {
         timelines: { ...mockTimelines },
         application: {
-          capabilities: { siemV2: { crud_alerts: true, read_alerts: true } },
+          capabilities: { siemV3: { crud_alerts: true, read_alerts: true } },
         },
         cases: {
           ...mockCasesContract(),

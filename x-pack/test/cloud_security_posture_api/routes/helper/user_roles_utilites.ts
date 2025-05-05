@@ -89,7 +89,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         {
           base: [],
           feature: {
-            siemV2: ['read'],
+            siemV3: ['read'],
             fleet: ['all'],
             fleetv2: ['all'],
             savedObjectsManagement: ['all'],
@@ -107,7 +107,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         {
           base: [],
           feature: {
-            siemV2: ['read'],
+            siemV3: ['read'],
             fleet: ['all'],
             fleetv2: ['all'],
           },
@@ -140,7 +140,7 @@ export function CspSecurityCommonProvider(providerContext: FtrProviderContext) {
         {
           base: [],
           feature: {
-            siemV2: ['all'],
+            siemV3: ['all'],
             fleet: ['all'],
             fleetv2: ['all'],
             savedObjectsManagement: ['all'],

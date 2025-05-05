@@ -62,7 +62,7 @@ export const secAll: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siemV3: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
@@ -99,7 +99,7 @@ export const secReadCasesAll: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['read'],
+          siemV3: ['read'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
@@ -136,7 +136,7 @@ export const secAllCasesOnlyReadDelete: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siemV3: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
@@ -173,7 +173,7 @@ export const secAllCasesNoDelete: Role = {
     kibana: [
       {
         feature: {
-          siemV2: ['all'],
+          siemV3: ['all'],
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],

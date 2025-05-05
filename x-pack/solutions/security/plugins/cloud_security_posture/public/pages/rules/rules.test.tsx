@@ -47,7 +47,7 @@ const getTestComponent =
         ...coreStart.application,
         capabilities: {
           ...coreStart.application.capabilities,
-          siemV2: { crud: true },
+          siemV3: { crud: true },
         },
       },
     };

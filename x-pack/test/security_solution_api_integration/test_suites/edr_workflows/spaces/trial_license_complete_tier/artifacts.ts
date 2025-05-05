@@ -62,9 +62,9 @@ export default function ({ getService }: FtrProviderContext) {
         { name: 'artifactManager' }
       );
 
-      if (artifactManagerRole.kibana[0].feature.siemV2.includes('global_artifact_management_all')) {
-        artifactManagerRole.kibana[0].feature.siemV2 =
-          artifactManagerRole.kibana[0].feature.siemV2.filter(
+      if (artifactManagerRole.kibana[0].feature.siemV3.includes('global_artifact_management_all')) {
+        artifactManagerRole.kibana[0].feature.siemV3 =
+          artifactManagerRole.kibana[0].feature.siemV3.filter(
             (privilege) => privilege !== 'global_artifact_management_all'
           );
       }
@@ -75,11 +75,11 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       if (
-        !globalArtifactManagerRole.kibana[0].feature.siemV2.includes(
+        !globalArtifactManagerRole.kibana[0].feature.siemV3.includes(
           'global_artifact_management_all'
         )
       ) {
-        globalArtifactManagerRole.kibana[0].feature.siemV2.push('global_artifact_management_all');
+        globalArtifactManagerRole.kibana[0].feature.siemV3.push('global_artifact_management_all');
       }
 
       const [artifactManagerUser, globalArtifactManagerUser] = await Promise.all([

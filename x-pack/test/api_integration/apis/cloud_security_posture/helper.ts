@@ -123,7 +123,7 @@ export const createCSPRole = async (
   await security.role.create(roleName, {
     kibana: [
       {
-        feature: { siemV2: ['read'], fleetv2: ['all'], fleet: ['read'] },
+        feature: { siemV3: ['read'], fleetv2: ['all'], fleet: ['read'] },
         spaces: ['*'],
       },
     ],

@@ -101,7 +101,7 @@ describe('Results', () => {
       services: {
         application: {
           capabilities: {
-            siemV2: { crud_alerts: true, read_alerts: true },
+            siemV3: { crud_alerts: true, read_alerts: true },
           },
           navigateToUrl: jest.fn(),
         },

@@ -140,7 +140,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                   <UserPrivilegesProvider
                     kibanaCapabilities={
                       {
-                        siemV2: { show: true, crud: true },
+                        siemV3: { show: true, crud: true },
                         [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
                         [ASSISTANT_FEATURE_ID]: { 'ai-assistant': true },
                       } as unknown as Capabilities

@@ -42,7 +42,7 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
         osquery: ['all'],
         savedObjectsManagement: ['all'],
         savedObjectsTagging: ['all'],
-        siemV2: [
+        siemV3: [
           'minimal_all',
           'endpoint_list_all',
           'endpoint_list_read',

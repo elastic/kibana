@@ -28,7 +28,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
       application: {
         getUrlForApp: jest.fn(),
         capabilities: {
-          siemV2: {
+          siemV3: {
             crud: true,
           },
           actions: {

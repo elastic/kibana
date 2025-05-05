@@ -61,9 +61,9 @@ viewer:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.read
-        - feature_siemV2.read_alerts
-        - feature_siemV2.endpoint_list_read
+        - feature_siemV3.read
+        - feature_siemV3.read_alerts
+        - feature_siemV3.endpoint_list_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -134,19 +134,19 @@ editor:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all
-        - feature_siemV2.policy_management_read # Elastic Defend Policy Management
-        - feature_siemV2.host_isolation_all
-        - feature_siemV2.process_operations_all
-        - feature_siemV2.actions_log_management_all # Response actions history
-        - feature_siemV2.file_operations_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all
+        - feature_siemV3.policy_management_read # Elastic Defend Policy Management
+        - feature_siemV3.host_isolation_all
+        - feature_siemV3.process_operations_all
+        - feature_siemV3.actions_log_management_all # Response actions history
+        - feature_siemV3.file_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -198,9 +198,9 @@ t1_analyst:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.read
-        - feature_siemV2.read_alerts
-        - feature_siemV2.endpoint_list_read
+        - feature_siemV3.read
+        - feature_siemV3.read_alerts
+        - feature_siemV3.endpoint_list_read
         - feature_securitySolutionCases.read
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -257,9 +257,9 @@ t2_analyst:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.read
-        - feature_siemV2.read_alerts
-        - feature_siemV2.endpoint_list_read
+        - feature_siemV3.read
+        - feature_siemV3.read_alerts
+        - feature_siemV3.endpoint_list_read
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -320,21 +320,21 @@ t3_analyst:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all
-        - feature_siemV2.policy_management_read # Elastic Defend Policy Management
-        - feature_siemV2.host_isolation_all
-        - feature_siemV2.process_operations_all
-        - feature_siemV2.actions_log_management_all # Response actions history
-        - feature_siemV2.file_operations_all
-        - feature_siemV2.scan_operations_all
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all
+        - feature_siemV3.policy_management_read # Elastic Defend Policy Management
+        - feature_siemV3.host_isolation_all
+        - feature_siemV3.process_operations_all
+        - feature_siemV3.actions_log_management_all # Response actions history
+        - feature_siemV3.file_operations_all
+        - feature_siemV3.scan_operations_all
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -394,9 +394,9 @@ threat_intelligence_analyst:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.endpoint_list_read
-        - feature_siemV2.blocklist_all
+        - feature_siemV3.all
+        - feature_siemV3.endpoint_list_read
+        - feature_siemV3.blocklist_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -459,17 +459,17 @@ rule_author:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.policy_management_all
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_read
-        - feature_siemV2.blocklist_all # Elastic Defend Policy Management
-        - feature_siemV2.actions_log_management_read
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.policy_management_all
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_read
+        - feature_siemV3.blocklist_all # Elastic Defend Policy Management
+        - feature_siemV3.actions_log_management_read
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -532,22 +532,22 @@ soc_manager:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.policy_management_all
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all
-        - feature_siemV2.host_isolation_all
-        - feature_siemV2.process_operations_all
-        - feature_siemV2.actions_log_management_all
-        - feature_siemV2.file_operations_all
-        - feature_siemV2.execute_operations_all
-        - feature_siemV2.scan_operations_all
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.policy_management_all
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all
+        - feature_siemV3.host_isolation_all
+        - feature_siemV3.process_operations_all
+        - feature_siemV3.actions_log_management_all
+        - feature_siemV3.file_operations_all
+        - feature_siemV3.execute_operations_all
+        - feature_siemV3.scan_operations_all
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -610,9 +610,9 @@ detections_admin:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -666,17 +666,17 @@ platform_engineer:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.policy_management_all
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all # Elastic Defend Policy Management
-        - feature_siemV2.actions_log_management_read
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.policy_management_all
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all # Elastic Defend Policy Management
+        - feature_siemV3.actions_log_management_read
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -740,21 +740,21 @@ endpoint_operations_analyst:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.read
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.policy_management_all
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all
-        - feature_siemV2.host_isolation_all
-        - feature_siemV2.process_operations_all
-        - feature_siemV2.actions_log_management_all # Response History
-        - feature_siemV2.file_operations_all
-        - feature_siemV2.execute_operations_all # Execute
-        - feature_siemV2.scan_operations_all
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.policy_management_all
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all
+        - feature_siemV3.host_isolation_all
+        - feature_siemV3.process_operations_all
+        - feature_siemV3.actions_log_management_all # Response History
+        - feature_siemV3.file_operations_all
+        - feature_siemV3.execute_operations_all # Execute
+        - feature_siemV3.scan_operations_all
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all
@@ -818,16 +818,16 @@ endpoint_policy_manager:
     - application: 'kibana-.kibana'
       privileges:
         - feature_ml.all
-        - feature_siemV2.all
-        - feature_siemV2.read_alerts
-        - feature_siemV2.crud_alerts
-        - feature_siemV2.policy_management_all
-        - feature_siemV2.endpoint_list_all
-        - feature_siemV2.trusted_applications_all
-        - feature_siemV2.event_filters_all
-        - feature_siemV2.host_isolation_exceptions_all
-        - feature_siemV2.blocklist_all # Elastic Defend Policy Management
-        - feature_siemV2.workflow_insights_all
+        - feature_siemV3.all
+        - feature_siemV3.read_alerts
+        - feature_siemV3.crud_alerts
+        - feature_siemV3.policy_management_all
+        - feature_siemV3.endpoint_list_all
+        - feature_siemV3.trusted_applications_all
+        - feature_siemV3.event_filters_all
+        - feature_siemV3.host_isolation_exceptions_all
+        - feature_siemV3.blocklist_all # Elastic Defend Policy Management
+        - feature_siemV3.workflow_insights_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_securitySolutionAttackDiscovery.all

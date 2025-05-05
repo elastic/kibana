@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         searchSynonyms: 0,
         searchQueryRules: 0,
         siem: 0,
-        siemV2: 0,
+        siemV3: 0,
         securitySolutionCases: 0,
         securitySolutionCasesV2: 0,
         securitySolutionCasesV3: 0,

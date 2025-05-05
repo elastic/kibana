@@ -88,7 +88,7 @@ jest.mock('../../../common/lib/kibana', () => {
         application: {
           navigateToUrl: jest.fn(),
           capabilities: {
-            siemV2: { crud_alerts: true, read_alerts: true },
+            siemV3: { crud_alerts: true, read_alerts: true },
           },
         },
         dataViews: mockDataViewsService,
@@ -103,7 +103,7 @@ jest.mock('../../../common/lib/kibana', () => {
         },
         docLinks: {
           links: {
-            siemV2: {
+            siemV3: {
               privileges: 'link',
             },
           },

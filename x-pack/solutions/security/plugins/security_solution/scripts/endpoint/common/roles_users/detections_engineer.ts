@@ -17,7 +17,7 @@ export const getDetectionsEngineer: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siemV2: [
+          siemV3: [
             'minimal_all',
 
             'policy_management_read',

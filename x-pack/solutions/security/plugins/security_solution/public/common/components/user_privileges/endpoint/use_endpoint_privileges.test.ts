@@ -53,7 +53,7 @@ describe('When using useEndpointPrivileges hook', () => {
       catalogue: {},
       management: {},
       navLinks: {},
-      siemV2: {
+      siemV3: {
         crud: true,
         show: true,
       },
