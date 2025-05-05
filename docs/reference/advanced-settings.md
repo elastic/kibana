@@ -312,9 +312,6 @@ $$$apm-aws-request$$$`observability:apmAWSLambdaRequestCostPerMillion`
 $$$apm-continuous-rollups$$$`observability:apmEnableContinuousRollups`
 :   [beta] When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.
 
-$$$apm-enable-service-metrics$$$`observability:apmEnableServiceMetrics`
-:   [beta] Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.
-
 $$$observability-apm-labs$$$`observability:apmLabsButton`
 :   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
 
