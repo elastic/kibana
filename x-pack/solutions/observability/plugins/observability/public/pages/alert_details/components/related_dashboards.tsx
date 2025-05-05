@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import {
   EuiTitle,
   EuiText,

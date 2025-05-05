@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiPopover, EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
+import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
 
 interface DashboardActionsProps {
