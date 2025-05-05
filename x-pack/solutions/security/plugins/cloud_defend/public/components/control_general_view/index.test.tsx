@@ -44,7 +44,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.safeLoad(configuration);
+      const json = yaml.load(configuration);
 
       expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
       expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
@@ -69,7 +69,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.safeLoad(configuration);
+      const json = yaml.load(configuration);
 
       expect(json.file.selectors.length).toBe(getAllByTestId('cloud-defend-selector').length);
     } catch (err) {
@@ -91,7 +91,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.safeLoad(configuration);
+      const json = yaml.load(configuration);
 
       expect(json.file.responses.length).toBe(getAllByTestId('cloud-defend-file-response').length);
     } catch (err) {
@@ -113,7 +113,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.safeLoad(configuration);
+      const json = yaml.load(configuration);
 
       expect(json.process.responses.length).toBe(
         getAllByTestId('cloud-defend-process-response').length
@@ -166,7 +166,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.safeLoad(configuration);
+      const json = yaml.load(configuration);
 
       expect(json.file.responses[0].match).toHaveLength(1);
     } catch (err) {
@@ -205,7 +205,7 @@ describe('<ControlGeneralView />', () => {
     const configuration = input?.vars?.configuration?.value;
 
     try {
-      const json = yaml.safeLoad(configuration);
+      const json = yaml.load(configuration);
 
       expect(json.file.selectors).toHaveLength(4);
       expect(json.file.selectors[3].name).toEqual(json.file.selectors[0].name + '1');

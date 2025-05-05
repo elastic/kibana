@@ -63,7 +63,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         position: monaco.Position,
         token: monaco.CancellationToken
       ) {
-        return getHoverItem(model, position, token, callbacks);
+        return getHoverItem(model, position, callbacks);
       },
     };
   },

@@ -10,7 +10,7 @@ import { Client } from '@elastic/elasticsearch';
 import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { StreamUpsertRequest } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
@@ -74,7 +74,7 @@ export async function forkStream(
 export async function putStream(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,
-  body: StreamUpsertRequest,
+  body: Streams.all.UpsertRequest,
   expectStatusCode: number = 200
 ) {
   return await apiClient
