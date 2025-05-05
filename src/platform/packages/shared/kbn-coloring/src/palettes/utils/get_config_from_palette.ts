@@ -42,7 +42,7 @@ export function getConfigFromPalette(
       .map((color, i) => [color.toLowerCase(), i])
   );
   const colors = palette.colors(3).reverse();
-  const stepss = colors
+  const paletteColorIndices = colors
     .map<number | string | null>((color, i) => {
       const colorIndex = defaultPaletteColorMap.get(color.toLowerCase()) ?? -1;
       if (colorIndex > 0) return colorIndex;
@@ -51,7 +51,7 @@ export function getConfigFromPalette(
     })
     .filter(isNotNull);
 
-  const steps = stepss.map(
+  const steps = paletteColorIndices.map(
     (color) =>
       ({
         touched: false,
