@@ -11,14 +11,6 @@ export { observer } from './src/lib/agent_config';
 export type { AgentConfigFields } from './src/lib/agent_config/agent_config_fields';
 export { apm } from './src/lib/apm';
 export type { ApmFields } from './src/lib/apm/apm_fields';
-<<<<<<< HEAD
-=======
-export type {
-  ApmOtelFields,
-  ApmOtelAttributes,
-  SpanKind,
-} from './src/lib/apm/otel/apm_otel_fields';
->>>>>>> 9cc220ac52f ([Synthtrace] APM Otel v2 (#217019))
 export type { Instance } from './src/lib/apm/instance';
 export { MobileDevice } from './src/lib/apm/mobile_device';
 export type {
