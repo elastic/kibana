@@ -19,7 +19,7 @@ To control how data is collected from your {{es}} nodes, you configure [`xpack.m
 For more information, check out [Monitor a cluster](docs-content://deploy-manage/monitor.md).
 
 :::{note}
-If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
 :::
 
 ## General monitoring settings [monitoring-general-settings]

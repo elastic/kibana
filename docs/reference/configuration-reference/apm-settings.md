@@ -13,7 +13,7 @@ applies_to:
 These settings allow the APM app to function, and specify the data that it surfaces. Unless you’ve customized your setup, you do not need to configure any settings to use the APM app. It is enabled by default.
 
 :::{note}
-If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
 :::
 
 ## APM indices [apm-indices-settings-kb]
