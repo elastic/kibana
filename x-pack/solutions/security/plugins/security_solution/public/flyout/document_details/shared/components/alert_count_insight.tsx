@@ -129,6 +129,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
   const { to, from } = useGlobalTime();
   const { signalIndexName } = useSignalIndex();
+
   const { items, isLoading } = useAlertsByStatus({
     entityFilter,
     signalIndexName,

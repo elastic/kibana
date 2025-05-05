@@ -85,8 +85,6 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
               entityDocId,
               scopeId,
               contextId,
-              id: entityDocId,
-              indexName: 'logs-cloud_asset_inventory.asset_inventory-default',
             },
           },
         });

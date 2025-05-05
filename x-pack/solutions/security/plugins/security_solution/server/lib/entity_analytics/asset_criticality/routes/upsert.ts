@@ -57,10 +57,6 @@ export const assetCriticalityPublicUpsertRoute = (
 
           const securitySolution = await context.securitySolution;
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
-
-          console.log('request ###');
-          console.log(request.body);
-
           const assetCriticalityRecord: AssetCriticalityUpsert = {
             idField: request.body.id_field,
             idValue: request.body.id_value,
@@ -71,8 +67,6 @@ export const assetCriticalityPublicUpsertRoute = (
             assetCriticalityRecord,
             request.body.refresh
           );
-          console.log('result ###');
-          console.log(result);
 
           securitySolution.getAuditLogger()?.log({
             message: 'User attempted to assign the asset criticality level for an entity',

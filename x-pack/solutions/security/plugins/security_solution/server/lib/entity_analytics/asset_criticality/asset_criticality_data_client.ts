@@ -250,7 +250,6 @@ export class AssetCriticalityDataClient {
       doc_as_upsert: true,
     });
 
-    console.log('doc', doc);
     return doc;
   }
 

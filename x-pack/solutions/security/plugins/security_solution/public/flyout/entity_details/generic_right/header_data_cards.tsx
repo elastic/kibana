@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { assetCriticalityOptions } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
@@ -38,7 +39,7 @@ export const HeaderDataCards = ({
   type: string;
 }) => {
   const { getAssetCriticality, assignAssetCriticality } = useGenericEntityCriticality({
-    idField: 'entity.id',
+    idField: EntityIdentifierFields.generic,
     idValue: id,
   });
 
@@ -48,7 +49,7 @@ export const HeaderDataCards = ({
     (value: CriticalityLevelWithUnassigned) => {
       assignAssetCriticality.mutate({
         criticalityLevel: value,
-        idField: 'entity.id',
+        idField: EntityIdentifierFields.generic,
         idValue: id,
       });
     },

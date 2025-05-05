@@ -59,7 +59,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
   const { getGenericEntity } = useGetGenericEntity(entityDocId);
   const { getAssetCriticality } = useGenericEntityCriticality({
     enabled: !!getGenericEntity.data?._source?.entity.id,
-    idField: 'entity.id',
+    idField: EntityIdentifierFields.generic,
     // @ts-ignore since this query is only enabled when the entity.id exists, we can safely assume that idValue won't be undefined
     idValue: getGenericEntity.data?._source?.entity.id,
   });

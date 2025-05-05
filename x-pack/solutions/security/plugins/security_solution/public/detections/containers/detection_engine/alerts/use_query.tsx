@@ -124,6 +124,7 @@ export const useQueryAlerts = <Hit, Aggs>({
           });
         }
       }
+
       if (isSubscribed) {
         setLoading(false);
       }

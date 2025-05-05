@@ -11,13 +11,17 @@ import { EuiCode, EuiCodeBlock, EuiText } from '@elastic/eui';
 import { EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+import { EcsFlat } from '@elastic/ecs';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { TableFieldNameCell } from '../../../document_details/right/components/table_field_name_cell';
 
 interface FlattenedItem {
-  key: string;
+  key: string; // Flattened dot notation object path for an object;
   value: unknown;
 }
+
+const isValidEcsField = (fieldName: string): fieldName is keyof typeof EcsFlat =>
+  fieldName in EcsFlat;
 
 const getDescriptionDisplay = (value: unknown) => {
   if (value === undefined) return 'undefined';
@@ -51,16 +55,65 @@ const getSortedFlattenedItems = (
 
     if (isAPinned && !isBPinned) return -1;
     if (!isAPinned && isBPinned) return 1;
-    return 0;
+    return 0; // Keep original order if neither are pinned
   });
 };
 
+const getPinnedFieldsFromLocalStorage = (storageKey: string): string[] => {
+  const storedPinned = localStorage.getItem(storageKey);
+  return storedPinned ? JSON.parse(storedPinned) : [];
+};
+
+const setPinnedFieldsInLocalStorage = (storageKey: string, fields: string[]) => {
+  localStorage.setItem(storageKey, JSON.stringify(fields));
+};
+
+export const usePinnedFields = (storageKey: string) => {
+  const queryClient = useQueryClient();
+
+  const { data: pinnedFields = [] } = useQuery<string[]>({
+    queryKey: ['pinnedFields', storageKey],
+    queryFn: () => getPinnedFieldsFromLocalStorage(storageKey),
+    initialData: getPinnedFieldsFromLocalStorage(storageKey) || [],
+  });
+
+  const togglePin = (fieldKey: string) => {
+    const updatedPinnedFields = pinnedFields.includes(fieldKey)
+      ? pinnedFields.filter((key) => key !== fieldKey)
+      : [...pinnedFields, fieldKey];
+
+    setPinnedFieldsInLocalStorage(storageKey, updatedPinnedFields);
+    queryClient.setQueryData(['pinnedFields', storageKey], updatedPinnedFields);
+  };
+
+  return {
+    pinnedFields,
+    togglePin,
+  };
+};
+
 export interface FieldsTableProps {
+  /**
+   * The document object containing the fields and values to be displayed in the table.
+   */
   document: Record<string, unknown>;
+
+  /**
+   * Optional key to store pinned fields in localStorage.
+   * If provided, pinned fields will be saved under this key.
+   * If not provided, pinning functionality will be disabled.
+   */
   tableStorageKey?: string;
+
+  /**
+   * Optional key to override component's defaults or set custom behaviors.
+   */
   euiInMemoryTableProps?: Partial<EuiInMemoryTableProps>;
 }
 
+/**
+ * Displays a table of flattened fields and values with an option to pin items to the top.
+ */
 export const FieldsTable: React.FC<FieldsTableProps> = ({
   document,
   tableStorageKey,
@@ -101,8 +154,12 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
           defaultMessage: 'Field',
         }),
         width: '25%',
-        render: (fieldName: string, flattenedItem: FlattenedItem) => {
-          const dataType: string = typeof flattenedItem.value;
+        render: (fieldName: keyof typeof EcsFlat | string, flattenedItem: FlattenedItem) => {
+          let dataType: string = typeof flattenedItem.value;
+          if (isValidEcsField(fieldName)) {
+            dataType = EcsFlat[fieldName].type;
+          }
+
           return <TableFieldNameCell field={fieldName} dataType={dataType} />;
         },
       },
@@ -130,37 +187,4 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
       {...euiInMemoryTableProps}
     />
   );
-};
-
-const getPinnedFieldsFromLocalStorage = (storageKey: string): string[] => {
-  const storedPinned = localStorage.getItem(storageKey);
-  return storedPinned ? JSON.parse(storedPinned) : [];
-};
-
-const setPinnedFieldsInLocalStorage = (storageKey: string, fields: string[]) => {
-  localStorage.setItem(storageKey, JSON.stringify(fields));
-};
-
-export const usePinnedFields = (storageKey: string) => {
-  const queryClient = useQueryClient();
-
-  const { data: pinnedFields = [] } = useQuery<string[]>({
-    queryKey: ['pinnedFields', storageKey],
-    queryFn: () => getPinnedFieldsFromLocalStorage(storageKey),
-    initialData: getPinnedFieldsFromLocalStorage(storageKey) || [],
-  });
-
-  const togglePin = (fieldKey: string) => {
-    const updatedPinnedFields = pinnedFields.includes(fieldKey)
-      ? pinnedFields.filter((key) => key !== fieldKey)
-      : [...pinnedFields, fieldKey];
-
-    setPinnedFieldsInLocalStorage(storageKey, updatedPinnedFields);
-    queryClient.setQueryData(['pinnedFields', storageKey], updatedPinnedFields);
-  };
-
-  return {
-    pinnedFields,
-    togglePin,
-  };
 };
