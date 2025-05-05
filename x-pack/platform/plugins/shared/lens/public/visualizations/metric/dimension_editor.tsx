@@ -216,7 +216,10 @@ function TrendEditor({
   }
 
   const selectedPalette = secondaryTrend
-    ? allPalettes.find(({ id }) => id === secondaryTrend.paletteId) || defaultPalette
+    ? allPalettes.find(
+        ({ id, reversed }) =>
+          id === secondaryTrend.paletteId && reversed === secondaryTrend.reversed
+      ) || defaultPalette
     : defaultPalette;
 
   const isPrimaryMetricOptionSelected =
@@ -248,7 +251,7 @@ function TrendEditor({
               ...state,
               secondaryTrend: {
                 ...secondaryTrend,
-                paletteId: paletteDefinition.id,
+                paletteId: paletteDefinition.paletteId,
                 reversed: Boolean(paletteDefinition.reversed),
               },
             });
@@ -383,6 +386,7 @@ function TrendEditor({
               compressed
               fullWidth
               defaultValue={'0'}
+              type="number"
               value={
                 typeof secondaryTrend?.baselineValue === 'number'
                   ? String(secondaryTrend.baselineValue)
@@ -570,7 +574,7 @@ function SecondaryMetricEditor({
             });
 
             // save previous trend config
-            if (state.secondaryTrend?.type !== 'none') {
+            if (state.secondaryTrend && state.secondaryTrend.type !== 'none') {
               setPrevColorConfig({
                 ...prevColorConfig,
                 [state.secondaryTrend!.type]: state.secondaryTrend,

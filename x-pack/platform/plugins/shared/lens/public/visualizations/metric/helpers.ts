@@ -73,10 +73,6 @@ export function getDefaultConfigForMode(mode: SecondaryTrendType): SecondaryTren
   };
 }
 
-function getRawPaletteId(paletteId: string) {
-  return paletteId.replace('--reversed', '');
-}
-
 export function getTrendPalette(
   colorMode: SecondaryTrendType,
   secondaryTrend: MetricVisualizationState['secondaryTrend'],
@@ -90,11 +86,11 @@ export function getTrendPalette(
       SecondaryTrend,
       { type: 'dynamic' }
     >;
-    const palette = getKbnPalettes(theme).get(getRawPaletteId(defaultConfig.paletteId));
+    const palette = getKbnPalettes(theme).get(defaultConfig.paletteId);
     const colors = palette?.colors(3);
     return (defaultConfig.reversed ? colors.reverse() : colors) as [string, string, string];
   }
-  const palette = getKbnPalettes(theme).get(getRawPaletteId(secondaryTrend.paletteId));
+  const palette = getKbnPalettes(theme).get(secondaryTrend.paletteId);
   const colors = palette?.colors(3);
   return (secondaryTrend.reversed ? colors.reverse() : colors) as [string, string, string];
 }
