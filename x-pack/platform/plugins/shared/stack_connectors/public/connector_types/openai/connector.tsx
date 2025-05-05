@@ -47,7 +47,6 @@ import {
   pkiConfig,
 } from './constants';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Config } from './types';
 
 const { emptyField } = fieldValidators;
 
@@ -123,6 +122,38 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             readOnly={readOnly}
             configFormSchema={otherOpenAiConfig}
             secretsFormSchema={otherOpenAiSecrets}
+            configValidations={
+              hasPKI
+                ? [
+                    {
+                      validator: ({
+                        certificateFile,
+                        certificateData,
+                        privateKeyFile,
+                        privateKeyData,
+                      }) => {
+                        if (
+                          (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
+                          !(certificateFile || certificateData)
+                        ) {
+                          return {
+                            message: i18n.MISSING_CERTIFICATE,
+                          };
+                        }
+                        if (
+                          (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
+                          !(privateKeyFile || privateKeyData)
+                        ) {
+                          return {
+                            message: i18n.MISSING_PRIVATE_KEY,
+                          };
+                        }
+                        return undefined;
+                      },
+                    },
+                  ]
+                : []
+            }
           />
           <EuiSpacer size="s" />
           <UseField
