@@ -18,7 +18,12 @@ import {
   getControlSuggestionIfSupported,
 } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { isExpressionComplete, pushItUpInTheList, suggestForExpression } from '../../helper';
+import {
+  handleFragment,
+  isExpressionComplete,
+  pushItUpInTheList,
+  suggestForExpression,
+} from '../../helper';
 import {
   byCompleteItem,
   getDateHistogramCompletionItem,
@@ -31,6 +36,7 @@ import { isMarkerNode } from '../../../shared/context';
 export async function suggest({
   innerText,
   command,
+  columnExists,
   getColumnsByType,
   getSuggestedUserDefinedColumnName,
   getPreferences,
@@ -41,9 +47,10 @@ export async function suggest({
   const pos = getPosition(innerText, command);
 
   const columnSuggestions = pushItUpInTheList(
-    await getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true }),
+    await getColumnsByType('any', [], { openSuggestions: true }),
     true
   );
+
   const lastCharacterTyped = innerText[innerText.length - 1];
   const controlSuggestions = getControlSuggestionIfSupported(
     Boolean(supportsControls),
@@ -97,20 +104,33 @@ export async function suggest({
 
       return suggestions;
 
-    case 'grouping_expression_after_assignment':
-      return [
-        ...getFunctionSuggestions({ location: Location.STATS_BY }),
-        getDateHistogramCompletionItem((await getPreferences?.())?.histogramBarTarget),
-        ...columnSuggestions,
-      ];
+    case 'grouping_expression_after_assignment': {
+      const histogramBarTarget = (await getPreferences?.())?.histogramBarTarget;
 
-    case 'grouping_expression_without_assignment':
-      return [
-        ...getFunctionSuggestions({ location: Location.STATS_BY }),
-        getDateHistogramCompletionItem((await getPreferences?.())?.histogramBarTarget),
-        ...columnSuggestions,
-        getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()),
-      ];
+      return suggestColumns(
+        columnSuggestions,
+        [
+          ...getFunctionSuggestions({ location: Location.STATS_BY }),
+          getDateHistogramCompletionItem(histogramBarTarget),
+        ],
+        innerText,
+        columnExists
+      );
+    }
+
+    case 'grouping_expression_without_assignment': {
+      const histogramBarTarget = (await getPreferences?.())?.histogramBarTarget;
+
+      return suggestColumns(
+        columnSuggestions,
+        [
+          ...getFunctionSuggestions({ location: Location.STATS_BY }),
+          getDateHistogramCompletionItem(histogramBarTarget),
+        ],
+        innerText,
+        columnExists
+      );
+    }
 
     case 'grouping_expression_complete':
       return [
@@ -121,4 +141,42 @@ export async function suggest({
     default:
       return [];
   }
+}
+
+function suggestColumns(
+  columnSuggestions: SuggestionRawDefinition[],
+  otherSuggestions: SuggestionRawDefinition[],
+  innerText: string,
+  columnExists: (name: string) => boolean
+) {
+  return handleFragment(
+    innerText,
+    (fragment) => columnExists(fragment),
+    async (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+      // fie<suggest>
+      return [
+        ...columnSuggestions.map((suggestion) => {
+          return {
+            ...suggestion,
+            text: suggestion.text,
+            rangeToReplace,
+          };
+        }),
+        ...otherSuggestions,
+      ];
+    },
+    (fragment: string, rangeToReplace: { start: number; end: number }) => {
+      // field<suggest>
+      const finalSuggestions = [{ ...pipeCompleteItem, text: ' | ' }];
+      finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+
+      return finalSuggestions.map<SuggestionRawDefinition>((s) => ({
+        ...s,
+        filterText: fragment,
+        text: fragment + s.text,
+        command: TRIGGER_SUGGESTION_COMMAND,
+        rangeToReplace,
+      }));
+    }
+  );
 }

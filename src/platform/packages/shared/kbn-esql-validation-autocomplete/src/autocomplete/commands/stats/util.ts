@@ -52,10 +52,7 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
       return 'grouping_expression_after_assignment';
     }
 
-    if (
-      getLastNonWhitespaceChar(innerText) === ',' ||
-      noCaseCompare(findPreviousWord(innerText), 'by')
-    ) {
+    if (/\,\s+\S*$/.test(innerText) || noCaseCompare(findPreviousWord(innerText), 'by')) {
       return 'grouping_expression_without_assignment';
     } else {
       return 'grouping_expression_complete';
