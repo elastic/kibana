@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { errors } from '@elastic/elasticsearch';
-import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
+import { LockManagerService, isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
@@ -66,8 +66,10 @@ export async function runStartupMigrations({
           retries: 5,
           minTimeout: 10_000,
           onFailedAttempt: async (error) => {
-            const isLockAcquisitionError = error instanceof LockAcquisitionError;
-            if (!isLockAcquisitionError) {
+            // if the error is a LockAcquisitionError the operation is already in progress and we should not retry
+            // for other errors we should retry
+            // throwing the error will cause pRetry to abort all retries
+            if (isLockAcquisitionError(error)) {
               throw error;
             }
           },
@@ -75,10 +77,11 @@ export async function runStartupMigrations({
       );
     })
     .catch((error) => {
-      const isLockAcquisitionError = error instanceof LockAcquisitionError;
-      if (!isLockAcquisitionError) {
+      // we should propogate the error if it is not a LockAcquisitionError
+      if (!isLockAcquisitionError(error)) {
         throw error;
       }
+      logger.info('Startup migrations are already in progress. Aborting startup migrations');
     });
 }
 
