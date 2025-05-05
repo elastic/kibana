@@ -373,6 +373,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           apiKeyOwner: null,
           artifacts: {
             dashboards: [],
+            investigation_guide: { blob: '' },
           },
           apiKeyCreatedByUser: null,
           scheduledTaskId: match.scheduledTaskId,
