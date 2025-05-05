@@ -153,7 +153,11 @@ export interface LogsEndpointAction<
      * Added in support of space awareness.
      */
     policy: Array<{
-      /** The agent id running on the host */
+      /**
+       * The agent id running on the host. This is same value included in `agent.id`,
+       * **HOWEVER** it is not a mapped field in the index, so no search queries can be targeted
+       * at this field.
+       */
       agentId: string;
       /** The elastic agent id that ingested the data. This will be different from `agentId` for 3rd party EDRs */
       elasticAgentId: string;
