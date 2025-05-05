@@ -250,8 +250,8 @@ export async function getTotalCountAggregations({
           script: {
             source: `
                def rule = params._source['alert'];
-                if (rule != null && rule.artifacts != null && rule.artifacts.investigationGuide != null) {
-                  if (rule.artifacts.investigationGuide.trim() != '') {
+                if (rule != null && rule.artifacts != null && rule.artifacts.investigation_guide != null && rule.artifacts.investigation_guide.blob != null) {
+                  if (rule.artifacts.investigation_guide.blob.trim() != '') {
                     emit(1);
                   } else {
                     emit(0);

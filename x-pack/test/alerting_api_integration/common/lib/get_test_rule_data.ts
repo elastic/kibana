@@ -18,15 +18,8 @@ export function getTestRuleData(overwrites = {}) {
     actions: [],
     params: {},
     artifacts: {
-      dashboards: [
-        {
-          id: 'dashboard-0',
-        },
-        {
-          id: 'dashboard-1',
-        },
-      ],
-      investigationGuide: 'investigation guide',
+      dashboards: [{ id: 'dashboard-0' }, { id: 'dashboard-1' }],
+      investigation_guide: { blob: 'investigation guide' },
     },
     ...overwrites,
   };
