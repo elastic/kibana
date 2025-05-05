@@ -34,9 +34,8 @@ export const validateURL =
 
       const isValid = hostname && !hostname.endsWith('.') && safeURL.test(hostname);
       if (isValid) return;
-    } catch {
-      return error;
-    }
+      // eslint-disable-next-line no-empty
+    } catch {}
 
     return error;
   };
