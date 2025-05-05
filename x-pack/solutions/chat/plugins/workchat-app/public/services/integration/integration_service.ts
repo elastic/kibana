@@ -23,16 +23,12 @@ export class IntegrationService {
   }
 
   async list() {
-    const response = await this.http.get<ListIntegrationsResponse>(
-      '/internal/workchat/tools'
-    );
+    const response = await this.http.get<ListIntegrationsResponse>('/internal/workchat/tools');
     return response.integrations;
   }
 
   async get(integrationId: string) {
-    return await this.http.get<GetIntegrationResponse>(
-      `/internal/workchat/tools/${integrationId}`
-    );
+    return await this.http.get<GetIntegrationResponse>(`/internal/workchat/tools/${integrationId}`);
   }
 
   async create(request: CreateIntegrationPayload) {

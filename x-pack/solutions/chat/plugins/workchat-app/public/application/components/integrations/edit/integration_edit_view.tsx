@@ -148,9 +148,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
     <KibanaPageTemplate panelled>
       <KibanaPageTemplate.Header
         pageTitle={
-          integrationId
-            ? toolLabels.editView.editToolTitle
-            : toolLabels.editView.createToolTitle
+          integrationId ? toolLabels.editView.editToolTitle : toolLabels.editView.createToolTitle
         }
       />
 
@@ -263,9 +261,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                 buttonColor="danger"
                 defaultFocusedButton="confirm"
               >
-                <p>
-                  Are you sure you want to delete this tool? This action cannot be undone.
-                </p>
+                <p>Are you sure you want to delete this tool? This action cannot be undone.</p>
               </EuiConfirmModal>
             )}
           </FormProvider>

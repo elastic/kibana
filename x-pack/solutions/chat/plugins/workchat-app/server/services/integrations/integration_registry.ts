@@ -17,9 +17,7 @@ export class IntegrationRegistry {
       throw new Error(`Tried to register tool but allowRegistration is false`);
     }
     if (this.has(definition.getType())) {
-      throw new Error(
-        `Tried to register Tool [${definition.getType()}], but alrrady registered`
-      );
+      throw new Error(`Tried to register Tool [${definition.getType()}], but alrrady registered`);
     }
     this.integrationTypes.set(definition.getType(), definition);
   }
