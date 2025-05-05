@@ -57,6 +57,7 @@ export const assetCriticalityPublicUpsertRoute = (
 
           const securitySolution = await context.securitySolution;
           const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
+
           const assetCriticalityRecord: AssetCriticalityUpsert = {
             idField: request.body.id_field,
             idValue: request.body.id_value,
