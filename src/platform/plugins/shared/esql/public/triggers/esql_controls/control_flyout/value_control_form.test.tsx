@@ -13,11 +13,10 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { monaco } from '@kbn/monaco';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType, EsqlControlType, ESQLControlState } from '@kbn/esql-types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ESQLControlsFlyout } from '.';
-import { EsqlControlType, ESQLControlState } from '../types';
 
 jest.mock('@kbn/esql-utils', () => {
   return {

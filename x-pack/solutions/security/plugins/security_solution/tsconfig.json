@@ -160,7 +160,6 @@
     "@kbn/data-view-editor-plugin",
     "@kbn/alerts-ui-shared",
     "@kbn/saved-search-plugin",
-    "@kbn/unified-histogram-plugin",
     "@kbn/navigation-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-lifecycle-browser",
@@ -252,6 +251,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-chrome-browser",
     "@kbn/actions-types",
-    "@kbn/triggers-actions-ui-types"
+    "@kbn/triggers-actions-ui-types",
+    "@kbn/unified-histogram"
   ]
 }
