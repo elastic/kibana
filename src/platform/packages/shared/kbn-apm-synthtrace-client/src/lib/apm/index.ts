@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-
 import { service, otelService } from './service';
 
 import { mobileApp } from './mobile_app';

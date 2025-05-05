@@ -20,7 +20,7 @@ export function adserviceEdot({ from, to }: { from: number; to: number }) {
       distro: 'elastic',
     })
     .instance('da7a8507-53be-421c-8d77-984f12397213');
- 
+
   return range
     .interval('1s')
     .rate(1)
