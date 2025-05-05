@@ -12,7 +12,7 @@ import {
   E5_LARGE_IN_EIS_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
   ELSER_IN_EIS_INFERENCE_ID,
-} from '@kbn/observability-ai-assistant-plugin/common';
+} from '@kbn/observability-ai-assistant-plugin/public';
 
 export interface ModelOptionsData {
   key: string;
