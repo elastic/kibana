@@ -9,6 +9,7 @@ import { PassThrough, Readable } from 'stream';
 import type { Logger } from '@kbn/logging';
 import type { Stream } from 'openai/streaming';
 import type { ChatCompletionChunk } from 'openai/resources/chat/completions';
+import { OpenAiProviderType } from '@kbn/inference-plugin/server/chat_complete/adapters/openai/types';
 import type { SmithyStream } from './get_token_count_from_bedrock_converse';
 import { getTokensFromBedrockConverseStream } from './get_token_count_from_bedrock_converse';
 import type { InvokeAsyncIteratorBody } from './get_token_count_from_invoke_async_iterator';
@@ -330,8 +331,9 @@ export const getGenAiTokenTracking = async ({
   return null;
 };
 
-export const shouldTrackGenAiToken = (actionTypeId: string) =>
-  actionTypeId === '.gen-ai' ||
+export const shouldTrackGenAiToken = (actionTypeId: string, apiProvider: OpenAiProviderType) =>
+  // Do not track tokens for local models
+  (actionTypeId === '.gen-ai' && apiProvider !== OpenAiProviderType.Other) ||
   actionTypeId === '.bedrock' ||
   actionTypeId === '.gemini' ||
   actionTypeId === '.inference';

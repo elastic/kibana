@@ -112,35 +112,46 @@ const manuallyCountPromptTokens = (requestBody: string) => {
     JSON.parse(requestBody);
 
   // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
-  const tokensFromMessages = encode(
-    chatCompletionRequest.messages
-      .map(
-        (msg) =>
-          `<|start|>${msg.role}\n${msg.content}\n${
-            'name' in msg
-              ? msg.name
-              : 'function_call' in msg && msg.function_call
-              ? msg.function_call.name + '\n' + msg.function_call.arguments
-              : ''
-          }<|end|>`
-      )
-      .join('\n')
-  ).length;
+  let tokensFromMessages;
+
+  try {
+    tokensFromMessages = encode(
+      chatCompletionRequest.messages
+        .map(
+          (msg) =>
+            `<|start|>${msg.role}\n${msg.content}\n${
+              'name' in msg
+                ? msg.name
+                : 'function_call' in msg && msg.function_call
+                ? msg.function_call.name + '\n' + msg.function_call.arguments
+                : ''
+            }<|end|>`
+        )
+        .join('\n')
+    ).length;
+  } catch (error) {
+    tokensFromMessages = 0;
+  }
 
   // this is an approximation. OpenAI cuts off a function schema
   // at a certain level of nesting, so their token count might
   // be lower than what we are calculating here.
 
-  const tokensFromFunctions = chatCompletionRequest.functions
-    ? encode(
-        chatCompletionRequest.functions
-          ?.map(
-            (fn) =>
-              `<|start|>${fn.name}\n${fn.description}\n${JSON.stringify(fn.parameters)}<|end|>`
-          )
-          .join('\n')
-      ).length
-    : 0;
+  let tokensFromFunctions;
+  try {
+    tokensFromFunctions = chatCompletionRequest.functions
+      ? encode(
+          chatCompletionRequest.functions
+            ?.map(
+              (fn) =>
+                `<|start|>${fn.name}\n${fn.description}\n${JSON.stringify(fn.parameters)}<|end|>`
+            )
+            .join('\n')
+        ).length
+      : 0;
+  } catch (e) {
+    tokensFromFunctions = 0;
+  }
 
   return tokensFromMessages + tokensFromFunctions;
 };

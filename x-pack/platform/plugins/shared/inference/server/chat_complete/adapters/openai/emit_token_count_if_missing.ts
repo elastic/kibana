@@ -60,8 +60,19 @@ export function manuallyCountTokens(
   request: OpenAIRequest,
   chunks: ChatCompletionChunkEvent[]
 ): ChatCompletionTokenCountEvent {
-  const promptTokens = manuallyCountPromptTokens(request);
-  const completionTokens = manuallyCountCompletionTokens(chunks);
+  let promptTokens;
+  try {
+    promptTokens = manuallyCountPromptTokens(request);
+  } catch (e) {
+    promptTokens = 0;
+  }
+
+  let completionTokens;
+  try {
+    completionTokens = manuallyCountCompletionTokens(chunks);
+  } catch (e) {
+    completionTokens = 0;
+  }
 
   return {
     type: ChatCompletionEventType.ChatCompletionTokenCount,
