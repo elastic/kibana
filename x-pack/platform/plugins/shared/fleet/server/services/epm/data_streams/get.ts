@@ -6,10 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 
 import type { PackageDataStreamTypes } from '../../../../common/types';
-
 import { dataStreamService } from '../../data_streams';
+import { FleetUnauthorizedError } from '../../../errors';
 
 const VALID_STREAM_TYPES = ['logs', 'metrics', 'traces', 'synthetics', 'profiling'];
 
@@ -22,10 +23,20 @@ export async function getDataStreams(options: {
 }) {
   const { esClient, type, datasetQuery, uncategorisedOnly, sortOrder } = options;
 
-  const allDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
-    type: type ? type : '*',
-    dataset: datasetQuery ? `*${datasetQuery}*` : '*',
-  });
+  const allDataStreams = await dataStreamService
+    .getMatchingDataStreams(esClient, {
+      type: type ? type : '*',
+      dataset: datasetQuery ? `*${datasetQuery}*` : '*',
+    })
+    .catch((err) => {
+      const isResponseError = err instanceof errors.ResponseError;
+      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+        throw new FleetUnauthorizedError(
+          `Not enough permissions to query datastreams: ${err.message}`
+        );
+      }
+      throw err;
+    });
 
   let filteredDataStreams = uncategorisedOnly
     ? allDataStreams.filter((stream) => {
