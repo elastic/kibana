@@ -54,6 +54,7 @@ export async function waitForKnowledgeBaseReady(
     });
     expect(res.status).to.be(200);
     expect(res.body.kbState).to.be(KnowledgeBaseState.READY);
+    expect(res.body.isReIndexing).to.be(false);
     log.debug(`Knowledge base is in ready state.`);
   });
 }
