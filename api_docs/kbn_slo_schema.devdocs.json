@@ -417,6 +417,141 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.BulkDeleteResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkDeleteResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.BulkDeleteResponse.taskId",
+            "type": "string",
+            "tags": [],
+            "label": "taskId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.BulkDeleteResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkDeleteResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.BulkDeleteResult.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.BulkDeleteResult.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.BulkDeleteResult.error",
+            "type": "string",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.BulkDeleteStatusResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkDeleteStatusResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.BulkDeleteStatusResponse.isDone",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDone",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.BulkDeleteStatusResponse.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/slo-schema",
+                "scope": "common",
+                "docId": "kibKbnSloSchemaPluginApi",
+                "section": "def-common.BulkDeleteResult",
+                "text": "BulkDeleteResult"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.BulkDeleteStatusResponse.error",
+            "type": "string",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.BulkPurgeRollupResponse",
         "type": "Interface",
         "tags": [],
@@ -623,6 +758,36 @@
           "\"occurrences\" | \"timeslices\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.BulkDeleteInput",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkDeleteInput",
+        "description": [],
+        "signature": [
+          "{ list: string[]; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.BulkDeleteParams",
+        "type": "Type",
+        "tags": [],
+        "label": "BulkDeleteParams",
+        "description": [],
+        "signature": [
+          "{ list: string[]; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1907,6 +2072,48 @@
           "<\"timeslices\">]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/schema/slo.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.bulkDeleteParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "bulkDeleteParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ list: ",
+          "ArrayC",
+          "<",
+          "Type",
+          "<string, string, unknown>>; }>; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.bulkDeleteStatusParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "bulkDeleteStatusParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ path: ",
+          "TypeC",
+          "<{ taskId: ",
+          "StringC",
+          "; }>; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

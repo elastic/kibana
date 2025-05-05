@@ -7,7 +7,8 @@
 
 export const MAX_ASSETS_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
-export const ASSET_INVENTORY_INDEX_PATTERN = 'logs-cloud_asset_inventory.asset_inventory-*';
+export const ASSET_INVENTORY_INDEX_PATTERN = 'entities-generic-latest';
+export const ASSET_INVENTORY_DATA_VIEW_ID_PREFIX = 'asset-inventory';
 
 export const QUERY_KEY_GRID_DATA = 'asset_inventory_grid_data';
 export const QUERY_KEY_CHART_DATA = 'asset_inventory_chart_data';
@@ -49,7 +50,6 @@ export const ASSET_FIELDS = {
   ENTITY_ID: 'entity.id',
   ENTITY_NAME: 'entity.name',
   ENTITY_RISK: 'entity.risk',
-  ENTITY_SOURCE: 'entity.source',
   ENTITY_SUB_TYPE: 'entity.sub_type',
   ENTITY_TYPE: 'entity.type',
   TIMESTAMP: '@timestamp',
@@ -60,5 +60,4 @@ export const ASSET_GROUPING_OPTIONS = {
   ASSET_CRITICALITY: ASSET_FIELDS.ASSET_CRITICALITY,
   ENTITY_TYPE: ASSET_FIELDS.ENTITY_TYPE,
   CLOUD_ACCOUNT: ASSET_FIELDS.CLOUD_ACCOUNT_ID,
-  ENTITY_SOURCE: ASSET_FIELDS.ENTITY_SOURCE,
 };
