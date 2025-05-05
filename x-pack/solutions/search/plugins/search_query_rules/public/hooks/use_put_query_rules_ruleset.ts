@@ -51,7 +51,9 @@ export const usePutRuleset = (
         if (onSuccess) {
           onSuccess();
         }
-        application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/ruleset/${rulesetId}`));
+        application.navigateToUrl(
+          http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/ruleset/${rulesetId}`)
+        );
       },
       onError: (error: { body: KibanaServerError }) => {
         if (onConflictError && error.body.statusCode === 409) {
