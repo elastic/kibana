@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Duration, DurationDistributionChart } from '@kbn/apm-ui-shared';
-import { ProcessorEvent } from '@kbn/apm-ui-shared';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { useRootTransactionContext } from '../../hooks/use_root_transaction';
 import { useTransactionLatencyChart } from '../../hooks/use_transaction_latency_chart';
 import { Section } from '../../../components/section';

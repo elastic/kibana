@@ -12,9 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
 
 import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
-import type { HistogramItem } from '@kbn/apm-ui-shared';
 import { DurationDistributionChartData } from '@kbn/apm-ui-shared';
 import { useAbortableAsync } from '@kbn/react-hooks';
+import type { HistogramItem } from '@kbn/apm-types-shared';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 
 interface GetTransactionDistributionChartDataParams {
