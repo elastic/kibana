@@ -95,7 +95,7 @@ const mlLinks = [
   MACHINE_LEARNING_DATA_FRAME_ANALYTICS_MAP,
 ];
 
-const linkedPagesAssertions = {
+const linkedPagesAssertions: Record<string, () => void> = {
   alert_summary: () => {
     cy.getByTestSubjContains('alert-summary-landing-page-prompt').should('exist');
   },
