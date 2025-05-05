@@ -50,7 +50,7 @@ const asyncNoop = async () => {};
 
 export class StreamManager {
   private readonly clientStreams: Map<SynthtraceEsClient<Fields>, PassThrough> = new Map();
-  private readonly trackedStreams: Writable[] = [];
+  private readonly trackedGeneratorStreams: Writable[] = [];
   private readonly trackedWorkers: Worker[] = [];
 
   constructor(
@@ -94,13 +94,32 @@ export class StreamManager {
     generator: SynthGenerator<Fields>
   ): Promise<void> {
     const clientStream = this.createOrReuseClientStream(client);
+    const generatorStream = new PassThrough({ objectMode: true });
+    const generatorArray = castArray(generator);
+    const streams: Readable[] = [];
 
-    const generatorStream = castArray(generator)
-      .reverse()
-      .reduce<Writable>((prev, current) => {
-        const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
-        return currentStream.pipe(prev);
-      }, new PassThrough({ objectMode: true }));
+    generatorArray.reverse().forEach((current) => {
+      const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
+      currentStream.pipe(generatorStream, { end: false });
+      streams.push(currentStream);
+
+      currentStream.on('end', () => {
+        pull(streams, currentStream);
+        if (streams.length === 0) {
+          generatorStream.end();
+        }
+      });
+
+      currentStream.on('error', (err) => {
+        generatorStream.destroy(err);
+        clientStream.destroy(err);
+        streams.forEach((stream) => {
+          stream.destroy(err);
+        });
+
+        pull(streams, currentStream);
+      });
+    });
 
     // the generator stream should write to the client
     // stream, but not end it, as the next buckets will
@@ -108,10 +127,10 @@ export class StreamManager {
     generatorStream.pipe(clientStream, { end: false });
 
     // track the stream for later to end it if needed
-    this.trackedStreams.push(generatorStream);
+    this.trackedGeneratorStreams.push(generatorStream);
 
     await awaitStream(generatorStream).finally(() => {
-      pull(this.trackedStreams, generatorStream);
+      pull(streams, generatorStream);
     });
   }
 
@@ -140,9 +159,12 @@ export class StreamManager {
 
     // end all streams and listen until they've
     // completed
-    function endStream(stream: Writable) {
+    function endStream(stream: Writable | Readable) {
       return new Promise<void>((resolve, reject) => {
-        stream.end();
+        if (stream instanceof Writable) {
+          stream.end();
+        }
+
         finished(stream, (err) => {
           if (err) {
             return reject(err);
@@ -152,11 +174,11 @@ export class StreamManager {
       });
     }
 
-    if (this.trackedStreams.length) {
+    if (this.trackedGeneratorStreams.length) {
       // ending generator streams
-      this.logger.debug(`Ending ${this.trackedStreams.length} tracked streams`);
+      this.logger.debug(`Ending ${this.trackedGeneratorStreams.length} generator streams`);
 
-      await Promise.all(this.trackedStreams.map(endStream));
+      await Promise.all(this.trackedGeneratorStreams.map(endStream));
     }
 
     if (this.trackedWorkers.length) {

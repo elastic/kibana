@@ -25,16 +25,19 @@ import {
 import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
 import { EsVersion } from '@kbn/test';
+import { getFips } from 'crypto';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
 const logFilePath = Path.join(__dirname, 'migration_from_older_v1.log');
 
 const asyncUnlink = Util.promisify(Fs.unlink);
+
 async function removeLogFile() {
   // ignore errors if it doesn't exist
   await asyncUnlink(logFilePath).catch(() => void 0);
 }
+
 const assertMigratedDocuments = (arr: any[], target: any[]) => target.every((v) => arr.includes(v));
 
 function sortByTypeAndId(a: { type: string; id: string }, b: { type: string; id: string }) {
@@ -177,51 +180,59 @@ describeIf('migrating from 7.3.0-xpack which used v1 migrations', () => {
       await esServer.stop();
     }
   };
-
-  beforeAll(async () => {
-    await removeLogFile();
-    await startServers({
-      oss: false,
-      dataArchive: Path.join(__dirname, '..', 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+  if (getFips() === 0) {
+    beforeAll(async () => {
+      await removeLogFile();
+      await startServers({
+        oss: false,
+        dataArchive: Path.join(__dirname, '..', 'archives', '7.3.0_xpack_sample_saved_objects.zip'),
+      });
     });
-  });
 
-  afterAll(async () => {
-    await stopServers();
-  });
+    afterAll(async () => {
+      await stopServers();
+    });
 
-  it('creates the new index and the correct aliases', async () => {
-    const body = await esClient.indices.get(
-      {
+    it('creates the new index and the correct aliases', async () => {
+      const body = await esClient.indices.get(
+        {
+          index: migratedIndex,
+        },
+        { ignore: [404] }
+      );
+
+      const response = body[migratedIndex];
+
+      expect(response).toBeDefined();
+      expect(Object.keys(response.aliases!).sort()).toEqual([
+        '.kibana',
+        `.kibana_${kibanaVersion}`,
+      ]);
+    });
+
+    it('copies all the document of the previous index to the new one', async () => {
+      const originalDocs = await fetchDocuments(esClient, originalIndex);
+      const migratedDocs = await fetchDocuments(esClient, migratedIndex);
+      expect(assertMigratedDocuments(migratedDocs, originalDocs));
+    });
+
+    it('migrates the documents to the highest version', async () => {
+      const expectedVersions = getExpectedVersionPerType();
+      const res = await esClient.search({
         index: migratedIndex,
-      },
-      { ignore: [404] }
-    );
-
-    const response = body[migratedIndex];
-
-    expect(response).toBeDefined();
-    expect(Object.keys(response.aliases!).sort()).toEqual(['.kibana', `.kibana_${kibanaVersion}`]);
-  });
-
-  it('copies all the document of the previous index to the new one', async () => {
-    const originalDocs = await fetchDocuments(esClient, originalIndex);
-    const migratedDocs = await fetchDocuments(esClient, migratedIndex);
-    expect(assertMigratedDocuments(migratedDocs, originalDocs));
-  });
-
-  it('migrates the documents to the highest version', async () => {
-    const expectedVersions = getExpectedVersionPerType();
-    const res = await esClient.search({
-      index: migratedIndex,
-      body: {
-        sort: ['_doc'],
-      },
-      size: 10000,
+        body: {
+          sort: ['_doc'],
+        },
+        size: 10000,
+      });
+      const allDocuments = res.hits.hits as SavedObjectsRawDoc[];
+      allDocuments.forEach((doc) => {
+        assertMigrationVersion(doc, expectedVersions);
+      });
     });
-    const allDocuments = res.hits.hits as SavedObjectsRawDoc[];
-    allDocuments.forEach((doc) => {
-      assertMigrationVersion(doc, expectedVersions);
+  } else {
+    it('cannot run tests with dataArchives that have a basic license in FIPS mode', () => {
+      expect(getFips()).toBe(1);
     });
-  });
+  }
 });

@@ -8,21 +8,21 @@
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { last } from 'lodash';
 import { GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE } from '@kbn/observability-ai-assistant-plugin/server/functions/get_dataset_info/get_relevant_field_names';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { ApmAlertFields } from '../../../../../../../apm_api_integration/tests/alerts/helpers/alerting_api_helper';
 import {
   LlmProxy,
   RelevantField,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { createSyntheticApmData } from '../../synthtrace_scenarios/create_synthetic_apm_data';
 import { chatComplete, getSystemMessage, systemMessageSorted } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { APM_ALERTS_INDEX } from '../../../apm/alerts/helpers/alerting_helper';
+import { createRule } from '../../utils/alerts';
 
 const USER_MESSAGE = 'How many alerts do I have for the past 10 days?';
 
@@ -38,13 +38,32 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let connectorId: string;
     let messageAddedEvents: MessageAddEvent[];
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+    let internalReqHeader: InternalRequestHeader;
     let roleAuthc: RoleCredentials;
     let createdRuleId: string;
     let getRelevantFields: () => Promise<RelevantField[]>;
 
     before(async () => {
-      ({ apmSynthtraceEsClient } = await createSyntheticApmData(getService));
-      ({ roleAuthc, createdRuleId } = await createApmErrorCountRule(getService));
+      internalReqHeader = samlAuth.getInternalRequestHeader();
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+
+      ({ apmSynthtraceEsClient } = await createSyntheticApmData({ getService }));
+
+      createdRuleId = await createRule({
+        getService,
+        roleAuthc,
+        internalReqHeader,
+        data: {
+          ruleTypeId: ApmRuleType.ErrorCount,
+          indexName: APM_ALERTS_INDEX,
+          consumer: 'apm',
+          environment: 'production',
+          threshold: 1,
+          windowSize: 1,
+          windowUnit: 'h',
+          ruleName: 'APM error threshold',
+        },
+      });
 
       llmProxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
@@ -369,70 +388,4 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
   });
-}
-
-async function createApmErrorCountRule(
-  getService: DeploymentAgnosticFtrProviderContext['getService']
-) {
-  const alertingApi = getService('alertingApi');
-  const samlAuth = getService('samlAuth');
-
-  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-  const createdRule = await alertingApi.createRule({
-    ruleTypeId: ApmRuleType.ErrorCount,
-    name: 'APM error threshold',
-    consumer: 'apm',
-    schedule: { interval: '1m' },
-    tags: ['apm'],
-    params: {
-      environment: 'production',
-      threshold: 1,
-      windowSize: 1,
-      windowUnit: 'h',
-    },
-    roleAuthc,
-  });
-
-  const createdRuleId = createdRule.id as string;
-  const esResponse = await alertingApi.waitForDocumentInIndex<ApmAlertFields>({
-    indexName: APM_ALERTS_INDEX,
-    ruleId: createdRuleId,
-    docCountTarget: 1,
-  });
-
-  return {
-    roleAuthc,
-    createdRuleId,
-    alerts: esResponse.hits.hits.map((hit) => hit._source!),
-  };
-}
-
-async function createSyntheticApmData(
-  getService: DeploymentAgnosticFtrProviderContext['getService']
-) {
-  const synthtrace = getService('synthtrace');
-  const apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-
-  const opbeansNode = apm
-    .service({ name: 'opbeans-node', environment: 'production', agentName: 'node' })
-    .instance('instance');
-
-  const events = timerange('now-15m', 'now')
-    .ratePerMinute(1)
-    .generator((timestamp) => {
-      return [
-        opbeansNode
-          .transaction({ transactionName: 'DELETE /user/:id' })
-          .timestamp(timestamp)
-          .duration(100)
-          .failure()
-          .errors(
-            opbeansNode.error({ message: 'Unable to delete user' }).timestamp(timestamp + 50)
-          ),
-      ];
-    });
-
-  await apmSynthtraceEsClient.index(events);
-
-  return { apmSynthtraceEsClient };
 }

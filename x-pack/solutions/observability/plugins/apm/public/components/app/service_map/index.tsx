@@ -12,7 +12,7 @@ import React from 'react';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { useTheme } from '../../../hooks/use_theme';
 import { LicensePrompt } from '../../shared/license_prompt';
@@ -33,6 +33,7 @@ import { DisabledPrompt } from './disabled_prompt';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
+import { useServiceMap } from './use_service_map';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -107,36 +108,17 @@ export function ServiceMap({
   const theme = useTheme();
   const license = useLicenseContext();
   const serviceName = useServiceName();
+
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
-
-  const {
-    data = { elements: [], nodesCount: 0, tracesCount: 0 },
-    status,
-    error,
-  } = useFetcher(
-    (callApmApi) => {
-      // When we don't have a license or a valid license, don't make the request.
-      if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
-        return;
-      }
-
-      return callApmApi('GET /internal/apm/service-map', {
-        isCachable: false,
-        params: {
-          query: {
-            start,
-            end,
-            environment,
-            serviceName,
-            serviceGroup: serviceGroupId,
-            kuery,
-          },
-        },
-      });
-    },
-    [license, serviceName, environment, start, end, serviceGroupId, kuery, config.serviceMapEnabled]
-  );
+  const { data, status, error } = useServiceMap({
+    environment,
+    kuery,
+    start,
+    end,
+    serviceGroupId,
+    serviceName,
+  });
 
   const { ref, height } = useRefDimensions();
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createOrUpdateIndexAssets } from '../../service/create_or_update_index_assets';
+import { createOrUpdateIndexAssets } from '../../service/startup_migrations/create_or_update_index_assets';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
 const createOrUpdateIndexAssetsRoute = createObservabilityAIAssistantServerRoute({

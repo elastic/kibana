@@ -206,14 +206,17 @@ export function RuleDetailsPage() {
         },
         children: <PageTitleContent rule={rule} />,
         bottomBorder: false,
-        rightSideItems: [
-          <HeaderActions
-            isLoading={isLoading || isRuleDeleting}
-            isRuleEditable={isEditable}
-            onEditRule={handleEditRule}
-            onDeleteRule={handleDeleteRule}
-          />,
-        ],
+        rightSideItems: ruleId
+          ? [
+              <HeaderActions
+                ruleId={ruleId}
+                isLoading={isLoading || isRuleDeleting}
+                isRuleEditable={isEditable}
+                onEditRule={handleEditRule}
+                onDeleteRule={handleDeleteRule}
+              />,
+            ]
+          : [],
       }}
     >
       <HeaderMenu />
