@@ -122,7 +122,53 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             readOnly={readOnly}
             configFormSchema={[
               ...otherOpenAiConfig,
-              ...(hasPKI ? pkiConfig : []),
+              ...(hasPKI ? pkiConfig.map(field => ({
+                ...field,
+                validations: [
+                  {
+                    validator: ({ 
+                      value, 
+                      formData 
+                    }: { 
+                      value: string | string[] | undefined;
+                      formData: {
+                        certificateFile?: string | string[];
+                        certificateData?: string;
+                        privateKeyFile?: string | string[];
+                        privateKeyData?: string;
+                      };
+                    }) => {
+                      if (field.id === 'certificateData' && Array.isArray(value)) {
+                        return {
+                          message: 'Certificate data must be a string, not an array',
+                        };
+                      }
+                      if (field.id === 'privateKeyData' && Array.isArray(value)) {
+                        return {
+                          message: 'Private key data must be a string, not an array',
+                        };
+                      }
+                      if (
+                        (value || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
+                        !(value || formData.certificateData)
+                      ) {
+                        return {
+                          message: i18n.MISSING_CERTIFICATE,
+                        };
+                      }
+                      if (
+                        (value || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
+                        !(formData.privateKeyFile || formData.privateKeyData)
+                      ) {
+                        return {
+                          message: i18n.MISSING_PRIVATE_KEY,
+                        };
+                      }
+                      return undefined;
+                    },
+                  },
+                ],
+              })) : []),
             ]}
             secretsFormSchema={otherOpenAiSecrets}
           />
