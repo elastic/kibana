@@ -126,6 +126,11 @@ export class SavedMap {
     return this._store;
   }
 
+  public async reset(mapSerializedState: MapSerializedState) {
+    this._mapSerializedState = mapSerializedState;
+    await this.whenReady();
+  }
+
   async whenReady() {
     await whenLicenseInitialized();
 
