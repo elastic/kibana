@@ -16,6 +16,7 @@ import {
   getPrebuiltRulesStatus,
   installPrebuiltRules,
   getInstalledRules,
+  getWebHookAction,
 } from '../../../../utils';
 import { deleteAllRules, deleteRule } from '../../../../../../../common/utils/security_solution';
 
@@ -23,6 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const securitySolutionApi = getService('securitySolutionApi');
 
   describe('@ess @serverless @skipInServerlessMKI install prebuilt rules from package with historical versions with mock rule assets', () => {
     const getRuleAssetSavedObjects = () => [
@@ -97,6 +99,109 @@ export default ({ getService }: FtrProviderContext): void => {
         const response = await installPrebuiltRulesAndTimelines(es, supertest);
         expect(response.rules_installed).toBe(1);
         expect(response.rules_updated).toBe(0);
+      });
+
+      it('should not overwrite existing actions', async () => {
+        // Install prebuilt detection rule
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
+        ]);
+        await installPrebuiltRulesAndTimelines(es, supertest);
+
+        const { body: hookAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        await securitySolutionApi
+          .patchRule({
+            body: {
+              rule_id: 'rule-1',
+              actions: [
+                {
+                  group: 'default',
+                  id: hookAction.id,
+                  action_type_id: hookAction.connector_type_id,
+                  params: {},
+                },
+              ],
+            },
+          })
+          .expect(200);
+
+        // Install new rule version
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 2 }),
+        ]);
+
+        // Install/update prebuilt rules again
+        const response = await installPrebuiltRulesAndTimelines(es, supertest);
+        expect(response.rules_installed).toBe(0);
+        expect(response.rules_updated).toBe(1);
+
+        const { body: prebuiltRule } = await securitySolutionApi.readRule({
+          query: { rule_id: 'rule-1' },
+        });
+
+        // Check the actions field of existing prebuilt rules is not overwritten
+        expect(prebuiltRule.actions).toEqual([
+          expect.objectContaining({
+            action_type_id: hookAction.connector_type_id,
+            frequency: { notifyWhen: 'onActiveAlert', summary: true, throttle: null },
+            group: 'default',
+            id: hookAction.id,
+            params: {},
+          }),
+        ]);
+      });
+
+      it('should not overwrite existing exceptions lists', async () => {
+        // Install prebuilt detection rule
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
+        ]);
+        await installPrebuiltRulesAndTimelines(es, supertest);
+
+        await securitySolutionApi
+          .patchRule({
+            body: {
+              rule_id: 'rule-1',
+              exceptions_list: [
+                {
+                  id: 'some_uuid',
+                  list_id: 'list_id_single',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
+            },
+          })
+          .expect(200);
+
+        // Install new rule version
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 2 }),
+        ]);
+
+        // Install/update prebuilt rules again
+        const response = await installPrebuiltRulesAndTimelines(es, supertest);
+        expect(response.rules_installed).toBe(0);
+        expect(response.rules_updated).toBe(1);
+
+        const { body: prebuiltRule } = await securitySolutionApi.readRule({
+          query: { rule_id: 'rule-1' },
+        });
+
+        // Check the exceptions_list field of existing prebuilt rules is not overwritten
+        expect(prebuiltRule.exceptions_list).toEqual([
+          expect.objectContaining({
+            id: 'some_uuid',
+            list_id: 'list_id_single',
+            namespace_type: 'single',
+            type: 'detection',
+          }),
+        ]);
       });
     });
 

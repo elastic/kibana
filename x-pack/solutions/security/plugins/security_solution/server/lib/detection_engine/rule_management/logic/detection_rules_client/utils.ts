@@ -74,13 +74,15 @@ export const mergeExceptionLists = (
 ): RuleResponse => {
   if (latestPrebuiltRule.exceptions_list != null) {
     if (existingRule.exceptions_list != null) {
-      const installedExceptionList = existingRule.exceptions_list;
-      const fileSystemExceptions = latestPrebuiltRule.exceptions_list.filter((potentialDuplicate) =>
-        installedExceptionList.every((item) => item.list_id !== potentialDuplicate.list_id)
+      const uniqueExceptionsLists = latestPrebuiltRule.exceptions_list.filter(
+        (potentialDuplicateList) =>
+          existingRule.exceptions_list.every(
+            (list) => list.list_id !== potentialDuplicateList.list_id
+          )
       );
       return {
         ...latestPrebuiltRule,
-        exceptions_list: [...fileSystemExceptions, ...existingRule.exceptions_list],
+        exceptions_list: [...uniqueExceptionsLists, ...existingRule.exceptions_list],
       };
     } else {
       return latestPrebuiltRule;
