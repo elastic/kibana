@@ -466,7 +466,7 @@ export async function persistedStateToExpression(
         visualization.getConfiguration({
           layerId,
           frame: { datasourceLayers, activeData: {} },
-          state: datasourceStates[datasourceId]?.state,
+          state: activeVisualizationState,
         }).groups,
     }),
     activeVisualizationState,

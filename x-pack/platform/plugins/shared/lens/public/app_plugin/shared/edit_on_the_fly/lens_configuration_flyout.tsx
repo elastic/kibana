@@ -226,7 +226,7 @@ export function LensEditConfigurationFlyout({
       activeVisualization.getConfiguration({
         layerId,
         frame: framePublicAPI,
-        state: visualization,
+        state: visualization.state,
       }).groups,
     [activeVisualization, visualization, framePublicAPI]
   );
