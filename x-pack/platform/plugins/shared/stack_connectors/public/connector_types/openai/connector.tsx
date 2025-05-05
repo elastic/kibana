@@ -126,18 +126,29 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                 ...field,
                 validations: [
                   {
-                    validator: ({ value }: { value: string | string[] | undefined }) => {
+                    validator: ({ 
+                      value, 
+                      formData 
+                    }: { 
+                      value: string | string[] | undefined;
+                      formData: {
+                        certificateFile?: string | string[];
+                        certificateData?: string;
+                        privateKeyFile?: string | string[];
+                        privateKeyData?: string;
+                      };
+                    }) => {
                       if (
-                        (value || (config as any).privateKeyFile || (config as any).certificateData || (config as any).privateKeyData) &&
-                        !(value || (config as any).certificateData)
+                        (value || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
+                        !(value || formData.certificateData)
                       ) {
                         return {
                           message: i18n.MISSING_CERTIFICATE,
                         };
                       }
                       if (
-                        (value || (config as any).privateKeyFile || (config as any).certificateData || (config as any).privateKeyData) &&
-                        !((config as any).privateKeyFile || (config as any).privateKeyData)
+                        (value || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
+                        !(formData.privateKeyFile || formData.privateKeyData)
                       ) {
                         return {
                           message: i18n.MISSING_PRIVATE_KEY,
