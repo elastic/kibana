@@ -771,6 +771,32 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         `Action id [${actionId}] with agent type of [${this.agentType}] not found`
       );
     }
+
+    if (this.options.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      const integrationPolicyIds = (actionRequest.agent.policy ?? []).map(
+        ({ integrationPolicyId }) => integrationPolicyId
+      );
+
+      if (integrationPolicyIds.length === 0) {
+        this.log.error(
+          () => `Action id [${actionId}] missing 'agent.policy' info:\n${stringify(actionRequest)}`
+        );
+
+        throw new ResponseActionsClientError(
+          `Unable to determine access to response action [${actionId}] for space [${this.options.spaceId}] (Action request document is missing integration policy data)`
+        );
+      }
+
+      const fleetServices = this.options.endpointService.getInternalFleetServices(
+        this.options.spaceId
+      );
+
+      await fleetServices.ensureInCurrentSpace({
+        integrationPolicyIds,
+        // We only need one integration policy to be valid in active space in order for access to be granted.
+        options: { matchAll: false },
+      });
+    }
   }
 
   protected fetchAllPendingActions<
