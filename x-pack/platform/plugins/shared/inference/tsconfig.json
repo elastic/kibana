@@ -36,5 +36,7 @@
     "@kbn/es-types",
     "@kbn/field-types",
     "@kbn/expressions-plugin",
+    "@kbn/inference-langchain",
+    "@kbn/sse-utils-server"
   ]
 }

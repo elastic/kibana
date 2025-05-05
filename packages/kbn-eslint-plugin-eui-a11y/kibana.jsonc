@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/eslint-plugin-eui-a11y",
+  "owner": "@elastic/obs-ux-infra_services-team",
+  "devOnly": true
+}

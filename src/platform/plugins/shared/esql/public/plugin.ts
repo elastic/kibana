@@ -10,6 +10,7 @@
 import type { Plugin, CoreStart, CoreSetup } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -17,13 +18,18 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
+  esqlControlTrigger,
+  ESQL_CONTROL_TRIGGER,
+} from './triggers/esql_controls/esql_control_trigger';
+import {
   updateESQLQueryTrigger,
-  UpdateESQLQueryAction,
   UPDATE_ESQL_QUERY_TRIGGER,
-} from './triggers';
+} from './triggers/update_esql_query/update_esql_query_trigger';
+import { ACTION_UPDATE_ESQL_QUERY, ACTION_CREATE_ESQL_CONTROL } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
 import { JoinIndicesAutocompleteResult } from '../common';
 import { cacheNonParametrizedAsyncFunction } from './util/cache';
+import { EsqlVariablesService } from './variables_service';
 
 interface EsqlPluginSetupDependencies {
   indexManagement: IndexManagementPluginSetup;
@@ -36,11 +42,13 @@ interface EsqlPluginStartDependencies {
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  licensing?: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
 }
 
 export interface EsqlPluginStart {
   getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  variablesService: EsqlVariablesService;
 }
 
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
@@ -50,6 +58,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     this.indexManagement = indexManagement;
 
     uiActions.registerTrigger(updateESQLQueryTrigger);
+    uiActions.registerTrigger(esqlControlTrigger);
 
     return {};
   }
@@ -63,12 +72,33 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       uiActions,
       fieldsMetadata,
       usageCollection,
+      licensing,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const storage = new Storage(localStorage);
-    const appendESQLAction = new UpdateESQLQueryAction(data);
 
-    uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
+    // Register triggers
+    uiActions.addTriggerActionAsync(
+      UPDATE_ESQL_QUERY_TRIGGER,
+      ACTION_UPDATE_ESQL_QUERY,
+      async () => {
+        const { UpdateESQLQueryAction } = await import(
+          './triggers/update_esql_query/update_esql_query_actions'
+        );
+        const appendESQLAction = new UpdateESQLQueryAction(data);
+        return appendESQLAction;
+      }
+    );
+
+    uiActions.addTriggerActionAsync(ESQL_CONTROL_TRIGGER, ACTION_CREATE_ESQL_CONTROL, async () => {
+      const { CreateESQLControlAction } = await import(
+        './triggers/esql_controls/esql_control_action'
+      );
+      const createESQLControlAction = new CreateESQLControlAction(core, data.search.search);
+      return createESQLControlAction;
+    });
+
+    const variablesService = new EsqlVariablesService();
 
     const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
       async () => {
@@ -84,14 +114,18 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
 
     const start = {
       getJoinIndicesAutocomplete,
+      variablesService,
+      getLicense: async () => await licensing?.getLicense(),
     };
 
     setKibanaServices(
       start,
       core,
       dataViews,
+      data,
       expressions,
       storage,
+      uiActions,
       this.indexManagement,
       fieldsMetadata,
       usageCollection

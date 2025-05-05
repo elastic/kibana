@@ -22,8 +22,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import { Adapters } from '@kbn/inspector-plugin/public';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   ExpressionAstExpression,
   ExpressionLoader,
@@ -38,7 +36,7 @@ import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { isFallbackDataView } from '../../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../../components/visualization_missed_saved_object_error';
 import VisualizationError from '../../components/visualization_error';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { SerializedVis, Vis } from '../../vis';
 import { getApplication, getExpressions, getUiActions } from '../../services';
 import { VIS_EVENT_TO_TRIGGER } from '../../embeddable/events';
@@ -48,7 +46,7 @@ import { toExpressionAst } from '../../embeddable/to_ast';
 import { AttributeService } from './attribute_service';
 import { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
-import { EmbeddableOutput } from './i_embeddable';
+import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<
@@ -95,7 +93,7 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
   savedVis?: VisSavedObject;
 };
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
-export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
+export type VisualizeByReferenceInput = { savedObjectId: string } & VisualizeInput;
 
 /** @deprecated
  * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only
@@ -122,11 +120,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
   private abortController?: AbortController;
   private readonly deps: VisualizeEmbeddableDeps;
   private readonly inspectorAdapters?: Adapters;
-  private attributeService?: AttributeService<
-    VisualizeSavedObjectAttributes,
-    VisualizeByValueInput,
-    VisualizeByReferenceInput
-  >;
+  private attributeService?: AttributeService;
   private expressionVariables: Record<string, unknown> | undefined;
   private readonly expressionVariablesSubject = new ReplaySubject<
     Record<string, unknown> | undefined
@@ -136,11 +130,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     timefilter: TimefilterContract,
     { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
-    attributeService?: AttributeService<
-      VisualizeSavedObjectAttributes,
-      VisualizeByValueInput,
-      VisualizeByReferenceInput
-    >
+    attributeService?: AttributeService
   ) {
     super(initialInput, {
       defaultTitle: vis.title,
@@ -446,7 +436,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     render(
       <KibanaRenderContextProvider {...core}>
         <div className="visChart__spinner">
-          <EuiLoadingChart mono size="l" />
+          <EuiLoadingChart size="l" />
         </div>
       </KibanaRenderContextProvider>,
       this.domNode

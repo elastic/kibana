@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ES_TELEMETRY_NAME } from '../../collectors/enterprise_search/telemetry';
 import { incrementUICounter } from '../../collectors/lib/telemetry';
 
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 
 const productToTelemetryMap = {
   enterprise_search: ES_TELEMETRY_NAME,
@@ -20,6 +20,12 @@ export function registerTelemetryRoute({ router, getSavedObjectsService }: Route
   router.put(
     {
       path: '/internal/enterprise_search/stats',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           product: schema.oneOf([schema.literal('enterprise_search')]),

@@ -7,22 +7,23 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import {
+import type {
   IndicesGetDataStreamResponse,
   IndicesDataStreamIndex,
 } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject, of } from 'rxjs';
 import { AlertsService } from './alerts_service';
-import { IRuleTypeAlerts, RecoveredActionGroup } from '../types';
+import type { IRuleTypeAlerts } from '../types';
+import { RecoveredActionGroup } from '../types';
 import { retryUntil } from './test_utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { AlertsClient } from '../alerts_client';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { getDataStreamAdapter } from './lib/data_stream_adapter';
 import { maintenanceWindowsServiceMock } from '../task_runner/maintenance_windows/maintenance_windows_service.mock';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 
 jest.mock('../alerts_client');
@@ -173,6 +174,7 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
             }),
         'index.mapping.ignore_malformed': true,
         'index.mapping.total_fields.limit': 2500,
+        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
       mappings: {
         dynamic: false,
@@ -227,6 +229,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
   autoRecoverAlerts: true,
@@ -477,6 +480,7 @@ describe('Alerts Service', () => {
               settings: {
                 ...existingIndexTemplate.index_template.template?.settings,
                 'index.mapping.total_fields.limit': 2500,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
               },
             },
           });
@@ -694,6 +698,36 @@ describe('Alerts Service', () => {
           }
         });
 
+        test('should save the dynamic_templates', async () => {
+          const dynamicTemplates = [
+            {
+              strings_as_keywords: {
+                path_match: 'test-path',
+                match_mapping_type: 'string',
+                mapping: {
+                  type: 'keyword',
+                  ignore_above: 1024,
+                },
+              },
+            },
+          ] satisfies IRuleTypeAlerts['mappings']['dynamicTemplates'];
+
+          alertsService.register({
+            ...TestRegistrationContext,
+            mappings: {
+              ...TestRegistrationContext.mappings,
+              dynamicTemplates,
+            },
+          });
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(alertsService)) === true
+          );
+
+          const componentTemplate = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
+          expect(componentTemplate.template.mappings?.dynamic_templates).toEqual(dynamicTemplates);
+        });
+
         test('should correctly install resources for custom namespace on demand when isSpaceAware is true', async () => {
           alertsService.register({ ...TestRegistrationContext, isSpaceAware: true });
           await retryUntil(
@@ -897,6 +931,7 @@ describe('Alerts Service', () => {
                       },
                     }),
                 'index.mapping.ignore_malformed': true,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
                 'index.mapping.total_fields.limit': 2500,
               },
               mappings: {
@@ -2060,11 +2095,13 @@ describe('Alerts Service', () => {
           // leverage the outcome of the first retry
           expect(
             logger.info.mock.calls.filter(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
             ).length
           ).toEqual(1);
           expect(
             logger.info.mock.calls.filter(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (calls: any[]) =>
                 calls[0] === `Resource installation for "test" succeeded after retry`
             ).length
@@ -2137,6 +2174,7 @@ describe('Alerts Service', () => {
           // Should only log the retry once because the second and third retries should be throttled
           expect(
             logger.info.mock.calls.filter(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
             ).length
           ).toEqual(1);

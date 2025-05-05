@@ -6,10 +6,10 @@
  */
 
 import type {
+  ClusterPutComponentTemplateRequest,
   MappingDynamicMapping,
   Metadata,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   createOrUpdateComponentTemplate,
   createOrUpdateIndexTemplate,
@@ -111,7 +111,7 @@ export class RiskScoreDataClient {
     });
   };
 
-  public createOrUpdateRiskScoreIndexTemplate = async () =>
+  public createOrUpdateRiskScoreComponentTemplate = async () =>
     createOrUpdateComponentTemplate({
       logger: this.options.logger,
       esClient: this.options.esClient,
@@ -128,6 +128,40 @@ export class RiskScoreDataClient {
       totalFieldsLimit,
     });
 
+  public createOrUpdateRiskScoreIndexTemplate = async () => {
+    const indexPatterns = getIndexPatternDataStream(this.options.namespace);
+    const indexMetadata: Metadata = {
+      kibana: {
+        version: this.options.kibanaVersion,
+      },
+      managed: true,
+      namespace: this.options.namespace,
+    };
+
+    return createOrUpdateIndexTemplate({
+      logger: this.options.logger,
+      esClient: this.options.esClient,
+      template: {
+        name: indexPatterns.template,
+        data_stream: { hidden: true },
+        index_patterns: [indexPatterns.alias],
+        composed_of: [nameSpaceAwareMappingsComponentName(this.options.namespace)],
+        template: {
+          lifecycle: {},
+          settings: {
+            'index.mapping.total_fields.limit': totalFieldsLimit,
+            'index.default_pipeline': getIngestPipelineName(this.options.namespace),
+          },
+          mappings: {
+            dynamic: false,
+            _meta: indexMetadata,
+          },
+        },
+        _meta: indexMetadata,
+      },
+    });
+  };
+
   public updateRiskScoreTimeSeriesIndexMappings = async () =>
     updateUnderlyingMapping({
       esClient: this.options.esClient,
@@ -142,59 +176,11 @@ export class RiskScoreDataClient {
     try {
       await createEventIngestedFromTimestamp(esClient, namespace);
 
-      const indexPatterns = getIndexPatternDataStream(namespace);
+      await this.createOrUpdateRiskScoreComponentTemplate();
 
-      const indexMetadata: Metadata = {
-        kibana: {
-          version: this.options.kibanaVersion,
-        },
-        managed: true,
-        namespace,
-      };
-
-      // Check if there are any existing component templates with the namespace in the name
-      const oldComponentTemplateExists = await esClient.cluster.existsComponentTemplate({
-        name: mappingComponentName,
-      });
-      if (oldComponentTemplateExists) {
-        await this.updateComponentTemplateNameWithNamespace(namespace);
-      }
-
-      // Update the new component template with the required data
       await this.createOrUpdateRiskScoreIndexTemplate();
 
-      // Reference the new component template in the index template
-      await createOrUpdateIndexTemplate({
-        logger: this.options.logger,
-        esClient,
-        template: {
-          name: indexPatterns.template,
-          data_stream: { hidden: true },
-          index_patterns: [indexPatterns.alias],
-          composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
-          template: {
-            lifecycle: {},
-            settings: {
-              'index.mapping.total_fields.limit': totalFieldsLimit,
-              'index.default_pipeline': getIngestPipelineName(namespace),
-            },
-            mappings: {
-              dynamic: false,
-              _meta: indexMetadata,
-            },
-          },
-          _meta: indexMetadata,
-        },
-      });
-
-      // Delete the component template without the namespace in the name
-      await esClient.cluster.deleteComponentTemplate(
-        {
-          name: mappingComponentName,
-        },
-        { ignore: [404] }
-      );
-
+      const indexPatterns = getIndexPatternDataStream(namespace);
       await createDataStream({
         logger: this.options.logger,
         esClient,
@@ -213,6 +199,7 @@ export class RiskScoreDataClient {
           ...getTransformOptions({
             dest: getRiskScoreLatestIndex(namespace),
             source: [indexPatterns.alias],
+            namespace: this.options.namespace,
           }),
         },
       });
@@ -331,22 +318,6 @@ export class RiskScoreDataClient {
     );
   }
 
-  private async updateComponentTemplateNameWithNamespace(namespace: string): Promise<void> {
-    const esClient = this.options.esClient;
-    const oldComponentTemplateResponse = await esClient.cluster.getComponentTemplate(
-      {
-        name: mappingComponentName,
-      },
-      { ignore: [404] }
-    );
-    const oldComponentTemplate = oldComponentTemplateResponse?.component_templates[0];
-    const newComponentTemplateName = nameSpaceAwareMappingsComponentName(namespace);
-    await esClient.cluster.putComponentTemplate({
-      name: newComponentTemplateName,
-      body: oldComponentTemplate.component_template,
-    });
-  }
-
   public copyTimestampToEventIngestedForRiskScore = (abortSignal?: AbortSignal) => {
     return this.options.esClient.updateByQuery(
       {
@@ -354,20 +325,18 @@ export class RiskScoreDataClient {
         conflicts: 'proceed',
         ignore_unavailable: true,
         allow_no_indices: true,
-        body: {
-          query: {
-            bool: {
-              must_not: {
-                exists: {
-                  field: 'event.ingested',
-                },
+        query: {
+          bool: {
+            must_not: {
+              exists: {
+                field: 'event.ingested',
               },
             },
           },
-          script: {
-            source: 'ctx._source.event.ingested = ctx._source.@timestamp',
-            lang: 'painless',
-          },
+        },
+        script: {
+          source: 'ctx._source.event.ingested = ctx._source.@timestamp',
+          lang: 'painless',
         },
       },
       {
@@ -395,6 +364,7 @@ export class RiskScoreDataClient {
         ...getTransformOptions({
           dest: getRiskScoreLatestIndex(namespace),
           source: [indexPatterns.alias],
+          namespace: this.options.namespace,
         }),
       },
     });

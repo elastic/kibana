@@ -55,7 +55,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
-      diskSizeGb: 75
+      diskSizeGb: 80
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -117,7 +117,7 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-      diskSizeGb: 75
+      diskSizeGb: 80
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -487,7 +487,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on: build
     timeout_in_minutes: 120
     parallelism: 3
     retry:
@@ -503,7 +502,6 @@ steps:
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
-    depends_on: build
     timeout_in_minutes: 120
     parallelism: 3
     retry:

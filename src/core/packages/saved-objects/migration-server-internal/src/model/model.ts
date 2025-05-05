@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
 import { isTypeof } from '../actions';
@@ -42,12 +42,12 @@ import {
   throwBadControlState,
   throwBadResponse,
   versionMigrationCompleted,
-  buildRemoveAliasActions,
   MigrationType,
   increaseBatchSize,
   hasLaterVersionAlias,
   aliasVersion,
   REINDEX_TEMP_SUFFIX,
+  getPrepareCompatibleMigrationStateProperties,
 } from './helpers';
 import { buildTempIndexMap, createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -537,27 +537,39 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (res.right.unknownDocs.length) {
+      if (res.right.type === 'cleanup_started') {
+        if (res.right.unknownDocs.length) {
+          logs = [
+            ...stateP.logs,
+            { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
+          ];
+        }
+
         logs = [
-          ...stateP.logs,
-          { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
+          ...logs,
+          ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
+            level: 'warning' as const,
+            message: `Ignored excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
+          })),
         ];
+
+        return {
+          ...stateP,
+          logs,
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
+          deleteByQueryTaskId: res.right.taskId,
+        };
+      } else if (res.right.type === 'cleanup_not_needed') {
+        // let's move to the step after CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK
+        return {
+          ...stateP,
+          logs,
+          controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+          ...getPrepareCompatibleMigrationStateProperties(stateP),
+        };
+      } else {
+        throwBadResponse(stateP, res.right);
       }
-
-      logs = [
-        ...logs,
-        ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
-          level: 'warning' as const,
-          message: `Ignored excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
-        })),
-      ];
-
-      return {
-        ...stateP,
-        logs,
-        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
-        deleteByQueryTaskId: res.right.taskId,
-      };
     } else {
       const reason = extractUnknownDocFailureReason(
         stateP.migrationDocLinks.resolveMigrationFailures,
@@ -579,27 +591,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      const source = stateP.sourceIndex.value;
       return {
         ...stateP,
         logs,
         controlState: 'PREPARE_COMPATIBLE_MIGRATION',
         mustRefresh:
           stateP.mustRefresh || typeof res.right.deleted === 'undefined' || res.right.deleted > 0,
-        targetIndexMappings: mergeMappingMeta(
-          stateP.targetIndexMappings,
-          stateP.sourceIndexMappings.value
-        ),
-        preTransformDocsActions: [
-          // Point the version alias to the source index. This let's other Kibana
-          // instances know that a migration for the current version is "done"
-          // even though we may be waiting for document transformations to finish.
-          { add: { index: source!, alias: stateP.versionAlias } },
-          ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
-            stateP.currentAlias,
-            stateP.versionAlias,
-          ]),
-        ],
+        ...getPrepareCompatibleMigrationStateProperties(stateP),
       };
     } else {
       if (isTypeof(res.left, 'wait_for_task_completion_timeout')) {
@@ -1558,6 +1556,16 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // exponential delay.  We will basically keep polling forever until the
         // Elasticsearch task succeeds or fails.
         return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
+      } else if (isTypeof(left, 'task_completed_with_retriable_error')) {
+        return delayRetryState(
+          {
+            ...stateP,
+            controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+            skipRetryReset: true,
+          },
+          left.message,
+          stateP.retryAttempts
+        );
       } else {
         throwBadResponse(stateP, left);
       }

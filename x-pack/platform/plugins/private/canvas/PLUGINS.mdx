@@ -60,8 +60,8 @@ In your plugin folder, create a new folder `public` and an `index.ts` file withi
 This `index.ts` will need export a Kibana Plugin. You can use this as a starting point for your plugin.
 
 ```typescript
-import { Plugin, CoreSetup, CoreStart } from '../../../../../src/core/public';
-import { CanvasSetup } from '../../../../../x-pack/plugins/canvas/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import { CanvasSetup } from '@kbn/canvas-plugin/public';
 
 interface CanvasExampleSetupPlugins {
   canvas: CanvasSetup;
@@ -171,8 +171,8 @@ Now, much like we made the client plugin, we'll make a server plugin.
 Start by making the `server` directory and an `index.ts` file with a shell for your server plugin:
 
 ```typescript
-import { Plugin, CoreSetup, CoreStart } from '../../../../../src/core/server';
-import { ExpressionsServerSetup } from '../../../../../src/plugins/expressions/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 
 interface CanvasExamplePluginsSetup {
   expressions: ExpressionsServerSetup;

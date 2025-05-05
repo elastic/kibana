@@ -17,7 +17,7 @@ import {
   renderWithReduxStore,
 } from '../../../mocks';
 
-import { mockDataPlugin, mountWithProvider } from '../../../mocks';
+import { mockDataPlugin, mountWithReduxStore } from '../../../mocks';
 
 import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';
@@ -28,7 +28,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public/embeddable/events';
 import {
   applyChanges,
   setState,
@@ -367,7 +367,7 @@ describe('workspace_panel', () => {
 
       const visualizationShowing = () => instance.exists(expressionRendererMock);
 
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...defaultProps}
           datasourceMap={{
@@ -431,7 +431,7 @@ describe('workspace_panel', () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       const props = defaultProps;
 
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...props}
           datasourceMap={{
@@ -467,7 +467,7 @@ describe('workspace_panel', () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       const props = defaultProps;
 
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...props}
           datasourceMap={{
@@ -505,7 +505,7 @@ describe('workspace_panel', () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       const props = defaultProps;
 
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...props}
           datasourceMap={{
@@ -540,7 +540,7 @@ describe('workspace_panel', () => {
       mockDatasource.toExpression.mockReturnValue('datasource');
       mockDatasource.getLayers.mockReturnValue(['table1']);
 
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...defaultProps}
           datasourceMap={{
@@ -585,7 +585,7 @@ describe('workspace_panel', () => {
 
       expressionRendererMock = jest.fn((_arg) => <span />);
 
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...defaultProps}
           datasourceMap={{
@@ -629,7 +629,7 @@ describe('workspace_panel', () => {
         .mockReturnValueOnce('datasource second');
 
       expressionRendererMock = jest.fn((_arg) => <span />);
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...defaultProps}
           datasourceMap={{
@@ -687,7 +687,7 @@ describe('workspace_panel', () => {
 
       const getUserMessages = jest.fn(() => messages);
 
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...defaultProps}
           getUserMessages={getUserMessages}
@@ -717,7 +717,7 @@ describe('workspace_panel', () => {
       let userMessages = [] as UserMessage[];
       const getUserMessageFn = jest.fn(() => userMessages);
 
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...defaultProps}
           getUserMessages={getUserMessageFn}
@@ -786,7 +786,7 @@ describe('workspace_panel', () => {
       const mockAddUserMessages = jest.fn(() => mockRemoveUserMessages);
       const mockGetUserMessages = jest.fn<UserMessage[], unknown[]>(() => []);
 
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...defaultProps}
           datasourceMap={{
@@ -814,7 +814,7 @@ describe('workspace_panel', () => {
         first: mockDatasource.publicAPIMock,
       };
 
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...defaultProps}
           datasourceMap={{
@@ -844,7 +844,7 @@ describe('workspace_panel', () => {
       framePublicAPI.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };
-      const mounted = await mountWithProvider(
+      const mounted = mountWithReduxStore(
         <WorkspacePanel
           {...defaultProps}
           datasourceMap={{

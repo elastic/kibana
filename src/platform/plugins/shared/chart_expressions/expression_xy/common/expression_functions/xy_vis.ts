@@ -54,7 +54,7 @@ export const xyVisFunction: XyVisFn = {
     },
   },
   async fn(data, args, handlers) {
-    const { xyVisFn } = await import('./xy_vis_fn');
+    const { xyVisFn } = await import('./expression_module');
     return await xyVisFn(data, args, handlers);
   },
 };

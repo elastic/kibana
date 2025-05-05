@@ -37,7 +37,7 @@ The APIs exposed in the `public` context aim to collect the _aggregate_ number o
 
 #### Application Usage
 
-Kibana automatically tracks the number of minutes the users spend on each application, as well as the number of general clicks in the same app. There is no need for plugins to opt-in. However, if a plugin needs to collect the same metric for specific sections of the app (i.e.: tabs, flyouts, or any component that may be shown in specific situations), it can use the React component `TrackApplicationView`. For more info about the app-level and sub-views tracking, please read [this collector's README](../kibana_usage_collection/server/collectors/application_usage/README.md).
+Kibana automatically tracks the number of minutes the users spend on each application, as well as the number of general clicks in the same app. There is no need for plugins to opt-in. However, if a plugin needs to collect the same metric for specific sections of the app (i.e.: tabs, flyouts, or any component that may be shown in specific situations), it can use the React component `TrackApplicationView`. For more info about the app-level and sub-views tracking, please read [this collector's README](../../../../../src/platform/plugins/private/kibana_usage_collection/server/collectors/application_usage/README.md).
 
 #### UI Counters
 
@@ -52,7 +52,7 @@ To track a user interaction, use the API `usageCollection.reportUiCounter` as fo
 ```ts
 // public/plugin.ts
 import { METRIC_TYPE } from '@kbn/analytics';
-import { Plugin, CoreStart } from '../../../../../core/public';
+import { Plugin, CoreStart } from '@kbn/core/public';
 
 export class MyPlugin implements Plugin {
   public start(
@@ -133,8 +133,8 @@ To create a usage counter for your plugin, use the API `usageCollection.createUs
 
 ```ts
 // server/plugin.ts
-import type { Plugin, CoreStart } from '../../../../../core/server';
-import type { UsageCollectionSetup, UsageCounter } from '../../../../../plugins/usage_collection/server';
+import type { Plugin, CoreStart } from '@kbn/core/server';
+import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 export class MyPlugin implements Plugin {
   private usageCounter?: UsageCounter;

@@ -45,6 +45,7 @@ export type {
   AlertsHealth,
   AlertingFrameworkHealth,
   ResolvedSanitizedRule,
+  Artifacts,
 } from '@kbn/alerting-types';
 
 export {
@@ -106,4 +107,8 @@ export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
   total_alerts_detected?: number | null;
   total_alerts_created?: number | null;
   gap_duration_s?: number | null;
+  gap_range?: {
+    lte: string;
+    gte: string;
+  } | null;
 }

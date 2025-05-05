@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 
-import { useConfig } from '../../../../../hooks';
+import { useConfig, sendGetOneFleetServerHost, sendGetOneOutput } from '../../../../../hooks';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 import type {
   AgentPolicy,
@@ -24,6 +24,10 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENTLESS_AGENT_POLICY_MONITORING,
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  DEFAULT_OUTPUT_ID,
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  DEFAULT_FLEET_SERVER_HOST_ID,
 } from '../../../../../../../../common/constants';
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
@@ -38,6 +42,7 @@ export const useAgentless = () => {
   const isCloud = !!cloud?.isCloudEnabled;
 
   const isAgentlessEnabled = (isCloud || isServerless) && config.agentless?.enabled === true;
+  const isAgentlessDefault = isAgentlessEnabled && config.agentless?.isDefault === true;
 
   const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
     if (!agentPolicy) return false;
@@ -54,46 +59,102 @@ export const useAgentless = () => {
 
   return {
     isAgentlessEnabled,
+    isAgentlessDefault,
     isAgentlessAgentPolicy,
     isAgentlessIntegration,
+    isServerless,
+    isCloud,
   };
 };
 
 export function useSetupTechnology({
   setNewAgentPolicy,
   newAgentPolicy,
-  updateAgentPolicies,
   updatePackagePolicy,
   setSelectedPolicyTab,
   packageInfo,
   packagePolicy,
   isEditPage,
   agentPolicies,
+  integrationToEnable,
 }: {
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
-  updateAgentPolicies: (policies: AgentPolicy[]) => void;
   updatePackagePolicy: (policy: Partial<NewPackagePolicy>) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   packageInfo?: PackageInfo;
   packagePolicy: NewPackagePolicy;
   isEditPage?: boolean;
   agentPolicies?: AgentPolicy[];
+  integrationToEnable?: string;
 }) {
-  const { isAgentlessEnabled } = useAgentless();
+  const { isAgentlessEnabled, isAgentlessDefault, isServerless, isCloud } = useAgentless();
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const orginalAgentPolicyRef = useRef<NewAgentPolicy>({ ...newAgentPolicy });
   const [currentAgentPolicy, setCurrentAgentPolicy] = useState(newAgentPolicy);
-  const defaultSetupTechnology = useMemo(() => {
-    return isOnlyAgentlessIntegration(packageInfo) || isAgentlessSetupDefault(packageInfo)
-      ? SetupTechnology.AGENTLESS
-      : SetupTechnology.AGENT_BASED;
-  }, [packageInfo]);
-  const [selectedSetupTechnology, setSelectedSetupTechnology] =
-    useState<SetupTechnology>(defaultSetupTechnology);
+
+  const allowedSetupTechnologies = useMemo(() => {
+    return isOnlyAgentlessIntegration(packageInfo, integrationToEnable)
+      ? [SetupTechnology.AGENTLESS]
+      : [SetupTechnology.AGENTLESS, SetupTechnology.AGENT_BASED];
+  }, [integrationToEnable, packageInfo]);
+  const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
+    SetupTechnology.AGENT_BASED
+  );
+  // derive default setup technology based on package info and selected integration
+  const [defaultSetupTechnology, setDefaultSetupTechnology] = useState<SetupTechnology>(
+    SetupTechnology.AGENT_BASED
+  );
+  useEffect(() => {
+    const shouldBeDefault =
+      isAgentlessEnabled &&
+      (isOnlyAgentlessIntegration(packageInfo, integrationToEnable) ||
+        isAgentlessSetupDefault(isAgentlessDefault, packageInfo, integrationToEnable))
+        ? SetupTechnology.AGENTLESS
+        : SetupTechnology.AGENT_BASED;
+    setDefaultSetupTechnology(shouldBeDefault);
+    setSelectedSetupTechnology(shouldBeDefault);
+  }, [isAgentlessEnabled, isAgentlessDefault, packageInfo, integrationToEnable]);
 
   const agentlessPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name);
+  const [agentlessPolicyOutputId, setAgentlessPolicyOutputId] = useState<string | undefined>();
+  const [agentlessPolicyFleetServerHostId, setAgentlessPolicyFleetServerHostId] = useState<
+    string | undefined
+  >();
+
+  useEffect(() => {
+    const fetchOutputId = async () => {
+      const outputId = isServerless
+        ? SERVERLESS_DEFAULT_OUTPUT_ID
+        : isCloud
+        ? DEFAULT_OUTPUT_ID
+        : undefined;
+      if (outputId) {
+        const outputData = await sendGetOneOutput(outputId);
+        setAgentlessPolicyOutputId(outputData.data?.item ? outputId : undefined);
+      } else {
+        setAgentlessPolicyOutputId(undefined);
+      }
+    };
+    const fetchFleetServerHostId = async () => {
+      const hostId = isServerless
+        ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+        : isCloud
+        ? DEFAULT_FLEET_SERVER_HOST_ID
+        : undefined;
+
+      if (hostId) {
+        const hostData = await sendGetOneFleetServerHost(hostId);
+        setAgentlessPolicyFleetServerHostId(hostData.data?.item ? hostId : undefined);
+      } else {
+        setAgentlessPolicyFleetServerHostId(undefined);
+      }
+    };
+
+    fetchOutputId();
+    fetchFleetServerHostId();
+  }, [isCloud, isServerless]);
 
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology: SetupTechnology) => {
@@ -127,6 +188,10 @@ export function useSetupTechnology({
         inactivity_timeout: AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
         supports_agentless: true,
         monitoring_enabled: AGENTLESS_AGENT_POLICY_MONITORING,
+        ...(agentlessPolicyOutputId ? { data_output_id: agentlessPolicyOutputId } : {}),
+        ...(agentlessPolicyFleetServerHostId
+          ? { fleet_server_host_id: agentlessPolicyFleetServerHostId }
+          : {}),
       }),
       name: agentlessPolicyName,
       global_data_tags: getGlobaDataTags(packageInfo),
@@ -139,7 +204,6 @@ export function useSetupTechnology({
 
     setCurrentAgentPolicy(nextNewAgentlessPolicy);
     setNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
-    updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
     updatePackagePolicy({
       supports_agentless: true,
     });
@@ -156,7 +220,6 @@ export function useSetupTechnology({
     };
     setCurrentAgentPolicy(nextNewAgentlessPolicy);
     setNewAgentPolicy(nextNewAgentlessPolicy);
-    updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
     updatePackagePolicy({
       supports_agentless: false,
     });
@@ -164,14 +227,46 @@ export function useSetupTechnology({
 
   return {
     handleSetupTechnologyChange,
+    allowedSetupTechnologies,
     selectedSetupTechnology,
     defaultSetupTechnology,
   };
 }
 
-const isAgentlessSetupDefault = (packageInfo?: PackageInfo) => {
-  // TODO: https://github.com/elastic/kibana/issues/205761
-  // placeholder for the logic to determine if the agentless setup is the default
+export const isAgentlessSetupDefault = (
+  isAgentlessDefault: boolean,
+  packageInfo?: PackageInfo,
+  integrationToEnable?: string
+): boolean => {
+  const policyTemplates = packageInfo?.policy_templates ?? [];
+  if (policyTemplates.length === 0) {
+    return false;
+  }
+
+  const hasDefaultAgentlessIntegration =
+    integrationToEnable &&
+    policyTemplates.find((p) => p.name === integrationToEnable)?.deployment_modes?.agentless
+      ?.is_default;
+  if (hasDefaultAgentlessIntegration) {
+    return true;
+  }
+
+  const allPolicyTemplatesAreDefaultAgentless = policyTemplates.every(
+    (template) => template.deployment_modes?.agentless?.is_default
+  );
+  if (allPolicyTemplatesAreDefaultAgentless) {
+    return true;
+  }
+
+  if (isAgentlessDefault) {
+    const allPolicyTemplatesHaveAgentlessDefined = policyTemplates.every(
+      (template) => template.deployment_modes?.agentless
+    );
+    if (allPolicyTemplatesHaveAgentlessDefined) {
+      return true;
+    }
+  }
+
   return false;
 };
 

@@ -45,7 +45,7 @@ import { SAVED_OBJECTS_LIMIT_SETTING, SAVED_OBJECTS_PER_PAGE_SETTING } from '../
 import type { VisualizationListItem } from '../..';
 import type { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../../../common/constants';
-import { getNoItemsMessage, getCustomColumn } from '../utils';
+import { getNoItemsMessage, getCustomColumn, getCustomSortingOptions } from '../utils';
 import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
 import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
 
@@ -395,7 +395,7 @@ export const VisualizeListing = () => {
             // we allow users to create visualizations even if they can't save them
             // for data exploration purposes
             customTableColumn={getCustomColumn()}
-            listingLimit={listingLimit}
+            customSortingOptions={getCustomSortingOptions()}
             initialPageSize={initialPageSize}
             initialFilter={''}
             entityName={i18n.translate('visualizations.listing.table.entityName', {
@@ -430,7 +430,6 @@ export const VisualizeListing = () => {
     dashboardCapabilities.createNew,
     initialPageSize,
     kbnUrlStateStorage,
-    listingLimit,
     tableViewProps,
     visualizeLibraryTitle,
   ]);

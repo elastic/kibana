@@ -5,12 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { disableStreams, enableStreams, indexDocument } from '../helpers/requests';
+import { disableStreams, enableStreams, indexDocument, linkDashboard } from '../helpers/requests';
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from '../helpers/repository_client';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { loadDashboards, unloadDashboards } from '../helpers/dashboards';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -22,46 +23,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   const SPACE_ID = 'default';
   const ARCHIVES = [
-    'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
-    'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
+    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+    'x-pack/test/api_integration/fixtures/kbn_archiver/streams/tagged_dashboard.json',
   ];
 
   const SEARCH_DASHBOARD_ID = 'b70c7ae0-3224-11e8-a572-ffca06da1357';
   const BASIC_DASHBOARD_ID = 'be3733a0-9efe-11e7-acb3-3dab96693fab';
   const BASIC_DASHBOARD_TITLE = 'Requests';
-
-  async function loadDashboards() {
-    for (const archive of ARCHIVES) {
-      await kibanaServer.importExport.load(archive, { space: SPACE_ID });
-    }
-  }
-
-  async function unloadDashboards() {
-    for (const archive of ARCHIVES) {
-      await kibanaServer.importExport.unload(archive, { space: SPACE_ID });
-    }
-  }
-
-  async function linkDashboard(id: string) {
-    const response = await apiClient.fetch('PUT /api/streams/{id}/dashboards/{dashboardId}', {
-      params: { path: { id: 'logs', dashboardId: id } },
-    });
-
-    expect(response.status).to.be(200);
-  }
+  const TAG_ID = '00ad6a46-6ac3-4f6c-892c-2f72c54a5e7d';
 
   async function unlinkDashboard(id: string) {
-    const response = await apiClient.fetch('DELETE /api/streams/{id}/dashboards/{dashboardId}', {
-      params: { path: { id: 'logs', dashboardId: id } },
-    });
+    const response = await apiClient.fetch(
+      'DELETE /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
+      {
+        params: { path: { name: 'logs', dashboardId: id } },
+      }
+    );
 
     expect(response.status).to.be(200);
   }
 
   async function bulkLinkDashboard(...ids: string[]) {
-    const response = await apiClient.fetch('POST /api/streams/{id}/dashboards/_bulk', {
+    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
       params: {
-        path: { id: 'logs' },
+        path: { name: 'logs' },
         body: {
           operations: ids.map((id) => {
             return {
@@ -78,9 +64,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   async function bulkUnlinkDashboard(...ids: string[]) {
-    const response = await apiClient.fetch('POST /api/streams/{id}/dashboards/_bulk', {
+    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
       params: {
-        path: { id: 'logs' },
+        path: { name: 'logs' },
         body: {
           operations: ids.map((id) => {
             return {
@@ -96,21 +82,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     expect(response.status).to.be(200);
   }
 
-  async function deleteAssetIndices() {
-    const concreteIndices = await esClient.indices.resolveIndex({
-      name: '.kibana_streams_assets*',
-    });
-
-    if (concreteIndices.indices.length) {
-      await esClient.indices.delete({
-        index: concreteIndices.indices.map((index) => index.name),
-      });
-    }
-  }
-
   describe('Asset links', function () {
-    // see details: https://github.com/elastic/kibana/issues/207310
-    this.tags(['failsOnMKI']);
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -123,51 +95,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await disableStreams(apiClient);
-
-      await deleteAssetIndices();
-    });
-
-    describe('without writing', () => {
-      it('creates no indices initially', async () => {
-        const exists = await esClient.indices.exists({ index: '.kibana_streams_assets' });
-
-        expect(exists).to.eql(false);
-      });
-
-      it('creates no indices after reading the assets', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-          params: { path: { id: 'logs' } },
-        });
-
-        expect(response.status).to.be(200);
-
-        const exists = await esClient.indices.exists({ index: '.kibana_streams_assets' });
-
-        expect(exists).to.eql(false);
-      });
     });
 
     describe('after linking a dashboard', () => {
       before(async () => {
-        await loadDashboards();
+        await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
 
-        await linkDashboard(SEARCH_DASHBOARD_ID);
+        await linkDashboard(apiClient, 'logs', SEARCH_DASHBOARD_ID);
       });
 
       after(async () => {
-        await unloadDashboards();
         await unlinkDashboard(SEARCH_DASHBOARD_ID);
-      });
-
-      it('creates the index', async () => {
-        const exists = await esClient.indices.exists({ index: '.kibana_streams_assets' });
-
-        expect(exists).to.be(true);
+        await unloadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
       });
 
       it('lists the dashboard in the stream response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{id}', {
-          params: { path: { id: 'logs' } },
+        const response = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: { path: { name: 'logs' } },
         });
 
         expect(response.status).to.eql(200);
@@ -176,8 +120,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists the dashboard in the dashboards get response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-          params: { path: { id: 'logs' } },
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+          params: { path: { name: 'logs' } },
         });
 
         expect(response.status).to.eql(200);
@@ -185,56 +129,28 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body.dashboards.length).to.eql(1);
       });
 
-      describe('after manually rolling over the index and relinking the dashboard', () => {
+      describe('after disabling', () => {
         before(async () => {
-          await esClient.indices.updateAliases({
-            actions: [
-              {
-                add: {
-                  index: `.kibana_streams_assets-000001`,
-                  alias: `.kibana_streams_assets`,
-                  is_write_index: false,
-                },
-              },
-            ],
-          });
-
-          await esClient.indices.create({
-            index: `.kibana_streams_assets-000002`,
-          });
-
-          await unlinkDashboard(SEARCH_DASHBOARD_ID);
-          await linkDashboard(SEARCH_DASHBOARD_ID);
+          // disabling and re-enabling streams wipes the asset links
+          await disableStreams(apiClient);
+          await enableStreams(apiClient);
         });
 
-        it('there are no duplicates', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-            params: { path: { id: 'logs' } },
+        it('dropped all dashboards', async () => {
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+            params: { path: { name: 'logs' } },
           });
 
           expect(response.status).to.eql(200);
 
-          expect(response.body.dashboards.length).to.eql(1);
-
-          const esResponse = await esClient.search({
-            index: `.kibana_streams_assets`,
-          });
-
-          expect(esResponse.hits.hits.length).to.eql(1);
-        });
-      });
-
-      describe('after deleting the indices and relinking the dashboard', () => {
-        before(async () => {
-          await deleteAssetIndices();
-
-          await unlinkDashboard(SEARCH_DASHBOARD_ID);
-          await linkDashboard(SEARCH_DASHBOARD_ID);
+          expect(response.body.dashboards.length).to.eql(0);
         });
 
         it('recovers on write and lists the linked dashboard ', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-            params: { path: { id: 'logs' } },
+          await linkDashboard(apiClient, 'logs', SEARCH_DASHBOARD_ID);
+
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+            params: { path: { name: 'logs' } },
           });
 
           expect(response.status).to.eql(200);
@@ -245,12 +161,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       describe('after deleting the dashboards', () => {
         before(async () => {
-          await unloadDashboards();
+          await unloadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
         });
 
         it('no longer lists the dashboard as a linked asset', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-            params: { path: { id: 'logs' } },
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+            params: { path: { name: 'logs' } },
           });
 
           expect(response.status).to.eql(200);
@@ -262,19 +178,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('after using the bulk API', () => {
       before(async () => {
-        await loadDashboards();
+        await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
 
         await bulkLinkDashboard(SEARCH_DASHBOARD_ID, BASIC_DASHBOARD_ID);
       });
 
       after(async () => {
         await bulkUnlinkDashboard(SEARCH_DASHBOARD_ID, BASIC_DASHBOARD_ID);
-        await unloadDashboards();
+        await unloadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
       });
 
       it('shows the linked dashboards', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-          params: { path: { id: 'logs' } },
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+          params: { path: { name: 'logs' } },
         });
 
         expect(response.body.dashboards.length).to.eql(2);
@@ -286,8 +202,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('only shows the remaining linked dashboard', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{id}/dashboards', {
-            params: { path: { id: 'logs' } },
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+            params: { path: { name: 'logs' } },
           });
 
           expect(response.body.dashboards.length).to.eql(1);
@@ -297,39 +213,75 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('on class stream that has not been touched yet', () => {
+      before(async () => {
+        await esClient.indices.createDataStream({
+          name: 'logs-testlogs-default',
+        });
+      });
+      after(async () => {
+        await esClient.indices.deleteDataStream({
+          name: 'logs-testlogs-default',
+        });
+      });
+      it('does not list any dashboards but returns 200', async () => {
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+          params: { path: { name: 'logs-testlogs-default' } },
+        });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.dashboards.length).to.eql(0);
+      });
+    });
+
     describe('suggestions', () => {
       before(async () => {
-        await loadDashboards();
+        await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
 
-        await linkDashboard(SEARCH_DASHBOARD_ID);
+        await linkDashboard(apiClient, 'logs', SEARCH_DASHBOARD_ID);
       });
 
       after(async () => {
         await unlinkDashboard(SEARCH_DASHBOARD_ID);
-        await unloadDashboards();
+        await unloadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
       });
 
       describe('after creating multiple dashboards', () => {
         it('suggests dashboards to link', async () => {
-          const response = await apiClient.fetch('POST /api/streams/{id}/dashboards/_suggestions', {
-            params: { path: { id: 'logs' }, body: { tags: [] }, query: { query: '' } },
-          });
+          const response = await apiClient.fetch(
+            'POST /internal/streams/{name}/dashboards/_suggestions',
+            {
+              params: { path: { name: 'logs' }, body: { tags: [] }, query: { query: '' } },
+            }
+          );
 
           expect(response.status).to.eql(200);
-          expect(response.body.suggestions.length).to.eql(2);
+          expect(response.body.suggestions.length).to.eql(3);
         });
 
-        // TODO: needs a dataset with dashboards with tags
-        it.skip('filters suggested dashboards based on tags', () => {});
+        it('filters suggested dashboards based on tags', async () => {
+          const response = await apiClient.fetch(
+            'POST /internal/streams/{name}/dashboards/_suggestions',
+            {
+              params: { path: { name: 'logs' }, body: { tags: [TAG_ID] }, query: { query: '' } },
+            }
+          );
+
+          expect(response.status).to.eql(200);
+          expect(response.body.suggestions.length).to.eql(1);
+        });
 
         it('filters suggested dashboards based on the query', async () => {
-          const response = await apiClient.fetch('POST /api/streams/{id}/dashboards/_suggestions', {
-            params: {
-              path: { id: 'logs' },
-              body: { tags: [] },
-              query: { query: BASIC_DASHBOARD_TITLE },
-            },
-          });
+          const response = await apiClient.fetch(
+            'POST /internal/streams/{name}/dashboards/_suggestions',
+            {
+              params: {
+                path: { name: 'logs' },
+                body: { tags: [] },
+                query: { query: BASIC_DASHBOARD_TITLE },
+              },
+            }
+          );
 
           expect(response.status).to.eql(200);
           expect(response.body.suggestions.length).to.eql(1);

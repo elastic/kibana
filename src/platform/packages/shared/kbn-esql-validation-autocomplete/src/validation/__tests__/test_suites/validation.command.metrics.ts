@@ -9,17 +9,17 @@
 
 import * as helpers from '../helpers';
 
-export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
+export const validationTimeseriesCommandTestSuite = (setup: helpers.Setup) => {
   describe('validation', () => {
     describe('command', () => {
-      describe('METRICS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
+      describe('TS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
         test('errors on invalid command start', async () => {
           const { expectErrors } = await setup();
 
           await expectErrors('m', [
-            "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'row', 'show'}",
+            "SyntaxError: mismatched input 'm' expecting {'explain', 'row', 'from', 'show'}",
           ]);
-          await expectErrors('metrics ', [
+          await expectErrors('ts ', [
             "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
           ]);
         });
@@ -28,47 +28,44 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
           test('no errors on correct indices usage', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('metrics index', []);
-            await expectErrors('metrics index, other_index', []);
-            await expectErrors('metrics index, other_index,.secret_index', []);
-            await expectErrors('metrics .secret_index', []);
-            await expectErrors('METRICS .secret_index', []);
-            await expectErrors('mEtRiCs .secret_index', []);
-            await expectErrors('metrics ind*, other*', []);
-            await expectErrors('metrics index*', []);
-            await expectErrors('metrics *a_i*dex*', []);
-            await expectErrors('metrics in*ex*', []);
-            await expectErrors('metrics *n*ex', []);
-            await expectErrors('metrics *n*ex*', []);
-            await expectErrors('metrics i*d*x*', []);
-            await expectErrors('metrics i*d*x', []);
-            await expectErrors('metrics i***x*', []);
-            await expectErrors('metrics i****', []);
-            await expectErrors('metrics i**', []);
-            await expectErrors('metrics index**', []);
-            await expectErrors('metrics *ex', []);
-            await expectErrors('metrics *ex*', []);
-            await expectErrors('metrics in*ex', []);
-            await expectErrors('metrics ind*ex', []);
-            await expectErrors('metrics *,-.*', []);
-            await expectErrors('metrics remote-*:indexes*', ['Unknown index [remote-*:indexes*]']);
-            await expectErrors('metrics remote-*:indexes', ['Unknown index [remote-*:indexes]']);
-            await expectErrors('metrics remote-ccs:indexes', [
+            await expectErrors('ts index', []);
+            await expectErrors('ts index, other_index', []);
+            await expectErrors('ts index, other_index,.secret_index', []);
+            await expectErrors('ts .secret_index', []);
+            await expectErrors('TS .secret_index', []);
+            await expectErrors('Ts .secret_index', []);
+            await expectErrors('ts ind*, other*', []);
+            await expectErrors('ts index*', []);
+            await expectErrors('ts *a_i*dex*', []);
+            await expectErrors('ts in*ex*', []);
+            await expectErrors('ts *n*ex', []);
+            await expectErrors('ts *n*ex*', []);
+            await expectErrors('ts i*d*x*', []);
+            await expectErrors('ts i*d*x', []);
+            await expectErrors('ts i***x*', []);
+            await expectErrors('ts i****', []);
+            await expectErrors('ts i**', []);
+            await expectErrors('ts index**', []);
+            await expectErrors('ts *ex', []);
+            await expectErrors('ts *ex*', []);
+            await expectErrors('ts in*ex', []);
+            await expectErrors('ts ind*ex', []);
+            await expectErrors('ts *,-.*', []);
+            await expectErrors('ts remote-*:indexes*', ['Unknown index [remote-*:indexes*]']);
+            await expectErrors('ts remote-ccs:indexes', ['Unknown index [remote-ccs:indexes]']);
+            await expectErrors('ts a_index, remote-ccs:indexes', [
               'Unknown index [remote-ccs:indexes]',
             ]);
-            await expectErrors('metrics a_index, remote-ccs:indexes', [
-              'Unknown index [remote-ccs:indexes]',
-            ]);
-            await expectErrors('metrics .secret_index', []);
+            await expectErrors('ts .secret_index', []);
           });
 
           test('errors on trailing comma', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('metrics index,', [
+            await expectErrors('ts index,', [
               "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
             ]);
-            await expectErrors(`metrics index\n, \tother_index\t,\n \t `, [
+            await expectErrors(`ts index\n, \tother_index\t,\n \t `, [
               "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}",
             ]);
           });
@@ -76,22 +73,21 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
           test('errors on invalid syntax', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors(`metrics index = 1`, [
-              "SyntaxError: token recognition error at: '='",
-              "SyntaxError: token recognition error at: '1'",
+            await expectErrors(`ts index = 1`, [
+              "SyntaxError: mismatched input '=' expecting <EOF>",
             ]);
-            await expectErrors('metrics `index`', ['Unknown index [`index`]']);
+            await expectErrors('ts `index`', ['Unknown index [`index`]']);
           });
 
           test('errors on unknown index', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors(`METRICS index, missingIndex`, ['Unknown index [missingIndex]']);
-            await expectErrors(`METRICS average()`, ['Unknown index [average()]']);
-            await expectErrors(`metrics custom_function()`, ['Unknown index [custom_function()]']);
-            await expectErrors(`metrics indexes*`, ['Unknown index [indexes*]']);
-            await expectErrors('metrics doubleField', ['Unknown index [doubleField]']);
-            await expectErrors('metrics policy', ['Unknown index [policy]']);
+            await expectErrors(`TS index, missingIndex`, ['Unknown index [missingIndex]']);
+            await expectErrors(`TS average()`, ['Unknown index [average()]']);
+            await expectErrors(`ts custom_function()`, ['Unknown index [custom_function()]']);
+            await expectErrors(`ts indexes*`, ['Unknown index [indexes*]']);
+            await expectErrors('ts doubleField', ['Unknown index [doubleField]']);
+            await expectErrors('ts policy', ['Unknown index [policy]']);
           });
         });
 
@@ -99,83 +95,32 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
           test('no errors on correct usage', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('METRICS a_index count()', []);
-            await expectErrors('metrics a_index avg(doubleField) by 1', []);
-            await expectErrors('metrics a_index count(`doubleField`)', []);
-            await expectErrors('metrics a_index count(*)', []);
-            await expectErrors('metrics index var0 = count(*)', []);
-            await expectErrors('metrics a_index var0 = count()', []);
-            await expectErrors('metrics a_index var0 = avg(doubleField), count(*)', []);
-            await expectErrors(`metrics a_index sum(case(false, 0, 1))`, []);
-            await expectErrors(`metrics a_index var0 = sum( case(false, 0, 1))`, []);
-            await expectErrors('metrics a_index count(textField == "a" or null)', []);
-            await expectErrors('metrics other_index max(doubleField) by textField', []);
+            await expectErrors('TS a_index | STATS count()', []);
+            await expectErrors('ts a_index | STATS avg(doubleField) by 1', []);
+            await expectErrors('ts a_index | STATS count(`doubleField`)', []);
+            await expectErrors('ts a_index | STATS count(*)', []);
+            await expectErrors('ts index | STATS col0 = count(*)', []);
+            await expectErrors('ts a_index | STATS col0 = count()', []);
+            await expectErrors('ts a_index | STATS col0 = avg(doubleField), count(*)', []);
+            await expectErrors(`ts a_index | STATS sum(case(false, 0, 1))`, []);
+            await expectErrors(`ts a_index | STATS col0 = sum( case(false, 0, 1))`, []);
+            await expectErrors('ts a_index | STATS count(textField == "a" or null)', []);
+            await expectErrors('ts other_index | STATS max(doubleField) by textField', []);
           });
 
           test('syntax errors', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('metrics a_index doubleField=', [
-              expect.any(String),
-              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
-            ]);
-            await expectErrors('metrics a_index doubleField=5 by ', [
-              expect.any(String),
-              "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, INTEGER_LITERAL, DECIMAL_LITERAL, 'false', '(', 'not', 'null', '?', 'true', '+', '-', NAMED_OR_POSITIONAL_PARAM, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER}",
+            await expectErrors('ts a_index doubleField=', [
+              "SyntaxError: mismatched input 'doubleField' expecting <EOF>",
             ]);
           });
 
           test('errors on unknown function', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('metrics a_index var0 = avg(fn(number)), count(*)', [
-              'Unknown function [fn]',
-            ]);
-          });
-
-          test('errors when no aggregation function specified', async () => {
-            const { expectErrors } = await setup();
-
-            await expectErrors('metrics a_index doubleField + 1', [
-              'At least one aggregation function required in [METRICS], found [doubleField+1]',
-            ]);
-            await expectErrors('metrics a_index a = doubleField + 1', [
-              'At least one aggregation function required in [METRICS], found [a=doubleField+1]',
-            ]);
-            await expectErrors('metrics a_index a = doubleField + 1, textField', [
-              'At least one aggregation function required in [METRICS], found [a=doubleField+1]',
-              'Expected an aggregate function or group but got [textField] of type [FieldAttribute]',
-            ]);
-            await expectErrors('metrics a_index doubleField + 1 by ipField', [
-              'At least one aggregation function required in [METRICS], found [doubleField+1]',
-            ]);
-          });
-
-          test('errors on agg and non-agg mix', async () => {
-            const { expectErrors } = await setup();
-
-            await expectErrors('METRICS a_index sum( doubleField ) + abs( doubleField ) ', [
-              'Cannot combine aggregation and non-aggregation values in [METRICS], found [sum(doubleField)+abs(doubleField)]',
-            ]);
-            await expectErrors('METRICS a_index abs( doubleField + sum( doubleField )) ', [
-              'Cannot combine aggregation and non-aggregation values in [METRICS], found [abs(doubleField+sum(doubleField))]',
-            ]);
-          });
-
-          test('errors when aggregation functions are nested', async () => {
-            const { expectErrors } = await setup();
-
-            // avg() inside avg()
-            await expectErrors('METRICS a_index avg(to_long(avg(2)))', [
-              'The aggregation function [avg] cannot be used as an argument in another aggregation function',
-            ]);
-          });
-
-          test('errors when input is not an aggregate function', async () => {
-            const { expectErrors } = await setup();
-
-            await expectErrors('metrics a_index doubleField ', [
-              'Expected an aggregate function or group but got [doubleField] of type [FieldAttribute]',
+            await expectErrors('ts a_index col0 = avg(fn(number)), count(*)', [
+              "SyntaxError: mismatched input 'col0' expecting <EOF>",
             ]);
           });
 
@@ -184,7 +129,7 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
 
             for (const subCommand of ['keep', 'drop', 'eval']) {
               await expectErrors(
-                'metrics a_index count(`doubleField`) | ' +
+                'TS a_index | stats count(`doubleField`) | ' +
                   subCommand +
                   ' `count(``doubleField``)` ',
                 []
@@ -195,10 +140,10 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
           test('semantic function validation errors', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('metrics a_index count(round(*))', [
+            await expectErrors('TS a_index | stats count(round(*))', [
               'Using wildcards (*) in round is not allowed',
             ]);
-            await expectErrors('metrics a_index count(count(*))', [
+            await expectErrors('TS a_index | stats count(count(*))', [
               `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [long]`,
             ]);
           });
@@ -209,42 +154,33 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
             const { expectErrors } = await setup();
 
             await expectErrors(
-              'metrics a_index avg(doubleField), percentile(doubleField, 50) by ipField',
+              'TS a_index | stats avg(doubleField), percentile(doubleField, 50) by ipField',
               []
             );
             await expectErrors(
-              'metrics a_index avg(doubleField), percentile(doubleField, 50) BY ipField',
+              'TS a_index | stats avg(doubleField), percentile(doubleField, 50) BY ipField',
               []
             );
             await expectErrors(
-              'metrics a_index avg(doubleField), percentile(doubleField, 50) + 1 by ipField',
+              'TS a_index | stats avg(doubleField), percentile(doubleField, 50) + 1 by ipField',
               []
             );
-            await expectErrors('metrics a_index avg(doubleField) by textField | limit 100', []);
+            await expectErrors('TS a_index | stats avg(doubleField) by textField | limit 100', []);
             for (const op of ['+', '-', '*', '/', '%']) {
               await expectErrors(
-                `metrics a_index avg(doubleField) ${op} percentile(doubleField, 50) BY ipField`,
+                `TS a_index | stats avg(doubleField) ${op} percentile(doubleField, 50) BY ipField`,
                 []
               );
             }
           });
 
-          test('syntax does not allow <grouping> clause without <aggregates>', async () => {
-            const { expectErrors } = await setup();
-
-            await expectErrors('metrics a_index BY textField', [
-              'Expected an aggregate function or group but got [BY] of type [FieldAttribute]',
-              "SyntaxError: extraneous input 'textField' expecting <EOF>",
-            ]);
-          });
-
           test('syntax errors in <aggregates>', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('metrics a_index count(* + 1) BY ipField', [
+            await expectErrors('TS a_index | stats count(* + 1) BY ipField', [
               "SyntaxError: no viable alternative at input 'count(* +'",
             ]);
-            await expectErrors('metrics a_index \n count(* + round(doubleField)) BY ipField', [
+            await expectErrors('TS a_index \n | stats count(* + round(doubleField)) BY ipField', [
               "SyntaxError: no viable alternative at input 'count(* +'",
             ]);
           });
@@ -252,10 +188,10 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
           test('semantic errors in <aggregates>', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('metrics a_index count(round(*)) BY ipField', [
+            await expectErrors('TS a_index | stats count(round(*)) BY ipField', [
               'Using wildcards (*) in round is not allowed',
             ]);
-            await expectErrors('metrics a_index count(count(*)) BY ipField', [
+            await expectErrors('TS a_index | stats count(count(*)) BY ipField', [
               `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [long]`,
             ]);
           });
@@ -263,13 +199,13 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
           test('errors on unknown field', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('metrics a_index avg(doubleField) by wrongField', [
+            await expectErrors('TS a_index | stats avg(doubleField) by wrongField', [
               'Unknown column [wrongField]',
             ]);
-            await expectErrors('metrics a_index avg(doubleField) by wrongField + 1', [
+            await expectErrors('TS a_index | stats avg(doubleField) by wrongField + 1', [
               'Unknown column [wrongField]',
             ]);
-            await expectErrors('metrics a_index avg(doubleField) by var0 = wrongField + 1', [
+            await expectErrors('TS a_index | stats avg(doubleField) by col0 = wrongField + 1', [
               'Unknown column [wrongField]',
             ]);
           });
@@ -277,14 +213,14 @@ export const validationMetricsCommandTestSuite = (setup: helpers.Setup) => {
           test('various errors', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('METRICS a_index  avg(doubleField) by percentile(doubleField)', [
-              'METRICS BY does not support function percentile',
+            await expectErrors('TS a_index | stats avg(doubleField) by percentile(doubleField)', [
+              'STATS BY does not support function percentile',
             ]);
             await expectErrors(
-              'METRICS a_index avg(doubleField) by textField, percentile(doubleField) by ipField',
+              'TS a_index | stats avg(doubleField) by textField, percentile(doubleField) by ipField',
               [
                 "SyntaxError: mismatched input 'by' expecting <EOF>",
-                'METRICS BY does not support function percentile',
+                'STATS BY does not support function percentile',
               ]
             );
           });

@@ -14,7 +14,10 @@ import type { QueryStringInputProps } from './query_string_input';
 
 const Fallback = () => <div />;
 
-const LazyQueryBarTopRow = React.lazy(() => import('./query_bar_top_row'));
+const LazyQueryBarTopRow = React.lazy(async () => {
+  const { QueryBarTopRow } = await import('../ui_module');
+  return { default: QueryBarTopRow };
+});
 
 export const QueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
   props: QueryBarTopRowProps<QT>
@@ -24,7 +27,10 @@ export const QueryBarTopRow = <QT extends AggregateQuery | Query = Query>(
   </React.Suspense>
 );
 
-const LazyQueryStringInputUI = React.lazy(() => import('./query_string_input'));
+const LazyQueryStringInputUI = React.lazy(async () => {
+  const { QueryStringInput } = await import('../ui_module');
+  return { default: QueryStringInput };
+});
 
 export const QueryStringInput = (props: QueryStringInputProps) => (
   <React.Suspense fallback={<Fallback />}>

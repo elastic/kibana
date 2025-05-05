@@ -112,19 +112,15 @@ export default function (providerContext: FtrProviderContext) {
         es.deleteByQuery({
           index: ENROLLMENT_API_KEYS_INDEX,
           refresh: true,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         }),
         es.deleteByQuery({
           index: AGENT_POLICY_INDEX,
           refresh: true,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         }),
       ]).catch((err) => {
@@ -137,10 +133,8 @@ export default function (providerContext: FtrProviderContext) {
         await es.deleteByQuery({
           index: AGENTS_INDEX,
           refresh: true,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         });
       } catch (err) {
@@ -153,10 +147,8 @@ export default function (providerContext: FtrProviderContext) {
         await es.deleteByQuery({
           index: SECRETS_INDEX_NAME,
           refresh: true,
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         });
       } catch (err) {
@@ -239,7 +231,8 @@ export default function (providerContext: FtrProviderContext) {
             disk_queue_encryption_enabled: true,
           },
           secrets: { password: 'pass' },
-        });
+        })
+        .expect(200);
 
       return res.body.item;
     };
@@ -253,7 +246,7 @@ export default function (providerContext: FtrProviderContext) {
       const agentResponse = await es.index({
         index: '.fleet-agents',
         refresh: true,
-        body: {
+        document: {
           access_api_key_id: 'api-key-3',
           active: true,
           policy_id: policyId,
@@ -282,9 +275,7 @@ export default function (providerContext: FtrProviderContext) {
       const query = ids ? { terms: { _id: ids } } : { match_all: {} };
       return es.search({
         index: SECRETS_INDEX_NAME,
-        body: {
-          query,
-        },
+        query,
       });
     };
 
@@ -301,27 +292,25 @@ export default function (providerContext: FtrProviderContext) {
     const getLatestPolicyRevision = async (id: string): Promise<{ data: FullAgentPolicy }> => {
       const res = await es.search({
         index: '.fleet-policies',
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    policy_id: id,
-                  },
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  policy_id: id,
                 },
-              ],
+              },
+            ],
+          },
+        },
+        sort: [
+          {
+            revision_idx: {
+              order: 'desc',
             },
           },
-          sort: [
-            {
-              revision_idx: {
-                order: 'desc',
-              },
-            },
-          ],
-          size: 1,
-        },
+        ],
+        size: 1,
       });
       return res.hits.hits[0]._source as any as { data: FullAgentPolicy };
     };
@@ -356,6 +345,7 @@ export default function (providerContext: FtrProviderContext) {
           vars: {
             package_var_secret: 'package_secret_val',
             package_var_non_secret: 'package_non_secret_val',
+            package_var_multi_secret: ['package_multi_secret_val_1', 'package_multi_secret_val_2'],
           },
           package: {
             name: 'secrets',
@@ -415,8 +405,11 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should correctly create the policy with secrets', async () => {
         const packageVarId = packagePolicyWithSecrets.vars.package_var_secret.value.id;
-
         expect(packageVarId).to.be.an('string');
+
+        const packageVarMultiIds = packagePolicyWithSecrets.vars.package_var_multi_secret.value.ids;
+        expect(packageVarMultiIds).to.be.an('array');
+        expect(packageVarMultiIds.length).to.eql(2);
 
         const inputVarId = packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.id;
         expect(inputVarId).to.be.an('string');
@@ -428,6 +421,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           arrayIdsEqual(packagePolicyWithSecrets.secret_references, [
             { id: packageVarId },
+            { id: packageVarMultiIds[0] },
+            { id: packageVarMultiIds[1] },
             { id: streamVarId },
             { id: inputVarId },
           ])
@@ -436,6 +431,10 @@ export default function (providerContext: FtrProviderContext) {
         const expectedCompiledStream = {
           'config.version': '2',
           package_var_secret: secretVar(packageVarId),
+          package_var_multi_secret: [
+            secretVar(packageVarMultiIds[0]),
+            secretVar(packageVarMultiIds[1]),
+          ],
           package_var_non_secret: 'package_non_secret_val',
           input_var_secret: secretVar(inputVarId),
           input_var_non_secret: 'input_non_secret_val',
@@ -449,6 +448,10 @@ export default function (providerContext: FtrProviderContext) {
 
         const expectedCompiledInput = {
           package_var_secret: secretVar(packageVarId),
+          package_var_multi_secret: [
+            secretVar(packageVarMultiIds[0]),
+            secretVar(packageVarMultiIds[1]),
+          ],
           package_var_non_secret: 'package_non_secret_val',
           input_var_secret: secretVar(inputVarId),
           input_var_non_secret: 'input_non_secret_val',
@@ -457,6 +460,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(packagePolicyWithSecrets.inputs[0].compiled_input).to.eql(expectedCompiledInput);
 
         expect(packagePolicyWithSecrets.vars.package_var_secret.value.isSecretRef).to.eql(true);
+        expect(packagePolicyWithSecrets.vars.package_var_multi_secret.value.isSecretRef).to.eql(
+          true
+        );
         expect(packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(
           true
         );
@@ -469,12 +475,17 @@ export default function (providerContext: FtrProviderContext) {
         const packagePolicy = await getPackagePolicyById(packagePolicyWithSecrets.id);
 
         const packageVarId = packagePolicy.vars.package_var_secret.value.id;
+        const packageVarMultiIds = packagePolicy.vars.package_var_multi_secret.value.ids;
         const inputVarId = packagePolicy.inputs[0].vars.input_var_secret.value.id;
         const streamVarId = packagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id;
 
         const expectedCompiledStream = {
           'config.version': '2',
           package_var_secret: secretVar(packageVarId),
+          package_var_multi_secret: [
+            secretVar(packageVarMultiIds[0]),
+            secretVar(packageVarMultiIds[1]),
+          ],
           package_var_non_secret: 'package_non_secret_val',
           input_var_secret: secretVar(inputVarId),
           input_var_non_secret: 'input_non_secret_val',
@@ -484,6 +495,10 @@ export default function (providerContext: FtrProviderContext) {
 
         const expectedCompiledInput = {
           package_var_secret: secretVar(packageVarId),
+          package_var_multi_secret: [
+            secretVar(packageVarMultiIds[0]),
+            secretVar(packageVarMultiIds[1]),
+          ],
           package_var_non_secret: 'package_non_secret_val',
           input_var_secret: secretVar(inputVarId),
           input_var_non_secret: 'input_non_secret_val',
@@ -492,6 +507,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           arrayIdsEqual(packagePolicy.secret_references, [
             { id: packageVarId },
+            { id: packageVarMultiIds[0] },
+            { id: packageVarMultiIds[1] },
             { id: streamVarId },
             { id: inputVarId },
           ])
@@ -501,6 +518,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(packagePolicy.inputs[0].compiled_input).to.eql(expectedCompiledInput);
         expect(packagePolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
         expect(packagePolicy.vars.package_var_secret.value.id).eql(packageVarId);
+        expect(packagePolicy.vars.package_var_multi_secret.value.isSecretRef).to.eql(true);
+        expect(packagePolicy.vars.package_var_multi_secret.value.ids).to.eql(packageVarMultiIds);
         expect(packagePolicy.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(true);
         expect(packagePolicy.inputs[0].vars.input_var_secret.value.id).eql(inputVarId);
         expect(packagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.isSecretRef).to.eql(
@@ -511,19 +530,27 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should have correctly created the secrets', async () => {
         const packageVarId = packagePolicyWithSecrets.vars.package_var_secret.value.id;
+        const packageVarMultiIds = packagePolicyWithSecrets.vars.package_var_multi_secret.value.ids;
         const inputVarId = packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.id;
         const streamVarId =
           packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value.id;
 
-        const searchRes = await getSecrets([packageVarId, inputVarId, streamVarId]);
+        const searchRes = await getSecrets([
+          packageVarId,
+          ...packageVarMultiIds,
+          inputVarId,
+          streamVarId,
+        ]);
 
-        expect(searchRes.hits.hits.length).to.eql(3);
+        expect(searchRes.hits.hits.length).to.eql(5);
 
         const secretValuesById = searchRes.hits.hits.reduce((acc: any, secret: any) => {
           acc[secret._id] = secret._source.value;
           return acc;
         }, {});
         expect(secretValuesById[packageVarId]).to.eql('package_secret_val');
+        expect(secretValuesById[packageVarMultiIds[0]]).to.eql('package_multi_secret_val_1');
+        expect(secretValuesById[packageVarMultiIds[1]]).to.eql('package_multi_secret_val_2');
         expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
         expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
       });
@@ -532,6 +559,7 @@ export default function (providerContext: FtrProviderContext) {
         const { data: policyDoc } = await getLatestPolicyRevision(testAgentPolicy.id);
 
         const packageVarId = packagePolicyWithSecrets.vars.package_var_secret.value.id;
+        const packageVarMultiIds = packagePolicyWithSecrets.vars.package_var_multi_secret.value.ids;
         const inputVarId = packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.id;
         const streamVarId =
           packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value.id;
@@ -540,6 +568,12 @@ export default function (providerContext: FtrProviderContext) {
           arrayIdsEqual(policyDoc.secret_references!, [
             {
               id: packageVarId,
+            },
+            {
+              id: packageVarMultiIds[0],
+            },
+            {
+              id: packageVarMultiIds[1],
             },
             {
               id: inputVarId,
@@ -551,6 +585,10 @@ export default function (providerContext: FtrProviderContext) {
         ).to.eql(true);
 
         expect(policyDoc.inputs[0].package_var_secret).to.eql(secretVar(packageVarId));
+        expect(policyDoc.inputs[0].package_var_multi_secret).to.eql([
+          secretVar(packageVarMultiIds[0]),
+          secretVar(packageVarMultiIds[1]),
+        ]);
         expect(policyDoc.inputs[0].input_var_secret).to.eql(secretVar(inputVarId));
         expect(policyDoc.inputs[0].streams![0].package_var_secret).to.eql(secretVar(packageVarId));
         expect(policyDoc.inputs[0].streams![0].input_var_secret).to.eql(secretVar(inputVarId));
@@ -563,6 +601,7 @@ export default function (providerContext: FtrProviderContext) {
         const input = agentPolicy.inputs[0];
 
         const packageVarId = packagePolicyWithSecrets.vars.package_var_secret.value.id;
+        const packageVarMultiIds = packagePolicyWithSecrets.vars.package_var_multi_secret.value.ids;
         const inputVarId = packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.id;
         const streamVarId =
           packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value.id;
@@ -571,6 +610,12 @@ export default function (providerContext: FtrProviderContext) {
           arrayIdsEqual(agentPolicy.secret_references!, [
             {
               id: packageVarId,
+            },
+            {
+              id: packageVarMultiIds[0],
+            },
+            {
+              id: packageVarMultiIds[1],
             },
             {
               id: inputVarId,
@@ -582,6 +627,10 @@ export default function (providerContext: FtrProviderContext) {
         ).to.eql(true);
 
         expect(input.package_var_secret).to.eql(secretVar(packageVarId));
+        expect(input.package_var_multi_secret).to.eql([
+          secretVar(packageVarMultiIds[0]),
+          secretVar(packageVarMultiIds[1]),
+        ]);
         expect(input.input_var_secret).to.eql(secretVar(inputVarId));
         expect(input.streams[0].package_var_secret).to.eql(secretVar(packageVarId));
         expect(input.streams[0].input_var_secret).to.eql(secretVar(inputVarId));
@@ -610,6 +659,10 @@ export default function (providerContext: FtrProviderContext) {
 
         const updatedPolicy = createdPolicyToUpdatePolicy(packagePolicyWithSecrets);
         updatedPolicy.vars.package_var_secret.value = 'new_package_secret_val';
+        updatedPolicy.vars.package_var_multi_secret.value = [
+          'new_package_multi_secret_val_1',
+          'new_package_multi_secret_val_2',
+        ];
 
         const updateRes = await supertest
           .put(`/api/fleet/package_policies/${packagePolicyWithSecrets.id}`)
@@ -628,7 +681,11 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should allow secret values to be updated (single policy update API)', async () => {
         const updatedPackageVarId = updatedPackagePolicy.vars.package_var_secret.value.id;
+        const updatedPackageVarMultiIds =
+          updatedPackagePolicy.vars.package_var_multi_secret.value.ids;
         expect(updatedPackageVarId).to.be.a('string');
+        expect(updatedPackageVarMultiIds).to.be.an('array');
+        expect(updatedPackageVarMultiIds.length).to.eql(2);
 
         const inputVarId = packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.id;
         const streamVarId =
@@ -637,6 +694,8 @@ export default function (providerContext: FtrProviderContext) {
         expect(
           arrayIdsEqual(updatedPackagePolicy.secret_references, [
             { id: updatedPackageVarId },
+            { id: updatedPackageVarMultiIds[0] },
+            { id: updatedPackageVarMultiIds[1] },
             { id: streamVarId },
             { id: inputVarId },
           ])
@@ -645,6 +704,10 @@ export default function (providerContext: FtrProviderContext) {
         expect(updatedPackagePolicy.inputs[0].streams[0].compiled_stream).to.eql({
           'config.version': 2,
           package_var_secret: secretVar(updatedPackageVarId),
+          package_var_multi_secret: [
+            secretVar(updatedPackageVarMultiIds[0]),
+            secretVar(updatedPackageVarMultiIds[1]),
+          ],
           package_var_non_secret: 'package_non_secret_val',
           input_var_secret: secretVar(inputVarId),
           input_var_non_secret: 'input_non_secret_val',
@@ -654,6 +717,10 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(updatedPackagePolicy.inputs[0].compiled_input).to.eql({
           package_var_secret: secretVar(updatedPackageVarId),
+          package_var_multi_secret: [
+            secretVar(updatedPackageVarMultiIds[0]),
+            secretVar(updatedPackageVarMultiIds[1]),
+          ],
           package_var_non_secret: 'package_non_secret_val',
           input_var_secret: secretVar(inputVarId),
           input_var_non_secret: 'input_non_secret_val',
@@ -661,6 +728,10 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(updatedPackagePolicy.vars.package_var_secret.value.isSecretRef).to.eql(true);
         expect(updatedPackagePolicy.vars.package_var_secret.value.id).eql(updatedPackageVarId);
+        expect(updatedPackagePolicy.vars.package_var_multi_secret.value.isSecretRef).to.eql(true);
+        expect(updatedPackagePolicy.vars.package_var_multi_secret.value.ids).to.eql(
+          updatedPackageVarMultiIds
+        );
         expect(updatedPackagePolicy.inputs[0].vars.input_var_secret.value.isSecretRef).to.eql(true);
         expect(updatedPackagePolicy.inputs[0].vars.input_var_secret.value.id).eql(inputVarId);
         expect(
@@ -673,7 +744,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should have correctly deleted unused secrets after update', async () => {
         const searchRes = await getSecrets();
-        expect(searchRes.hits.hits.length).to.eql(3); // should have created 1 and deleted 1 doc
+        expect(searchRes.hits.hits.length).to.eql(5); // should have created 2 and deleted 2 docs
 
         const secretValuesById = searchRes.hits.hits.reduce((acc: any, secret: any) => {
           acc[secret._id] = secret._source.value;
@@ -681,6 +752,8 @@ export default function (providerContext: FtrProviderContext) {
         }, {});
 
         const updatedPackageVarId = updatedPackagePolicy.vars.package_var_secret.value.id;
+        const updatedPackageVarMultiIds =
+          updatedPackagePolicy.vars.package_var_multi_secret.value.ids;
         expect(updatedPackageVarId).to.be.a('string');
 
         const inputVarId = packagePolicyWithSecrets.inputs[0].vars.input_var_secret.value.id;
@@ -688,6 +761,12 @@ export default function (providerContext: FtrProviderContext) {
           packagePolicyWithSecrets.inputs[0].streams[0].vars.stream_var_secret.value.id;
 
         expect(secretValuesById[updatedPackageVarId]).to.eql('new_package_secret_val');
+        expect(secretValuesById[updatedPackageVarMultiIds[0]]).to.eql(
+          'new_package_multi_secret_val_1'
+        );
+        expect(secretValuesById[updatedPackageVarMultiIds[1]]).to.eql(
+          'new_package_multi_secret_val_2'
+        );
         expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
         expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
       });
@@ -738,6 +817,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should not duplicate secrets after duplicating agent policy', async () => {
         const packageVarId = duplicatedPackagePolicy.vars.package_var_secret.value.id;
+        const packageVarMultiIds = duplicatedPackagePolicy.vars.package_var_multi_secret.value.ids;
         const inputVarId = duplicatedPackagePolicy.inputs[0].vars.input_var_secret.value.id;
         const streamVarId =
           duplicatedPackagePolicy.inputs[0].streams[0].vars.stream_var_secret.value.id;
@@ -746,6 +826,12 @@ export default function (providerContext: FtrProviderContext) {
           arrayIdsEqual(policyDoc.secret_references!, [
             {
               id: packageVarId,
+            },
+            {
+              id: packageVarMultiIds[0],
+            },
+            {
+              id: packageVarMultiIds[1],
             },
             {
               id: inputVarId,
@@ -757,6 +843,10 @@ export default function (providerContext: FtrProviderContext) {
         ).to.eql(true);
 
         expect(policyDoc.inputs[0].package_var_secret).to.eql(secretVar(packageVarId));
+        expect(policyDoc.inputs[0].package_var_multi_secret).to.eql([
+          secretVar(packageVarMultiIds[0]),
+          secretVar(packageVarMultiIds[1]),
+        ]);
         expect(policyDoc.inputs[0].input_var_secret).to.eql(secretVar(inputVarId));
         expect(policyDoc.inputs[0].streams![0].package_var_secret).to.eql(secretVar(packageVarId));
         expect(policyDoc.inputs[0].streams![0].input_var_secret).to.eql(secretVar(inputVarId));
@@ -764,7 +854,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const searchRes = await getSecrets();
 
-        expect(searchRes.hits.hits.length).to.eql(3);
+        expect(searchRes.hits.hits.length).to.eql(5);
 
         const secretValuesById = searchRes.hits.hits.reduce((acc: any, secret: any) => {
           acc[secret._id] = secret._source.value;
@@ -772,6 +862,8 @@ export default function (providerContext: FtrProviderContext) {
         }, {});
 
         expect(secretValuesById[packageVarId]).to.eql('package_secret_val');
+        expect(secretValuesById[packageVarMultiIds[0]]).to.eql('package_multi_secret_val_1');
+        expect(secretValuesById[packageVarMultiIds[1]]).to.eql('package_multi_secret_val_2');
         expect(secretValuesById[inputVarId]).to.eql('input_secret_val');
         expect(secretValuesById[streamVarId]).to.eql('stream_secret_val');
       });
@@ -781,6 +873,10 @@ export default function (providerContext: FtrProviderContext) {
         delete updatedPolicy.name;
 
         updatedPolicy.vars.package_var_secret.value = 'new_package_secret_val_2';
+        updatedPolicy.vars.package_var_multi_secret.value = [
+          'new_package_multi_secret_val_3',
+          'new_package_multi_secret_val_4',
+        ];
 
         const updateRes = await supertest
           .put(`/api/fleet/package_policies/${duplicatedPackagePolicy.id}`)
@@ -790,15 +886,19 @@ export default function (providerContext: FtrProviderContext) {
 
         const updatedPackagePolicy = updateRes.body.item;
         const updatedPackageVarId = updatedPackagePolicy.vars.package_var_secret.value.id;
+        const updatedPackageVarMultiIds =
+          updatedPackagePolicy.vars.package_var_multi_secret.value.ids;
 
-        const packageVarSecretIds = [
+        const packageSecretIds = [
           packagePolicyWithSecrets.vars.package_var_secret.value.id,
+          ...packagePolicyWithSecrets.vars.package_var_multi_secret.value.ids,
           updatedPackageVarId,
+          ...updatedPackageVarMultiIds,
         ];
 
-        const searchRes = await getSecrets(packageVarSecretIds);
+        const searchRes = await getSecrets(packageSecretIds);
 
-        expect(searchRes.hits.hits.length).to.eql(2);
+        expect(searchRes.hits.hits.length).to.eql(6);
       });
 
       it('should not delete used secrets on delete of duplicated package policy', async () => {
@@ -812,8 +912,8 @@ export default function (providerContext: FtrProviderContext) {
 
         const searchRes = await getSecrets();
 
-        // should have deleted new_package_secret_val_2
-        expect(searchRes.hits.hits.length).to.eql(3);
+        // should have deleted new_package_secret_val_2 and new_package_multi_secret_val_3/4
+        expect(searchRes.hits.hits.length).to.eql(5);
       });
     });
 
@@ -1174,8 +1274,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(fullAgentPolicy.secret_references).to.eql([{ id: passwordSecretId }]);
 
         const output = Object.entries(fullAgentPolicy.outputs)[0][1];
+
         // @ts-expect-error
-        expect(output.secrets.password.id).to.eql(passwordSecretId);
+        expect(output?.secrets?.password?.id).to.eql(passwordSecretId);
 
         // delete output with secret
         await supertest

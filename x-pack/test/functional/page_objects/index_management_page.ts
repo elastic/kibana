@@ -18,7 +18,11 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       return await testSubjects.getVisibleText('appTitle');
     },
 
-    async expectToBeOnIndicesManagement() {
+    async expectToBeOnSearchIndexManagement() {
+      await testSubjects.existOrFail('elasticsearchIndexManagement');
+    },
+
+    async expectToBeOnIndexManagement() {
       const headingText = await testSubjects.getVisibleText('appTitle');
       expect(headingText).to.be('Index Management');
     },
@@ -168,6 +172,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async clickNextButton() {
       await testSubjects.click('nextButton');
     },
+
     indexDetailsPage: {
       async openIndexDetailsPage(indexOfRow: number) {
         const indexList = await testSubjects.findAll('indexTableIndexNameLink');
@@ -207,6 +212,13 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       ) {
         await testSubjects.click(tab);
       },
+      async expectBreadcrumbNavigationToHaveBreadcrumbName(breadcrumbName: string) {
+        await testSubjects.existOrFail('euiBreadcrumb');
+        expect(await testSubjects.getVisibleText('breadcrumb first')).to.contain(
+          'Stack Management'
+        );
+        expect(await testSubjects.getVisibleText('breadcrumb last')).to.contain(breadcrumbName);
+      },
     },
     async clickCreateIndexButton() {
       await testSubjects.click('createIndexButton');
@@ -214,6 +226,10 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async setCreateIndexName(value: string) {
       await testSubjects.existOrFail('createIndexNameFieldText');
       await testSubjects.setValue('createIndexNameFieldText', value);
+    },
+    async setCreateIndexMode(value: string) {
+      await testSubjects.existOrFail('indexModeField');
+      await testSubjects.selectValue('indexModeField', value);
     },
     async clickCreateIndexSaveButton() {
       await testSubjects.existOrFail('createIndexSaveButton');

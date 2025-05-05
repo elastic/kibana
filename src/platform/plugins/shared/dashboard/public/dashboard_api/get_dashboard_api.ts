@@ -18,18 +18,17 @@ import {
   getReferencesForControls,
   getReferencesForPanelId,
 } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
-import { UnsavedPanelState } from '../dashboard_container/types';
-import { DASHBOARD_APP_ID } from '../plugin_constants';
+import { DASHBOARD_APP_ID } from '../../common/constants';
 import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
-import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
+import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { getSerializedState } from './get_serialized_state';
-import { openSaveModal } from './open_save_modal';
+import { openSaveModal } from './save_modal/open_save_modal';
 import { initializePanelsManager } from './panels_manager';
-import { initializeSearchSessionManager } from './search_session_manager';
+import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
@@ -39,8 +38,9 @@ import {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
-  DashboardState,
+  UnsavedPanelState,
 } from './types';
+import type { DashboardState } from '../../common/types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
@@ -90,7 +90,8 @@ export function getDashboardApi({
     initialPanelsRuntimeState ?? {},
     trackPanel,
     getPanelReferences,
-    pushPanelReferences
+    pushPanelReferences,
+    savedObjectId
   );
   const dataLoadingManager = initializeDataLoadingManager(panelsManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
@@ -110,7 +111,7 @@ export function getDashboardApi({
     creationOptions,
     controlGroupApi$,
     lastSavedState: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
-      ...DEFAULT_DASHBOARD_INPUT,
+      ...DEFAULT_DASHBOARD_STATE,
     },
     panelsManager,
     savedObjectId$,
@@ -127,7 +128,7 @@ export function getDashboardApi({
       ...settingsManager.internalApi.getState(),
       ...unifiedSearchState,
       panels,
-      viewMode: viewModeManager.api.viewMode.value,
+      viewMode: viewModeManager.api.viewMode$.value,
     };
 
     const controlGroupApi = controlGroupApi$.value;
@@ -163,7 +164,7 @@ export function getDashboardApi({
     controlGroupApi$,
     executionContext: {
       type: 'dashboard',
-      description: settingsManager.api.panelTitle.value,
+      description: settingsManager.api.title$.value,
     },
     fullScreenMode$,
     getAppContext: () => {
@@ -185,7 +186,7 @@ export function getDashboardApi({
       const saveResult = await openSaveModal({
         isManaged,
         lastSavedId: savedObjectId$.value,
-        viewMode: viewModeManager.api.viewMode.value,
+        viewMode: viewModeManager.api.viewMode$.value,
         ...getState(),
       });
 
@@ -225,7 +226,7 @@ export function getDashboardApi({
 
       return;
     },
-    savedObjectId: savedObjectId$,
+    savedObjectId$,
     setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     type: DASHBOARD_API_TYPE as 'dashboard',

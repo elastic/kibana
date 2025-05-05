@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Manage Knowledge Base Entries API endpoint
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from '@kbn/zod';
@@ -19,7 +19,8 @@ import { z } from '@kbn/zod';
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
-  KnowledgeBaseEntryUpdateProps,
+  KnowledgeBaseEntryUpdateRouteProps,
+  DeleteResponseFields,
 } from './common_attributes.gen';
 import { NonEmptyString } from '../../common_attributes.gen';
 
@@ -48,7 +49,7 @@ export type DeleteKnowledgeBaseEntryRequestParamsInput = z.input<
 >;
 
 export type DeleteKnowledgeBaseEntryResponse = z.infer<typeof DeleteKnowledgeBaseEntryResponse>;
-export const DeleteKnowledgeBaseEntryResponse = KnowledgeBaseEntryResponse;
+export const DeleteKnowledgeBaseEntryResponse = DeleteResponseFields;
 
 export type ReadKnowledgeBaseEntryRequestParams = z.infer<
   typeof ReadKnowledgeBaseEntryRequestParams
@@ -82,7 +83,7 @@ export type UpdateKnowledgeBaseEntryRequestParamsInput = z.input<
 export type UpdateKnowledgeBaseEntryRequestBody = z.infer<
   typeof UpdateKnowledgeBaseEntryRequestBody
 >;
-export const UpdateKnowledgeBaseEntryRequestBody = KnowledgeBaseEntryUpdateProps;
+export const UpdateKnowledgeBaseEntryRequestBody = KnowledgeBaseEntryUpdateRouteProps;
 export type UpdateKnowledgeBaseEntryRequestBodyInput = z.input<
   typeof UpdateKnowledgeBaseEntryRequestBody
 >;

@@ -10,16 +10,18 @@
 import React, { createContext, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { EuiListGroup, EuiPanel } from '@elastic/eui';
+import { EuiListGroup, EuiPanel, UseEuiTheme } from '@elastic/eui';
 
 import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   SerializedTitles,
-  initializeTitles,
+  initializeTitleManager,
   SerializedPanelState,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { css } from '@emotion/react';
 
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
@@ -41,7 +43,6 @@ import {
 import { DISPLAY_NAME } from '../../common';
 import { injectReferences } from '../../common/persistable_state';
 
-import '../components/links_component.scss';
 import { checkForDuplicateTitle, linksClient } from '../content_management';
 import { resolveLinks } from '../lib/resolve_links';
 import {
@@ -49,7 +50,7 @@ import {
   linksSerializeStateIsByReference,
 } from '../lib/deserialize_from_library';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
-import { isParentApiCompatible } from '../actions/compatibility_check';
+import { isParentApiCompatible } from '../actions/add_links_panel_action';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
@@ -94,25 +95,25 @@ export const getLinksEmbeddableFactory = () => {
       };
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const error$ = new BehaviorSubject<Error | undefined>(state.error);
-      if (!isParentApiCompatible(parentApi)) error$.next(new PanelIncompatibleError());
+      const blockingError$ = new BehaviorSubject<Error | undefined>(state.error);
+      if (!isParentApiCompatible(parentApi)) blockingError$.next(new PanelIncompatibleError());
 
       const links$ = new BehaviorSubject<ResolvedLink[] | undefined>(state.links);
       const layout$ = new BehaviorSubject<LinksLayoutType | undefined>(state.layout);
-      const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.defaultPanelTitle);
-      const defaultPanelDescription = new BehaviorSubject<string | undefined>(
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(state.defaultPanelTitle);
+      const defaultDescription$ = new BehaviorSubject<string | undefined>(
         state.defaultPanelDescription
       );
       const savedObjectId$ = new BehaviorSubject(state.savedObjectId);
       const isByReference = Boolean(state.savedObjectId);
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(state);
 
       const serializeLinksState = (byReference: boolean, newId?: string) => {
         if (byReference) {
           const linksByReferenceState: LinksByReferenceSerializedState = {
             savedObjectId: newId ?? state.savedObjectId!,
-            ...serializeTitles(),
+            ...titleManager.serialize(),
           };
           return { rawState: linksByReferenceState, references: [] };
         }
@@ -120,22 +121,22 @@ export const getLinksEmbeddableFactory = () => {
         const { attributes, references } = serializeLinksAttributes(runtimeState);
         const linksByValueState: LinksByValueSerializedState = {
           attributes,
-          ...serializeTitles(),
+          ...titleManager.serialize(),
         };
         return { rawState: linksByValueState, references };
       };
 
       const api = buildApi(
         {
-          ...titlesApi,
-          blockingError: error$,
-          defaultPanelTitle,
-          defaultPanelDescription,
-          isEditingEnabled: () => Boolean(error$.value === undefined),
+          ...titleManager.api,
+          blockingError$,
+          defaultTitle$,
+          defaultDescription$,
+          isEditingEnabled: () => Boolean(blockingError$.value === undefined),
           getTypeDisplayName: () => DISPLAY_NAME,
           serializeState: () => serializeLinksState(isByReference),
           saveToLibrary: async (newTitle: string) => {
-            defaultPanelTitle.next(newTitle);
+            defaultTitle$.next(newTitle);
             const runtimeState = api.snapshotRuntimeState();
             const { attributes, references } = serializeLinksAttributes(runtimeState);
             const {
@@ -181,14 +182,14 @@ export const getLinksEmbeddableFactory = () => {
 
             // if the by reference state has changed during this edit, reinitialize the panel.
             const nextIsByReference = Boolean(newState?.savedObjectId);
-            if (nextIsByReference !== isByReference) {
+            if (nextIsByReference !== isByReference && apiIsPresentationContainer(api.parentApi)) {
               const serializedState = serializeLinksState(
                 nextIsByReference,
                 newState?.savedObjectId
               );
               (serializedState.rawState as SerializedTitles).title = newState.title;
 
-              api.parentApi?.replacePanel<LinksSerializedState>(api.uuid, {
+              api.parentApi.replacePanel<LinksSerializedState>(api.uuid, {
                 serializedState,
                 panelType: api.type,
               });
@@ -196,26 +197,23 @@ export const getLinksEmbeddableFactory = () => {
             }
             links$.next(newState.links);
             layout$.next(newState.layout);
-            defaultPanelTitle.next(newState.defaultPanelTitle);
-            defaultPanelDescription.next(newState.defaultPanelDescription);
+            defaultTitle$.next(newState.defaultPanelTitle);
+            defaultDescription$.next(newState.defaultPanelDescription);
           },
         },
         {
-          ...titleComparators,
+          ...titleManager.comparators,
           links: [links$, (nextLinks?: ResolvedLink[]) => links$.next(nextLinks ?? [])],
           layout: [
             layout$,
             (nextLayout?: LinksLayoutType) => layout$.next(nextLayout ?? LINKS_VERTICAL_LAYOUT),
           ],
-          error: [error$, (nextError?: Error) => error$.next(nextError)],
+          error: [blockingError$, (nextError?: Error) => blockingError$.next(nextError)],
           defaultPanelDescription: [
-            defaultPanelDescription,
-            (nextDescription?: string) => defaultPanelDescription.next(nextDescription),
+            defaultDescription$,
+            (nextDescription?: string) => defaultDescription$.next(nextDescription),
           ],
-          defaultPanelTitle: [
-            defaultPanelTitle,
-            (nextTitle?: string) => defaultPanelTitle.next(nextTitle),
-          ],
+          defaultPanelTitle: [defaultTitle$, (nextTitle?: string) => defaultTitle$.next(nextTitle)],
           savedObjectId: [savedObjectId$, (val) => savedObjectId$.next(val)],
         }
       );
@@ -251,9 +249,7 @@ export const getLinksEmbeddableFactory = () => {
         }, [links, layout]);
         return (
           <EuiPanel
-            className={`linksComponent ${
-              layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'
-            }`}
+            className={layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'}
             paddingSize="xs"
             data-shared-item
             data-rendering-count={1}
@@ -262,6 +258,7 @@ export const getLinksEmbeddableFactory = () => {
           >
             <EuiListGroup
               maxWidth={false}
+              css={styles}
               className={`${layout ?? LINKS_VERTICAL_LAYOUT}LayoutWrapper`}
               data-test-subj="links--component--listGroup"
             >
@@ -278,3 +275,20 @@ export const getLinksEmbeddableFactory = () => {
   };
   return linksEmbeddableFactory;
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    '.linksPanelLink': {
+      maxWidth: 'fit-content', // ensures that the error tooltip shows up **right beside** the link label
+    },
+    '&.verticalLayoutWrapper': {
+      gap: euiTheme.size.xs,
+    },
+    '&.horizontalLayoutWrapper': {
+      height: '100%',
+      display: 'flex',
+      flexWrap: 'nowrap',
+      alignItems: 'center',
+      flexDirection: 'row',
+    },
+  });

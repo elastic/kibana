@@ -9,7 +9,11 @@ import React from 'react';
 import type { ComponentType } from 'react';
 import type { ReactElement } from 'react-markdown';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { DataViewErrorComponent } from './data_view_error';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+
 import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 
@@ -30,15 +34,21 @@ export const withDataView = <P extends WithDataViewArg>(
   fallback?: ReactElement
 ) => {
   const ComponentWithDataView = (props: OmitDataView<P>) => {
+    const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.timeline);
+
     const dataView = useGetScopedSourcererDataView({
       sourcererScope: SourcererScopeName.timeline,
     });
 
-    if (!dataView) {
+    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+    const dataViewToUse = newDataViewPickerEnabled ? experimentalDataView : dataView;
+
+    if (!dataViewToUse) {
       return fallback ?? <DataViewErrorComponent />;
     }
 
-    return <Component {...(props as unknown as P)} dataView={dataView} />;
+    return <Component {...(props as unknown as P)} dataView={dataViewToUse} />;
   };
 
   return ComponentWithDataView;

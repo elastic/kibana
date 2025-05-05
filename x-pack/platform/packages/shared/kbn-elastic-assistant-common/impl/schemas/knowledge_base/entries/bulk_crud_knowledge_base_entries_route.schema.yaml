@@ -1,13 +1,11 @@
 openapi: 3.0.0
 info:
   title: Bulk Knowledge Base Actions API endpoint
-  version: '1'
+  version: '2023-10-31'
 paths:
-  /internal/elastic_assistant/knowledge_base/entries/_bulk_action:
+  /api/security_ai_assistant/knowledge_base/entries/_bulk_action:
     post:
       x-codegen-enabled: true
-      # Targeted to update to public by 8.18
-      x-internal: true
       x-labels: [ess, serverless]
       operationId: PerformKnowledgeBaseEntryBulkAction
       summary: Applies a bulk action to multiple Knowledge Base Entries

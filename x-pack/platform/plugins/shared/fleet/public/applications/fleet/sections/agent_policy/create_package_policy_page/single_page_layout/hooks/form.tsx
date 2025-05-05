@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { load } from 'js-yaml';
-
 import { isEqual } from 'lodash';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink } from '@elastic/eui';
 
+import { AgentlessAgentCreateOverProvisionedError } from '../../../../../../../../common/errors';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
-import type {
-  AgentPolicy,
-  NewPackagePolicy,
-  NewAgentPolicy,
-  CreatePackagePolicyRequest,
-  PackagePolicy,
-  PackageInfo,
+import {
+  type AgentPolicy,
+  type NewPackagePolicy,
+  type NewAgentPolicy,
+  type CreatePackagePolicyRequest,
+  type PackagePolicy,
+  type PackageInfo,
+  SetupTechnology,
 } from '../../../../../types';
 import {
   useStartServices,
@@ -27,6 +32,7 @@ import {
   sendBulkInstallPackages,
   sendGetPackagePolicies,
   useMultipleAgentPolicies,
+  useFleetStatus,
 } from '../../../../../hooks';
 import { isVerificationError, packageToPackagePolicy } from '../../../../../services';
 import {
@@ -48,8 +54,12 @@ import {
   getCloudFormationPropsFromPackagePolicy,
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
+import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
+import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
 
-import { useAgentless } from './setup_technology';
+import { useAgentless, useSetupTechnology } from './setup_technology';
+
+const DEFAULT_AGENTLESS_LIMIT = 5;
 
 export async function createAgentPolicy({
   packagePolicy,
@@ -142,6 +152,8 @@ export function useOnSubmit({
   packageInfo,
   integrationToEnable,
   hasFleetAddAgentsPrivileges,
+  setNewAgentPolicy,
+  setSelectedPolicyTab,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -151,8 +163,11 @@ export function useOnSubmit({
   queryParamsPolicyId: string | undefined;
   integrationToEnable?: string;
   hasFleetAddAgentsPrivileges: boolean;
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void;
+  setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
 }) {
-  const { notifications } = useStartServices();
+  const { notifications, docLinks } = useStartServices();
+  const { spaceId } = useFleetStatus();
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
@@ -176,9 +191,10 @@ export function useOnSubmit({
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
-  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
+
+  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Update agent policy method
   const updateAgentPolicies = useCallback(
@@ -255,16 +271,15 @@ export function useOnSubmit({
       const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
       isInitializedRef.current = true;
-      updatePackagePolicy(
-        packageToPackagePolicy(
-          packageInfo,
-          agentPolicies.map((policy) => policy.id),
-          '',
-          DEFAULT_PACKAGE_POLICY.name || incrementedName,
-          DEFAULT_PACKAGE_POLICY.description,
-          integrationToEnable
-        )
+      const basePackagePolicy = packageToPackagePolicy(
+        packageInfo,
+        agentPolicies.map((policy) => policy.id),
+        '',
+        DEFAULT_PACKAGE_POLICY.name || incrementedName,
+        DEFAULT_PACKAGE_POLICY.description,
+        integrationToEnable
       );
+      updatePackagePolicy(basePackagePolicy);
       setIsInitialized(true);
     }
     init();
@@ -284,8 +299,47 @@ export function useOnSubmit({
     }
   }, [packagePolicy, agentPolicies, updatePackagePolicy, canUseMultipleAgentPolicies]);
 
-  const onSaveNavigate = useOnSaveNavigate({
+  const {
+    handleSetupTechnologyChange,
+    allowedSetupTechnologies,
+    selectedSetupTechnology,
+    defaultSetupTechnology,
+  } = useSetupTechnology({
+    newAgentPolicy,
+    setNewAgentPolicy,
+    updatePackagePolicy,
+    setSelectedPolicyTab,
+    packageInfo,
     packagePolicy,
+    integrationToEnable,
+  });
+  const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
+  // sync the inputs with the agentless selector change
+  useEffect(() => {
+    setupTechnologyRef.current = selectedSetupTechnology;
+  });
+  const prevSetupTechnology = setupTechnologyRef.current;
+  const isAgentlessSelected =
+    isAgentlessIntegration(packageInfo) && selectedSetupTechnology === SetupTechnology.AGENTLESS;
+
+  const newInputs = useMemo(() => {
+    return packagePolicy.inputs.map((input, i) => {
+      if (isAgentlessSelected && AGENTLESS_DISABLED_INPUTS.includes(input.type)) {
+        return { ...input, enabled: false };
+      }
+      return packagePolicy.inputs[i];
+    });
+  }, [packagePolicy.inputs, isAgentlessSelected]);
+
+  useEffect(() => {
+    if (prevSetupTechnology !== selectedSetupTechnology) {
+      updatePackagePolicy({
+        inputs: newInputs,
+      });
+    }
+  }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
+
+  const onSaveNavigate = useOnSaveNavigate({
     queryParamsPolicyId,
   });
 
@@ -337,15 +391,43 @@ export function useOnSubmit({
             (policy) => policy?.supports_agentless === true
           );
 
-          notifications.toasts.addError(e, {
-            title: agentlessPolicy?.supports_agentless
-              ? i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
-                  defaultMessage: 'Unable to create integration',
-                })
-              : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
-                  defaultMessage: 'Unable to create agent policy',
-                }),
-          });
+          if (e?.attributes?.type === AgentlessAgentCreateOverProvisionedError.name) {
+            notifications.toasts.addError(e, {
+              title: i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
+                defaultMessage: 'Unable to create integration',
+              }),
+              // @ts-expect-error
+              toastMessage: (
+                <>
+                  <FormattedMessage
+                    id="xpack.fleet.createAgentlessPolicy.overProvisionErrorMessage"
+                    defaultMessage="You've reached the maximum number of {limit} agentless deployments. To add more, either remove or change some to Elastic Agent-based integrations. {docLink}"
+                    values={{
+                      limit: <b>{e?.attributes?.limit ?? DEFAULT_AGENTLESS_LIMIT}</b>,
+                      docLink: (
+                        <EuiLink href={docLinks.links.fleet.agentlessIntegrations} target="_blank">
+                          <FormattedMessage
+                            id="xpack.fleet.createAgentlessPolicy.seeDocLink"
+                            defaultMessage="See agentless documentation."
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </>
+              ),
+            });
+          } else {
+            notifications.toasts.addError(e, {
+              title: agentlessPolicy?.supports_agentless
+                ? i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
+                    defaultMessage: 'Unable to create integration',
+                  })
+                : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+                    defaultMessage: 'Unable to create agent policy',
+                  }),
+            });
+          }
           return;
         }
       }
@@ -366,6 +448,15 @@ export function useOnSubmit({
         policy_ids: agentPolicyIdToSave,
         force: forceInstall,
       });
+
+      if (!error && data?.item.package) {
+        await ensurePackageKibanaAssetsInstalled({
+          currentSpaceId: spaceId ?? DEFAULT_SPACE_ID,
+          pkgName: data.item.package.name,
+          pkgVersion: data.item.package.version,
+          toasts: notifications.toasts,
+        });
+      }
 
       const hasAzureArmTemplate = data?.item
         ? getAzureArmPropsFromPackagePolicy(data.item).templateUrl
@@ -419,7 +510,12 @@ export function useOnSubmit({
           setFormState('SUBMITTED_NO_AGENTS');
           return;
         }
-        onSaveNavigate(data!.item);
+
+        if (isAgentlessConfigured) {
+          onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
+        } else {
+          onSaveNavigate(data!.item);
+        }
 
         notifications.toasts.addSuccess({
           title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
@@ -459,6 +555,7 @@ export function useOnSubmit({
     },
     [
       formState,
+      spaceId,
       hasErrors,
       agentCount,
       isAgentlessIntegration,
@@ -474,6 +571,7 @@ export function useOnSubmit({
       agentPolicies,
       onSaveNavigate,
       confirmForceInstall,
+      docLinks.links.fleet.agentlessIntegrations,
     ]
   );
 
@@ -495,5 +593,10 @@ export function useOnSubmit({
     // TODO check
     navigateAddAgent,
     navigateAddAgentHelp,
+    handleSetupTechnologyChange,
+    allowedSetupTechnologies,
+    selectedSetupTechnology,
+    defaultSetupTechnology,
+    isAgentlessSelected,
   };
 }

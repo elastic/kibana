@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PROXY_MODE } from '../constants';
+import { PROXY_MODE, SECURITY_MODEL } from '../constants';
 
 // Values returned from ES GET /_remote/info
 /**
@@ -113,7 +113,7 @@ export function deserializeCluster(
     proxySocketConnections,
     connectedSocketsCount,
     serverName,
-    securityModel: clusterCredentials ? 'api_key' : 'certificate',
+    securityModel: clusterCredentials ? SECURITY_MODEL.API : SECURITY_MODEL.CERTIFICATE,
   };
 
   if (transport) {
@@ -153,7 +153,9 @@ export function deserializeCluster(
 }
 
 export function serializeCluster(
-  deserializedClusterObject: ClusterPayload
+  deserializedClusterObject: ClusterPayload,
+  previousClusterMode?: 'proxy' | 'sniff',
+  isDelete?: boolean
 ): ClusterSettingsPayloadEs {
   if (!deserializedClusterObject || typeof deserializedClusterObject !== 'object') {
     throw new Error('Unable to serialize cluster');
@@ -174,12 +176,27 @@ export function serializeCluster(
   const clusterData: ClusterPayloadEs = {
     skip_unavailable: typeof skipUnavailable === 'boolean' ? skipUnavailable : null,
     mode: mode || null,
-    proxy_address: proxyAddress || null,
-    proxy_socket_connections: proxySocketConnections || null,
-    server_name: serverName || null,
-    seeds: seeds || null,
-    node_connections: nodeConnections || null,
+    ...(mode === PROXY_MODE
+      ? {
+          proxy_address: proxyAddress || null,
+          proxy_socket_connections: proxySocketConnections || null,
+          server_name: serverName || null,
+        }
+      : {
+          seeds: seeds || null,
+          node_connections: nodeConnections || null,
+        }),
   };
+
+  // If the cluster is been deleted, we need to set all values to null
+  // If the cluster is been edited and the mode has changed, we need to set to null the previous mode settings values
+  if (isDelete || (previousClusterMode && previousClusterMode !== mode)) {
+    clusterData.proxy_address = proxyAddress || null;
+    clusterData.proxy_socket_connections = proxySocketConnections || null;
+    clusterData.server_name = serverName || null;
+    clusterData.seeds = seeds || null;
+    clusterData.node_connections = nodeConnections || null;
+  }
 
   // This is only applicable in edit mode
   // In order to "upgrade" an existing remote cluster to use the new proxy mode settings, we need to set the old proxy setting to null

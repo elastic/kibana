@@ -9,3 +9,6 @@
  * Index pattern where the SentinelOne activity log is written to by the SentinelOne integration
  */
 export const SENTINEL_ONE_ACTIVITY_INDEX_PATTERN = 'logs-sentinel_one.activity-*';
+
+/** Index pattern where the SentinelOne Agent records are ingested into by the integration */
+export const SENTINEL_ONE_AGENT_INDEX_PATTERN = 'logs-sentinel_one.agent-*';

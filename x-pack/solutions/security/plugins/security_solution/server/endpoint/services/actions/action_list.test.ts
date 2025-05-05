@@ -6,8 +6,7 @@
  */
 
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   EndpointActionResponse,
   LogsEndpointAction,
@@ -21,791 +20,648 @@ import {
   createActionRequestsEsSearchResultsMock,
   createActionResponsesEsSearchResultsMock,
 } from './mocks';
-import type { MockedLogger } from '@kbn/logging-mocks';
-import { EndpointAppContextService } from '../../endpoint_app_context_services';
-import {
-  createMockEndpointAppContextServiceSetupContract,
-  createMockEndpointAppContextServiceStartContract,
-} from '../../mocks';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { createMockEndpointAppContextService } from '../../mocks';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 
-describe('When using `getActionList()', () => {
+describe('action list services', () => {
   let esClient: ElasticsearchClientMock;
-  let logger: MockedLogger;
   let endpointActionGenerator: EndpointActionGenerator;
   let actionRequests: estypes.SearchResponse<LogsEndpointAction>;
   let actionResponses: estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>;
   let endpointAppContextService: EndpointAppContextService;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
-    logger = loggingSystemMock.createLogger();
+    endpointAppContextService = createMockEndpointAppContextService();
+    esClient = endpointAppContextService.getInternalEsClient() as ElasticsearchClientMock;
     endpointActionGenerator = new EndpointActionGenerator('seed');
-    endpointAppContextService = new EndpointAppContextService();
-    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
-
     actionRequests = createActionRequestsEsSearchResultsMock();
     actionResponses = createActionResponsesEsSearchResultsMock();
 
     applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
-  });
 
-  afterEach(() => {
-    endpointAppContextService.stop();
-  });
-
-  it('should return expected output', async () => {
-    const doc = actionRequests.hits.hits[0]._source;
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([
-          {
-            agent: {
-              id: 'agent-a',
-            },
-            host: {
-              hostname: 'Host-agent-a',
-            },
+    const fleetAgentGenerator = new FleetAgentGenerator('seed');
+    (
+      endpointAppContextService.getInternalFleetServices().agent.getByIds as jest.Mock
+    ).mockResolvedValue([
+      fleetAgentGenerator.generate({
+        id: 'agent-a',
+        local_metadata: {
+          host: {
+            name: 'Host-agent-a',
           },
-        ]),
-      });
-    await expect(
-      getActionList({
-        esClient,
-        logger,
-        metadataService: endpointAppContextService.getEndpointMetadataService(),
+        },
+      }),
+      fleetAgentGenerator.generate({
+        id: 'agent-b',
+        local_metadata: {
+          host: {
+            name: 'Host-agent-b',
+          },
+        },
+      }),
+    ]);
+  });
+
+  describe('When using `getActionList()', () => {
+    it('should return expected output', async () => {
+      const doc = actionRequests.hits.hits[0]._source;
+
+      await expect(
+        getActionList({
+          endpointService: endpointAppContextService,
+          spaceId: 'default',
+          page: 1,
+          pageSize: 10,
+        })
+      ).resolves.toEqual({
         page: 1,
         pageSize: 10,
-      })
-    ).resolves.toEqual({
-      page: 1,
-      pageSize: 10,
-      commands: undefined,
-      userIds: undefined,
-      startDate: undefined,
-      elasticAgentIds: undefined,
-      endDate: undefined,
-      data: [
-        {
-          action: '123',
-          agents: ['agent-a'],
-          agentType: 'endpoint',
-          hosts: { 'agent-a': { name: 'Host-agent-a' } },
-          command: 'kill-process',
-          alertIds: undefined,
-          completedAt: '2022-04-30T16:08:47.449Z',
-          wasSuccessful: true,
-          errors: undefined,
-          id: '123',
-          isCompleted: true,
-          isExpired: false,
-          startedAt: '2022-04-27T16:08:47.449Z',
-          status: 'successful',
-          comment: doc?.EndpointActions.data.comment,
-          createdBy: doc?.user.id,
-          parameters: doc?.EndpointActions.data.parameters,
-          agentState: {
-            'agent-a': {
-              errors: undefined,
-              completedAt: '2022-04-30T16:08:47.449Z',
-              isCompleted: true,
-              wasSuccessful: true,
-            },
-          },
-          outputs: {
-            'agent-a': {
-              content: {
-                code: 'ra_execute_success_done',
-                cwd: '/some/path',
-                output_file_id: 'some-output-file-id',
-                output_file_stderr_truncated: false,
-                output_file_stdout_truncated: true,
-                shell: 'bash',
-                shell_code: 0,
-                stderr: expect.any(String),
-                stderr_truncated: true,
-                stdout: expect.any(String),
-                stdout_truncated: true,
-              },
-              type: 'json',
-            },
-          },
-        },
-      ],
-      total: 1,
-    });
-  });
-
-  it('should return expected `output` for given actions', async () => {
-    const doc = actionRequests.hits.hits[0]._source;
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([
-          {
-            agent: {
-              id: 'agent-a',
-            },
-            host: {
-              hostname: 'Host-agent-a',
-            },
-          },
-        ]),
-      });
-    await expect(
-      getActionList({
-        esClient,
-        logger,
-        metadataService: endpointAppContextService.getEndpointMetadataService(),
-        page: 1,
-        pageSize: 10,
-        withOutputs: ['123'],
-      })
-    ).resolves.toEqual({
-      page: 1,
-      pageSize: 10,
-      agentTypes: undefined,
-      commands: undefined,
-      userIds: undefined,
-      startDate: undefined,
-      elasticAgentIds: undefined,
-      endDate: undefined,
-      data: [
-        {
-          action: '123',
-          agents: ['agent-a'],
-          agentType: 'endpoint',
-          hosts: { 'agent-a': { name: 'Host-agent-a' } },
-          command: 'kill-process',
-          completedAt: '2022-04-30T16:08:47.449Z',
-          errors: undefined,
-          wasSuccessful: true,
-          id: '123',
-          isCompleted: true,
-          isExpired: false,
-          startedAt: '2022-04-27T16:08:47.449Z',
-          status: 'successful',
-          outputs: {
-            'agent-a': {
-              content: {
-                code: 'ra_execute_success_done',
-                cwd: '/some/path',
-                output_file_id: 'some-output-file-id',
-                output_file_stderr_truncated: false,
-                output_file_stdout_truncated: true,
-                shell: 'bash',
-                shell_code: 0,
-                stderr: expect.any(String),
-                stderr_truncated: true,
-                stdout: expect.any(String),
-                stdout_truncated: true,
-              },
-              type: 'json',
-            },
-          },
-          comment: doc?.EndpointActions.data.comment,
-          createdBy: doc?.user.id,
-          parameters: doc?.EndpointActions.data.parameters,
-          agentState: {
-            'agent-a': {
-              completedAt: '2022-04-30T16:08:47.449Z',
-              isCompleted: true,
-              wasSuccessful: true,
-            },
-          },
-        },
-      ],
-      total: 1,
-    });
-  });
-
-  it('should return expected output for multiple agent ids', async () => {
-    const agentIds = ['agent-a', 'agent-b', 'agent-x'];
-    actionRequests = createActionRequestsEsSearchResultsMock(agentIds);
-    actionResponses = createActionResponsesEsSearchResultsMock(agentIds);
-
-    applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
-    const doc = actionRequests.hits.hits[0]._source;
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([
-          {
-            agent: {
-              id: 'agent-a',
-            },
-            host: {
-              hostname: 'Host-agent-a',
-            },
-          },
-          {
-            agent: {
-              id: 'agent-b',
-            },
-            host: {
-              hostname: 'Host-agent-b',
-            },
-          },
-        ]),
-      });
-    await expect(
-      getActionList({
-        esClient,
-        logger,
-        metadataService: endpointAppContextService.getEndpointMetadataService(),
-        page: 1,
-        pageSize: 10,
-      })
-    ).resolves.toEqual({
-      page: 1,
-      pageSize: 10,
-      commands: undefined,
-      agentTypes: undefined,
-      userIds: undefined,
-      startDate: undefined,
-      elasticAgentIds: undefined,
-      endDate: undefined,
-      statuses: undefined,
-      data: [
-        {
-          action: '123',
-          agents: ['agent-a', 'agent-b', 'agent-x'],
-          agentType: 'endpoint',
-          hosts: {
-            'agent-a': { name: 'Host-agent-a' },
-            'agent-b': { name: 'Host-agent-b' },
-            'agent-x': { name: '' },
-          },
-          alertIds: undefined,
-          command: 'kill-process',
-          completedAt: undefined,
-          wasSuccessful: false,
-          errors: undefined,
-          id: '123',
-          isCompleted: false,
-          isExpired: true,
-          startedAt: '2022-04-27T16:08:47.449Z',
-          status: 'failed',
-          comment: doc?.EndpointActions.data.comment,
-          createdBy: doc?.user.id,
-          parameters: doc?.EndpointActions.data.parameters,
-          ruleId: undefined,
-          ruleName: undefined,
-          agentState: {
-            'agent-a': {
-              completedAt: '2022-04-30T16:08:47.449Z',
-              isCompleted: true,
-              wasSuccessful: true,
-              errors: undefined,
-            },
-            'agent-b': {
-              completedAt: undefined,
-              isCompleted: false,
-              wasSuccessful: false,
-              errors: undefined,
-            },
-            'agent-x': {
-              completedAt: undefined,
-              isCompleted: false,
-              wasSuccessful: false,
-              errors: undefined,
-            },
-          },
-          outputs: {
-            'agent-a': {
-              content: {
-                code: '200',
-              },
-              type: 'json',
-            },
-          },
-        },
-      ],
-      total: 1,
-    });
-  });
-
-  it('should call query with expected filters when querying for Action Request', async () => {
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
-    await getActionList({
-      esClient,
-      logger,
-      metadataService: endpointAppContextService.getEndpointMetadataService(),
-      agentTypes: ['endpoint'] as ResponseActionAgentType[],
-      elasticAgentIds: ['123'],
-      pageSize: 20,
-      startDate: 'now-10d',
-      endDate: 'now',
-      commands: ['isolate', 'unisolate', 'get-file'],
-      userIds: ['*elastic*'],
-    });
-
-    expect(esClient.search).toHaveBeenNthCalledWith(
-      1,
-      {
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-10d',
-                        },
-                      },
-                    },
-                    {
-                      range: {
-                        '@timestamp': {
-                          lte: 'now',
-                        },
-                      },
-                    },
-                    {
-                      terms: {
-                        'data.command': ['isolate', 'unisolate', 'get-file'],
-                      },
-                    },
-                    {
-                      terms: {
-                        input_type: ['endpoint'],
-                      },
-                    },
-                    {
-                      terms: {
-                        agents: ['123'],
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      query_string: {
-                        fields: ['user_id'],
-                        query: '*elastic*',
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
-          },
-        },
-        sort: [
-          {
-            '@timestamp': {
-              order: 'desc',
-            },
-          },
-        ],
-        from: 0,
-        index: '.logs-endpoint.actions-default',
-        size: 20,
-      },
-      { ignore: [404] }
-    );
-  });
-
-  it('should call search with exact usernames when no wildcards are present', async () => {
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
-    await getActionList({
-      esClient,
-      logger,
-      metadataService: endpointAppContextService.getEndpointMetadataService(),
-      pageSize: 10,
-      startDate: 'now-1d',
-      endDate: 'now',
-      userIds: ['elastic', 'kibana'],
-    });
-
-    expect(esClient.search).toHaveBeenNthCalledWith(
-      1,
-      {
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-1d',
-                        },
-                      },
-                    },
-                    {
-                      range: {
-                        '@timestamp': {
-                          lte: 'now',
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                bool: {
-                  should: [
-                    {
-                      bool: {
-                        should: [
-                          {
-                            match: {
-                              user_id: 'elastic',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                    {
-                      bool: {
-                        should: [
-                          {
-                            match: {
-                              user_id: 'kibana',
-                            },
-                          },
-                        ],
-                        minimum_should_match: 1,
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
-          },
-        },
-        sort: [
-          {
-            '@timestamp': {
-              order: 'desc',
-            },
-          },
-        ],
-        from: 0,
-        index: '.logs-endpoint.actions-default',
-        size: 10,
-      },
-      { ignore: [404] }
-    );
-  });
-
-  it('should return an empty array if no actions are found', async () => {
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
-    actionRequests.hits.hits = [];
-    (actionRequests.hits.total as estypes.SearchTotalHits).value = 0;
-    (actionResponses.hits.total as estypes.SearchTotalHits).value = 0;
-    actionRequests = endpointActionGenerator.toEsSearchResponse([]);
-
-    await expect(
-      getActionList({
-        esClient,
-        logger,
-        metadataService: endpointAppContextService.getEndpointMetadataService(),
-      })
-    ).resolves.toEqual(
-      expect.objectContaining({
         commands: undefined,
-        data: [],
+        userIds: undefined,
+        startDate: undefined,
         elasticAgentIds: undefined,
         endDate: undefined,
+        data: [
+          {
+            action: '123',
+            agents: ['agent-a'],
+            agentType: 'endpoint',
+            hosts: { 'agent-a': { name: 'Host-agent-a' } },
+            command: 'running-processes',
+            alertIds: undefined,
+            completedAt: '2022-04-30T16:08:47.449Z',
+            wasSuccessful: true,
+            errors: undefined,
+            id: '123',
+            isCompleted: true,
+            isExpired: false,
+            startedAt: '2022-04-27T16:08:47.449Z',
+            status: 'successful',
+            comment: doc?.EndpointActions.data.comment,
+            createdBy: doc?.user.id,
+            parameters: doc?.EndpointActions.data.parameters,
+            agentState: {
+              'agent-a': {
+                errors: undefined,
+                completedAt: '2022-04-30T16:08:47.449Z',
+                isCompleted: true,
+                wasSuccessful: true,
+              },
+            },
+            outputs: {
+              'agent-a': {
+                content: {
+                  code: 'ra_execute_success_done',
+                  cwd: '/some/path',
+                  output_file_id: 'some-output-file-id',
+                  output_file_stderr_truncated: false,
+                  output_file_stdout_truncated: true,
+                  shell: 'bash',
+                  shell_code: 0,
+                  stderr: expect.any(String),
+                  stderr_truncated: true,
+                  stdout: expect.any(String),
+                  stdout_truncated: true,
+                },
+                type: 'json',
+              },
+            },
+          },
+        ],
+        total: 1,
+      });
+    });
+
+    it('should return expected `output` for given actions', async () => {
+      const doc = actionRequests.hits.hits[0]._source;
+
+      await expect(
+        getActionList({
+          endpointService: endpointAppContextService,
+          spaceId: 'default',
+          page: 1,
+          pageSize: 10,
+          withOutputs: ['123'],
+        })
+      ).resolves.toEqual({
         page: 1,
         pageSize: 10,
-        startDate: undefined,
-        total: 0,
+        agentTypes: undefined,
+        commands: undefined,
         userIds: undefined,
-      })
-    );
-  });
-
-  it('should have `isExpired` as `true` if NOT complete and expiration is in the past', async () => {
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
+        startDate: undefined,
+        elasticAgentIds: undefined,
+        endDate: undefined,
+        data: [
+          {
+            action: '123',
+            agents: ['agent-a'],
+            agentType: 'endpoint',
+            hosts: { 'agent-a': { name: 'Host-agent-a' } },
+            command: 'running-processes',
+            completedAt: '2022-04-30T16:08:47.449Z',
+            errors: undefined,
+            wasSuccessful: true,
+            id: '123',
+            isCompleted: true,
+            isExpired: false,
+            startedAt: '2022-04-27T16:08:47.449Z',
+            status: 'successful',
+            outputs: {
+              'agent-a': {
+                content: {
+                  code: 'ra_execute_success_done',
+                  cwd: '/some/path',
+                  output_file_id: 'some-output-file-id',
+                  output_file_stderr_truncated: false,
+                  output_file_stdout_truncated: true,
+                  shell: 'bash',
+                  shell_code: 0,
+                  stderr: expect.any(String),
+                  stderr_truncated: true,
+                  stdout: expect.any(String),
+                  stdout_truncated: true,
+                },
+                type: 'json',
+              },
+            },
+            comment: doc?.EndpointActions.data.comment,
+            createdBy: doc?.user.id,
+            parameters: doc?.EndpointActions.data.parameters,
+            agentState: {
+              'agent-a': {
+                completedAt: '2022-04-30T16:08:47.449Z',
+                isCompleted: true,
+                wasSuccessful: true,
+              },
+            },
+          },
+        ],
+        total: 1,
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
-    actionResponses.hits.hits.pop(); // remove the endpoint response
-
-    await expect(
-      await (
-        await getActionList({
-          esClient,
-          logger,
-          metadataService: endpointAppContextService.getEndpointMetadataService(),
-          elasticAgentIds: ['123'],
-        })
-      ).data[0]
-    ).toEqual(
-      expect.objectContaining({
-        isExpired: true,
-        isCompleted: false,
-      })
-    );
-  });
-
-  it('should have `isExpired` as `false` if complete and expiration is in the past', async () => {
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
-
-    await expect(
-      await (
-        await getActionList({
-          esClient,
-          logger,
-          metadataService: endpointAppContextService.getEndpointMetadataService(),
-          elasticAgentIds: ['123'],
-        })
-      ).data[0]
-    ).toEqual(
-      expect.objectContaining({
-        isExpired: false,
-        isCompleted: true,
-      })
-    );
-  });
-
-  it('should show status as `completed` if NOT expired and action IS completed AND is successful', async () => {
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
-
-    await expect(
-      await (
-        await getActionList({
-          esClient,
-          logger,
-          metadataService: endpointAppContextService.getEndpointMetadataService(),
-          elasticAgentIds: ['123'],
-        })
-      ).data[0]
-    ).toEqual(
-      expect.objectContaining({
-        isExpired: false,
-        isCompleted: true,
-        wasSuccessful: true,
-        status: 'successful',
-      })
-    );
-  });
-
-  it('should show status as `failed` if IS expired', async () => {
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
-    actionResponses.hits.hits.pop(); // remove the endpoint response
-
-    await expect(
-      await (
-        await getActionList({
-          esClient,
-          logger,
-          metadataService: endpointAppContextService.getEndpointMetadataService(),
-          elasticAgentIds: ['123'],
-        })
-      ).data[0]
-    ).toEqual(
-      expect.objectContaining({
-        isExpired: true,
-        isCompleted: false,
-        wasSuccessful: false,
-        status: 'failed',
-      })
-    );
-  });
-
-  it('should show status as `failed` if IS completed AND was unsuccessful', async () => {
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
-    (actionResponses.hits.hits[0]._source as LogsEndpointActionResponse).error = Error(
-      'Some error in action response'
-    );
-
-    await expect(
-      await (
-        await getActionList({
-          esClient,
-          logger,
-          metadataService: endpointAppContextService.getEndpointMetadataService(),
-          elasticAgentIds: ['123'],
-        })
-      ).data[0]
-    ).toEqual(
-      expect.objectContaining({
-        isExpired: false,
-        isCompleted: true,
-        wasSuccessful: false,
-        status: 'failed',
-      })
-    );
-  });
-
-  it('should show status as `pending` if no response and NOT expired', async () => {
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
-    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
-      new Date(new Date().setDate(new Date().getDate() + 5)).toISOString();
-    // remove response
-    actionResponses.hits.hits.pop();
-
-    await expect(
-      await (
-        await getActionList({
-          esClient,
-          logger,
-          metadataService: endpointAppContextService.getEndpointMetadataService(),
-          elasticAgentIds: ['123'],
-        })
-      ).data[0]
-    ).toEqual(
-      expect.objectContaining({
-        isExpired: false,
-        isCompleted: false,
-        wasSuccessful: false,
-        status: 'pending',
-      })
-    );
-  });
-
-  it('should throw custom errors', async () => {
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
-    const error = new Error('Some odd error!');
-
-    esClient.search.mockImplementation(async () => {
-      return Promise.reject(error);
-    });
-    const getActionListPromise = getActionList({
-      esClient,
-      logger,
-      metadataService: endpointAppContextService.getEndpointMetadataService(),
     });
 
-    await expect(getActionListPromise).rejects.toThrowError(
-      'Unknown error while fetching action requests'
-    );
-    await expect(getActionListPromise).rejects.toBeInstanceOf(CustomHttpRequestError);
-  });
-});
+    it('should return expected output for multiple agent ids', async () => {
+      const agentIds = ['agent-a', 'agent-b', 'agent-x'];
+      actionRequests = createActionRequestsEsSearchResultsMock(agentIds);
+      actionResponses = createActionResponsesEsSearchResultsMock(agentIds);
 
-describe('When using `getActionListByStatus()', () => {
-  let esClient: ElasticsearchClientMock;
-  let logger: MockedLogger;
-  // let endpointActionGenerator: EndpointActionGenerator;
-  let actionRequests: estypes.SearchResponse<LogsEndpointAction>;
-  let actionResponses: estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>;
-  let endpointAppContextService: EndpointAppContextService;
+      applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
+      const doc = actionRequests.hits.hits[0]._source;
 
-  beforeEach(() => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
-    logger = loggingSystemMock.createLogger();
-    // endpointActionGenerator = new EndpointActionGenerator('seed');
-    endpointAppContextService = new EndpointAppContextService();
-    endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-    endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
-
-    actionRequests = createActionRequestsEsSearchResultsMock(undefined);
-    actionResponses = createActionResponsesEsSearchResultsMock();
-
-    applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
-  });
-
-  afterEach(() => {
-    endpointAppContextService.stop();
-  });
-
-  it('should return expected output `data` length for selected statuses', async () => {
-    actionRequests = createActionRequestsEsSearchResultsMock(undefined, true);
-    actionResponses = createActionResponsesEsSearchResultsMock();
-
-    applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
-    // mock metadataService.findHostMetadataForFleetAgents resolved value
-    (endpointAppContextService.getEndpointMetadataService as jest.Mock) = jest
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
-      });
-
-    const getActionListByStatusPromise = ({ page }: { page: number }) =>
-      getActionListByStatus({
-        esClient,
-        logger,
-        metadataService: endpointAppContextService.getEndpointMetadataService(),
-        page: page ?? 1,
+      await expect(
+        getActionList({
+          endpointService: endpointAppContextService,
+          spaceId: 'default',
+          page: 1,
+          pageSize: 10,
+        })
+      ).resolves.toEqual({
+        page: 1,
         pageSize: 10,
-        statuses: ['failed', 'pending', 'successful'],
+        commands: undefined,
+        agentTypes: undefined,
+        userIds: undefined,
+        startDate: undefined,
+        elasticAgentIds: undefined,
+        endDate: undefined,
+        statuses: undefined,
+        data: [
+          {
+            action: '123',
+            agents: ['agent-a', 'agent-b', 'agent-x'],
+            agentType: 'endpoint',
+            hosts: {
+              'agent-a': { name: 'Host-agent-a' },
+              'agent-b': { name: 'Host-agent-b' },
+              'agent-x': { name: '' },
+            },
+            alertIds: undefined,
+            command: 'running-processes',
+            completedAt: undefined,
+            wasSuccessful: false,
+            errors: undefined,
+            id: '123',
+            isCompleted: false,
+            isExpired: true,
+            startedAt: '2022-04-27T16:08:47.449Z',
+            status: 'failed',
+            comment: doc?.EndpointActions.data.comment,
+            createdBy: doc?.user.id,
+            parameters: doc?.EndpointActions.data.parameters,
+            ruleId: undefined,
+            ruleName: undefined,
+            agentState: {
+              'agent-a': {
+                completedAt: '2022-04-30T16:08:47.449Z',
+                isCompleted: true,
+                wasSuccessful: true,
+                errors: undefined,
+              },
+              'agent-b': {
+                completedAt: undefined,
+                isCompleted: false,
+                wasSuccessful: false,
+                errors: undefined,
+              },
+              'agent-x': {
+                completedAt: undefined,
+                isCompleted: false,
+                wasSuccessful: false,
+                errors: undefined,
+              },
+            },
+            outputs: {
+              'agent-a': {
+                content: {
+                  code: '200',
+                },
+                type: 'json',
+              },
+            },
+          },
+        ],
+        total: 1,
+      });
+    });
+
+    it('should call query with expected filters when querying for Action Request', async () => {
+      await getActionList({
+        endpointService: endpointAppContextService,
+        spaceId: 'default',
+        agentTypes: ['endpoint'] as ResponseActionAgentType[],
+        elasticAgentIds: ['123'],
+        pageSize: 20,
+        startDate: 'now-10d',
+        endDate: 'now',
+        commands: ['isolate', 'unisolate', 'get-file'],
+        userIds: ['*elastic*'],
       });
 
-    expect(await (await getActionListByStatusPromise({ page: 1 })).data.length).toEqual(10);
+      expect(esClient.search).toHaveBeenNthCalledWith(
+        1,
+        {
+          query: {
+            bool: {
+              must: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        range: {
+                          '@timestamp': {
+                            gte: 'now-10d',
+                          },
+                        },
+                      },
+                      {
+                        range: {
+                          '@timestamp': {
+                            lte: 'now',
+                          },
+                        },
+                      },
+                      {
+                        terms: {
+                          'data.command': ['isolate', 'unisolate', 'get-file'],
+                        },
+                      },
+                      {
+                        terms: {
+                          input_type: ['endpoint'],
+                        },
+                      },
+                      {
+                        terms: {
+                          agents: ['123'],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        query_string: {
+                          fields: ['user_id'],
+                          query: '*elastic*',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+          sort: [
+            {
+              '@timestamp': {
+                order: 'desc',
+              },
+            },
+          ],
+          from: 0,
+          index: '.logs-endpoint.actions-default',
+          size: 20,
+        },
+        { ignore: [404] }
+      );
+    });
 
-    expect(await (await getActionListByStatusPromise({ page: 2 })).data.length).toEqual(10);
+    it('should call search with exact usernames when no wildcards are present', async () => {
+      await getActionList({
+        endpointService: endpointAppContextService,
+        spaceId: 'default',
+        pageSize: 10,
+        startDate: 'now-1d',
+        endDate: 'now',
+        userIds: ['elastic', 'kibana'],
+      });
 
-    expect(await (await getActionListByStatusPromise({ page: 3 })).data.length).toEqual(3);
+      expect(esClient.search).toHaveBeenNthCalledWith(
+        1,
+        {
+          query: {
+            bool: {
+              must: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        range: {
+                          '@timestamp': {
+                            gte: 'now-1d',
+                          },
+                        },
+                      },
+                      {
+                        range: {
+                          '@timestamp': {
+                            lte: 'now',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                user_id: 'elastic',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                      {
+                        bool: {
+                          should: [
+                            {
+                              match: {
+                                user_id: 'kibana',
+                              },
+                            },
+                          ],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+          sort: [
+            {
+              '@timestamp': {
+                order: 'desc',
+              },
+            },
+          ],
+          from: 0,
+          index: '.logs-endpoint.actions-default',
+          size: 10,
+        },
+        { ignore: [404] }
+      );
+    });
+
+    it('should return an empty array if no actions are found', async () => {
+      actionRequests.hits.hits = [];
+      (actionRequests.hits.total as estypes.SearchTotalHits).value = 0;
+      (actionResponses.hits.total as estypes.SearchTotalHits).value = 0;
+      actionRequests = endpointActionGenerator.toEsSearchResponse([]);
+
+      await expect(
+        getActionList({
+          endpointService: endpointAppContextService,
+          spaceId: 'default',
+        })
+      ).resolves.toEqual(
+        expect.objectContaining({
+          commands: undefined,
+          data: [],
+          elasticAgentIds: undefined,
+          endDate: undefined,
+          page: 1,
+          pageSize: 10,
+          startDate: undefined,
+          total: 0,
+          userIds: undefined,
+        })
+      );
+    });
+
+    it('should have `isExpired` as `true` if NOT complete and expiration is in the past', async () => {
+      (
+        actionRequests.hits.hits[0]._source as LogsEndpointAction
+      ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+      actionResponses.hits.hits.pop(); // remove the endpoint response
+
+      await expect(
+        await (
+          await getActionList({
+            endpointService: endpointAppContextService,
+            spaceId: 'default',
+            elasticAgentIds: ['123'],
+          })
+        ).data[0]
+      ).toEqual(
+        expect.objectContaining({
+          isExpired: true,
+          isCompleted: false,
+        })
+      );
+    });
+
+    it('should have `isExpired` as `false` if complete and expiration is in the past', async () => {
+      (
+        actionRequests.hits.hits[0]._source as LogsEndpointAction
+      ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+
+      await expect(
+        await (
+          await getActionList({
+            endpointService: endpointAppContextService,
+            spaceId: 'default',
+            elasticAgentIds: ['123'],
+          })
+        ).data[0]
+      ).toEqual(
+        expect.objectContaining({
+          isExpired: false,
+          isCompleted: true,
+        })
+      );
+    });
+
+    it('should show status as `completed` if NOT expired and action IS completed AND is successful', async () => {
+      (
+        actionRequests.hits.hits[0]._source as LogsEndpointAction
+      ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+
+      await expect(
+        await (
+          await getActionList({
+            endpointService: endpointAppContextService,
+            spaceId: 'default',
+            elasticAgentIds: ['123'],
+          })
+        ).data[0]
+      ).toEqual(
+        expect.objectContaining({
+          isExpired: false,
+          isCompleted: true,
+          wasSuccessful: true,
+          status: 'successful',
+        })
+      );
+    });
+
+    it('should show status as `failed` if IS expired', async () => {
+      (
+        actionRequests.hits.hits[0]._source as LogsEndpointAction
+      ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+      actionResponses.hits.hits.pop(); // remove the endpoint response
+
+      await expect(
+        await (
+          await getActionList({
+            endpointService: endpointAppContextService,
+            spaceId: 'default',
+            elasticAgentIds: ['123'],
+          })
+        ).data[0]
+      ).toEqual(
+        expect.objectContaining({
+          isExpired: true,
+          isCompleted: false,
+          wasSuccessful: false,
+          status: 'failed',
+        })
+      );
+    });
+
+    it('should show status as `failed` if IS completed AND was unsuccessful', async () => {
+      (
+        actionRequests.hits.hits[0]._source as LogsEndpointAction
+      ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+      (actionResponses.hits.hits[0]._source as LogsEndpointActionResponse).error = Error(
+        'Some error in action response'
+      );
+
+      await expect(
+        await (
+          await getActionList({
+            endpointService: endpointAppContextService,
+            spaceId: 'default',
+            elasticAgentIds: ['123'],
+          })
+        ).data[0]
+      ).toEqual(
+        expect.objectContaining({
+          isExpired: false,
+          isCompleted: true,
+          wasSuccessful: false,
+          status: 'failed',
+        })
+      );
+    });
+
+    it('should show status as `pending` if no response and NOT expired', async () => {
+      (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+        new Date(new Date().setDate(new Date().getDate() + 5)).toISOString();
+      // remove response
+      actionResponses.hits.hits.pop();
+
+      await expect(
+        await (
+          await getActionList({
+            endpointService: endpointAppContextService,
+            spaceId: 'default',
+            elasticAgentIds: ['123'],
+          })
+        ).data[0]
+      ).toEqual(
+        expect.objectContaining({
+          isExpired: false,
+          isCompleted: false,
+          wasSuccessful: false,
+          status: 'pending',
+        })
+      );
+    });
+
+    it('should throw custom errors', async () => {
+      const error = new Error('Some odd error!');
+
+      esClient.search.mockImplementation(async () => {
+        return Promise.reject(error);
+      });
+      const getActionListPromise = getActionList({
+        endpointService: endpointAppContextService,
+        spaceId: 'default',
+      });
+
+      await expect(getActionListPromise).rejects.toThrowError(
+        'Unknown error while fetching action requests'
+      );
+      await expect(getActionListPromise).rejects.toBeInstanceOf(CustomHttpRequestError);
+    });
+  });
+
+  describe('When using `getActionListByStatus()', () => {
+    it('should return expected output `data` length for selected statuses', async () => {
+      actionRequests = createActionRequestsEsSearchResultsMock(undefined, true);
+      actionResponses = createActionResponsesEsSearchResultsMock();
+
+      applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
+
+      const getActionListByStatusPromise = ({ page }: { page: number }) =>
+        getActionListByStatus({
+          endpointService: endpointAppContextService,
+          spaceId: 'default',
+          page: page ?? 1,
+          pageSize: 10,
+          statuses: ['failed', 'pending', 'successful'],
+        });
+
+      expect(await (await getActionListByStatusPromise({ page: 1 })).data.length).toEqual(10);
+
+      expect(await (await getActionListByStatusPromise({ page: 2 })).data.length).toEqual(10);
+
+      expect(await (await getActionListByStatusPromise({ page: 3 })).data.length).toEqual(3);
+    });
   });
 });

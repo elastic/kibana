@@ -26,7 +26,7 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
     async expectToBeOnIndexListPage() {
       await retry.tryForTime(60 * 1000, async () => {
         expect(await browser.getCurrentUrl()).contain(
-          '/app/management/data/index_management/indices'
+          '/app/elasticsearch/index_management/indices'
         );
       });
     },
@@ -54,6 +54,8 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
     },
     async clickSkipButton() {
       await testSubjects.existOrFail('createIndexSkipBtn');
+      const element = await testSubjects.find('createIndexSkipBtn');
+      await element.scrollIntoView();
       await testSubjects.click('createIndexSkipBtn');
     },
     async expectCreateIndexButtonToExist() {
@@ -109,6 +111,23 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
     async expectAPIKeyFormNotAvailable() {
       await testSubjects.missingOrFail('apiKeyHasNotBeenGenerated');
       await testSubjects.missingOrFail('apiKeyHasBeenGenerated');
+    },
+    async expectAnalyzeLogsIntegrationLink() {
+      await testSubjects.existOrFail('analyzeLogsBrowseIntegrations');
+      expect(await testSubjects.getAttribute('analyzeLogsBrowseIntegrations', 'href')).match(
+        /^https?\:\/\/.*\/app\/integrations\/browse\/observability/
+      );
+
+      expect(await testSubjects.getAttribute('analyzeLogsBrowseIntegrations', 'target')).equal(
+        '_blank'
+      );
+    },
+    async expectCreateO11ySpaceBtn() {
+      await testSubjects.existOrFail('createO11ySpaceBtn');
+      expect(await testSubjects.getAttribute('createO11ySpaceBtn', 'href')).match(
+        /^https?\:\/\/.*\/app\/management\/kibana\/spaces\/create/
+      );
+      expect(await testSubjects.getAttribute('createO11ySpaceBtn', 'target')).equal('_blank');
     },
   };
 }

@@ -13,7 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
-import { DashboardState } from './types';
+import { DashboardState } from '../../common';
 
 export function initializeViewModeManager(
   incomingEmbeddable?: EmbeddablePackageState,
@@ -47,7 +47,7 @@ export function initializeViewModeManager(
 
   return {
     api: {
-      viewMode: viewMode$,
+      viewMode$,
       setViewMode,
     },
     comparators: {

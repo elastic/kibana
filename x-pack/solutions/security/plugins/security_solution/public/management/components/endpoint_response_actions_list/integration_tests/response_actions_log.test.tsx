@@ -381,7 +381,7 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
 
       expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
-        'Host-agent-a, Host-agent-b, Host-agent-d'
+        'Host-agent-a, Host-agent-b, agent-c (Host name unavailable), Host-agent-d'
       );
     });
 
@@ -399,7 +399,7 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
 
       expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
-        'Host unenrolled'
+        'agent-a (Host name unavailable)'
       );
     });
 
@@ -421,7 +421,7 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
 
       expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
-        'Hosts unenrolled'
+        'agent-a (Host name unavailable), agent-b (Host name unavailable), agent-c (Host name unavailable)'
       );
     });
 
@@ -1222,7 +1222,7 @@ describe('Response actions history', () => {
         }
 
         const hostnameInfo = getByTestId(`${testPrefix}-action-details-info-Hostname`);
-        expect(hostnameInfo.textContent).toEqual('—');
+        expect(hostnameInfo.textContent).toEqual('agent-a');
       });
 
       describe('with `outputs` and `errors`', () => {
@@ -1374,7 +1374,9 @@ describe('Response actions history', () => {
         }
 
         const hostnameInfo = getAllByTestId(`${testPrefix}-action-details-info-Hostname`);
-        expect(hostnameInfo.map((element) => element.textContent)).toEqual(['—, Agent-B, —']);
+        expect(hostnameInfo.map((element) => element.textContent)).toEqual([
+          'agent-a, Agent-B, agent-c',
+        ]);
       });
 
       describe('with `outputs` and `errors`', () => {
@@ -1854,25 +1856,6 @@ describe('Response actions history', () => {
       ]);
     });
 
-    it('should show only action types when 3rd party vendor feature flags are set to false thus only endpoint available', async () => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneV1Enabled: false,
-        responseActionsCrowdstrikeManualHostIsolationEnabled: false,
-      });
-      render({ isFlyout: false });
-      const { getByTestId, getAllByTestId } = renderResult;
-
-      await user.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
-      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
-      expect(filterList).toBeTruthy();
-      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
-        [...RESPONSE_ACTION_TYPE].length
-      );
-      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
-        'Triggered by rule',
-        'Triggered manually',
-      ]);
-    });
     it('should show a list of agents and action types when opened in page view', async () => {
       mockedContext.setExperimentalFlag({
         responseActionsSentinelOneV1Enabled: true,

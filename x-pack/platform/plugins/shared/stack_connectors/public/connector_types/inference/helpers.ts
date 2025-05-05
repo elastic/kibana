@@ -6,9 +6,9 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { ConfigEntryView } from '../../../common/dynamic_config/types';
-import { Config } from './types';
+import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ConfigEntryView } from '@kbn/inference-endpoint-ui-common';
+import type { Config } from './types';
 import * as i18n from './translations';
 
 export interface TaskTypeOption {
@@ -39,8 +39,8 @@ export const generateInferenceEndpointId = (
 export const getNonEmptyValidator = (
   schema: ConfigEntryView[],
   validationEventHandler: (fieldsWithErrors: ConfigEntryView[]) => void,
-  isSubmitting: boolean = false,
-  isSecrets: boolean = false
+  isSubmitting = false,
+  isSecrets = false
 ) => {
   return (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
     const [{ value, path }] = args;

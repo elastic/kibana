@@ -18,7 +18,7 @@ import {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
-  PublishesPanelTitle,
+  PublishesTitle,
   PublishesUnsavedChanges,
   PublishingSubject,
   StateComparators,
@@ -35,8 +35,8 @@ export interface HasCustomPrepend {
 export type DefaultControlApi = PublishesDataLoading &
   PublishesBlockingError &
   PublishesUnsavedChanges &
-  Partial<PublishesPanelTitle & PublishesDisabledActionIds & HasCustomPrepend> &
-  CanClearSelections &
+  Partial<PublishesTitle & PublishesDisabledActionIds & HasCustomPrepend> &
+  Partial<CanClearSelections> &
   HasType &
   HasUniqueId &
   HasSerializableState<DefaultControlState> &
@@ -49,7 +49,7 @@ export type DefaultControlApi = PublishesDataLoading &
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,
-  'uuid' | 'parentApi' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'
+  'uuid' | 'parentApi' | 'type' | 'unsavedChanges$' | 'resetUnsavedChanges'
 >;
 
 export type ControlApiInitialization<ControlApi extends DefaultControlApi = DefaultControlApi> =

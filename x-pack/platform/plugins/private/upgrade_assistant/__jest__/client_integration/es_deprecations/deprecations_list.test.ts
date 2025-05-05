@@ -60,7 +60,7 @@ describe('ES deprecations table', () => {
 
     // Verify all deprecations appear in the table
     expect(find('deprecationTableRow').length).toEqual(
-      esDeprecationsMockResponse.deprecations.length
+      esDeprecationsMockResponse.migrationsDeprecations.length
     );
   });
 
@@ -69,8 +69,8 @@ describe('ES deprecations table', () => {
 
     await actions.table.clickRefreshButton();
 
-    const mlDeprecation = esDeprecationsMockResponse.deprecations[0];
-    const reindexDeprecation = esDeprecationsMockResponse.deprecations[3];
+    const mlDeprecation = esDeprecationsMockResponse.migrationsDeprecations[0];
+    const reindexDeprecation = esDeprecationsMockResponse.migrationsDeprecations[3];
 
     // Since upgradeStatusMockResponse includes ML and reindex actions (which require fetching status), there will be 4 requests made
     expect(httpSetup.get).toHaveBeenCalledWith(
@@ -96,10 +96,10 @@ describe('ES deprecations table', () => {
 
   it('shows critical and warning deprecations count', () => {
     const { find } = testBed;
-    const criticalDeprecations = esDeprecationsMockResponse.deprecations.filter(
+    const criticalDeprecations = esDeprecationsMockResponse.migrationsDeprecations.filter(
       (deprecation) => deprecation.isCritical
     );
-    const warningDeprecations = esDeprecationsMockResponse.deprecations.filter(
+    const warningDeprecations = esDeprecationsMockResponse.migrationsDeprecations.filter(
       (deprecation) => deprecation.isCritical === false
     );
 
@@ -133,7 +133,7 @@ describe('ES deprecations table', () => {
 
       await actions.searchBar.clickCriticalFilterButton();
 
-      const criticalDeprecations = esDeprecationsMockResponse.deprecations.filter(
+      const criticalDeprecations = esDeprecationsMockResponse.migrationsDeprecations.filter(
         (deprecation) => deprecation.isCritical
       );
 
@@ -142,7 +142,7 @@ describe('ES deprecations table', () => {
       await actions.searchBar.clickCriticalFilterButton();
 
       expect(find('deprecationTableRow').length).toEqual(
-        esDeprecationsMockResponse.deprecations.length
+        esDeprecationsMockResponse.migrationsDeprecations.length
       );
     });
 
@@ -165,7 +165,7 @@ describe('ES deprecations table', () => {
 
       component.update();
 
-      const clusterDeprecations = esDeprecationsMockResponse.deprecations.filter(
+      const clusterDeprecations = esDeprecationsMockResponse.migrationsDeprecations.filter(
         (deprecation) => deprecation.type === 'cluster_settings'
       );
 
@@ -174,7 +174,7 @@ describe('ES deprecations table', () => {
 
     it('filters results by query string', async () => {
       const { find, actions } = testBed;
-      const multiFieldsDeprecation = esDeprecationsMockResponse.deprecations[2];
+      const multiFieldsDeprecation = esDeprecationsMockResponse.migrationsDeprecations[2];
 
       await actions.searchBar.setSearchInputValue(multiFieldsDeprecation.message);
 
@@ -205,7 +205,7 @@ describe('ES deprecations table', () => {
 
   describe('pagination', () => {
     const esDeprecationsMockResponseWithManyDeprecations = createEsDeprecationsMockResponse(20);
-    const { deprecations } = esDeprecationsMockResponseWithManyDeprecations;
+    const { migrationsDeprecations } = esDeprecationsMockResponseWithManyDeprecations;
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(
@@ -229,7 +229,7 @@ describe('ES deprecations table', () => {
       const { find, actions } = testBed;
 
       expect(find('esDeprecationsPagination').find('.euiPagination__item').length).toEqual(
-        Math.round(deprecations.length / 50) // Default rows per page is 50
+        Math.round(migrationsDeprecations.length / 50) // Default rows per page is 50
       );
       expect(find('deprecationTableRow').length).toEqual(50);
 
@@ -237,7 +237,7 @@ describe('ES deprecations table', () => {
       await actions.pagination.clickPaginationAt(1);
 
       // On the second (last) page, we expect to see the remaining deprecations
-      expect(find('deprecationTableRow').length).toEqual(deprecations.length - 50);
+      expect(find('deprecationTableRow').length).toEqual(migrationsDeprecations.length - 50);
     });
 
     it('allows the number of viewable rows to change', async () => {
@@ -260,15 +260,17 @@ describe('ES deprecations table', () => {
       component.update();
 
       expect(find('esDeprecationsPagination').find('.euiPagination__item').length).toEqual(
-        Math.round(deprecations.length / 100) // Rows per page is now 100
+        Math.round(migrationsDeprecations.length / 100) // Rows per page is now 100
       );
-      expect(find('deprecationTableRow').length).toEqual(deprecations.length);
+      expect(find('deprecationTableRow').length).toEqual(migrationsDeprecations.length);
     });
 
     it('updates pagination when filters change', async () => {
       const { actions, find } = testBed;
 
-      const criticalDeprecations = deprecations.filter((deprecation) => deprecation.isCritical);
+      const criticalDeprecations = migrationsDeprecations.filter(
+        (deprecation) => deprecation.isCritical
+      );
 
       await actions.searchBar.clickCriticalFilterButton();
 
@@ -279,7 +281,7 @@ describe('ES deprecations table', () => {
 
     it('updates pagination on search', async () => {
       const { actions, find } = testBed;
-      const reindexDeprecations = deprecations.filter(
+      const reindexDeprecations = migrationsDeprecations.filter(
         (deprecation) => deprecation.correctiveAction?.type === 'reindex'
       );
 
@@ -295,7 +297,9 @@ describe('ES deprecations table', () => {
     beforeEach(async () => {
       const noDeprecationsResponse = {
         totalCriticalDeprecations: 0,
-        deprecations: [],
+        migrationsDeprecations: [],
+        totalCriticalHealthIssues: 0,
+        enrichedHealthIndicators: [],
       };
 
       httpRequestsMockHelpers.setLoadEsDeprecationsResponse(noDeprecationsResponse);

@@ -44,7 +44,7 @@ export default function searchSolutionNavigation({
 
     it('renders expected side nav items', async () => {
       // Verify all expected top-level links exist
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Overview' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Home' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dev Tools' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
@@ -53,7 +53,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Web Crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Behavioral Analytics' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Other tools' });
     });
@@ -66,8 +65,14 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'enterpriseSearch',
       });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearch',
+        text: 'Indices',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Create your first index',
       });
 
       // check Dev tools
@@ -90,7 +95,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'discover',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Kibana' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Analyze' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Discover' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'discover',
@@ -102,7 +107,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'dashboards',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Kibana' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Analyze' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Dashboards' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'dashboards',
@@ -111,13 +116,13 @@ export default function searchSolutionNavigation({
       // check the Content
       // > Indices section
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         text: 'Indices',
@@ -129,7 +134,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'enterpriseSearchContent:connectors',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Connectors' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'enterpriseSearchContent:connectors',
@@ -141,7 +146,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'enterpriseSearchContent:webCrawlers',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Web Crawlers' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'enterpriseSearchContent:webCrawlers',
@@ -173,20 +178,6 @@ export default function searchSolutionNavigation({
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'enterpriseSearchApplications:searchApplications',
-      });
-      // > Behavioral Analytics
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Behavioral Analytics',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchAnalytics',
       });
 
       // check Relevance
@@ -243,40 +234,47 @@ export default function searchSolutionNavigation({
 
     it("should redirect to index management when clicking on 'Indices'", async () => {
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
-      await indexManagement.expectToBeOnIndicesManagement();
+      await indexManagement.expectToBeOnIndexManagement();
     });
 
     it('renders only expected items', async () => {
       await solutionNavigation.sidenav.openSection('search_project_nav.otherTools');
-      await solutionNavigation.sidenav.openSection('project_settings_project_nav');
       await solutionNavigation.sidenav.expectSectionOpen('search_project_nav.otherTools');
-      await solutionNavigation.sidenav.expectSectionOpen('project_settings_project_nav');
+
+      await solutionNavigation.sidenav.openSection(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
+      await solutionNavigation.sidenav.expectSectionOpen(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
 
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
         'enterpriseSearch',
         'dev_tools',
-        'kibana',
+        'analyze',
         'discover',
         'dashboards',
-        'content',
-        'management:index_management',
+        'data',
+        'elasticsearchIndexManagement',
         'enterpriseSearchContent:connectors',
         'enterpriseSearchContent:webCrawlers',
         'build',
         'searchPlayground',
+        'searchSynonyms:synonyms',
         'enterpriseSearchApplications:searchApplications',
-        'enterpriseSearchAnalytics',
         'relevance',
         'searchInferenceEndpoints:inferenceEndpoints',
         'otherTools',
         'maps',
         'graph',
+        'search_project_nav_footer',
         'project_settings_project_nav',
-        'ml:modelManagement',
+        'management:trained_models',
         'stack_management',
+        'monitoring',
       ]);
     });
   });

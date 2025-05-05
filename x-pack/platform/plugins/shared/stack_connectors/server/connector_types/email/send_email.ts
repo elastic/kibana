@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
 // info on nodemailer: https://nodemailer.com/about/
 import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
-import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
+import type { Logger } from '@kbn/core/server';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { CustomHostSettings } from '@kbn/actions-plugin/server/config';
 import {
   getNodeSSLOptions,
   getSSLSettingsFromConfig,
 } from '@kbn/actions-plugin/server/lib/get_node_ssl_options';
-import {
+import type {
   ConnectorUsageCollector,
   ConnectorTokenClientContract,
   ProxySettings,
@@ -237,6 +238,7 @@ function getTransportConfig(
 ) {
   const { service, host, port, secure, user, password } = transport;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transportConfig: Record<string, any> = {};
   const proxySettings = configurationUtilities.getProxySettings();
   const generalSSLSettings = configurationUtilities.getSSLSettings();

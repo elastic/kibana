@@ -5,47 +5,56 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import type { Logger, IScopedClusterClient } from '@kbn/core/server';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 
-import type { ExperimentalFeatures } from '../../../common';
-
-import { createKeywordBuilderPipeline, deleteKeywordBuilderPipeline } from './ingest_pipelines';
+import { EntityType } from '../../../common/api/entity_analytics';
+import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
+import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
+import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
+import type { SecuritySolutionApiRequestHandlerContext } from '../..';
+import { installDataView } from './saved_objects/data_view';
+import {
+  ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
+  ASSET_INVENTORY_DATA_VIEW_NAME,
+  ASSET_INVENTORY_INDEX_PATTERN,
+} from './constants';
 
 interface AssetInventoryClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
-  experimentalFeatures: ExperimentalFeatures;
+  uiSettingsClient: IUiSettingsClient;
 }
+
+type EntityStoreEngineStatus = GetEntityStoreStatusResponse['engines'][number];
+
+interface GenericEntityEngineStatus extends Omit<EntityStoreEngineStatus, 'type'> {
+  type: 'generic';
+}
+
+interface TransformMetadata {
+  documents_processed: number;
+  trigger_count: number;
+}
+
+export const ASSET_INVENTORY_STATUS: Record<string, string> = {
+  INACTIVE_FEATURE: 'inactive_feature',
+  DISABLED: 'disabled',
+  INITIALIZING: 'initializing',
+  INSUFFICIENT_PRIVILEGES: 'insufficient_privileges',
+  EMPTY: 'empty',
+  READY: 'ready',
+};
 
 // AssetInventoryDataClient is responsible for managing the asset inventory,
 // including initializing and cleaning up resources such as Elasticsearch ingest pipelines.
 export class AssetInventoryDataClient {
-  private esClient: ElasticsearchClient;
-
-  constructor(private readonly options: AssetInventoryClientOpts) {
-    const { clusterClient } = options;
-    this.esClient = clusterClient.asCurrentUser;
-  }
-
-  // Enables the asset inventory by deferring the initialization to avoid blocking the main thread.
-  public async enable() {
-    // Utility function to defer execution to the next tick using setTimeout.
-    const run = <T>(fn: () => Promise<T>) =>
-      new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
-
-    // Defer and execute the initialization process.
-    await run(() => this.init());
-
-    return { succeeded: true };
-  }
+  constructor(private readonly options: AssetInventoryClientOpts) {}
 
   // Initializes the asset inventory by validating experimental feature flags and triggering asynchronous setup.
   public async init() {
-    const { experimentalFeatures, logger } = this.options;
-
-    if (!experimentalFeatures.assetInventoryStoreEnabled) {
-      throw new Error('Universal entity store is not enabled');
-    }
+    const { logger } = this.options;
 
     logger.debug(`Initializing asset inventory`);
 
@@ -54,19 +63,72 @@ export class AssetInventoryDataClient {
     );
   }
 
-  // Sets up the necessary resources for asset inventory, including creating Elasticsearch ingest pipelines.
+  // Sets up the necessary resources for asset inventory.
   private async asyncSetup() {
     const { logger } = this.options;
     try {
-      logger.debug('creating keyword builder pipeline');
-      await createKeywordBuilderPipeline({
-        logger,
-        esClient: this.esClient,
-      });
-      logger.debug('keyword builder pipeline created');
+      logger.debug('Initializing asset inventory');
     } catch (err) {
       logger.error(`Error initializing asset inventory: ${err.message}`);
       await this.delete();
+    }
+  }
+
+  // Enables the asset inventory by deferring the initialization to avoid blocking the main thread.
+  public async enable(
+    secSolutionContext: SecuritySolutionApiRequestHandlerContext,
+    requestBodyOverrides: InitEntityStoreRequestBody
+  ) {
+    const { logger } = this.options;
+
+    logger.debug(`Enabling asset inventory`);
+
+    try {
+      if (!(await this.checkUISettingEnabled())) {
+        throw new Error('uiSetting');
+      }
+
+      // Retrieve entity store status
+      const entityStoreStatus = await secSolutionContext.getEntityStoreDataClient().status({
+        include_components: true,
+      });
+
+      const entityEngineStatus = entityStoreStatus.status;
+
+      let entityStoreEnablementResponse;
+      // If the entity store is not installed, we need to install it.
+      if (entityEngineStatus === 'not_installed') {
+        entityStoreEnablementResponse = await secSolutionContext
+          .getEntityStoreDataClient()
+          .enable(requestBodyOverrides);
+      } else {
+        // If the entity store is already installed, we need to check if the generic engine is installed.
+        const genericEntityEngine = entityStoreStatus.engines.find(this.isGenericEntityEngine);
+
+        // If the generic engine is not installed or is stopped, we need to start it.
+        if (!genericEntityEngine) {
+          entityStoreEnablementResponse = await secSolutionContext
+            .getEntityStoreDataClient()
+            // @ts-ignore-next-line TS2345
+            .init(EntityType.enum.generic, requestBodyOverrides);
+        }
+      }
+
+      await installDataView(
+        secSolutionContext.getSpaceId(),
+        secSolutionContext.getDataViewsService(),
+        ASSET_INVENTORY_DATA_VIEW_NAME,
+        ASSET_INVENTORY_INDEX_PATTERN,
+        ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
+        logger
+      );
+
+      logger.debug(`Enabled asset inventory`);
+
+      return entityStoreEnablementResponse;
+    } catch (err) {
+      logger.error(`Error enabling asset inventory: ${err.message}`);
+      throw err;
     }
   }
 
@@ -77,14 +139,9 @@ export class AssetInventoryDataClient {
     logger.debug(`Deleting asset inventory`);
 
     try {
-      logger.debug(`Deleting asset inventory keyword builder pipeline`);
-
-      await deleteKeywordBuilderPipeline({
-        logger,
-        esClient: this.esClient,
-      }).catch((err) => {
-        logger.error('Error on deleting keyword builder pipeline', err);
-      });
+      if (!(await this.checkUISettingEnabled())) {
+        throw new Error('uiSetting');
+      }
 
       logger.debug(`Deleted asset inventory`);
       return { deleted: true };
@@ -92,5 +149,108 @@ export class AssetInventoryDataClient {
       logger.error(`Error deleting asset inventory: ${err.message}`);
       throw err;
     }
+  }
+
+  public async status(
+    secSolutionContext: SecuritySolutionApiRequestHandlerContext,
+    entityStorePrivileges: EntityAnalyticsPrivileges
+  ) {
+    if (!(await this.checkUISettingEnabled())) {
+      return { status: ASSET_INVENTORY_STATUS.INACTIVE_FEATURE };
+    }
+
+    // Check if the user has the required privileges to access the entity store.
+    if (!entityStorePrivileges.has_all_required) {
+      return {
+        status: ASSET_INVENTORY_STATUS.INSUFFICIENT_PRIVILEGES,
+        privileges: entityStorePrivileges,
+      };
+    }
+
+    // Retrieve entity store status
+    const entityStoreStatus = await secSolutionContext.getEntityStoreDataClient().status({
+      include_components: true,
+    });
+
+    const entityEngineStatus = entityStoreStatus.status;
+
+    // Determine the asset inventory status based on the entity engine status
+    if (entityEngineStatus === 'not_installed') {
+      return { status: ASSET_INVENTORY_STATUS.DISABLED };
+    }
+    if (entityEngineStatus === 'installing') {
+      return { status: ASSET_INVENTORY_STATUS.INITIALIZING };
+    }
+
+    // Check for the Generic entity engine
+    const genericEntityEngine = entityStoreStatus.engines.find(this.isGenericEntityEngine);
+    // If the generic engine is not installed, the asset inventory is disabled.
+    if (!genericEntityEngine) {
+      return { status: ASSET_INVENTORY_STATUS.DISABLED };
+    }
+
+    // Determine final status based on transform metadata
+    if (this.hasDocumentsProcessed(genericEntityEngine)) {
+      return { status: ASSET_INVENTORY_STATUS.READY };
+    }
+    if (this.hasTransformTriggered(genericEntityEngine)) {
+      return { status: ASSET_INVENTORY_STATUS.EMPTY };
+    }
+
+    // If the engine is still initializing, return the initializing status
+    return { status: ASSET_INVENTORY_STATUS.INITIALIZING };
+  }
+
+  private async checkUISettingEnabled() {
+    const { uiSettingsClient, logger } = this.options;
+
+    const isAssetInventoryEnabled = await uiSettingsClient.get<boolean>(
+      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
+    );
+
+    if (!isAssetInventoryEnabled) {
+      logger.debug(
+        `${SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING} advanced setting is disabled`
+      );
+    }
+
+    return isAssetInventoryEnabled;
+  }
+
+  // Type guard to check if an entity engine is a generic entity engine
+  private isGenericEntityEngine(
+    engine: EntityStoreEngineStatus
+  ): engine is GenericEntityEngineStatus {
+    return engine.type === 'generic';
+  }
+
+  // Type guard function to validate entity store component metadata
+  private isTransformMetadata(metadata: unknown): metadata is TransformMetadata {
+    return (
+      typeof metadata === 'object' &&
+      metadata !== null &&
+      'documents_processed' in metadata &&
+      'trigger_count' in metadata &&
+      typeof (metadata as TransformMetadata).documents_processed === 'number' &&
+      typeof (metadata as TransformMetadata).trigger_count === 'number'
+    );
+  }
+
+  private hasDocumentsProcessed(engine: GenericEntityEngineStatus): boolean {
+    return !!engine.components?.some((component) => {
+      if (component.resource === 'transform' && this.isTransformMetadata(component.metadata)) {
+        return component.metadata.documents_processed > 0;
+      }
+      return false;
+    });
+  }
+
+  private hasTransformTriggered(engine: GenericEntityEngineStatus): boolean {
+    return !!engine.components?.some((component) => {
+      if (component.resource === 'transform' && this.isTransformMetadata(component.metadata)) {
+        return component.metadata.trigger_count > 0;
+      }
+      return false;
+    });
   }
 }

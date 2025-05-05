@@ -880,6 +880,10 @@
           "trackAdoption": true,
           "references": [
             {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
+            },
+            {
               "plugin": "fleet",
               "path": "x-pack/platform/plugins/shared/fleet/server/telemetry/sender.test.ts"
             },

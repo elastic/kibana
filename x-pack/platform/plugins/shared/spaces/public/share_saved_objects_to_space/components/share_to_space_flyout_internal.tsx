@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './share_to_space_flyout_internal.scss';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,7 +18,9 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
 import type { ToastsStart } from '@kbn/core/public';
@@ -161,6 +161,7 @@ function createDefaultChangeSpacesHandler(
 
 export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
   const { spacesManager, spacesDataPromise, services } = useSpaces();
+  const { euiTheme } = useEuiTheme();
   const { notifications } = services;
   const toastNotifications = notifications!.toasts;
 
@@ -487,7 +488,10 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
       <EuiFlexGroup
         direction="column"
         gutterSize="none"
-        className="spcShareToSpace__flyoutBodyWrapper eui-yScroll"
+        className="eui-yScroll"
+        css={css({
+          padding: euiTheme.size.l,
+        })}
         responsive={false}
       >
         <EuiFlexItem grow={false}>

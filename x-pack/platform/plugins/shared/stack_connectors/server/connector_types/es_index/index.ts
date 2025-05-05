@@ -7,8 +7,9 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -16,16 +17,14 @@ import type {
 } from '@kbn/actions-plugin/server/types';
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import {
-  AlertingConnectorFeatureId,
-  UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/types';
-import {
   AlertHistoryEsIndexConnectorId,
   ALERT_HISTORY_PREFIX,
   buildAlertHistoryDocument,
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { BulkOperationType, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
+import type { BulkOperationType, BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 
 export type ESIndexConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -105,20 +104,20 @@ async function executor(
   const { actionId, config, params, services, logger } = execOptions;
   const index = params.indexOverride || config.index;
 
-  const operations = [];
+  const bulkBody = [];
   for (const document of params.documents) {
     const timeField = config.executionTimeField == null ? '' : config.executionTimeField.trim();
     if (timeField !== '') {
       document[timeField] = new Date();
     }
 
-    operations.push({ index: { op_type: 'create' } });
-    operations.push(document);
+    bulkBody.push({ index: { op_type: 'create' } });
+    bulkBody.push(document);
   }
 
   const bulkParams = {
     index,
-    operations,
+    body: bulkBody,
     refresh: config.refresh,
   };
 

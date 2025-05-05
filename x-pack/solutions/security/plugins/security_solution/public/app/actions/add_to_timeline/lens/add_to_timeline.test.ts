@@ -71,7 +71,7 @@ describe('createAddToTimelineLensAction', () => {
   });
 
   it('should return display name', () => {
-    expect(addToTimelineAction.getDisplayName(context)).toEqual('Add to timeline');
+    expect(addToTimelineAction.getDisplayName(context)).toEqual('Add to Timeline');
   });
 
   it('should return icon type', () => {
@@ -85,7 +85,7 @@ describe('createAddToTimelineLensAction', () => {
           ...context,
           embeddable: {
             ...getMockLensApi(),
-            blockingError: new BehaviorSubject(new Error('some error')),
+            blockingError$: new BehaviorSubject(new Error('some error')),
           },
         })
       ).toEqual(false);

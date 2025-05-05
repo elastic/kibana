@@ -7,21 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
-import type {
-  Alert,
-  RuleRegistrySearchRequest,
-  RuleRegistrySearchResponse,
-} from '@kbn/alerting-types';
-import { set } from '@kbn/safer-lodash-set';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
   MappingRuntimeFields,
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { EsQuerySnapshot, LegacyField } from '../../types';
+import type {
+  Alert,
+  EsQuerySnapshot,
+  LegacyField,
+  RuleRegistrySearchRequest,
+  RuleRegistrySearchResponse,
+} from '@kbn/alerting-types';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { set } from '@kbn/safer-lodash-set';
+import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 
 export interface SearchAlertsParams {
   // Dependencies
@@ -67,6 +68,14 @@ export interface SearchAlertsParams {
    * The page size to fetch
    */
   pageSize: number;
+  /**
+   * The minimum score to apply to the query
+   */
+  minScore?: number;
+  /**
+   * Whether to track the score of the query
+   */
+  trackScores?: boolean;
 }
 
 export interface SearchAlertsResult {
@@ -91,6 +100,8 @@ export const searchAlerts = ({
   runtimeMappings,
   pageIndex,
   pageSize,
+  minScore,
+  trackScores,
 }: SearchAlertsParams): Promise<SearchAlertsResult> =>
   lastValueFrom(
     data.search
@@ -103,6 +114,8 @@ export const searchAlerts = ({
           pagination: { pageIndex, pageSize },
           sort,
           runtimeMappings,
+          minScore,
+          trackScores,
         },
         {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
@@ -166,6 +179,7 @@ const parseAlerts = (rawResponse: RuleRegistrySearchResponse['rawResponse']) =>
       acc.push({
         ...hit.fields,
         _id: hit._id,
+        _score: hit._score,
         _index: hit._index,
       } as Alert);
     }

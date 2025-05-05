@@ -86,6 +86,10 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          spaces_usage: {
+            rules_in_spaces: [1],
+            total: 1,
+          },
           detection_rule_status: getAllEventLogTransform(),
           detection_rule_detail: [
             {
@@ -162,6 +166,10 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          spaces_usage: {
+            rules_in_spaces: [1],
+            total: 1,
+          },
           detection_rule_status: getAllEventLogTransform(),
           detection_rule_detail: [], // *should not* contain custom detection rule details
           detection_rule_usage: {
@@ -219,6 +227,10 @@ describe('Detections Usage and Metrics', () => {
       expect(result).toEqual<DetectionMetrics>({
         ...getInitialDetectionMetrics(),
         detection_rules: {
+          spaces_usage: {
+            rules_in_spaces: [1],
+            total: 1,
+          },
           detection_rule_status: getAllEventLogTransform(),
           detection_rule_detail: [
             {

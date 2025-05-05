@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -45,7 +45,6 @@ interface HostSummaryProps {
   scopeId?: string;
   data: HostItem;
   id: string;
-  isDraggable?: boolean;
   isInDetailsSidePanel: boolean;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
@@ -58,8 +57,10 @@ interface HostSummaryProps {
   jobNameById: Record<string, string | undefined>;
 }
 
-const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
-  padding-top: ${({ theme }) => theme.eui.euiSizeM};
+const HostRiskOverviewWrapper = styled(EuiFlexGroup, {
+  shouldForwardProp: (propName) => propName !== '$width',
+})`
+  padding-top: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   width: ${({ $width }: { $width: string }) => $width};
 `;
 
@@ -73,7 +74,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
     data,
     endDate,
     id,
-    isDraggable = false,
     isInDetailsSidePanel = false, // Rather than duplicate the component, alter the structure based on it's location
     isLoadingAnomaliesData,
     indexNames,
@@ -121,11 +121,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
           rowItems={getOr([], fieldName, fieldData)}
           attrName={fieldName}
           idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
-          isDraggable={isDraggable}
           scopeId={scopeId}
         />
       ),
-      [contextID, isDraggable, scopeId]
+      [contextID, scopeId]
     );
 
     const [hostRiskScore, hostRiskLevel] = useMemo(() => {
@@ -179,7 +178,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.HOST_ID,
           description:
             data && data.host
-              ? hostIdRenderer({ host: data.host, isDraggable, noLink: true })
+              ? hostIdRenderer({ host: data.host, noLink: true, scopeId })
               : getEmptyTagValue(),
         },
         {
@@ -205,7 +204,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
       ],
-      [data, indexNames, hostName, isDraggable]
+      [data, scopeId, indexNames, hostName]
     );
     const firstColumn = useMemo(
       () =>
@@ -251,7 +250,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 attrName={'host.ip'}
                 idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
                 scopeId={scopeId}
-                isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
             ),
@@ -287,7 +285,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [contextID, scopeId, data, firstColumn, getDefaultRenderer, isDraggable]
+      [contextID, scopeId, data, firstColumn, getDefaultRenderer]
     );
     return (
       <>

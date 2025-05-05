@@ -14,9 +14,9 @@ import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client
 
 export type { RuleVersions };
 export type PrebuildRuleVersionsMap = Map<string, RuleVersions>;
-/* The minimum score required for a integration to be considered correct, might need to change this later */
+/* The minimum score required for a prebuilt rule to be considered correct */
 const MIN_SCORE = 40 as const;
-/* The number of integrations the RAG will return, sorted by score */
+/* The number of prebuilt rules the RAG will return, sorted by score */
 const RETURNED_RULES = 5 as const;
 
 /* BULK_MAX_SIZE defines the number to break down the bulk operations by.
@@ -31,12 +31,12 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
     return fetchRuleVersionsTriad({ ruleAssetsClient, ruleObjectsClient });
   }
 
-  /** Indexes an array of integrations to be used with ELSER semantic search queries */
+  /** Indexes an array of prebuilt rules to be used with ELSER semantic search queries */
   async populate(ruleVersionsMap: PrebuildRuleVersionsMap): Promise<void> {
     const filteredRules: RuleMigrationPrebuiltRule[] = [];
 
     ruleVersionsMap.forEach((ruleVersions) => {
-      const rule = ruleVersions.target || ruleVersions.current;
+      const rule = ruleVersions.target;
       if (rule) {
         const mitreAttackIds = rule?.threat?.flatMap(
           ({ technique }) => technique?.map(({ id }) => id) ?? []
@@ -71,10 +71,17 @@ export class RuleMigrationsDataPrebuiltRulesClient extends RuleMigrationsDataBas
               },
             ]),
           },
-          { requestTimeout: 10 * 60 * 1000 }
+          { requestTimeout: 10 * 60 * 1000 } // 10 minutes
         )
+        .then((response) => {
+          if (response.errors) {
+            // use the first error to throw
+            const reason = response.items.find((item) => item.update?.error)?.update?.error?.reason;
+            throw new Error(reason ?? 'Unknown error');
+          }
+        })
         .catch((error) => {
-          this.logger.error(`Error preparing prebuilt rules for SIEM migration: ${error.message}`);
+          this.logger.error(`Error indexing prebuilt rules embeddings: ${error.message}`);
           throw error;
         });
     }

@@ -9,9 +9,9 @@ import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
 
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
-import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 
 import { prepareSearchParams } from './prepare_search_params';
+import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
 
 jest.mock('../../../../../../../common/detection_engine/rule_management/rule_filtering', () => ({
   convertRulesFilterToKQL: jest.fn().mockReturnValue('str'),
@@ -44,7 +44,7 @@ describe('prepareSearchParams', () => {
 
   test.each([
     [
-      BulkActionsDryRunErrCode.MACHINE_LEARNING_INDEX_PATTERN,
+      BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_INDEX_PATTERN,
       {
         filter: '',
         tags: [],
@@ -54,7 +54,7 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
-      BulkActionsDryRunErrCode.MACHINE_LEARNING_AUTH,
+      BulkActionsDryRunErrCodeEnum.MACHINE_LEARNING_AUTH,
       {
         filter: '',
         tags: [],
@@ -64,7 +64,7 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
-      BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN,
+      BulkActionsDryRunErrCodeEnum.ESQL_INDEX_PATTERN,
       {
         filter: '',
         tags: [],
@@ -74,7 +74,7 @@ describe('prepareSearchParams', () => {
       },
     ],
     [
-      BulkActionsDryRunErrCode.IMMUTABLE,
+      BulkActionsDryRunErrCodeEnum.IMMUTABLE,
       {
         filter: '',
         tags: [],

@@ -9,60 +9,67 @@
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
 import {
-  type ShowInfoContext,
-  type SingleStatementContext,
-  type RowCommandContext,
-  type FromCommandContext,
-  type EvalCommandContext,
-  type StatsCommandContext,
-  type LimitCommandContext,
-  type SortCommandContext,
-  type KeepCommandContext,
-  type DropCommandContext,
-  type RenameCommandContext,
-  type DissectCommandContext,
-  type GrokCommandContext,
-  type MvExpandCommandContext,
-  type ShowCommandContext,
-  type EnrichCommandContext,
-  type WhereCommandContext,
-  default as esql_parser,
-  type MetricsCommandContext,
   IndexPatternContext,
   InlinestatsCommandContext,
   JoinCommandContext,
+  type ChangePointCommandContext,
+  type DissectCommandContext,
+  type DropCommandContext,
+  type EnrichCommandContext,
+  type EvalCommandContext,
+  type ForkCommandContext,
+  type FromCommandContext,
+  type GrokCommandContext,
+  type KeepCommandContext,
+  type LimitCommandContext,
+  type MvExpandCommandContext,
+  type RenameCommandContext,
+  type RowCommandContext,
+  type ShowCommandContext,
+  type ShowInfoContext,
+  type SingleStatementContext,
+  type SortCommandContext,
+  type StatsCommandContext,
+  type TimeSeriesCommandContext,
+  type WhereCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
+import type { ESQLAst, ESQLAstTimeseriesCommand } from '../types';
 import {
+  createAstBaseItem,
   createCommand,
   createFunction,
-  createOption,
-  createLiteral,
   textExistsAndIsValid,
-  createSource,
-  createAstBaseItem,
+  visitSource,
 } from './factories';
+import { createChangePointCommand } from './factories/change_point';
+import { createDissectCommand } from './factories/dissect';
+import { createForkCommand } from './factories/fork';
+import { createFromCommand } from './factories/from';
+import { createGrokCommand } from './factories/grok';
+import { createJoinCommand } from './factories/join';
+import { createLimitCommand } from './factories/limit';
+import { createRowCommand } from './factories/row';
+import { createSortCommand } from './factories/sort';
+import { createStatsCommand } from './factories/stats';
+import { createWhereCommand } from './factories/where';
 import { getPosition } from './helpers';
 import {
-  collectAllSourceIdentifiers,
-  collectAllFields,
   collectAllAggFields,
-  visitByOption,
   collectAllColumnIdentifiers,
-  visitRenameClauses,
-  collectBooleanExpression,
-  visitOrderExpressions,
-  getPolicyName,
-  getMatchField,
+  collectAllFields,
   getEnrichClauses,
+  getMatchField,
+  getPolicyName,
+  visitByOption,
+  visitRenameClauses,
 } from './walkers';
-import type { ESQLAst, ESQLAstMetricsCommand } from '../types';
-import { createJoinCommand } from './factories/join';
-import { createDissectCommand } from './factories/dissect';
-import { createGrokCommand } from './factories/grok';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
+  private inFork: boolean = false;
+
+  constructor(public src: string) {}
 
   public getAst() {
     return { ast: this.ast };
@@ -97,9 +104,13 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitWhereCommand(ctx: WhereCommandContext) {
-    const command = createCommand('where', ctx);
+    if (this.inFork) {
+      return;
+    }
+
+    const command = createWhereCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...collectBooleanExpression(ctx.booleanExpression()));
   }
 
   /**
@@ -107,9 +118,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitRowCommand(ctx: RowCommandContext) {
-    const command = createCommand('row', ctx);
+    const command = createRowCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...collectAllFields(ctx.fields()));
   }
 
   /**
@@ -117,45 +128,27 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitFromCommand(ctx: FromCommandContext) {
-    const commandAst = createCommand('from', ctx);
-    this.ast.push(commandAst);
-    commandAst.args.push(...collectAllSourceIdentifiers(ctx));
-    const metadataContext = ctx.metadata();
-    const metadataContent =
-      metadataContext?.deprecated_metadata()?.metadataOption() || metadataContext?.metadataOption();
-    if (metadataContent && metadataContent.METADATA()) {
-      const option = createOption(
-        metadataContent.METADATA().getText().toLowerCase(),
-        metadataContent
-      );
-      commandAst.args.push(option);
-      option.args.push(...collectAllColumnIdentifiers(metadataContent));
-    }
+    const command = createFromCommand(ctx);
+
+    this.ast.push(command);
   }
 
   /**
-   * Exit a parse tree produced by `esql_parser.metricsCommand`.
+   * Exit a parse tree produced by `esql_parser.timeseriesCommand`.
    * @param ctx the parse tree
    */
-  exitMetricsCommand(ctx: MetricsCommandContext): void {
-    const node: ESQLAstMetricsCommand = {
-      ...createAstBaseItem('metrics', ctx),
+  exitTimeSeriesCommand(ctx: TimeSeriesCommandContext): void {
+    const node: ESQLAstTimeseriesCommand = {
+      ...createAstBaseItem('ts', ctx),
       type: 'command',
       args: [],
       sources: ctx
+        .indexPatternAndMetadataFields()
         .getTypedRuleContexts(IndexPatternContext)
-        .map((sourceCtx) => createSource(sourceCtx)),
+        .map((sourceCtx) => visitSource(sourceCtx)),
     };
     this.ast.push(node);
-    const aggregates = collectAllAggFields(ctx.aggFields());
-    const grouping = collectAllFields(ctx.fields());
-    if (aggregates && aggregates.length) {
-      node.aggregates = aggregates;
-    }
-    if (grouping && grouping.length) {
-      node.grouping = grouping;
-    }
-    node.args.push(...node.sources, ...aggregates, ...grouping);
+    node.args.push(...node.sources);
   }
 
   /**
@@ -173,16 +166,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitStatsCommand(ctx: StatsCommandContext) {
-    const command = createCommand('stats', ctx);
-    this.ast.push(command);
+    const command = createStatsCommand(ctx, this.src);
 
-    // STATS expression is optional
-    if (ctx._stats) {
-      command.args.push(...collectAllAggFields(ctx.aggFields()));
-    }
-    if (ctx._grouping) {
-      command.args.push(...visitByOption(ctx, ctx.fields()));
-    }
+    this.ast.push(command);
   }
 
   /**
@@ -207,14 +193,13 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitLimitCommand(ctx: LimitCommandContext) {
-    const command = createCommand('limit', ctx);
-    this.ast.push(command);
-    if (ctx.getToken(esql_parser.INTEGER_LITERAL, 0)) {
-      const literal = createLiteral('integer', ctx.INTEGER_LITERAL());
-      if (literal) {
-        command.args.push(literal);
-      }
+    if (this.inFork) {
+      return;
     }
+
+    const command = createLimitCommand(ctx);
+
+    this.ast.push(command);
   }
 
   /**
@@ -222,9 +207,13 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitSortCommand(ctx: SortCommandContext) {
-    const command = createCommand('sort', ctx);
+    if (this.inFork) {
+      return;
+    }
+
+    const command = createSortCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...visitOrderExpressions(ctx.orderExpression_list()));
   }
 
   /**
@@ -319,6 +308,37 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    */
   exitJoinCommand(ctx: JoinCommandContext): void {
     const command = createJoinCommand(ctx);
+
+    this.ast.push(command);
+  }
+
+  enterForkCommand() {
+    this.inFork = true;
+  }
+
+  /**
+   * NOTE — every new command supported in fork needs to be added
+   * to createForkCommand!
+   */
+  exitForkCommand(ctx: ForkCommandContext): void {
+    const command = createForkCommand(ctx);
+
+    this.ast.push(command);
+
+    this.inFork = false;
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.changePointCommand`.
+   *
+   * Parse the CHANGE_POINT command:
+   *
+   * CHANGE_POINT <value> [ ON <key> ] [ AS <target-type>, <target-pvalue> ]
+   *
+   * @param ctx the parse tree
+   */
+  exitChangePointCommand(ctx: ChangePointCommandContext): void {
+    const command = createChangePointCommand(ctx);
 
     this.ast.push(command);
   }

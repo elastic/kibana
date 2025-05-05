@@ -5,45 +5,48 @@
  * 2.0.
  */
 
-import {
+import type {
+  ISavedObjectsRepository,
   Logger,
   SavedObject,
   SavedObjectReference,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
-  SavedObjectsErrorHelpers,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import { AuditLogger } from '@kbn/security-plugin/server';
-import {
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { AuditLogger } from '@kbn/security-plugin/server';
+import type {
   RunContext,
   TaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-  TaskPriority,
 } from '@kbn/task-manager-plugin/server';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
+import type { IEventLogger, IEventLogClient } from '@kbn/event-log-plugin/server';
 import { isNumber } from 'lodash';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import {
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type {
   ScheduleBackfillError,
   ScheduleBackfillParams,
   ScheduleBackfillResult,
   ScheduleBackfillResults,
 } from '../application/backfill/methods/schedule/types';
-import { Backfill } from '../application/backfill/result/types';
+import type { Backfill } from '../application/backfill/result/types';
 import {
   transformBackfillParamToAdHocRun,
   transformAdHocRunToBackfillResult,
 } from '../application/backfill/transforms';
-import { RuleDomain } from '../application/rule/types';
-import { AdHocRunSO } from '../data/ad_hoc_run/types';
+import type { RuleDomain } from '../application/rule/types';
+import type { AdHocRunSO } from '../data/ad_hoc_run/types';
 import { AdHocRunAuditAction, adHocRunAuditEvent } from '../rules_client/common/audit_events';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { TaskRunnerFactory } from '../task_runner';
-import { RuleTypeRegistry } from '../types';
+import type { TaskRunnerFactory } from '../task_runner';
+import type { RuleTypeRegistry } from '../types';
 import { createBackfillError } from './lib';
+import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { denormalizeActions } from '../rules_client/lib/denormalize_actions';
-import { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../rules_client';
+import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../rules_client';
 
 export const BACKFILL_TASK_TYPE = 'ad_hoc_run-backfill';
 
@@ -62,6 +65,9 @@ interface BulkQueueOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   spaceId: string;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  eventLogClient: IEventLogClient;
+  internalSavedObjectsRepository: ISavedObjectsRepository;
+  eventLogger: IEventLogger | undefined;
 }
 
 interface DeleteBackfillForRulesOpts {
@@ -96,6 +102,9 @@ export class BackfillClient {
     ruleTypeRegistry,
     spaceId,
     unsecuredSavedObjectsClient,
+    eventLogClient,
+    internalSavedObjectsRepository,
+    eventLogger,
   }: BulkQueueOpts): Promise<ScheduleBackfillResults> {
     const adHocSOsToCreate: Array<SavedObjectsBulkCreateObject<AdHocRunSO>> = [];
 
@@ -243,10 +252,11 @@ export class BackfillClient {
 
     // Build array of tasks to schedule
     const adHocTasksToSchedule: TaskInstance[] = [];
+    const backfillSOs: Backfill[] = [];
     createSOResult.forEach((result: ScheduleBackfillResult) => {
       if (!(result as ScheduleBackfillError).error) {
         const createdSO = result as Backfill;
-
+        backfillSOs.push(createdSO);
         const ruleTypeTimeout = ruleTypeRegistry.get(createdSO.rule.alertTypeId).ruleTaskTimeout;
         adHocTasksToSchedule.push({
           id: createdSO.id,
@@ -260,6 +270,35 @@ export class BackfillClient {
         });
       }
     });
+
+    try {
+      // Process backfills in chunks of 10 to manage resource usage
+      for (let i = 0; i < backfillSOs.length; i += 10) {
+        const chunk = backfillSOs.slice(i, i + 10);
+        await Promise.all(
+          chunk.map((backfill) =>
+            updateGaps({
+              backfillSchedule: backfill.schedule,
+              ruleId: backfill.rule.id,
+              start: new Date(backfill.start),
+              end: backfill?.end ? new Date(backfill.end) : new Date(),
+              eventLogger,
+              eventLogClient,
+              savedObjectsRepository: internalSavedObjectsRepository,
+              logger: this.logger,
+              backfillClient: this,
+              actionsClient,
+            })
+          )
+        );
+      }
+    } catch {
+      this.logger.warn(
+        `Error updating gaps for backfill jobs: ${backfillSOs
+          .map((backfill) => backfill.id)
+          .join(', ')}`
+      );
+    }
 
     if (adHocTasksToSchedule.length > 0) {
       const taskManager = await this.taskManagerStartPromise;
@@ -330,6 +369,50 @@ export class BackfillClient {
         `Error deleting backfill jobs for rule IDs: ${ruleIds.join(',')} - ${error.message}`
       );
     }
+  }
+
+  public async findOverlappingBackfills({
+    ruleId,
+    start,
+    end,
+    savedObjectsRepository,
+    actionsClient,
+  }: {
+    ruleId: string;
+    start: Date;
+    end: Date;
+    savedObjectsRepository: ISavedObjectsRepository;
+    actionsClient: ActionsClient;
+  }) {
+    const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
+
+    // Create a point in time finder for efficient pagination
+    const adHocRunFinder = await savedObjectsRepository.createPointInTimeFinder<AdHocRunSO>({
+      type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+      perPage: 100,
+      hasReference: [{ id: ruleId, type: RULE_SAVED_OBJECT_TYPE }],
+      filter: `
+        ad_hoc_run_params.attributes.start <= "${end.toISOString()}" and
+        ad_hoc_run_params.attributes.end >= "${start.toISOString()}"
+      `,
+    });
+
+    try {
+      // Collect all results using async iterator
+      for await (const response of adHocRunFinder.find()) {
+        adHocRuns.push(...response.saved_objects);
+      }
+    } finally {
+      // Make sure we always close the finder
+      await adHocRunFinder.close();
+    }
+
+    return adHocRuns.map((data) =>
+      transformAdHocRunToBackfillResult({
+        adHocRunSO: data,
+        isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+      })
+    );
   }
 }
 

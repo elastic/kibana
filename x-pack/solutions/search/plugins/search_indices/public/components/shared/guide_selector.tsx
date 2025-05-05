@@ -5,43 +5,20 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 import {
-  EuiButton,
   EuiCard,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
   EuiTourStep,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Workflow, WorkflowId, workflows } from '../../code_examples/workflows';
+import { WorkflowId } from '@kbn/search-shared-ui';
+import { workflows } from '../../code_examples/workflows';
 import { useGuideTour } from './hooks/use_guide_tour';
-
-interface PopoverCardProps {
-  workflow: Workflow;
-  isSelected: boolean;
-  onChange: (workflowId: WorkflowId) => void;
-}
-
-const PopoverCard: React.FC<PopoverCardProps> = ({ workflow, onChange, isSelected }) => (
-  <EuiCard
-    title={workflow.title}
-    hasBorder
-    titleSize="xs"
-    description={
-      <EuiText color="subdued" size="s">
-        {workflow.summary}
-      </EuiText>
-    }
-    selectable={{
-      onClick: () => onChange(workflow.id),
-      isSelected,
-    }}
-  />
-);
 
 interface GuideSelectorProps {
   selectedWorkflowId: WorkflowId;
@@ -54,59 +31,8 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({
   selectedWorkflowId,
   onChange,
   showTour,
-  container,
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { tourIsOpen, setTourIsOpen } = useGuideTour();
-
-  const onPopoverClick = () => {
-    setIsPopoverOpen(() => !isPopoverOpen);
-  };
-
-  useEffect(() => {
-    closePopover();
-  }, [selectedWorkflowId]);
-
-  const closePopover = () => setIsPopoverOpen(false);
-
-  const PopoverButton = (
-    <EuiButton
-      color="text"
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={onPopoverClick}
-      data-test-subj="workflowSelectorButton"
-    >
-      {i18n.translate('xpack.searchIndices.guideSelector.selectWorkflow', {
-        defaultMessage: 'Select a guide',
-      })}
-    </EuiButton>
-  );
-
-  const Popover = () => (
-    <EuiPopover
-      anchorPosition="downRight"
-      button={PopoverButton}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      title="Select a workflow"
-      container={container || undefined}
-    >
-      <>
-        <EuiFlexGroup gutterSize="m" style={{ maxWidth: '960px' }}>
-          {workflows.map((workflow) => (
-            <EuiFlexItem key={workflow.id}>
-              <PopoverCard
-                workflow={workflow}
-                isSelected={workflow.id === selectedWorkflowId}
-                onChange={(value) => onChange(value)}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </>
-    </EuiPopover>
-  );
 
   return showTour ? (
     <EuiTourStep
@@ -124,14 +50,41 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({
       onFinish={() => setTourIsOpen(false)}
       step={1}
       stepsTotal={1}
-      title={i18n.translate('xpack.searchIndices.touTitle', {
+      title={i18n.translate('xpack.searchIndices.tourTitle', {
         defaultMessage: 'New guides available!',
       })}
       anchorPosition="rightUp"
     >
-      <Popover />
+      <GuideSelectorTiles selectedWorkflowId={selectedWorkflowId} onChange={onChange} />
     </EuiTourStep>
   ) : (
-    <Popover />
+    <GuideSelectorTiles selectedWorkflowId={selectedWorkflowId} onChange={onChange} />
+  );
+};
+
+const GuideSelectorTiles: React.FC<Pick<GuideSelectorProps, 'selectedWorkflowId' | 'onChange'>> = ({
+  selectedWorkflowId,
+  onChange,
+}) => {
+  return (
+    <EuiFlexGroup gutterSize="m">
+      {workflows.map((workflow) => {
+        const isSelected = selectedWorkflowId === workflow.id;
+        return (
+          <EuiFlexItem key={workflow.id}>
+            <EuiCard
+              title={workflow.title}
+              hasBorder={!isSelected}
+              titleSize="xs"
+              description={<EuiTextColor color="subdued">{workflow.summary}</EuiTextColor>}
+              selectable={{
+                onClick: () => onChange(workflow.id),
+                isSelected,
+              }}
+            />
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
   );
 };

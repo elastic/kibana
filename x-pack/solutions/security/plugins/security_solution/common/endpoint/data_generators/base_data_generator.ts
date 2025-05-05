@@ -7,7 +7,7 @@
 
 import seedrandom from 'seedrandom';
 import { v4 as uuidv4 } from 'uuid';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 const OS_FAMILY = ['windows', 'macos', 'linux'];
 /** Array of 14 day offsets */
@@ -166,7 +166,7 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
 
   /** generate a seeded random UUID v4 */
   protected seededUUIDv4(): string {
-    return uuidv4({ random: [...this.randomNGenerator(255, 16)] });
+    return uuidv4({ random: new Uint8Array([...this.randomNGenerator(255, 16)]) });
   }
 
   /** Generate a random number up to the max provided */

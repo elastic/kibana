@@ -368,6 +368,39 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.getMvExpandFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getMvExpandFields",
+        "description": [],
+        "signature": [
+          "(query: string) => string[]"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/get_mv_expand_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.getMvExpandFields.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/get_mv_expand_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-common.hasSimpleExecutableName",
         "type": "Function",
         "tags": [],
@@ -824,7 +857,7 @@
         "label": "validateHasWildcardWithWrongOperator",
         "description": [],
         "signature": [
-          "({ operator, value, }: { operator: \"wildcard\" | \"nested\" | \"match\" | \"exists\" | \"match_any\"; value: string | string[]; }) => boolean"
+          "({ operator, value, }: { operator: \"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\"; value: string | string[]; }) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
@@ -849,7 +882,7 @@
                 "label": "operator",
                 "description": [],
                 "signature": [
-                  "\"wildcard\" | \"nested\" | \"match\" | \"exists\" | \"match_any\""
+                  "\"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\""
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,

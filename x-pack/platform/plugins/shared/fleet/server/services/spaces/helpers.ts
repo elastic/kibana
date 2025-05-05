@@ -6,6 +6,10 @@
  */
 
 import { appContextService } from '../app_context';
+import {
+  getIsSpaceAwarenessEnabledCache,
+  setIsSpaceAwarenessEnabledCache,
+} from '../epm/packages/cache';
 import { getSettingsOrUndefined } from '../settings';
 
 export const PENDING_MIGRATION_TIMEOUT = 60 * 60 * 1000;
@@ -16,10 +20,17 @@ export async function isSpaceAwarenessEnabled(): Promise<boolean> {
   if (!appContextService.getExperimentalFeatures().useSpaceAwareness) {
     return false;
   }
+  const cache = getIsSpaceAwarenessEnabledCache();
+  if (typeof cache === 'boolean') {
+    return cache;
+  }
 
   const settings = await getSettingsOrUndefined(appContextService.getInternalUserSOClient());
 
-  return settings?.use_space_awareness_migration_status === 'success' ?? false;
+  const res = settings?.use_space_awareness_migration_status === 'success' ?? false;
+  setIsSpaceAwarenessEnabledCache(res);
+
+  return res;
 }
 
 /**

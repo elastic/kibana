@@ -6,18 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  AttachmentType,
-  Case,
-  CaseSeverity,
-  CaseStatuses,
-} from '@kbn/cases-plugin/common/types/domain';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentType, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
-import {
-  UserActionTypes,
-  CommentUserAction,
-  ConnectorTypes,
-} from '@kbn/cases-plugin/common/types/domain';
+import type { CommentUserAction } from '@kbn/cases-plugin/common/types/domain';
+import { UserActionTypes, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -42,11 +35,10 @@ import {
   createComment,
   bulkCreateAttachments,
   findInternalCaseUserActions,
-  getCaseUserActions,
   updateComment,
 } from '../../../../common/lib/api';
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -58,10 +50,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllCaseItems(es);
     });
 
-    it('returns the id and version fields but not action_id', async () => {
+    it('returns the id and version fields', async () => {
       const theCase = await createCase(supertest, getPostCaseRequest());
-
-      const allUserActions = await getCaseUserActions({ supertest, caseID: theCase.id });
 
       const response = await findInternalCaseUserActions({
         caseID: theCase.id,
@@ -70,10 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(response.userActions.length).to.be(1);
       expect(response.userActions[0].id).not.to.be(undefined);
-      expect(response.userActions[0].id).to.eql(allUserActions[0].action_id);
       expect(response.userActions[0].version).not.to.be(undefined);
-      expect(response.userActions[0]).not.to.have.property('action_id');
-      expect(response.userActions[0]).not.to.have.property('case_id');
       expect(response.latestAttachments.length).to.be(0);
     });
 

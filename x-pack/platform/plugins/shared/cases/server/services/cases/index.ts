@@ -18,7 +18,7 @@ import type {
   SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { nodeBuilder } from '@kbn/es-query';
 
 import type { Case, CaseStatuses, User } from '../../../common/types/domain';

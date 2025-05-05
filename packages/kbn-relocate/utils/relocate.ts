@@ -10,8 +10,9 @@
 import { basename, join } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { orderBy } from 'lodash';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 import type { Package } from '../types';
-import { applyTransforms } from './transforms';
+import { HARDCODED_MODULE_PATHS, applyTransforms } from './transforms';
 import {
   BASE_FOLDER,
   BASE_FOLDER_DEPTH,
@@ -42,7 +43,12 @@ export const calculateModuleTargetFolder = (module: Package): string => {
     : join(BASE_FOLDER, module.directory);
 
   let moduleDelimiter: string;
-  if (!fullPath.includes('/plugins/') && !fullPath.includes('/packages/')) {
+  if (HARDCODED_MODULE_PATHS[module.id]) {
+    return join(BASE_FOLDER, HARDCODED_MODULE_PATHS[module.id]);
+  } else if (module.isDevOnly()) {
+    // only packages can be devOnly
+    moduleDelimiter = '/packages/';
+  } else if (!fullPath.includes('/plugins/') && !fullPath.includes('/packages/')) {
     throw new Error(
       `The module ${module.id} is not located under a '*/plugins/*' or '*/packages/*' folder`
     );
@@ -63,6 +69,15 @@ export const calculateModuleTargetFolder = (module: Package): string => {
   chunks.shift(); // remove the base path up to '/packages/' or '/plugins/'
   const moduleFolder = chunks.join(moduleDelimiter); // in case there's an extra /packages/ or /plugins/ folder
 
+  if (
+    module.isDevOnly() &&
+    (!module.group || module.group === 'common') &&
+    fullPath.includes(`/${KIBANA_FOLDER}/packages/`) &&
+    !fullPath.includes(`/${KIBANA_FOLDER}/packages/core/`)
+  ) {
+    // relocate all dev modules under /packages to /src/dev/packages
+    return applyTransforms(module, join(BASE_FOLDER, 'src', 'dev', 'packages', moduleFolder));
+  }
   let path: string;
 
   if (group === 'platform') {
@@ -85,7 +100,7 @@ export const calculateModuleTargetFolder = (module: Package): string => {
         moduleFolder
       );
     }
-  } else {
+  } else if (KIBANA_SOLUTIONS.some((solution) => solution === group)) {
     path = join(
       BASE_FOLDER,
       'x-pack', // all solution modules are 'x-pack'
@@ -94,6 +109,8 @@ export const calculateModuleTargetFolder = (module: Package): string => {
       isPlugin ? 'plugins' : 'packages',
       moduleFolder
     );
+  } else {
+    path = fullPath;
   }
 
   // after-creation transforms
@@ -112,6 +129,13 @@ export const replaceReferences = async (module: Package, destination: string, lo
       : dir;
   const relativeSource = source.replace(BASE_FOLDER, '');
   const relativeDestination = destination.replace(BASE_FOLDER, '');
+
+  if (relativeSource.split('/').length === 1) {
+    log.warning(
+      `Cannot replace references of a 1-level relative path '${relativeSource}'. Skipping.`
+    );
+    return;
+  }
 
   if (
     (relativeSource.startsWith('src') && relativeDestination.startsWith('src')) ||

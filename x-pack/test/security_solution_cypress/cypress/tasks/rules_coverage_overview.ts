@@ -16,7 +16,7 @@ import {
 } from '../screens/rules_coverage_overview';
 import { LOADING_INDICATOR } from '../screens/security_header';
 
-export const openTechniquePanelByName = (label: string) => {
+export const toggleTechniquePanelByName = (label: string) => {
   cy.get(COVERAGE_OVERVIEW_TECHNIQUE_PANEL).contains(label).click();
 };
 

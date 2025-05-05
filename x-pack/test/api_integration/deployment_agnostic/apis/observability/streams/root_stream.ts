@@ -6,34 +6,38 @@
  */
 
 import expect from '@kbn/expect';
-import { WiredStreamConfigDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
+import { get } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { disableStreams, enableStreams, putStream } from './helpers/requests';
+import { disableStreams, enableStreams, indexDocument, putStream } from './helpers/requests';
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 
-const rootStreamDefinition: WiredStreamDefinition = {
+const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
-  stream: {
-    ingest: {
-      processing: [],
+  description: '',
+  ingest: {
+    lifecycle: { dsl: {} },
+    processing: [],
+    wired: {
       routing: [],
-      wired: {
-        fields: {
-          '@timestamp': {
-            type: 'date',
-          },
-          message: {
-            type: 'match_only_text',
-          },
-          'host.name': {
-            type: 'keyword',
-          },
-          'log.level': {
-            type: 'keyword',
-          },
+      fields: {
+        '@timestamp': {
+          type: 'date',
+        },
+        message: {
+          type: 'match_only_text',
+        },
+        'host.name': {
+          type: 'keyword',
+        },
+        'log.level': {
+          type: 'keyword',
+        },
+        'stream.name': {
+          type: 'system',
         },
       },
     },
@@ -43,6 +47,7 @@ const rootStreamDefinition: WiredStreamDefinition = {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
+  const esClient = getService('es');
 
   describe('Root stream', () => {
     before(async () => {
@@ -55,66 +60,105 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Should not allow processing changes', async () => {
-      const body: WiredStreamConfigDefinition = {
-        ingest: {
-          ...rootStreamDefinition.stream.ingest,
-          processing: [
-            {
-              config: {
+      const body: Streams.WiredStream.UpsertRequest = {
+        dashboards: [],
+        queries: [],
+        stream: {
+          description: '',
+          ingest: {
+            ...rootStreamDefinition.ingest,
+            processing: [
+              {
                 grok: {
                   field: 'message',
                   patterns: [
                     '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                   ],
+                  if: { always: {} },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property(
-        'message',
+      expect(response).to.have.property('message', 'Desired stream state is invalid');
+
+      expect(get(response, 'attributes.caused_by.0.message')).to.eql(
         'Root stream processing rules cannot be changed'
       );
     });
 
     it('Should not allow fields changes', async () => {
-      const body: WiredStreamConfigDefinition = {
-        ingest: {
-          ...rootStreamDefinition.stream.ingest,
-          wired: {
-            fields: {
-              ...rootStreamDefinition.stream.ingest.wired.fields,
-              'log.level': {
-                type: 'boolean',
+      const body: Streams.WiredStream.UpsertRequest = {
+        dashboards: [],
+        queries: [],
+        stream: {
+          description: '',
+          ingest: {
+            ...rootStreamDefinition.ingest,
+            wired: {
+              ...rootStreamDefinition.ingest.wired,
+              fields: {
+                ...rootStreamDefinition.ingest.wired.fields,
+                'log.level': {
+                  type: 'boolean',
+                },
               },
             },
           },
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property('message', 'Root stream fields cannot be changed');
+
+      expect(response).to.have.property('message', 'Desired stream state is invalid');
+
+      expect(get(response, 'attributes.caused_by.0.message')).to.eql(
+        'Root stream fields cannot be changed'
+      );
     });
 
     it('Should allow routing changes', async () => {
-      const body: WiredStreamConfigDefinition = {
-        ingest: {
-          ...rootStreamDefinition.stream.ingest,
-          routing: [
-            {
-              name: 'logs.gcpcloud',
-              condition: {
-                field: 'cloud.provider',
-                operator: 'eq',
-                value: 'gcp',
-              },
+      const body: Streams.WiredStream.UpsertRequest = {
+        dashboards: [],
+        queries: [],
+        stream: {
+          description: '',
+          ingest: {
+            ...rootStreamDefinition.ingest,
+            wired: {
+              ...rootStreamDefinition.ingest.wired,
+              routing: [
+                {
+                  destination: 'logs.gcpcloud',
+                  if: {
+                    field: 'cloud.provider',
+                    operator: 'eq',
+                    value: 'gcp',
+                  },
+                },
+              ],
             },
-          ],
+          },
         },
       };
       const response = await putStream(apiClient, 'logs', body);
       expect(response).to.have.property('acknowledged', true);
+    });
+
+    it('Should not allow sending data directly to a child stream', async () => {
+      const doc = {
+        '@timestamp': '2024-01-01T00:00:20.000Z',
+        message: 'test',
+      };
+      let threw = false;
+      try {
+        await indexDocument(esClient, 'logs.gcpcloud', doc);
+      } catch (e) {
+        threw = true;
+        expect(e.message).to.contain('stream.name is not set properly');
+      }
+      expect(threw).to.be(true);
     });
   });
 }

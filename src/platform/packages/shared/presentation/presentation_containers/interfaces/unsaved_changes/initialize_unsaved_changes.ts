@@ -62,7 +62,7 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
     comparatorKeys.push(key);
   }
 
-  const unsavedChanges = new BehaviorSubject<Partial<RuntimeState> | undefined>(
+  const unsavedChanges$ = new BehaviorSubject<Partial<RuntimeState> | undefined>(
     runComparators(
       comparators,
       comparatorKeys,
@@ -84,7 +84,7 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
         combineLatestWith(lastSavedState$)
       )
       .subscribe(([latestState, lastSavedState]) => {
-        unsavedChanges.next(
+        unsavedChanges$.next(
           runComparators(comparators, comparatorKeys, lastSavedState, latestState)
         );
       })
@@ -92,7 +92,7 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
 
   return {
     api: {
-      unsavedChanges,
+      unsavedChanges$,
       resetUnsavedChanges: () => {
         const lastSaved = lastSavedState$.getValue();
 

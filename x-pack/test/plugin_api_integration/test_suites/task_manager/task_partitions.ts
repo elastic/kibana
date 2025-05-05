@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
 import { asyncForEach } from '@kbn/std';
@@ -104,11 +104,9 @@ export default function ({ getService }: FtrProviderContext) {
     return es
       .search({
         index: testHistoryIndex,
-        body: {
-          query: {
-            bool: {
-              filter,
-            },
+        query: {
+          bool: {
+            filter,
           },
         },
       })
@@ -122,25 +120,23 @@ export default function ({ getService }: FtrProviderContext) {
         await es.deleteByQuery({
           index: testHistoryIndex,
           refresh: true,
-          body: { query: { term: { type: 'task' } } },
+          query: { term: { type: 'task' } },
         });
       } else {
         await es.indices.create({
           index: testHistoryIndex,
-          body: {
-            mappings: {
-              properties: {
-                type: {
-                  type: 'keyword',
-                },
-                taskId: {
-                  type: 'keyword',
-                },
-                params: taskManagerIndexMapping.params,
-                state: taskManagerIndexMapping.state,
-                runAt: taskManagerIndexMapping.runAt,
-              } as Record<string, estypes.MappingProperty>,
-            },
+          mappings: {
+            properties: {
+              type: {
+                type: 'keyword',
+              },
+              taskId: {
+                type: 'keyword',
+              },
+              params: taskManagerIndexMapping.params,
+              state: taskManagerIndexMapping.state,
+              runAt: taskManagerIndexMapping.runAt,
+            } as Record<string, estypes.MappingProperty>,
           },
         });
       }
@@ -151,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
       await es.deleteByQuery({
         index: '.kibana_task_manager',
         refresh: true,
-        body: { query: { terms: { id: [testNode1, testNode2] } } },
+        query: { terms: { id: [testNode1, testNode2] } },
       });
     });
 

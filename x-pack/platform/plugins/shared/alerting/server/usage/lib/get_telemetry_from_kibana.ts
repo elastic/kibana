@@ -11,20 +11,19 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger, ISavedObjectsRepository } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, ISavedObjectsRepository } from '@kbn/core/server';
 
-import {
-  ConnectorsByConsumersBucket,
-  groupConnectorsByConsumers,
-} from './group_connectors_by_consumers';
+import type { ConnectorsByConsumersBucket } from './group_connectors_by_consumers';
+import { groupConnectorsByConsumers } from './group_connectors_by_consumers';
 import { groupRulesByNotifyWhen } from './group_rules_by_notify_when';
 import { groupRulesByStatus } from './group_rules_by_status';
-import { AlertingUsage } from '../types';
+import type { AlertingUsage } from '../types';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import { groupRulesBySearchType } from './group_rules_by_search_type';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
-import { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
+import type { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
+import { parseAndLogError } from './parse_and_log_error';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -91,7 +90,7 @@ export async function getTotalCountAggregations({
       },
       runtime_mappings: {
         rule_action_count: {
-          type: 'long',
+          type: 'long' as const,
           script: {
             source: `
                 def alert = params._source['alert'];
@@ -107,7 +106,7 @@ export async function getTotalCountAggregations({
         },
         // Convert schedule interval duration string from rule saved object to interval in seconds
         rule_schedule_interval: {
-          type: 'long',
+          type: 'long' as const,
           script: {
             source: `
                 int parsed = 0;
@@ -143,7 +142,7 @@ export async function getTotalCountAggregations({
         },
         // Convert throttle interval duration string from rule saved object to interval in seconds
         rule_throttle_interval: {
-          type: 'long',
+          type: 'long' as const,
           script: {
             source: `
                 int parsed = 0;
@@ -178,7 +177,7 @@ export async function getTotalCountAggregations({
           },
         },
         rule_with_tags: {
-          type: 'long',
+          type: 'long' as const,
           script: {
             source: `
                def rule = params._source['alert'];
@@ -192,7 +191,7 @@ export async function getTotalCountAggregations({
           },
         },
         rule_snoozed: {
-          type: 'long',
+          type: 'long' as const,
           script: {
             source: `
                 def rule = params._source['alert'];
@@ -206,7 +205,7 @@ export async function getTotalCountAggregations({
           },
         },
         rule_muted: {
-          type: 'long',
+          type: 'long' as const,
           script: {
             source: `
                 if (doc['alert.muteAll'].value == true) {
@@ -217,7 +216,7 @@ export async function getTotalCountAggregations({
           },
         },
         rule_with_muted_alerts: {
-          type: 'long',
+          type: 'long' as const,
           script: {
             source: `
                 def rule = params._source['alert'];
@@ -374,15 +373,8 @@ export async function getTotalCountAggregations({
       },
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
+    const errorMessage = parseAndLogError(err, `getTotalCountAggregations`, logger);
 
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalCountAggregations - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
     return {
       hasErrors: true,
       errorMessage,
@@ -487,14 +479,8 @@ export async function getTotalCountInUse({
       countNamespaces: aggregations.namespaces_count.value ?? 0,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalCountInUse - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getTotalCountInUse`, logger);
+
     return {
       hasErrors: true,
       errorMessage,
@@ -544,14 +530,8 @@ export async function getMWTelemetry({
       count_mw_with_filter_alert_toggle_on: countMWWithFilterAlertToggleON,
     };
   } catch (err) {
-    const errorMessage = err?.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalMWCount - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err?.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getTotalMWCount`, logger);
+
     return {
       hasErrors: true,
       errorMessage,

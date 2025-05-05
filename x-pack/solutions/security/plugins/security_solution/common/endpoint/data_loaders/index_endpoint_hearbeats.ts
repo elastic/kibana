@@ -37,8 +37,8 @@ export const indexEndpointHeartbeats = async (
   count: number = 1,
   unbilledCount: number = 1
 ): Promise<IndexedEndpointHeartbeats> => {
-  log.debug(`Indexing ${count} endpoint heartbeats`);
   const startTime = new Date();
+  log.debug(`Indexing ${count} endpoint heartbeats with startTime = ${startTime}`);
 
   const docs: EndpointHeartbeat[] = Array.from({ length: count }).map((_, i) => {
     const ingested = new Date(startTime.getTime() + i).toISOString();

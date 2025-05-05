@@ -9,6 +9,7 @@ import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { getSLOSummaryTransformId, getSLOTransformId } from '@kbn/slo-plugin/common/constants';
+import { omit } from 'lodash';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
@@ -16,6 +17,7 @@ import { TransformHelper, createTransformHelper } from './helpers/transform';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
+  const spaceApi = getService('spaces');
   const sloApi = getService('sloApi');
   const logger = getService('log');
   const retry = getService('retry');
@@ -29,8 +31,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let transformHelper: TransformHelper;
 
   describe('Create SLOs', function () {
-    // see details: https://github.com/elastic/kibana/issues/207354
-    this.tags(['failsOnMKI']);
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       transformHelper = createTransformHelper(getService);
@@ -52,6 +52,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await cleanup({ client: esClient, config: DATA_FORGE_CONFIG, logger });
       await sloApi.deleteAllSLOs(adminRoleAuthc);
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
+      await spaceApi.delete('space1');
+      await spaceApi.delete('space2');
     });
 
     it('creates a new slo and transforms', async () => {
@@ -61,12 +63,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const definitions = await sloApi.findDefinitions(adminRoleAuthc);
       expect(definitions.total).eql(1);
-      expect(definitions.results[0]).eql({
+
+      expect(omit(definitions.results[0], ['createdBy', 'updatedBy'])).eql({
         budgetingMethod: 'occurrences',
         updatedAt: definitions.results[0].updatedAt,
-        updatedBy: 'elastic_admin',
         createdAt: definitions.results[0].createdAt,
-        createdBy: 'elastic_admin',
         description: 'Fixture for api integration tests',
         enabled: true,
         groupBy: 'tags',
@@ -98,6 +99,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
         version: 2,
       });
+      expect(definitions.results[0].createdBy).eql(definitions.results[0].updatedBy);
 
       const rollUpTransformResponse = await transformHelper.assertExist(getSLOTransformId(id, 1));
       expect(rollUpTransformResponse.transforms[0].source.index).eql(['kbn-data-forge*']);
@@ -120,6 +122,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         index: '.slo-observability.summary-v3.4',
         pipeline: `.slo-observability.summary.pipeline-${id}-1`,
       });
+    });
+
+    it('creates two SLOs with matching ids across different spaces', async () => {
+      const spaceApiResponse = await spaceApi.create({
+        name: 'space1',
+        id: 'space1',
+        initials: '1',
+      });
+      expect(spaceApiResponse.space).property('id');
+
+      const {
+        space: { id: spaceId1 },
+      } = spaceApiResponse;
+      const sloApiResponse = await sloApi.createWithSpace(
+        DEFAULT_SLO,
+        spaceId1,
+        adminRoleAuthc,
+        200
+      );
+      expect(sloApiResponse).property('id');
+
+      const { id } = sloApiResponse;
+      const spaceApiResponse2 = await spaceApi.create({
+        name: 'space2',
+        id: 'space2',
+        initials: '2',
+      });
+
+      const {
+        space: { id: spaceId2 },
+      } = spaceApiResponse;
+      expect(spaceApiResponse2.space).property('id');
+
+      await sloApi.createWithSpace({ ...DEFAULT_SLO, id }, spaceId2, adminRoleAuthc, 409);
     });
 
     describe('groupBy smoke tests', () => {
@@ -232,7 +268,7 @@ const getRollupDataEsQuery = (id: string) => ({
         sort: [
           {
             '@timestamp': {
-              order: 'desc',
+              order: 'desc' as const,
             },
           },
         ],

@@ -16,20 +16,23 @@ import { StatusBadge } from '../status_badge';
 import { TableHeader } from './header';
 import { convertTranslationResultIntoText } from '../../utils/translation_results';
 
+export const SIEM_MIGRATIONS_STATUS_HEADER_ID = 'siemMigrationsStatusHeader';
+
 export const createStatusColumn = (): TableColumn => {
   return {
     field: 'translation_result',
     name: (
       <TableHeader
+        id={SIEM_MIGRATIONS_STATUS_HEADER_ID}
         title={i18n.COLUMN_STATUS}
         tooltipContent={
           <FormattedMessage
             id="xpack.securitySolution.siemMigrations.rules.tableColumn.statusTooltip"
-            defaultMessage="{title}
-            {installed} - already added to Elastic SIEM. Click View to manage and enable it. {lineBreak}
-            {translated} - rule is ready to install. Rules with matching capabilities have been mapped to Elastic Authored rules. If not match was detected, an AI translation was provided. {lineBreak}
-            {partiallyTranslated} - part of the original query could not be translated. Make sure you’ve uploaded all macros and lookups, and resolved all syntax errors. {lineBreak}
-            {notTranslated} - none of the original query could be translated."
+            defaultMessage={`{title}
+            {installed} - already added to Elastic SIEM. Click "View" to manage and enable it.{lineBreak}
+            {translated} - ready to install. This rule was mapped to an Elastic Authored rule if possible, or translated by AI.{lineBreak}
+            {partiallyTranslated} - part of the query could not be translated. Upload any missing macros or lookups and check your syntax.{lineBreak}
+            {notTranslated} - none of the original query could be translated.`}
             values={{
               lineBreak: <br />,
               title: (

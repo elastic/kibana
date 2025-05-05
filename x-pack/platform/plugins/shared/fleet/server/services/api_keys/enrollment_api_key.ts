@@ -78,10 +78,8 @@ export async function listEnrollmentApiKeys(
     track_total_hits: true,
     rest_total_hits_as_int: true,
     ignore_unavailable: true,
-    body: {
-      sort: [{ created_at: { order: 'desc' } }],
-      ...(query ? { query } : {}),
-    },
+    sort: [{ created_at: { order: 'desc' } }],
+    ...(query ? { query } : {}),
   });
 
   // @ts-expect-error @elastic/elasticsearch _source is optional
@@ -119,7 +117,10 @@ export async function getEnrollmentAPIKey(
 
     if (spaceId) {
       if (spaceId === DEFAULT_SPACE_ID) {
-        if (body._source?.namespaces && !body._source?.namespaces.includes(DEFAULT_SPACE_ID)) {
+        if (
+          (body._source?.namespaces?.length ?? 0) > 0 &&
+          !body._source?.namespaces?.includes(DEFAULT_SPACE_ID)
+        ) {
           throw new EnrollmentKeyNotFoundError(`Enrollment api key ${id} not found in namespace`);
         }
       } else if (!body._source?.namespaces?.includes(spaceId)) {
@@ -169,10 +170,8 @@ export async function deleteEnrollmentApiKey(
     await esClient.update({
       index: ENROLLMENT_API_KEYS_INDEX,
       id,
-      body: {
-        doc: {
-          active: false,
-        },
+      doc: {
+        active: false,
       },
       refresh: 'wait_for',
     });
@@ -269,27 +268,25 @@ export async function generateEnrollmentAPIKey(
 
   const key = await esClient.security
     .createApiKey({
-      body: {
-        name,
-        metadata: {
-          managed_by: 'fleet',
-          managed: true,
-          type: 'enroll',
-          policy_id: data.agentPolicyId,
-        },
-        role_descriptors: {
-          // Useless role to avoid to have the privilege of the user that created the key
-          'fleet-apikey-enroll': {
-            cluster: [],
-            index: [],
-            applications: [
-              {
-                application: 'fleet',
-                privileges: ['no-privileges'],
-                resources: ['*'],
-              },
-            ],
-          },
+      name,
+      metadata: {
+        managed_by: 'fleet',
+        managed: true,
+        type: 'enroll',
+        policy_id: data.agentPolicyId,
+      },
+      role_descriptors: {
+        // Useless role to avoid to have the privilege of the user that created the key
+        'fleet-apikey-enroll': {
+          cluster: [],
+          index: [],
+          applications: [
+            {
+              application: 'fleet',
+              privileges: ['no-privileges'],
+              resources: ['*'],
+            },
+          ],
         },
       },
     })
@@ -315,6 +312,7 @@ export async function generateEnrollmentAPIKey(
     policy_id: agentPolicyId,
     namespaces: agentPolicy?.space_ids,
     created_at: new Date().toISOString(),
+    hidden: agentPolicy?.supports_agentless || agentPolicy?.is_managed,
   };
 
   const res = await esClient.create({
@@ -432,5 +430,6 @@ function esDocToEnrollmentApiKey(doc: {
     policy_id: doc._source.policy_id,
     created_at: doc._source.created_at as string,
     active: doc._source.active || false,
+    hidden: doc._source.hidden || false,
   };
 }

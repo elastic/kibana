@@ -21,7 +21,6 @@ import {
   EuiToolTip,
   EuiIconTip,
   EuiPortal,
-  EuiNotificationBadge,
 } from '@elastic/eui';
 
 import { useAgentPolicyRefresh, useAuthz, useLink } from '../../../../../hooks';
@@ -32,6 +31,9 @@ import { FLEET_SERVER_PACKAGE } from '../../../../../../../../common/constants';
 import { getRootIntegrations } from '../../../../../../../../common/services';
 import { ManageAutoUpgradeAgentsModal } from '../../../../agents/components/manage_auto_upgrade_agents_modal';
 import { AutoUpgradeAgentsTour } from '../../../components/auto_upgrade_agents_tour';
+import { ExperimentalFeaturesService } from '../../../../../services';
+
+import { ManageAutoUpgradeAgentsBadge } from './manage_auto_upgrade_agents';
 
 export interface HeaderRightContentProps {
   isLoading: boolean;
@@ -62,6 +64,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
   const [isManageAutoUpgradeAgentsModalOpen, setIsManageAutoUpgradeAgentsModalOpen] =
     useState<boolean>(false);
   const refreshAgentPolicy = useAgentPolicyRefresh();
+  const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
 
   const isFleetServerPolicy = useMemo(
     () =>
@@ -214,41 +217,20 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
                   '',
               },
               { isDivider: true },
-              ...(authz.fleet.allAgentPolicies
+              ...(enableAutomaticAgentUpgrades && authz.fleet.allAgentPolicies
                 ? [
                     {
                       label: i18n.translate('xpack.fleet.policyDetails.summary.autoUpgrade', {
                         defaultMessage: 'Auto-upgrade agents',
                       }),
                       content: (
-                        <EuiFlexGroup
-                          gutterSize="xs"
-                          justifyContent="flexEnd"
-                          alignItems="center"
-                          id="auto-upgrade-manage-button"
-                        >
-                          <EuiFlexItem grow={false}>
-                            <EuiLink
-                              onClick={() => {
-                                setIsManageAutoUpgradeAgentsModalOpen(
-                                  !isManageAutoUpgradeAgentsModalOpen
-                                );
-                              }}
-                            >
-                              <FormattedMessage
-                                id="xpack.fleet.policyDetails.summary.autoUpgradeButton"
-                                defaultMessage="Manage"
-                              />
-                            </EuiLink>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiNotificationBadge
-                              color={agentPolicy.required_versions?.length ? 'accent' : 'subdued'}
-                            >
-                              {agentPolicy.required_versions?.length || 0}
-                            </EuiNotificationBadge>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
+                        <ManageAutoUpgradeAgentsBadge
+                          agentPolicy={agentPolicy}
+                          isManageAutoUpgradeAgentsModalOpen={isManageAutoUpgradeAgentsModalOpen}
+                          setIsManageAutoUpgradeAgentsModalOpen={
+                            setIsManageAutoUpgradeAgentsModalOpen
+                          }
+                        />
                       ),
                     },
                     { isDivider: true },
@@ -299,7 +281,9 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
           />
         </EuiPortal>
       )}
-      <AutoUpgradeAgentsTour anchor="#auto-upgrade-manage-button" />
+      {enableAutomaticAgentUpgrades ? (
+        <AutoUpgradeAgentsTour anchor="#auto-upgrade-manage-button" />
+      ) : null}
     </>
   );
 };

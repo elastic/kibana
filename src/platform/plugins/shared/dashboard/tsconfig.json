@@ -23,7 +23,6 @@
     "@kbn/saved-objects-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/ui-actions-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/spaces-plugin",
     "@kbn/config-schema",
     "@kbn/utility-types",
@@ -44,7 +43,6 @@
     "@kbn/analytics",
     "@kbn/safer-lodash-set",
     "@kbn/task-manager-plugin",
-    "@kbn/core-execution-context-common",
     "@kbn/core-custom-branding-browser",
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-management-plugin",
@@ -83,7 +81,10 @@
     "@kbn/visualization-utils",
     "@kbn/std",
     "@kbn/core-rendering-browser",
-    "@kbn/grid-layout"
+    "@kbn/grid-layout",
+    "@kbn/ui-actions-browser",
+    "@kbn/esql-types",
+    "@kbn/saved-objects-tagging-plugin"
   ],
   "exclude": ["target/**/*"]
 }

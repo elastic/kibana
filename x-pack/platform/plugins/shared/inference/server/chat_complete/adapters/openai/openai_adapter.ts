@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import type OpenAI from 'openai';
-import { from, identity, switchMap, throwError } from 'rxjs';
-import { isReadable, Readable } from 'stream';
-import { createInferenceInternalError } from '@kbn/inference-common';
+import { defer, identity } from 'rxjs';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import type { InferenceConnectorAdapter } from '../../types';
 import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
+import { isNativeFunctionCallingSupported, handleConnectorResponse } from '../../utils';
+import type { OpenAIRequest } from './types';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
 import { processOpenAIStream } from './process_openai_stream';
+import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -26,15 +27,21 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     toolChoice,
     tools,
     temperature = 0,
-    functionCalling,
-    modelName,
+    functionCalling = 'auto',
+    modelName: modelName,
     logger,
     abortSignal,
+    metadata,
   }) => {
-    const simulatedFunctionCalling = functionCalling === 'simulated';
+    const connector = executor.getConnector();
+    const useSimulatedFunctionCalling =
+      functionCalling === 'auto'
+        ? !isNativeFunctionCallingSupported(executor.getConnector())
+        : functionCalling === 'simulated';
 
-    let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
-    if (simulatedFunctionCalling) {
+    let request: OpenAIRequest;
+
+    if (useSimulatedFunctionCalling) {
       const wrapped = wrapWithSimulatedFunctionCalling({
         system,
         messages,
@@ -43,14 +50,14 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       });
       request = {
         stream: true,
-        temperature,
+        ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
       request = {
         stream: true,
-        temperature,
+        ...getTemperatureIfValid(temperature, { connector, modelName }),
         model: modelName,
         messages: messagesToOpenAI({ system, messages }),
         tool_choice: toolChoiceToOpenAI(toolChoice),
@@ -58,33 +65,23 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       };
     }
 
-    return from(
-      executor.invoke({
+    return defer(() => {
+      return executor.invoke({
         subAction: 'stream',
         subActionParams: {
           body: JSON.stringify(request),
           signal: abortSignal,
           stream: true,
+          ...(metadata?.connectorTelemetry
+            ? { telemetryMetadata: metadata.connectorTelemetry }
+            : {}),
         },
-      })
-    ).pipe(
-      switchMap((response) => {
-        if (response.status === 'error') {
-          return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
-            })
-          );
-        }
-        if (isReadable(response.data as any)) {
-          return eventSourceStreamIntoObservable(response.data as Readable);
-        }
-        return throwError(() =>
-          createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
-        );
-      }),
+      });
+    }).pipe(
+      handleConnectorResponse({ processStream: eventSourceStreamIntoObservable }),
       processOpenAIStream(),
-      simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
+      emitTokenCountEstimateIfMissing({ request }),
+      useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
 };

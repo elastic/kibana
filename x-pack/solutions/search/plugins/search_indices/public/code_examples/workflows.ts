@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-export type WorkflowId = 'default' | 'vector' | 'semantic';
+import { WorkflowId } from '@kbn/search-shared-ui';
 
 export interface Workflow {
   title: string;
@@ -41,7 +40,7 @@ export const workflows: Workflow[] = [
     id: 'semantic',
     summary: i18n.translate('xpack.searchIndices.workflows.semanticSummary', {
       defaultMessage:
-        "Semantic search in Elasticsearch is now simpler with the new semantic_text field type. This example walks through setting up your index with a semantic_text field, which uses Elastic's built-in ELSER machine learning model. If the model is not running, a new deployment will start once the mappings are defined.",
+        "Use a semantic_text field type and Elastic's built-in ELSER machine learning model.",
     }),
   },
 ];

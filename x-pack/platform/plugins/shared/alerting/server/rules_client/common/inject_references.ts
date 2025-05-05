@@ -7,9 +7,10 @@
 
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
-import { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { RawRule, RuleTypeParams } from '../../types';
+import type { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type { RawRule, RuleTypeParams } from '../../types';
+import type { RuleDomain } from '../../application/rule/types';
 import {
   preconfiguredConnectorActionRefPrefix,
   extractedSavedObjectParamReferenceNamePrefix,
@@ -76,4 +77,35 @@ export function injectReferencesIntoParams<
       `Error injecting reference into rule params for rule id ${ruleId} - ${err.message}`
     );
   }
+}
+
+export function injectReferencesIntoArtifacts(
+  ruleId: string,
+  artifacts?: RawRule['artifacts'],
+  references?: SavedObjectReference[]
+): Required<RuleDomain['artifacts']> {
+  if (!artifacts) {
+    return { dashboards: [], investigation_guide: { blob: '' } };
+  }
+  return {
+    ...artifacts,
+    investigation_guide: {
+      blob: artifacts.investigation_guide?.blob ?? '',
+    },
+    dashboards:
+      artifacts.dashboards?.map((dashboard) => {
+        const reference = references?.find(
+          (ref) => ref.name === dashboard.refId && ref.type === 'dashboard'
+        );
+        if (!reference) {
+          throw new Error(
+            `Artifacts reference "${dashboard.refId}" not found in rule id: ${ruleId}`
+          );
+        }
+        return {
+          ...omit(dashboard, 'refId'),
+          id: reference.id,
+        };
+      }) ?? [],
+  };
 }

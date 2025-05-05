@@ -8,61 +8,82 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { GridPanel, GridPanelProps } from './grid_panel';
-import { gridLayoutStateManagerMock } from '../test_utils/mocks';
+import { EuiThemeProvider } from '@elastic/eui';
+import { render, screen } from '@testing-library/react';
+import { GridPanel, type GridPanelProps } from './grid_panel';
+import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
+import { GridLayoutContext, type GridLayoutContextType } from '../use_grid_layout_context';
 
 describe('GridPanel', () => {
-  const mockRenderPanelContents = jest.fn((panelId) => <div>Panel Content {panelId}</div>);
-  const mockInteractionStart = jest.fn();
-
-  const renderGridPanel = (propsOverrides: Partial<GridPanelProps> = {}) => {
-    return render(
-      <GridPanel
-        panelId="panel1"
-        rowIndex={0}
-        renderPanelContents={mockRenderPanelContents}
-        interactionStart={mockInteractionStart}
-        gridLayoutStateManager={gridLayoutStateManagerMock}
-        {...propsOverrides}
-      />
+  const renderGridPanel = (overrides?: {
+    propsOverrides?: Partial<GridPanelProps>;
+    contextOverrides?: Partial<GridLayoutContextType>;
+  }) => {
+    const contextValue = {
+      renderPanelContents: mockRenderPanelContents,
+      gridLayoutStateManager: getGridLayoutStateManagerMock(),
+      ...(overrides?.contextOverrides ?? {}),
+    } as GridLayoutContextType;
+    const panelProps = {
+      panelId: 'panel1',
+      rowId: 'first',
+      ...(overrides?.propsOverrides ?? {}),
+    };
+    const { rerender, ...rtlRest } = render(
+      <EuiThemeProvider>
+        <GridLayoutContext.Provider value={contextValue}>
+          <GridPanel {...panelProps} />
+        </GridLayoutContext.Provider>
+      </EuiThemeProvider>
     );
+
+    return {
+      ...rtlRest,
+      rerender: (newOverrides?: {
+        propsOverrides?: Partial<GridPanelProps>;
+        contextOverrides?: Partial<GridLayoutContextType>;
+      }) => {
+        return rerender(
+          <EuiThemeProvider>
+            <GridLayoutContext.Provider
+              value={
+                {
+                  ...contextValue,
+                  ...(newOverrides?.contextOverrides ?? {}),
+                } as GridLayoutContextType
+              }
+            >
+              <GridPanel {...panelProps} {...(newOverrides?.propsOverrides ?? {})} />
+            </GridLayoutContext.Provider>
+          </EuiThemeProvider>
+        );
+      },
+    };
   };
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders panel contents correctly', () => {
+  it('renders panel contents', () => {
     renderGridPanel();
-    expect(screen.getByText('Panel Content panel1')).toBeInTheDocument();
+    expect(screen.getByText('panel content panel1')).toBeInTheDocument();
+    expect(mockRenderPanelContents).toHaveBeenCalledWith('panel1', undefined);
   });
 
-  describe('drag handle interaction', () => {
-    it('calls `drag` interactionStart on mouse down', () => {
-      renderGridPanel();
-      const dragHandle = screen.getByRole('button', { name: /drag to move/i });
-      fireEvent.mouseDown(dragHandle);
-      expect(mockInteractionStart).toHaveBeenCalledWith('drag', expect.any(Object));
+  describe('use custom drag handle', () => {
+    it('renders default drag handle when `useCustomDragHandle` is false | undefined', () => {
+      const panel = renderGridPanel();
+      expect(panel.queryByTestId('kbnGridPanel--dragHandle')).toBeInTheDocument();
+
+      panel.rerender({ contextOverrides: { useCustomDragHandle: false } });
+      expect(panel.queryByTestId('kbnGridPanel--dragHandle')).toBeInTheDocument();
     });
-    it('calls `drop` interactionStart on mouse up', () => {
-      renderGridPanel();
-      const dragHandle = screen.getByRole('button', { name: /drag to move/i });
-      fireEvent.mouseUp(dragHandle);
-      expect(mockInteractionStart).toHaveBeenCalledWith('drop', expect.any(Object));
-    });
-  });
-  describe('resize handle interaction', () => {
-    it('calls `resize` interactionStart on mouse down', () => {
-      renderGridPanel();
-      const resizeHandle = screen.getByRole('button', { name: /resize/i });
-      fireEvent.mouseDown(resizeHandle);
-      expect(mockInteractionStart).toHaveBeenCalledWith('resize', expect.any(Object));
-    });
-    it('calls `drop` interactionStart on mouse up', () => {
-      renderGridPanel();
-      const resizeHandle = screen.getByRole('button', { name: /resize/i });
-      fireEvent.mouseUp(resizeHandle);
-      expect(mockInteractionStart).toHaveBeenCalledWith('drop', expect.any(Object));
+
+    it('does not render default drag handle when `useCustomDragHandle` is true and calls setDragHandles', () => {
+      const panel = renderGridPanel({ contextOverrides: { useCustomDragHandle: true } });
+      expect(panel.queryByTestId('kbnGridPanel--dragHandle')).not.toBeInTheDocument();
+      expect(mockRenderPanelContents).toHaveBeenCalledWith('panel1', expect.any(Function));
     });
   });
 });

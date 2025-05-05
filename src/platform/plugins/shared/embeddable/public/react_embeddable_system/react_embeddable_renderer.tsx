@@ -202,7 +202,7 @@ export const ReactEmbeddableRenderer = <
            * */
           const errorApi = {
             uuid,
-            blockingError: new BehaviorSubject(e),
+            blockingError$: new BehaviorSubject(e),
           } as unknown as Api;
           if (apiIsPresentationContainer(parentApi)) {
             errorApi.parentApi = parentApi;

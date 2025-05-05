@@ -21,8 +21,12 @@ export {
 } from './actions/constants';
 
 export type { ControlGroupApi, ControlStateTransform } from './control_group/types';
-
 export type { DataControlApi, DataControlFactory } from './controls/data_controls/types';
+export type { DefaultControlApi } from './controls/types';
+export type { OptionsListControlApi } from './controls/data_controls/options_list_control/types';
+export type { RangesliderControlApi } from './controls/data_controls/range_slider/types';
+export type { ESQLControlApi } from './controls/esql_control/types';
+export type { TimesliderControlApi } from './controls/timeslider_control/types';
 
 export {
   ControlGroupRenderer,
@@ -36,6 +40,7 @@ export {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
+  ESQL_CONTROL,
 } from '../common';
 export type {
   ControlGroupRuntimeState,

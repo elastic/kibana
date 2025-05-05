@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { map, of } from 'rxjs';
 import { createNavigationTree } from './navigation_tree';
-import { createObservabilityDashboardRegistration } from './logs_signal/overview_registration';
 import {
   ServerlessObservabilityPublicSetup,
   ServerlessObservabilityPublicStart,
@@ -32,16 +31,8 @@ export class ServerlessObservabilityPlugin
       ServerlessObservabilityPublicStartDependencies,
       ServerlessObservabilityPublicStart
     >,
-    setupDeps: ServerlessObservabilityPublicSetupDependencies
+    _setupDeps: ServerlessObservabilityPublicSetupDependencies
   ): ServerlessObservabilityPublicSetup {
-    setupDeps.observability.dashboard.register(
-      createObservabilityDashboardRegistration({
-        search: _core
-          .getStartServices()
-          .then(([_coreStart, startDeps]) => startDeps.data.search.search),
-      })
-    );
-
     return {};
   }
 

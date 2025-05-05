@@ -5,9 +5,9 @@
  * 2.0.
  */
 import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
+import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
+import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
 import {
   getAllowedFieldForTermQueryFromMapping,
@@ -96,12 +96,12 @@ describe('get_allowed_fields_for_terms_query copy', () => {
   });
 
   describe('getlAllowedFieldsForTermQuery', () => {
-    let alertServices: RuleExecutorServicesMock;
+    let ruleServices: PersistenceExecutorOptionsMock;
     let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
 
     beforeEach(() => {
-      alertServices = alertsMock.createRuleExecutorServices();
-      alertServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
+      ruleServices = createPersistenceExecutorOptionsMock();
+      ruleServices.scopedClusterClient.asCurrentUser.fieldCaps.mockResolvedValue(
         fieldsCapsResponse
       );
       ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
@@ -117,7 +117,7 @@ describe('get_allowed_fields_for_terms_query copy', () => {
 
       const result = await getAllowedFieldsForTermQuery({
         threatMatchedFields,
-        services: alertServices,
+        services: ruleServices,
         threatIndex,
         inputIndex,
         ruleExecutionLogger,

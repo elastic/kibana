@@ -188,7 +188,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const [isDashboardFormValid, setIsDashboardFormValid] = useState(true);
 
-  const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+  const canEditDashboards = capabilities.dashboard_v2?.createNew ?? false;
   const { create: canCreateCase, update: canUpdateCase } = cases?.helpers?.canUseCases() ?? {
     create: false,
     update: false,
@@ -536,7 +536,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <FieldsControls fieldConfig={fieldConfig} onChange={onChange} data-test-subj="blablabla">
+          <FieldsControls fieldConfig={fieldConfig} onChange={onChange}>
             <EuiFlexItem {...(progress === null && { css: { display: 'none' } })} grow={true}>
               <EuiProgress
                 label={

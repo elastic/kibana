@@ -4,26 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import {
+  IngestPutPipelineRequest,
+  TransformPutTransformRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+import {
+  IBasePath,
+  IScopedClusterClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { asyncForEach } from '@kbn/std';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import {
   SLO_MODEL_VERSION,
-  SLO_SUMMARY_TEMP_INDEX_NAME,
+  SUMMARY_TEMP_INDEX_NAME,
   getSLOPipelineId,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '../../common/constants';
-import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
-import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
-import { Duration, DurationUnit, SLODefinition } from '../domain/models';
+import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
+import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
+import { Duration, DurationUnit, SLODefinition, StoredSLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
+import { SO_SLO_TYPE } from '../saved_objects';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
@@ -33,9 +42,9 @@ import { getTransformQueryComposite } from './utils/get_transform_compite_query'
 
 export class CreateSLO {
   constructor(
-    private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
     private repository: SLORepository,
+    private internalSOClient: SavedObjectsClientContract,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private logger: Logger,
@@ -50,24 +59,24 @@ export class CreateSLO {
 
     await Promise.all([
       this.assertSLOInexistant(slo),
-      assertExpectedIndicatorSourceIndexPrivileges(slo, this.esClient),
+      assertExpectedIndicatorSourceIndexPrivileges(slo, this.scopedClusterClient.asCurrentUser),
     ]);
 
     const rollbackOperations = [];
     const createPromise = this.repository.create(slo);
-    rollbackOperations.push(() => this.repository.deleteById(slo.id, true));
+    rollbackOperations.push(() => this.repository.deleteById(slo.id, { ignoreNotFound: true }));
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
-      const sloPipelinePromise = this.createPipeline(getSLOPipelineTemplate(slo));
+      const sloPipelinePromise = this.createPipeline(getSLIPipelineTemplate(slo, this.spaceId));
       rollbackOperations.push(() => this.deletePipeline(getSLOPipelineId(slo.id, slo.revision)));
 
       const rollupTransformPromise = this.transformManager.install(slo);
       rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
 
       const summaryPipelinePromise = this.createPipeline(
-        getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
+        getSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
       );
 
       rollbackOperations.push(() =>
@@ -100,7 +109,7 @@ export class CreateSLO {
         this.summaryTransformManager.start(summaryTransformId),
       ]);
     } catch (err) {
-      this.logger.error(
+      this.logger.debug(
         `Cannot create the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
       );
 
@@ -108,7 +117,7 @@ export class CreateSLO {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.error(`Rollback operation failed. ${rollbackErr}`);
+          this.logger.debug(`Rollback operation failed. ${rollbackErr}`);
         }
       });
 
@@ -123,7 +132,15 @@ export class CreateSLO {
   }
 
   private async assertSLOInexistant(slo: SLODefinition) {
-    const exists = await this.repository.exists(slo.id);
+    const findResponse = await this.internalSOClient.find<StoredSLODefinition>({
+      type: SO_SLO_TYPE,
+      perPage: 0,
+      filter: `slo.attributes.id:(${slo.id})`,
+      namespaces: [ALL_SPACES_ID],
+    });
+
+    const exists = findResponse.total > 0;
+
     if (exists) {
       throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
     }
@@ -131,8 +148,8 @@ export class CreateSLO {
   async createTempSummaryDocument(slo: SLODefinition) {
     return await retryTransientEsErrors(
       () =>
-        this.esClient.index({
-          index: SLO_SUMMARY_TEMP_INDEX_NAME,
+        this.scopedClusterClient.asCurrentUser.index({
+          index: SUMMARY_TEMP_INDEX_NAME,
           id: `slo-${slo.id}`,
           document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
           refresh: true,
@@ -144,8 +161,8 @@ export class CreateSLO {
   async deleteTempSummaryDocument(slo: SLODefinition) {
     return await retryTransientEsErrors(
       () =>
-        this.esClient.delete({
-          index: SLO_SUMMARY_TEMP_INDEX_NAME,
+        this.scopedClusterClient.asCurrentUser.delete({
+          index: SUMMARY_TEMP_INDEX_NAME,
           id: `slo-${slo.id}`,
           refresh: true,
         }),
@@ -181,8 +198,8 @@ export class CreateSLO {
     validateSLO(slo);
 
     const rollUpTransform = await this.transformManager.inspect(slo);
-    const rollUpPipeline = getSLOPipelineTemplate(slo);
-    const summaryPipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
+    const rollUpPipeline = getSLIPipelineTemplate(slo, this.spaceId);
+    const summaryPipeline = getSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
     const summaryTransform = await this.summaryTransformManager.inspect(slo);
     const temporaryDoc = createTempSummaryDocument(slo, this.spaceId, this.basePath);
 
@@ -193,9 +210,7 @@ export class CreateSLO {
       temporaryDoc,
       summaryTransform,
       rollUpTransform,
-      // @ts-expect-error there is some issue with deprecated types being used in es types
       rollUpTransformCompositeQuery: getTransformQueryComposite(rollUpTransform),
-      // @ts-expect-error there is some issue with deprecated types being used in es types
       summaryTransformCompositeQuery: getTransformQueryComposite(summaryTransform),
     };
   }

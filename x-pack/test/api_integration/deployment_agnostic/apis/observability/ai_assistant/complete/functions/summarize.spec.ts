@@ -12,33 +12,26 @@ import {
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import { invokeChatCompleteWithFunctionRequest } from './helpers';
+import { invokeChatCompleteWithFunctionRequest } from '../../utils/conversation';
 import {
   clearKnowledgeBase,
-  importTinyElserModel,
-  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
-} from '../../knowledge_base/helpers';
+} from '../../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
-  const ml = getService('ml');
   const es = getService('es');
-  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('when calling summarize function', function () {
+  describe('summarize', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
     let proxy: LlmProxy;
     let connectorId: string;
 
     before(async () => {
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
 
       proxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
@@ -46,9 +39,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       // intercept the LLM request and return a fixed response
-      void proxy
-        .intercept('conversation', () => true, 'Hello from LLM Proxy')
-        .completeAfterIntercept();
+      void proxy.interceptConversation('Hello from LLM Proxy');
 
       await invokeChatCompleteWithFunctionRequest({
         connectorId,
@@ -66,7 +57,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       });
 
-      await proxy.waitForAllInterceptorsSettled();
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
     });
 
     after(async () => {
@@ -75,9 +66,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
-      await deleteKnowledgeBaseModel(ml);
+      await deleteKnowledgeBaseModel(getService);
       await clearKnowledgeBase(es);
-      await deleteInferenceEndpoint({ es });
     });
 
     it('persists entry in knowledge base', async () => {

@@ -65,8 +65,8 @@ export function registerClusterSettingsRoute({
         );
 
         const settingsResponse = await client.asCurrentUser.cluster.putSettings({
-          body: settingsToDelete,
           flat_settings: true,
+          ...settingsToDelete,
         });
 
         return response.ok({

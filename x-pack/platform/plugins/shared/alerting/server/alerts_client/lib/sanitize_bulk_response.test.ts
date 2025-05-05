@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { sanitizeBulkErrorResponse } from './sanitize_bulk_response';
 
@@ -231,7 +231,7 @@ describe('sanitizeBulkErrorResponse', () => {
 
 function wrapResponseBody(
   body: estypes.BulkResponse,
-  statusCode: number = 200
+  statusCode = 200
 ): TransportResult<estypes.BulkResponse, unknown> {
   return {
     body,

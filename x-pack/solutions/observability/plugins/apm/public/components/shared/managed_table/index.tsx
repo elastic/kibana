@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -20,6 +20,12 @@ import {
 } from '../table_search_bar/table_search_bar';
 
 type SortDirection = 'asc' | 'desc';
+
+/**
+ * A tuple of the start and end indices for all visible/rendered items
+ * for the `ManagedTable` component.
+ */
+export type VisibleItemsStartEnd = readonly [number, number];
 
 export interface TableOptions<T> {
   page: { index: number; size: number };
@@ -36,6 +42,7 @@ export interface ITableColumn<T extends object> {
   width?: string;
   sortable?: boolean;
   truncateText?: boolean;
+  nameTooltip?: EuiBasicTableColumn<T>['nameTooltip'];
   render?: (value: any, item: T) => unknown;
 }
 
@@ -44,7 +51,7 @@ export interface TableSearchBar<T> {
   fieldsToSearch: Array<keyof T>;
   maxCountExceeded: boolean;
   placeholder: string;
-  onChangeSearchQuery: (searchQuery: string) => void;
+  onChangeSearchQuery?: (searchQuery: string) => void;
   techPreview?: boolean;
 }
 
@@ -85,6 +92,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // onChange handlers
   onChangeRenderedItems?: (renderedItems: T[]) => void;
   onChangeSorting?: (sorting: TableOptions<T>['sort']) => void;
+  onChangeItemIndices?: (range: VisibleItemsStartEnd) => void;
 
   // sorting
   sortItems?: boolean;
@@ -114,8 +122,9 @@ function UnoptimizedManagedTable<T extends object>(props: {
     showPerPageOptions = true,
 
     // onChange handlers
-    onChangeRenderedItems = () => {},
-    onChangeSorting = () => {},
+    onChangeRenderedItems,
+    onChangeSorting,
+    onChangeItemIndices,
 
     // sorting
     sortItems = true,
@@ -196,35 +205,43 @@ function UnoptimizedManagedTable<T extends object>(props: {
         });
   }, [items, searchQuery, tableSearchBar.fieldsToSearch]);
 
+  const renderedIndices = useMemo<VisibleItemsStartEnd>(
+    () => [
+      tableOptions.page.index * tableOptions.page.size,
+      (tableOptions.page.index + 1) * tableOptions.page.size,
+    ],
+    [tableOptions.page.index, tableOptions.page.size]
+  );
+
   const renderedItems = useMemo(() => {
     const sortedItems = sortItems
       ? sortFn(filteredItems, tableOptions.sort.field as keyof T, tableOptions.sort.direction)
       : filteredItems;
 
-    return sortedItems.slice(
-      tableOptions.page.index * tableOptions.page.size,
-      (tableOptions.page.index + 1) * tableOptions.page.size
-    );
+    return sortedItems.slice(...renderedIndices);
   }, [
     sortItems,
     sortFn,
     filteredItems,
     tableOptions.sort.field,
     tableOptions.sort.direction,
-    tableOptions.page.index,
-    tableOptions.page.size,
+    renderedIndices,
   ]);
 
   useEffect(() => {
-    onChangeRenderedItems(renderedItems);
+    onChangeRenderedItems?.(renderedItems);
   }, [onChangeRenderedItems, renderedItems]);
+
+  useEffect(() => {
+    onChangeItemIndices?.(renderedIndices);
+  }, [onChangeItemIndices, renderedIndices]);
 
   const sorting = useMemo(
     () => ({ sort: tableOptions.sort as TableOptions<T>['sort'] }),
     [tableOptions.sort]
   );
 
-  useEffect(() => onChangeSorting(sorting.sort), [onChangeSorting, sorting]);
+  useEffect(() => onChangeSorting?.(sorting.sort), [onChangeSorting, sorting]);
 
   const paginationProps = useMemo(() => {
     if (!pagination) {
@@ -255,48 +272,51 @@ function UnoptimizedManagedTable<T extends object>(props: {
           oldSearchQuery: searchQuery,
         })
       ) {
-        tableSearchBar.onChangeSearchQuery(value);
+        tableSearchBar.onChangeSearchQuery?.(value);
       }
     },
     [searchQuery, tableSearchBar]
   );
 
   return (
-    <>
+    <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
       {tableSearchBar.isEnabled ? (
-        <TableSearchBar
-          placeholder={tableSearchBar.placeholder}
-          searchQuery={searchQuery}
-          onChangeSearchQuery={onChangeSearchQuery}
-          techPreview={tableSearchBar.techPreview}
-        />
+        <EuiFlexItem>
+          <TableSearchBar
+            placeholder={tableSearchBar.placeholder}
+            searchQuery={searchQuery}
+            onChangeSearchQuery={onChangeSearchQuery}
+            techPreview={tableSearchBar.techPreview}
+          />
+        </EuiFlexItem>
       ) : null}
-
-      <EuiBasicTable<T>
-        loading={isLoading}
-        tableLayout={tableLayout}
-        error={
-          error
-            ? i18n.translate('xpack.apm.managedTable.errorMessage', {
-                defaultMessage: 'Failed to fetch',
-              })
-            : ''
-        }
-        noItemsMessage={
-          isLoading
-            ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
-                defaultMessage: 'Loading…',
-              })
-            : noItemsMessage
-        }
-        items={renderedItems}
-        columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
-        rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
-        sorting={sorting}
-        onChange={onTableChange}
-        {...(paginationProps ? { pagination: paginationProps } : {})}
-      />
-    </>
+      <EuiFlexItem>
+        <EuiBasicTable<T>
+          loading={isLoading}
+          tableLayout={tableLayout}
+          error={
+            error
+              ? i18n.translate('xpack.apm.managedTable.errorMessage', {
+                  defaultMessage: 'Failed to fetch',
+                })
+              : ''
+          }
+          noItemsMessage={
+            isLoading
+              ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
+                  defaultMessage: 'Loading…',
+                })
+              : noItemsMessage
+          }
+          items={renderedItems}
+          columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+          rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
+          sorting={sorting}
+          onChange={onTableChange}
+          {...(paginationProps ? { pagination: paginationProps } : {})}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

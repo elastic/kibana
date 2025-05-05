@@ -98,7 +98,7 @@ const saveApmServerSchemaRoute = createApmServerRoute({
       { schemaJson: JSON.stringify(schema) },
       { id: APM_SERVER_SCHEMA_SAVED_OBJECT_ID, overwrite: true }
     );
-    logger.info(`Stored apm-server schema.`);
+    logger.debug(`Stored apm-server schema.`);
   },
 });
 

@@ -9,30 +9,35 @@
 
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
-import { Story } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { NodeShapeContainer } from './styles';
-import { NodeExpandButton, type NodeExpandButtonProps } from './node_expand_button';
+import { NodeExpandButton } from './node_expand_button';
 
-export default {
+const meta = {
+  component: NodeExpandButton,
+  render: (args) => (
+    <ThemeProvider theme={{ darkMode: false }}>
+      <NodeShapeContainer>
+        Hover me
+        <NodeExpandButton color={args.color} onClick={args.onClick} />
+      </NodeShapeContainer>
+    </ThemeProvider>
+  ),
   title: 'Components/Graph Components/Additional Components',
-  description: 'CDR - Graph visualization',
   argTypes: {
     onClick: { action: 'onClick' },
     color: {
       options: ['primary', 'danger', 'warning'],
       control: { type: 'radio' },
-      defaultValue: 'primary',
     },
   },
-};
+  args: {
+    color: 'primary',
+  },
+  decorators: [GlobalStylesStorybookDecorator],
+} satisfies Meta<typeof NodeExpandButton>;
 
-const Template: Story<NodeExpandButtonProps> = (args) => (
-  <ThemeProvider theme={{ darkMode: false }}>
-    <NodeShapeContainer>
-      Hover me
-      <NodeExpandButton color={args.color} onClick={args.onClick} />
-    </NodeShapeContainer>
-  </ThemeProvider>
-);
+export default meta;
 
-export const ExpandButton = Template.bind({});
+export const ExpandButton: StoryObj<typeof meta> = {};

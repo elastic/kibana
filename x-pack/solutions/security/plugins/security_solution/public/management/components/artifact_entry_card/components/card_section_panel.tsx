@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui';
 import { EuiPanel } from '@elastic/eui';
 
@@ -16,15 +16,15 @@ export type CardSectionPanelProps = Exclude<
 >;
 
 const StyledEuiPanel = styled(EuiPanel)`
-  padding: 32px;
+  padding: ${({ theme }) => theme.euiTheme.size.xl};
   &.top-section {
-    padding-bottom: 24px;
+    padding-bottom: ${({ theme }) => theme.euiTheme.size.l};
   }
   &.bottom-section {
-    padding-top: 24px;
+    padding-top: ${({ theme }) => theme.euiTheme.size.l};
   }
   &.artifact-entry-collapsible-card {
-    padding: 24px !important;
+    padding: ${({ theme }) => theme.euiTheme.size.l} !important;
   }
 `;
 

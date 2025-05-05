@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import {
   EuiBasicTable,
   EuiButton,
@@ -21,14 +21,10 @@ import {
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
-  EuiBetaBadge,
-  useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 
-import { BETA } from '../../../common/translations';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScoreLevel } from '../severity/common';
@@ -43,7 +39,7 @@ import { EntityAnalyticsLearnMoreLink } from '../entity_analytics_learn_more_lin
 
 const SpacedOrderedList = styled.ol`
   li {
-    margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
+    margin-bottom: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   }
 `;
 
@@ -119,7 +115,6 @@ export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: EntityT
 };
 
 export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => void }) => {
-  const { euiTheme } = useEuiTheme();
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'RiskInformation',
   });
@@ -138,16 +133,6 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
             <EuiTitle size="m">
               <h2 id={simpleFlyoutTitleId}>{i18n.TITLE}</h2>
             </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={BETA}
-              size="s"
-              css={css`
-                color: ${euiTheme.colors.text};
-                margin-top: ${euiTheme.size.xxs};
-              `}
-            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>

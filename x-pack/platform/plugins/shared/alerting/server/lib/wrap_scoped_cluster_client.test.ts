@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
@@ -20,7 +20,9 @@ const eqlQuery = {
 const esqlQueryRequest = {
   method: 'POST',
   path: '/_query',
-  query: 'from .kibana_task_manager',
+  body: {
+    query: 'from .kibana_task_manager',
+  },
 };
 
 let logger = loggingSystemMock.create().get();
@@ -457,7 +459,7 @@ describe('wrapScopedClusterClient', () => {
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","query":"from .kibana_task_manager"} - with options {} and 5000ms requestTimeout'
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
         );
         expect(logger.warn).not.toHaveBeenCalled();
       });
@@ -483,7 +485,7 @@ describe('wrapScopedClusterClient', () => {
         expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","query":"from .kibana_task_manager"} - with options {} and 5000ms requestTimeout'
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
         );
         expect(logger.warn).not.toHaveBeenCalled();
       });
@@ -514,7 +516,7 @@ describe('wrapScopedClusterClient', () => {
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","query":"from .kibana_task_manager"} - with options {"ignore":[404],"requestTimeout":10000} and 5000ms requestTimeout'
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {"ignore":[404],"requestTimeout":10000} and 5000ms requestTimeout'
         );
         expect(logger.warn).not.toHaveBeenCalled();
       });
@@ -570,7 +572,7 @@ describe('wrapScopedClusterClient', () => {
         expect(stats.totalSearchDurationMs).toBeGreaterThan(-1);
 
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
-          `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_query\",\"query\":\"from .kibana_task_manager\"} - with options {}`
+          `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_query\",\"body\":{\"query\":\"from .kibana_task_manager\"}} - with options {}`
         );
         expect(logger.warn).not.toHaveBeenCalled();
       });
@@ -601,6 +603,66 @@ describe('wrapScopedClusterClient', () => {
 
         expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
           `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_query\"} - with options {}`
+        );
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+
+      test('throws error when es|ql async search throws abort error', async () => {
+        const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
+
+        abortController.abort();
+        childClient.transport.request.mockRejectedValueOnce(
+          new Error('Request has been aborted by the user')
+        );
+
+        const abortableSearchClient = createWrappedScopedClusterClientFactory({
+          scopedClusterClient,
+          rule,
+          logger,
+          abortController,
+        }).client();
+
+        await expect(
+          abortableSearchClient.asInternalUser.transport.request({
+            method: 'POST',
+            path: '/_query/async',
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"ES|QL search has been aborted due to cancelled execution"`
+        );
+
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+          `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_query/async\"} - with options {}`
+        );
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+
+      test('throws error when es|ql async query poll throws abort error', async () => {
+        const { abortController, scopedClusterClient, childClient } = getMockClusterClients();
+
+        abortController.abort();
+        childClient.transport.request.mockRejectedValueOnce(
+          new Error('Request has been aborted by the user')
+        );
+
+        const abortableSearchClient = createWrappedScopedClusterClientFactory({
+          scopedClusterClient,
+          rule,
+          logger,
+          abortController,
+        }).client();
+
+        await expect(
+          abortableSearchClient.asInternalUser.transport.request({
+            method: 'GET',
+            path: '/_query/async/FjhHTHlyRVltUm5xck1tV0RFN18wREEeOUxMcnkxZ3NTd0MzOTNabm1NQW9TUTozMjY1NjQ3',
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"ES|QL search has been aborted due to cancelled execution"`
+        );
+
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
+          `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"GET\",\"path\":\"/_query/async/FjhHTHlyRVltUm5xck1tV0RFN18wREEeOUxMcnkxZ3NTd0MzOTNabm1NQW9TUTozMjY1NjQ3\"} - with options {}`
         );
         expect(logger.warn).not.toHaveBeenCalled();
       });
@@ -739,7 +801,7 @@ describe('wrapScopedClusterClient', () => {
   });
 });
 
-function getMockClusterClients(asCurrentUser: boolean = false) {
+function getMockClusterClients(asCurrentUser = false) {
   const abortController = new AbortController();
   const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
   const childClient = elasticsearchServiceMock.createElasticsearchClient();

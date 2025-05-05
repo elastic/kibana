@@ -10,6 +10,7 @@ import { BehaviorSubject, firstValueFrom, type Subscription } from 'rxjs';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { SearchConnectorsPluginStart } from '@kbn/content-connectors-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
@@ -33,7 +34,6 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
-import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -45,8 +45,8 @@ import {
   APPLICATIONS_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   AI_SEARCH_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ENTERPRISE_SEARCH_DATA_PLUGIN,
+  ENTERPRISE_SEARCH_HOME_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   VECTOR_SEARCH_PLUGIN,
@@ -59,14 +59,11 @@ import { hasEnterpriseLicense } from '../common/utils/licensing';
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import { CONNECTORS_PATH, CRAWLERS_PATH } from './applications/enterprise_search_content/routes';
 import { docLinks } from './applications/shared/doc_links';
-import connectorIcon from './assets/images/connector.svg';
-import crawlerIcon from './assets/images/crawler.svg';
 
 import type { DynamicSideNavItems } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
   errorConnectingMessage?: string;
-  publicUrl?: string;
 }
 
 export type EnterpriseSearchPublicSetup = ReturnType<EnterpriseSearchPlugin['setup']>;
@@ -85,6 +82,7 @@ export interface PluginsStart {
   charts?: ChartsPluginStart;
   cloud?: CloudSetup & CloudStart;
   console?: ConsolePluginStart;
+  contentConnectors?: SearchConnectorsPluginStart;
   data?: DataPublicPluginStart;
   fleet?: FleetStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
@@ -93,7 +91,6 @@ export interface PluginsStart {
   licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
   navigation: NavigationPublicPluginStart;
-  searchConnectors?: SearchConnectorsPluginStart;
   searchNavigation?: SearchNavigationPluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
   security?: SecurityPluginStart;
@@ -109,7 +106,6 @@ export type UpdateSideNavDefinitionFn = (items: Partial<DynamicSideNavItems>) =>
 
 const contentLinks: AppDeepLink[] = [
   {
-    euiIconType: connectorIcon,
     id: 'connectors',
     path: `/${CONNECTORS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentConnectorsLinkLabel', {
@@ -117,7 +113,6 @@ const contentLinks: AppDeepLink[] = [
     }),
   },
   {
-    euiIconType: crawlerIcon,
     id: 'webCrawlers',
     path: `/${CRAWLERS_PATH}`,
     title: i18n.translate('xpack.enterpriseSearch.navigation.contentWebcrawlersLinkLabel', {
@@ -136,7 +131,7 @@ const applicationsLinks: AppDeepLink[] = [
         defaultMessage: 'Search Applications',
       }
     ),
-    visibleIn: ['globalSearch'],
+    visibleIn: [],
   },
 ];
 
@@ -150,7 +145,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
   }
 
-  private data: ClientData = {} as ClientData;
+  private data: ClientData = {};
   private esConfig: ESConfig;
 
   private async getInitialData(http: HttpSetup) {
@@ -214,21 +209,17 @@ export class EnterpriseSearchPlugin implements Plugin {
   private isSidebarEnabled = true;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
-    const { config } = this;
-    if (!config.ui?.enabled) {
-      return;
-    }
     const { cloud, share } = plugins;
 
     core.application.register({
-      appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      appRoute: ENTERPRISE_SEARCH_HOME_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
-      id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
+      id: ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME);
+        chrome.docTitle.change(ENTERPRISE_SEARCH_HOME_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
@@ -241,20 +232,20 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
       },
       order: 0,
-      title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
+      title: ENTERPRISE_SEARCH_HOME_PLUGIN.NAV_TITLE,
       visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
     });
 
     core.application.register({
-      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
+      appRoute: ENTERPRISE_SEARCH_DATA_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: contentLinks,
-      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
-      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      euiIconType: ENTERPRISE_SEARCH_DATA_PLUGIN.LOGO,
+      id: ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+        chrome.docTitle.change(ENTERPRISE_SEARCH_DATA_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
@@ -267,13 +258,14 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },
       order: 1,
-      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      title: ENTERPRISE_SEARCH_DATA_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
       appRoute: ELASTICSEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
       id: ELASTICSEARCH_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
@@ -364,7 +356,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+        chrome.docTitle.change(ENTERPRISE_SEARCH_DATA_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
@@ -381,7 +373,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       appRoute: ANALYTICS_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
       id: ANALYTICS_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
@@ -397,12 +389,13 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Analytics, kibanaDeps, pluginData);
       },
       title: ANALYTICS_PLUGIN.NAME,
+      visibleIn: [],
     });
 
     core.application.register({
       appRoute: SEARCH_EXPERIENCES_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
       id: SEARCH_EXPERIENCES_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
@@ -442,11 +435,11 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
-        description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
-        icon: 'logoEnterpriseSearch',
-        id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+        description: ENTERPRISE_SEARCH_HOME_PLUGIN.DESCRIPTION,
+        icon: 'logoElasticsearch',
+        id: ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
         order: 100,
-        path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+        path: ENTERPRISE_SEARCH_HOME_PLUGIN.URL,
         title: SEARCH_PRODUCT_NAME,
       });
 
@@ -473,7 +466,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.register({
         category: 'data',
         description: SEARCH_EXPERIENCES_PLUGIN.DESCRIPTION,
-        icon: 'logoEnterpriseSearch',
+        icon: 'logoElasticsearch',
         id: SEARCH_EXPERIENCES_PLUGIN.ID,
         path: SEARCH_EXPERIENCES_PLUGIN.URL,
         showOnHomePage: false,
@@ -485,9 +478,6 @@ export class EnterpriseSearchPlugin implements Plugin {
   private readonly sideNavDynamicItems$ = new BehaviorSubject<DynamicSideNavItems>({});
 
   public start(core: CoreStart, plugins: PluginsStart) {
-    if (!this.config.ui?.enabled) {
-      return;
-    }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);

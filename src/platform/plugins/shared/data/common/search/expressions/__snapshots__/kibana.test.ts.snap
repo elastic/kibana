@@ -2,6 +2,7 @@
 
 exports[`interpreter/functions#kibana returns an object with the correct structure 1`] = `
 Object {
+  "esqlVariables": undefined,
   "filters": Array [
     Object {
       "meta": Object {

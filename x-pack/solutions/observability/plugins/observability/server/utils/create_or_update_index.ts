@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import pRetry from 'p-retry';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 
-export type Mappings = Required<estypes.IndicesCreateRequest>['body']['mappings'] &
-  Required<estypes.IndicesPutMappingRequest>['body'];
+export type Mappings = Required<estypes.IndicesCreateRequest>['mappings'] &
+  Omit<estypes.IndicesPutMappingRequest, 'index'>;
 
 export async function createOrUpdateIndex({
   index,
@@ -54,13 +54,12 @@ export async function createOrUpdateIndex({
       },
       {
         onFailedAttempt: (e) => {
-          logger.warn(`Could not create index: '${index}'. Retrying...`);
-          logger.warn(e);
+          logger.warn(`Could not create index: '${index}'. Retrying...`, { error: e });
         },
       }
     );
   } catch (e) {
-    logger.error(`Could not create index: '${index}'. Error: ${e.message}.`);
+    logger.error(`Could not create index: '${index}'`, { error: e });
   }
 }
 
@@ -71,15 +70,13 @@ function createNewIndex({
 }: {
   index: string;
   client: ElasticsearchClient;
-  mappings: Required<estypes.IndicesCreateRequest>['body']['mappings'];
+  mappings?: Required<estypes.IndicesCreateRequest>['mappings'];
 }) {
   return client.indices.create({
     index,
-    body: {
-      // auto_expand_replicas: Allows cluster to not have replicas for this index
-      settings: { index: { auto_expand_replicas: '0-1' } },
-      mappings,
-    },
+    // auto_expand_replicas: Allows cluster to not have replicas for this index
+    settings: { index: { auto_expand_replicas: '0-1' } },
+    mappings,
   });
 }
 
@@ -90,10 +87,10 @@ function updateExistingIndex({
 }: {
   index: string;
   client: ElasticsearchClient;
-  mappings: estypes.IndicesPutMappingRequest['body'];
+  mappings?: Omit<estypes.IndicesPutMappingRequest, 'index'>;
 }) {
   return client.indices.putMapping({
     index,
-    body: mappings,
+    ...mappings,
   });
 }

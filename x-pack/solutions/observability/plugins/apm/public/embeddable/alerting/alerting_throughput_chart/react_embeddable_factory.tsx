@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { initializeTitleManager, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React from 'react';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type { EmbeddableApmAlertingVizProps } from '../types';
-import type { EmbeddableDeps } from '../../types';
 import { ApmEmbeddableContext } from '../../embeddable_context';
-import { APMAlertingThroughputChart } from './chart';
+import type { EmbeddableDeps } from '../../types';
 import { APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE } from '../constants';
+import type { EmbeddableApmAlertingVizProps } from '../types';
+import { APMAlertingThroughputChart } from './chart';
 
 export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<
@@ -26,7 +25,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
       return state.rawState as EmbeddableApmAlertingVizProps;
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(state);
       const serviceName$ = new BehaviorSubject(state.serviceName);
       const transactionType$ = new BehaviorSubject(state.transactionType);
       const transactionName$ = new BehaviorSubject(state.transactionName);
@@ -40,11 +39,11 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
 
       const api = buildApi(
         {
-          ...titlesApi,
+          ...titleManager.api,
           serializeState: () => {
             return {
               rawState: {
-                ...serializeTitles(),
+                ...titleManager.serialize(),
                 serviceName: serviceName$.getValue(),
                 transactionType: transactionType$.getValue(),
                 transactionName: transactionName$.getValue(),
@@ -70,7 +69,7 @@ export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableD
           alert: [alert$, (value) => alert$.next(value)],
           kuery: [kuery$, (value) => kuery$.next(value)],
           filters: [filters$, (value) => filters$.next(value)],
-          ...titleComparators,
+          ...titleManager.comparators,
         }
       );
 

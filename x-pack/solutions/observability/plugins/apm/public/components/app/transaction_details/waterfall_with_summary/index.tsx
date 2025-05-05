@@ -64,7 +64,7 @@ export function WaterfallWithSummary<TSample extends {}>({
     waterfallFetchStatus === FETCH_STATUS.LOADING ||
     traceSamplesFetchStatus === FETCH_STATUS.LOADING;
   // When traceId is not present, call to waterfallFetchResult will not be initiated
-  const isSucceded =
+  const isSucceeded =
     (waterfallFetchStatus === FETCH_STATUS.SUCCESS ||
       waterfallFetchStatus === FETCH_STATUS.NOT_INITIATED) &&
     traceSamplesFetchStatus === FETCH_STATUS.SUCCESS;
@@ -91,7 +91,7 @@ export function WaterfallWithSummary<TSample extends {}>({
 
   const { entryTransaction } = waterfallFetchResult;
 
-  if (!entryTransaction && traceSamples?.length === 0 && isSucceded) {
+  if (!entryTransaction && traceSamples?.length === 0 && isSucceeded) {
     return (
       <EuiEmptyPrompt
         title={

@@ -148,13 +148,13 @@ export async function mountApp(
   }
 ) {
   const { createEditorFrame, attributeService, topNavMenuEntryGenerators, locator } = mountProps;
+  const { contextType, initialContext, initialStateFromLocator, originatingApp } =
+    getInitialContext(params.history) || {};
+
   const [[coreStart, startDependencies], instance] = await Promise.all([
     core.getStartServices(),
     createEditorFrame(),
   ]);
-
-  const { contextType, initialContext, initialStateFromLocator, originatingApp } =
-    getInitialContext(params.history) || {};
 
   const lensServices = await getLensServices(
     coreStart,
@@ -169,7 +169,7 @@ export async function mountApp(
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
-  if (!lensServices.application.capabilities.visualize.save) {
+  if (!lensServices.application.capabilities.visualize_v2.save) {
     coreStart.chrome.setBadge({
       text: i18n.translate('xpack.lens.badge.readOnly.text', {
         defaultMessage: 'Read only',
@@ -397,8 +397,6 @@ export async function mountApp(
   const unlistenParentHistory = params.history.listen(() => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
-
-  params.element.classList.add('lnsAppWrapper');
 
   render(
     <KibanaRenderContextProvider {...coreStart}>

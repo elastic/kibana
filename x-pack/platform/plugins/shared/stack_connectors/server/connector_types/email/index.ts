@@ -7,10 +7,11 @@
 
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
-import SMTPConnection from 'nodemailer/lib/smtp-connection';
+import type SMTPConnection from 'nodemailer/lib/smtp-connection';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -21,7 +22,7 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common/connector_feature_config';
+} from '@kbn/actions-plugin/common';
 import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
 import {
   renderMustacheObject,
@@ -30,7 +31,8 @@ import {
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { AdditionalEmailServices } from '../../../common';
-import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
+import type { SendEmailOptions, Transport } from './send_email';
+import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
 import { portSchema } from '../lib/schemas';
 
 export type EmailConnectorType = ConnectorType<
@@ -82,7 +84,7 @@ function validateConfig(
 
   const emails = [config.from];
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
-  if (!!invalidEmailsMessage) {
+  if (invalidEmailsMessage) {
     throw new Error(`[from]: ${invalidEmailsMessage}`);
   }
 

@@ -5,21 +5,69 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
-import { EnrichedDeprecationInfo, ESUpgradeStatus, FeatureSet } from '../../../common/types';
+import { ElasticsearchClient } from '@kbn/core/server';
+import {
+  EnrichedDeprecationInfo,
+  ESUpgradeStatus,
+  FeatureSet,
+  DataSourceExclusions,
+  DataStreamsAction,
+  ReindexAction,
+} from '../../../common/types';
 import { getEnrichedDeprecations } from './migrations';
 import { getHealthIndicators } from './health_indicators';
+import { matchExclusionPattern } from '../data_source_exclusions';
 
 export async function getESUpgradeStatus(
-  dataClient: IScopedClusterClient,
-  featureSet: FeatureSet
+  dataClient: ElasticsearchClient,
+  {
+    featureSet,
+    dataSourceExclusions,
+  }: { featureSet: FeatureSet; dataSourceExclusions: DataSourceExclusions }
 ): Promise<ESUpgradeStatus> {
   const getCombinedDeprecations = async () => {
     const healthIndicators = await getHealthIndicators(dataClient);
     const enrichedDeprecations = await getEnrichedDeprecations(dataClient);
 
-    const toggledMigrationsDeprecations = enrichedDeprecations.filter(
-      ({ type, correctiveAction }) => {
+    const toggledMigrationsDeprecations = enrichedDeprecations
+      .map((deprecation) => {
+        const correctiveActionType = deprecation.correctiveAction?.type;
+        if (correctiveActionType === 'dataStream') {
+          const excludedActions = matchExclusionPattern(deprecation.index!, dataSourceExclusions);
+          (deprecation.correctiveAction as DataStreamsAction).metadata.excludedActions =
+            excludedActions;
+        } else if (correctiveActionType === 'reindex') {
+          const excludedActions = matchExclusionPattern(deprecation.index!, dataSourceExclusions);
+          (deprecation.correctiveAction as ReindexAction).excludedActions = excludedActions;
+        }
+        return deprecation;
+      })
+      .filter(({ correctiveAction }) => {
+        const correctiveActionType = correctiveAction?.type;
+        switch (correctiveActionType) {
+          // Only show the deprecation if there are actions that are not excluded
+          // This only applies to data streams since normal reindexing shows a "delete" manual option.
+          case 'dataStream': {
+            const { excludedActions } = (correctiveAction as DataStreamsAction).metadata;
+
+            // nothing exlcuded, keep the deprecation
+            if (!excludedActions || !excludedActions.length) {
+              return true;
+            }
+
+            // if all actions are excluded, don't show the deprecation
+            const allActionsExcluded =
+              excludedActions.includes('readOnly') && excludedActions.includes('reindex');
+
+            return !allActionsExcluded;
+          }
+          case 'reindex':
+          default: {
+            return true;
+          }
+        }
+      })
+      .filter(({ type, correctiveAction }) => {
         /**
          * This disables showing the ML deprecations in the UA if `featureSet.mlSnapshots`
          * is set to `false`.
@@ -49,21 +97,28 @@ export async function getESUpgradeStatus(
         }
 
         return true;
-      }
-    );
+      });
 
     const enrichedHealthIndicators = healthIndicators.filter(({ status }) => {
       return status !== 'green';
     }) as EnrichedDeprecationInfo[];
 
-    return [...enrichedHealthIndicators, ...toggledMigrationsDeprecations];
+    return {
+      enrichedHealthIndicators,
+      migrationsDeprecations: toggledMigrationsDeprecations,
+    };
   };
+  const { enrichedHealthIndicators, migrationsDeprecations } = await getCombinedDeprecations();
 
-  const combinedDeprecations = await getCombinedDeprecations();
-  const criticalWarnings = combinedDeprecations.filter(({ isCritical }) => isCritical === true);
-
-  return {
-    totalCriticalDeprecations: criticalWarnings.length,
-    deprecations: combinedDeprecations,
+  const result = {
+    totalCriticalDeprecations: migrationsDeprecations.filter(
+      ({ isCritical }) => isCritical === true
+    ).length,
+    migrationsDeprecations,
+    totalCriticalHealthIssues: enrichedHealthIndicators.filter(
+      ({ isCritical }) => isCritical === true
+    ).length,
+    enrichedHealthIndicators,
   };
+  return result;
 }

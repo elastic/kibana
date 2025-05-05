@@ -67,10 +67,31 @@
       {
         "level": "critical",
         "message": "Index created before 7.0",
-        "url":
-          "https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html",
+        "url": "https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html",
         "details": "This index was created using version: 6.8.13",
-        "resolve_during_rolling_upgrade": false
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true
+        }
+      }
+    ],
+    "frozen_index": [
+      {
+        "level": "critical",
+        "message": "Old index with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking-changes-8.0",
+        "details": "This index has version: 7.17.28-8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": { "reindex_required": true }
+      },
+      {
+          "level": "critical",
+          "message":
+            "Index [frozen_index] is a frozen index. The frozen indices feature is deprecated and will be removed in version 9.0.",
+          "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html",
+          "details":
+            "Frozen indices must be unfrozen before upgrading to version 9.0. (The legacy frozen indices feature no longer offers any advantages. You may consider cold or frozen tiers in place of frozen indices.)",
+          "resolve_during_rolling_upgrade": false
       }
     ],
     "closed_index": [
@@ -79,17 +100,18 @@
         "message": "Index created before 7.0",
         "url": "https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html",
         "details": "This index was created using version: 6.8.13",
-        "resolve_during_rolling_upgrade": false
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true
+        }
       }
     ],
     "deprecated_settings": [
       {
         "level": "warning",
         "message": "Setting [index.routing.allocation.include._tier] is deprecated",
-        "url":
-          "https://www.elastic.co/guide/en/elasticsearch/reference/7.16/migrating-7.13.html#deprecate-tier-filter-setting",
-        "details":
-          "Remove the [index.routing.allocation.include._tier] setting. Use [index.routing.allocation.include._tier_preference] to control allocation to data tiers.",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/7.16/migrating-7.13.html#deprecate-tier-filter-setting",
+        "details": "Remove the [index.routing.allocation.include._tier] setting. Use [index.routing.allocation.include._tier_preference] to control allocation to data tiers.",
         "resolve_during_rolling_upgrade": false,
         "_meta": {
           "actions": [
@@ -148,40 +170,157 @@
         "resolve_during_rolling_upgrade": false
       }
     ],
+    "transforms_index": [
+      {
+        "level": "critical",
+        "message": "Old index with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+        "details": "This index has version: 7.17.25",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true,
+          "transform_ids": ["abc"]
+        }
+      }
+    ],
     "myindex": [
       {
         "level": "critical",
         "message": "Old index with a compatibility version < 8.0",
         "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
         "details": "This index has version: 7.17.25",
-        "resolve_during_rolling_upgrade": false
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true
+        }
+      }
+    ],
+    ".ent-search-1": [
+      {
+        "level": "critical",
+        "message": "Old index with a compatibility version < 8.0",
+        "url": "https: //www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking-changes-8.0",
+        "details": "This index has version: 7.17.28-8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true
+        }
+      }
+    ],
+    ".ent-search-2": [
+      {
+        "level": "critical",
+        "message": "Old index with a compatibility version < 8.0",
+        "url": "https: //www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking-changes-8.0",
+        "details": "This index has version: 7.17.28-8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true
+        }
+      }
+    ],
+    ".ent-search-3": [
+      {
+        "level": "critical",
+        "message": "Old index with a compatibility version < 8.0",
+        "url": "https: //www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking-changes-8.0",
+        "details": "This index has version: 7.17.28-8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true
+        }
       }
     ]
   },
   "data_streams": {
-    "my-v7-data-stream" : [{
-      "level" : "critical",
-      "message" : "Old data stream with a compatibility version < 8.0",
-      "url" : "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
-      "details" : "This data stream has backing indices that were created before Elasticsearch 8.0.0",
-      "resolve_during_rolling_upgrade" : false,
-      "_meta": {
-        "backing_indices": {
-          "count": 52,
-          "need_upgrading": {
-            "count": 37,
-            "searchable_snapshot": {
-              "count": 23,
-              "fully_mounted": {
-                "count": 7
-              },
-              "partially_mounted": {
-                "count": 16
-              }
-            }
-          }
+    "my-v7-data-stream": [
+      {
+        "level": "critical",
+        "message": "Old data stream with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+        "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "indices_requiring_upgrade": [
+            ".ds-some-backing-index-5-2024.11.07-000001"
+          ],
+          "indices_requiring_upgrade_count": 1,
+          "total_backing_indices": 2,
+          "reindex_required": true
         }
       }
-    }]
+    ],
+    "logs-enterprise_search.default": [
+      {
+        "level": "critical",
+        "message": "Old data stream with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+        "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "indices_requiring_upgrade": [
+            ".ds-some-backing-index-5-2024.11.07-000001"
+          ],
+          "indices_requiring_upgrade_count": 1,
+          "total_backing_indices": 2,
+          "reindex_required": true
+        }
+      }
+    ],
+    "logs-app_search.default": [
+      {
+        "level": "critical",
+        "message": "Old data stream with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+        "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "indices_requiring_upgrade": [
+            ".ds-some-backing-index-5-2024.11.07-000001"
+          ],
+          "indices_requiring_upgrade_count": 1,
+          "total_backing_indices": 2,
+          "reindex_required": true
+        }
+      }
+    ],
+    "logs-workplace_search.default": [
+      {
+        "level": "critical",
+        "message": "Old data stream with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+        "details": "This data stream has backing indices that were created before Elasticsearch 8.0.0",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "indices_requiring_upgrade": [
+            ".ds-some-backing-index-5-2024.11.07-000001"
+          ],
+          "indices_requiring_upgrade_count": 1,
+          "total_backing_indices": 2,
+          "reindex_required": true
+        }
+      }
+    ]
+  },
+  "ilm_policies": {
+    "myfreezepolicy": [
+      {
+        "level": "warning",
+        "message": "ILM policy [myfreezepolicy] contains the action 'freeze' that is deprecated and will be removed in a future version.",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/frozen-indices.html",
+        "details": "This action is already a noop so it can be safely removed, because frozen indices no longer offer any advantages. Consider cold or frozen tiers in place of frozen indices.",
+        "resolve_during_rolling_upgrade": false
+      }
+    ]
+  },
+  "templates": {
+    "mytemplate": [
+      {
+        "level": "critical",
+        "message": "Configuring source mode in mappings is deprecated and will be removed in future versions. Use [index.mapping.source.mode] index setting instead.",
+        "url": "https://github.com/elastic/elasticsearch/pull/117172",
+        "resolve_during_rolling_upgrade": false
+      }
+    ]
   }
 }

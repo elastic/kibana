@@ -19,7 +19,6 @@ interface UseNavigateToUserDetailsParams {
   email?: string[];
   scopeId: string;
   contextID: string;
-  isDraggable?: boolean;
   isRiskScoreExist: boolean;
   hasMisconfigurationFindings: boolean;
   hasNonClosedAlerts: boolean;
@@ -42,7 +41,6 @@ export const useNavigateToUserDetails = ({
   email,
   scopeId,
   contextID,
-  isDraggable,
   isRiskScoreExist,
   hasMisconfigurationFindings,
   hasNonClosedAlerts,
@@ -50,8 +48,8 @@ export const useNavigateToUserDetails = ({
 }: UseNavigateToUserDetailsParams): UseNavigateToUserDetailsResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   const isLinkEnabled = !isPreviewMode || (isNewNavigationEnabled && isPreviewMode);
@@ -83,7 +81,6 @@ export const useNavigateToUserDetails = ({
           contextID,
           userName,
           scopeId,
-          isDraggable,
         },
       };
 
@@ -109,7 +106,6 @@ export const useNavigateToUserDetails = ({
       isPreviewMode,
       openFlyout,
       contextID,
-      isDraggable,
     ]
   );
 

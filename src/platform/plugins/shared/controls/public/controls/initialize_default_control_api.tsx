@@ -23,8 +23,8 @@ export const initializeDefaultControlApi = (
   comparators: StateComparators<DefaultControlState>;
   serialize: () => SerializedPanelState<DefaultControlState>;
 } => {
-  const dataLoading = new BehaviorSubject<boolean | undefined>(false);
-  const blockingError = new BehaviorSubject<Error | undefined>(undefined);
+  const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   const grow = new BehaviorSubject<boolean | undefined>(state.grow);
   const width = new BehaviorSubject<ControlWidth | undefined>(state.width);
 
@@ -32,10 +32,10 @@ export const initializeDefaultControlApi = (
     api: {
       grow,
       width,
-      dataLoading,
-      blockingError,
-      setBlockingError: (error) => blockingError.next(error),
-      setDataLoading: (loading) => dataLoading.next(loading),
+      dataLoading$,
+      blockingError$,
+      setBlockingError: (error) => blockingError$.next(error),
+      setDataLoading: (loading) => dataLoading$.next(loading),
     },
     comparators: {
       grow: [grow, (newGrow: boolean | undefined) => grow.next(newGrow)],

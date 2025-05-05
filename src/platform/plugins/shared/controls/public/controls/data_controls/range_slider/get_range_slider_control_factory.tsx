@@ -85,7 +85,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       const api = buildApi(
         {
           ...dataControl.api,
-          dataLoading: dataLoading$,
+          dataLoading$,
           getTypeDisplayName: RangeSliderStrings.control.getDisplayName,
           serializeState: () => {
             const { rawState: dataControlState, references } = dataControl.serialize();
@@ -117,7 +117,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       const dataLoadingSubscription = combineLatest([
         loadingMinMax$,
         loadingHasNoResults$,
-        dataControl.api.dataLoading,
+        dataControl.api.dataLoading$,
       ])
         .pipe(
           debounceTime(100),
@@ -142,11 +142,11 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({
         controlFetch$,
-        dataViews$: dataControl.api.dataViews,
+        dataViews$: dataControl.api.dataViews$,
         fieldName$: dataControl.stateManager.fieldName,
         setIsLoading: (isLoading: boolean) => {
           // clear previous loading error on next loading start
-          if (isLoading && dataControl.api.blockingError.value) {
+          if (isLoading && dataControl.api.blockingError$.value) {
             dataControl.api.setBlockingError(undefined);
           }
           loadingMinMax$.next(isLoading);
@@ -171,7 +171,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       );
 
       const outputFilterSubscription = combineLatest([
-        dataControl.api.dataViews,
+        dataControl.api.dataViews$,
         dataControl.stateManager.fieldName,
         selections.value$,
       ])
@@ -201,7 +201,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       const selectionHasNoResults$ = new BehaviorSubject(false);
       const hasNotResultsSubscription = hasNoResults$({
         controlFetch$,
-        dataViews$: dataControl.api.dataViews,
+        dataViews$: dataControl.api.dataViews$,
         rangeFilters$: dataControl.api.filters$,
         ignoreParentSettings$: controlGroupApi.ignoreParentSettings$,
         setIsLoading: (isLoading: boolean) => {
@@ -218,7 +218,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
-          const [dataLoading, fieldFormatter, max, min, selectionHasNotResults, step, value] =
+          const [dataLoading, fieldFormatter, max, min, selectionHasNoResults, step, value] =
             useBatchedPublishingSubjects(
               dataLoading$,
               dataControl.api.fieldFormatter,
@@ -243,7 +243,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
             <RangeSliderControl
               controlPanelClassName={controlPanelClassName}
               fieldFormatter={fieldFormatter}
-              isInvalid={selectionHasNotResults}
+              isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
               max={max}
               min={min}

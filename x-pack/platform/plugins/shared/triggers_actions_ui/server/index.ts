@@ -4,24 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, ConfigSchema } from './config';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { ConfigSchema } from './config';
+import { configSchema } from './config';
 
 export type { PluginStartContract } from './plugin';
-export type { TimeSeriesQuery, CoreQueryParams } from './data';
-export {
-  CoreQueryParamsSchemaProperties,
-  validateCoreQueryBody,
-  validateTimeWindowUnits,
-  validateAggType,
-  validateGroupBy,
-  MAX_GROUPS,
-  DEFAULT_GROUPS,
-  TIME_SERIES_BUCKET_SELECTOR_FIELD,
-} from './data';
+export type { TimeSeriesQuery } from './data';
+export { DEFAULT_GROUPS, TIME_SERIES_BUCKET_SELECTOR_FIELD } from './data';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
+    rules: {
+      enabled: true,
+    },
     enableGeoTrackingThresholdAlert: true,
     enableExperimental: true,
   },

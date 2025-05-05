@@ -8,12 +8,12 @@
 import { noop } from 'lodash';
 import {
   HasLibraryTransforms,
-  PublishesWritablePanelTitle,
-  PublishesWritablePanelDescription,
+  PublishesWritableTitle,
+  PublishesWritableDescription,
   SerializedTitles,
   StateComparators,
   getUnchangingComparator,
-  initializeTitles,
+  initializeTitleManager,
 } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
 import { buildObservableVariable, isTextBasedLanguage } from '../helper';
@@ -36,8 +36,8 @@ import { StateManagementConfig } from './initialize_state_management';
 type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensSharedProps;
 
 export interface DashboardServicesConfig {
-  api: PublishesWritablePanelTitle &
-    PublishesWritablePanelDescription &
+  api: PublishesWritableTitle &
+    PublishesWritableDescription &
     HasLibraryTransforms<LensSerializedState, LensSerializedState> &
     Pick<LensApi, 'parentApi'> &
     Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
@@ -57,15 +57,15 @@ export function initializeDashboardServices(
   internalApi: LensInternalApi,
   stateConfig: StateManagementConfig,
   parentApi: unknown,
+  titleManager: ReturnType<typeof initializeTitleManager>,
   { attributeService, uiActions }: LensEmbeddableStartServices
 ): DashboardServicesConfig {
-  const { titlesApi, serializeTitles, titleComparators } = initializeTitles(initialState);
   // For some legacy reason the title and description default value is picked differently
   // ( based on existing FTR tests ).
-  const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(
+  const [defaultTitle$] = buildObservableVariable<string | undefined>(
     initialState.title || internalApi.attributes$.getValue().title
   );
-  const [defaultPanelDescription$] = buildObservableVariable<string | undefined>(
+  const [defaultDescription$] = buildObservableVariable<string | undefined>(
     initialState.savedObjectId
       ? internalApi.attributes$.getValue().description || initialState.description
       : initialState.description
@@ -82,9 +82,9 @@ export function initializeDashboardServices(
   return {
     api: {
       parentApi: apiIsPresentationContainer(parentApi) ? parentApi : undefined,
-      defaultPanelTitle: defaultPanelTitle$,
-      defaultPanelDescription: defaultPanelDescription$,
-      ...titlesApi,
+      defaultTitle$,
+      defaultDescription$,
+      ...titleManager.api,
       updateOverrides: internalApi.updateOverrides,
       getTriggerCompatibleActions: uiActions.getTriggerCompatibleActions,
 
@@ -143,7 +143,7 @@ export function initializeDashboardServices(
           }
         : {};
       return {
-        ...serializeTitles(),
+        ...titleManager.serialize(),
         style,
         className,
         ...settings,
@@ -153,7 +153,7 @@ export function initializeDashboardServices(
       };
     },
     comparators: {
-      ...titleComparators,
+      ...titleManager.comparators,
       id: getUnchangingComparator<SerializedTitles & LensPanelProps, 'id'>(),
       palette: getUnchangingComparator<SerializedTitles & LensPanelProps, 'palette'>(),
       renderMode: getUnchangingComparator<SerializedTitles & LensPanelProps, 'renderMode'>(),

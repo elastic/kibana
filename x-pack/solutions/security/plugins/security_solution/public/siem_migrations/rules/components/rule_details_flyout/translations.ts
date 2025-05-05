@@ -41,3 +41,10 @@ export const CLOSE_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Close',
   }
 );
+
+export const LAST_UPDATED_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.lastUpdatedLabel',
+  {
+    defaultMessage: 'Last updated',
+  }
+);

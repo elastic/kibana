@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { setupSpacesAndUsers, tearDown } from '../../../setup';
 
 // eslint-disable-next-line import/no-default-export
@@ -26,9 +26,12 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./health'));
       loadTestFile(require.resolve('./excluded'));
       loadTestFile(require.resolve('./snooze'));
+      loadTestFile(require.resolve('./snooze_internal'));
       loadTestFile(require.resolve('./unsnooze'));
+      loadTestFile(require.resolve('./unsnooze_internal'));
       loadTestFile(require.resolve('./global_execution_log'));
       loadTestFile(require.resolve('./get_global_execution_kpi'));
+      loadTestFile(require.resolve('./get_global_execution_summary'));
       loadTestFile(require.resolve('./get_action_error_log'));
       loadTestFile(require.resolve('./get_rule_execution_kpi'));
     });

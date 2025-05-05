@@ -15,16 +15,13 @@ import type {
   ActionVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UseArray } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { RuleActionsField } from '../../../../common/components/rule_actions_field';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { ResponseActionsForm } from '../../../rule_response_actions/response_actions_form';
-import type {
-  RuleStepProps,
-  ActionsStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { Form, UseField } from '../../../../shared_imports';
+import type { ActionsStepRule, RuleStepProps } from '../../../common/types';
 import type { FormHook } from '../../../../shared_imports';
+import { Form, UseField } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
-import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useFetchConnectorsQuery } from '../../../rule_management/api/hooks/use_fetch_connectors_query';
 import { useFetchConnectorTypesQuery } from '../../../rule_management/api/hooks/use_fetch_connector_types_query';
@@ -35,6 +32,7 @@ import { ResponseAction } from './response_action';
 
 interface StepRuleActionsProps extends RuleStepProps {
   ruleId?: RuleObjectId; // Rule SO's id (not ruleId)
+  ruleTypeId?: string;
   actionMessageParams: ActionVariables;
   summaryActionMessageParams: ActionVariables;
   form: FormHook<ActionsStepRule>;
@@ -72,6 +70,7 @@ const DisplayActionsHeader = () => {
 
 const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   ruleId,
+  ruleTypeId,
   isUpdateView = false,
   actionMessageParams,
   summaryActionMessageParams,
@@ -90,11 +89,12 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
           componentProps={{
             messageVariables: actionMessageParams,
             summaryMessageVariables: summaryActionMessageParams,
+            ruleTypeId,
           }}
         />
       </>
     ),
-    [actionMessageParams, summaryActionMessageParams]
+    [actionMessageParams, ruleTypeId, summaryActionMessageParams]
   );
   const displayResponseActionsOptions = useMemo(() => {
     return (

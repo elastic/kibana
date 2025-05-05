@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import type { EuiSelectProps, EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -13,9 +14,8 @@ import {
   EuiFieldNumber,
   EuiFormRow,
   EuiSelect,
-  transparentize,
+  useEuiTheme,
 } from '@elastic/eui';
-import styled from 'styled-components';
 
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
@@ -29,7 +29,7 @@ interface ScheduleItemProps {
   isDisabled?: boolean;
   minValue?: number;
   maxValue?: number;
-  timeTypes?: string[];
+  units?: string[];
   fullWidth?: boolean;
 }
 
@@ -40,33 +40,6 @@ const timeTypeOptions = [
   { value: 'd', text: I18n.DAYS },
 ];
 
-// move optional label to the end of input
-const StyledLabelAppend = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    margin-left: 31px;
-  }
-`;
-
-const StyledEuiFormRow = styled(EuiFormRow)`
-  max-width: none;
-
-  .euiFormControlLayout__append {
-    padding-inline: 0 !important;
-  }
-
-  .euiFormControlLayoutIcons {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-`;
-
-const MyEuiSelect = styled(EuiSelect)`
-  min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
-  background: ${({ theme }) =>
-    transparentize(theme.eui.euiColorPrimary, 0.1)} !important; // Override focus states etc.
-  color: ${({ theme }) => theme.eui.euiColorPrimary};
-  box-shadow: none;
-`;
-
 export function ScheduleItemField({
   field,
   isDisabled,
@@ -74,13 +47,32 @@ export function ScheduleItemField({
   idAria,
   minValue = Number.MIN_SAFE_INTEGER,
   maxValue = Number.MAX_SAFE_INTEGER,
-  timeTypes = DEFAULT_TIME_DURATION_UNITS,
+  units = DEFAULT_TIME_DURATION_UNITS,
   fullWidth = false,
 }: ScheduleItemProps): JSX.Element {
-  const [timeType, setTimeType] = useState(timeTypes[0]);
+  const [timeType, setTimeType] = useState(units[0]);
   const [timeVal, setTimeVal] = useState<number>(0);
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
   const { value, setValue } = field;
+
+  const { euiTheme } = useEuiTheme();
+  const formRowStyles = css`
+    max-width: none;
+
+    .euiFormControlLayout__append {
+      padding-inline: 0 !important;
+    }
+
+    .euiFormControlLayoutIcons {
+      color: ${euiTheme.colors.primary};
+    }
+  `;
+  const timeUnitSelectStyles = css`
+    min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
+    box-shadow: none;
+    background: ${euiTheme.colors.backgroundBasePrimary} !important;
+    color: ${euiTheme.colors.primary};
+  `;
 
   const onChangeTimeType = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
@@ -92,7 +84,7 @@ export function ScheduleItemField({
 
   const onChangeTimeVal = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     (e) => {
-      const number = parseInt(e.target.value, 10);
+      const number = e.target.value === '' ? minValue : parseInt(e.target.value, 10);
 
       if (Number.isNaN(number)) {
         return;
@@ -112,7 +104,7 @@ export function ScheduleItemField({
     }
 
     const isNegative = value.startsWith('-');
-    const durationRegexp = new RegExp(`^\\-?(\\d+)(${timeTypes.join('|')})$`);
+    const durationRegexp = new RegExp(`^\\-?(\\d+)(${units.join('|')})$`);
     const durationMatchArray = value.match(durationRegexp);
 
     if (!durationMatchArray) {
@@ -124,24 +116,25 @@ export function ScheduleItemField({
 
     setTimeVal(time);
     setTimeType(unit);
-  }, [timeType, timeTypes, timeVal, value]);
+  }, [timeType, units, timeVal, value]);
 
   const label = useMemo(
     () => (
-      <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
+      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false} component="span">
           {field.label}
         </EuiFlexItem>
-        <StyledLabelAppend grow={false} component="span">
+        <EuiFlexItem grow={false} component="span">
           {field.labelAppend}
-        </StyledLabelAppend>
+        </EuiFlexItem>
       </EuiFlexGroup>
     ),
     [field.label, field.labelAppend]
   );
 
   return (
-    <StyledEuiFormRow
+    <EuiFormRow
+      css={formRowStyles}
       label={label}
       helpText={field.helpText}
       error={errorMessage}
@@ -152,9 +145,10 @@ export function ScheduleItemField({
     >
       <EuiFieldNumber
         append={
-          <MyEuiSelect
+          <EuiSelect
+            css={timeUnitSelectStyles}
             fullWidth
-            options={timeTypeOptions.filter((type) => timeTypes.includes(type.value))}
+            options={timeTypeOptions.filter((type) => units.includes(type.value))}
             value={timeType}
             onChange={onChangeTimeType}
             disabled={isDisabled}
@@ -170,7 +164,7 @@ export function ScheduleItemField({
         disabled={isDisabled}
         data-test-subj="interval"
       />
-    </StyledEuiFormRow>
+    </EuiFormRow>
   );
 }
 

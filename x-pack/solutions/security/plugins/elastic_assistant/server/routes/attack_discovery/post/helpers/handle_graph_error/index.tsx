@@ -15,7 +15,7 @@ import { ATTACK_DISCOVERY_ERROR_EVENT } from '../../../../../lib/telemetry/event
 
 export const handleGraphError = async ({
   apiConfig,
-  attackDiscoveryId,
+  executionUuid,
   authenticatedUser,
   dataClient,
   err,
@@ -24,7 +24,7 @@ export const handleGraphError = async ({
   telemetry,
 }: {
   apiConfig: ApiConfig;
-  attackDiscoveryId: string;
+  executionUuid: string;
   authenticatedUser: AuthenticatedUser;
   dataClient: AttackDiscoveryDataClient;
   err: Error;
@@ -36,7 +36,7 @@ export const handleGraphError = async ({
     logger.error(err);
     const error = transformError(err);
     const currentAd = await dataClient.getAttackDiscovery({
-      id: attackDiscoveryId,
+      id: executionUuid,
       authenticatedUser,
     });
 
@@ -48,7 +48,7 @@ export const handleGraphError = async ({
       attackDiscoveryUpdateProps: {
         attackDiscoveries: [],
         status: attackDiscoveryStatus.failed,
-        id: attackDiscoveryId,
+        id: executionUuid,
         replacements: latestReplacements,
         backingIndex: currentAd.backingIndex,
         failureReason: error.message,

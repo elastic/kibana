@@ -11,7 +11,8 @@ export type {
   ESQLAst,
   ESQLAstItem,
   ESQLAstCommand,
-  ESQLAstMetricsCommand,
+  ESQLAstTimeseriesCommand,
+  ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLCommandMode,
@@ -25,16 +26,22 @@ export type {
   ESQLColumn,
   ESQLLiteral,
   ESQLParamLiteral,
-  AstProviderFn,
   EditorError,
   ESQLAstNode,
+  ESQLInlineCast,
+  ESQLAstRenameExpression,
+  ESQLAstBaseItem,
+  ESQLAstChangePointCommand,
 } from './src/types';
 
 export {
-  isBinaryExpression,
   isColumn,
   isDoubleLiteral,
   isFunctionExpression,
+  isBinaryExpression,
+  isWhereExpression,
+  isFieldExpression,
+  isSource,
   isIdentifier,
   isIntegerLiteral,
   isLiteral,
@@ -52,11 +59,10 @@ export {
   parseErrors,
   type ParseOptions,
   type ParseResult,
-  getAstAndSyntaxErrors,
   ESQLErrorListener,
 } from './src/parser';
 
-export { Walker, type WalkerOptions, walk } from './src/walker';
+export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
 export * as synth from './src/synth';
 
 export {

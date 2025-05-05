@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { type RenderResult } from '@testing-library/react';
+import { type RenderResult, fireEvent, waitFor } from '@testing-library/react';
+
+import type { FleetStartServices } from '../../../../../../..';
 
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 
@@ -18,33 +20,61 @@ import {
 jest.mock('react-use/lib/useLocalStorage');
 
 describe('BidirectionalIntegrationsBanner', () => {
-  let formProps: BidirectionalIntegrationsBannerProps;
+  let componentProps: BidirectionalIntegrationsBannerProps;
   let renderResult: RenderResult;
+  let render: () => RenderResult;
+  let storageMock: jest.Mocked<FleetStartServices['storage']>;
 
   beforeEach(() => {
-    formProps = {
-      onDismiss: jest.fn(),
+    componentProps = { integrationPackageName: 'sentinel_one' };
+
+    const testRunner = createFleetTestRendererMock();
+
+    storageMock = testRunner.startServices.storage;
+
+    render = () => {
+      renderResult = testRunner.render(<BidirectionalIntegrationsBanner {...componentProps} />);
+      return renderResult;
     };
-
-    const renderer = createFleetTestRendererMock();
-
-    renderResult = renderer.render(<BidirectionalIntegrationsBanner {...formProps} />);
   });
 
   it('should render bidirectional integrations banner', () => {
+    render();
     expect(renderResult.getByTestId('bidirectionalIntegrationsCallout')).toBeInTheDocument();
   });
 
   it('should contain a link to documentation', () => {
+    render();
     const docLink = renderResult.getByTestId('bidirectionalIntegrationDocLink');
 
     expect(docLink).toBeInTheDocument();
-    expect(docLink.getAttribute('href')).toContain('third-party-actions.html');
+    expect(docLink.getAttribute('href')).toContain('third-party-response-actions');
   });
 
-  it('should call `onDismiss` callback when user clicks dismiss', () => {
-    renderResult.getByTestId('euiDismissCalloutButton').click();
+  it('should remove the callout when the dismiss button is clicked', async () => {
+    render();
+    fireEvent.click(renderResult.getByTestId('euiDismissCalloutButton'));
 
-    expect(formProps.onDismiss).toBeCalled();
+    await waitFor(() => {
+      expect(storageMock.store.setItem).toHaveBeenCalledWith(
+        'fleet.showSOReponseSupportBanner',
+        'false'
+      );
+      expect(renderResult.queryByTestId('bidirectionalIntegrationsCallout')).toBeFalsy();
+    });
+  });
+
+  it('should render nothing if integration is not supported', () => {
+    componentProps.integrationPackageName = 'foo';
+    render();
+
+    expect(renderResult.queryByTestId('bidirectionalIntegrationsCallout')).toBeFalsy();
+  });
+
+  it('should render nothing if user had dismissed the callout in the past', () => {
+    (storageMock.store.getItem as jest.Mock).mockReturnValue('false');
+    render();
+
+    expect(renderResult.queryByTestId('bidirectionalIntegrationsCallout')).toBeFalsy();
   });
 });

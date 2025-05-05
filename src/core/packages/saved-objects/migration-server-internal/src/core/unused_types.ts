@@ -11,6 +11,8 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 
 /**
  * Types that are no longer registered and need to be removed
+ * As of 8.8, no new types are allowed to be removed.
+ * Removing saved object types is not backward compatible
  */
 export const REMOVED_TYPES: string[] = [
   'apm-services-telemetry',
@@ -50,6 +52,8 @@ export const REMOVED_TYPES: string[] = [
   'upgrade-assistant-telemetry',
   // Removed in 8.8 https://github.com/elastic/kibana/pull/155204
   'endpoint:user-artifact',
+  // Removed in 9.1 https://github.com/elastic/kibana/pull/216342
+  'investigation',
 ].sort();
 
 export const excludeUnusedTypesQuery: QueryDslQueryContainer = {

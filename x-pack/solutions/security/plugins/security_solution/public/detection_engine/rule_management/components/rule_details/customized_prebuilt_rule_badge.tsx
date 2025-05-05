@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiBadge } from '@elastic/eui';
-import * as i18n from './translations';
-import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
+import React from 'react';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../hooks/use_is_prebuilt_rules_customization_enabled';
+import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
+import * as i18n from './translations';
 
 interface CustomizedPrebuiltRuleBadgeProps {
   rule: RuleResponse | null;
@@ -19,15 +18,13 @@ interface CustomizedPrebuiltRuleBadgeProps {
 export const CustomizedPrebuiltRuleBadge: React.FC<CustomizedPrebuiltRuleBadgeProps> = ({
   rule,
 }) => {
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
-
-  if (!isPrebuiltRulesCustomizationEnabled) {
-    return null;
-  }
-
   if (rule === null || !isCustomizedPrebuiltRule(rule)) {
     return null;
   }
 
-  return <EuiBadge color="hollow">{i18n.MODIFIED_PREBUILT_RULE_LABEL}</EuiBadge>;
+  return (
+    <EuiBadge data-test-subj="modified-prebuilt-rule-badge" color="hollow">
+      {i18n.MODIFIED_PREBUILT_RULE_LABEL}
+    </EuiBadge>
+  );
 };

@@ -19,8 +19,8 @@ import fastIsEqual from 'fast-deep-equal';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { RenderMode } from '@kbn/expressions-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
-import { LensRuntimeState, LensSerializedState } from './types';
-import type { LensAttributesService } from '../lens_attribute_service';
+import type { LensEmbeddableStartServices, LensRuntimeState, LensSerializedState } from './types';
+import { loadESQLAttributes } from './esql';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -51,10 +51,23 @@ export function createEmptyLensState(
 // Make sure to inject references from the container down to the runtime state
 // this ensure migrations/copy to spaces works correctly
 export async function deserializeState(
-  attributeService: LensAttributesService,
+  {
+    attributeService,
+    ...services
+  }: Pick<
+    LensEmbeddableStartServices,
+    | 'attributeService'
+    | 'data'
+    | 'dataViews'
+    | 'data'
+    | 'visualizationMap'
+    | 'datasourceMap'
+    | 'uiSettings'
+  >,
   rawState: LensSerializedState,
   references?: SavedObjectReference[]
 ) {
+  const fallbackAttributes = createEmptyLensState().attributes;
   if (rawState.savedObjectId) {
     try {
       const { attributes, managed, sharingSavedObjectProps } =
@@ -62,14 +75,28 @@ export async function deserializeState(
       return { ...rawState, attributes, managed, sharingSavedObjectProps };
     } catch (e) {
       // return an empty Lens document if no saved object is found
-      return { ...rawState, attributes: createEmptyLensState().attributes };
+      return { ...rawState, attributes: fallbackAttributes };
     }
   }
   // Inject applied only to by-value SOs
-  return attributeService.injectReferences(
+  const newState = attributeService.injectReferences(
     ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState,
     references?.length ? references : undefined
   );
+  if (newState.isNewPanel) {
+    try {
+      const newAttributes = await loadESQLAttributes(services);
+      // provide a fallback
+      return {
+        ...newState,
+        attributes: newAttributes ?? newState.attributes ?? fallbackAttributes,
+      };
+    } catch (e) {
+      // return an empty Lens document if no saved object is found
+      return { ...newState, attributes: fallbackAttributes };
+    }
+  }
+  return newState;
 }
 
 export function emptySerializer() {
@@ -138,7 +165,7 @@ export function extractInheritedViewModeObservable(
   parentApi?: unknown
 ): PublishingSubject<ViewMode> {
   if (apiPublishesViewMode(parentApi)) {
-    return parentApi.viewMode;
+    return parentApi.viewMode$;
   }
   if (apiHasParentApi(parentApi)) {
     return extractInheritedViewModeObservable(parentApi.parentApi);

@@ -41,7 +41,9 @@ export const useStyles = (progress: number) => {
       if (selected) {
         return euiVars.terminalOutputMarkerAccent;
       }
-      return isAmsterdam(themeName) ? euiVars.euiColorVis1 : euiVars.euiColorVis2;
+      return isAmsterdam(themeName)
+        ? euiTheme.colors.vis.euiColorVis1
+        : euiTheme.colors.vis.euiColorVis2;
     };
 
     const marker = (type: TTYPlayerLineMarkerType, selected: boolean): CSSObject => ({
@@ -89,23 +91,17 @@ export const useStyles = (progress: number) => {
       "input[type='range']::-webkit-slider-thumb": customThumb,
       "input[type='range']::-moz-range-thumb": customThumb,
       '.euiRangeHighlight__progress': {
-        backgroundColor: isAmsterdam(themeName)
-          ? euiVars.euiColorVis0_behindText
-          : euiVars.euiColorVis0,
+        backgroundColor: euiTheme.colors.vis.euiColorVis0,
         width: progress + '%!important',
         borderBottomRightRadius: 0,
         borderTopRightRadius: 0,
       },
       '.euiRangeSlider:focus ~ .euiRangeHighlight .euiRangeHighlight__progress': {
-        backgroundColor: isAmsterdam(themeName)
-          ? euiVars.euiColorVis0_behindText
-          : euiVars.euiColorVis0,
+        backgroundColor: euiTheme.colors.vis.euiColorVis0,
       },
       '.euiRangeSlider:focus:not(:focus-visible) ~ .euiRangeHighlight .euiRangeHighlight__progress':
         {
-          backgroundColor: isAmsterdam(themeName)
-            ? euiVars.euiColorVis0_behindText
-            : euiVars.euiColorVis0,
+          backgroundColor: euiTheme.colors.vis.euiColorVis0,
         },
       '.euiRangeTrack::after': {
         background: euiVars.terminalOutputSliderBackground,
@@ -132,10 +128,6 @@ export const useStyles = (progress: number) => {
     };
   }, [
     euiTheme,
-    euiVars.euiColorVis0_behindText,
-    euiVars.euiColorVis0,
-    euiVars.euiColorVis1,
-    euiVars.euiColorVis2,
     euiVars.terminalOutputBackground,
     euiVars.terminalOutputMarkerAccent,
     euiVars.terminalOutputMarkerWarning,

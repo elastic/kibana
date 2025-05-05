@@ -17,9 +17,10 @@
   ],
   "baseBranches": [
     "main",
-    "8.x",
+    "9.0",
+    "8.19",
+    "8.18",
     "8.17",
-    "8.16",
     "7.17"
   ],
   "prConcurrentLimit": 0,
@@ -39,6 +40,51 @@
         ".*"
       ],
       "enabled": false
+    },
+    {
+      "groupName": "webpack",
+      "matchDepNames": [
+        "autoprefixer",
+        "clean-webpack-plugin",
+        "css-loader",
+        "file-loader",
+        "loader-utils",
+        "mini-css-extract-plugin",
+        "postcss-loader",
+        "raw-loader",
+        "sass-loader",
+        "style-loader",
+        "url-loader",
+        "val-loader",
+        "webpack",
+        "webpack-bundle-analyzer",
+        "webpack-cli",
+        "webpack-dev-server",
+        "webpack-merge",
+        "webpack-sources",
+        "webpack-visualizer-plugin2",
+        "@statoscope/webpack-plugin",
+        "@types/loader-utils",
+        "@types/webpack",
+        "@types/webpack-bundle-analyzer",
+        "@types/webpack-env",
+        "@types/webpack-merge",
+        "@types/webpack-sources"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:all-open",
+        "release_note:skip",
+        "ci:build-webpack-bundle-analyzer"
+      ],
+      "minimumReleaseAge": "60 days",
+      "enabled": true
     },
     {
       "groupName": "devcontainer",
@@ -78,6 +124,27 @@
       "enabled": true
     },
     {
+      "groupName": "chainguard-fips",
+      "matchPackageNames": [
+        "docker.elastic.co/wolfi/chainguard-base-fips"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main",
+        "/^[9].*/",
+        "8.19"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip",
+        "ci:build-docker-fips"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "operations actions",
       "matchManagers": [
         "github-actions"
@@ -95,7 +162,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "/.*/"
+        "main",
+        "/^[8-9].*/"
       ],
       "labels": [
         "Team:Operations",
@@ -112,8 +180,6 @@
         "@langtrase/trace-attributes",
         "@opentelemetry/sdk-trace-base",
         "@smithy/eventstream-serde-node",
-        "@smithy/protocol-http",
-        "@smithy/signature-v4",
         "@smithy/types",
         "@types/aws4",
         "ajv",
@@ -151,6 +217,7 @@
         "@types/supertest",
         "@types/react-test-renderer",
         "babel-plugin-istanbul",
+        "lighthouse",
         "nyc",
         "oboe",
         "pixelmatch",
@@ -216,28 +283,174 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/appex-sharedux dependencies",
+      "groupName": "Enzyme dependencies",
       "matchDepNames": [
-        "@elastic/filesaver",
-        "@elastic/numeral",
         "@wojtekmaj/enzyme-adapter-react-17",
-        "base64-js",
-        "blurhash",
-        "classnames",
-        "deep-freeze-strict",
         "enzyme",
         "enzyme-to-json",
-        "fflate",
-        "history",
+        "@types/enzyme"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "matchDepNames": [
+        "@elastic/filesaver"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "matchDepNames": [
+        "@elastic/numeral"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "base64-js dependencies",
+      "matchDepNames": [
+        "base64-js",
+        "@types/base64-js"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "matchDepNames": [
+        "blurhash"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "classnames dependencies",
+      "matchDepNames": [
+        "classnames",
+        "@types/classnames"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "deep-freeze-strict dependencies",
+      "matchDepNames": [
+        "deep-freeze-strict",
+        "@types/deep-freeze-strict"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "lz-string dependencies",
+      "matchDepNames": [
         "lz-string",
-        "rison-node",
+        "@types/lz-string"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "matchDepNames": [
+        "rison-node"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "styled-components dependencies",
+      "matchDepNames": [
         "styled-components",
-        "@types/base64-js",
-        "@types/classnames",
-        "@types/deep-freeze-strict",
-        "@types/enzyme",
-        "@types/history",
-        "@types/lz-string",
         "@types/styled-components"
       ],
       "reviewers": [
@@ -254,7 +467,7 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/appex-sharedux emotion dependencies",
+      "groupName": "Emotion dependencies",
       "matchDepNames": [
         "@emotion/cache",
         "@emotion/css",
@@ -277,24 +490,16 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/appex-sharedux react dependencies",
+      "groupName": "React dependencies",
       "matchDepNames": [
         "prop-types",
         "react",
         "react-dom",
-        "react-fast-compare",
-        "react-router",
-        "react-router-config",
-        "react-router-dom",
-        "react-router-dom-v5-compat",
-        "react-use",
-        "reselect",
+        "react-is",
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
-        "@types/react-router",
-        "@types/react-router-config",
-        "@types/react-router-dom"
+        "@types/react-is"
       ],
       "reviewers": [
         "team:appex-sharedux"
@@ -310,10 +515,51 @@
       "enabled": true
     },
     {
-      "groupName": "@elastic/appex-sharedux react-18 dependencies",
       "matchDepNames": [
-        "react-18",
-        "react-dom-18"
+        "react-fast-compare"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "matchDepNames": [
+        "react-use"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "react-router dependencies",
+      "matchDepNames": [
+        "react-router",
+        "react-router-config",
+        "react-router-dom",
+        "react-router-dom-v5-compat",
+        "@types/react-router",
+        "@types/react-router-config",
+        "@types/react-router-dom",
+        "history",
+        "@types/history"
       ],
       "reviewers": [
         "team:appex-sharedux"
@@ -621,6 +867,8 @@
         "fp-ts",
         "getos",
         "joi-to-json",
+        "@apidevtools/json-schema-ref-parser",
+        "@fast-check/jest",
         "json5",
         "load-json-file",
         "mock-fs",
@@ -694,8 +942,7 @@
     {
       "groupName": "lru-cache",
       "matchDepNames": [
-        "lru-cache",
-        "@types/lru-cache"
+        "lru-cache"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -780,12 +1027,28 @@
     {
       "groupName": "@elastic/kibana-management dependencies",
       "matchDepNames": [
-        "@mapbox/vector-tile",
         "csstype",
         "cronstrue",
+        "immer"
+      ],
+      "reviewers": [
+        "team:kibana-management"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Kibana Management",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-management - file-saver",
+      "matchDepNames": [
         "file-saver",
-        "immer",
-        "@types/mapbox__vector-tile",
         "@types/file-saver"
       ],
       "reviewers": [
@@ -947,6 +1210,27 @@
       "enabled": true
     },
     {
+      "groupName": "@elastic/elasticsearch (CI clients)",
+      "matchDepNames": [
+        "elasticsearch-8.x"
+      ],
+      "reviewers": [
+        "team:kibana-operations",
+        "team:appex-qa"
+      ],
+      "allowedVersions": "<9.0.0",
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:prev-minor",
+        "Team:Operations",
+        "Team:QA"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "@elastic/elasticsearch",
       "matchDepNames": [
         "@elastic/elasticsearch"
@@ -955,6 +1239,28 @@
         "team:kibana-operations",
         "team:kibana-core"
       ],
+      "allowedVersions": "<9.0.0",
+      "matchBaseBranches": [
+        "8.19"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:skip",
+        "Team:Operations",
+        "Team:Core"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/elasticsearch",
+      "matchDepNames": [
+        "@elastic/elasticsearch"
+      ],
+      "reviewers": [
+        "team:kibana-operations",
+        "team:kibana-core"
+      ],
+      "allowedVersions": "<8.0.0",
       "matchBaseBranches": [
         "7.17"
       ],
@@ -986,7 +1292,8 @@
         "release_note:skip",
         "Team:Security",
         "Team:Core",
-        "backport:prev-minor"
+        "backport:prev-minor",
+        "backport:prev-major"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1009,7 +1316,8 @@
         "release_note:skip",
         "Team:Security",
         "Team:Core",
-        "backport:prev-minor"
+        "backport:prev-minor",
+        "backport:prev-major"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1031,7 +1339,8 @@
       "labels": [
         "release_note:skip",
         "Team:Core",
-        "backport:prev-minor"
+        "backport:prev-minor",
+        "backport:prev-major"
       ],
       "enabled": true
     },
@@ -1369,7 +1678,8 @@
       "matchDepNames": [
         "prettier",
         "eslint-plugin-prettier",
-        "eslint-config-prettier"
+        "eslint-config-prettier",
+        "@types/prettier"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -1404,6 +1714,7 @@
         "eslint-plugin-mocha",
         "eslint-plugin-no-unsanitized",
         "eslint-plugin-node",
+        "eslint-plugin-playwright",
         "eslint-plugin-react",
         "eslint-plugin-react-hooks",
         "eslint-plugin-react-perf",
@@ -2030,6 +2341,28 @@
       "enabled": true
     },
     {
+      "groupName": "workchat gen-ai dependencies",
+      "matchDepNames": [
+        "@modelcontextprotocol/sdk",
+        "@n8n/json-schema-to-zod",
+        "expr-eval"
+      ],
+      "reviewers": [
+        "team:search-kibana"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Search",
+        "Team:Enterprise Search",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "vinyl",
       "matchDepNames": [
         "vinyl",
@@ -2070,50 +2403,6 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
-    },
-    {
-      "groupName": "webpack",
-      "matchDepNames": [
-        "autoprefixer",
-        "clean-webpack-plugin",
-        "css-loader",
-        "file-loader",
-        "loader-utils",
-        "mini-css-extract-plugin",
-        "postcss-loader",
-        "raw-loader",
-        "sass-loader",
-        "style-loader",
-        "url-loader",
-        "val-loader",
-        "webpack",
-        "webpack-bundle-analyzer",
-        "webpack-cli",
-        "webpack-dev-server",
-        "webpack-merge",
-        "webpack-sources",
-        "webpack-visualizer-plugin2",
-        "@statoscope/webpack-plugin",
-        "@types/loader-utils",
-        "@types/webpack",
-        "@types/webpack-bundle-analyzer",
-        "@types/webpack-env",
-        "@types/webpack-merge",
-        "@types/webpack-sources"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": false
     },
     {
       "groupName": "yargs",
@@ -2342,9 +2631,11 @@
         "@mapbox/mapbox-gl-draw",
         "@mapbox/mapbox-gl-rtl-text",
         "@mapbox/mapbox-gl-supported",
+        "@mapbox/vector-tile",
         "mapbox-gl-draw-rectangle-mode",
         "maplibre-gl",
-        "@types/geojson"
+        "@types/geojson",
+        "@types/mapbox__vector-tile"
       ],
       "reviewers": [
         "team:kibana-presentation"
@@ -2819,7 +3110,6 @@
         "cypress"
       ],
       "reviewers": [
-        "team:apm",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -3089,7 +3379,9 @@
         "redux-thunk"
       ],
       "reviewers": [
-        "team:kibana-visualizations"
+        "team:kibana-presentation",
+        "team:kibana-management",
+        "team:security-solution"
       ],
       "matchBaseBranches": [
         "main"
@@ -3184,11 +3476,34 @@
       "enabled": true
     },
     {
+      "groupName": "chromedriver",
+      "matchDepNames": [
+        "chromedriver"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main",
+        "/^[8-9].*/"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true,
+      "matchUpdateTypes": [
+        "major",
+        "minor"
+      ]
+    },
+    {
       "groupName": "ftr",
       "matchDepNames": [
         "@types/chromedriver",
         "@types/selenium-webdriver",
-        "chromedriver",
         "geckodriver",
         "ms-chromium-edge-driver",
         "selenium-webdriver"
@@ -3197,7 +3512,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "/.*/"
+        "main",
+        "/^[8-9].*/"
       ],
       "labels": [
         "Team:Operations",
@@ -3334,28 +3650,7 @@
       "enabled": true
     },
     {
-      "groupName": "@storybook",
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "matchDepPatterns": [
-        "^@storybook"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "ci:build-storybooks",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "allowedVersions": "<7.0",
-      "enabled": true
-    },
-    {
-      "groupName": "@storybook/testing-react",
+      "groupName": "storybook",
       "reviewers": [
         "team:kibana-operations"
       ],
@@ -3363,16 +3658,20 @@
         "main"
       ],
       "matchDepNames": [
-        "@storybook/testing-react"
+        "@pmmmwh/react-refresh-webpack-plugin",
+        "fix-esm",
+        "react-refresh"
+      ],
+      "matchDepPatterns": [
+        "storybook"
       ],
       "labels": [
         "Team:Operations",
         "release_note:skip",
         "ci:build-storybooks",
-        "backport:skip"
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
-      "allowedVersions": "<2.0",
       "enabled": true
     },
     {
@@ -3445,26 +3744,6 @@
       "groupName": "redux-saga-testing",
       "matchDepNames": [
         "redux-saga-testing"
-      ],
-      "reviewers": [
-        "team:obs-ux-management-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open",
-        "ci:all-cypress-suites",
-        "Team:obs-ux-management"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "date-fns",
-      "matchDepNames": [
-        "date-fns"
       ],
       "reviewers": [
         "team:obs-ux-management-team"
@@ -3583,7 +3862,8 @@
       "groupName": "redux",
       "matchDepNames": [
         "redux",
-        "react-redux"
+        "react-redux",
+        "reselect"
       ],
       "reviewers": [
         "team:search-kibana",
@@ -3604,13 +3884,13 @@
       "enabled": true
     },
     {
-      "groupName": "Profiling",
+      "groupName": "Peggy",
       "matchDepNames": [
-        "peggy",
-        "@types/dagre"
+        "peggy"
       ],
       "reviewers": [
-        "team:obs-ux-infra_services-team"
+        "team:kibana-visualizations",
+        "team:kibana-data-discovery"
       ],
       "matchBaseBranches": [
         "main"
@@ -3662,28 +3942,9 @@
       "enabled": true
     },
     {
-      "groupName": "react-syntax-highlighter",
+      "groupName": "hdr-histogram-js",
       "matchDepNames": [
-        "react-syntax-highlighter",
-        "@types/react-syntax-highlighter"
-      ],
-      "reviewers": [
-        "team:obs-ux-infra_services-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "native-hdr-histogram",
-      "matchDepNames": [
-        "native-hdr-histogram"
+        "hdr-histogram-js"
       ],
       "reviewers": [
         "team:obs-ux-infra_services-team"
@@ -3728,67 +3989,15 @@
         "@langchain/google-genai",
         "@langchain/google-vertexai",
         "@langchain/langgraph",
-        "@langchain/openai"
-      ],
-      "reviewers": [
-        "team:security-generative-ai"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Security Generative AI",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "@google/generative-ai",
-      "matchDepNames": [
-        "@google/generative-ai"
-      ],
-      "reviewers": [
-        "team:security-generative-ai"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Security Generative AI",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "@smithy",
-      "matchDepNames": [
+        "@langchain/openai",
+        "@google/generative-ai",
         "@smithy/eventstream-codec",
         "@smithy/middleware-stack",
-        "@smithy/node-http-handler",
-        "@smithy/util-utf8"
-      ],
-      "reviewers": [
-        "team:security-generative-ai"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Security Generative AI",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "@aws-sdk/client-bedrock-runtime",
-      "matchDepNames": [
-        "@aws-sdk/client-bedrock-runtime"
+        "@smithy/util-utf8",
+        "@aws-sdk/client-bedrock-agent-runtime",
+        "@aws-sdk/client-bedrock-runtime",
+        "@aws-sdk/client-kendra",
+        "@aws-sdk/credential-provider-node"
       ],
       "reviewers": [
         "team:security-generative-ai"
@@ -3994,11 +4203,30 @@
       "enabled": true
     },
     {
-      "groupName": "XState",
+      "groupName": "XState4",
       "matchDepNames": [
         "xstate",
+        "@xstate/react"
+      ],
+      "reviewers": [
+        "team:obs-ux-logs-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:obs-ux-logs",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "separateMajorMinor": true,
+      "enabled": true
+    },
+    {
+      "groupName": "XState5",
+      "matchDepNames": [
         "xstate5",
-        "@xstate/react",
         "@xstate5/react"
       ],
       "reviewers": [
@@ -4008,11 +4236,12 @@
         "main"
       ],
       "labels": [
-        "Team:Obs UX Logs",
+        "Team:obs-ux-logs",
         "release_note:skip",
         "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
+      "separateMajorMinor": true,
       "enabled": true
     },
     {
@@ -4027,7 +4256,26 @@
         "main"
       ],
       "labels": [
-        "Team:Obs UX Logs",
+        "Team:obs-ux-logs",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "Oniguruma to es",
+      "matchDepNames": [
+        "oniguruma-to-es"
+      ],
+      "reviewers": [
+        "team:obs-ux-logs-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:obs-ux-logs",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4172,21 +4420,20 @@
       "enabled": true
     },
     {
-      "groupName": "react-is",
+      "groupName": "Kibana ES|QL Highlighting",
       "matchDepNames": [
-        "react-is",
-        "@types/react-is"
+        "@elastic/monaco-esql"
       ],
       "reviewers": [
-        "team:kibana-visualizations"
+        "team:kibana-esql"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Visualizations",
+        "Team:ESQL",
         "release_note:skip",
-        "backport:prev-minor"
+        "backport:version"
       ],
       "enabled": true
     },
@@ -4325,6 +4572,44 @@
         "Feature:Console"
       ],
       "enabled": true
+    },
+    {
+      "groupName": "node-stdlib-browser",
+      "matchDepNames": [
+        "node-stdlib-browser"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:prev-minor",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "chrome-remote-interface",
+      "matchDepNames": [
+        "chrome-remote-interface",
+        "@types/chrome-remote-interface"
+      ],
+      "reviewers": [
+        "team:obs-knowledge-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
     }
   ],
   "customManagers": [
@@ -4336,6 +4621,17 @@
       ],
       "matchStrings": [
         "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "description": "Update Wolfi FIPS base image",
+      "customType": "regex",
+      "fileMatch": [
+        "^src/dev/build/tasks/os_packages/docker_generator/run\\.ts$"
+      ],
+      "matchStrings": [
+        "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base-fips):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
       ],
       "datasourceTemplate": "docker"
     },

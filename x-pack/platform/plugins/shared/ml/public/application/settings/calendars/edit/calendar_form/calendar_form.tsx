@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useState, useCallback } from 'react';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiSwitchEvent, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
-import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
+import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
 import { DstEventGenerator } from './dst_event_generator';
 import { EventsTable } from '../events_table';
@@ -132,8 +132,9 @@ export const CalendarForm: FC<Props> = ({
     calendarId === '' ||
     loading === true ||
     (isDst && eventsList.length === 0);
-  const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(
-    isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE
+  const redirectToCalendarsManagementPage = useCreateAndNavigateToManagementMlLink(
+    isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE,
+    'ad_settings'
   );
 
   const addDstEvents = useCallback(

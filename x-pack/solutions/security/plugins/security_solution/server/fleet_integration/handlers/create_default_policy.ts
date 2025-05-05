@@ -8,6 +8,7 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import type { TelemetryConfigProvider } from '../../../common/telemetry_config/telemetry_config_provider';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
@@ -36,17 +37,19 @@ export const createDefaultPolicy = (
   config: AnyPolicyCreateConfig | undefined,
   cloud: CloudSetup,
   esClientInfo: InfoResponse,
-  productFeatures: ProductFeaturesService
+  productFeatures: ProductFeaturesService,
+  telemetryConfigProvider: TelemetryConfigProvider
 ): PolicyConfig => {
   // Pass license and cloud information to use in Policy creation
-  const factoryPolicy = policyConfigFactory(
-    licenseService.getLicenseType(),
-    cloud?.isCloudEnabled,
-    licenseService.getLicenseUID(),
-    esClientInfo?.cluster_uuid,
-    esClientInfo?.cluster_name,
-    cloud?.isServerlessEnabled
-  );
+  const factoryPolicy = policyConfigFactory({
+    license: licenseService.getLicenseType(),
+    cloud: cloud?.isCloudEnabled,
+    licenseUuid: licenseService.getLicenseUID(),
+    clusterUuid: esClientInfo?.cluster_uuid,
+    clusterName: esClientInfo?.cluster_name,
+    serverless: cloud?.isServerlessEnabled,
+    isGlobalTelemetryEnabled: telemetryConfigProvider.getIsOptedIn(),
+  });
 
   let defaultPolicyPerType: PolicyConfig =
     config?.type === 'cloud'

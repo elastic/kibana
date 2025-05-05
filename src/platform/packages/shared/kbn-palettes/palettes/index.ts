@@ -46,7 +46,7 @@ const lightKbnPalettes = new KbnPalettes(
     elasticPalette,
     kibana7Palette,
     kibana4Palette,
-    getNeutralPalette(true),
+    getNeutralPalette(false),
     complementaryPalette,
     coolPalette,
     grayPalette,

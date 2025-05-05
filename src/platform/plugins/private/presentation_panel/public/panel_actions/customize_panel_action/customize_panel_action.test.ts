@@ -25,8 +25,8 @@ describe('Customize panel action', () => {
     context = {
       embeddable: {
         parentApi: {},
-        viewMode: new BehaviorSubject<ViewMode>('edit'),
-        dataViews: new BehaviorSubject<DataView[] | undefined>(undefined),
+        viewMode$: new BehaviorSubject<ViewMode>('edit'),
+        dataViews$: new BehaviorSubject<DataView[] | undefined>(undefined),
       },
     };
   });
@@ -36,7 +36,7 @@ describe('Customize panel action', () => {
   });
 
   it('is compatible in view mode when API exposes writable unified search', async () => {
-    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
+    (context.embeddable as PublishesViewMode).viewMode$ = new BehaviorSubject<ViewMode>('view');
     context.embeddable.timeRange$ = new BehaviorSubject<TimeRange | undefined>({
       from: 'now-15m',
       to: 'now',
