@@ -16,6 +16,7 @@ import { registerApp } from './application';
 import { ChatService, ConversationService, AgentService, type WorkChatServices } from './services';
 import { IntegrationService } from './services/integration/integration_service';
 import { IntegrationRegistry } from './services/integration/integration_registry';
+import type { IntegrationComponentDescriptor } from '@kbn/wci-browser';
 
 export class WorkChatAppPlugin
   implements
@@ -45,8 +46,8 @@ export class WorkChatAppPlugin
     });
 
     return {
-      integrations: {
-        register: (integrationComponents) => {
+      integration: {
+        register: (integrationComponents: IntegrationComponentDescriptor) => {
           this.integrationRegistry.register(integrationComponents);
         },
       },

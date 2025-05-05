@@ -29,7 +29,7 @@ export class WCIExternalServerPlugin
     core: CoreSetup<WCIExternalServerPluginStartDependencies, WCIExternalServerPluginStart>,
     { workchatApp }: WCIExternalServerPluginSetupDependencies
   ): WCIExternalServerPluginSetup {
-    workchatApp.integrations.register(getExternalServerIntegrationComponents());
+    workchatApp.integration.register(getExternalServerIntegrationComponents());
 
     return {};
   }
