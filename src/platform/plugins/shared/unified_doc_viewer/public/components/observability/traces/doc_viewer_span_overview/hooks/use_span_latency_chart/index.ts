@@ -59,19 +59,18 @@ const getSpanLatencyChart = ({
 }> => {
   const { data } = getUnifiedDocViewerServices();
   const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
-  const params = {
-    spanName,
-    serviceName,
-    chartType: 'spanLatency',
-    end: timeFilter.to,
-    environment: 'ENVIRONMENT_ALL',
-    kuery: '',
-    percentileThreshold: 95,
-    start: timeFilter.from,
-  };
 
   return core.http.post('/internal/apm/latency/overall_distribution/spans', {
-    body: JSON.stringify(params),
+    body: JSON.stringify({
+      spanName,
+      serviceName,
+      chartType: 'spanLatency',
+      end: timeFilter.to,
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
+      percentileThreshold: 95,
+      start: timeFilter.from,
+    }),
     signal,
   });
 };

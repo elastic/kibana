@@ -64,20 +64,19 @@ const getTransactionLatencyChart = ({
 }> => {
   const { data } = getUnifiedDocViewerServices();
   const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
-  const params = {
-    transactionName,
-    transactionType,
-    serviceName,
-    chartType: 'transactionLatency',
-    end: timeFilter.to,
-    environment: 'ENVIRONMENT_ALL',
-    kuery: '',
-    percentileThreshold: 95,
-    start: timeFilter.from,
-  };
 
   return core.http.post('/internal/apm/latency/overall_distribution/transactions', {
-    body: JSON.stringify(params),
+    body: JSON.stringify({
+      transactionName,
+      transactionType,
+      serviceName,
+      chartType: 'transactionLatency',
+      end: timeFilter.to,
+      environment: 'ENVIRONMENT_ALL',
+      kuery: '',
+      percentileThreshold: 95,
+      start: timeFilter.from,
+    }),
     signal,
   });
 };
