@@ -61,7 +61,7 @@ const mockOptions = {
   previousStartedAt: null,
   params: {
     searchConfiguration: {
-      index: {},
+      index: 'valid-index-name',
       query: {
         query: mockQuery,
         language: 'kuery',
@@ -673,7 +673,7 @@ describe('The custom threshold alert type', () => {
               },
             ],
             searchConfiguration: {
-              index: {},
+              index: 'valid-index-name', // Replace with the actual index name
               query: {
                 query: filterQuery,
                 language: 'kuery',
@@ -1598,11 +1598,11 @@ describe('The custom threshold alert type', () => {
               value: 'a',
             },
           ],
-          logsExplorerLocator: undefined,
+          logsLocator: undefined,
           metrics: customThresholdCountCriterion.metrics,
           startedAt: expect.stringMatching(ISO_DATE_REGEX),
           searchConfiguration: {
-            index: {},
+            index: 'valid-index-name',
             query: {
               query: mockQuery,
               language: 'kuery',
@@ -1653,11 +1653,11 @@ describe('The custom threshold alert type', () => {
               value: 'host-0',
             },
           ],
-          logsExplorerLocator: undefined,
+          logsLocator: undefined,
           metrics: customThresholdCountCriterion.metrics,
           startedAt: expect.stringMatching(ISO_DATE_REGEX),
           searchConfiguration: {
-            index: {},
+            index: 'valid-index-name',
             query: {
               query: mockQuery,
               language: 'kuery',
@@ -2709,7 +2709,7 @@ describe('The custom threshold alert type', () => {
               },
             ],
             searchConfiguration: {
-              index: {},
+              index: 'mockedIndexId',
               query: {
                 query: filterQuery,
                 language: 'kuery',
