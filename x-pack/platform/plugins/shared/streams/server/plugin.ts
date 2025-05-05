@@ -22,6 +22,7 @@ import { registerRoutes } from '@kbn/server-route-repository';
 import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
+  STREAMS_CONSUMER,
   STREAMS_FEATURE_ID,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
@@ -81,7 +82,7 @@ export class StreamsPlugin
 
     const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
       ruleTypeId,
-      consumers: [STREAMS_FEATURE_ID],
+      consumers: [STREAMS_CONSUMER],
     }));
 
     const assetService = new AssetService(core, this.logger);
