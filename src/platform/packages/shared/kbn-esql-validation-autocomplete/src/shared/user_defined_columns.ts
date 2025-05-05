@@ -9,7 +9,7 @@
 
 import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
-import type { ESQLUserDefinedColumn, ESQLRealField } from '../validation/types';
+import type { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../validation/types';
 import { EDITOR_MARKER } from './constants';
 import { isColumnItem, isFunctionItem, getExpressionType } from './helpers';
 
@@ -27,7 +27,7 @@ function addToUserDefinedColumnOccurrences(
 function addToUserDefinedColumns(
   oldArg: ESQLAstItem,
   newArg: ESQLAstItem,
-  fields: Map<string, ESQLRealField>,
+  fields: Map<string, ESQLFieldWithMetadata>,
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>
 ) {
   if (isColumnItem(oldArg) && isColumnItem(newArg)) {
@@ -50,7 +50,7 @@ function addToUserDefinedColumns(
 export function excludeUserDefinedColumnsFromCurrentCommand(
   commands: ESQLCommand[],
   currentCommand: ESQLCommand,
-  fieldsMap: Map<string, ESQLRealField>,
+  fieldsMap: Map<string, ESQLFieldWithMetadata>,
   queryString: string
 ) {
   const anyUserDefinedColumns = collectUserDefinedColumns(commands, fieldsMap, queryString);
@@ -71,7 +71,7 @@ export function excludeUserDefinedColumnsFromCurrentCommand(
 function addUserDefinedColumnFromAssignment(
   assignOperation: ESQLFunction,
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
-  fields: Map<string, ESQLRealField>
+  fields: Map<string, ESQLFieldWithMetadata>
 ) {
   if (isColumnItem(assignOperation.args[0])) {
     const rightHandSideArgType = getExpressionType(
@@ -91,7 +91,7 @@ function addUserDefinedColumnFromExpression(
   expressionOperation: ESQLFunction,
   queryString: string,
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
-  fields: Map<string, ESQLRealField>
+  fields: Map<string, ESQLFieldWithMetadata>
 ) {
   if (!expressionOperation.text.includes(EDITOR_MARKER)) {
     const expressionText = queryString.substring(
@@ -109,7 +109,7 @@ function addUserDefinedColumnFromExpression(
 
 export function collectUserDefinedColumns(
   ast: ESQLAst,
-  fields: Map<string, ESQLRealField>,
+  fields: Map<string, ESQLFieldWithMetadata>,
   queryString: string
 ): Map<string, ESQLUserDefinedColumn[]> {
   const userDefinedColumns = new Map<string, ESQLUserDefinedColumn[]>();
