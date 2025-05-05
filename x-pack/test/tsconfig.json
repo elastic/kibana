@@ -123,7 +123,6 @@
     "@kbn/core-http-common",
     "@kbn/lens-plugin",
     "@kbn/logs-shared-plugin",
-    "@kbn/profiling-plugin",
     "@kbn/observability-onboarding-plugin",
     "@kbn/bfetch-plugin",
     "@kbn/uptime-plugin",
@@ -173,7 +172,6 @@
     "@kbn/actions-simulators-plugin",
     "@kbn/cases-api-integration-test-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
-    "@kbn/management-settings-ids",
     "@kbn/mock-idp-utils",
     "@kbn/cloud-security-posture-common",
     "@kbn/saved-objects-management-plugin",
@@ -196,5 +194,6 @@
     "@kbn/content-packs-schema",
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
+    "@kbn/test-suites-xpack-observability"
   ]
 }
