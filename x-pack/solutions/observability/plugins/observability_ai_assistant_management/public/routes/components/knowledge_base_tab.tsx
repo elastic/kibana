@@ -435,6 +435,7 @@ export function KnowledgeBaseTab() {
             'Knowledge Base is a feature that enables the AI Assistant to recall multiple knowledge sources: documents, organizational resources like runbooks, GitHub issues, and internal documentation. It improves response quality with added context for more tailored assistance. ',
         })}
         <EuiLink
+          data-test-subj="observabilityAiAssistantManagementKnowledgeBaseTabLearnMoreLink"
           href="https://www.elastic.co/docs/solutions/observability/observability-ai-assistant#obs-ai-add-data"
           target="_blank"
         >
