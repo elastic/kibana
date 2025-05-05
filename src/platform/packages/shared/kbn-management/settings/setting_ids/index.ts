@@ -105,16 +105,12 @@ export const NOTIFICATIONS_LIFETIME_WARNING_ID = 'notifications:lifetime:warning
 export const OBSERVABILITY_APM_AWS_LAMBDA_PRICE_FACTOR_ID = 'observability:apmAWSLambdaPriceFactor';
 export const OBSERVABILITY_APM_AWS_LAMBDA_REQUEST_COST_PER_MILLION_ID =
   'observability:apmAWSLambdaRequestCostPerMillion';
-export const OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID = 'observability:apmAgentExplorerView';
 export const OBSERVABILITY_APM_DEFAULT_SERVICE_ENVIRONMENT_ID =
   'observability:apmDefaultServiceEnvironment';
-export const OBSERVABILITY_APM_ENABLE_CRITICAL_PATH_ID = 'observability:apmEnableCriticalPath';
 export const OBSERVABILITY_APM_LABS_BUTTON_ID = 'observability:apmLabsButton';
 export const OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID = 'observability:apmProgressiveLoading';
 export const OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVCIE_ID =
   'observability:apmServiceGroupMaxNumberOfServices';
-export const OBSERVABILITY_APM_SERVICE_INVENTORY_OPTIMIZED_SORTING_ID =
-  'observability:apmServiceInventoryOptimizedSorting';
 export const OBSERVABILITY_APM_TRACE_EXPLORER_TAB_ID = 'observability:apmTraceExplorerTab';
 export const OBSERVABILITY_ENABLE_AWS_LAMBDA_METRICS_ID = 'observability:enableAwsLambdaMetrics';
 export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
