@@ -20,6 +20,7 @@ const fields: Array<keyof SpanDocumentOverview> = [
   fieldConstants.SERVICE_ENVIRONMENT_FIELD,
   fieldConstants.AGENT_NAME_FIELD,
   fieldConstants.TRANSACTION_ID_FIELD,
+  fieldConstants.TRANSACTION_NAME_FIELD,
   fieldConstants.SPAN_NAME_FIELD,
   fieldConstants.SPAN_ID_FIELD,
   fieldConstants.SPAN_ACTION_FIELD,
