@@ -142,7 +142,7 @@ describe('<DocViewer />', () => {
     render(
       <DocViewer
         docViews={registry.getAll()}
-        initialTabId={`kbn_doc_viewer_tab_${initialTabId}`}
+        initialTabId={initialTabId}
         hit={records[0]}
         dataView={dataViewMock}
       />
