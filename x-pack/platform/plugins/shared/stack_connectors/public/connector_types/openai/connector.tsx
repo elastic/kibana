@@ -131,42 +131,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             readOnly={readOnly}
             configFormSchema={[
               ...otherOpenAiConfig,
-              ...(hasPKI ? pkiConfig.map(field => {
-                const fieldConfig: FieldConfig<string | string[] | undefined, FormData> = {
-                  label: field.label,
-                  helpText: field.helpText,
-                  defaultValue: field.defaultValue,
-                  type: field.type,
-                  validations: [
-                    {
-                      validator: ((data) => {
-                        const { value, formData } = data;
-                        if (
-                          (formData.certificateFile || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
-                          !(formData.certificateFile || formData.certificateData)
-                        ) {
-                          return {
-                            message: i18n.MISSING_CERTIFICATE,
-                          };
-                        }
-                        if (
-                          (formData.certificateFile || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
-                          !(formData.privateKeyFile || formData.privateKeyData)
-                        ) {
-                          return {
-                            message: i18n.MISSING_PRIVATE_KEY,
-                          };
-                        }
-                        return undefined;
-                      }) as ValidationFunc<FormData, string, string | string[] | undefined>,
-                    },
-                  ],
-                };
-                return {
-                  ...field,
-                  ...fieldConfig,
-                } as ConfigFieldSchema;
-              }) : [])
+              ...(hasPKI ? pkiConfig : [])
             ]}
             secretsFormSchema={otherOpenAiSecrets}
           />
@@ -187,13 +152,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           />
           {hasPKI && (
             <>
-              <EuiSpacer size="s" />
-              <SimpleConnectorForm
-                isEdit={isEdit}
-                readOnly={readOnly}
-                configFormSchema={pkiConfig}
-                secretsFormSchema={[]}
-              />
               <EuiSpacer size="s" />
               <UseField
                 path="config.verificationMode"
