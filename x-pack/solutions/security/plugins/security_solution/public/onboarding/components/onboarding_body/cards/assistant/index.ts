@@ -12,7 +12,6 @@ import { OnboardingCardId } from '../../../../constants';
 import { ASSISTANT_CARD_TITLE } from './translations';
 import { checkAssistantCardComplete } from '../common/connectors/assistant_check_complete';
 import type { AssistantCardMetadata } from './types';
-import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
 
 export const assistantCardConfig: OnboardingCardConfig<AssistantCardMetadata> = {
   id: OnboardingCardId.assistant,
@@ -26,8 +25,6 @@ export const assistantCardConfig: OnboardingCardConfig<AssistantCardMetadata> = 
       )
   ),
   checkComplete: checkAssistantCardComplete,
-  capabilitiesRequired: [
-    ['securitySolutionAssistant.ai-assistant', `${SECURITY_FEATURE_ID}.detections`],
-  ],
+  capabilitiesRequired: ['securitySolutionAssistant.ai-assistant'],
   licenseTypeRequired: 'enterprise',
 };
