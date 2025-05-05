@@ -6,7 +6,7 @@
  */
 
 import { SERVICE_ENVIRONMENT } from '../es_fields/apm';
-import { ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
+import { ENVIRONMENT_ALL, ENVIRONMENT_NOT_DEFINED } from '../environment_filter_values';
 import { environmentQuery } from './environment_query';
 
 describe('environmentQuery', () => {
@@ -42,6 +42,10 @@ describe('environmentQuery', () => {
         term: { [SERVICE_ENVIRONMENT]: 'test' },
       },
     ]);
+  });
+
+  it('creates a query for all environments', () => {
+    expect(environmentQuery(ENVIRONMENT_ALL.value)).toEqual([]);
   });
 
   it('creates a query for missing service environments', () => {
