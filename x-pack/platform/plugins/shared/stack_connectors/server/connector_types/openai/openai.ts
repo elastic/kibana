@@ -120,18 +120,18 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     try {
       if (
         this.provider === OpenAiProviderType.Other &&
-        ((this.config as any).certificateFile ||
-          (this.config as any).certificateData ||
-          (this.config as any).privateKeyFile ||
-          (this.config as any).privateKeyData)
+        (this.config.certificateFile ||
+          this.config.certificateData ||
+          this.config.privateKeyFile ||
+          this.config.privateKeyData)
       ) {
         // Validate PKI configuration
         if (
           !validatePKICertificates(
-            (this.config as any).certificateFile,
-            (this.config as any).certificateData,
-            (this.config as any).privateKeyFile,
-            (this.config as any).privateKeyData
+            this.config.certificateFile,
+            this.config.certificateData,
+            this.config.privateKeyFile,
+            this.config.privateKeyData
           )
         ) {
           throw new Error('Invalid or inaccessible PKI certificates');
@@ -140,28 +140,28 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         let cert: string;
         let key: string;
 
-        if ((this.config as any).certificateFile) {
+        if (this.config.certificateFile) {
           cert = fs.readFileSync(
-            Array.isArray((this.config as any).certificateFile)
-              ? (this.config as any).certificateFile[0]
-              : (this.config as any).certificateFile,
+            Array.isArray(this.config.certificateFile)
+              ? this.config.certificateFile[0]
+              : this.config.certificateFile,
             'utf8'
           );
-        } else if ((this.config as any).certificateData) {
-          cert = formatPEMContent((this.config as any).certificateData, 'CERTIFICATE', this.logger);
+        } else if (this.config.certificateData) {
+          cert = formatPEMContent(this.config.certificateData, 'CERTIFICATE');
         } else {
           throw new Error('No certificate file or data provided');
         }
 
-        if ((this.config as any).privateKeyFile) {
+        if (this.config.privateKeyFile) {
           key = fs.readFileSync(
-            Array.isArray((this.config as any).privateKeyFile)
-              ? (this.config as any).privateKeyFile[0]
-              : (this.config as any).privateKeyFile,
+            Array.isArray(this.config.privateKeyFile)
+              ? this.config.privateKeyFile[0]
+              : this.config.privateKeyFile,
             'utf8'
           );
-        } else if ((this.config as any).privateKeyData) {
-          key = formatPEMContent((this.config as any).privateKeyData, 'PRIVATE KEY', this.logger);
+        } else if (this.config.privateKeyData) {
+          key = formatPEMContent(this.config.privateKeyData, 'PRIVATE KEY');
         } else {
           throw new Error('No private key file or data provided');
         }
@@ -169,9 +169,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         const httpsAgent = new https.Agent({
           cert,
           key,
-          rejectUnauthorized: (this.config as any).verificationMode === 'none',
+          rejectUnauthorized: this.config.verificationMode === 'none',
           checkServerIdentity:
-            (this.config as any).verificationMode === 'certificate' || (this.config as any).verificationMode === 'none'
+            this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
               ? () => undefined
               : undefined,
         });
@@ -181,8 +181,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug(JSON.stringify({
           cert: cert.slice(0, 100) + '...',
           key: key.slice(0, 100) + '...',
-          rejectUnauthorized: (this.config as any).verificationMode === 'none',
-          checkServerIdentity: (this.config as any).verificationMode === 'certificate' || (this.config as any).verificationMode === 'none'
+          rejectUnauthorized: this.config.verificationMode === 'none',
+          checkServerIdentity: this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
         }, null, 2));
 
         try {
@@ -293,10 +293,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   ): Promise<RunActionResponse> {
     if (
       this.provider === OpenAiProviderType.Other &&
-      ((this.config as any).certificateFile ||
-        (this.config as any).certificateData ||
-        (this.config as any).privateKeyFile ||
-        (this.config as any).privateKeyData)
+      (this.configAny.certificateFile ||
+        this.configAny.certificateData ||
+        this.configAny.privateKeyFile ||
+        this.configAny.privateKeyData)
     ) {
       try {
         const sanitizedBody = JSON.parse(body);
@@ -358,10 +358,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   ): Promise<RunActionResponse> {
     if (
       this.provider === OpenAiProviderType.Other &&
-      ((this.config as any).certificateFile ||
-        (this.config as any).certificateData ||
-        (this.config as any).privateKeyFile ||
-        (this.config as any).privateKeyData)
+      (this.configAny.certificateFile ||
+        this.configAny.certificateData ||
+        this.configAny.privateKeyFile ||
+        this.configAny.privateKeyData)
     ) {
       try {
         const sanitizedBody = JSON.parse(body);
