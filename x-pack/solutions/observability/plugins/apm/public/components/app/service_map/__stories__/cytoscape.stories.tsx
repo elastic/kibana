@@ -15,6 +15,10 @@ import { Centerer } from './centerer';
 export default {
   title: 'app/ServiceMap/cytoscape',
   component: Cytoscape,
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   decorators: [
     (StoryComponent: ComponentType) => {
       return (

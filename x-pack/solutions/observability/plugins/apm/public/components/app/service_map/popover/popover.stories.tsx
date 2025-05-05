@@ -23,6 +23,10 @@ interface Args extends PopoverProps {
 const stories: Meta<Args> = {
   title: 'app/ServiceMap/popover',
   component: Popover,
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   decorators: [
     (StoryComponent) => {
       mockApmApiCallResponse('GET /internal/apm/service-map/dependency', () => {

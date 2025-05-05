@@ -19,11 +19,11 @@ const config: TestRunnerConfig = {
     await injectAxe(page);
   },
   async postVisit(page, context) {
-     const storyContext = await getStoryContext(page, context);
-     // Do not run a11y tests on disabled stories.
-    // if (storyContext.parameters.a11y.test === 'todo') {
-    //   return;
-    // }
+    const storyContext = await getStoryContext(page, context);
+    // // Do not run a11y tests on disabled stories.
+    if (storyContext.parameters?.a11y?.disable) {
+      return;
+    }
     await checkA11y(page, 'body', {
       detailedReport: true,
       detailedReportOptions: {

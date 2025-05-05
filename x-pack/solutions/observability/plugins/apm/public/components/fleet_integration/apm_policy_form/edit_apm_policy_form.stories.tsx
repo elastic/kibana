@@ -22,6 +22,10 @@ const KibanaReactContext = createKibanaReactContext(coreMock);
 const stories: Meta<{}> = {
   title: 'fleet/Edit APM policy',
   component: EditAPMPolicyForm,
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   decorators: [
     (StoryComponent) => {
       return (

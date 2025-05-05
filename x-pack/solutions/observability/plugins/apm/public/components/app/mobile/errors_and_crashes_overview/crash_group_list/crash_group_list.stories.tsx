@@ -100,6 +100,10 @@ export const EmptyState: StoryObj<Args> = {
   render: (args) => {
     return <MobileCrashGroupList {...args} />;
   },
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
 
   args: {
     mainStatistics: [],

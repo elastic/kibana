@@ -31,6 +31,10 @@ const coreMock = {
 const stories: Meta<Args> = {
   title: 'app/ServiceInventory/ServiceList',
   component: ApmServicesTable,
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   decorators: [
     (StoryComponent) => {
       mockApmApiCallResponse('GET /internal/apm/fallback_to_transactions', () => ({

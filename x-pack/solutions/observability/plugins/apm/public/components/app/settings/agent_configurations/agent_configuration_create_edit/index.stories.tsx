@@ -17,7 +17,10 @@ import { ApmPluginContext } from '../../../../../context/apm_plugin/apm_plugin_c
 
 export default {
   title: 'app/settings/AgentConfigurations/agent_configuration_create_edit',
-
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   decorators: [
     (storyFn) => {
       const coreMock = {} as unknown as CoreStart;

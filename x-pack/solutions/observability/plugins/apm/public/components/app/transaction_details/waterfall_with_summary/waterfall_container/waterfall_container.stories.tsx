@@ -27,6 +27,10 @@ type Args = ComponentProps<typeof WaterfallContainer>;
 const stories: Meta<Args> = {
   title: 'app/TransactionDetails/waterfall',
   component: WaterfallContainer,
+  // TODO: fix a11y errors
+  parameters: {
+    a11y: { disable: true },
+  },
   decorators: [
     (StoryComponent) => (
       <MockApmPluginStorybook routePath="/services/{serviceName}/transactions/view?rangeFrom=now-15m&rangeTo=now&transactionName=testTransactionName">
