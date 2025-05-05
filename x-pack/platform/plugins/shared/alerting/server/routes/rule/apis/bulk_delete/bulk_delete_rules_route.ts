@@ -57,7 +57,10 @@ export const bulkDeleteRulesRoute = ({
                 rules: bulkDeleteResult.rules.map((rule) => {
                   // TODO (http-versioning): Remove this cast, this enables us to move forward
                   // without fixing all of other solution types
-                  return transformRuleToRuleResponseV1<RuleParamsV1>(rule as Rule<RuleParamsV1>);
+                  return transformRuleToRuleResponseV1<RuleParamsV1>(
+                    rule as Rule<RuleParamsV1>,
+                    true
+                  );
                 }),
               },
             };
