@@ -176,12 +176,12 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
           savedObjectId: 'skip',
         };
       },
-      onReset: (lastSaved) => {
-        const lastSavedState = injectReferences(lastSaved);
-        dynamicActionsManager?.reinitializeState(lastSavedState ?? {});
-        reduxSync.reinitializeState(lastSavedState);
-        timeRangeManager.reinitializeState(lastSavedState);
-        titleManager.reinitializeState(lastSavedState);
+      onReset: async (lastSaved) => {
+        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
+        timeRangeManager.reinitializeState(lastSaved?.rawState);
+        titleManager.reinitializeState(lastSaved?.rawState);
+
+        await savedMap.reset(injectReferences(lastSaved));
       },
     });
 
@@ -193,7 +193,18 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
       ...(dynamicActionsManager?.api ?? {}),
       ...titleManager.api,
       ...reduxSync.api,
-      ...initializeEditApi(uuid, getLatestState, parentApi, state.savedObjectId),
+      ...initializeEditApi(
+        uuid,
+        () => {
+          const latestState = getLatestState();
+
+          return latestState.savedObjectId
+            ? getByReferenceState(latestState, latestState.savedObjectId)
+            : getByValueState(latestState, savedMap.getAttributes());
+        },
+        parentApi,
+        state.savedObjectId
+      ),
       ...initializeLibraryTransforms(savedMap, serializeState),
       ...initializeDataViews(savedMap.getStore()),
       serializeState,
