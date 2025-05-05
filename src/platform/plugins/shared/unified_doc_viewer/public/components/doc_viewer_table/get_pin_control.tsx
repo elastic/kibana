@@ -21,7 +21,7 @@ import type { FieldRow } from './field_row';
 
 interface PinControlCellProps {
   row: FieldRow;
-  onTogglePinned: (fieldName: string) => void;
+  onTogglePinned: (fieldName: string, params: { isKeyboardEvent: boolean }) => void;
 }
 
 const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row, onTogglePinned }) => {
@@ -55,8 +55,11 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row, onToggl
           iconType={isPinned ? 'pinFilled' : 'pin'}
           color="text"
           aria-label={label}
-          onClick={() => {
-            onTogglePinned(fieldName);
+          onMouseUp={() => onTogglePinned(fieldName, { isKeyboardEvent: false })}
+          onKeyUp={(e: { key: string }) => {
+            if (e.key === 'Enter') {
+              onTogglePinned(fieldName, { isKeyboardEvent: true });
+            }
           }}
         />
       </EuiToolTip>
@@ -69,7 +72,7 @@ export const getPinColumnControl = ({
   onTogglePinned,
 }: {
   rows: FieldRow[];
-  onTogglePinned: (fieldName: string) => void;
+  onTogglePinned: (fieldName: string, params: { isKeyboardEvent: boolean }) => void;
 }): EuiDataGridControlColumn => {
   const pinColumnHeader = i18n.translate('unifiedDocViewer.fieldsTable.pinControlColumnHeader', {
     defaultMessage: 'Pin field column',
