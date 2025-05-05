@@ -120,40 +120,36 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           <SimpleConnectorForm
             isEdit={isEdit}
             readOnly={readOnly}
-            configFormSchema={otherOpenAiConfig}
-            secretsFormSchema={otherOpenAiSecrets}
-            configValidations={
-              hasPKI
-                ? [
-                    {
-                      validator: ({
-                        certificateFile,
-                        certificateData,
-                        privateKeyFile,
-                        privateKeyData,
-                      }) => {
-                        if (
-                          (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
-                          !(certificateFile || certificateData)
-                        ) {
-                          return {
-                            message: i18n.MISSING_CERTIFICATE,
-                          };
-                        }
-                        if (
-                          (certificateFile || privateKeyFile || certificateData || privateKeyData) &&
-                          !(privateKeyFile || privateKeyData)
-                        ) {
-                          return {
-                            message: i18n.MISSING_PRIVATE_KEY,
-                          };
-                        }
-                        return undefined;
-                      },
+            configFormSchema={[
+              ...otherOpenAiConfig,
+              ...(hasPKI ? pkiConfig.map(field => ({
+                ...field,
+                validations: [
+                  {
+                    validator: ({ value }: { value: string | string[] | undefined }) => {
+                      if (
+                        (value || (config as any).privateKeyFile || (config as any).certificateData || (config as any).privateKeyData) &&
+                        !(value || (config as any).certificateData)
+                      ) {
+                        return {
+                          message: i18n.MISSING_CERTIFICATE,
+                        };
+                      }
+                      if (
+                        (value || (config as any).privateKeyFile || (config as any).certificateData || (config as any).privateKeyData) &&
+                        !((config as any).privateKeyFile || (config as any).privateKeyData)
+                      ) {
+                        return {
+                          message: i18n.MISSING_PRIVATE_KEY,
+                        };
+                      }
+                      return undefined;
                     },
-                  ]
-                : []
-            }
+                  },
+                ],
+              })) : []),
+            ]}
+            secretsFormSchema={otherOpenAiSecrets}
           />
           <EuiSpacer size="s" />
           <UseField

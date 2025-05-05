@@ -106,37 +106,37 @@ export const getAxiosOptions = (
     case OpenAiProviderType.Other:
       if (
         config &&
-        (config.certificateFile ||
-          config.certificateData ||
-          config.privateKeyFile ||
-          config.privateKeyData)
+        ((config as any).certificateFile ||
+          (config as any).certificateData ||
+          (config as any).privateKeyFile ||
+          (config as any).privateKeyData)
       ) {
-        if (!config.certificateFile && !config.certificateData) {
+        if (!(config as any).certificateFile && !(config as any).certificateData) {
           throw new Error('Either certificate file or certificate data must be provided for PKI');
         }
-        if (!config.privateKeyFile && !config.privateKeyData) {
+        if (!(config as any).privateKeyFile && !(config as any).privateKeyData) {
           throw new Error('Either private key file or private key data must be provided for PKI');
         }
 
         let cert: string | Buffer;
         let key: string | Buffer;
 
-        if (config.certificateFile) {
+        if ((config as any).certificateFile) {
           cert = fs.readFileSync(
-            Array.isArray(config.certificateFile)
-              ? config.certificateFile[0]
-              : config.certificateFile
+            Array.isArray((config as any).certificateFile)
+              ? (config as any).certificateFile[0]
+              : (config as any).certificateFile
           );
         } else {
-          cert = config.certificateData!;
+          cert = (config as any).certificateData!;
         }
 
-        if (config.privateKeyFile) {
+        if ((config as any).privateKeyFile) {
           key = fs.readFileSync(
-            Array.isArray(config.privateKeyFile) ? config.privateKeyFile[0] : config.privateKeyFile
+            Array.isArray((config as any).privateKeyFile) ? (config as any).privateKeyFile[0] : (config as any).privateKeyFile
           );
         } else {
-          key = config.privateKeyData!;
+          key = (config as any).privateKeyData!;
         }
 
         if (!cert.toString().includes('-----BEGIN CERTIFICATE-----')) {
@@ -149,9 +149,9 @@ export const getAxiosOptions = (
         const httpsAgent = new https.Agent({
           cert,
           key,
-          rejectUnauthorized: config.verificationMode === 'none',
+          rejectUnauthorized: (config as any).verificationMode === 'none',
           checkServerIdentity:
-            config.verificationMode === 'certificate' || config.verificationMode === 'none'
+            (config as any).verificationMode === 'certificate' || (config as any).verificationMode === 'none'
               ? () => undefined
               : undefined,
         });
