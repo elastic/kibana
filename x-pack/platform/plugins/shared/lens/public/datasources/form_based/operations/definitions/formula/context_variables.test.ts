@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment, { unitOfTime } from 'moment';
 import type { FormBasedLayer } from '../../../../..';
 import {
   INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
@@ -43,6 +44,86 @@ function createLayer<T extends ConstantsIndexPatternColumn>(
 
 describe('context variables', () => {
   describe('interval', () => {
+    describe('toExpression', () => {
+      it.each<{ interval: string; value: { value: number; unit: unitOfTime.Base } | undefined }>([
+        // single unit
+        { interval: '1ms', value: { value: 1, unit: 'ms' } },
+        { interval: '1s', value: { value: 1, unit: 'second' } },
+        { interval: '1m', value: { value: 1, unit: 'minute' } },
+        { interval: '1h', value: { value: 1, unit: 'hour' } },
+        { interval: '1d', value: { value: 1, unit: 'day' } },
+        { interval: '1w', value: { value: 1, unit: 'week' } },
+        { interval: '1M', value: { value: 1, unit: 'month' } },
+        { interval: '1q', value: { value: 0.25, unit: 'year' } },
+        { interval: '1y', value: { value: 1, unit: 'year' } },
+        // notation with space
+        { interval: '1 ms', value: { value: 1, unit: 'ms' } },
+        // multiple digit intervals
+        { interval: '60s', value: { value: 1, unit: 'minute' } },
+        { interval: '7d', value: { value: 1, unit: 'week' } },
+        { interval: '365d', value: { value: 365, unit: 'days' } },
+        // invalid intervals
+        { interval: '1', value: undefined },
+        { interval: '1x', value: undefined },
+        { interval: '1ss', value: undefined },
+        { interval: 's', value: undefined },
+      ])(
+        'should inherit the $interval interval from the date histogram column if defined',
+        ({ interval, value }) => {
+          const layer = createLayer('interval');
+          layer.columns = {
+            col2: {
+              label: 'Date histogram',
+              dataType: 'date',
+              operationType: 'date_histogram',
+              sourceField: '@timestamp',
+              isBucketed: true,
+              scale: 'interval',
+              params: {
+                interval,
+                includeEmptyRows: true,
+                dropPartials: false,
+              },
+            } as DateHistogramIndexPatternColumn,
+            ...layer.columns,
+          };
+          layer.columnOrder = ['col2', 'col1'];
+          expect(
+            intervalOperation.toExpression(layer, 'col1', createMockedIndexPattern(), {
+              dateRange: {
+                fromDate: new Date().toISOString(),
+                toDate: new Date().toISOString(),
+              },
+            })
+          ).toEqual([
+            {
+              arguments: {
+                expression: [
+                  {
+                    chain: [
+                      {
+                        arguments: value
+                          ? {
+                              override: [moment.duration(value.value, value.unit).asMilliseconds()],
+                            }
+                          : {},
+                        function: 'formula_interval',
+                        type: 'function',
+                      },
+                    ],
+                    type: 'expression',
+                  },
+                ],
+                id: ['col1'],
+                name: ['Constant: interval'],
+              },
+              function: 'mathColumn',
+              type: 'function',
+            },
+          ]);
+        }
+      );
+    });
     describe('getErrorMessages', () => {
       it('should return error if no date_histogram is configured', () => {
         expect(
