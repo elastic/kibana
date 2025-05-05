@@ -170,8 +170,10 @@ export class AstBuilderVisitor implements OttlVisitor {
     } else if (ctx.constExpr()) {
       // constExpr can be BOOLEAN or converter
       const constExprCtx = ctx.constExpr()!;
-      if (constExprCtx.BOOLEAN()) {
-        valueNode = { type: 'Literal', value: constExprCtx.BOOLEAN()!.getText() === 'true' };
+      if (constExprCtx.TRUE()) {
+        valueNode = { type: 'Literal', value: true };
+      } else if (constExprCtx.FALSE()) {
+        valueNode = { type: 'Literal', value: false };
       } else {
         // converter
         valueNode = this.visit(constExprCtx.converter()!) as AST.Converter;
@@ -204,8 +206,11 @@ export class AstBuilderVisitor implements OttlVisitor {
     if (ctx.STRING()) {
       return { type: 'Literal', value: AST.unquoteString(ctx.STRING()!.getText()) };
     }
-    if (ctx.BOOLEAN()) {
-      return { type: 'Literal', value: ctx.BOOLEAN()!.getText() === 'true' };
+    if (ctx.TRUE()) {
+      return { type: 'Literal', value: true };
+    }
+    if (ctx.FALSE()) {
+      return { type: 'Literal', value: false };
     }
     if (ctx.literal()) {
       // Handles INT/FLOAT from the specific rule

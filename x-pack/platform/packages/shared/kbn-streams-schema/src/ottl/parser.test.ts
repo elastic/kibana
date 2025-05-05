@@ -16,7 +16,7 @@ describe('OTTL Parser', () => {
     // Example Usage
     // -----------------------------------------------------------------------------
 
-    const ottlExample1 = `merge_maps(body, ExtractGrokPatterns(body, "%{WORD:abc}", true))`;
+    const ottlExample1 = `merge_maps(attributes, ExtractGrokPatterns(body, "%{WORD:abc} %{WORD:def}", true), "upsert")`;
     // const ottlExample1 = `set(resource.attributes["xyz"], attributes[attributes["test"] + attributes["test"]])`;
     // const ottlExample1 = `set(resource.attributes["xyz"], attributes[attributes["test"]])`;
     // const ottlExample1 = `delete_key(resource.attributes, attributes["test"])`;
@@ -39,7 +39,7 @@ describe('OTTL Parser', () => {
     console.log(JSON.stringify(result1, null, 2));
     console.log(ottlExample1);
     // console.log(result1.ast!.editor.arguments[0].value.fields[0].keys); // Should print "user.id"
-    // console.log(JSON.stringify(compile(result1.ast!), null, 2));
+    console.log(JSON.stringify(compile(result1.ast!), null, 2));
     // if (result1.errors.length > 0) console.error('Errors:', result1.errors);
 
     // console.log('\n--- Example 6 ---');

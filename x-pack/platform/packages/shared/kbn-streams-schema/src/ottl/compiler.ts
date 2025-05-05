@@ -332,10 +332,10 @@ function visitEditor(
         script: {
           source: `
           ctx['${resultVarName}'] = $(ctx['${targetArg.name}'], null);
-            if (ctx['${resultVarName}'] == null) {
+            if (ctx['${resultVarName}'] == null || !(ctx['${resultVarName}'] instanceof Map)) {
               ctx['${resultVarName}'] = [:];
             }
-          for (entry in ctx['${valueArg.name}']) {
+          for (def entry : ctx['${valueArg.name}'].keySet()) {
             ctx['${resultVarName}'][entry] = ctx['${valueArg.name}'][entry];
           }
           `,
@@ -347,10 +347,10 @@ function visitEditor(
         script: {
           source: `
             ctx['${resultVarName}'] = $(ctx['${targetArg.name}'], null);
-            if (ctx['${resultVarName}'] == null) {
+            if (ctx['${resultVarName}'] == null || !(ctx['${resultVarName}'] instanceof Map)) {
               ctx['${resultVarName}'] = [:];
             }
-            for (entry in ctx['${valueArg.name}']) {
+            for (def entry : ctx['${valueArg.name}'].keySet()) {
               if (ctx['${resultVarName}'][entry] == null) {
                 ctx['${resultVarName}'][entry] = ctx['${valueArg.name}'][entry];
               }
@@ -364,10 +364,10 @@ function visitEditor(
         script: {
           source: `
             ctx['${resultVarName}'] = $(ctx['${targetArg.name}'], null);
-            if (ctx['${resultVarName}'] == null) {
+            if (ctx['${resultVarName}'] == null || !(ctx['${resultVarName}'] instanceof Map)) {
               ctx['${resultVarName}'] = [:];
             }
-            for (entry in ctx['${valueArg.name}']) {
+            for (def entry : ctx['${valueArg.name}'].keySet()) {
               if (ctx['${resultVarName}'][entry] != null) {
                 ctx['${resultVarName}'][entry] = ctx['${valueArg.name}'][entry];
               }
@@ -416,7 +416,7 @@ function visitConverter(
       if (!targetArg.isValue) {
         processors.push(resolveIngestPipelineRef(targetArg));
       }
-      target = `{{{${targetArg.name}}}}`;
+      target = targetArg.name;
     } else {
       throw new Error('Target argument can not be a literal');
     }

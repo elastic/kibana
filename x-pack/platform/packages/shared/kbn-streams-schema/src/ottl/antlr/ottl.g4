@@ -43,7 +43,8 @@ booleanValue
     ;
 
 constExpr
-    : BOOLEAN
+    : TRUE
+    | FALSE
     | converter // A converter can evaluate to a boolean constant in some contexts
     ;
 
@@ -62,7 +63,8 @@ value
     | mathExpression // Must come before path/converter if they can be part of math
     | BYTES
     | STRING
-    | BOOLEAN
+    | TRUE
+    | FALSE
     | enumSymbol
     | mapValue
     | listValue
