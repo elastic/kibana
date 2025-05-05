@@ -1,3 +1,5 @@
+EAH 2025 DEMO
+
 # Discover
 
 Contains the Discover application and the saved search embeddable.
