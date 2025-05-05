@@ -39,7 +39,7 @@ export class WCIExternalServerPlugin
     core: CoreSetup,
     { workchatApp }: WCIExternalServerPluginSetupDependencies
   ): WCIExternalServerPluginSetup {
-    workchatApp.tools.register(
+    workchatApp.integrations.register(
       getExternalServerIntegrationDefinition({
         core,
         logger: this.logger,

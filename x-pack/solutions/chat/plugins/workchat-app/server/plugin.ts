@@ -69,7 +69,7 @@ export class WorkChatAppPlugin
     registerFeatures({ features: setupDeps.features });
 
     return {
-      tools: {
+      integrations: {
         register: (tool) => {
           return this.integrationRegistry.register(tool);
         },

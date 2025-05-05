@@ -15,7 +15,7 @@ import {
 } from '@kbn/workchat-framework-plugin/server';
 
 export interface WorkChatAppPluginSetup {
-  tools: {
+  integrations: {
     register: (tool: WorkchatIntegrationDefinition) => void;
   };
 }

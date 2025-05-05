@@ -45,7 +45,7 @@ export class WorkChatAppPlugin
     });
 
     return {
-      tools: {
+      integrations: {
         register: (integrationComponents) => {
           this.integrationRegistry.register(integrationComponents);
         },
