@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
@@ -31,6 +35,7 @@ const licensing = Promise.resolve(
 );
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const soClient = savedObjectsClientMock.create();
 
 const SimulateTemplateResponse = {
   template: {
@@ -120,6 +125,7 @@ describe('AI Assistant Service', () => {
     assistantServiceOpts = {
       logger,
       elasticsearchClientPromise: Promise.resolve(clusterClient),
+      soClientPromise: Promise.resolve(soClient),
       pluginStop$,
       kibanaVersion: '8.8.0',
       ml,
