@@ -41,11 +41,32 @@ export const registerUpdateRoute = ({
 
       try {
         // Verify component exists; ES will throw 404 if not
-        await client.asCurrentUser.cluster.getComponentTemplate({ name });
+        const existingComponentTemplate = await client.asCurrentUser.transport.request<{
+          component_templates?: Array<{
+            component_template?: { template?: { data_stream_options?: unknown } };
+          }>;
+        }>({
+          method: 'GET',
+          path: `/_component_template/${name}`,
+        });
+        // TBD: Replace with the following when the client includes data_stream_options in ClusterComponentTemplateSummary
+        // const existingComponentTemplate = await client.asCurrentUser.cluster.getComponentTemplate({
+        //   name,
+        // });
+        const existingDataStreamOptions =
+          existingComponentTemplate?.component_templates?.[0]?.component_template?.template
+            ?.data_stream_options ?? undefined;
+
+        // If the existing component template contains data stream options, we need to persist them.
+        // Otherwise, they will be lost when the component template is updated.
+        const updatedTemplate = {
+          ...template,
+          ...(existingDataStreamOptions && { data_stream_options: existingDataStreamOptions }),
+        };
 
         const responseBody = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
-          template: template as estypes.IndicesIndexState,
+          template: updatedTemplate as estypes.IndicesIndexState,
           version,
           _meta,
           deprecated,

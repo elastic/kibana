@@ -55,3 +55,35 @@ export const saveTemplate = async ({
     ...(serializedTemplate as Omit<IndicesPutIndexTemplateRequest, 'name'>),
   });
 };
+
+export const getTemplateDataStreamOptions = async ({
+  name,
+  client,
+  isLegacy,
+}: {
+  name: string;
+  client: IScopedClusterClient;
+  isLegacy?: boolean;
+}) => {
+  // Legacy templates do not support data stream options
+  if (isLegacy) {
+    return undefined;
+  }
+  const existingTemplate = await client.asCurrentUser.transport.request<{
+    index_templates?: Array<{
+      index_template?: { template?: { data_stream_options?: unknown } };
+    }>;
+  }>({
+    method: 'GET',
+    path: `/_index_template/${name}`,
+  });
+  // TBD: Replace with the following when the client includes data_stream_options in IndicesIndexTemplateSummary
+  // const existingTemplate = await client.asCurrentUser.indices.getIndexTemplate({
+  //   name,
+  // });
+
+  return (
+    existingTemplate?.index_templates?.[0]?.index_template?.template?.data_stream_options ??
+    undefined
+  );
+};

@@ -19,6 +19,7 @@ export const componentTemplateSchema = schema.object({
         data_retention: schema.maybe(schema.string()),
       })
     ),
+    data_stream_options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   }),
   version: schema.maybe(schema.number()),
   _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),

@@ -16,6 +16,7 @@ export interface ComponentTemplateSerialized {
     aliases?: Aliases;
     mappings?: Mappings;
     lifecycle?: DataStream['lifecycle'];
+    data_stream_options?: object;
   };
   version?: number;
   deprecated?: boolean;
