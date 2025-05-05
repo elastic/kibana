@@ -90,6 +90,14 @@ export const initializeSession: InternalStateThunkActionCreator<
 
     const wasTabInitialized = Boolean(stateContainer$.getValue());
 
+    if (wasTabInitialized) {
+      // Clear existing runtime state on re-initialization
+      // to ensure no stale state is used during loading
+      currentDataView$.next(undefined);
+      stateContainer$.next(undefined);
+      customizationService$.next(undefined);
+    }
+
     if (TABS_ENABLED && !wasTabInitialized) {
       const tabGlobalStateFromLocalStorage =
         tabsStorageManager.loadTabGlobalStateFromLocalCache(tabId);

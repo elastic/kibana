@@ -36,10 +36,17 @@ import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import {
-  CurrentTabProvider,
+  InternalStateProvider,
   RuntimeStateProvider,
   internalStateActions,
 } from '../../state_management/redux';
+import { ChartPortalsRenderer } from '../chart';
+import { UnifiedHistogramChart } from '@kbn/unified-histogram';
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
+}));
 
 function getStateContainer({
   savedSearch,
@@ -158,13 +165,15 @@ const mountComponent = async ({
   const component = mountWithIntl(
     <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
-        <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
-          <DiscoverMainProvider value={stateContainer}>
-            <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
-              <DiscoverHistogramLayout {...props} />
-            </RuntimeStateProvider>
-          </DiscoverMainProvider>
-        </CurrentTabProvider>
+        <InternalStateProvider store={stateContainer.internalState}>
+          <ChartPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
+            <DiscoverMainProvider value={stateContainer}>
+              <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
+                <DiscoverHistogramLayout {...props} />
+              </RuntimeStateProvider>
+            </DiscoverMainProvider>
+          </ChartPortalsRenderer>
+        </InternalStateProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );
@@ -180,19 +189,19 @@ const mountComponent = async ({
 
 describe('Discover histogram layout component', () => {
   describe('render', () => {
-    it('should render null if there is no search session', async () => {
+    it('should not render chart if there is no search session', async () => {
       const { component } = await mountComponent({ searchSessionId: null });
-      expect(component.isEmptyRender()).toBe(true);
+      expect(component.exists(UnifiedHistogramChart)).toBe(false);
     });
 
-    it('should not render null if there is a search session', async () => {
+    it('should render chart if there is a search session', async () => {
       const { component } = await mountComponent();
-      expect(component.isEmptyRender()).toBe(false);
+      expect(component.exists(UnifiedHistogramChart)).toBe(true);
     }, 10000);
 
-    it('should not render null if there is no search session, but isEsqlMode is true', async () => {
+    it('should render chart if there is no search session, but isEsqlMode is true', async () => {
       const { component } = await mountComponent({ isEsqlMode: true });
-      expect(component.isEmptyRender()).toBe(false);
+      expect(component.exists(UnifiedHistogramChart)).toBe(true);
     });
 
     it('should render PanelsToggle', async () => {

@@ -268,13 +268,16 @@ export interface InternalStateThunkDependencies {
   tabsStorageManager: TabsStorageManager;
 }
 
+const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
+
 export const createInternalStateStore = (options: InternalStateThunkDependencies) => {
   return configureStore({
     reducer: internalStateSlice.reducer,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({ thunk: { extraArgument: options } }).prepend(
-        createMiddleware(options).middleware
-      ),
+      getDefaultMiddleware({
+        thunk: { extraArgument: options },
+        serializableCheck: !IS_JEST_ENVIRONMENT,
+      }).prepend(createMiddleware(options).middleware),
   });
 };
 

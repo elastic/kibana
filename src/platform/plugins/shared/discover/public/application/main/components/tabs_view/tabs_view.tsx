@@ -11,7 +11,6 @@ import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import React, { useCallback } from 'react';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
-  CurrentTabProvider,
   createTabItem,
   internalStateActions,
   selectAllTabs,
@@ -33,10 +32,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
 
   const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
-    (updateState) => {
-      const updateTabsAction = internalStateActions.updateTabs(updateState);
-      return dispatch(updateTabsAction);
-    },
+    (updateState) => dispatch(internalStateActions.updateTabs(updateState)),
     [dispatch]
   );
 
@@ -45,13 +41,10 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
     [allTabs]
   );
 
-  const renderContent: UnifiedTabsProps['renderContent'] = useCallback(() => {
-    return (
-      <CurrentTabProvider key={currentTabId} currentTabId={currentTabId}>
-        <DiscoverSessionView key={currentTabId} {...props} />
-      </CurrentTabProvider>
-    );
-  }, [currentTabId, props]);
+  const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
+    () => <DiscoverSessionView key={currentTabId} {...props} />,
+    [currentTabId, props]
+  );
 
   return (
     <UnifiedTabs
