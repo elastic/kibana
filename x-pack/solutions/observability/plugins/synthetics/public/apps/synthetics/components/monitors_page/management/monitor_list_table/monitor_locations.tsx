@@ -7,31 +7,44 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { OverviewStatusState, ServiceLocations } from '../../../../../../../common/runtime_types';
+import { useSelector } from 'react-redux';
+import { useMonitorHealthColor } from '../../hooks/use_monitor_health_color';
+import {
+  OverviewStatusMetaData,
+  ServiceLocations,
+} from '../../../../../../../common/runtime_types';
 import { LocationStatusBadges } from '../../../common/components/location_status_badges';
+import { selectOverviewStatus } from '../../../../state/overview_status';
 
 interface Props {
-  locations: ServiceLocations;
-  monitorId: string;
-  overviewStatus: OverviewStatusState | null;
+  locations: ServiceLocations | OverviewStatusMetaData['locations'];
+  configId: string;
 }
 
-export const MonitorLocations = ({ locations, monitorId, overviewStatus }: Props) => {
+export const MonitorLocations = ({ locations, configId }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
+  const { status: overviewStatus } = useSelector(selectOverviewStatus);
+
+  const getColor = useMonitorHealthColor();
 
   const locationsToDisplay = locations.map((loc) => {
-    const locById = `${monitorId}-${loc.id}`;
-
     let status: string = 'unknown';
     let color = euiTheme.colors.disabled;
-
-    if (overviewStatus?.downConfigs[locById]) {
-      status = 'down';
-      color = isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.danger;
-    } else if (overviewStatus?.upConfigs[locById]) {
-      status = 'up';
-      color = isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.success;
+    if (overviewStatus?.downConfigs[configId]) {
+      const configStatus = overviewStatus.downConfigs[configId];
+      const locStatus = configStatus?.locations?.find((location) => location.id === loc.id)?.status;
+      if (locStatus) {
+        status = locStatus;
+        color = getColor(status);
+      }
+    }
+    if (overviewStatus?.upConfigs[configId]) {
+      const configStatus = overviewStatus.upConfigs[configId];
+      const locStatus = configStatus?.locations?.find((location) => location.id === loc.id)?.status;
+      if (locStatus) {
+        status = locStatus;
+        color = getColor(status);
+      }
     }
 
     return {
@@ -43,6 +56,6 @@ export const MonitorLocations = ({ locations, monitorId, overviewStatus }: Props
   });
 
   return (
-    <LocationStatusBadges configId={monitorId} locations={locationsToDisplay} loading={false} />
+    <LocationStatusBadges configId={configId} locations={locationsToDisplay} loading={false} />
   );
 };

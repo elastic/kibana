@@ -9,6 +9,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { LocationsBadge } from './locations_badge';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';
 import * as labels from '../../../management/monitor_list_table/labels';
 import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
@@ -19,7 +20,7 @@ export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData })
 
   return (
     <>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <MonitorTypeBadge
@@ -31,6 +32,9 @@ export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData })
               });
             }}
           />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <LocationsBadge monitor={monitor} />
         </EuiFlexItem>
         {(tags ?? []).length > 0 && (
           <EuiFlexItem grow={false}>

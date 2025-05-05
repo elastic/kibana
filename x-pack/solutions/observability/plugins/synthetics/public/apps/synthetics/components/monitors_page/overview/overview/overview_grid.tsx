@@ -52,7 +52,6 @@ const LIST_THRESHOLD = 12;
 
 interface ListItem {
   configId: string;
-  locationId: string;
 }
 
 export const OverviewGrid = memo(
@@ -83,10 +82,10 @@ export const OverviewGrid = memo(
 
     useEffect(() => {
       const trendRequests = monitorsSortedByStatus.reduce((acc, item) => {
-        if (trendData[item.configId + item.locationId] === undefined) {
+        if (trendData[item.configId] === undefined) {
           acc.push({
+            locationIds: item.locations.map((location) => location.id),
             configId: item.configId,
-            locationId: item.locationId,
             schedule: item.schedule,
           });
         }
@@ -152,13 +151,13 @@ export const OverviewGrid = memo(
         {view === 'cardView' ? (
           <>
             <div style={groupField === 'none' ? { height: listHeight } : undefined}>
-              {groupField === 'none' ? (
+              {groupField === 'none' || groupField === 'monitor' ? (
                 loaded && monitorsSortedByStatus.length ? (
                   <EuiAutoSizer>
                     {({ width }: EuiAutoSize) => (
                       <InfiniteLoader
                         isItemLoaded={(idx: number) =>
-                          listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
+                          listItems[idx].every((m) => !!trendData[m.configId])
                         }
                         itemCount={listItems.length}
                         loadMoreItems={(_, stop: number) => setMaxItem(Math.max(maxItem, stop))}

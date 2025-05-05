@@ -105,17 +105,19 @@ export function ActionsPopover({
   position,
   iconHasPanel = true,
   iconSize = 's',
-  locationId,
+  locationId: locId,
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
   const locationName = useLocationName(monitor);
 
   const { http } = useKibana().services;
+  const locationId = locId ?? monitor.locations[0].id;
+  const locationLabel = monitor.locations[0].label;
 
   const detailUrl = useMonitorDetailLocator({
+    locationId,
     configId: monitor.configId,
-    locationId: locationId ?? monitor.locationId,
     spaceId: monitor.spaceId,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId, spaceId: monitor.spaceId });
@@ -172,10 +174,10 @@ export function ActionsPopover({
       if (locationName) {
         dispatch(
           setFlyoutConfig({
+            locationId,
             configId: monitor.configId,
             location: locationName,
             id: monitor.configId,
-            locationId: monitor.locationId,
           })
         );
         setIsPopoverOpen(false);
@@ -189,13 +191,13 @@ export function ActionsPopover({
       filters: {
         monitorIds: [{ label: monitor.name, value: monitor.configId }],
         tags: [],
-        locations: [{ label: monitor.locationLabel, value: monitor.locationId }],
+        locations: [{ label: locationLabel, value: locationId }],
         monitorTypes: [],
         projects: [],
       },
       view,
     },
-    documentTitle: `${monitor.name} - ${monitor.locationLabel}`,
+    documentTitle: `${monitor.name} - ${locationLabel}`,
     objectType: i18n.translate('xpack.synthetics.overview.actions.addToDashboard.objectTypeLabel', {
       defaultMessage: 'Monitor Overview',
     }),

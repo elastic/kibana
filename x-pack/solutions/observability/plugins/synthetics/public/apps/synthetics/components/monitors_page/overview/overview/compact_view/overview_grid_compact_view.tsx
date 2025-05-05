@@ -23,7 +23,7 @@ export const OverviewGridCompactView = ({
   } = useSelector(selectOverviewState);
   const monitorsSortedByStatus = useMonitorsSortedByStatus();
 
-  return groupField === 'none' ? (
+  return groupField === 'none' || groupField === 'monitor' ? (
     <MonitorsTable
       items={monitorsSortedByStatus}
       setFlyoutConfigCallback={setFlyoutConfigCallback}

@@ -59,6 +59,7 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
         ...Object.values(pendingConfigs),
       ] as OverviewStatusMetaData[];
     }
+
     switch (sortField) {
       case 'name.keyword':
         result = result.sort((a, b) => a.name.localeCompare(b.name));

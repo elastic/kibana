@@ -7,18 +7,24 @@
 import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import {
+  EncryptedSyntheticsMonitor,
+  OverviewStatusMetaData,
+} from '../../../../../../common/runtime_types';
 
 export const BadgeStatus = ({
   status,
   isBrowserType,
   onClickBadge,
+  monitor,
 }: {
+  monitor?: OverviewStatusMetaData;
   status?: string;
   isBrowserType: boolean;
   onClickBadge?: () => void;
 }) => {
-  const { color, dataTestSubj, labels } = badgeMapping[status || 'unknown'];
+  const monStatus = status ? status : monitor?.locations[0]?.status;
+  const { color, dataTestSubj, labels } = badgeMapping[monStatus || 'unknown'];
   const label = isBrowserType && labels.browser ? labels.browser : labels.default;
 
   return (

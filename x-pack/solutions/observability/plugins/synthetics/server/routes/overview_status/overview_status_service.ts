@@ -30,7 +30,7 @@ type LocationStatus = Array<{
   status: string;
   locationId: string;
   timestamp: string;
-  monitorUrl?: string;
+  monitorUrl: string;
 }>;
 
 export const SUMMARIES_PAGE_SIZE = 5000;
@@ -212,7 +212,7 @@ export class OverviewStatusService {
           const monitorId = String(bKey.monitorId);
           const locationId = String(bKey.locationId);
           const status = String(statusAgg.top?.[0].metrics?.['monitor.status']);
-          const monitorUrl = statusAgg.top?.[0].metrics?.['url.full.keyword'];
+          const monitorUrl = String(statusAgg.top?.[0].metrics?.['url.full.keyword']);
 
           const timestamp = String(statusAgg.top[0].sort[0]);
           if (!monitorByIds.has(String(monitorId))) {
@@ -252,13 +252,25 @@ export class OverviewStatusService {
       const monitorQueryId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
       const meta = this.getMonitorMeta(monitor);
       monitor.attributes[ConfigKey.LOCATIONS]?.forEach((location) => {
-        disabledConfigs[`${meta.configId}-${location.id}`] = {
-          monitorQueryId,
-          status: 'disabled',
-          locationId: location.id,
-          locationLabel: location.label,
-          ...meta,
-        };
+        if (disabledConfigs[meta.configId]) {
+          disabledConfigs[meta.configId].locations.push({
+            id: location.id,
+            label: location.label,
+            status: 'disabled',
+          });
+        } else {
+          disabledConfigs[meta.configId] = {
+            monitorQueryId,
+            locations: [
+              {
+                id: location.id,
+                label: location.label,
+                status: 'disabled',
+              },
+            ],
+            ...meta,
+          };
+        }
       });
     });
 
@@ -279,31 +291,54 @@ export class OverviewStatusService {
         const meta = {
           ...metaInfo,
           monitorQueryId: monitorId,
-          locationId: monLocation.id,
           timestamp: locData?.timestamp,
           locationLabel: monLocation.label,
           urls: monitor.attributes[ConfigKey.URLS] || locData?.monitorUrl,
         };
-        const monLocId = `${meta.configId}-${monLocation.id}`;
+        const location = {
+          id: monLocation.id,
+          label: monLocation.label,
+          status: locData?.status || 'unknown',
+        };
         if (locData) {
-          if (locData.status === 'down') {
-            down += 1;
-            downConfigs[monLocId] = {
-              ...meta,
-              status: 'down',
-            };
-          } else if (locData.status === 'up') {
-            up += 1;
-            upConfigs[monLocId] = {
-              ...meta,
-              status: 'up',
-            };
+          if (downConfigs[meta.configId]) {
+            downConfigs[meta.configId].locations.push(location);
+          } else {
+            if (locData.status === 'down') {
+              down += 1;
+              downConfigs[meta.configId] = {
+                ...meta,
+                locations: [location],
+              };
+            } else if (locData.status === 'up') {
+              up += 1;
+              if (upConfigs[meta.configId]) {
+                upConfigs[meta.configId].locations.push(location);
+              } else {
+                upConfigs[meta.configId] = {
+                  ...meta,
+                  locations: [location],
+                };
+              }
+            }
           }
         } else {
-          pendingConfigs[monLocId] = {
-            status: 'unknown',
-            ...meta,
-          };
+          if (downConfigs[meta.configId] || upConfigs[meta.configId]) {
+            if (downConfigs[meta.configId]) {
+              downConfigs[meta.configId].locations.push(location);
+            } else {
+              upConfigs[meta.configId].locations.push(location);
+            }
+          } else {
+            if (pendingConfigs[meta.configId]) {
+              pendingConfigs[meta.configId].locations.push(location);
+            } else {
+              pendingConfigs[meta.configId] = {
+                ...meta,
+                locations: [location],
+              };
+            }
+          }
         }
       });
     });
