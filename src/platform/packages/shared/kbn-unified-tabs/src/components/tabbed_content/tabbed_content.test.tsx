@@ -20,6 +20,8 @@ const NEW_TAB = {
 };
 
 describe('TabbedContent', () => {
+  const user = userEvent.setup();
+
   const TabsWrapper = ({
     initialItems,
     initialSelectedItemId,
@@ -159,7 +161,6 @@ describe('TabbedContent', () => {
     ];
     const firstTab = initialItems[0];
     const onChanged = jest.fn();
-    const user = userEvent.setup();
 
     render(
       <TabsWrapper
@@ -201,13 +202,9 @@ describe('TabbedContent', () => {
       />
     );
 
-    screen.getByTestId(`unifiedTabs_tabMenuBtn_${tabWithSpecialChars.id}`).click();
-
-    await waitFor(() => {
-      expect(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate')).toBeInTheDocument();
-    });
-
-    screen.getByTestId('unifiedTabs_tabMenuItem_duplicate').click();
+    await user.click(screen.getByTestId(`unifiedTabs_tabMenuBtn_${tabWithSpecialChars.id}`));
+    expect(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate')).toBeInTheDocument();
+    await user.click(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate'));
 
     const duplicatedTab = { ...NEW_TAB, label: 'Tab (1+2)*.? (copy)' };
 
