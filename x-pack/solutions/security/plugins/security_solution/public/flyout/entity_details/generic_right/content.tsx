@@ -10,7 +10,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
-import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
+import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
+import {
+  EntityDetailsLeftPanelTab,
+  type EntityDetailsPath,
+} from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { useExpandSection } from '../../document_details/right/hooks/use_expand_section';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
@@ -20,29 +25,15 @@ import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
 interface GenericEntityFlyoutContentProps {
-  source: Record<string, unknown>;
-  entityDocId: string;
-  scopeId: string;
+  source: GenericEntityRecord;
+  openGenericEntityDetailsPanelByPath: (path: EntityDetailsPath) => void;
 }
 
 export const GenericEntityFlyoutContent = ({
   source,
-  entityDocId,
-  scopeId,
+  openGenericEntityDetailsPanelByPath,
 }: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
-
-  const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
-    field: 'entity.id',
-    value: source.entity.id,
-    entityDocId,
-    scopeId,
-    panelTab: 'fields',
-  });
-
-  const openDetailsPanel = (path: { tab: string; subT }) => {
-    return openGenericEntityDetails(path);
-  };
 
   const fieldsSectionExpandedState = useExpandSection({
     title: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION,
@@ -56,12 +47,15 @@ export const GenericEntityFlyoutContent = ({
 
     const flattenedDocument = getFlattenedObject(source);
 
-    const filtered = Object.entries(flattenedDocument).reduce((acc, [key, value]) => {
-      if (pinnedFields?.includes(key)) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
+    const filtered = Object.entries(flattenedDocument).reduce(
+      (acc: Record<string, unknown>, [key, value]) => {
+        if (pinnedFields?.includes(key)) {
+          acc[key] = value;
+        }
+        return acc;
+      },
+      {}
+    );
 
     return filtered;
   }, [source, pinnedFields]);
@@ -94,7 +88,10 @@ export const GenericEntityFlyoutContent = ({
               </EuiTitle>
             ),
             link: {
-              callback: openGenericEntityDetails,
+              callback: () =>
+                openGenericEntityDetailsPanelByPath({
+                  tab: EntityDetailsLeftPanelTab.FIELDS_TABLE,
+                }),
               tooltip: (
                 <FormattedMessage
                   id="xpack.securitySolution.genericEntityFlyout.flyoutContent.expandablePanel.highlightedFieldsTooltip"
@@ -106,7 +103,7 @@ export const GenericEntityFlyoutContent = ({
         >
           <FieldsTable
             document={filteredDocument}
-            euiInMemoryTableProps={{ search: null, pagination: null }}
+            euiInMemoryTableProps={{ search: undefined, pagination: undefined }}
           />
         </ExpandablePanel>
       </ExpandableSection>
@@ -114,13 +111,11 @@ export const GenericEntityFlyoutContent = ({
       <EuiHorizontalRule />
 
       <EntityInsight
-        // field={'entity.id'}
-        // value={source.entity.id}
-        field={'agent.type'}
-        value={'cloudbeat'}
+        field={EntityIdentifierFields.generic}
+        value={source.entity.id}
         isPreviewMode={false}
         isLinkEnabled={true}
-        openDetailsPanel={openDetailsPanel}
+        openDetailsPanel={openGenericEntityDetailsPanelByPath}
       />
     </FlyoutBody>
   );

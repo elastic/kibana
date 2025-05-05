@@ -8,6 +8,7 @@
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
 import type { CloudPostureEntityIdentifier } from '../../../../cloud_security_posture/components/entity_insight';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -33,14 +34,14 @@ export const useOpenGenericEntityDetailsLeftPanel = ({
 
   const { to, from } = useGlobalTime();
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: 'agent.type',
-    value: 'cloudbeat',
+    field,
+    value,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-generic-entity-alerts`,
   });
 
-  const openGenericEntityDetails = (path: { tab: string; subTab?: string }) => {
+  const openGenericEntityDetails = (path: EntityDetailsPath) => {
     return openLeftPanel({
       id: GenericEntityDetailsPanelKey,
       params: {
