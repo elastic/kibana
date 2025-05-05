@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   DataStreamMigrationStatus,
   DataStreamResolutionType,
+  DataStreamsAction,
 } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { MigrationState } from '../../../use_migration_state';
@@ -39,7 +40,17 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   resolutionType: DataStreamResolutionType;
   executeAction: () => void;
   cancelAction: () => void;
-}> = ({ closeFlyout, migrationState, resolutionType, executeAction, cancelAction }) => {
+  startReadonly: () => void;
+  correctiveAction: DataStreamsAction;
+}> = ({
+  closeFlyout,
+  migrationState,
+  resolutionType,
+  executeAction,
+  cancelAction,
+  startReadonly,
+  correctiveAction,
+}) => {
   const {
     services: { api },
   } = useAppContext();
@@ -55,10 +66,13 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
 
   const showMainButton = !hasFetchFailed && !isCompleted && hasRequiredPrivileges;
   const shouldShowCancelButton = showMainButton && status === DataStreamMigrationStatus.inProgress;
+  const readOnlyExcluded = correctiveAction.metadata.excludedActions?.includes('readOnly');
+  const shouldShowReadOnlyButton =
+    !readOnlyExcluded && !loading && status === DataStreamMigrationStatus.failed;
 
   return (
     <Fragment>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="dataStreamMigrationChecklistFlyout">
         {hasRequiredPrivileges === false && (
           <Fragment>
             <EuiSpacer />
@@ -71,6 +85,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               }
               color="danger"
               iconType="warning"
+              data-test-subj="dsInsufficientPrivilegesCallout"
             />
           </Fragment>
         )}
@@ -159,7 +174,12 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="closeDataStreamReindexingButton"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.closeButtonLabel"
                 defaultMessage="Close"
@@ -186,12 +206,26 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                   </EuiButton>
                 </EuiFlexItem>
               )}
+              {shouldShowReadOnlyButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color={'primary'}
+                    onClick={startReadonly}
+                    data-test-subj="startDataStreamReadonlyButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.initMarkAsReadOnlyButtonLabel"
+                      defaultMessage="Mark as read-only"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
 
               {showMainButton && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
-                    color={status === DataStreamMigrationStatus.inProgress ? 'primary' : 'warning'}
+                    color={'primary'}
                     iconType={
                       status === DataStreamMigrationStatus.inProgress ? undefined : 'refresh'
                     }
