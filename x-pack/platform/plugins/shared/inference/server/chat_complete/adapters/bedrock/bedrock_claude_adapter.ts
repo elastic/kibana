@@ -12,12 +12,7 @@ import {
   createInferenceInternalError,
   ToolChoiceType,
 } from '@kbn/inference-common';
-import {
-  type Message as BedrockMessage,
-  type MessageRole as BedRockMessageRole,
-  ConverseCommand,
-  SystemContentBlock,
-} from '@aws-sdk/client-bedrock-runtime';
+import { toUtf8 } from '@smithy/util-utf8';
 import { parseSerdeChunkMessage } from './serde_utils';
 import { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
@@ -26,68 +21,66 @@ import {
   BedrockChunkMember,
   serdeEventstreamIntoObservable,
 } from './serde_eventstream_into_observable';
-import { processCompletionChunks } from './process_completion_chunks';
+import {
+  processCompletionChunks,
+  processConverseCompletionChunks,
+} from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
 import { toolChoiceToBedrock, toolsToBedrock } from './convert_tools';
 
 export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
     executor,
-    system,
+    system = 'You are a helpful assistant.',
     messages,
     toolChoice,
     tools,
     temperature = 0,
     modelName,
-    modelId,
     abortSignal,
     metadata,
   }) => {
-    const model = modelName ?? modelId;
-    console.log(`--@@chatComplete modelId`, model);
-    // const model = modelName ??
     const noToolUsage = toolChoice === ToolChoiceType.none;
 
     const converseMessages = messagesToBedrock(messages).map((message) => ({
       role: message.role,
       content: message.rawContent,
     })) as BedrockMessage[];
+    // @TODO: remove
+    console.log(`--@@bedrockClaudeAdapter chatComplete system`, system);
     const systemMessage = noToolUsage
       ? [{ text: addNoToolUsageDirective(system) }]
       : [{ text: system }];
-    const command = new ConverseCommand({
-      modelId: model ?? 'anthropic.claude-3-5-sonnet-20240620-v1:0',
-      // system: noToolUsage ? addNoToolUsageDirective(system) : system,
-      messages: converseMessages,
-      system: systemMessage as SystemContentBlock[],
+    const _tools = noToolUsage ? [] : toolsToBedrock(tools, messages);
+    const bedRockTools = _tools.map((toolSpec) => {
+      return {
+        toolSpec: {
+          name: toolSpec.name,
+          description: toolSpec.description,
+          inputSchema: { json: toolSpec.input_schema },
+        },
+      };
     });
-    // @TODO: remove
-    console.log(`--@@command`, command);
-    console.log(`--@@command.input.system`, command.input.system);
 
-    console.log(`--@@command.input.messages`, JSON.stringify(command.input.messages, null, 2));
-
-    // const subActionParams = {
-    //   system: noToolUsage ? addNoToolUsageDirective(system) : system,
-    //   messages: messagesToBedrock(messages),
-    //   tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
-    //   toolChoice: toolChoiceToBedrock(toolChoice),
-    //   temperature,
-    //   model: modelName,
-    //   stopSequences: ['\n\nHuman:'],
-    //   signal: abortSignal,
-    //   ...(metadata?.connectorTelemetry ? { telemetryMetadata: metadata.connectorTelemetry } : {}),
-    // };
-
-    const converseSubActionParams = {
-      command,
+    const subActionParams = {
+      system: systemMessage,
+      messages: converseMessages,
+      tools: bedRockTools,
+      // system: noToolUsage ? addNoToolUsageDirective(system) : system,
+      // messages: messagesToBedrock(messages),
+      // tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
+      toolChoice: toolChoiceToBedrock(toolChoice),
+      temperature,
+      model: modelName,
+      stopSequences: ['\n\nHuman:'],
       signal: abortSignal,
-      ...(metadata?.connectorTelemetry ? { telemetryMetadata: metadata.connectorTelemetry } : {}),
     };
+
     return defer(() => {
       return executor.invoke({
-        subAction: 'bedrockClientSend',
-        subActionParams: converseSubActionParams,
+        // subAction: 'invokeStream',
+        subAction: 'converseStream',
+        subActionParams,
       });
     }).pipe(
       handleConnectorResponse({ processStream: serdeEventstreamIntoObservable }),
@@ -97,12 +90,20 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
         }
       }),
       filter((value): value is BedrockChunkMember => {
-        return 'chunk' in value && value.chunk?.headers?.[':event-type']?.value === 'chunk';
+        return value !== undefined;
+        // return value.messageStart?.body !== undefined;
+        // return (
+        //   'messageStart' in value &&
+        //   value.messageStart?.headers?.[':event-type']?.value === 'messageStart'
+        // );
       }),
       map((message) => {
-        return parseSerdeChunkMessage(message.chunk);
+        const key = Object.keys(message)[0];
+        return { type: key, body: JSON.parse(toUtf8(message[key].body)) };
+        // return JSON.parse(toUtf8(message.messageStart?.body));
+        // return parseSerdeChunkMessage(message.messageStart);
       }),
-      processCompletionChunks()
+      processConverseCompletionChunks()
     );
   },
 };

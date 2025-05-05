@@ -91,8 +91,100 @@ export function processCompletionChunks() {
       });
     });
 }
+export function processConverseCompletionChunks() {
+  return (source: Observable<CompletionChunk>) =>
+    new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
+      function handleNext({ type, body: chunkBody }: CompletionChunk) {
+        console.log(`--@@type`, type, chunkBody);
+        if (type === 'metadata' && 'metrics' in chunkBody) {
+          return emitTokenCountEvent(subscriber, chunkBody);
+        }
+
+        let completionChunk = '';
+        let toolCallChunk: ChatCompletionChunkToolCall | undefined;
+
+        switch (type) {
+          case 'contentBlockStart':
+            if (chunkBody.text) {
+              completionChunk = chunkBody.text || '';
+            } else if (chunkBody.toolUse) {
+              toolCallChunk = {
+                index: chunkBody.contentBlockIndex,
+                toolCallId: chunkBody.start.toolUse.toolUseId,
+                function: {
+                  name: chunkBody.start.toolUse.name,
+                  // the API returns '{}' here, which can't be merged with the deltas...
+                  arguments: '',
+                },
+              };
+            }
+            // @TODO: remove
+            console.log(`--@@contentBlockStart toolCallChunk`, toolCallChunk);
+            break;
+
+          case 'contentBlockDelta':
+            if (chunkBody.delta.text) {
+              completionChunk = chunkBody.delta.text || '';
+            } else if (chunkBody.delta.toolUse) {
+              // @TODO: remove
+              console.log(`--@@chunkBody.delta`, chunkBody.delta);
+              if (toolCallChunk) {
+                toolCallChunk.function.arguments = chunkBody.delta.toolUse.input;
+              } else {
+                // toolCallChunk = {
+                //   index: chunkBody.contentBlockIndex,
+                // toolCallId: '',
+                // function: {
+                //   name: '',
+                //   arguments: chunkBody.delta.toolUse.input,
+                // },
+              }
+            }
+            break;
+
+          // case 'contentBlockStop':
+          //   toolCallChunk = undefined;
+          //   break;
+
+          case 'messageDelta':
+            completionChunk = chunkBody.delta.stop_sequence || '';
+            break;
+
+          default:
+            break;
+        }
+
+        if (completionChunk || toolCallChunk) {
+          console.log(`--@@completionChunk`, completionChunk);
+          console.log(`--@@toolCallChunk`, toolCallChunk);
+          subscriber.next({
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            content: completionChunk,
+            tool_calls: toolCallChunk ? [toolCallChunk] : [],
+          });
+        }
+      }
+
+      source.subscribe({
+        next: (value) => {
+          try {
+            handleNext(value);
+          } catch (error) {
+            subscriber.error(error);
+          }
+        },
+        error: (err) => {
+          subscriber.error(err);
+        },
+        complete: () => {
+          subscriber.complete();
+        },
+      });
+    });
+}
 
 function isTokenCountCompletionChunk(value: CompletionChunk): value is MessageStopChunk {
+  // value.type === 'metadata' && 'metrics' in value
   return value.type === 'message_stop' && 'amazon-bedrock-invocationMetrics' in value;
 }
 
@@ -100,7 +192,7 @@ function emitTokenCountEvent(
   subscriber: Subscriber<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>,
   chunk: MessageStopChunk
 ) {
-  const { inputTokenCount, outputTokenCount } = chunk['amazon-bedrock-invocationMetrics'];
+  const { inputTokens: inputTokenCount, outputTokens: outputTokenCount } = chunk.usage;
 
   subscriber.next({
     type: ChatCompletionEventType.ChatCompletionTokenCount,

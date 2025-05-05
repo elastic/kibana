@@ -172,3 +172,36 @@ export const BedrockClientSendParamsSchema = schema.object({
 });
 
 export const BedrockClientSendResponseSchema = schema.object({}, { unknowns: 'allow' });
+
+export const ConverseActionParamsSchema = schema.any();
+// export const ConverseActionParamsSchema = schema.object({
+//   // Converse from @aws-sdk/client-bedrock-runtime
+//   messages: schema.arrayOf(BedrockMessageSchema),
+//   model: schema.maybe(schema.string()),
+//   system: schema.maybe(
+//     schema.arrayOf(
+//       schema.object({
+//         text: schema.string(),
+//       })
+//     )
+//   ),
+//   temperature: schema.maybe(schema.number()),
+//   maxTokens: schema.maybe(schema.number()),
+//   stopSequences: schema.maybe(schema.arrayOf(schema.string())),
+//   tools: schema.maybe(
+//     schema.arrayOf(
+//       schema.object({
+//         name: schema.string(),
+//         description: schema.string(),
+//         input_schema: schema.object({}, { unknowns: 'allow' }),
+//       })
+//     )
+//   ),
+//   toolChoice: schema.maybe(BedrockToolChoiceSchema),
+//   // Kibana related properties
+//   signal: schema.maybe(schema.any()),
+//   timeout: schema.maybe(schema.number()),
+//   telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
+// });
+
+export const ConverseStreamActionParamsSchema = ConverseActionParamsSchema;

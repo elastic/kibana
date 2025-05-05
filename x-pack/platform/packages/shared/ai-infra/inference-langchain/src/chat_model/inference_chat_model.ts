@@ -202,10 +202,9 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   ): Promise<ChatCompleteCompositeResponse<ToolOptions, boolean>> {
     return this.caller.call(async () => {
       try {
-        // @TODO: remove
-        console.log(`--@@this._identifyingParams().model_name`, this.getLsParams({}));
         return await this.chatComplete({
           ...request,
+          // @TODO: remove
           modelId: this.getLsParams({}).ls_model_name,
         });
       } catch (e) {

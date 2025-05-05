@@ -126,11 +126,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     createLlmInstance,
     isOssModel,
   };
-  // @TODO: remove
-  console.log(
-    `--@@getModelOrOss(llmType, isOssModel, request.body.model)`,
-    getModelOrOss(llmType, isOssModel, request.body.model)
-  );
 
   const tools: StructuredTool[] = (
     await Promise.all(
@@ -188,8 +183,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     llmType,
   });
 
-  // @TODO: remove
-  console.log(`--@@tools`, tools);
   const llm = await createLlmInstance();
   const agentRunnable = await agentRunnableFactory({
     llm,
