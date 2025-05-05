@@ -107,7 +107,7 @@ export function processConverseCompletionChunks() {
           case 'contentBlockStart':
             if (chunkBody.text) {
               completionChunk = chunkBody.text || '';
-            } else if (chunkBody.toolUse) {
+            } else if (chunkBody.start.toolUse) {
               toolCallChunk = {
                 index: chunkBody.contentBlockIndex,
                 toolCallId: chunkBody.start.toolUse.toolUseId,
