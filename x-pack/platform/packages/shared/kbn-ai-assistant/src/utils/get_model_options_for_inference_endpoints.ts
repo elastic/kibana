@@ -7,6 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import {
+  DEFAULT_ELSER_INFERENCE_ID,
+  E5_LARGE_IN_EIS_INFERENCE_ID,
+  E5_SMALL_INFERENCE_ID,
+  ELSER_IN_EIS_INFERENCE_ID,
+} from '@kbn/observability-ai-assistant-plugin/common';
 
 export interface ModelOptionsData {
   key: string;
@@ -59,14 +65,11 @@ const e5LargeDescription = i18n.translate(
   }
 );
 
-const ELSER_IN_EIS_INFERENCE_ID = '.elser-v2-elastic';
-const E5_LARGE_IN_EIS_INFERENCE_ID = '.multilingual-e5-large-elastic'; // TODO: verify the inference ID once it's created in EIS
-
 const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
   string,
   { title: string; description: string }
 > = {
-  '.elser-2-elasticsearch': {
+  [DEFAULT_ELSER_INFERENCE_ID]: {
     title: elserTitle,
     description: elserDescription,
   },
@@ -74,7 +77,7 @@ const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
     title: elserTitle,
     description: elserDescription,
   },
-  '.multilingual-e5-small-elasticsearch': {
+  [E5_SMALL_INFERENCE_ID]: {
     title: e5SmallTitle,
     description: e5SmallDescription,
   },
