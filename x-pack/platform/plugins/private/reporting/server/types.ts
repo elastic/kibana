@@ -100,7 +100,7 @@ export interface ScheduledReportingJobResponse {
   job: ScheduledReportApiJSON;
 }
 
-export type ScheduledReport = Omit<RawScheduledReport, 'schedule'> & {
+export type ScheduledReportType = Omit<RawScheduledReport, 'schedule'> & {
   schedule: RruleSchedule;
 };
 

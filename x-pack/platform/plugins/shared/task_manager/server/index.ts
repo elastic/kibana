@@ -24,7 +24,6 @@ export type {
 } from './task';
 
 export { Frequency, Weekday } from '@kbn/rrule';
-
 export { scheduleRruleSchema } from './saved_objects';
 
 export type { RruleSchedule } from './task';

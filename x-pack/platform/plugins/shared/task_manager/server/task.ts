@@ -275,7 +275,6 @@ interface RruleMonthly extends RruleCommon {
   byhour?: number[];
   byminute?: number[];
   byweekday?: string[];
-  bymonthday?: number[];
 }
 interface RruleWeekly extends RruleCommon {
   freq: Frequency.WEEKLY;

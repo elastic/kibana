@@ -7,10 +7,10 @@
 
 import { SavedObject } from '@kbn/core/server';
 import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
-import { ScheduledReport } from '../../../../types';
+import { ScheduledReportType } from '../../../../types';
 
 export function transformRawScheduledReportToReport(
-  rawScheduledReport: SavedObject<ScheduledReport>
+  rawScheduledReport: SavedObject<ScheduledReportType>
 ): ScheduledReportApiJSON {
   const parsedPayload = JSON.parse(rawScheduledReport.attributes.payload);
   return {
