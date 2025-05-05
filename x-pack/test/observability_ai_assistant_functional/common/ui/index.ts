@@ -36,7 +36,11 @@ const pages = {
     setupGenAiConnectorsButtonSelector:
       'observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton',
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
-    retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
+    installKnowledgeBaseButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
+    settingUpKnowledgeBase: 'observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseText',
+    selectModelDropdown: 'observabilityAiAssistantKnowledgeBaseModelDropdown',
+    pendingModelText: 'observabilityAiAssistantKnowledgeBaseModelPendingText',
+    redeployModelButton: 'observabilityAiAssistantKnowledgeBaseReDeployModelButton',
     conversationLink: 'observabilityAiAssistantConversationsLink',
     positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
     connectorsErrorMsg: 'observabilityAiAssistantConnectorsError',
