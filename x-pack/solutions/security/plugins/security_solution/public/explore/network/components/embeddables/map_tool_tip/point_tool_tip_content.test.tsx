@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
@@ -22,12 +22,12 @@ describe('PointToolTipContent', () => {
   ];
 
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <PointToolTipContentComponent contextId={'contextId'} featureProps={mockFeatureProps} />
       </TestProviders>
     );
-    expect(wrapper.find('PointToolTipContentComponent')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   describe('#getRenderedFieldValue', () => {
