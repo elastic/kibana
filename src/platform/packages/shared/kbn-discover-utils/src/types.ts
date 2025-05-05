@@ -125,7 +125,6 @@ export interface SpanDocumentOverview
     SpanFields,
     UserAgentFields {
   'transaction.id'?: string;
-  'transaction.name'?: string;
 }
 
 export interface TraceFields {
