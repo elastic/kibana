@@ -57,7 +57,6 @@ import {
   LegendColorPickerWrapperContext,
   getLayers,
   getLegendActions,
-  canFilter,
   getFilterClickData,
   getFilterEventData,
   getPartitionTheme,
@@ -95,6 +94,7 @@ export type PartitionVisComponentProps = Omit<
   visParams: PartitionVisParams;
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
+  hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'];
   renderComplete: IInterpreterRenderHandlers['done'];
   interactive: boolean;
   chartsThemeService: ChartsPluginSetup['theme'];
@@ -340,13 +340,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     () =>
       interactive
         ? getLegendActions(
-            canFilter,
+            props.hasCompatibleActions,
             getLegendActionEventData(visData),
             handleLegendAction,
             columnCellValueActions,
             visParams,
             visData,
-            services.data.actions,
             services.fieldFormats
           )
         : undefined,
@@ -355,10 +354,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       getLegendActionEventData,
       handleLegendAction,
       interactive,
-      services.data.actions,
       services.fieldFormats,
       visData,
       visParams,
+      props.hasCompatibleActions,
     ]
   );
 
