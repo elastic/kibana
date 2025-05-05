@@ -26,7 +26,7 @@ import {
 } from '@kbn/core/server';
 import { Frequency } from '@kbn/rrule';
 import { ReportingStore, SavedReport } from '../store';
-import { ScheduledReport } from '../../types';
+import { ScheduledReportType } from '../../types';
 
 interface StreamMock {
   getSeqNo: () => number;
@@ -79,7 +79,7 @@ const payload = {
   version: '8.0.0',
 };
 
-const reportSO: SavedObject<ScheduledReport> = {
+const reportSO: SavedObject<ScheduledReportType> = {
   id: 'report-so-id',
   attributes: {
     createdAt: new Date().toISOString(),

@@ -15,7 +15,7 @@ import { errorLogger } from './error_logger';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { PrepareJobResults, RunReportTask } from './run_report';
 import { ScheduledReport } from '../store/scheduled_report';
-import { ScheduledReport as ScheduledReportType } from '../../types';
+import { ScheduledReportType } from '../../types';
 
 type ScheduledReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: Omit<ScheduledReportTaskParams, 'schedule'>;

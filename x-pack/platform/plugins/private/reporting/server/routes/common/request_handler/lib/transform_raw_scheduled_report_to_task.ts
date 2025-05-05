@@ -6,11 +6,11 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { ScheduledReport } from '../../../../types';
+import { ScheduledReportType } from '../../../../types';
 import { ScheduledReportTaskParams } from '../../../../lib/tasks';
 
 export function transformRawScheduledReportToTaskParams(
-  rawScheduledReport: SavedObject<ScheduledReport>
+  rawScheduledReport: SavedObject<ScheduledReportType>
 ): ScheduledReportTaskParams {
   return {
     id: rawScheduledReport.id,

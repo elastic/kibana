@@ -11,7 +11,7 @@ import { JOB_STATUS } from '@kbn/reporting-common';
 import { SavedObject } from '@kbn/core/server';
 import { BasePayload } from '@kbn/reporting-common/types';
 import { Report } from './report';
-import { ScheduledReport as ScheduledReportType } from '../../types';
+import { ScheduledReportType } from '../../types';
 
 interface ConstructorOpts {
   runAt: Date;
