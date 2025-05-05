@@ -724,7 +724,7 @@ describe('Error count alert', () => {
         threshold: 2,
         triggerValue: 5,
         viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
+          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_NOT_DEFINED',
       },
       id: 'foo_ENVIRONMENT_NOT_DEFINED',
       payload: {
@@ -750,7 +750,7 @@ describe('Error count alert', () => {
         threshold: 2,
         triggerValue: 4,
         viewInAppUrl:
-          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_ALL',
+          'http://localhost:5601/eyr/app/apm/services/foo/errors?environment=ENVIRONMENT_NOT_DEFINED',
       },
       id: 'foo_ENVIRONMENT_NOT_DEFINED',
       payload: {
