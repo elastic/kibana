@@ -7,8 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
-import { EuiCode, EuiCodeBlock, EuiText } from '@elastic/eui';
-import { EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
+import { EuiCode, EuiCodeBlock, EuiText, EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { EcsFlat } from '@elastic/ecs';
