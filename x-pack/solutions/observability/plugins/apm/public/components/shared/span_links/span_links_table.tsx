@@ -39,7 +39,8 @@ export function SpanLinksTable({ items }: Props) {
     query: { rangeFrom, rangeTo, comparisonEnabled },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer/waterfall'
   );
   const [idActionMenuOpen, setIdActionMenuOpen] = useState<string | undefined>();
   const {

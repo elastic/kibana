@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { synth } from '@kbn/esql-ast';
-import type { ESQLRealField } from '../../../validation/types';
+import type { ESQLFieldWithMetadata } from '../../../validation/types';
 import { extractDissectColumnNames, fieldsSuggestionsAfter } from './fields_suggestions_after';
 
 describe('DISSECT', () => {
@@ -73,9 +73,9 @@ describe('DISSECT', () => {
       const previousCommandFields = [
         { name: 'field1', type: 'keyword' },
         { name: 'field2', type: 'double' },
-      ] as ESQLRealField[];
+      ] as ESQLFieldWithMetadata[];
 
-      const userDefinedColumns = [] as ESQLRealField[];
+      const userDefinedColumns = [] as ESQLFieldWithMetadata[];
 
       const result = fieldsSuggestionsAfter(
         synth.cmd`DISSECT agent "%{firstWord}"`,
