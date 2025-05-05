@@ -23,7 +23,6 @@ import {
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
@@ -362,21 +361,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.2,
     schema: schema.number({ min: 0 }),
-    solution: 'oblt',
-  },
-  [apmEnableServiceMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
-      defaultMessage: 'Service transaction metrics',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.apmEnableServiceMetricsDescription', {
-      defaultMessage:
-        '{betaLabel} Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.',
-      values: { betaLabel: `<em>[${betaLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
     solution: 'oblt',
   },
   [apmEnableContinuousRollups]: {
