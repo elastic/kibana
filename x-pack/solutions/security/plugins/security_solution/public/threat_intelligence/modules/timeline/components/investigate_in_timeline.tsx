@@ -62,7 +62,7 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
     >
       <FormattedMessage
         defaultMessage="Investigate in Timeline"
-        id="xpack.threatIntelligence.investigateInTimelineButton"
+        id="xpack.securitySolution.threatIntelligence.investigateInTimelineButton"
       />
     </EuiContextMenuItem>
   );
