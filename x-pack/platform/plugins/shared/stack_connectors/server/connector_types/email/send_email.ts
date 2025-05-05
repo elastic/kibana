@@ -26,6 +26,7 @@ import type {
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
+import type { Attachment } from '.';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';
@@ -69,20 +70,13 @@ export interface Content {
   messageHTML?: string | null;
 }
 
-export interface Attachment {
-  content: string;
-  contentType?: string;
-  encoding?: string;
-  filename: string;
-}
-
 export async function sendEmail(
   logger: Logger,
   options: SendEmailOptions,
   connectorTokenClient: ConnectorTokenClientContract,
   connectorUsageCollector: ConnectorUsageCollector
 ): Promise<unknown> {
-  const { transport, content, attachments } = options;
+  const { transport, content } = options;
   const { message, messageHTML } = content;
 
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
@@ -96,13 +90,7 @@ export async function sendEmail(
       connectorUsageCollector
     );
   } else {
-    return await sendEmailWithNodemailer(
-      logger,
-      options,
-      renderedMessage,
-      connectorUsageCollector,
-      attachments
-    );
+    return await sendEmailWithNodemailer(logger, options, renderedMessage, connectorUsageCollector);
   }
 }
 
@@ -192,8 +180,7 @@ async function sendEmailWithNodemailer(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  connectorUsageCollector: ConnectorUsageCollector,
-  attachments?: Attachment[]
+  connectorUsageCollector: ConnectorUsageCollector
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
@@ -210,7 +197,6 @@ async function sendEmailWithNodemailer(
     subject,
     html: messageHTML,
     text: message,
-    ...(attachments && { attachments }),
   };
 
   // The transport options do not seem to be exposed as a type, and we reference
