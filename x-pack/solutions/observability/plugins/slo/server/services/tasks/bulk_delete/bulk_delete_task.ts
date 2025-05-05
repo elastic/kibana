@@ -66,6 +66,7 @@ export class BulkDeleteTask {
                 return;
               }
 
+              this.abortController = new AbortController();
               const [coreStart, pluginStart] = await core.getStartServices();
 
               const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);

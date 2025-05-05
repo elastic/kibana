@@ -21,19 +21,23 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiPopover,
   EuiScreenReaderOnly,
   EuiSpacer,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
-import { WelcomeMessageKnowledgeBase } from '@kbn/ai-assistant/src/chat/welcome_message_knowledge_base';
 import { css } from '@emotion/css';
 import {
   KnowledgeBaseEntry,
   KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
-import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { KnowledgeBaseInstallationStatusPanel } from '@kbn/ai-assistant/src/knowledge_base/knowledge_base_installation_status_panel';
+import { SettingUpKnowledgeBase } from '@kbn/ai-assistant/src/knowledge_base/setting_up_knowledge_base';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
@@ -50,11 +54,16 @@ const centerMaxWidthClassName = css`
   text-align: center;
 `;
 
+const panelClassname = css`
+  width: 100%;
+`;
+
 export function KnowledgeBaseTab() {
   const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
 
   const knowledgeBase = useKnowledgeBase();
+  const { euiTheme } = useEuiTheme();
 
   const columns: Array<EuiBasicTableColumn<KnowledgeBaseEntryCategory>> = [
     {
@@ -211,7 +220,13 @@ export function KnowledgeBaseTab() {
     entries = [],
     isLoading,
     refetch,
-  } = useGetKnowledgeBaseEntries({ query, sortBy, sortDirection });
+  } = useGetKnowledgeBaseEntries({
+    query,
+    sortBy,
+    sortDirection,
+    kbState: knowledgeBase.status.value?.kbState,
+  });
+
   const categorizedEntries = categorizeEntries({ entries });
 
   const handleChangeSort = ({ sort }: Criteria<KnowledgeBaseEntryCategory>) => {
@@ -226,7 +241,7 @@ export function KnowledgeBaseTab() {
     setQuery(e?.currentTarget.value || '');
   };
 
-  if (knowledgeBase.status.loading) {
+  if (knowledgeBase.status.loading && !knowledgeBase.isInstalling) {
     return (
       <EuiFlexGroup alignItems="center" direction="column">
         <EuiFlexItem grow>
@@ -236,183 +251,211 @@ export function KnowledgeBaseTab() {
     );
   }
 
-  return knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY ? (
-    <>
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow>
-              <EuiFieldSearch
-                data-test-subj="knowledgeBaseTabFieldSearch"
-                fullWidth
-                placeholder={i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.euiFieldSearch.searchThisLabel',
-                  { defaultMessage: 'Search for an entry' }
-                )}
-                value={query}
-                onChange={handleChangeQuery}
-                isClearable
-                aria-label={i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.euiFieldSearch.searchEntriesLabel',
-                  { defaultMessage: 'Search entries' }
-                )}
-              />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="knowledgeBaseTabReloadButton"
-                color="success"
-                iconType="refresh"
-                onClick={() => refetch()}
-              >
-                {i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.reloadButtonLabel',
-                  { defaultMessage: 'Reload' }
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="observabilityAiAssistantManagementKnowledgeBaseTabEditInstructionsButton"
-                color="text"
-                onClick={() => setIsEditUserInstructionFlyoutOpen(true)}
-              >
-                {i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.editInstructionsButtonLabel',
-                  { defaultMessage: 'Edit User-specific Prompt' }
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                isOpen={isNewEntryPopoverOpen}
-                closePopover={() => setIsNewEntryPopoverOpen(false)}
-                button={
-                  <EuiButton
-                    fill
-                    data-test-subj="knowledgeBaseNewEntryButton"
-                    iconSide="right"
-                    iconType="arrowDown"
-                    onClick={() => setIsNewEntryPopoverOpen((prevValue) => !prevValue)}
-                  >
-                    {i18n.translate(
-                      'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.newEntryButtonLabel',
-                      {
-                        defaultMessage: 'New entry',
-                      }
-                    )}
-                  </EuiButton>
-                }
-              >
-                <EuiContextMenuPanel
-                  size="s"
-                  items={[
-                    <EuiContextMenuItem
-                      key="singleEntry"
-                      icon="document"
-                      data-test-subj="knowledgeBaseSingleEntryContextMenuItem"
-                      onClick={() => {
-                        setIsNewEntryPopoverOpen(false);
-                        setNewEntryFlyoutType('singleEntry');
-                      }}
-                      size="s"
-                    >
-                      {i18n.translate(
-                        'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.singleEntryContextMenuItemLabel',
-                        { defaultMessage: 'Single entry' }
-                      )}
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      key="bulkImport"
-                      icon="documents"
-                      data-test-subj="knowledgeBaseBulkImportContextMenuItem"
-                      onClick={() => {
-                        setIsNewEntryPopoverOpen(false);
-                        setNewEntryFlyoutType('bulkImport');
-                      }}
-                    >
-                      {i18n.translate(
-                        'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.bulkImportContextMenuItemLabel',
-                        { defaultMessage: 'Bulk import' }
-                      )}
-                    </EuiContextMenuItem>,
-                  ]}
+  if (knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY) {
+    return (
+      <>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow>
+                <EuiFieldSearch
+                  data-test-subj="knowledgeBaseTabFieldSearch"
+                  fullWidth
+                  placeholder={i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.euiFieldSearch.searchThisLabel',
+                    { defaultMessage: 'Search for an entry' }
+                  )}
+                  value={query}
+                  onChange={handleChangeQuery}
+                  isClearable
+                  aria-label={i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.euiFieldSearch.searchEntriesLabel',
+                    { defaultMessage: 'Search entries' }
+                  )}
                 />
-              </EuiPopover>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+              </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiBasicTable<KnowledgeBaseEntryCategory>
-            data-test-subj="knowledgeBaseTable"
-            columns={columns}
-            items={categorizedEntries}
-            loading={isLoading}
-            sorting={{
-              sort: {
-                field: sortBy,
-                direction: sortDirection,
-              },
-            }}
-            rowProps={(row) => ({
-              onClick: () => setSelectedCategory(row),
-            })}
-            onChange={handleChangeSort}
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="knowledgeBaseTabReloadButton"
+                  color="success"
+                  iconType="refresh"
+                  onClick={() => refetch()}
+                >
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.reloadButtonLabel',
+                    { defaultMessage: 'Reload' }
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="observabilityAiAssistantManagementKnowledgeBaseTabEditInstructionsButton"
+                  color="text"
+                  onClick={() => setIsEditUserInstructionFlyoutOpen(true)}
+                >
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.editInstructionsButtonLabel',
+                    { defaultMessage: 'Edit User-specific Prompt' }
+                  )}
+                </EuiButton>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  isOpen={isNewEntryPopoverOpen}
+                  closePopover={() => setIsNewEntryPopoverOpen(false)}
+                  button={
+                    <EuiButton
+                      fill
+                      data-test-subj="knowledgeBaseNewEntryButton"
+                      iconSide="right"
+                      iconType="arrowDown"
+                      onClick={() => setIsNewEntryPopoverOpen((prevValue) => !prevValue)}
+                    >
+                      {i18n.translate(
+                        'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.newEntryButtonLabel',
+                        {
+                          defaultMessage: 'New entry',
+                        }
+                      )}
+                    </EuiButton>
+                  }
+                >
+                  <EuiContextMenuPanel
+                    size="s"
+                    items={[
+                      <EuiContextMenuItem
+                        key="singleEntry"
+                        icon="document"
+                        data-test-subj="knowledgeBaseSingleEntryContextMenuItem"
+                        onClick={() => {
+                          setIsNewEntryPopoverOpen(false);
+                          setNewEntryFlyoutType('singleEntry');
+                        }}
+                        size="s"
+                      >
+                        {i18n.translate(
+                          'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.singleEntryContextMenuItemLabel',
+                          { defaultMessage: 'Single entry' }
+                        )}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key="bulkImport"
+                        icon="documents"
+                        data-test-subj="knowledgeBaseBulkImportContextMenuItem"
+                        onClick={() => {
+                          setIsNewEntryPopoverOpen(false);
+                          setNewEntryFlyoutType('bulkImport');
+                        }}
+                      >
+                        {i18n.translate(
+                          'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.bulkImportContextMenuItemLabel',
+                          { defaultMessage: 'Bulk import' }
+                        )}
+                      </EuiContextMenuItem>,
+                    ]}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiBasicTable<KnowledgeBaseEntryCategory>
+              data-test-subj="knowledgeBaseTable"
+              columns={columns}
+              items={categorizedEntries}
+              loading={isLoading}
+              sorting={{
+                sort: {
+                  field: sortBy,
+                  direction: sortDirection,
+                },
+              }}
+              rowProps={(row) => ({
+                onClick: () => setSelectedCategory(row),
+              })}
+              onChange={handleChangeSort}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        {isEditUserInstructionFlyoutOpen ? (
+          <KnowledgeBaseEditUserInstructionFlyout
+            onClose={() => setIsEditUserInstructionFlyoutOpen(false)}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        ) : null}
 
-      {isEditUserInstructionFlyoutOpen ? (
-        <KnowledgeBaseEditUserInstructionFlyout
-          onClose={() => setIsEditUserInstructionFlyoutOpen(false)}
-        />
-      ) : null}
+        {newEntryFlyoutType === 'singleEntry' ? (
+          <KnowledgeBaseEditManualEntryFlyout onClose={() => setNewEntryFlyoutType(undefined)} />
+        ) : null}
 
-      {newEntryFlyoutType === 'singleEntry' ? (
-        <KnowledgeBaseEditManualEntryFlyout onClose={() => setNewEntryFlyoutType(undefined)} />
-      ) : null}
+        {newEntryFlyoutType === 'bulkImport' ? (
+          <KnowledgeBaseBulkImportFlyout onClose={() => setNewEntryFlyoutType(undefined)} />
+        ) : null}
 
-      {newEntryFlyoutType === 'bulkImport' ? (
-        <KnowledgeBaseBulkImportFlyout onClose={() => setNewEntryFlyoutType(undefined)} />
-      ) : null}
+        {selectedCategory ? (
+          selectedCategory.entries.length === 1 &&
+          (selectedCategory.entries[0].role === 'user_entry' ||
+            selectedCategory.entries[0].role === 'assistant_summarization') ? (
+            <KnowledgeBaseEditManualEntryFlyout
+              entry={selectedCategory.entries[0]}
+              onClose={() => {
+                setSelectedCategory(undefined);
+                refetch();
+              }}
+            />
+          ) : (
+            <KnowledgeBaseCategoryFlyout
+              category={selectedCategory}
+              onClose={() => setSelectedCategory(undefined)}
+            />
+          )
+        ) : null}
+      </>
+    );
+  }
 
-      {selectedCategory ? (
-        selectedCategory.entries.length === 1 &&
-        (selectedCategory.entries[0].role === 'user_entry' ||
-          selectedCategory.entries[0].role === 'assistant_summarization') ? (
-          <KnowledgeBaseEditManualEntryFlyout
-            entry={selectedCategory.entries[0]}
-            onClose={() => {
-              setSelectedCategory(undefined);
-              refetch();
-            }}
-          />
-        ) : (
-          <KnowledgeBaseCategoryFlyout
-            category={selectedCategory}
-            onClose={() => setSelectedCategory(undefined)}
-          />
-        )
-      ) : null}
-    </>
-  ) : (
+  return (
     <EuiFlexGroup
       alignItems="center"
       direction="column"
       gutterSize="none"
       className={fullHeightClassName}
     >
-      <EuiFlexItem grow={false}>
-        <AssistantBeacon backgroundColor="emptyShade" size="xl" />
-      </EuiFlexItem>
+      <EuiText
+        color="subdued"
+        css={css`
+          line-height: ${euiTheme.size.l};
+        `}
+      >
+        {i18n.translate('xpack.observabilityAiAssistantManagement.knowledgeBaseTab.description', {
+          defaultMessage:
+            'Knowledge Base is a feature that enables the AI Assistant to recall multiple knowledge sources: documents, organizational resources like runbooks, GitHub issues, and internal documentation. It improves response quality with added context for more tailored assistance. ',
+        })}
+        <EuiLink
+          href="https://www.elastic.co/docs/solutions/observability/observability-ai-assistant#obs-ai-add-data"
+          target="_blank"
+        >
+          {i18n.translate(
+            'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.learnMoreLink',
+            {
+              defaultMessage: 'Learn More',
+            }
+          )}
+        </EuiLink>
+      </EuiText>
       <EuiSpacer size="l" />
-
-      <EuiFlexItem grow className={centerMaxWidthClassName}>
-        <WelcomeMessageKnowledgeBase knowledgeBase={knowledgeBase} />
-      </EuiFlexItem>
+      <EuiPanel hasBorder paddingSize="xl" grow={false} className={panelClassname}>
+        <EuiFlexItem grow className={centerMaxWidthClassName}>
+          {knowledgeBase.isInstalling ? (
+            <SettingUpKnowledgeBase />
+          ) : (
+            <KnowledgeBaseInstallationStatusPanel knowledgeBase={knowledgeBase} />
+          )}
+        </EuiFlexItem>
+      </EuiPanel>
     </EuiFlexGroup>
   );
 }
