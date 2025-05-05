@@ -11,7 +11,7 @@ import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: TagcloudState,
-  datasourceStates?: GeneralDatasourceStates
+  datasourceStates?: Readonly<GeneralDatasourceStates>
 ): TagcloudState {
   return getRuntimeConverters(datasourceStates).reduce((newState, fn) => fn(newState), state);
 }

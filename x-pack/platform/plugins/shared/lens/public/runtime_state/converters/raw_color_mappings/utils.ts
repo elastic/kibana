@@ -16,7 +16,7 @@ export interface ColumnMeta {
 }
 
 export function getColumnMetaFn(
-  datasourceStates?: GeneralDatasourceStates
+  datasourceStates?: Readonly<GeneralDatasourceStates>
 ): ((layerId: string, columnId: string) => ColumnMeta) | null {
   const datasources = getStructuredDatasourceStates(datasourceStates);
 

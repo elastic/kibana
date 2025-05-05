@@ -23,7 +23,9 @@ export interface DeprecatedColorMappingTagcloudState extends Omit<TagcloudState,
   colorMapping: DeprecatedColorMappingConfig;
 }
 
-export const convertToRawColorMappingsFn = (datasourceStates?: GeneralDatasourceStates) => {
+export const convertToRawColorMappingsFn = (
+  datasourceStates?: Readonly<GeneralDatasourceStates>
+) => {
   const getColumnMeta = getColumnMetaFn(datasourceStates);
 
   return (state: DeprecatedColorMappingTagcloudState | TagcloudState): TagcloudState => {

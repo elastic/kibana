@@ -29,7 +29,9 @@ export interface DeprecatedColorMappingsState extends Omit<DatatableVisualizatio
   columns: Array<DeprecatedColorMappingColumn | ColumnState>;
 }
 
-export const convertToRawColorMappingsFn = (datasourceStates?: GeneralDatasourceStates) => {
+export const convertToRawColorMappingsFn = (
+  datasourceStates?: Readonly<GeneralDatasourceStates>
+) => {
   const getColumnMeta = getColumnMetaFn(datasourceStates);
 
   return (

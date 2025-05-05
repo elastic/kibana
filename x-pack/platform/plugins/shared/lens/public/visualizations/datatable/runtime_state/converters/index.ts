@@ -8,6 +8,6 @@
 import { GeneralDatasourceStates } from '../../../../state_management';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
 
-export const getRuntimeConverters = (datasourceStates?: GeneralDatasourceStates) => [
+export const getRuntimeConverters = (datasourceStates?: Readonly<GeneralDatasourceStates>) => [
   convertToRawColorMappingsFn(datasourceStates),
 ];

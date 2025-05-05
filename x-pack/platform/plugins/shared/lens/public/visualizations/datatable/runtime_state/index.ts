@@ -11,7 +11,7 @@ import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: DatatableVisualizationState,
-  datasourceStates?: GeneralDatasourceStates
+  datasourceStates?: Readonly<GeneralDatasourceStates>
 ): DatatableVisualizationState {
   return getRuntimeConverters(datasourceStates).reduce((newState, fn) => fn(newState), state);
 }

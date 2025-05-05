@@ -182,7 +182,7 @@ export function extractInheritedViewModeObservable(
 }
 
 export function getStructuredDatasourceStates(
-  datasourceStates?: GeneralDatasourceStates
+  datasourceStates?: Readonly<GeneralDatasourceStates>
 ): StructuredDatasourceStates {
   return {
     formBased: ((datasourceStates as DatasourceStates)?.formBased?.state ??

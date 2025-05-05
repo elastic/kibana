@@ -28,7 +28,9 @@ export interface DeprecatedColorMappingsState extends Omit<XYState, 'layers'> {
   layers: Array<DeprecatedColorMappingLayer | XYLayerConfig>;
 }
 
-export const convertToRawColorMappingsFn = (datasourceStates?: GeneralDatasourceStates) => {
+export const convertToRawColorMappingsFn = (
+  datasourceStates?: Readonly<GeneralDatasourceStates>
+) => {
   const getColumnMeta = getColumnMetaFn(datasourceStates);
 
   return (state: DeprecatedColorMappingsState | XYState): XYState => {

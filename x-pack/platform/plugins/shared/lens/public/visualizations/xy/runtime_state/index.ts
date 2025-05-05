@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
+
 import { GeneralDatasourceStates } from '../../../state_management';
 import { XYState } from '../types';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: XYState,
-  datasourceStates?: GeneralDatasourceStates
+  datasourceStates?: Readonly<GeneralDatasourceStates>
 ): XYState {
-  return getRuntimeConverters(datasourceStates).reduce((newState, fn) => fn(newState), state);
+  return getRuntimeConverters(datasourceStates).reduce(
+    (newState, fn) => fn(newState),
+    cloneDeep(state)
+  );
 }

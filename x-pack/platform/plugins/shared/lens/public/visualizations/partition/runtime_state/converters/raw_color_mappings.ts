@@ -29,7 +29,9 @@ export interface DeprecatedColorMappingPieVisualizationState
   layers: Array<DeprecatedColorMappingLayer | PieLayerState>;
 }
 
-export const convertToRawColorMappingsFn = (datasourceStates?: GeneralDatasourceStates) => {
+export const convertToRawColorMappingsFn = (
+  datasourceStates?: Readonly<GeneralDatasourceStates>
+) => {
   const getColumnMeta = getColumnMetaFn(datasourceStates);
 
   return (
