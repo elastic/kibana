@@ -57,7 +57,6 @@ xpack.features.overrides:
       read.composedOf:
         - feature: "discover_v2"
           privileges: [ "read" ]
-
   siem:
     privileges:
       all.composedOf:
