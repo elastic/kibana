@@ -400,6 +400,9 @@ describe('update()', () => {
         },
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -473,6 +476,9 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -741,6 +747,7 @@ describe('update()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
@@ -798,6 +805,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -994,6 +1004,7 @@ describe('update()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
@@ -1033,6 +1044,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -1211,6 +1225,7 @@ describe('update()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
@@ -1260,6 +1275,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -1365,6 +1383,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -1416,6 +1437,9 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -1551,6 +1575,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
@@ -1594,6 +1621,9 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -2782,6 +2812,7 @@ describe('update()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
@@ -2821,6 +2852,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -3381,6 +3415,7 @@ describe('update()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
@@ -3498,6 +3533,9 @@ describe('update()', () => {
         "apiKeyCreatedByUser": true,
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -3543,6 +3581,9 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -3803,6 +3844,7 @@ describe('update()', () => {
           apiKeyOwner: null,
           artifacts: {
             dashboards: [],
+            investigation_guide: { blob: '' },
           },
           apiKeyCreatedByUser: null,
           consumer: 'myApp',
@@ -3842,6 +3884,9 @@ describe('update()', () => {
           ],
           "artifacts": Object {
             "dashboards": Array [],
+            "investigation_guide": Object {
+              "blob": "",
+            },
           },
           "createdAt": 2019-02-12T21:01:22.479Z,
           "enabled": true,
@@ -4241,6 +4286,7 @@ describe('update()', () => {
           actions: [],
           artifacts: {
             dashboards: existingDashboards,
+            investigation_guide: { blob: '' },
           },
         },
         references: [
@@ -4276,6 +4322,7 @@ describe('update()', () => {
                 refId: 'dashboard_0',
               },
             ],
+            investigation_guide: { blob: '' },
           },
           executionStatus: {
             lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -4315,6 +4362,7 @@ describe('update()', () => {
                 id: 'dashboard-1',
               },
             ],
+            investigation_guide: { blob: '' },
           },
         },
       });
@@ -4329,6 +4377,7 @@ describe('update()', () => {
                 refId: 'dashboard_0',
               },
             ],
+            investigation_guide: { blob: '' },
           },
         }),
         {
@@ -4345,6 +4394,7 @@ describe('update()', () => {
             id: 'dashboard-1',
           },
         ],
+        investigation_guide: { blob: '' },
       });
 
       expect(result).toMatchInlineSnapshot(`
@@ -4356,6 +4406,9 @@ describe('update()', () => {
                 "id": "dashboard-1",
               },
             ],
+            "investigation_guide": Object {
+              "blob": "",
+            },
           },
           "createdAt": 2019-02-12T21:01:22.479Z,
           "enabled": true,
@@ -4419,6 +4472,7 @@ describe('update()', () => {
           actions: [],
           artifacts: {
             dashboards: existingDashboards,
+            investigation_guide: { blob: '' },
           },
         },
         references: [
@@ -4535,6 +4589,7 @@ describe('update()', () => {
                 refId: 'dashboard_2',
               },
             ],
+            investigation_guide: { blob: '' },
           },
         }),
         {
@@ -4561,6 +4616,7 @@ describe('update()', () => {
             id: 'dashboard-3',
           },
         ],
+        investigation_guide: { blob: '' },
       });
 
       expect(result).toMatchInlineSnapshot(`
@@ -4578,6 +4634,9 @@ describe('update()', () => {
                 "id": "dashboard-3",
               },
             ],
+            "investigation_guide": Object {
+              "blob": "",
+            },
           },
           "createdAt": 2019-02-12T21:01:22.479Z,
           "enabled": true,
@@ -4601,6 +4660,164 @@ describe('update()', () => {
       `);
 
       expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    });
+
+    test('gives updated investigation guide to saved objects client', async () => {
+      actionsClient.getBulk.mockReset();
+      actionsClient.getBulk.mockResolvedValue([
+        {
+          id: '1',
+          actionTypeId: 'test',
+          config: {
+            from: 'me@me.com',
+            hasAuth: false,
+            host: 'hello',
+            port: 22,
+            secure: null,
+            service: null,
+          },
+          isMissingSecrets: false,
+          name: 'email connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+        {
+          id: '2',
+          actionTypeId: 'test2',
+          config: {
+            from: 'me@me.com',
+            hasAuth: false,
+            host: 'hello',
+            port: 22,
+            secure: null,
+            service: null,
+          },
+          isMissingSecrets: false,
+          name: 'email connector',
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+        },
+      ]);
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'test',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              actionRef: 'action_1',
+              actionTypeId: 'test',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              actionRef: 'action_2',
+              actionTypeId: 'test2',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+          notifyWhen: 'onActiveAlert',
+          revision: 1,
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          alertDelay: {
+            active: 5,
+          },
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+          {
+            name: 'action_1',
+            type: 'action',
+            id: '1',
+          },
+          {
+            name: 'action_2',
+            type: 'action',
+            id: '2',
+          },
+        ],
+      });
+
+      const result = await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+            risk_score: 40,
+            severity: 'low',
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          artifacts: {
+            investigation_guide: { blob: 'new blob' },
+          },
+          actions: [
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              id: '1',
+              params: {
+                foo: true,
+              },
+            },
+            {
+              group: 'default',
+              id: '2',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+          alertDelay: {
+            active: 10,
+          },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+      expect(
+        (unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain).artifacts
+          ?.investigation_guide?.blob
+      ).toEqual('new blob');
+      expect(result.artifacts).toBeDefined();
     });
   });
 });

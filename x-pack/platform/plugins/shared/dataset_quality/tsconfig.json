@@ -32,7 +32,6 @@
     "@kbn/unified-search-plugin",
     "@kbn/timerange",
     "@kbn/lens-plugin",
-    "@kbn/unified-histogram-plugin",
     "@kbn/data-views-plugin",
     "@kbn/shared-ux-error-boundary",
     "@kbn/es-query",
@@ -58,7 +57,8 @@
     "@kbn/logging",
     "@kbn/ui-theme",
     "@kbn/react-hooks",
-    "@kbn/charts-theme"
+    "@kbn/charts-theme",
+    "@kbn/unified-histogram"
   ],
   "exclude": [
     "target/**/*"

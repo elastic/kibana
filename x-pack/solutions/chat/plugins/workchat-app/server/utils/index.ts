@@ -6,3 +6,4 @@
  */
 
 export { createBuilder } from './so_filters';
+export { AppLogger } from './app_logger';
