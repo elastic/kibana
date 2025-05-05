@@ -42,10 +42,9 @@ export async function deleteIndexAssets(es: Client) {
   const response = await es.indices.get({ index: getResourceName('*') });
   const indicesToDelete = Object.keys(response);
   if (indicesToDelete.length > 0) {
-    await es.indices.delete(
-      { index: indicesToDelete, ignore_unavailable: true },
-      { ignore: [404] }
-    );
+    await es.indices.delete({ index: indicesToDelete, ignore_unavailable: true }).catch((err) => {
+      // ignore `IndexNotFoundException` error thrown by ES serverless: https://github.com/elastic/elasticsearch/blob/f1f745966f9c6b9d9fcad5242efb9a494d11e526/server/src/main/java/org/elasticsearch/cluster/metadata/Metadata.java#L2120-L2124
+    });
   }
 
   await es.indices.deleteIndexTemplate({ name: getResourceName('*') }, { ignore: [404] });
