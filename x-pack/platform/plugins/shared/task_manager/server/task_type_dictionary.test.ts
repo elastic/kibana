@@ -307,6 +307,17 @@ describe('taskTypeDictionary', () => {
       }).toThrowErrorMatchingInlineSnapshot(`"Task foo is already defined!"`);
     });
 
+    it('throws error when registering task type with invalid characters', () => {
+      expect(() => {
+        definitions.registerTaskDefinitions({
+          'abc,def': {
+            title: 'foo2',
+            createTaskRunner: jest.fn(),
+          },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(`"Task type \\"abc,def\\" cannot contain a comma."`);
+    });
+
     it('throws error when registering removed task type', () => {
       expect(() => {
         definitions.registerTaskDefinitions({
