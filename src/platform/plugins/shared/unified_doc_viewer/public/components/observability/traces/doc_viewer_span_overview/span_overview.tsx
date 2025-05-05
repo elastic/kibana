@@ -42,11 +42,13 @@ export function SpanOverview({
 }: SpanOverviewProps) {
   const parsedDoc = useMemo(() => getSpanDocumentOverview(hit), [hit]);
   const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
-  const transactionId = parsedDoc[TRANSACTION_ID_FIELD];
   const fieldConfigurations = useMemo(() => getSpanFieldConfiguration(parsedDoc), [parsedDoc]);
 
   return (
-    <TransactionProvider transactionId={transactionId} indexPattern={transactionIndexPattern}>
+    <TransactionProvider
+      transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
+      indexPattern={transactionIndexPattern}
+    >
       <FieldActionsProvider
         columns={columns}
         filter={filter}
@@ -71,7 +73,6 @@ export function SpanOverview({
               <SpanDurationSummary
                 spanDuration={spanDuration}
                 spanName={parsedDoc[SPAN_NAME_FIELD]}
-                transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
                 serviceName={parsedDoc[SERVICE_NAME_FIELD]}
               />
             </>

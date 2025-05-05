@@ -48,7 +48,6 @@ interface GetLatencyChartParams {
   core: CoreStart;
   signal: AbortSignal;
   spanName: string;
-  transactionId: string;
   serviceName: string;
 }
 
@@ -56,7 +55,6 @@ const getSpanLatencyChart = ({
   core,
   signal,
   spanName,
-  transactionId,
   serviceName,
 }: GetLatencyChartParams): Promise<{
   overallHistogram?: HistogramItem[];
@@ -66,7 +64,6 @@ const getSpanLatencyChart = ({
   const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
   const params = {
     spanName,
-    transactionId,
     serviceName,
     chartType: 'spanLatency',
     end: timeFilter.to,
@@ -89,21 +86,16 @@ interface SpanLatencyChartData {
 
 interface UseSpanLatencyChartParams {
   spanName: string;
-  transactionId: string;
   serviceName: string;
 }
 
-export const useSpanLatencyChart = ({
-  spanName,
-  transactionId,
-  serviceName,
-}: UseSpanLatencyChartParams) => {
+export const useSpanLatencyChart = ({ spanName, serviceName }: UseSpanLatencyChartParams) => {
   const { core } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
 
   const { loading, value, error } = useAbortableAsync(
     async ({ signal }) => {
-      if (!spanName || !transactionId || !serviceName) {
+      if (!spanName || !serviceName) {
         return null;
       }
 
@@ -111,7 +103,6 @@ export const useSpanLatencyChart = ({
         core,
         signal,
         spanName,
-        transactionId,
         serviceName,
       });
 
@@ -123,7 +114,7 @@ export const useSpanLatencyChart = ({
         percentileThresholdValue: result.percentileThresholdValue,
       };
     },
-    [core, euiTheme, serviceName, transactionId, spanName]
+    [core, euiTheme, serviceName, spanName]
   );
 
   useEffect(() => {

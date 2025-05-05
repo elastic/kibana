@@ -68,7 +68,6 @@ beforeEach(() => {
 describe('useSpanLatencyChart', () => {
   const params = {
     spanName: 'test-span',
-    transactionId: 'test-transaction-id',
     serviceName: 'test-service',
   };
 
@@ -96,7 +95,6 @@ describe('useSpanLatencyChart', () => {
       const { result } = renderHook(() =>
         useSpanLatencyChart({
           spanName: '',
-          transactionId: '',
           serviceName: '',
         })
       );

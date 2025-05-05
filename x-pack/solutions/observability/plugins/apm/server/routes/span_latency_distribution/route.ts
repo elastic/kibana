@@ -12,7 +12,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { getOverallLatencyDistribution } from '../latency_distribution/get_overall_latency_distribution';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import { SERVICE_NAME, SPAN_NAME, TRANSACTION_ID } from '../../../common/es_fields/apm';
+import { SERVICE_NAME, SPAN_NAME } from '../../../common/es_fields/apm';
 import { latencyDistributionChartTypeRt } from '../../../common/latency_distribution_chart_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { OverallLatencyDistributionResponse } from '../latency_distribution/types';
@@ -52,7 +52,6 @@ const latencyOverallSpanDistributionRoute = createApmServerRoute({
       kuery,
       serviceName,
       spanName,
-      transactionId,
       start,
       end,
       percentileThreshold,
@@ -74,7 +73,6 @@ const latencyOverallSpanDistributionRoute = createApmServerRoute({
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
             ...termQuery(SPAN_NAME, spanName),
-            ...termQuery(TRANSACTION_ID, transactionId),
             ...(termFilters?.flatMap((fieldValuePair): QueryDslQueryContainer[] =>
               termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue)
             ) ?? []),
