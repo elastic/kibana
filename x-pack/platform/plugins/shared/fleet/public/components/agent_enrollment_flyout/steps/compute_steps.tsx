@@ -17,7 +17,12 @@ import { getGcpIntegrationDetailsFromAgentPolicy } from '../../cloud_security_po
 
 import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
-import { useGetOneEnrollmentAPIKey, useStartServices, useAgentVersion } from '../../../hooks';
+import {
+  useGetOneEnrollmentAPIKey,
+  useStartServices,
+  useAgentVersion,
+  useShowCompleteAgentInstructions,
+} from '../../../hooks';
 import { useFetchFullPolicy } from '../hooks';
 
 import type { InstructionProps } from '../types';
@@ -61,6 +66,9 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     isK8s
   );
 
+  const { showCompleteAgentInstructions, onChangeShowCompleteAgentInstructions } =
+    useShowCompleteAgentInstructions();
+
   const agentVersion = useAgentVersion();
 
   const instructionsSteps = useMemo(() => {
@@ -68,6 +76,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       agentVersion: agentVersion || '',
       downloadSource,
       downloadSourceProxy,
+      showCompleteAgentInstructions,
     });
 
     const steps: EuiContainedStepProps[] = !agentPolicy
@@ -107,6 +116,8 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         isK8s,
         cloudSecurityIntegration,
         rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
+        showCompleteAgentInstructions,
+        onChangeShowCompleteAgentInstructions,
       })
     );
 
@@ -132,6 +143,8 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     cloudSecurityIntegration,
     mode,
     setMode,
+    showCompleteAgentInstructions,
+    onChangeShowCompleteAgentInstructions,
   ]);
 
   if (!agentVersion) {
@@ -173,6 +186,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const { enrolledAgentIds } = usePollingAgentCount(selectedPolicy?.id || '');
 
   const agentVersion = useAgentVersion();
+  const { showCompleteAgentInstructions, onChangeShowCompleteAgentInstructions } =
+    useShowCompleteAgentInstructions();
 
   const { gcpProjectId, gcpOrganizationId, gcpAccountType } =
     getGcpIntegrationDetailsFromAgentPolicy(selectedPolicy);
@@ -187,6 +202,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     gcpProjectId,
     gcpOrganizationId,
     gcpAccountType,
+    showCompleteAgentInstructions,
   });
 
   const instructionsSteps = useMemo(() => {
@@ -256,6 +272,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           fleetServerHost,
           enrollToken,
           rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
+          showCompleteAgentInstructions,
+          onChangeShowCompleteAgentInstructions,
         })
       );
     }
@@ -307,6 +325,8 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     agentDataConfirmed,
     installedPackagePolicy,
     gcpProjectId,
+    showCompleteAgentInstructions,
+    onChangeShowCompleteAgentInstructions,
   ]);
 
   if (!agentVersion) {
