@@ -1568,6 +1568,7 @@
     "@kbn/test-suites-serverless": "link:x-pack/test_serverless",
     "@kbn/test-suites-src": "link:src/platform/test",
     "@kbn/test-suites-xpack": "link:x-pack/test",
+    "@kbn/test-suites-xpack-observability": "link:x-pack/solutions/observability/test",
     "@kbn/test-suites-xpack-performance": "link:x-pack/performance",
     "@kbn/test-suites-xpack-platform": "link:x-pack/platform/test",
     "@kbn/tooling-log": "link:src/platform/packages/shared/kbn-tooling-log",
