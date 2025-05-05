@@ -86,14 +86,13 @@ export const transformUpdateBody = <Params extends RuleParams = never>({
   updateBody,
   actions,
   systemActions,
-  excludeArtifacts = false,
 }: {
   updateBody: UpdateRuleRequestBodyV1<Params>;
   actions: UpdateRuleRequestBodyV1<Params>['actions'];
   systemActions: UpdateRuleRequestBodyV1<Params>['actions'];
   excludeArtifacts?: boolean;
 }): UpdateRuleData<Params> => {
-  const transformedBody = {
+  return {
     name: updateBody.name,
     tags: updateBody.tags,
     ...(updateBody.throttle ? { throttle: updateBody.throttle } : {}),
@@ -108,8 +107,4 @@ export const transformUpdateBody = <Params extends RuleParams = never>({
       : {}),
     ...(updateBody.artifacts ? { artifacts: updateBody.artifacts } : {}),
   };
-  if (excludeArtifacts) {
-    return omit(transformedBody, 'artifacts');
-  }
-  return transformedBody;
 };

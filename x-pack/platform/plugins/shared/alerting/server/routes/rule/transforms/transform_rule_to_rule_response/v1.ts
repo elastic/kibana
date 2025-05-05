@@ -100,7 +100,8 @@ export const transformFlapping = (flapping: Rule['flapping']) => {
 };
 
 export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
-  rule: Rule<Params>
+  rule: Rule<Params>,
+  excludeArtifacts: boolean = false
 ): RuleResponseV1<RuleParamsV1> => ({
   id: rule.id,
   enabled: rule.enabled,
@@ -156,5 +157,5 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
     : {}),
   ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
   ...(rule.flapping !== undefined ? { flapping: transformFlapping(rule.flapping) } : {}),
-  ...(rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
+  ...(rule.artifacts !== undefined && !excludeArtifacts ? { artifacts: rule.artifacts } : {}),
 });

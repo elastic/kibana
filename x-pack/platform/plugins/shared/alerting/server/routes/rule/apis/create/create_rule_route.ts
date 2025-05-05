@@ -113,7 +113,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
 
             // Assert versioned response type
             const response: CreateRuleResponseV1<RuleParamsV1> = {
-              body: transformRuleToRuleResponseV1<RuleParamsV1>(createdRule),
+              body: transformRuleToRuleResponseV1<RuleParamsV1>(createdRule, true),
             };
 
             return res.ok(response);
