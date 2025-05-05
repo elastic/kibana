@@ -27,11 +27,8 @@ export const useOpenGenericEntityDetailsLeftPanel = ({
   scopeId: string;
 }) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
-
   const { hasMisconfigurationFindings } = useHasMisconfigurations(field, value);
-
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, value);
-
   const { to, from } = useGlobalTime();
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     field,
