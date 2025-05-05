@@ -16,9 +16,15 @@ import { DEPRECATION_LOGS_PROFILE_ID } from './consts';
 
 describe('deprecationLogsProfileProvider', () => {
   const deprecationLogsProfileProvider = createDeprecationLogsDataSourceProfileProvider();
-  const VALID_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default';
-  const VALID_MIXED_INDEX_PATTERN =
+
+  const INVALID_IN_V9_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default';
+  const INVALID_IN_V9_MIXED_INDEX_PATTERN =
     '.logs-deprecation.elasticsearch-default,.logs-deprecation.abc,.logs-deprecation.def';
+
+  const VALID_INDEX_PATTERN = '.logs-elasticsearch.deprecation-default';
+  const VALID_MIXED_INDEX_PATTERN =
+    '.logs-elasticsearch.deprecation-default,.logs-elasticsearch.abc,.logs-elasticsearch.def';
+
   const INVALID_MIXED_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default,metrics-*';
   const INVALID_INDEX_PATTERN = 'my_source-access-*';
   const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
@@ -62,11 +68,29 @@ describe('deprecationLogsProfileProvider', () => {
     expect(result).toEqual(RESOLUTION_MISMATCH);
   });
 
+  it('should NOT match data view sources prior with pre-9.0 index patterns', () => {
+    const result = deprecationLogsProfileProvider.resolve({
+      rootContext: ROOT_CONTEXT,
+      dataSource: createDataViewDataSource({ dataViewId: INVALID_IN_V9_INDEX_PATTERN }),
+      dataView: createStubIndexPattern({ spec: { title: INVALID_IN_V9_INDEX_PATTERN } }),
+    });
+    expect(result).toEqual(RESOLUTION_MISMATCH);
+  });
+
   it('should NOT match data view sources with a mixed pattern containing not allowed index patterns', () => {
     const result = deprecationLogsProfileProvider.resolve({
       rootContext: ROOT_CONTEXT,
       dataSource: createDataViewDataSource({ dataViewId: INVALID_MIXED_INDEX_PATTERN }),
       dataView: createStubIndexPattern({ spec: { title: INVALID_MIXED_INDEX_PATTERN } }),
+    });
+    expect(result).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it('should NOT match data view sources with a mixed pattern containing pre-9.0 index patterns', () => {
+    const result = deprecationLogsProfileProvider.resolve({
+      rootContext: ROOT_CONTEXT,
+      dataSource: createDataViewDataSource({ dataViewId: INVALID_IN_V9_MIXED_INDEX_PATTERN }),
+      dataView: createStubIndexPattern({ spec: { title: INVALID_IN_V9_MIXED_INDEX_PATTERN } }),
     });
     expect(result).toEqual(RESOLUTION_MISMATCH);
   });

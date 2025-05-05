@@ -14,8 +14,8 @@ export const CLOUD_SNAPSHOT_REPOSITORY = 'found-snapshots';
 
 export const DEPRECATION_WARNING_UPPER_LIMIT = 999999;
 export const DEPRECATION_LOGS_SOURCE_ID = 'deprecation_logs';
-export const DEPRECATION_LOGS_INDEX = '.logs-deprecation.elasticsearch-default';
-export const DEPRECATION_LOGS_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default';
+export const DEPRECATION_LOGS_INDEX = '.logs-elasticsearch.deprecation-default';
+export const DEPRECATION_LOGS_INDEX_PATTERN = '.logs-elasticsearch.deprecation-default';
 
 export const CLUSTER_UPGRADE_STATUS_POLL_INTERVAL_MS = 45000;
 export const CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS = 60000;
