@@ -47,17 +47,9 @@ import {
   pkiConfig,
 } from './constants';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FieldConfig, ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { ConfigFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Config } from './types';
 
 const { emptyField } = fieldValidators;
-
-interface FormData {
-  certificateFile?: string | string[];
-  certificateData?: string;
-  privateKeyFile?: string | string[];
-  privateKeyData?: string;
-}
 
 const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
   const { euiTheme } = useEuiTheme();
@@ -129,67 +121,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           <SimpleConnectorForm
             isEdit={isEdit}
             readOnly={readOnly}
-            configFormSchema={[
-              ...otherOpenAiConfig,
-              ...(hasPKI ? pkiConfig.map(field => {
-                const fieldConfig: FieldConfig<string | string[] | undefined, FormData> = {
-                  label: field.label,
-                  helpText: field.helpText,
-                  defaultValue: field.defaultValue,
-                  type: field.type,
-                  validations: [
-                    {
-                      validator: ((data) => {
-                        const { value, formData } = data;
-                        if (
-                          (formData.certificateFile || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
-                          !(formData.certificateFile || formData.certificateData)
-                        ) {
-                          return {
-                            message: i18n.MISSING_CERTIFICATE,
-                          };
-                        }
-                        if (
-                          (formData.certificateFile || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
-                          !(formData.privateKeyFile || formData.privateKeyData)
-                        ) {
-                          return {
-                            message: i18n.MISSING_PRIVATE_KEY,
-                          };
-                        }
-                        // Ensure certificateData and privateKeyData are strings
-                        if (formData.certificateData && typeof formData.certificateData !== 'string') {
-                          return {
-                            message: 'Certificate data must be a string',
-                          };
-                        }
-                        if (formData.privateKeyData && typeof formData.privateKeyData !== 'string') {
-                          return {
-                            message: 'Private key data must be a string',
-                          };
-                        }
-                        // Ensure PEM format for raw data
-                        if (formData.certificateData && !formData.certificateData.includes('-----BEGIN CERTIFICATE-----')) {
-                          return {
-                            message: 'Certificate data must be PEM-encoded',
-                          };
-                        }
-                        if (formData.privateKeyData && !formData.privateKeyData.includes('-----BEGIN PRIVATE KEY-----')) {
-                          return {
-                            message: 'Private key data must be PEM-encoded',
-                          };
-                        }
-                        return undefined;
-                      }) as ValidationFunc<FormData, string, string | string[] | undefined>,
-                    },
-                  ],
-                };
-                return {
-                  ...field,
-                  ...fieldConfig,
-                } as ConfigFieldSchema;
-              }) : [])
-            ]}
+            configFormSchema={otherOpenAiConfig}
             secretsFormSchema={otherOpenAiSecrets}
           />
           <EuiSpacer size="s" />
@@ -209,6 +141,13 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           />
           {hasPKI && (
             <>
+              <EuiSpacer size="s" />
+              <SimpleConnectorForm
+                isEdit={isEdit}
+                readOnly={readOnly}
+                configFormSchema={pkiConfig}
+                secretsFormSchema={[]}
+              />
               <EuiSpacer size="s" />
               <UseField
                 path="config.verificationMode"
