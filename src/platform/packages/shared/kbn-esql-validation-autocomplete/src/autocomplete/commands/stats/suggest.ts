@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import { ESQLFunction } from '@kbn/esql-ast';
+import { ESQLColumn, ESQLCommand, ESQLCommandOption, ESQLFunction } from '@kbn/esql-ast';
 import { isSingleItem } from '../../../..';
 import { CommandSuggestParams, Location } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
@@ -45,11 +45,6 @@ export async function suggest({
   getExpressionType,
 }: CommandSuggestParams<'stats'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
-
-  const columnSuggestions = pushItUpInTheList(
-    await getColumnsByType('any', [], { openSuggestions: true }),
-    true
-  );
 
   const lastCharacterTyped = innerText[innerText.length - 1];
   const controlSuggestions = getControlSuggestionIfSupported(
@@ -107,6 +102,11 @@ export async function suggest({
     case 'grouping_expression_after_assignment': {
       const histogramBarTarget = (await getPreferences?.())?.histogramBarTarget;
 
+      const columnSuggestions = pushItUpInTheList(
+        await getColumnsByType('any', [], { openSuggestions: true }),
+        true
+      );
+
       return suggestColumns(
         columnSuggestions,
         [
@@ -120,6 +120,13 @@ export async function suggest({
 
     case 'grouping_expression_without_assignment': {
       const histogramBarTarget = (await getPreferences?.())?.histogramBarTarget;
+
+      const ignored = getIgnoredColumns(command);
+
+      const columnSuggestions = pushItUpInTheList(
+        await getColumnsByType('any', ignored, { openSuggestions: true }),
+        true
+      );
 
       return suggestColumns(
         columnSuggestions,
@@ -141,6 +148,17 @@ export async function suggest({
     default:
       return [];
   }
+}
+
+function getIgnoredColumns(command: ESQLCommand<'stats'>) {
+  const byOption = command.args.find((arg) => isSingleItem(arg) && arg.name === 'by') as
+    | ESQLCommandOption
+    | undefined;
+
+  const columnNodes = (byOption?.args.filter((arg) => isSingleItem(arg) && arg.type === 'column') ??
+    []) as ESQLColumn[];
+
+  return columnNodes.map((node) => node.parts.join('.'));
 }
 
 function suggestColumns(
