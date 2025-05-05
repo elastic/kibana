@@ -56,7 +56,7 @@ export const fetchActionRequestById = async <
       const message = `Response action [${actionId}] missing 'agent.policy' information - unable to determine if response action is accessible for space [${spaceId}]`;
 
       logger.warn(message);
-      logger.debug(`Action missing policy info::\n${stringify(actionRequest)}`);
+      logger.debug(`Action missing policy info:\n${stringify(actionRequest)}`);
 
       throw new CustomHttpRequestError(message);
     } else {
