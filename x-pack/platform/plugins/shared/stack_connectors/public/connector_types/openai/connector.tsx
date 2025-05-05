@@ -144,13 +144,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           {hasPKI && (
             <>
               <EuiSpacer size="s" />
-              <SimpleConnectorForm
-                isEdit={isEdit}
-                readOnly={readOnly}
-                configFormSchema={pkiConfig}
-                secretsFormSchema={[]}
-              />
-              <EuiSpacer size="s" />
               <UseField
                 path="config.verificationMode"
                 component={SelectField}
