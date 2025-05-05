@@ -8,7 +8,10 @@
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { InterceptDialogService } from './intercept_dialog_service';
+
+const staticAssetsHelperMock = httpServiceMock.createSetupContract().staticAssets;
 
 describe('InterceptDialogService', () => {
   it('exposes a setup and start method', () => {
@@ -37,6 +40,7 @@ describe('InterceptDialogService', () => {
         rendering: renderingServiceMock.create(),
         targetDomElement: document.createElement('div'),
         persistInterceptRunId: jest.fn(),
+        staticAssetsHelper: staticAssetsHelperMock,
       });
     });
 

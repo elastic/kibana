@@ -9,6 +9,7 @@ import * as Rx from 'rxjs';
 import React, { ComponentProps } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { AnalyticsServiceStart, AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
@@ -28,6 +29,7 @@ export interface InterceptServiceStartDeps {
   persistInterceptRunId: ReturnType<
     UserInterceptRunPersistenceService['start']
   >['updateUserTriggerData'];
+  staticAssetsHelper: HttpStart['staticAssets'];
 }
 
 export class InterceptDialogService {
@@ -47,6 +49,7 @@ export class InterceptDialogService {
     targetDomElement,
     rendering,
     analytics,
+    staticAssetsHelper,
     persistInterceptRunId: persistInterceptRunInteraction,
   }: InterceptServiceStartDeps) {
     const { ack, add, get$ } = this.api.start({ analytics });
@@ -94,6 +97,7 @@ export class InterceptDialogService {
           {...{
             intercept$,
             ackIntercept,
+            staticAssetsHelper,
           }}
         />
       ),

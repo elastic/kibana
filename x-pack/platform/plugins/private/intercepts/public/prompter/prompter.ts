@@ -13,7 +13,10 @@ import { Intercept } from './service';
 import { TRIGGER_INFO_API_ROUTE } from '../../common/constants';
 
 type ProductInterceptPrompterSetupDeps = Pick<CoreSetup, 'analytics' | 'notifications'>;
-type ProductInterceptPrompterStartDeps = Omit<InterceptServiceStartDeps, 'persistInterceptRunId'> &
+type ProductInterceptPrompterStartDeps = Omit<
+  InterceptServiceStartDeps,
+  'persistInterceptRunId' | 'staticAssetsHelper'
+> &
   Pick<CoreStart, 'http'>;
 
 export class InterceptPrompter {
@@ -34,6 +37,7 @@ export class InterceptPrompter {
     ({ add: this.queueIntercept } = this.interceptDialogService.start({
       ...dialogServiceDeps,
       persistInterceptRunId: updateUserTriggerData,
+      staticAssetsHelper: http.staticAssets,
     }));
 
     return {

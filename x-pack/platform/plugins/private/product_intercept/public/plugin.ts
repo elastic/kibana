@@ -7,7 +7,6 @@
 
 import { Subscription } from 'rxjs';
 import React from 'react';
-import { css, Global } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
@@ -34,8 +33,6 @@ export class ProductInterceptPublicPlugin implements Plugin {
       analytics: core.analytics,
     });
 
-    const staticAssetsHelper = core.http.staticAssets;
-
     this.interceptSubscription = intercepts
       .registerIntercept?.({
         id: TRIGGER_DEF_ID,
@@ -46,32 +43,14 @@ export class ProductInterceptPublicPlugin implements Plugin {
               defaultMessage: 'Help us improve Kibana',
             }),
             content: () =>
-              React.createElement(React.Fragment, {}, [
-                React.createElement(
-                  Global,
-                  {
-                    key: 'productInterceptPrompterGlobalStyles',
-                    styles: css`
-                      :root {
-                        // hooks into exposed CSS variable to set background image the intercept
-                        --intercept-background: url(${staticAssetsHelper?.getPluginAssetHref(
-                            'magnifying_glass_search.png'
-                          )})
-                          no-repeat right;
-                      }
-                    `,
-                  },
-                  null
-                ),
-                React.createElement(
-                  EuiText,
-                  { key: 'productInterceptPrompterStartContent' },
-                  i18n.translate('productIntercept.prompter.step.start.content', {
-                    defaultMessage:
-                      'We are always looking for ways to improve Kibana. Please take a moment to share your feedback with us.',
-                  })
-                ),
-              ]),
+              React.createElement(
+                EuiText,
+                { key: 'productInterceptPrompterStartContent', size: 's' },
+                i18n.translate('productIntercept.prompter.step.start.content', {
+                  defaultMessage:
+                    'We are always looking for ways to improve Kibana. Please take a moment to share your feedback with us.',
+                })
+              ),
           },
           {
             id: 'satisfaction',
@@ -127,7 +106,7 @@ export class ProductInterceptPublicPlugin implements Plugin {
             content: () => {
               return React.createElement(
                 EuiText,
-                {},
+                { size: 's' },
                 i18n.translate('productIntercept.prompter.step.completion.content', {
                   defaultMessage:
                     "If you'd like to participate in future research to help improve kibana, click here",

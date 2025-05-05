@@ -9,13 +9,22 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { InterceptDisplayManager, type Intercept } from './intercept_display_manager';
+
+const staticAssetsHelperMock = httpServiceMock.createSetupContract().staticAssets;
 
 describe('InterceptDisplayManager', () => {
   it('does not render the dialog shell when there is not intercept to display', () => {
     const ackProductIntercept = jest.fn();
 
-    render(<InterceptDisplayManager ackIntercept={ackProductIntercept} intercept$={Rx.EMPTY} />);
+    render(
+      <InterceptDisplayManager
+        ackIntercept={ackProductIntercept}
+        intercept$={Rx.EMPTY}
+        staticAssetsHelper={staticAssetsHelperMock}
+      />
+    );
 
     expect(screen.queryByRole('dialog')).toBeNull();
   });
@@ -44,6 +53,7 @@ describe('InterceptDisplayManager', () => {
       <InterceptDisplayManager
         ackIntercept={ackProductIntercept}
         intercept$={intercept$.asObservable()}
+        staticAssetsHelper={staticAssetsHelperMock}
       />
     );
 
@@ -78,6 +88,7 @@ describe('InterceptDisplayManager', () => {
       <InterceptDisplayManager
         ackIntercept={ackProductIntercept}
         intercept$={intercept$.asObservable()}
+        staticAssetsHelper={staticAssetsHelperMock}
       />
     );
 
@@ -156,6 +167,7 @@ describe('InterceptDisplayManager', () => {
       <InterceptDisplayManager
         ackIntercept={ackProductIntercept}
         intercept$={intercept$.asObservable()}
+        staticAssetsHelper={staticAssetsHelperMock}
       />
     );
 

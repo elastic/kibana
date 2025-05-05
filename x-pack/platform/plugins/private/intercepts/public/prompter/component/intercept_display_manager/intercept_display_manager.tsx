@@ -24,6 +24,7 @@ import {
   EuiForm,
   EuiButtonIcon,
 } from '@elastic/eui';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { EuiTourStepStatus } from '@elastic/eui/src/components/tour/tour_step_indicator';
 import { InterceptDialogApi } from '../../service/intercept_dialog_api';
 
@@ -35,6 +36,10 @@ interface InterceptDialogManagerProps {
    * Observable that emits the intercept to be displayed
    */
   intercept$: Rx.Observable<Intercept>;
+  /**
+   * Helper to load static assets pertinent to the intercept plugin
+   */
+  staticAssetsHelper: HttpStart['staticAssets'];
 }
 
 interface InterceptProgressIndicatorProps {
@@ -64,11 +69,25 @@ const InterceptProgressIndicator = React.memo(
   }
 );
 
-export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptDialogManagerProps) {
+export function InterceptDisplayManager({
+  ackIntercept,
+  intercept$,
+  staticAssetsHelper,
+}: InterceptDialogManagerProps) {
   const { euiTheme } = useEuiTheme();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [currentIntercept, setCurrentIntercept] = useState<Intercept | null>(null);
   const feedbackStore = useRef<Record<string, unknown>>({});
+  const startIllustrationWidth = useRef(89); // Magic number was provided by Ryan
+  const startIllustrationStyle = useRef(css`
+    background: var(
+      --intercept-background,
+      url(${staticAssetsHelper.getPluginAssetHref('communication.svg')})
+    );
+    background-size: ${startIllustrationWidth.current}px 64px;
+    background-repeat: no-repeat;
+    background-position: top ${euiTheme.size.base} right ${euiTheme.size.base};
+  `);
 
   useEffect(() => {
     const subscription = intercept$.subscribe((intercept) => {
@@ -133,6 +152,7 @@ export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptD
   );
 
   let isLastStep = false;
+  const isStartStep = currentStepIndex === 0;
 
   return currentIntercept && currentInterceptStep ? (
     <EuiPortal>
@@ -141,8 +161,9 @@ export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptD
         role="dialog"
         css={css`
           position: fixed;
-          inline-size: 360px;
+          inline-size: 400px;
           max-block-size: auto;
+          z-index: ${euiTheme.levels.toast};
           inset-inline-end: ${euiTheme.size.l};
           inset-block-end: ${euiTheme.size.xxl};
 
@@ -157,15 +178,25 @@ export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptD
           css={css`
             min-height: 112px;
             position: relative;
-            background: var(--intercept-background);
+            ${isStartStep && startIllustrationStyle.current};
           `}
           data-test-subj={`interceptStep-${currentInterceptStep.id}`}
         >
-          <EuiFlexGroup direction="column">
+          <EuiFlexGroup
+            gutterSize="s"
+            direction="column"
+            css={css({
+              ...(isStartStep
+                ? {
+                    width: `calc(100% - ${startIllustrationWidth.current}px - ${euiTheme.size.base})`,
+                  }
+                : {}),
+            })}
+          >
             <EuiFlexItem>
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <EuiTitle size="xxs">
+                  <EuiTitle size="xs">
                     <h2>{currentInterceptStep!.title}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
@@ -205,24 +236,27 @@ export function InterceptDisplayManager({ ackIntercept, intercept$ }: InterceptD
                 currentStep={currentStepIndex}
               />
             </EuiFlexItem>
-            {(currentStepIndex === 0 || isLastStep) && (
+            {(isStartStep || isLastStep) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="xs">
-                  {currentStepIndex === 0 && (
+                  {isStartStep && (
                     <EuiFlexItem>
                       <EuiButtonEmpty
+                        size="s"
                         data-test-subj="productInterceptDismiss"
                         onClick={dismissProductIntercept}
                         color="text"
                       >
                         {i18n.translate('core.notifications.productIntercept.dismiss', {
-                          defaultMessage: 'Not now, thanks',
+                          defaultMessage: 'Not now',
                         })}
                       </EuiButtonEmpty>
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem>
                     <EuiButton
+                      size="s"
+                      color="success"
                       data-test-subj="productInterceptProgressionButton"
                       onClick={() => nextStep(isLastStep)}
                     >

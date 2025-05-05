@@ -25,7 +25,8 @@
     "@kbn/cloud-plugin",
     "@kbn/core-rendering-browser-mocks",
     "@kbn/core-rendering-browser",
-    "@kbn/core-notifications-browser"
+    "@kbn/core-notifications-browser",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }
