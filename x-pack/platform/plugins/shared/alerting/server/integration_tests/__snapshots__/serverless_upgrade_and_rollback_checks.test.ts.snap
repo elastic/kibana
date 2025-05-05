@@ -298,6 +298,27 @@ Object {
         },
       ],
     },
+    "investigation_guide": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
     "searchConfiguration": Object {
       "flags": Object {
         "description": "The query definition, which uses KQL or Lucene to fetch the documents from Elasticsearch.",
