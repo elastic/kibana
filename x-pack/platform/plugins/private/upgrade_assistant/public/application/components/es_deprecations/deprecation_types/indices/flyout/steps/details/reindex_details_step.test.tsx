@@ -136,7 +136,7 @@ describe('ReindexDetailsFlyoutStep', () => {
                         values={
                           Object {
                             "docsLink": <EuiLink
-                              href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/index-modules-blocks.html#index-block-settings"
+                              href="https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-block#index-block-settings"
                               target="_blank"
                             >
                               Learn more
