@@ -122,43 +122,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             readOnly={readOnly}
             configFormSchema={[
               ...otherOpenAiConfig,
-              ...(hasPKI ? pkiConfig.map(field => ({
-                ...field,
-                validations: [
-                  {
-                    validator: ({ 
-                      value, 
-                      formData 
-                    }: { 
-                      value: string | string[] | undefined;
-                      formData: {
-                        certificateFile?: string | string[];
-                        certificateData?: string;
-                        privateKeyFile?: string | string[];
-                        privateKeyData?: string;
-                      };
-                    }) => {
-                      if (
-                        (value || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
-                        !(value || formData.certificateData)
-                      ) {
-                        return {
-                          message: i18n.MISSING_CERTIFICATE,
-                        };
-                      }
-                      if (
-                        (value || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
-                        !(formData.privateKeyFile || formData.privateKeyData)
-                      ) {
-                        return {
-                          message: i18n.MISSING_PRIVATE_KEY,
-                        };
-                      }
-                      return undefined;
-                    },
-                  },
-                ],
-              })) : []),
+              ...(hasPKI ? pkiConfig : []),
             ]}
             secretsFormSchema={otherOpenAiSecrets}
           />
