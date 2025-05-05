@@ -391,7 +391,7 @@ groups:
         example: |
           To help diagnose problems using a proxy, you can use the `curl` command with options to use your proxy, and log debug information, with the following command, replacing the proxy and target URLs as appropriate.  This will force the request to be made to the
           proxy in tunneling mode, and display some of the interaction between the client and the proxy.
-          
+
           [source,sh]
           --
           curl --verbose --proxytunnel --proxy http://localhost:8080 http://example.com
@@ -418,12 +418,12 @@ groups:
           - cloud
         example: |
           For example:
-          
+
           [source,yaml]
           ----
           xpack.actions.proxyBypassHosts: [ "events.pagerduty.com" ]
           ----
-          
+
           If applicable, include the subdomain in the hostname
 
 
@@ -448,7 +448,7 @@ groups:
           - cloud
         example: |
           For example:
-          
+
           [source,yaml]
           ----
           xpack.actions.proxyOnlyHosts: [ "events.pagerduty.com" ]
@@ -640,7 +640,7 @@ groups:
       These settings vary depending on which type of preconfigured connector you're adding.
     example: |
       For example:
-      
+
       [source,yaml]
       ----------------------------------------
       xpack.actions.preconfigured:
@@ -648,7 +648,7 @@ groups:
           name: preconfigured-server-log-connector-type
           actionTypeId: .server-log
       ----------------------------------------
-      
+
       For more examples, go to <<pre-configured-connectors>>.
 
     settings:
@@ -1000,8 +1000,8 @@ groups:
         # id:
         description: |
           The default model to use for requests, which varies by connector:
-          * For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-3-5-sonnet-20240620-v1:0`.
-          * For a <<gemini-action-type,{gemini} connector>>, current support is for the Gemini models. Defaults to `gemini-1.5-pro-002`.
+          * For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `us.anthropic.claude-3-7-sonnet-20250219-v1:0`.
+          * For a <<gemini-action-type,{gemini} connector>>, current support is for the Gemini models. Defaults to `gemini-2.5-pro-preview-03-25`.
           * For a <<openai-action-type,OpenAI connector>>, it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
         # state: deprecated/hidden/tech-preview
         # deprecation_details: ""
@@ -2149,7 +2149,7 @@ groups:
          # example: |
 
       - setting: xpack.alerting.rules.maxScheduledPerMinute
-        # id: 
+        # id:
         description: |
           Specifies the maximum number of rules to run per minute.
         # state: deprecated/hidden/tech-preview
@@ -2288,7 +2288,7 @@ groups:
           - cloud
         example: |
           For example:
-          
+
           [source,yaml]
           --
           xpack.alerting.rules.run:
@@ -2318,7 +2318,7 @@ groups:
           - cloud
         example: |
           For example:
-          
+
           [source,yaml]
           --
           xpack.alerting.rules.run:
