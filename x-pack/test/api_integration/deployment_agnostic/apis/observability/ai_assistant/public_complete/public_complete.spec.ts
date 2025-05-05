@@ -159,7 +159,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         void llmProxy.interceptTitle('My Title');
-        void llmProxy.interceptConversation('Hello');
+        void llmProxy.interceptWithResponse('Hello');
 
         responseBody = await callPublicChatComplete({ format: 'openai' });
 
