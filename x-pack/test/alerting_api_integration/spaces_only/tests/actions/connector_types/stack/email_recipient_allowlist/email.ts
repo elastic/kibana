@@ -15,13 +15,13 @@ export default function emailTest({ getService }: FtrProviderContext) {
   const objectRemover = new ObjectRemover(supertest);
 
   const allowedEmailAddresses = ['foo.bar@example.org', 'user@test.com'];
-  const from = 'sender@domain.co'; // Wouldn't pass recipient_allowlist
+  const fromEmailAddress = 'sender@domain.co'; // Wouldn't pass recipient_allowlist
 
   describe('email connector', () => {
     afterEach(() => objectRemover.removeAll());
 
     it('does not apply recipient_allowlist on "from" field', async () => {
-      const { status, body } = await createConnector(from);
+      const { status, body } = await createConnector(fromEmailAddress);
       expect(status).to.be(200);
 
       const { message = 'no message returned' } = body || {};
@@ -29,7 +29,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
     });
 
     it('succeeds with allowed recipient emails', async () => {
-      const conn = await createConnector(from);
+      const conn = await createConnector(fromEmailAddress);
       expect(conn.status).to.be(200);
 
       const { id } = conn.body;
@@ -50,7 +50,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
       const { message } = data || {};
       const { from: fromMsg } = message || {};
 
-      expect(fromMsg?.address).to.be(from);
+      expect(fromMsg?.address).to.be(fromEmailAddress);
       expect(addressesFromMessage(message, 'to')).to.eql(to);
       expect(addressesFromMessage(message, 'cc')).to.eql(cc);
       expect(addressesFromMessage(message, 'bcc')).to.eql(bcc);
@@ -62,7 +62,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
     });
 
     it('in execute when invalid "to", "cc" or "bcc" used', async () => {
-      const conn = await createConnector(from);
+      const conn = await createConnector(fromEmailAddress);
       expect(conn.status).to.be(200);
 
       const { id } = conn.body || {};
