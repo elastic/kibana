@@ -112,6 +112,16 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
+    const cacheKey = `fetchAgentPolicyInfo:${agentIds.sort().join('#')}`;
+    const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached agent policy info. found - returning it:\n${stringify(cacheResponse)}`
+      );
+      return cacheResponse;
+    }
+
     const esClient = this.options.esClient;
     const esSearchRequest: SearchRequest = {
       index: await this.fetchIndexNames(),
@@ -173,13 +183,14 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    return this.fetchFleetInfoForAgents(elasticAgentIds, ['crowdstrike']).then((agentInfoList) => {
-      for (const agentInfo of agentInfoList) {
-        agentInfo.agentId = fleetAgentIdToCrowdstrikeAgentIdMap[agentInfo.elasticAgentId];
-      }
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds, ['crowdstrike']);
 
-      return agentInfoList;
-    });
+    for (const agentInfo of agentPolicyInfo) {
+      agentInfo.agentId = fleetAgentIdToCrowdstrikeAgentIdMap[agentInfo.elasticAgentId];
+    }
+
+    this.cache.set(cacheKey, agentPolicyInfo);
+    return agentPolicyInfo;
   }
 
   protected async writeActionRequestToEndpointIndex<
