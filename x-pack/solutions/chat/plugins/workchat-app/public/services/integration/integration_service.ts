@@ -24,7 +24,7 @@ export class IntegrationService {
 
   async list() {
     const response = await this.http.get<ListIntegrationsResponse>(
-      '/internal/workchat/integrations'
+      '/internal/workchat/tools'
     );
     return response.integrations;
   }
