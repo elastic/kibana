@@ -44,6 +44,7 @@ import { FieldBasedIndexPatternColumn } from './column_types';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { FormBasedLayer } from '../../types';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
+import { parseInterval } from './formula/util';
 
 const { isValidInterval } = search.aggs;
 const autoInterval = 'auto';
@@ -630,18 +631,6 @@ The date or date range values distributed into intervals.
     }
   ),
 };
-
-function parseInterval(currentInterval: string) {
-  const interval = currentInterval || '';
-  const valueMatch = interval.match(/[\d]+/) || [];
-  const unitMatch = interval.match(/[\D]+/) || [];
-  const result = parseInt(valueMatch[0] || '', 10);
-
-  return {
-    value: isNaN(result) ? '' : result,
-    unit: unitMatch[0] || 'h',
-  };
-}
 
 function restrictedInterval(aggregationRestrictions?: Partial<IndexPatternAggRestrictions>) {
   if (!aggregationRestrictions || !aggregationRestrictions.date_histogram) {

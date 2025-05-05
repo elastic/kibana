@@ -47,6 +47,7 @@ export type ExpressionFunctionFormulaInterval = ExpressionFunctionDefinition<
   undefined,
   {
     targetBars?: number;
+    override?: number;
   },
   number
 >;
@@ -65,11 +66,23 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
         defaultMessage: 'The target number of bars for the date histogram.',
       }),
     },
+    override: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.formula.interval.override.help', {
+        defaultMessage: 'The interval override used for the date histogram.',
+      }),
+    },
   },
 
   fn(_input, args, { getSearchContext }) {
     const { timeRange, now } = getSearchContext();
-    return timeRange && args.targetBars
+    if (!timeRange) {
+      return 0;
+    }
+    if (args.override != null) {
+      return args.override;
+    }
+    return args.targetBars
       ? calcAutoIntervalNear(args.targetBars, getTimeRangeAsNumber(timeRange, now)).asMilliseconds()
       : 0;
   },

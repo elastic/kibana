@@ -14,6 +14,7 @@ import type {
 } from '@kbn/tinymath';
 import type { Query } from '@kbn/es-query';
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
+import moment, { type unitOfTime } from 'moment';
 import { nonNullable } from '../../../../../utils';
 import type {
   OperationDefinition,
@@ -154,4 +155,43 @@ export function filterByVisibleOperation(
   return Object.fromEntries(
     Object.entries(operationDefinitionMap).filter(([, operation]) => !operation.hidden)
   );
+}
+
+export function parseInterval(
+  currentInterval: string,
+  shouldFallback: false
+): { value: number | string; unit: string | undefined };
+export function parseInterval(
+  currentInterval: string,
+  shouldFallback?: true
+): { value: number | string; unit: string };
+export function parseInterval(currentInterval: string, shouldFallback: boolean = true) {
+  const interval = currentInterval || '';
+  const valueMatch = interval.match(/[\d]+/) || [];
+  const unitMatch = interval.match(/[\D]+/) || [];
+  const result = parseInt(valueMatch[0] || '', 10);
+
+  return {
+    value: isNaN(result) ? '' : result,
+    unit: unitMatch[0]?.trim() || (shouldFallback ? 'h' : undefined),
+  };
+}
+
+const validUnits = new Set(['ms', 's', 'm', 'h', 'd', 'w', 'q', 'M', 'y']);
+
+export function getMsFromIntervalESLiteral(interval: string | undefined): number | undefined {
+  if (interval == null || interval === 'auto') {
+    return;
+  }
+  const { value, unit } = parseInterval(interval, false);
+  if (value == null || value === '' || unit == null) {
+    return;
+  }
+  if (!validUnits.has(unit)) {
+    return;
+  }
+  const validUnit = unit === 'q' ? 'y' : unit;
+  // translate the quarter notation into 1/4 * year
+  const validValue = unit === 'q' ? parseInt(String(value), 10) * 0.25 : value;
+  return moment.duration(validValue, validUnit as unitOfTime.Base).asMilliseconds();
 }

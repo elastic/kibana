@@ -38,6 +38,7 @@ import {
   TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
   TIMERANGE_OP_MISSING_TIME_RANGE,
 } from '../../../../../user_messages_ids';
+import { getMsFromIntervalESLiteral } from './util';
 
 // copied over from layer_helpers
 // TODO: split layer_helpers util into pure/non-pure functions to avoid issues with tests
@@ -72,6 +73,7 @@ export interface ContextValues {
   dateRange?: DateRange;
   now?: Date;
   targetBars?: number;
+  intervalOverride?: number;
 }
 
 export interface TimeRangeIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
@@ -187,9 +189,10 @@ export const intervalOperation = createContextValueBasedOperation<IntervalIndexP
   description: i18n.translate('xpack.lens.formula.interval.help', {
     defaultMessage: 'The specified minimum interval for the date histogram, in milliseconds (ms).',
   }),
-  getExpressionFunction: ({ targetBars }: ContextValues) =>
+  getExpressionFunction: ({ targetBars, intervalOverride }: ContextValues) =>
     buildExpressionFunction<ExpressionFunctionFormulaInterval>('formula_interval', {
       targetBars,
+      override: intervalOverride,
     }),
   getErrorMessage: getIntervalErrorMessages,
 });
@@ -243,11 +246,27 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
     },
     toExpression: (layer, columnId, _, context = {}) => {
       const column = layer.columns[columnId] as ColumnType;
+      const dateHistogramColumn = Object.values(layer.columns).find(
+        (c) => 'date_histogram' === c.operationType
+      );
       return [
         buildExpressionFunction<ExpressionFunctionDefinitions['math_column']>('mathColumn', {
           id: columnId,
           name: column.label,
-          expression: buildExpression([getExpressionFunction(context)]),
+          expression: buildExpression([
+            getExpressionFunction({
+              ...context,
+              intervalOverride:
+                // need to dance a bit for TS
+                dateHistogramColumn &&
+                isColumnOfType<DateHistogramIndexPatternColumn>(
+                  'date_histogram',
+                  dateHistogramColumn
+                )
+                  ? getMsFromIntervalESLiteral(dateHistogramColumn?.params?.interval)
+                  : undefined,
+            }),
+          ]),
         }).toAst(),
       ];
     },
