@@ -39,6 +39,7 @@ describe('V2 algorithm - using model versions - upgrade without stack version in
       name: 'test_mv',
       namespaceType: 'single',
       migrations: {},
+      switchToModelVersionAt: '8.8.0',
       modelVersions: {
         1: {
           changes: [],

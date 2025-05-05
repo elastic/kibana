@@ -206,7 +206,7 @@ describe('ModelVersion map utilities', () => {
   });
 
   describe('getCurrentVirtualVersion', () => {
-    it('returns the latest registered migration if modelVersions is not defined', () => {
+    it('returns the latest registered migration if switchToModelVersionAt is unset', () => {
       expect(
         getCurrentVirtualVersion(
           buildType({
@@ -214,15 +214,19 @@ describe('ModelVersion map utilities', () => {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
+            modelVersions: {
+              1: dummyModelVersion(),
+            },
           })
         )
       ).toEqual('8.6.0');
     });
 
-    it('returns the virtual version of the latest model version if the type has modelVersions', () => {
+    it('returns the virtual version of the latest model version if switchToModelVersionAt is set', () => {
       expect(
         getCurrentVirtualVersion(
           buildType({
+            switchToModelVersionAt: '8.7.0',
             migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
@@ -242,6 +246,7 @@ describe('ModelVersion map utilities', () => {
         getVirtualVersionMap([
           buildType({
             name: 'foo',
+            switchToModelVersionAt: '8.7.0',
             migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
@@ -256,11 +261,16 @@ describe('ModelVersion map utilities', () => {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
+            modelVersions: {
+              1: dummyModelVersion(),
+            },
           }),
           buildType({
             name: 'dolly',
-            modelVersions: {
-              0: dummyModelVersion(),
+            switchToModelVersionAt: '8.7.0',
+            migrations: {
+              '7.17.2': dummyMigration,
+              '8.6.0': dummyMigration,
             },
           }),
         ])
@@ -334,7 +344,7 @@ describe('ModelVersion map utilities', () => {
   });
 
   describe('getLatestMappingsModelVersion', () => {
-    it('returns the latest registered migration if no model versions are defined', () => {
+    it('returns the latest registered migration if switchToModelVersionAt is unset', () => {
       expect(
         getLatestMappingsModelVersion(
           buildType({
@@ -342,15 +352,20 @@ describe('ModelVersion map utilities', () => {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
+            modelVersions: {
+              1: dummyModelVersionWithMappingsChanges(),
+              2: dummyModelVersion(),
+            },
           })
         )
       ).toEqual('8.6.0');
     });
 
-    it('returns the virtual version of the latest model version if model versions are defined', () => {
+    it('returns the virtual version of the latest model version if switchToModelVersionAt is set', () => {
       expect(
         getLatestMappingsModelVersion(
           buildType({
+            switchToModelVersionAt: '8.7.0',
             migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
@@ -371,6 +386,7 @@ describe('ModelVersion map utilities', () => {
         getLatestMappingsVirtualVersionMap([
           buildType({
             name: 'foo',
+            switchToModelVersionAt: '8.7.0',
             migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
@@ -386,14 +402,18 @@ describe('ModelVersion map utilities', () => {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
+            modelVersions: {
+              1: dummyModelVersionWithMappingsChanges(),
+              2: dummyModelVersion(),
+            },
           }),
           buildType({
             name: 'dolly',
+            switchToModelVersionAt: '8.7.0',
             migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
-            modelVersions: { 0: dummyModelVersion() },
           }),
         ])
       ).toEqual({
