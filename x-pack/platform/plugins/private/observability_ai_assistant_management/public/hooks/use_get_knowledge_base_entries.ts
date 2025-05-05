@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useKibana } from './use_kibana';
 
@@ -13,10 +14,12 @@ export function useGetKnowledgeBaseEntries({
   query,
   sortBy,
   sortDirection,
+  kbState,
 }: {
   query: string;
   sortBy: string;
   sortDirection: 'asc' | 'desc';
+  kbState?: KnowledgeBaseState;
 }) {
   const { observabilityAIAssistant } = useKibana().services;
 
@@ -40,6 +43,7 @@ export function useGetKnowledgeBaseEntries({
         },
       });
     },
+    enabled: kbState === KnowledgeBaseState.READY,
     keepPreviousData: true,
     refetchOnWindowFocus: false,
   });
