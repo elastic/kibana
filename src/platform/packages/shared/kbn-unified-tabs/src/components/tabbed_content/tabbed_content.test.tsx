@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { TabbedContent, type TabbedContentProps } from './tabbed_content';
 import { getPreviewDataMock } from '../../../__mocks__/get_preview_data';
 import { servicesMock } from '../../../__mocks__/services';
@@ -158,6 +159,7 @@ describe('TabbedContent', () => {
     ];
     const firstTab = initialItems[0];
     const onChanged = jest.fn();
+    const user = userEvent.setup();
 
     render(
       <TabsWrapper
@@ -167,13 +169,9 @@ describe('TabbedContent', () => {
       />
     );
 
-    screen.getByTestId(`unifiedTabs_tabMenuBtn_${firstTab.id}`).click();
-
-    await waitFor(() => {
-      expect(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate')).toBeInTheDocument();
-    });
-
-    screen.getByTestId('unifiedTabs_tabMenuItem_duplicate').click();
+    await user.click(screen.getByTestId(`unifiedTabs_tabMenuBtn_${firstTab.id}`));
+    expect(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate')).toBeInTheDocument();
+    await user.click(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate'));
 
     const duplicatedTab = { ...NEW_TAB, label: 'Tab 1 (copy) 3' };
 
@@ -182,11 +180,12 @@ describe('TabbedContent', () => {
         items: [firstTab, duplicatedTab, ...initialItems.slice(1)],
         selectedItem: duplicatedTab,
       });
-      expect(screen.getByText(`Content for tab: ${duplicatedTab.label}`)).toBeInTheDocument();
-      const tab = screen.getByTestId(`unifiedTabs_selectTabBtn_${duplicatedTab.id}`);
-      expect(tab.getAttribute('aria-selected')).toBe('true');
-      expect(tab).toHaveFocus();
     });
+
+    expect(screen.getByText(`Content for tab: ${duplicatedTab.label}`)).toBeInTheDocument();
+    const tab = screen.getByTestId(`unifiedTabs_selectTabBtn_${duplicatedTab.id}`);
+    expect(tab.getAttribute('aria-selected')).toBe('true');
+    expect(tab).toHaveFocus();
   });
 
   it('correctly duplicates tabs with regex special characters in the label', async () => {
