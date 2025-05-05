@@ -17,10 +17,6 @@ export function getTestRuleData(overwrites = {}) {
     notify_when: 'onThrottleInterval',
     actions: [],
     params: {},
-    artifacts: {
-      dashboards: [{ id: 'dashboard-0' }, { id: 'dashboard-1' }],
-      investigation_guide: { blob: 'investigation guide' },
-    },
     ...overwrites,
   };
 }
