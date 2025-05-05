@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { IngestStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { computeInterval } from '@kbn/visualization-utils';
 import moment, { DurationInputArg1, DurationInputArg2 } from 'moment';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -26,7 +26,7 @@ import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 
 interface StreamChartPanelProps {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
 }
 
 export function StreamChartPanel({ definition }: StreamChartPanelProps) {
@@ -152,7 +152,8 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   const docCount = docCountFetch?.value?.details.count;
   const formattedDocCount = docCount ? formatNumber(docCount, 'decimal0') : '0';
 
-  const dataStreamExists = isWiredStreamGetResponse(definition) || definition.data_stream_exists;
+  const dataStreamExists =
+    Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
