@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Serializable } from '../../serializable';
-import { Fields } from '../../entity';
+import { Serializable } from '../serializable';
+import { Fields } from '../entity';
 
 export class OtelMetricset<TFields extends Fields> extends Serializable<TFields> {
   constructor(fields: TFields) {
