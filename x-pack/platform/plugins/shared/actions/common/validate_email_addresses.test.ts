@@ -11,6 +11,7 @@ import {
   validateEmailAddressesAsAlwaysValid,
   validateEmailAddresses,
   invalidEmailsAsMessage,
+  isAddressMatchingSomePattern,
 } from './validate_email_addresses';
 
 const AllowedDomains = ['elastic.co', 'dev.elastic.co', 'found.no'];
@@ -283,6 +284,30 @@ describe('validate_email_address', () => {
       expect(invalidEmailsAsMessage(entries)).toMatchInlineSnapshot(
         `"not valid emails: c, d; not allowed emails: e, f"`
       );
+    });
+  });
+
+  test('isAddressMatchingSomePattern', () => {
+    const patterns = ['*-list@example.com', '*@mydomain.com'];
+    const validEmails = [
+      'dev-list@example.com',
+      'sales-list@example.com',
+      'users@mydomain.com',
+      'execs@mydomain.com',
+    ];
+    const invalidEmails = [
+      'dev-group@example.com',
+      'devs@example.com',
+      'foo@bar.com',
+      'users@sub.mydomain.com',
+    ];
+
+    validEmails.forEach((email) => {
+      expect(isAddressMatchingSomePattern(email, patterns)).toBe(true);
+    });
+
+    invalidEmails.forEach((email) => {
+      expect(isAddressMatchingSomePattern(email, patterns)).toBe(false);
     });
   });
 });

@@ -6,7 +6,6 @@
  */
 
 import { parseAddressList } from 'email-addresses';
-import minimatch from 'minimatch';
 import type { ValidatedEmail } from './types';
 import { InvalidEmailReason } from './types';
 import { hasMustacheTemplate } from './mustache_template';
@@ -18,6 +17,16 @@ export interface ValidateEmailAddressesOptions {
   // addresses with this option won't be validated against the allowed recipient list
   isSender?: boolean;
 }
+
+export const isAddressMatchingSomePattern = (address: string, patterns: string[]): boolean => {
+  return patterns.some((pattern) => {
+    // replaces '.' with '\.' and '*' with '.*' for regex matching
+    const regexStr = '^' + pattern.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$';
+    const regex = new RegExp(regexStr, 'i');
+    const result = regex.test(address);
+    return result;
+  });
+};
 
 // this can be useful for cases where a plugin needs this function,
 // but the actions plugin may not be available.  This could be used
@@ -127,7 +136,7 @@ function validateEmailAddress_(
       }
 
       for (const _address of flattenEmailAddresses) {
-        if (recipientAllowList.some((pattern) => minimatch(_address, pattern))) {
+        if (isAddressMatchingSomePattern(_address, recipientAllowList)) {
           return { address, valid: true };
         }
       }
