@@ -18,33 +18,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const rangeFrom = '2021-01-17T16%3A46%3A15.338Z';
   const rangeTo = '2021-01-19T17%3A01%3A32.309Z';
+  const ARCHIVES_DIR_REL_PATH =
+    'x-pack/solutions/observability/test/apm_api_integration/common/fixtures/es_archiver';
 
   describe('ExploratoryView', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded(
-        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', '8.0.0')
-      );
+      await esArchiver.loadIfNeeded(Path.join(ARCHIVES_DIR_REL_PATH, '8.0.0'));
 
-      await esArchiver.loadIfNeeded(
-        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_8.0.0')
-      );
+      await esArchiver.loadIfNeeded(Path.join(ARCHIVES_DIR_REL_PATH, 'rum_8.0.0'));
 
-      await esArchiver.loadIfNeeded(
-        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_test_data')
-      );
+      await esArchiver.loadIfNeeded(Path.join(ARCHIVES_DIR_REL_PATH, 'rum_test_data'));
     });
 
     after(async () => {
-      await esArchiver.unload(
-        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', '8.0.0')
-      );
+      await esArchiver.unload(Path.join(ARCHIVES_DIR_REL_PATH, '8.0.0'));
 
-      await esArchiver.unload(
-        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_8.0.0')
-      );
-      await esArchiver.unload(
-        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_test_data')
-      );
+      await esArchiver.unload(Path.join(ARCHIVES_DIR_REL_PATH, 'rum_8.0.0'));
+      await esArchiver.unload(Path.join(ARCHIVES_DIR_REL_PATH, 'rum_test_data'));
     });
 
     it('should go to ux app', async function () {
