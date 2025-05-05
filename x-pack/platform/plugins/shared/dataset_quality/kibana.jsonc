@@ -34,7 +34,6 @@
       "lens"
     ],
     "requiredBundles": [
-      "unifiedHistogram",
       "discover"
     ],
     "extraPublicDirs": [

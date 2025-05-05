@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import type { Alert } from '@kbn/alerting-types';
-import { BasicCellRenderer } from './basic_cell_renderer';
+import { BASIC_CELL_RENDERER_TRUNCATE_TEST_ID, BasicCellRenderer } from './basic_cell_renderer';
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
@@ -130,5 +130,25 @@ describe('BasicCellRenderer', () => {
     );
 
     expect(getByText('[object Object]')).toBeInTheDocument();
+  });
+
+  it('should truncate long values and show tooltip', async () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      field1: 'value1',
+    };
+    const field = 'field1';
+
+    render(
+      <TestProviders>
+        <BasicCellRenderer alert={alert} field={field} />
+      </TestProviders>
+    );
+
+    const cell = screen.getByTestId(BASIC_CELL_RENDERER_TRUNCATE_TEST_ID);
+
+    expect(cell).toBeInTheDocument();
+    expect(cell.firstChild).toHaveClass('euiToolTipAnchor');
   });
 });
