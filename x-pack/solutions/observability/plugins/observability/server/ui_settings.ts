@@ -15,7 +15,6 @@ import {
   maxSuggestions,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
-  apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmLabsButton,
@@ -163,28 +162,6 @@ export const uiSettings: Record<string, UiSettings> = {
         }
       ),
     },
-    showInLabs: true,
-    solution: 'oblt',
-  },
-  [apmServiceInventoryOptimizedSorting]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
-      defaultMessage: 'Optimize services list load performance in APM',
-    }),
-    description: i18n.translate(
-      'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
-      {
-        defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name.',
-        values: {
-          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        },
-      }
-    ),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: false,
-    type: 'boolean',
     showInLabs: true,
     solution: 'oblt',
   },
