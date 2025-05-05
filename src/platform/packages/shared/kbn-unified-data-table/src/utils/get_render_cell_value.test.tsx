@@ -888,6 +888,7 @@ describe('Unified data table cell rendering', function () {
       dataView: dataViewMock,
       rows: rows.map(build),
       shouldShowFieldHandler: () => true,
+      useNewFieldsApi: true,
       closePopover: jest.fn(),
       fieldFormats: mockServices.fieldFormats as unknown as FieldFormatsStart,
       maxEntries: 100,
