@@ -11,10 +11,8 @@ import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
 
 export const ASSET_POLICY_TEMPLATE = 'asset_inventory';
 
-export const SUPPORTED_POLICY_TEMPLATES = [ASSET_POLICY_TEMPLATE] as const;
 export const SUPPORTED_CLOUDBEAT_INPUTS = [CLOUDBEAT_AWS, CLOUDBEAT_GCP, CLOUDBEAT_AZURE] as const;
 
-export const SINGLE_ACCOUNT = 'single-account';
 export const ORGANIZATION_ACCOUNT = 'organization-account';
 
 export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {

@@ -10,7 +10,6 @@ import { EuiAccordion, EuiButton, EuiCodeBlock, EuiLink, EuiSpacer, EuiText } fr
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getTemplateUrlFromPackageInfo, getAssetPolicy } from '../utils';
 import {
-  ORGANIZATION_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '../constants';
@@ -23,6 +22,7 @@ import {
 } from './gcp_credential_form';
 import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
 import { assetIntegrationDocsNavigation } from '../../../constants';
+import { GCP_ORGANIZATION_ACCOUNT } from './constants';
 
 const GoogleCloudShellCredentialsGuide = (props: {
   commandText: string;
@@ -153,7 +153,7 @@ export const GcpCredentialsFormAgentless = ({
   hasInvalidRequiredVars,
 }: GcpFormProps) => {
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
-  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
+  const isOrganization = accountType === GCP_ORGANIZATION_ACCOUNT;
   const organizationFields = ['gcp.organization_id', 'gcp.credentials.json'];
   const singleAccountFields = ['gcp.project_id', 'gcp.credentials.json'];
 

@@ -14,9 +14,6 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import merge from 'lodash/merge';
-import semverValid from 'semver/functions/valid';
-import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -28,11 +25,7 @@ import {
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
 } from './aws_credentials_form/aws_credentials_form_options';
 import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form';
-import type {
-  CloudAssetInventoryIntegrations,
-  AssetInput,
-  NewPackagePolicyAssetInput,
-} from './types';
+import type { AssetInput, AssetInventoryInputTypes, NewPackagePolicyAssetInput } from './types';
 import type { AwsCredentialsType } from './aws_credentials_form/types';
 import googleCloudLogo from './assets/icons/google_cloud_logo.svg';
 import { AWS_CREDENTIALS_TYPE, CLOUDBEAT_AWS } from './aws_credentials_form/constants';
@@ -260,79 +253,71 @@ export const getAssetInputHiddenVars = (
   }
 };
 
-const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
-  asset_inventory: {
-    policyTemplate: ASSET_POLICY_TEMPLATE,
+const assetInventoryCloudServiceProviders: Array<{
+  type: AssetInput;
+  name: string;
+  benchmark: string;
+  disabled?: boolean;
+  icon?: string;
+  tooltip?: string;
+  isBeta?: boolean;
+  testId?: string;
+}> = [
+  {
+    type: CLOUDBEAT_AWS,
     name: i18n.translate(
-      'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.nameTitle',
+      'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.awsOption.nameTitle',
       {
-        defaultMessage: 'Cloud Asset Discovery',
+        defaultMessage: 'AWS',
       }
     ),
-    shortName: i18n.translate(
-      'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.shortNameTitle',
+    benchmark: i18n.translate(
+      'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.awsOption.benchmarkTitle',
       {
-        defaultMessage: 'CAI',
+        defaultMessage: 'CAI AWS',
       }
     ),
-    options: [
-      {
-        type: CLOUDBEAT_AWS,
-        name: i18n.translate(
-          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.awsOption.nameTitle',
-          {
-            defaultMessage: 'AWS',
-          }
-        ),
-        benchmark: i18n.translate(
-          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.awsOption.benchmarkTitle',
-          {
-            defaultMessage: 'CAI AWS',
-          }
-        ),
-        icon: 'logoAWS',
-        testId: CAI_AWS_OPTION_TEST_SUBJ,
-      },
-      {
-        type: CLOUDBEAT_GCP,
-        name: i18n.translate(
-          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.gcpOption.nameTitle',
-          {
-            defaultMessage: 'GCP',
-          }
-        ),
-        benchmark: i18n.translate(
-          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.gcpOption.benchmarkTitle',
-          {
-            defaultMessage: 'CAI GCP',
-          }
-        ),
-        icon: googleCloudLogo,
-        testId: CAI_GCP_OPTION_TEST_SUBJ,
-      },
-      {
-        type: CLOUDBEAT_AZURE,
-        name: i18n.translate(
-          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.azureOption.nameTitle',
-          {
-            defaultMessage: 'Azure',
-          }
-        ),
-        benchmark: i18n.translate(
-          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.azureOption.benchmarkTitle',
-          {
-            defaultMessage: 'CAI Azure',
-          }
-        ),
-        icon: 'logoAzure',
-        testId: CAI_AZURE_OPTION_TEST_SUBJ,
-      },
-    ],
+    icon: 'logoAWS',
+    testId: CAI_AWS_OPTION_TEST_SUBJ,
   },
-};
+  {
+    type: CLOUDBEAT_GCP,
+    name: i18n.translate(
+      'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.gcpOption.nameTitle',
+      {
+        defaultMessage: 'GCP',
+      }
+    ),
+    benchmark: i18n.translate(
+      'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.gcpOption.benchmarkTitle',
+      {
+        defaultMessage: 'CAI GCP',
+      }
+    ),
+    icon: googleCloudLogo,
+    testId: CAI_GCP_OPTION_TEST_SUBJ,
+  },
+  {
+    type: CLOUDBEAT_AZURE,
+    name: i18n.translate(
+      'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.azureOption.nameTitle',
+      {
+        defaultMessage: 'Azure',
+      }
+    ),
+    benchmark: i18n.translate(
+      'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.azureOption.benchmarkTitle',
+      {
+        defaultMessage: 'CAI Azure',
+      }
+    ),
+    icon: 'logoAzure',
+    testId: CAI_AZURE_OPTION_TEST_SUBJ,
+  },
+];
 
 export const getPolicyTemplateInputOptions = () =>
-  assetInventoryIntegrations.asset_inventory.options.map((o) => ({
+  assetInventoryCloudServiceProviders.map((o) => ({
     tooltip: o.tooltip,
     value: o.type,
     id: o.type,
@@ -366,28 +351,12 @@ export const getAwsCredentialsType = (
   input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>
 ): AwsCredentialsType | undefined => input.streams[0].vars?.['aws.credentials.type'].value;
 
-export const isBelowMinVersion = (version: string, minVersion: string) => {
-  const semanticVersion = semverValid(version);
-  const versionNumberOnly = semverCoerce(semanticVersion) || '';
-  return semverLt(versionNumberOnly, minVersion);
-};
-
 export const getDefaultCloudCredentialsType = (
   isAgentless: boolean,
-  inputType: Extract<
-    AssetInput,
-    | 'cloudbeat/asset_inventory_aws'
-    | 'cloudbeat/asset_inventory_azure'
-    | 'cloudbeat/asset_inventory_gcp'
-  >
+  inputType: Extract<AssetInput, AssetInventoryInputTypes>
 ) => {
   const credentialsTypes: Record<
-    Extract<
-      AssetInput,
-      | 'cloudbeat/asset_inventory_aws'
-      | 'cloudbeat/asset_inventory_azure'
-      | 'cloudbeat/asset_inventory_gcp'
-    >,
+    Extract<AssetInput, AssetInventoryInputTypes>,
     {
       [key: string]: {
         value: string;
@@ -443,10 +412,6 @@ export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
 
 export const fieldIsInvalid = (value: string | undefined, hasInvalidRequiredVars: boolean) =>
   hasInvalidRequiredVars && !value;
-
-export const POLICY_TEMPLATE_FORM_DTS = {
-  LOADER: 'policy-template-form-loader',
-};
 
 export const hasErrors = (validationResults: PackagePolicyValidationResults | undefined) => {
   if (!validationResults) return 0;

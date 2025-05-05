@@ -6,42 +6,22 @@
  */
 
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import type {
-  ASSET_POLICY_TEMPLATE,
-  SUPPORTED_CLOUDBEAT_INPUTS,
-  SUPPORTED_POLICY_TEMPLATES,
-} from './constants';
+import type { ASSET_POLICY_TEMPLATE, SUPPORTED_CLOUDBEAT_INPUTS } from './constants';
 import type { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
 import type { CLOUDBEAT_AWS } from './aws_credentials_form/constants';
 import type { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 
 export type AssetInput = (typeof SUPPORTED_CLOUDBEAT_INPUTS)[number];
-export type AssetInventoryPolicyTemplate = (typeof SUPPORTED_POLICY_TEMPLATES)[number];
-
-export type CloudAssetInventoryIntegrations = Record<
-  AssetInventoryPolicyTemplate,
-  CloudAssetInventoryIntegrationProps
->;
-export interface CloudAssetInventoryIntegrationProps {
-  policyTemplate: AssetInventoryPolicyTemplate;
-  name: string;
-  shortName: string;
-  options: Array<{
-    type: AssetInput;
-    name: string;
-    benchmark: string;
-    disabled?: boolean;
-    icon?: string;
-    tooltip?: string;
-    isBeta?: boolean;
-    testId?: string;
-  }>;
-}
 
 type AssetPolicyInput =
   | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof ASSET_POLICY_TEMPLATE }
   | { type: typeof CLOUDBEAT_GCP; policy_template: typeof ASSET_POLICY_TEMPLATE }
   | { type: typeof CLOUDBEAT_AWS; policy_template: typeof ASSET_POLICY_TEMPLATE };
+
+export type AssetInventoryInputTypes =
+  | typeof CLOUDBEAT_AZURE
+  | typeof CLOUDBEAT_GCP
+  | typeof CLOUDBEAT_AWS;
 
 // Extend NewPackagePolicyInput with known string literals for input type and policy template
 export type NewPackagePolicyAssetInput = NewPackagePolicyInput & AssetPolicyInput;
