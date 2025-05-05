@@ -29,7 +29,7 @@ export class WCISalesforcePlugin
     core: CoreSetup<WCISalesforcePluginStartDependencies, WCISalesforcePluginStart>,
     { workchatApp }: WCISalesforcePluginSetupDependencies
   ): WCISalesforcePluginSetup {
-    workchatApp.integration.register(getSalesforceIntegrationComponents());
+    workchatApp.integrations.register(getSalesforceIntegrationComponents());
     return {};
   }
 
