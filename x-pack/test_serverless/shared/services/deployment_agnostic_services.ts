@@ -22,9 +22,7 @@ const {
   esDeleteAllIndices,
   indexPatterns,
   console,
-  supertest,
   esSupertest,
-  supertestWithoutAuth,
   security,
 } = commonFunctionalServices;
 

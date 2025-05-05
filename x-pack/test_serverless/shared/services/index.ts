@@ -33,3 +33,5 @@ export const services = {
   dataViewApi: DataViewApiProvider,
   platformSecurityUtils: PlatformSecurityUtilsProvider,
 };
+
+export type { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services';
