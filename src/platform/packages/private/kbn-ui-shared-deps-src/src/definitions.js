@@ -52,6 +52,7 @@ const externals = {
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   'react-router-dom-v5-compat': '__kbnSharedDeps__.ReactRouterDomV5Compat',
+  'react-use': '__kbnSharedDeps__.ReactUse',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
   // this is how plugins/consumers from npm load monaco
@@ -75,6 +76,29 @@ const externals = {
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
   'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
+  // cache some used methods of the react-use library
+  ...[
+    'useAsync',
+    'useAsyncFn',
+    'useDebounce',
+    'useDeepCompareEffect',
+    'useEffectOnce',
+    'useEvent',
+    'useLatest',
+    'useList',
+    'useLocalStorage',
+    'useMount',
+    'useMountedState',
+    'usePrevious',
+    'useSessionStorage',
+    'useTimeoutFn',
+    'useToggle',
+    'useUnmount',
+    'useUpdateEffect',
+  ].reduce((memo, subset) => {
+    memo[`react-use/lib/${subset}`] = `__kbnSharedDeps__.ReactUse.${subset}`;
+    return memo;
+  }, {}),
 
   /**
    * big deps which are locked to a single version
@@ -94,8 +118,6 @@ const externals = {
   '@hello-pangea/dnd': '__kbnSharedDeps__.HelloPangeaDnd',
   lodash: '__kbnSharedDeps__.Lodash',
   'lodash/fp': '__kbnSharedDeps__.LodashFp',
-  fflate: '__kbnSharedDeps__.Fflate',
-
   /**
    * runtime deps which don't need to be copied across all bundles
    */
@@ -122,6 +144,7 @@ const externals = {
   '@kbn/react-kibana-context-render': '__kbnSharedDeps__.KbnReactKibanaContextRender',
   '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
+  '@kbn/react-kibana-mount': '__kbnSharedDeps__.KbnReactKibanaMount',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

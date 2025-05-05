@@ -18,6 +18,7 @@ import {
   EuiCallOut,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiBadge,
 } from '@elastic/eui';
 
 import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
@@ -36,6 +37,7 @@ import { PackageIcon } from '../../../../../../components';
 import { sendGetPackageInfoByKeyForRq } from '../../../../hooks';
 
 import { IntegrationStatusBadge } from './integration_status_badge';
+import { getIntegrationStatus } from './integration_sync_status';
 
 const StyledEuiPanel = styled(EuiPanel)`
   border: solid 1px ${(props) => props.theme.eui.euiFormBorderColor};
@@ -122,6 +124,9 @@ export const IntegrationStatus: React.FunctionComponent<{
     });
   }, [integration.package_name, integration.package_version]);
 
+  const statuses = [integration.sync_status, ...customAssets.map((asset) => asset.sync_status)];
+  const integrationStatus = getIntegrationStatus(statuses).toUpperCase();
+
   return (
     <CollapsablePanel
       id={integration.package_name}
@@ -148,7 +153,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <IntegrationStatusBadge status={integration.sync_status.toUpperCase()} />
+                <IntegrationStatusBadge status={integrationStatus} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </h3>
@@ -181,7 +186,23 @@ export const IntegrationStatus: React.FunctionComponent<{
             <EuiAccordion
               id={`${customAsset.type}:${customAsset.name}`}
               key={`${customAsset.type}:${customAsset.name}`}
-              buttonContent={customAsset.name}
+              buttonContent={
+                <EuiFlexGroup alignItems="baseline" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">{customAsset.name}</EuiText>
+                  </EuiFlexItem>
+                  {customAsset.is_deleted && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">
+                        <FormattedMessage
+                          id="xpack.fleet.integrationSyncStatus.deletedText"
+                          defaultMessage="Deleted"
+                        />
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              }
               data-test-subj={`${customAsset.type}:${customAsset.name}-accordion`}
               extraAction={
                 customAsset.sync_status === SyncStatus.SYNCHRONIZING ? (
