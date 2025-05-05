@@ -298,6 +298,13 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
     } as SanitizedRuleAction;
   }),
   isSnoozedUntil: undefined,
+  artifacts: {
+    dashboards: [
+      {
+        id: 'dashboard-1',
+      },
+    ],
+  },
 };
 
 export const mockTaskInstance = () => ({

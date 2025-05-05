@@ -372,7 +372,7 @@ Object {
           "link": "securitySolutionUI:entity_analytics-landing",
           "renderAs": "panelOpener",
           "spaceBefore": null,
-          "title": "Entity Analytics",
+          "title": "Entity analytics",
         },
         Object {
           "children": Array [
@@ -458,13 +458,13 @@ Object {
           "id": "entity_analytics-management",
           "link": "securitySolutionUI:entity_analytics-management",
           "sideNavStatus": "hidden",
-          "title": "Entity Risk Score",
+          "title": "Entity risk score",
         },
         Object {
           "id": "entity_analytics-entity_store_management",
           "link": "securitySolutionUI:entity_analytics-entity_store_management",
           "sideNavStatus": "hidden",
-          "title": "Entity Store",
+          "title": "Entity store",
         },
       ],
       "defaultIsCollapsed": false,
@@ -727,6 +727,22 @@ Object {
       "id": "security_solution_ai_nav",
       "isCollapsible": false,
       "title": "AI for SOC",
+      "type": "navGroup",
+    },
+  ],
+  "callout": Array [
+    Object {
+      "children": Array [
+        Object {
+          "id": "ai_soc_callout",
+          "renderItem": [Function],
+          "title": "",
+        },
+      ],
+      "defaultIsCollapsed": false,
+      "id": "calloutGroup",
+      "isCollapsible": false,
+      "title": "",
       "type": "navGroup",
     },
   ],
