@@ -398,6 +398,7 @@ const RETRYABLE_DOCKER_PULL_ERROR_MESSAGES = [
   'connection refused',
   'i/o timeout',
   'Client.Timeout',
+  'TLS handshake timeout',
 ];
 
 /**
