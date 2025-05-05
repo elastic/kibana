@@ -25,7 +25,8 @@
       "kibanaUtils",
       "visTypeHeatmap",
       "visTypeGauge",
-      "visualizations"
+      "visualizations",
+      "embeddable"
     ]
   }
 }
