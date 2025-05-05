@@ -7635,6 +7635,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-suites-xpack-observability@link:x-pack/solutions/observability/test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-suites-xpack-performance@link:x-pack/performance":
   version "0.0.0"
   uid ""

@@ -765,6 +765,8 @@ module.exports = {
         'x-pack/solutions/observability/plugins/apm/**/*.js',
         'x-pack/platform/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/platform/test/*/*config.*ts',
+        'x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,deployment_agnostic,fixtures}/**/*',
+        'x-pack/solutions/*/test/**/*config.*ts',
         'x-pack/test/*/{tests,test_suites,apis,apps,deployment_agnostic}/**/*',
         'x-pack/test/*/*config.*ts',
         'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
