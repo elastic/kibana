@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { makeCheck } from '@kbn/test-suites-xpack-observability/api_integration/apis/uptime/rest/helper/make_checks';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { makeCheck } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { common } = getPageObjects(['common']);
