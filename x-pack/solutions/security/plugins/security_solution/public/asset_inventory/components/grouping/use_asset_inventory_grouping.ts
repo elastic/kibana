@@ -51,10 +51,6 @@ const defaultGroupingOptions: GroupOption[] = [
     label: GROUPING_LABELS.CLOUD_ACCOUNT,
     key: ASSET_GROUPING_OPTIONS.CLOUD_ACCOUNT,
   },
-  {
-    label: GROUPING_LABELS.SOURCE,
-    key: ASSET_GROUPING_OPTIONS.ENTITY_SOURCE,
-  },
 ];
 
 export const getDefaultQuery = ({
@@ -103,8 +99,6 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
         getTermAggregation('accountName', ASSET_FIELDS.CLOUD_ACCOUNT_NAME),
         getTermAggregation('cloudProvider', ASSET_FIELDS.CLOUD_PROVIDER),
       ];
-    case ASSET_GROUPING_OPTIONS.ENTITY_SOURCE:
-      return [...aggMetrics, getTermAggregation('source', ASSET_FIELDS.ENTITY_SOURCE)];
   }
   return aggMetrics;
 };

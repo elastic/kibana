@@ -38,12 +38,6 @@ const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
     }),
     fieldName: ASSET_FIELDS.ENTITY_ID,
   },
-  {
-    title: i18n.translate('xpack.securitySolution.assetInventory.filters.source', {
-      defaultMessage: 'Source',
-    }),
-    fieldName: ASSET_FIELDS.ENTITY_SOURCE,
-  },
 ];
 
 export interface AssetInventoryFiltersProps {
