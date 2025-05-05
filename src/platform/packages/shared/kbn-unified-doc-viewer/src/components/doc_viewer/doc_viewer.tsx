@@ -21,7 +21,7 @@ export interface DocViewerApi {
 
 interface DocViewerInternalProps extends DocViewRenderProps {
   docViews: DocView[];
-  initialTab?: DocView['id'];
+  initialTabId?: DocView['id'];
 }
 
 const getFullTabId = (tabId: string) => `kbn_doc_viewer_tab_${tabId}`;
