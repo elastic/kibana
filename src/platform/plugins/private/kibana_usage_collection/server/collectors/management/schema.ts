@@ -623,10 +623,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmEnableCriticalPath': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:enableInfrastructureProfilingIntegration': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

@@ -158,7 +158,6 @@ export interface UsageStats {
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:apmServiceInventoryOptimizedSorting': boolean;
   'observability:apmTraceExplorerTab': boolean;
-  'observability:apmEnableCriticalPath': boolean;
   'observability:apmEnableProfilingIntegration': boolean;
   'observability:entityCentricExperience': boolean;
   'observability:profilingShowErrorFrames': boolean;

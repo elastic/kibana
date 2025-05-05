@@ -26,7 +26,6 @@ import {
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
-  enableCriticalPath,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
@@ -414,24 +413,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
-    solution: 'oblt',
-  },
-  [enableCriticalPath]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableCriticalPath', {
-      defaultMessage: 'Critical path',
-    }),
-    description: i18n.translate('xpack.observability.enableCriticalPathDescription', {
-      defaultMessage: '{technicalPreviewLabel} Optionally display the critical path of a trace.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
     solution: 'oblt',
   },
   [syntheticsThrottlingEnabled]: {
