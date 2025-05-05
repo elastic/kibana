@@ -42,7 +42,10 @@ export async function deleteIndexAssets(es: Client) {
   const response = await es.indices.get({ index: getResourceName('*') });
   const indicesToDelete = Object.keys(response);
   if (indicesToDelete.length > 0) {
-    await es.indices.delete({ index: indicesToDelete, ignore_unavailable: true });
+    await es.indices.delete(
+      { index: indicesToDelete, ignore_unavailable: true },
+      { ignore: [404] }
+    );
   }
 
   await es.indices.deleteIndexTemplate({ name: getResourceName('*') }, { ignore: [404] });
