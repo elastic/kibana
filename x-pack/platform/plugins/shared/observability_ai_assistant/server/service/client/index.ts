@@ -31,8 +31,7 @@ import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
-
-import { LockAcquisitionError } from '@kbn/lock-manager';
+import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import {
   ChatCompletionChunkEvent,
@@ -736,8 +735,7 @@ export class ObservabilityAIAssistantClient {
         });
       })
       .catch((e) => {
-        const isLockAcquisitionError = e instanceof LockAcquisitionError;
-        if (isLockAcquisitionError) {
+        if (isLockAcquisitionError(e)) {
           logger.info(e.message);
         } else {
           logger.error(
