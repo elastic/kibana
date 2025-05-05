@@ -70,7 +70,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         ({ getRelevantFields } = llmProxy.interceptSelectRelevantFieldsToolChoice());
 
-        void llmProxy.interceptConversation(`Yes, you do have logs. Congratulations! 🎈️🎈️🎈️`);
+        void llmProxy.interceptWithResponse(`Yes, you do have logs. Congratulations! 🎈️🎈️🎈️`);
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: USER_MESSAGE,
