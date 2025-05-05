@@ -265,7 +265,10 @@ export const getTooltipActions = (
                   ? {}
                   : {
                       // If there is no sourceField, wrap the X axis label in [brackets] to let the user set the field name manually
-                      [String(xSourceField ?? `[${xColumn?.name ?? 'X'}]`)]: xSeriesValue,
+                      [String(xSourceField ?? `[${xColumn?.name ?? 'X'}]`)]:
+                        // Use xSeriesPoint.value instead of xSeriesValue; this is always the raw ES value, xSeriesValue sometimes returns
+                        // the display value
+                        xSeriesPoint.value,
                     };
 
               const query =
