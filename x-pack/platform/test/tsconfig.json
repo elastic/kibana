@@ -71,7 +71,6 @@
     "@kbn/automatic-import-plugin",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/utils",
-    "@kbn/repo-info",
     "@kbn/core",
   ]
 }

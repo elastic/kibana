@@ -6,7 +6,6 @@
  */
 
 import path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
@@ -23,9 +22,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
       kibana: {
-        api: await readConfigFile(
-          path.resolve(REPO_ROOT, 'src/platform/test/api_integration/config.js')
-        ),
+        api: await readConfigFile(path.resolve('@kbn/test-suites-src/api_integration/config')),
         functional: await readConfigFile(
           require.resolve('@kbn/test-suites-src/functional/config.base')
         ),
