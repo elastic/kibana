@@ -7,7 +7,6 @@
 
 import { get } from 'lodash/fp';
 
-import type { TablesAdapter } from '@kbn/expressions-plugin/common';
 import { getFutureTimeRange, getPreviousTimeRange } from '../../utils/get_time_range';
 import type {
   Inputs,
@@ -19,6 +18,7 @@ import type {
   TimeRange,
 } from './model';
 import { InputsModelId } from './constants';
+import type { VisualizationTablesWithMeta } from '../../components/visualization_actions/types';
 
 export const updateInputFullScreen = (
   inputId: InputsModelId,
@@ -99,7 +99,7 @@ export interface UpdateQueryParams {
   refetch: Refetch | RefetchKql;
   state: InputsModel;
   searchSessionId?: string;
-  tables?: TablesAdapter['tables'];
+  tables?: VisualizationTablesWithMeta;
 }
 
 export const upsertQuery = ({
