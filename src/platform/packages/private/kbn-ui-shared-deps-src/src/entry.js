@@ -89,9 +89,6 @@ export const Reselect = require('reselect');
 export const Lodash = require('lodash');
 export const LodashFp = require('lodash/fp');
 
-const { unzlibSync, strFromU8 } = require('fflate');
-export const Fflate = { unzlibSync, strFromU8 };
-
 // runtime deps which don't need to be copied across all bundles
 export const TsLib = require('tslib');
 export const Uuid = require('uuid');
