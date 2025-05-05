@@ -9,55 +9,55 @@ import { i18n } from '@kbn/i18n';
 
 export const toolLabels = {
   breadcrumb: {
-    toolsPill: i18n.translate('workchatApp.tools.breadcrumb.tools', {
+    toolsPill: i18n.translate('workchatApp.integrations.breadcrumb.tools', {
       defaultMessage: 'Tools',
     }),
-    editToolPill: i18n.translate('workchatApp.tools.breadcrumb.editTool', {
+    editToolPill: i18n.translate('workchatApp.integrations.breadcrumb.editTool', {
       defaultMessage: 'Edit tool',
     }),
-    createToolPill: i18n.translate('workchatApp.tools.breadcrumb.createTool', {
+    createToolPill: i18n.translate('workchatApp.integrations.breadcrumb.createTool', {
       defaultMessage: 'Create tool',
     }),
   },
   notifications: {
     toolCreatedToastText: i18n.translate(
-      'workchatApp.tools.notifications.toolCreatedToastText',
+      'workchatApp.integrations.notifications.toolCreatedToastText',
       {
         defaultMessage: 'Tool created',
       }
     ),
     toolUpdatedToastText: i18n.translate(
-      'workchatApp.tools.notifications.toolUpdatedToastText',
+      'workchatApp.integrations.notifications.toolUpdatedToastText',
       {
         defaultMessage: 'Tool updated',
       }
     ),
     toolDeletedToastText: i18n.translate(
-      'workchatApp.tools.notifications.toolDeletedToastText',
+      'workchatApp.integrations.notifications.toolDeletedToastText',
       {
         defaultMessage: 'Tool successfully deleted',
       }
     ),
   },
   editView: {
-    createToolTitle: i18n.translate('workchatApp.tools.editView.createTitle', {
+    createToolTitle: i18n.translate('workchatApp.integrations.editView.createTitle', {
       defaultMessage: 'Create a new tool',
     }),
-    editToolTitle: i18n.translate('workchatApp.tools.editView.editTitle', {
+    editToolTitle: i18n.translate('workchatApp.integrations.editView.editTitle', {
       defaultMessage: 'Edit tool',
     }),
-    cancelButtonLabel: i18n.translate('workchatApp.tools.editView.cancelButtonLabel', {
+    cancelButtonLabel: i18n.translate('workchatApp.integrations.editView.cancelButtonLabel', {
       defaultMessage: 'Cancel',
     }),
-    saveButtonLabel: i18n.translate('workchatApp.tools.editView.saveButtonLabel', {
+    saveButtonLabel: i18n.translate('workchatApp.integrations.editView.saveButtonLabel', {
       defaultMessage: 'Save',
     }),
   },
   listView: {
-    addToolLabel: i18n.translate('workchatApp.tools.listView.addTool', {
+    addToolLabel: i18n.translate('workchatApp.integrations.listView.addTool', {
       defaultMessage: 'Add tool',
     }),
-    browseToolLabel: i18n.translate('workchatApp.tools.listView.browseTool', {
+    browseToolLabel: i18n.translate('workchatApp.integrations.listView.browseTool', {
       defaultMessage: 'Browse tools',
     }),
   },

@@ -20,7 +20,7 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
     return [
       {
         id: 'active',
-        label: i18n.translate('workchatApp.tools.listView.activeTab', {
+        label: i18n.translate('workchatApp.integrations.listView.activeTab', {
           defaultMessage: 'Active',
         }),
         isSelected: tab === 'active',
@@ -30,7 +30,7 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
       },
       {
         id: 'catalog',
-        label: i18n.translate('workchatApp.tools.listView.catalogTab', {
+        label: i18n.translate('workchatApp.integrations.listView.catalogTab', {
           defaultMessage: 'Catalog',
         }),
         isSelected: tab === 'catalog',
@@ -44,7 +44,7 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
   return (
     <KibanaPageTemplate.Header
       pageTitle={toolLabels.breadcrumb.toolsPill}
-      description={i18n.translate('workchatApp.tools.listView.description', {
+      description={i18n.translate('workchatApp.integrations.listView.description', {
         defaultMessage:
           'Connect to your tools and data so you can easily find, understand, and act on the information that matters.',
       })}
