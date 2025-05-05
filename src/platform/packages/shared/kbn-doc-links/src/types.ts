@@ -266,6 +266,9 @@ export interface DocLinks {
     readonly remoteReindex: string;
     readonly unfreezeApi: string;
     readonly reindexWithPipeline: string;
+    readonly logsDatastream: string;
+    readonly usingLogsDbIndexModeWithESSecurity: string;
+    readonly dataStreamReindex: string;
   };
   readonly rollupJobs: string;
   readonly elasticsearch: Record<string, string>;
@@ -325,8 +328,6 @@ export interface DocLinks {
     };
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
-    readonly legacyEndpointManagementApiDeprecations: string;
-    readonly legacyRuleManagementBulkApiDeprecations: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
   };
@@ -463,7 +464,6 @@ export interface DocLinks {
     mappingRoles: string;
     mappingRolesFieldRules: string;
     runAsPrivilege: string;
-    deprecatedV1Endpoints: string;
     enableElasticSearchSecurityFeatures: string;
   }>;
   readonly spaces: Readonly<{

@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
+import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
@@ -47,6 +48,7 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
+import { LOCK_ID_RESOURCE_INSTALLER } from '../common/constants';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -72,6 +74,7 @@ export class SLOPlugin
     core: CoreSetup<SLOPluginStartDependencies, SLOServerStart>,
     plugins: SLOPluginSetupDependencies
   ): SLOServerSetup {
+    const lockManager = new LockManagerService(core, this.logger);
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
     const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
@@ -217,10 +220,14 @@ export class SLOPlugin
       .then(async ([coreStart, pluginStart]) => {
         const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
         const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
-        await sloResourceInstaller.ensureCommonResourcesInstalled();
+        await lockManager.withLock(LOCK_ID_RESOURCE_INSTALLER, () =>
+          sloResourceInstaller.ensureCommonResourcesInstalled()
+        );
       })
-      .catch(() => {
-        // noop - error already logged from the installer
+      .catch((err) => {
+        if (err instanceof LockAcquisitionError) {
+          this.logger.debug('Cannot install SLO resources, another process is already doing it');
+        }
       });
 
     this.sloOrphanCleanupTask = new SloOrphanSummaryCleanupTask(
