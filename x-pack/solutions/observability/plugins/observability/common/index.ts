@@ -40,7 +40,6 @@ export {
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
-  enableCriticalPath,
   syntheticsThrottlingEnabled,
   apmEnableProfilingIntegration,
   profilingShowErrorFrames,
