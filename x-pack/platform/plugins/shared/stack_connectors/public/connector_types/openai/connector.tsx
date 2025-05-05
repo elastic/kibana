@@ -47,8 +47,17 @@ import {
   pkiConfig,
 } from './constants';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FieldConfig, ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ConfigFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 
 const { emptyField } = fieldValidators;
+
+interface FormData {
+  certificateFile?: string | string[];
+  certificateData?: string;
+  privateKeyFile?: string | string[];
+  privateKeyData?: string;
+}
 
 const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdit }) => {
   const { euiTheme } = useEuiTheme();
@@ -122,53 +131,42 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             readOnly={readOnly}
             configFormSchema={[
               ...otherOpenAiConfig,
-              ...(hasPKI ? pkiConfig.map(field => ({
-                ...field,
-                validations: [
-                  {
-                    validator: ({ 
-                      value, 
-                      formData 
-                    }: { 
-                      value: string | string[] | undefined;
-                      formData: {
-                        certificateFile?: string | string[];
-                        certificateData?: string;
-                        privateKeyFile?: string | string[];
-                        privateKeyData?: string;
-                      };
-                    }) => {
-                      if (field.id === 'certificateData' && Array.isArray(value)) {
-                        return {
-                          message: 'Certificate data must be a string, not an array',
-                        };
-                      }
-                      if (field.id === 'privateKeyData' && Array.isArray(value)) {
-                        return {
-                          message: 'Private key data must be a string, not an array',
-                        };
-                      }
-                      if (
-                        (value || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
-                        !(value || formData.certificateData)
-                      ) {
-                        return {
-                          message: i18n.MISSING_CERTIFICATE,
-                        };
-                      }
-                      if (
-                        (value || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
-                        !(formData.privateKeyFile || formData.privateKeyData)
-                      ) {
-                        return {
-                          message: i18n.MISSING_PRIVATE_KEY,
-                        };
-                      }
-                      return undefined;
+              ...(hasPKI ? pkiConfig.map(field => {
+                const fieldConfig: FieldConfig<string | string[] | undefined, FormData> = {
+                  label: field.label,
+                  helpText: field.helpText,
+                  defaultValue: field.defaultValue,
+                  type: field.type,
+                  validations: [
+                    {
+                      validator: ((data) => {
+                        const { value, formData } = data;
+                        if (
+                          (formData.certificateFile || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
+                          !(formData.certificateFile || formData.certificateData)
+                        ) {
+                          return {
+                            message: i18n.MISSING_CERTIFICATE,
+                          };
+                        }
+                        if (
+                          (formData.certificateFile || formData.privateKeyFile || formData.certificateData || formData.privateKeyData) &&
+                          !(formData.privateKeyFile || formData.privateKeyData)
+                        ) {
+                          return {
+                            message: i18n.MISSING_PRIVATE_KEY,
+                          };
+                        }
+                        return undefined;
+                      }) as ValidationFunc<FormData, string, string | string[] | undefined>,
                     },
-                  },
-                ],
-              })) : []),
+                  ],
+                };
+                return {
+                  ...field,
+                  ...fieldConfig,
+                } as ConfigFieldSchema;
+              }) : [])
             ]}
             secretsFormSchema={otherOpenAiSecrets}
           />
@@ -189,6 +187,13 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           />
           {hasPKI && (
             <>
+              <EuiSpacer size="s" />
+              <SimpleConnectorForm
+                isEdit={isEdit}
+                readOnly={readOnly}
+                configFormSchema={pkiConfig}
+                secretsFormSchema={[]}
+              />
               <EuiSpacer size="s" />
               <UseField
                 path="config.verificationMode"
