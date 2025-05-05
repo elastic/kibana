@@ -16,6 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiFormRow,
   EuiText,
   EuiTitle,
   EuiButton,
@@ -54,27 +55,48 @@ function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOption
   return (
     <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiSwitch
+        <EuiFormRow
           label={
-            <EuiText size="s" css={{ textWrap: 'nowrap' }}>
+            <EuiText size="s">
+              <h4>
+                <FormattedMessage
+                  id="share.exportFlyoutContent.optimizeForPrinting.label"
+                  defaultMessage="Print format"
+                />
+              </h4>
+            </EuiText>
+          }
+          helpText={
+            <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="share.screenCapturePanelContent.optimizeForPrintingLabel"
-                defaultMessage="For print"
+                id="share.exportFlyoutContent.optimizeForPrinting.helpText"
+                defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
               />
             </EuiText>
           }
-          checked={usePrintLayout}
-          onChange={printLayoutChange}
-          data-test-subj="usePrintLayout"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs">
-          <FormattedMessage
-            id="share.screenCapturePanelContent.optimizeForPrintingHelpText"
-            defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
+          fullWidth
+        >
+          <EuiSwitch
+            label={
+              <EuiText size="s">
+                {usePrintLayout ? (
+                  <FormattedMessage
+                    id="share.exportFlyoutContent.optimizeForPrinting.selection.on"
+                    defaultMessage="On"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="share.exportFlyoutContent.optimizeForPrinting.selection.off"
+                    defaultMessage="Off"
+                  />
+                )}
+              </EuiText>
+            }
+            checked={usePrintLayout}
+            onChange={printLayoutChange}
+            data-test-subj="usePrintLayout"
           />
-        </EuiText>
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -173,56 +195,60 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem>
-                <Fragment>
-                  {selectedMenuItem?.config.renderLayoutOptionSwitch && (
+            <EuiFlexGroup direction="column">
+              <Fragment>
+                {selectedMenuItem?.config.renderLayoutOptionSwitch && (
+                  <EuiFlexItem>
                     <LayoutOptionsSwitch
                       usePrintLayout={usePrintLayout}
                       printLayoutChange={(evt) => setPrintLayout(evt.target.checked)}
                     />
-                  )}
-                </Fragment>
-              </EuiFlexItem>
+                  </EuiFlexItem>
+                )}
+              </Fragment>
               <Fragment>
                 {selectedMenuItem?.config.renderCopyURIButton && publicAPIEnabled && (
                   <EuiFlexItem>
-                    <EuiFlexGroup gutterSize="s" direction="column">
-                      <EuiFlexItem>
-                        <EuiTitle size="xxs">
+                    <EuiFormRow
+                      label={
+                        <EuiText size="s">
                           <h4>
                             <FormattedMessage
                               id="share.export.postURLHeading"
                               defaultMessage="Post URL"
                             />
                           </h4>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="s">
-                          <FormattedMessage
-                            id="share.export.postURLDescription"
-                            defaultMessage="Allows to generate selected file format programmatically outside Kibana or in Watcher."
-                          />
                         </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiCodeBlock
-                          data-test-subj="exportAssetValue"
-                          css={{ overflowWrap: 'break-word' }}
-                          language="text"
-                          isCopyable
-                          copyAriaLabel={i18n.translate('share.export.copyPostURLAriaLabel', {
-                            defaultMessage: 'Copy export asset value',
-                          })}
-                        >
-                          {selectedMenuItem?.config.generateAssetURIValue({
-                            intl,
-                            optimizedForPrinting: usePrintLayout,
-                          })}
-                        </EuiCodeBlock>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                      }
+                      fullWidth
+                    >
+                      <EuiFlexGroup direction="column">
+                        <EuiFlexItem>
+                          <EuiText size="s" color="subdued">
+                            <FormattedMessage
+                              id="share.export.postURLDescription"
+                              defaultMessage="Allows to generate selected file format programmatically outside Kibana or in Watcher."
+                            />
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiCodeBlock
+                            data-test-subj="exportAssetValue"
+                            css={{ overflowWrap: 'break-word' }}
+                            language="text"
+                            isCopyable
+                            copyAriaLabel={i18n.translate('share.export.copyPostURLAriaLabel', {
+                              defaultMessage: 'Copy export asset value',
+                            })}
+                          >
+                            {selectedMenuItem?.config.generateAssetURIValue({
+                              intl,
+                              optimizedForPrinting: usePrintLayout,
+                            })}
+                          </EuiCodeBlock>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFormRow>
                   </EuiFlexItem>
                 )}
               </Fragment>
