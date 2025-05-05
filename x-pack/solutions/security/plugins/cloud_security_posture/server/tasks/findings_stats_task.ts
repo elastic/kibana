@@ -128,6 +128,7 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
     };
   };
 }
+
 const getScoreAggregationQuery = () => ({
   score_by_policy_template: {
     terms: {
