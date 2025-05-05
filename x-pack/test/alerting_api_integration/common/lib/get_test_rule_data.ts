@@ -20,13 +20,13 @@ export function getTestRuleData(overwrites = {}) {
     artifacts: {
       dashboards: [
         {
-          id: 'dashboard-0'
+          id: 'dashboard-0',
         },
         {
-          id: 'dashboard-1'
-        }
+          id: 'dashboard-1',
+        },
       ],
-      investigationGuide: 'investigation guide'
+      investigationGuide: 'investigation guide',
     },
     ...overwrites,
   };
