@@ -4123,23 +4123,12 @@ describe('xy_visualization', () => {
     };
 
     it('compares after injecting annotation groups', () => {
-      expect(
-        xyVisualization.isEqual!(
-          state1,
-          references1,
-          undefined,
-          state2,
-          references2,
-          undefined,
-          annotationGroups
-        )
-      );
+      expect(xyVisualization.isEqual!(state1, references1, state2, references2, annotationGroups));
 
       expect(
         xyVisualization.isEqual!(
           state1,
           references1,
-          undefined,
           state2,
           [
             {
@@ -4153,7 +4142,6 @@ describe('xy_visualization', () => {
               type: 'index-pattern',
             },
           ],
-          undefined,
           annotationGroups
         )
       ).toBeFalsy();
@@ -4171,7 +4159,6 @@ describe('xy_visualization', () => {
             },
             // no index pattern reference
           ],
-          undefined,
           state2,
           [
             {
@@ -4181,7 +4168,6 @@ describe('xy_visualization', () => {
             },
             // no index pattern reference
           ],
-          undefined,
           annotationGroups
         )
       ).not.toThrowError();
