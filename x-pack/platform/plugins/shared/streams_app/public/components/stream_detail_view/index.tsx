@@ -8,6 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiBadgeGroup, EuiButton } from '@elastic/eui';
 import { Streams } from '@kbn/streams-schema';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
@@ -17,13 +18,16 @@ import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StatefulStreamsAppRouter, useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { RedirectTo } from '../redirect_to';
+import { useStreamPrivileges } from '../../hooks/use_stream_privileges';
 
 const getStreamDetailTabs = ({
   definition,
   router,
+  license,
 }: {
   definition: Streams.ingest.all.GetResponse;
   router: StatefulStreamsAppRouter;
+  license: ILicense;
 }) =>
   ({
     overview: {
@@ -46,16 +50,20 @@ const getStreamDetailTabs = ({
         defaultMessage: 'Dashboards',
       }),
     },
-    significant_events: {
-      href: router.link('/{key}/{tab}', {
-        path: { key: definition.stream.name, tab: 'significant_events' },
-      }),
-      content: <StreamDetailSignificantEventsView definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.significantEventsTab', {
-        defaultMessage: 'Significant events',
-      }),
-      background: true,
-    },
+    ...(license.hasAtLeast('enterprise')
+      ? {
+          significant_events: {
+            href: router.link('/{key}/{tab}', {
+              path: { key: definition.stream.name, tab: 'significant_events' },
+            }),
+            content: <StreamDetailSignificantEventsView definition={definition} />,
+            label: i18n.translate('xpack.streams.streamDetailView.significantEventsTab', {
+              defaultMessage: 'Significant events',
+            }),
+            background: true,
+          },
+        }
+      : {}),
   } as const);
 
 export type StreamDetailTabs = ReturnType<typeof getStreamDetailTabs>;
@@ -72,6 +80,8 @@ export function StreamDetailView() {
 
   const { definition } = useStreamDetail();
 
+  const { license } = useStreamPrivileges();
+
   if (tab === 'management') {
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'route' } }} />;
   }
@@ -80,9 +90,9 @@ export function StreamDetailView() {
     return <RedirectTo path="/{key}/{tab}" params={{ path: { key, tab: 'overview' } }} />;
   }
 
-  const tabs = getStreamDetailTabs({ definition, router });
+  const tabs = license ? getStreamDetailTabs({ definition, router, license }) : undefined;
 
-  const selectedTabObject = tabs[tab as StreamDetailTabName];
+  const selectedTabObject = tabs?.[tab as StreamDetailTabName];
 
   return (
     <>
@@ -97,7 +107,7 @@ export function StreamDetailView() {
             </EuiBadgeGroup>
           </EuiFlexGroup>
         }
-        tabs={Object.entries(tabs).map(([tabName, { label, href }]) => {
+        tabs={Object.entries(tabs ?? {}).map(([tabName, { label, href }]) => {
           return {
             label,
             href,
@@ -117,8 +127,8 @@ export function StreamDetailView() {
           </EuiButton>,
         ]}
       />
-      <StreamsAppPageTemplate.Body color={selectedTabObject.background ? 'plain' : 'subdued'}>
-        {selectedTabObject.content}
+      <StreamsAppPageTemplate.Body color={selectedTabObject?.background ? 'plain' : 'subdued'}>
+        {selectedTabObject?.content}
       </StreamsAppPageTemplate.Body>
     </>
   );

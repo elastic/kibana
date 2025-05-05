@@ -46,8 +46,6 @@ export function UncontrolledStreamsAppSearchBar({
     [query, showQueryInput]
   );
 
-  console.log({ showQueryInput });
-
   return (
     <unifiedSearch.ui.SearchBar
       appName="streamsApp"

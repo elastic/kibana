@@ -11,8 +11,10 @@ import { AssetImage } from '../asset_image';
 
 export function SignificantEventsViewEmptyState({
   onGenerateClick,
+  onAddClick,
 }: {
   onGenerateClick?: () => Promise<void>;
+  onAddClick?: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
   return (
@@ -31,20 +33,34 @@ export function SignificantEventsViewEmptyState({
             'There are no significant events defined for this stream. We can generate these events for you, based on historical data.',
         })}
       </EuiText>
-      <EuiButton
-        isLoading={isLoading}
-        iconType="sparkles"
-        onClick={() => {
-          setIsLoading(true);
-          onGenerateClick?.().finally(() => {
-            setIsLoading(false);
-          });
-        }}
-      >
-        {i18n.translate('xpack.significantEvents.emptyState.generateEvents', {
-          defaultMessage: 'Generate events',
-        })}
-      </EuiButton>
+      <EuiFlexGroup direction="row" gutterSize="s">
+        <EuiButton
+          isLoading={isLoading}
+          iconType="sparkles"
+          onClick={() => {
+            setIsLoading(true);
+            onGenerateClick?.().finally(() => {
+              setIsLoading(false);
+            });
+          }}
+        >
+          {i18n.translate('xpack.streams.significantEvents.emptyState.generateEvents', {
+            defaultMessage: 'Generate events',
+          })}
+        </EuiButton>
+        <EuiButton
+          isLoading={isLoading}
+          iconType="plusInCircle"
+          fill
+          onClick={() => {
+            onAddClick?.();
+          }}
+        >
+          {i18n.translate('xpack.streams.significantEvents.emptyState.addEvent', {
+            defaultMessage: 'Add new event',
+          })}
+        </EuiButton>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 }

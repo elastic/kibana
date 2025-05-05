@@ -147,13 +147,107 @@ export function StreamDetailSignificantEventsView({
     return <LoadingPanel />;
   }
 
-  if (significantEventsFetchState.value.length === 0 && !isSuggestionFlyoutOpen) {
-    return (
-      <SignificantEventsViewEmptyState
-        onGenerateClick={() => {
-          return generateEvents();
+  const editFlyout = isEditFlyoutOpen ? (
+    <SignificantEventFlyout
+      onCreate={async (next) => {
+        await addQuery?.(next).then(
+          () => {
+            notifications.toasts.addSuccess({
+              title: i18n.translate(
+                'xpack.streams.significantEvents.significantEventCreateSuccessToastTitle',
+                {
+                  defaultMessage: `Added significant event`,
+                }
+              ),
+            });
+            setIsEditFlyoutOpen(false);
+            significantEventsFetchState.refresh();
+          },
+          (error) => {
+            notifications.showErrorDialog({
+              title: i18n.translate(
+                'xpack.streams.significantEvents.significantEventCreateErrorToastTitle',
+                {
+                  defaultMessage: `Could not add significant event`,
+                }
+              ),
+              error,
+            });
+          }
+        );
+      }}
+      onUpdate={async (next) => {
+        await addQuery?.(next).then(
+          () => {
+            notifications.toasts.addSuccess({
+              title: i18n.translate(
+                'xpack.streams.significantEvents.significantEventUpdateSuccessToastTitle',
+                {
+                  defaultMessage: `Updated significant event`,
+                }
+              ),
+            });
+            setIsEditFlyoutOpen(false);
+            significantEventsFetchState.refresh();
+          },
+          (error) => {
+            notifications.showErrorDialog({
+              title: i18n.translate(
+                'xpack.streams.significantEvents.significantEventUpdateErrorToastTitle',
+                {
+                  defaultMessage: `Could not update significant event`,
+                }
+              ),
+              error,
+            });
+          }
+        );
+      }}
+      onClose={() => {
+        setIsEditFlyoutOpen(false);
+        setQueryToEdit(undefined);
+      }}
+      query={queryToEdit}
+      name={definition?.stream.name ?? ''}
+    />
+  ) : null;
+
+  const suggestionFlyout =
+    name && isSuggestionFlyoutOpen ? (
+      <SignificantEventSuggestionsFlyout
+        name={name}
+        suggestions={suggestedEvents}
+        onAccept={async (next) => {
+          await bulk?.(next.map((item) => ({ index: item })))
+            .then(() => {
+              significantEventsFetchState.refresh();
+            })
+            .finally(() => {
+              setIsSuggestionFlyoutOpen(false);
+            });
+        }}
+        onClose={() => {
+          setSuggestedEvents([]);
+          setIsSuggestionFlyoutOpen(false);
         }}
       />
+    ) : null;
+
+  if (significantEventsFetchState.value.length === 0) {
+    return (
+      <>
+        <SignificantEventsViewEmptyState
+          onGenerateClick={() => {
+            return generateEvents();
+          }}
+          onAddClick={() => {
+            setIsEditFlyoutOpen(true);
+            setQueryToEdit(undefined);
+          }}
+        />
+        {editFlyout}
+        {suggestionFlyout}
+      </>
     );
   }
 
@@ -208,43 +302,8 @@ export function StreamDetailSignificantEventsView({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isEditFlyoutOpen ? (
-        <SignificantEventFlyout
-          onCreate={async (next) => {
-            await addQuery?.(next).then(() => {
-              significantEventsFetchState.refresh();
-            });
-          }}
-          onUpdate={async () => {}}
-          onClose={() => {
-            setIsEditFlyoutOpen(false);
-            setQueryToEdit(undefined);
-          }}
-          query={queryToEdit}
-          name={definition?.stream.name ?? ''}
-        />
-      ) : null}
-      {name && isSuggestionFlyoutOpen ? (
-        <SignificantEventSuggestionsFlyout
-          name={name}
-          suggestions={suggestedEvents}
-          onAccept={async (next) => {
-            await bulk?.(next.map((item) => ({ index: item })))
-              .then(() => {
-                significantEventsFetchState.refresh();
-              })
-              .finally(() => {
-                setIsSuggestionFlyoutOpen(false);
-              });
-          }}
-          onClose={() => {
-            setSuggestedEvents([]);
-            setIsSuggestionFlyoutOpen(false);
-          }}
-        />
-      ) : (
-        <></>
-      )}
+      {editFlyout}
+      {suggestionFlyout}
     </>
   );
 }

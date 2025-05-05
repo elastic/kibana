@@ -20,7 +20,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import { StreamQueryKql } from '@kbn/streams-schema';
+import { StreamQueryKql, streamQuerySchema } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { v4 } from 'uuid';
 import { fromKueryExpression } from '@kbn/es-query';
@@ -77,6 +77,8 @@ export function SignificantEventFlyoutContents({
   name,
   query,
   onClose,
+  onCreate,
+  onUpdate,
 }: SignificantEventFlyoutProps) {
   const [queryValues, setQueryValues] = useState<{ id: string } & Partial<StreamQueryKql>>({
     id: v4(),
@@ -84,6 +86,8 @@ export function SignificantEventFlyoutContents({
   });
 
   const [touched, setTouched] = useState({ title: false, kql: false });
+
+  const [loading, setLoading] = useState(false);
 
   const theme = useEuiTheme().euiTheme;
 
@@ -248,6 +252,10 @@ export function SignificantEventFlyoutContents({
     };
   }, [previewFetch.value, queryValues, theme]);
 
+  const parsedQuery = useMemo(() => {
+    return streamQuerySchema.safeParse(queryValues);
+  }, [queryValues]);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -335,7 +343,25 @@ export function SignificantEventFlyoutContents({
             color="primary"
             fill
             iconType={query ? 'save' : 'plusInCircle'}
-            onClick={() => {}}
+            disabled={loading || !parsedQuery.success}
+            isLoading={loading}
+            onClick={() => {
+              if (!parsedQuery.success) {
+                return;
+              }
+
+              setLoading(true);
+
+              if (query) {
+                onUpdate?.(parsedQuery.data).finally(() => {
+                  setLoading(false);
+                });
+              } else {
+                onCreate?.(parsedQuery.data).finally(() => {
+                  setLoading(false);
+                });
+              }
+            }}
           >
             {getSubmitTitle(query)}
           </EuiButton>
