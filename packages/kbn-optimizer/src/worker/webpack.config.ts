@@ -293,6 +293,14 @@ export function getWebpackConfig(
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
+        buffer: [
+          Path.resolve(worker.repoRoot, 'node_modules/node-stdlib-browser/node_modules/buffer'),
+          require.resolve('buffer'),
+        ],
+        punycode: [
+          Path.resolve(worker.repoRoot, 'node_modules/node-stdlib-browser/node_modules/punycode'),
+          require.resolve('punycode'),
+        ],
       },
     },
 

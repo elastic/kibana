@@ -695,7 +695,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '1d' },
                 throttle: null,
                 params: {
                   pattern,
@@ -713,6 +713,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   },
                 ],
                 notify_when: RuleNotifyWhen.CHANGE,
+                alert_delay: {
+                  active: 1,
+                },
               })
             );
 
@@ -721,24 +724,24 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
           // get the events we're expecting
-          const events = await retry.try(async () => {
-            return await getEventLog({
-              getService,
-              spaceId: space.id,
-              type: 'alert',
-              id: alertId,
-              provider: 'alerting',
-              actions: new Map([
-                // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 6 }],
-                ['execute', { gte: 6 }],
-                ['execute-action', { equal: 6 }],
-                ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 6 }],
-                ['recovered-instance', { equal: 3 }],
-              ]),
-            });
-          });
+          let run = 1;
+          await waitForEventLog(space.id, alertId, new Map([['execute', { equal: 1 }]]));
+          // Run the rule 14 more times
+          for (let i = 0; i < 14; i++) {
+            await runSoon(alertId, space.id);
+            await waitForEventLog(space.id, alertId, new Map([['execute', { equal: ++run }]]));
+          }
+
+          const events = await waitForEventLog(
+            space.id,
+            alertId,
+            new Map([
+              ['execute', { equal: 15 }],
+              ['active-instance', { equal: 12 }],
+              ['new-instance', { equal: 3 }],
+              ['recovered-instance', { equal: 2 }],
+            ])
+          );
 
           const flapping = events
             .filter(
@@ -747,12 +750,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          const result = [false, false, false, false, false].concat(
-            new Array(9).fill(true),
-            false,
-            false,
-            false
-          );
+          const result = [false, false, false, false, false].concat(new Array(9).fill(true));
           expect(flapping).to.eql(result);
         });
 
@@ -797,7 +795,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '1d' },
                 throttle: null,
                 notify_when: null,
                 params: {
@@ -825,6 +823,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     },
                   },
                 ],
+                alert_delay: {
+                  active: 1,
+                },
               })
             );
 
@@ -833,24 +834,24 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
           // get the events we're expecting
-          const events = await retry.try(async () => {
-            return await getEventLog({
-              getService,
-              spaceId: space.id,
-              type: 'alert',
-              id: alertId,
-              provider: 'alerting',
-              actions: new Map([
-                // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 6 }],
-                ['execute', { gte: 6 }],
-                ['execute-action', { equal: 6 }],
-                ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 6 }],
-                ['recovered-instance', { equal: 3 }],
-              ]),
-            });
-          });
+          let run = 1;
+          await waitForEventLog(space.id, alertId, new Map([['execute', { equal: 1 }]]));
+          // Run the rule 14 more times
+          for (let i = 0; i < 14; i++) {
+            await runSoon(alertId, space.id);
+            await waitForEventLog(space.id, alertId, new Map([['execute', { equal: ++run }]]));
+          }
+
+          const events = await waitForEventLog(
+            space.id,
+            alertId,
+            new Map([
+              ['execute', { equal: 15 }],
+              ['active-instance', { equal: 12 }],
+              ['new-instance', { equal: 3 }],
+              ['recovered-instance', { equal: 2 }],
+            ])
+          );
 
           const flapping = events
             .filter(
@@ -859,12 +860,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          const result = [false, false, false, false, false].concat(
-            new Array(9).fill(true),
-            false,
-            false,
-            false
-          );
+          const result = [false, false, false, false, false].concat(new Array(9).fill(true));
           expect(flapping).to.eql(result);
         });
 
@@ -908,7 +904,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '1d' },
                 throttle: null,
                 params: {
                   pattern,
@@ -926,6 +922,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   },
                 ],
                 notify_when: RuleNotifyWhen.CHANGE,
+                alert_delay: {
+                  active: 1,
+                },
               })
             );
 
@@ -934,24 +933,24 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
           // get the events we're expecting
-          const events = await retry.try(async () => {
-            return await getEventLog({
-              getService,
-              spaceId: space.id,
-              type: 'alert',
-              id: alertId,
-              provider: 'alerting',
-              actions: new Map([
-                // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 6 }],
-                ['execute', { gte: 6 }],
-                ['execute-action', { equal: 6 }],
-                ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 3 }],
-                ['recovered-instance', { equal: 3 }],
-              ]),
-            });
-          });
+          let run = 1;
+          await waitForEventLog(space.id, alertId, new Map([['execute', { equal: 1 }]]));
+          // Run the rule 13 more times
+          for (let i = 0; i < 13; i++) {
+            await runSoon(alertId, space.id);
+            await waitForEventLog(space.id, alertId, new Map([['execute', { equal: ++run }]]));
+          }
+
+          const events = await waitForEventLog(
+            space.id,
+            alertId,
+            new Map([
+              ['execute', { equal: 14 }],
+              ['active-instance', { equal: 10 }],
+              ['new-instance', { equal: 3 }],
+              ['recovered-instance', { equal: 3 }],
+            ])
+          );
 
           const flapping = events
             .filter(
@@ -1005,7 +1004,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             .send(
               getTestRuleData({
                 rule_type_id: 'test.patternFiring',
-                schedule: { interval: '1s' },
+                schedule: { interval: '1d' },
                 throttle: null,
                 notify_when: null,
                 params: {
@@ -1033,6 +1032,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                     },
                   },
                 ],
+                alert_delay: {
+                  active: 1,
+                },
               })
             );
 
@@ -1041,24 +1043,24 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           objectRemover.add(space.id, alertId, 'rule', 'alerting');
 
           // get the events we're expecting
-          const events = await retry.try(async () => {
-            return await getEventLog({
-              getService,
-              spaceId: space.id,
-              type: 'alert',
-              id: alertId,
-              provider: 'alerting',
-              actions: new Map([
-                // make sure the counts of the # of events per type are as expected
-                ['execute-start', { gte: 6 }],
-                ['execute', { gte: 6 }],
-                ['execute-action', { equal: 6 }],
-                ['new-instance', { equal: 3 }],
-                ['active-instance', { gte: 3 }],
-                ['recovered-instance', { equal: 3 }],
-              ]),
-            });
-          });
+          let run = 1;
+          await waitForEventLog(space.id, alertId, new Map([['execute', { equal: 1 }]]));
+          // Run the rule 13 more times
+          for (let i = 0; i < 13; i++) {
+            await runSoon(alertId, space.id);
+            await waitForEventLog(space.id, alertId, new Map([['execute', { equal: ++run }]]));
+          }
+
+          const events = await waitForEventLog(
+            space.id,
+            alertId,
+            new Map([
+              ['execute', { equal: 14 }],
+              ['active-instance', { equal: 10 }],
+              ['new-instance', { equal: 3 }],
+              ['recovered-instance', { equal: 3 }],
+            ])
+          );
 
           const flapping = events
             .filter(
@@ -2029,6 +2031,30 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       });
     }
   });
+
+  async function runSoon(ruleId: string, spaceId: string) {
+    const response = await supertest
+      .post(`${getUrlPrefix(spaceId)}/internal/alerting/rule/${ruleId}/_run_soon`)
+      .set('kbn-xsrf', 'foo');
+    expect(response.status).to.eql(204);
+  }
+
+  async function waitForEventLog(
+    spaceId: string,
+    id: string,
+    actions: Map<string, { gte: number } | { equal: number }>
+  ) {
+    return await retry.try(async () => {
+      return await getEventLog({
+        getService,
+        spaceId,
+        type: 'alert',
+        id,
+        provider: 'alerting',
+        actions,
+      });
+    });
+  }
 }
 
 interface SavedObject {
