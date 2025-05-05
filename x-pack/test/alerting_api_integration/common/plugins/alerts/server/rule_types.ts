@@ -939,6 +939,78 @@ function getAlwaysFiringAlertAsDataRuleType() {
   return result;
 }
 
+function getAlwaysFiringAlertAsDataWithDynamicTemplatesRuleType() {
+  const paramsSchema = schema.object({
+    dynamic_fields: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+
+  const result: RuleType<
+    ParamsType,
+    never,
+    RuleTypeState,
+    {},
+    {},
+    'default',
+    'recovered',
+    { 'kibana.alert.dynamic': { [key: string]: any } }
+  > = {
+    id: 'test.always-firing-alert-as-data-with-dynamic-templates',
+    name: 'Test: Rule with dynamicTemplates and writing Alerts as Data',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'management',
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    doesSetRecoveryContext: true,
+    validate: {
+      params: paramsSchema,
+    },
+    async executor(ruleExecutorOptions) {
+      const { services, params } = ruleExecutorOptions;
+
+      services.alertsClient?.report({
+        id: '1',
+        actionGroup: 'default',
+        payload: { 'kibana.alert.dynamic': params.dynamic_fields },
+      });
+
+      return { state: {} };
+    },
+    alerts: {
+      context: 'observability.test.alerts.dynamic.templates',
+      mappings: {
+        dynamic: false,
+        fieldMap: {
+          ['kibana.alert.dynamic']: {
+            type: 'object',
+            dynamic: true,
+            array: false,
+            required: false,
+          },
+        },
+        dynamicTemplates: [
+          {
+            strings_as_keywords: {
+              path_match: 'kibana.alert.dynamic.*',
+              match_mapping_type: 'string',
+              mapping: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+            },
+          },
+        ],
+      },
+      useLegacyAlerts: false,
+      useEcs: false,
+      shouldWrite: true,
+    },
+  };
+  return result;
+}
+
 function getWaitingRuleType(logger: Logger) {
   const ParamsType = schema.object({
     source: schema.string(),
@@ -1369,6 +1441,7 @@ export function defineRuleTypes(
   alerting.registerType(getPatternSuccessOrFailureRuleType());
   alerting.registerType(getExceedsAlertLimitRuleType());
   alerting.registerType(getAlwaysFiringAlertAsDataRuleType());
+  alerting.registerType(getAlwaysFiringAlertAsDataWithDynamicTemplatesRuleType());
   alerting.registerType(getPatternFiringAutoRecoverFalseRuleType());
   alerting.registerType(getPatternFiringAlertsAsDataRuleType());
   alerting.registerType(getWaitingRuleType(logger));

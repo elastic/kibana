@@ -17,6 +17,7 @@ export interface DocLinksMeta {
   elasticGithubUrl: string;
   docsWebsiteUrl: string;
   searchLabsUrl: string;
+  apiDocsUrl: string;
 }
 
 /**
@@ -322,8 +323,6 @@ export interface DocLinks {
     };
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
-    readonly legacyEndpointManagementApiDeprecations: string;
-    readonly legacyRuleManagementBulkApiDeprecations: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
   };
@@ -378,7 +377,6 @@ export interface DocLinks {
     simulatePipeline: string;
     tasks: string;
     timeUnits: string;
-    unfreezeIndex: string;
     updateTransform: string;
   }>;
   readonly observability: Readonly<{
@@ -405,6 +403,7 @@ export interface DocLinks {
     aiAssistant: string;
   }>;
   readonly alerting: Readonly<{
+    authorization: string;
     guide: string;
     actionTypes: string;
     apmRulesErrorCount: string;

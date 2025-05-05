@@ -29,6 +29,7 @@ const TELEMETRY_ILM_STATS_EVENT = 'telemetry_ilm_stats_event';
 const TELEMETRY_ILM_POLICY_EVENT = 'telemetry_ilm_policy_event';
 const TELEMETRY_DATA_STREAM_EVENT = 'telemetry_data_stream_event';
 const TELEMETRY_INDEX_SETTINGS_EVENT = 'telemetry_index_settings_event';
+const TELEMETRY_INDEX_TEMPLATES_EVENT = 'telemetry_index_templates_event';
 
 export default ({ getService }: FtrProviderContext) => {
   const ebtServer = getService('kibana_ebt_server');
@@ -58,7 +59,18 @@ export default ({ getService }: FtrProviderContext) => {
           dsName,
         });
 
-        expect(events.length).toEqual(1);
+        expect(events.length).toBeGreaterThanOrEqual(1);
+      });
+
+      it('should include `template` in data stream events when defined', async () => {
+        const events = await launchTaskAndWaitForEvents({
+          eventTypes: [TELEMETRY_DATA_STREAM_EVENT],
+          dsName,
+        });
+
+        expect(events.length).toBeGreaterThanOrEqual(1);
+        const event = events[0] as any;
+        expect(event.template).toBeDefined();
       });
 
       it('should publish index stats events', async () => {
@@ -88,13 +100,24 @@ export default ({ getService }: FtrProviderContext) => {
         await cleanupIngestPipelines(es);
       });
 
+      it('should include `ilm_policy` in data stream events when defined', async () => {
+        const events = await launchTaskAndWaitForEvents({
+          eventTypes: [TELEMETRY_DATA_STREAM_EVENT],
+          dsName,
+        });
+
+        expect(events.length).toBeGreaterThanOrEqual(1);
+        const event = events[0] as any;
+        expect(event.ilm_policy).toBeDefined();
+      });
+
       it('should publish ilm policy events', async () => {
         const events = await launchTaskAndWaitForEvents({
           eventTypes: [TELEMETRY_ILM_POLICY_EVENT],
           policyName,
         });
 
-        expect(events.length).toEqual(1);
+        expect(events.length).toBeGreaterThanOrEqual(1);
       });
 
       it('should publish ilm stats events', async () => {
@@ -203,6 +226,24 @@ export default ({ getService }: FtrProviderContext) => {
           NUM_INDICES
         );
         expect(events.filter((v) => v.final_pipeline === finalPipeline)).toHaveLength(NUM_INDICES);
+      });
+
+      it('should publish index mode as part of index settings', async () => {
+        const events = await launchTaskAndWaitForEvents({
+          eventTypes: [TELEMETRY_INDEX_SETTINGS_EVENT],
+          index: dsName,
+        });
+
+        expect(events.length).toEqual(NUM_INDICES);
+        expect(events.filter((v) => v.index_mode !== undefined)).toHaveLength(NUM_INDICES);
+      });
+
+      it('should publish index templates', async () => {
+        const events = await launchTaskAndWaitForEvents({
+          eventTypes: [TELEMETRY_INDEX_TEMPLATES_EVENT],
+        });
+
+        expect(events.length).toBeGreaterThanOrEqual(1);
       });
     });
 

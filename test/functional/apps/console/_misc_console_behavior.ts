@@ -18,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/213784
-  describe.skip('misc console behavior', function testMiscConsoleBehavior() {
+  describe('misc console behavior', function testMiscConsoleBehavior() {
     before(async () => {
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
@@ -128,7 +127,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // Retry until the documentation is loaded
             await retry.try(async () => {
               const url = await browser.getCurrentUrl();
-              expect(url).to.contain('search-search.html');
+              // The url that is open is https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html
+              // but it redirects to https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search
+              expect(url).to.contain('operation-search');
             });
           });
         });

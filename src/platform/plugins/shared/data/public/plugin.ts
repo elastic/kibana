@@ -15,6 +15,11 @@ import {
   IStorageWrapper,
   createStartServicesGetter,
 } from '@kbn/kibana-utils-plugin/public';
+import {
+  EVENT_PROPERTY_EXECUTION_CONTEXT,
+  EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
+  EVENT_TYPE_DATA_SEARCH_TIMEOUT,
+} from './search/constants';
 import type { ConfigSchema } from '../server/config';
 import type {
   DataPublicPluginSetup,
@@ -112,6 +117,25 @@ export class DataPublicPlugin
         startServices().plugins.fieldFormats.deserialize(serializedFieldFormat)
       )
     );
+
+    core.analytics.registerEventType({
+      eventType: EVENT_TYPE_DATA_SEARCH_TIMEOUT,
+      schema: {
+        [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: {
+          type: 'long',
+          _meta: {
+            description:
+              'The time (in ms) before the search request was aborted due to timeout (search:timeout advanced setting)',
+          },
+        },
+        [EVENT_PROPERTY_EXECUTION_CONTEXT]: {
+          type: 'pass_through',
+          _meta: {
+            description: 'Execution context of the search request that timed out',
+          },
+        },
+      },
+    });
 
     return {
       search: searchService,
