@@ -81,7 +81,6 @@ xpack.features.overrides:
         includeIn: "read"
   ### Shared images feature is hidden in Role management since it's not needed.
   filesSharedImage.hidden: true
-
   ### Reporting feature is supposed to give access to reporting capabilities across different features.
   reporting:
     privileges:

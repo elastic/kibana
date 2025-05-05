@@ -249,7 +249,7 @@ export class MapsPlugin
 
     registerUiActions(core, plugins);
 
-    if (!core.application.capabilities.maps_v2?.save) {
+    if (!core.application.capabilities.maps_v2.save) {
       plugins.visualizations.unRegisterAlias(APP_ID);
     }
 

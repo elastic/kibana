@@ -83,7 +83,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     const kibana = useKibana();
     const { tabName } = useParams<{ tabName: string }>();
 
-    const canUseMaps = kibana.services.application.capabilities.maps_v2?.show;
+    const canUseMaps = kibana.services.application.capabilities.maps_v2.show;
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.events) {

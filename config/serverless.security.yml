@@ -18,7 +18,6 @@ xpack.features.overrides:
   dashboard_v2.hidden: true
   visualize.hidden: true
   visualize_v2.hidden: true
-
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"

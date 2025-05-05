@@ -17,7 +17,7 @@ import { SYNCHRONIZE_MOVEMENT_ACTION } from './synchronize_movement/constants';
 import type { MapsPluginStartDependencies } from '../plugin';
 
 export function registerUiActions(core: CoreStart, plugins: MapsPluginStartDependencies) {
-  if (core.application.capabilities.maps_v2?.show) {
+  if (core.application.capabilities.maps_v2.show) {
     plugins.uiActions.addTriggerActionAsync(
       VISUALIZE_GEO_FIELD_TRIGGER,
       ACTION_VISUALIZE_GEO_FIELD,
