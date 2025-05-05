@@ -7635,6 +7635,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-suites-xpack-observability@link:x-pack/solutions/observability/test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-suites-xpack-performance@link:x-pack/performance":
   version "0.0.0"
   uid ""
@@ -7795,7 +7799,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/unified-histogram-plugin@link:src/platform/plugins/shared/unified_histogram":
+"@kbn/unified-histogram@link:src/platform/packages/shared/kbn-unified-histogram":
   version "0.0.0"
   uid ""
 
@@ -22418,7 +22422,7 @@ launchdarkly-eventsource@2.1.0:
   resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-2.1.0.tgz#9d16d0fadda61dc54cb393d323b3ef82a08803ff"
   integrity sha512-1HigECOMYdqX6t1cLs21vYy8Cn4enx1uhVKI7ZgT3fY14x0e75xZGAJ+K2BrAkM6ldUQj2WvIHB9es4k3yaaTQ==
 
-launchdarkly-js-client-sdk@^3.6.0:
+launchdarkly-js-client-sdk@^3.6.1:
   version "3.6.1"
   resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-3.6.1.tgz#f397c33e1a3782909e5b1282934aad69b9b6d576"
   integrity sha512-eq8v1cc3LG6tzlmOw03XrGlEjZsCLx9Pfs/eOQ0o72O8aqNj/ltmgVBFH1Z4HjNufX2680tHcOA/f68bvWyDzQ==
