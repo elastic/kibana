@@ -12,8 +12,7 @@ import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import { isEmpty, omit } from 'lodash';
 import { RruleSchedule, scheduleRruleSchema } from '@kbn/task-manager-plugin/server';
 import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v1';
-import { ScheduledReportingJobResponse } from '../../../types';
-import { RawScheduledReport } from '../../../saved_objects/scheduled_report/schemas/latest';
+import { ScheduledReportType, ScheduledReportingJobResponse } from '../../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RequestHandler, RequestParams } from './request_handler';
 import { transformRawScheduledReportToReport } from './lib';
@@ -97,7 +96,7 @@ export class ScheduleRequestHandler extends RequestHandler<
     };
 
     // Create a scheduled report saved object
-    const report = await soClient.create<RawScheduledReport>(
+    const report = await soClient.create<ScheduledReportType>(
       SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
       attributes
     );
