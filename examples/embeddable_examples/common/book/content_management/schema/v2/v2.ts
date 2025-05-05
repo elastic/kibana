@@ -8,25 +8,38 @@
  */
 
 import type { VersionableEmbeddableObject } from '@kbn/embeddable-plugin/common';
+import type { ItemAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
 import type { SavedBookAttributes } from '../../../../../server/types';
 import type { BookAttributes } from '../../../../../server/book/content_management/schema/v2';
 import type { BookAttributes as BookV1Attributes } from '../../../../../server/book/content_management/schema/v1';
 
-function transformV1ToV2(v1Item: BookV1Attributes): BookAttributes {
+function savedObjectToItem({
+  attributes,
+  references,
+}: ItemAttributesWithReferences<BookV1Attributes>): ItemAttributesWithReferences<BookAttributes> {
   return {
-    title: v1Item.bookTitle,
-    author: v1Item.authorName,
-    numberOfPages: v1Item.numberOfPages,
-    synopsis: v1Item.bookSynopsis,
+    attributes: {
+      title: attributes.bookTitle,
+      author: attributes.authorName,
+      numberOfPages: attributes.numberOfPages,
+      synopsis: attributes.bookSynopsis,
+    },
+    references,
   };
 }
 
-function transformV2ToV1(v2Item: BookAttributes): BookV1Attributes {
+function itemToSavedObject({
+  attributes,
+  references,
+}: ItemAttributesWithReferences<BookAttributes>): ItemAttributesWithReferences<BookV1Attributes> {
   return {
-    bookTitle: v2Item.title,
-    authorName: v2Item.author,
-    numberOfPages: v2Item.numberOfPages,
-    bookSynopsis: v2Item.synopsis,
+    attributes: {
+      bookTitle: attributes.title,
+      authorName: attributes.author,
+      numberOfPages: attributes.numberOfPages,
+      bookSynopsis: attributes.synopsis,
+    },
+    references,
   };
 }
 
@@ -35,8 +48,8 @@ export const bookAttributesDefinition: VersionableEmbeddableObject<
   BookAttributes,
   BookV1Attributes
 > = {
-  up: transformV1ToV2,
-  down: transformV2ToV1,
-  itemToSavedObject: transformV2ToV1,
-  savedObjectToItem: transformV1ToV2,
+  // up: transformV1ToV2,
+  // down: transformV2ToV1,
+  itemToSavedObject,
+  savedObjectToItem,
 };

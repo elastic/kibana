@@ -16,6 +16,7 @@ import type {
 import type { ObjectTransform } from '@kbn/object-versioning';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Type } from '@kbn/config-schema';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 
 export type EmbeddableStateWithType = {
   enhancements?: SerializableRecord;
@@ -30,16 +31,37 @@ export interface EmbeddableRegistryDefinition<
 
 export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
 
+export type SavedObjectAttributesWithReferences<SavedObjectAttributes> = Pick<
+  SavedObject<SavedObjectAttributes>,
+  'attributes' | 'references'
+>;
+
+export type ItemAttributesWithReferences<ItemAttributes> = {
+  attributes: ItemAttributes;
+  references: SavedObjectReference[];
+};
+
 export type VersionableEmbeddableObject<
   SOAttributes = unknown,
-  Item = unknown,
-  PrevItem = unknown
+  ItemAttributes = unknown,
+  PrevItemAttributes = void,
+  NextItemAttributes = void
 > = {
-  up?: ObjectTransform<PrevItem, Item>;
-  down?: ObjectTransform<Item, PrevItem>;
-  itemSchema?: Type<Item>;
-  savedObjectToItem?: (savedObject: SOAttributes) => MaybePromise<Item>;
-  itemToSavedObject?: (item: Item) => MaybePromise<SOAttributes>;
+  up?: ObjectTransform<
+    ItemAttributesWithReferences<ItemAttributes>,
+    ItemAttributesWithReferences<NextItemAttributes>
+  >;
+  down?: ObjectTransform<
+    ItemAttributesWithReferences<ItemAttributes>,
+    ItemAttributesWithReferences<PrevItemAttributes>
+  >;
+  itemSchema?: Type<ItemAttributes>;
+  savedObjectToItem?: (
+    savedObject: SavedObjectAttributesWithReferences<SOAttributes>
+  ) => MaybePromise<ItemAttributesWithReferences<ItemAttributes>>;
+  itemToSavedObject?: (
+    item: ItemAttributesWithReferences<ItemAttributes>
+  ) => MaybePromise<SavedObjectAttributesWithReferences<SOAttributes>>;
 };
 
 export type EmbeddableContentManagementDefinition = {
