@@ -6,13 +6,15 @@
  */
 
 import { useMemo } from 'react';
-import type { DataViewManagerScopeName } from '../constants';
+import { DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
 
 /**
  * Returns data view selection for given scopeName
  */
-export const useDataViewSpec = (scopeName: DataViewManagerScopeName) => {
+export const useDataViewSpec = (
+  scopeName: DataViewManagerScopeName = DataViewManagerScopeName.default
+) => {
   const { dataView, status } = useDataView(scopeName);
 
   return useMemo(() => {
