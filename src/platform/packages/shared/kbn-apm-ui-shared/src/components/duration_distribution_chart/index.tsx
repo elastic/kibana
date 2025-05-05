@@ -120,29 +120,39 @@ export function DurationDistributionChart({
   const { euiTheme } = useEuiTheme();
   const markerPercentile = DEFAULT_PERCENTILE_THRESHOLD;
 
-  const annotationsDataValues: LineAnnotationDatum[] = [
-    {
-      dataValue: markerValue,
-      details: i18n.translate('kbnApmUiShared.durationDistributionChart.percentileMarkerLabel', {
-        defaultMessage: '{markerPercentile}th percentile',
-        values: {
-          markerPercentile,
-        },
-      }),
-    },
-  ];
+  const annotationsDataValues: LineAnnotationDatum[] = useMemo(
+    () => [
+      {
+        dataValue: markerValue,
+        details: i18n.translate('kbnApmUiShared.durationDistributionChart.percentileMarkerLabel', {
+          defaultMessage: '{markerPercentile}th percentile',
+          values: {
+            markerPercentile,
+          },
+        }),
+      },
+    ],
+    [markerPercentile, markerValue]
+  );
 
   // This will create y axis ticks for 1, 10, 100, 1000 ...
-  const yMax = Math.max(...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)) ?? 0;
-  const yTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
-  const yAxisMaxDomain = Math.pow(10, yTicks);
-  const yAxisDomain = {
-    min: Y_AXIS_MIN_DOMAIN,
-    max: yAxisMaxDomain,
-  };
+  const { yTicks, yAxisMaxDomain, yAxisDomain } = useMemo(() => {
+    const yMax = Math.max(...flatten(data.map((d) => d.histogram)).map((d) => d.doc_count)) ?? 0;
+    const computedYTicks = Math.max(1, Math.ceil(Math.log10(yMax)));
+    const computedMaxDomain = Math.pow(10, computedYTicks);
 
-  const selectionAnnotation =
-    selection !== undefined
+    return {
+      yTicks: computedYTicks,
+      yAxisMaxDomain: computedMaxDomain,
+      yAxisDomain: {
+        min: Y_AXIS_MIN_DOMAIN,
+        max: computedMaxDomain,
+      },
+    };
+  }, [data]);
+
+  const selectionAnnotation = useMemo(() => {
+    return selection !== undefined
       ? [
           {
             coordinates: {
@@ -155,6 +165,7 @@ export function DurationDistributionChart({
           },
         ]
       : undefined;
+  }, [selection, yAxisMaxDomain]);
 
   const chartData = useMemo(
     () =>
