@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { EuiCollapsibleNavBeta, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type {
   ChromeProjectNavigationNode,
-  RootNavigationItemDefinition,
-  RecentlyAccessedDefinition,
   NavigationTreeDefinitionUI,
+  RecentlyAccessedDefinition,
+  RootNavigationItemDefinition,
 } from '@kbn/core-chrome-browser';
+import React, { createContext, FC, useCallback, useContext, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { EuiCollapsibleNavBeta, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { RecentlyAccessed, NavigationPanel, PanelProvider, FeedbackBtn } from './components';
 import { useNavigation as useNavigationService } from '../services';
-import { NavigationSectionUI } from './components/navigation_section_ui';
+import {
+  FeedbackBtn,
+  NavigationPanel,
+  NavigationSectionUI,
+  PanelProvider,
+  RecentlyAccessed,
+} from './components';
 
 const isRecentlyAccessedDefinition = (
   item: ChromeProjectNavigationNode | RecentlyAccessedDefinition
@@ -76,11 +81,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
   );
 
   return (
-    <PanelProvider
-      activeNodes={activeNodes}
-      selectedNode={selectedPanelNode}
-      setSelectedNode={setSelectedPanelNode}
-    >
+    <PanelProvider selectedNode={selectedPanelNode} setSelectedNode={setSelectedPanelNode}>
       <NavigationContext.Provider value={contextValue}>
         {/* Main navigation content */}
         <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>

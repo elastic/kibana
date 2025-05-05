@@ -13,4 +13,5 @@ export interface ActionDocument {
   tags: string;
   alertId: string;
   alertActionGroup: string;
+  grouping: string;
 }
