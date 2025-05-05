@@ -752,7 +752,10 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const theme = kibanaTheme.getTheme(); // how if kibanaTheme.theme$ an old value here???
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
+      darkMode: false,
+      name: 'amsterdam',
+    });
     const palettes = getKbnPalettes(theme);
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (

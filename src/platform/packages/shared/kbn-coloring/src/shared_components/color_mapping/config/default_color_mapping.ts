@@ -10,6 +10,7 @@
 import { KbnPalettes } from '@kbn/palettes';
 import { ColorMapping } from '.';
 import { getColor, getGradientColorScale } from '../color/color_handling';
+import { DEFAULT_FALLBACK_PALETTE } from '../../../palettes';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
 export const DEFAULT_OTHER_ASSIGNMENT_INDEX = 0;
@@ -32,7 +33,7 @@ export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
       touched: false,
     },
   ],
-  paletteId: 'default',
+  paletteId: DEFAULT_FALLBACK_PALETTE,
   colorMode: {
     type: 'categorical',
   },

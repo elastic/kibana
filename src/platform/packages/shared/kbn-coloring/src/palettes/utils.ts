@@ -14,7 +14,7 @@ import {
   DataBounds,
   ColorStop,
   PaletteOutput,
-} from '../types';
+} from './types';
 
 import {
   DEFAULT_COLOR_STEPS,
@@ -25,7 +25,7 @@ import {
   COMPLEMENTARY_PALETTE,
   DEFAULT_FALLBACK_PALETTE,
   LEGACY_COMPLIMENTARY_PALETTE,
-} from '../constants';
+} from './constants';
 
 /** @internal **/
 export function calculateStop(

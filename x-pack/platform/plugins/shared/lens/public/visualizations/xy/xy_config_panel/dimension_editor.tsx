@@ -96,10 +96,7 @@ export function DataDimensionEditor(
 
   const setColorMapping = useCallback(
     (colorMapping?: ColorMapping.Config) => {
-      updateLayerState(index, {
-        colorMapping,
-        // palette: undefined,
-      });
+      updateLayerState(index, { colorMapping });
     },
     [updateLayerState, index]
   );
@@ -145,18 +142,17 @@ export function DataDimensionEditor(
     return !layer.collapseFn ? (
       <ColorMappingByTerms
         isDarkMode={isDarkMode}
-        panelRef={props.panelRef}
         colorMapping={layer.colorMapping}
-        palettes={props.palettes}
+        palette={layer.palette}
+        isInlineEditing={isInlineEditing}
+        setPalette={setPalette}
         setColorMapping={setColorMapping}
+        paletteService={props.paletteService}
+        palettes={props.palettes}
+        panelRef={props.panelRef}
         categories={splitCategories}
         formatter={formatter}
-        isInlineEditing={isInlineEditing}
         allowCustomMatch={allowCustomMatch}
-        // Legacy palette props
-        palette={layer.palette}
-        paletteService={props.paletteService}
-        setPalette={setPalette}
       />
     ) : null;
   }
