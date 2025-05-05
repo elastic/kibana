@@ -22,7 +22,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const config = {
       kibana: {
-        api: await readConfigFile(path.resolve('@kbn/test-suites-src/api_integration/config')),
+        api: await readConfigFile(require.resolve('@kbn/test-suites-src/api_integration/config')),
         functional: await readConfigFile(
           require.resolve('@kbn/test-suites-src/functional/config.base')
         ),
