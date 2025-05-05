@@ -267,6 +267,9 @@ export interface DocLinks {
     readonly remoteReindex: string;
     readonly unfreezeApi: string;
     readonly reindexWithPipeline: string;
+    readonly logsDatastream: string;
+    readonly usingLogsDbIndexModeWithESSecurity: string;
+    readonly dataStreamReindex: string;
   };
   readonly rollupJobs: string;
   readonly elasticsearch: Record<string, string>;
