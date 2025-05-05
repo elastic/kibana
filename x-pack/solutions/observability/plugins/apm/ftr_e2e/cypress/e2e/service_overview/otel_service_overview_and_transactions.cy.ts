@@ -14,7 +14,7 @@ const start = '2021-10-10T00:00:00.000Z';
 const end = '2021-10-10T00:15:00.000Z';
 const serviceInstanceId = '89117ac1-0dbf-4488-9e17-4c2c3b76943a';
 
-const serviceOverviewPath = '/app/apm/services/sendotlp-synth/overview';
+const serviceOverviewPath = '/app/apm/services/sendotlp-otel-native-synth/overview';
 const baseUrl = url.format({
   pathname: serviceOverviewPath,
   query: { rangeFrom: start, rangeTo: end },
@@ -41,7 +41,7 @@ describe('Service Overview', () => {
     });
 
     it('renders all components on the page', () => {
-      cy.contains('sendotlp-synth');
+      cy.contains('sendotlp-otel-native-synth');
       // set skipFailures to true to not fail the test when there are accessibility failures
       checkA11y({ skipFailures: true });
       cy.getByTestSubj('latencyChart');
@@ -60,16 +60,17 @@ describe('Service Overview', () => {
     });
 
     it('show information on click', () => {
-      cy.intercept('GET', '/internal/apm/services/sendotlp-synth/metadata/details?*').as(
-        'metadataDetailsRequest'
-      );
+      cy.intercept(
+        'GET',
+        '/internal/apm/services/sendotlp-otel-native-synth/metadata/details?*'
+      ).as('metadataDetailsRequest');
 
       cy.visitKibana(baseUrl);
 
       cy.getByTestSubj('service').click();
       cy.wait('@metadataDetailsRequest');
       cy.contains('dt', 'Framework name');
-      cy.contains('dd', 'sendotlp-synth');
+      cy.contains('dd', 'sendotlp-otel-native-synth');
 
       cy.getByTestSubj('opentelemetry').click();
       cy.contains('dt', 'Language');
@@ -84,7 +85,7 @@ describe('Service Overview', () => {
 
     it('has data in the table', () => {
       cy.visitKibana(baseUrl);
-      cy.contains('sendotlp-synth');
+      cy.contains('sendotlp-otel-native-synth');
       cy.getByTestSubj('serviceInstancesTableContainer');
       cy.contains(serviceInstanceId);
     });
@@ -96,9 +97,10 @@ describe('Service Overview', () => {
     });
 
     it('persists transaction type selected when clicking on Transactions tab', () => {
-      cy.intercept('GET', '/internal/apm/services/sendotlp-synth/transaction_types?*').as(
-        'transactionTypesRequest'
-      );
+      cy.intercept(
+        'GET',
+        '/internal/apm/services/sendotlp-otel-native-synth/transaction_types?*'
+      ).as('transactionTypesRequest');
 
       cy.visitKibana(baseUrl);
 
@@ -125,14 +127,14 @@ describe('Service Overview', () => {
       cy.visitKibana(baseUrl);
     });
     it('errors table is populated', () => {
-      cy.contains('sendotlp-synth');
+      cy.contains('sendotlp-otel-native-synth');
       cy.contains('*errors.errorString');
     });
 
     it('navigates to the errors page', () => {
-      cy.contains('sendotlp-synth');
+      cy.contains('sendotlp-otel-native-synth');
       cy.contains('a', 'View errors').click();
-      cy.url().should('include', '/sendotlp-synth/errors');
+      cy.url().should('include', '/sendotlp-otel-native-synth/errors');
     });
 
     it('navigates to error detail page', () => {
