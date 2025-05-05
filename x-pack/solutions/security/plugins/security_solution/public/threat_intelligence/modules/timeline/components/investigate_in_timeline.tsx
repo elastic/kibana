@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { BUTTON_ICON_LABEL } from './translations';
-import { indicatorToEcsCompliantRecord } from '../utils/indicator_to_ecs';
+import { useInvestigateInTimeline } from '../../../hooks/use_investigate_in_timeline';
 
 export interface InvestigateInTimelineProps {
   /**
@@ -31,56 +30,62 @@ export interface InvestigateInTimelineProps {
 }
 
 /**
- * This component renders an {@link EuiContextMenu} with investigate in timeline action.
+ * Investigate in timeline button, uses the InvestigateInTimelineAction component (x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/timeline_actions/investigate_in_timeline_action.tsx)
+ * retrieved from the SecuritySolutionContext.
+ *
+ * This component renders an {@link EuiContextMenu}.
  *
  * @returns investigate in timeline for a context menu
  */
-export const InvestigateInTimelineContextMenu: FC<InvestigateInTimelineProps> = ({
+export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> = ({
   data,
   onClick,
   'data-test-subj': dataTestSub,
 }) => {
-  const { investigateInTimelineActionItems } = useInvestigateInTimeline({
-    ecsRowData: indicatorToEcsCompliantRecord(data),
-    onInvestigateInTimelineAlertClick: onClick,
-  });
+  const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
   const securitySolutionContext = useSecurityContext();
 
-  if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineActionItems.length) {
+  if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineFn) {
     return null;
   }
 
-  return investigateInTimelineActionItems.map((itemConfig) => {
-    return (
-      <EuiContextMenuItem {...itemConfig} data-test-subj={dataTestSub}>
-        <FormattedMessage
-          defaultMessage="Investigate in Timeline"
-          id="xpack.securitySolution.threatIntelligence.investigateInTimelineButton"
-        />
-      </EuiContextMenuItem>
-    );
-  });
+  const menuItemClicked = () => {
+    if (onClick) onClick();
+    investigateInTimelineFn();
+  };
+
+  return (
+    <EuiContextMenuItem
+      key="investigateInTime"
+      onClick={() => menuItemClicked()}
+      data-test-subj={dataTestSub}
+    >
+      <FormattedMessage
+        defaultMessage="Investigate in Timeline"
+        id="xpack.threatIntelligence.investigateInTimelineButton"
+      />
+    </EuiContextMenuItem>
+  );
 };
 
 /**
+ * Investigate in timeline button uses the InvestigateInTimelineAction component (x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/timeline_actions/investigate_in_timeline_action.tsx)
+ * retrieved from the SecuritySolutionContext.
+ *
  * This component renders an {@link EuiButtonIcon}.
  *
  * @returns add to timeline button icon
  */
-export const InvestigateInTimelineButtonIcon: FC<InvestigateInTimelineProps> = ({
+export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = ({
   data,
   'data-test-subj': dataTestSub,
 }) => {
-  const { investigateInTimelineActionItems } = useInvestigateInTimeline({
-    ecsRowData: indicatorToEcsCompliantRecord(data),
-  });
+  const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
   const securitySolutionContext = useSecurityContext();
 
-  if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineActionItems.length) {
+  if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineFn) {
     return null;
   }
-
-  const [action] = investigateInTimelineActionItems;
 
   return (
     <EuiToolTip content={BUTTON_ICON_LABEL}>
@@ -90,7 +95,7 @@ export const InvestigateInTimelineButtonIcon: FC<InvestigateInTimelineProps> = (
         iconSize="s"
         size="xs"
         color="primary"
-        onClick={action.onClick}
+        onClick={investigateInTimelineFn}
         data-test-subj={dataTestSub}
       />
     </EuiToolTip>

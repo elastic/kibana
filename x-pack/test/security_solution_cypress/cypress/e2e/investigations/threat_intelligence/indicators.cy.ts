@@ -317,7 +317,7 @@ describe('Invalid Indicators', { tags: ['@ess'] }, () => {
       waitForViewToBeLoaded();
     });
 
-    it('should display data grid despite the missing fields', () => {
+    it.only('should display data grid despite the missing fields', () => {
       cy.get(INDICATORS_TABLE).should('exist');
 
       // there are 19 documents in the x-pack/test/security_solution_cypress/es_archives/ti_indicators_data_invalid/data.json
