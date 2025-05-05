@@ -30,7 +30,7 @@ import type {
   OperationDefinition,
 } from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { IndexPattern } from '../../../../../types';
+import { IndexPattern, VisualizationDimensionGroupConfig } from '../../../../../types';
 import {
   INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
   INTERVAL_OP_MISSING_TIME_RANGE,
@@ -39,6 +39,27 @@ import {
   TIMERANGE_OP_MISSING_TIME_RANGE,
 } from '../../../../../user_messages_ids';
 import { getMsFromIntervalESLiteral } from './util';
+
+function getDateHistogramColumnForInterval(
+  layer: FormBasedLayer,
+  visualizationGroups: VisualizationDimensionGroupConfig[]
+) {
+  const breakdownGroup = visualizationGroups.find((group) => group.isBreakdownDimension);
+  const [_id, dateHistogramColumn] =
+    Object.entries(layer.columns).find(
+      ([id, c]) =>
+        isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', c) &&
+        (breakdownGroup ? breakdownGroup?.accessors.every(({ columnId }) => columnId !== id) : true)
+    ) ?? [];
+  if (
+    !dateHistogramColumn ||
+    // dance a bit for TS
+    !isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', dateHistogramColumn)
+  ) {
+    return undefined;
+  }
+  return dateHistogramColumn;
+}
 
 // copied over from layer_helpers
 // TODO: split layer_helpers util into pure/non-pure functions to avoid issues with tests
@@ -244,11 +265,9 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
         references: [],
       } as unknown as ColumnType;
     },
-    toExpression: (layer, columnId, _, context = {}) => {
+    toExpression: (layer, columnId, _, visualizationGroups, context = {}) => {
       const column = layer.columns[columnId] as ColumnType;
-      const dateHistogramColumn = Object.values(layer.columns).find(
-        (c) => 'date_histogram' === c.operationType
-      );
+      const dateHistogramColumn = getDateHistogramColumnForInterval(layer, visualizationGroups);
       return [
         buildExpressionFunction<ExpressionFunctionDefinitions['math_column']>('mathColumn', {
           id: columnId,
@@ -256,15 +275,9 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
           expression: buildExpression([
             getExpressionFunction({
               ...context,
-              intervalOverride:
-                // need to dance a bit for TS
-                dateHistogramColumn &&
-                isColumnOfType<DateHistogramIndexPatternColumn>(
-                  'date_histogram',
-                  dateHistogramColumn
-                )
-                  ? getMsFromIntervalESLiteral(dateHistogramColumn?.params?.interval)
-                  : undefined,
+              intervalOverride: dateHistogramColumn
+                ? getMsFromIntervalESLiteral(dateHistogramColumn?.params?.interval)
+                : undefined,
             }),
           ]),
         }).toAst(),
