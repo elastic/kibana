@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ActionConnectorWarnings } from '.';
 
-jest.mock('../../../lib/kibana/kibana_react', () => ({
+jest.mock('../../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: { http: { basePath: { prepend: jest.fn() } } },
   }),

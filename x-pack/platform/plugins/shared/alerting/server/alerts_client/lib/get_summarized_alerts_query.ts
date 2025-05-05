@@ -340,7 +340,7 @@ export const getQueryByScopedQueries = ({
       aggs: {
         alertId: {
           top_hits: {
-            size: maxAlertLimit,
+            size: 100,
             _source: {
               includes: [ALERT_UUID],
             },
