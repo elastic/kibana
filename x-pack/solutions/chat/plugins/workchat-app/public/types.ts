@@ -9,7 +9,7 @@ import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { IntegrationComponentDescriptor } from '@kbn/wci-browser';
 
 export interface WorkChatAppPluginSetup {
-  integration: {
+  integrations: {
     register: (integrationComponents: IntegrationComponentDescriptor) => void;
   };
 }

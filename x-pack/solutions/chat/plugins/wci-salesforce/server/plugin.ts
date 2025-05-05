@@ -39,7 +39,7 @@ export class WCISalesforcePlugin
     core: CoreSetup,
     { workchatApp }: WCISalesforcePluginSetupDependencies
   ): WCISalesforcePluginSetup {
-    workchatApp.integration.register(
+    workchatApp.integrations.register(
       getSalesforceIntegrationDefinition({
         core,
         logger: this.logger,

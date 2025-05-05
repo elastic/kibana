@@ -15,8 +15,8 @@ import {
 } from '@kbn/workchat-framework-plugin/server';
 
 export interface WorkChatAppPluginSetup {
-  integration: {
-    register: (integration: WorkchatIntegrationDefinition) => void;
+  integrations: {
+    register: (tool: WorkchatIntegrationDefinition) => void;
   };
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
