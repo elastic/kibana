@@ -24,13 +24,18 @@ export function createInferenceClient({
   actions: ActionsPluginStart;
 }): InferenceClient {
   const chatComplete = createChatCompleteApi({ request, actions, logger });
-  const { callMCPTool, listMCPTools } = createMCPApis({ request, actions, logger });
+  const { callMCPTool, listMCPTools, listMcpToolsViaHub } = createMCPApis({
+    request,
+    actions,
+    logger,
+  });
 
   return {
     chatComplete,
     output: createOutputApi(chatComplete),
     callMCPTool,
     listMCPTools,
+    listMcpToolsViaHub,
     getConnectorById: async (connectorId: string) => {
       const actionsClient = await actions.getActionsClientWithRequest(request);
       return await getConnectorById({ connectorId, actionsClient });

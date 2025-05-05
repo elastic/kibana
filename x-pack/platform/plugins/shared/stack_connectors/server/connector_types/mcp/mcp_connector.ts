@@ -6,7 +6,8 @@
  */
 
 import { SubActionConnector, type ServiceParams } from '@kbn/actions-plugin/server';
-import type { AxiosError } from 'axios';
+import axios from 'axios';
+import type { AxiosError, AxiosInstance } from 'axios';
 import type {
   MCPConnectorConfig,
   MCPConnectorSecrets,
@@ -26,9 +27,13 @@ import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { format } from 'node:util';
 
+const callToolSchema: Type<CallToolRequest> = schema.object({
+  name: schema.string({ minLength: 1 }),
+  arguments: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+});
+
 export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConnectorSecrets> {
   private readonly client: Client;
-
   private connected: boolean = false;
 
   constructor(params: ServiceParams<MCPConnectorConfig, MCPConnectorSecrets>) {
@@ -93,23 +98,30 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     this.connected = true;
   }
 
+  private buildAuthHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {};
+    const serviceConfig = this.config.service as MCPConnectorHTTPServiceConfig;
+
+    if (serviceConfig.authType === 'apiKey') {
+      const apiKeySecrets = this.secrets as MCPConnectorSecretsAPIKey;
+      headers.Authorization = `ApiKey ${apiKeySecrets.auth.apiKey}`;
+    } else if (serviceConfig.authType === 'basic') {
+      const basicAuth = this.secrets as MCPConnectorSecretsBasicAuth;
+      const token = Buffer.from(`${basicAuth.auth.username}:${basicAuth.auth.password}`).toString(
+        'base64'
+      );
+      headers.Authorization = `Basic ${token}`;
+    }
+    return headers;
+  }
+
   private registerSubActions() {
-    this.registerSubAction({
-      method: 'listTools',
-      name: 'listTools',
-      schema: null,
-    });
+    // MCP JSON-RPC sub-actions
+    this.registerSubAction({ method: 'listTools', name: 'listTools', schema: null });
+    this.registerSubAction({ method: 'callTool', name: 'callTool', schema: callToolSchema });
 
-    const callToolSchema: Type<CallToolRequest> = schema.object({
-      name: schema.string({ minLength: 1 }),
-      arguments: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    });
-
-    this.registerSubAction({
-      method: 'callTool',
-      name: 'callTool',
-      schema: callToolSchema,
-    });
+    // REST-via-MCP-Hub sub-action
+    this.registerSubAction({ method: 'listToolsViaHub', name: 'listToolsViaHub', schema: null });
   }
 
   public async listTools(): Promise<ListToolsResponse> {
@@ -159,6 +171,51 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     return {
       content: response.content as ContentPart[],
     };
+  }
+
+  public async listToolsViaHub(): Promise<ListToolsResponse> {
+    const serviceConfig = this.config.service as MCPConnectorHTTPServiceConfig;
+    const baseUrl = serviceConfig.http.url.replace(/\/+$/, '');
+    const headers = this.buildAuthHeaders();
+    const axiosInstance: AxiosInstance = axios.create();
+
+    try {
+      const serversResponse = await axiosInstance.get<{ servers: Array<{ name: string }> }>(
+        `${baseUrl}/api/servers`,
+        { headers }
+      );
+      const { servers } = serversResponse.data;
+
+      const allTools: Tool[] = [];
+
+      for (const { name: serverName } of servers) {
+        try {
+          const infoResponse = await axiosInstance.post(
+            `${baseUrl}/api/servers/info`,
+            { server_name: serverName },
+            { headers }
+          );
+
+          const toolDefinitions = infoResponse.data.server.capabilities.tools;
+
+          for (const tool of toolDefinitions) {
+            allTools.push({
+              name: tool.name,
+              description: tool.description,
+              inputSchema: tool.inputSchema as OpenAPIV3.NonArraySchemaObject,
+            });
+          }
+        } catch (err) {
+          this.logger.error(
+            `Failed to fetch tools for server "${serverName}": ${(err as AxiosError).message}`
+          );
+        }
+      }
+
+      return { tools: allTools };
+    } catch (err) {
+      throw new Error(`Failed to list Hub servers: ${(err as AxiosError).message}`);
+    }
   }
 
   protected getResponseErrorMessage(error: AxiosError<unknown, unknown>): string {

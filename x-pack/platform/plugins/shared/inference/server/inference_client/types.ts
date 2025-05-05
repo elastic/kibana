@@ -47,6 +47,10 @@ export interface InferenceClient {
    * @returns
    */
   callMCPTool: (request: InferenceCallToolRequest) => Promise<InferenceCallToolResponseResolved>;
+  /**
+   * `listMcpToolsViaHub` returns the available tools from the MCP Hub.
+   */
+  listMcpToolsViaHub: () => Promise<InferenceListToolsResponse>;
 }
 
 /**

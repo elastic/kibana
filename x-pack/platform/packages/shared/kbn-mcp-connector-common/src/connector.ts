@@ -55,13 +55,20 @@ export type MCPConnectorSecrets =
 
 export const MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS = 'listTools';
 export const MCP_CONNECTOR_SUB_ACTION_TYPE_CALL_TOOL = 'callTool';
+export const MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS_VIA_HUB = 'listToolsViaHub';
 
 export type MCPConnectorSubActionType =
   | typeof MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS
-  | typeof MCP_CONNECTOR_SUB_ACTION_TYPE_CALL_TOOL;
+  | typeof MCP_CONNECTOR_SUB_ACTION_TYPE_CALL_TOOL
+  | typeof MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS_VIA_HUB;
 
 export interface MCPListToolsParams {
   subAction: typeof MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS;
+  subActionParams: {};
+}
+
+export interface MCPListToolsViaHubParams {
+  subAction: typeof MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS_VIA_HUB;
   subActionParams: {};
 }
 
@@ -73,4 +80,4 @@ export interface MCPCallToolParams {
   };
 }
 
-export type MCPExecutorParams = MCPListToolsParams | MCPCallToolParams;
+export type MCPExecutorParams = MCPListToolsParams | MCPCallToolParams | MCPListToolsViaHubParams;

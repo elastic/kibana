@@ -86,9 +86,14 @@ ${
     request: resources.request,
   });
 
+  // const [{ kbState }, mcpTools] = await Promise.all([
+  //   client.getKnowledgeBaseStatus(),
+  //   inferenceClient.listMCPTools(),
+  // ]);
+
   const [{ kbState }, mcpTools] = await Promise.all([
     client.getKnowledgeBaseStatus(),
-    inferenceClient.listMCPTools(),
+    inferenceClient.listMcpToolsViaHub(),
   ]);
 
   const isKnowledgeBaseReady = kbState === KnowledgeBaseState.READY;

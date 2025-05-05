@@ -23,6 +23,7 @@ import {
   MCP_CONNECTOR_SUB_ACTION_TYPE_CALL_TOOL,
   MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS,
 } from '@kbn/mcp-connector-common';
+import { MCPListToolsViaHubParams } from '@kbn/mcp-connector-common/src/connector';
 import { InferenceClient } from '../inference_client';
 import { getMCPConnectors } from './get_mcp_connectors';
 
@@ -36,7 +37,10 @@ export function createMCPApis({
   actions,
   request,
   logger,
-}: CreateMCPApiOptions): Pick<InferenceClient, 'callMCPTool' | 'listMCPTools'> {
+}: CreateMCPApiOptions): Pick<
+  InferenceClient,
+  'callMCPTool' | 'listMCPTools' | 'listMcpToolsViaHub'
+> {
   const getActionsClient = once(() => {
     return actions.getActionsClientWithRequest(request);
   });
@@ -64,8 +68,6 @@ export function createMCPApis({
           },
         } satisfies MCPCallToolParams,
       });
-
-      console.log(result);
 
       if (result.status === 'ok') {
         const response = result.data as CallToolResponse;
@@ -100,6 +102,7 @@ export function createMCPApis({
               ...(result.data as ListToolsResponse),
             };
           }
+
           throw new InferenceTaskError(
             InferenceTaskErrorCode.requestError,
             result.message ?? result.serviceMessage ?? result.errorSource ?? 'Unknown error',
@@ -114,6 +117,40 @@ export function createMCPApis({
             return [];
           }
           return [result.value];
+        }),
+      };
+    },
+    listMcpToolsViaHub: async (): Promise<InferenceListToolsResponse> => {
+      const [actionsClient, connectors] = await Promise.all([getActionsClient(), getConnectors()]);
+
+      const results = await Promise.allSettled(
+        connectors.map(async ({ connectorId }) => {
+          const result = await actionsClient.execute({
+            actionId: connectorId,
+            params: {
+              subAction: 'listToolsViaHub',
+              subActionParams: {},
+            } satisfies MCPListToolsViaHubParams,
+          });
+
+          if (result.status === 'ok') {
+            return {
+              connectorId,
+              ...(result.data as ListToolsResponse),
+            };
+          } else {
+            // Do nothing for now.
+            // Connectors created for MCP JSON-RPC will fail
+          }
+        })
+      );
+
+      return {
+        servers: results.flatMap((r) => {
+          if (r.status === 'fulfilled' && r.value) {
+            return [r.value];
+          }
+          return [];
         }),
       };
     },

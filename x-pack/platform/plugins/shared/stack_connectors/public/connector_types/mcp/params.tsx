@@ -12,8 +12,8 @@ import {
   MCPExecutorParams,
   MCPListToolsParams,
 } from '@kbn/mcp-connector-common';
-import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EVENT_ACTION_LABEL } from './translations';
 
 const MCPParamsFields: React.FunctionComponent<ActionParamsProps<MCPExecutorParams>> = ({
@@ -27,19 +27,17 @@ const MCPParamsFields: React.FunctionComponent<ActionParamsProps<MCPExecutorPara
 }) => {
   const [eventAction, setEventAction] = useState(actionParams.subAction ?? 'listTools');
 
-  const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
-
   const editActionRef = useRef(editAction);
   editActionRef.current = editAction;
 
   const setWithDefaults = useCallback(
     <T extends MCPConnectorSubActionType>(
       subAction: T,
-      values: T extends 'listTools'
+      values: T extends 'listTools' | 'listToolsViaHub'
         ? MCPListToolsParams['subActionParams']
         : MCPCallToolParams['subActionParams']
     ) => {
-      setEventAction(() => subAction);
+      setEventAction(subAction);
       editActionRef.current('subAction', subAction, index);
       editActionRef.current('subActionParams', values, index);
     },
@@ -47,20 +45,21 @@ const MCPParamsFields: React.FunctionComponent<ActionParamsProps<MCPExecutorPara
   );
 
   useEffect(() => {
-    if (actionConnector?.id || !actionConnector?.id) {
-      setWithDefaults('listTools', {});
-    }
+    setWithDefaults('listTools', {});
   }, [actionConnector?.id, setWithDefaults]);
 
   const setEventActionType = useCallback(
-    (eventActionType: 'listTools' | 'callTool') => {
-      if (eventActionType === 'listTools') {
-        setWithDefaults('listTools', {});
-      } else {
-        setWithDefaults('callTool', {
-          name: 'my_tool',
-          arguments: {},
-        });
+    (eventActionType: MCPConnectorSubActionType) => {
+      switch (eventActionType) {
+        case 'listTools':
+          setWithDefaults('listTools', {});
+          break;
+        case 'listToolsViaHub':
+          setWithDefaults('listToolsViaHub', {});
+          break;
+        case 'callTool':
+        default:
+          setWithDefaults('callTool', { name: 'my_tool', arguments: {} });
       }
     },
     [setWithDefaults]
@@ -80,6 +79,10 @@ const MCPParamsFields: React.FunctionComponent<ActionParamsProps<MCPExecutorPara
             {
               text: 'Call tool',
               value: 'callTool',
+            },
+            {
+              text: 'List tools via hub',
+              value: 'listToolsViaHub',
             },
           ]}
           value={eventAction}

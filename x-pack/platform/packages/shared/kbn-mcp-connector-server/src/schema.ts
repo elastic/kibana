@@ -19,6 +19,7 @@ import {
   MCP_CONNECTOR_AUTH_TYPE_BASIC,
   MCPConnectorSecretsNoAuth,
 } from '@kbn/mcp-connector-common';
+import { MCPListToolsViaHubParams } from '@kbn/mcp-connector-common/src/connector';
 
 export const MCPConnectorHTTPServiceConfigSchema: Type<MCPConnectorHTTPServiceConfig> =
   schema.object({
@@ -75,7 +76,15 @@ const MCPCallToolParamsSchema: Type<MCPCallToolParams> = schema.object({
   }) satisfies Type<CallToolRequest>,
 });
 
-export const MCPExecutorParamsSchema: Type<MCPCallToolParams | MCPListToolsParams> = schema.oneOf([
+const MCPListToolsViaHubParamsSchema: Type<MCPListToolsViaHubParams> = schema.object({
+  subAction: schema.literal('listToolsViaHub'),
+  subActionParams: schema.object({}),
+});
+
+export const MCPExecutorParamsSchema: Type<
+  MCPCallToolParams | MCPListToolsParams | MCPListToolsViaHubParams
+> = schema.oneOf([
   MCPListToolsParamsSchema,
   MCPCallToolParamsSchema,
+  MCPListToolsViaHubParamsSchema,
 ]);
