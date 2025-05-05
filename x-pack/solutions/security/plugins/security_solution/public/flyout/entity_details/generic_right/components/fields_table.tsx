@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
+import { EuiCode, EuiCodeBlock, EuiText } from '@elastic/eui';
 import { EuiButtonIcon, EuiInMemoryTable } from '@elastic/eui';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
@@ -17,6 +18,23 @@ interface FlattenedItem {
   key: string;
   value: unknown;
 }
+
+const getDescriptionDisplay = (value: unknown) => {
+  if (value === undefined) return 'undefined';
+  if (typeof value === 'boolean' || value === null) {
+    return <EuiCode>{JSON.stringify(value)}</EuiCode>;
+  }
+
+  if (typeof value === 'object') {
+    return (
+      <EuiCodeBlock isCopyable={true} overflowHeight={300}>
+        {JSON.stringify(value, null, 2)}
+      </EuiCodeBlock>
+    );
+  }
+
+  return <EuiText size="s">{value as string}</EuiText>;
+};
 
 const getSortedFlattenedItems = (
   document: Record<string, unknown>,
@@ -94,7 +112,7 @@ export const FieldsTable: React.FC<FieldsTableProps> = ({
           defaultMessage: 'Value',
         }),
         render: (value: unknown) => (
-          <div style={{ width: '100%' }}>{JSON.stringify(value, null, 2)}</div>
+          <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>
         ),
       },
     ],

@@ -21,7 +21,7 @@ import { PermissionDenied } from './permission_denied';
  */
 export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) => {
   const { data, isLoading } = useAssetInventoryStatus();
-
+  return children;
   if (isLoading || !data) {
     return <AssetInventoryLoading />;
   }

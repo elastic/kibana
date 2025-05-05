@@ -8,6 +8,8 @@
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { SyntheticEvent } from 'react';
+import type { CloudPostureEntityIdentifier } from '../../../../cloud_security_posture/components/entity_insight';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
@@ -42,7 +44,7 @@ export const useOpenGenericEntityDetailsLeftPanel = ({
   scopeId,
   panelTab,
 }: {
-  field: string;
+  field: CloudPostureEntityIdentifier;
   value: string;
   entityDocId: string;
   scopeId: string;
@@ -56,21 +58,22 @@ export const useOpenGenericEntityDetailsLeftPanel = ({
 
   const { to, from } = useGlobalTime();
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field,
-    value,
+    field: 'agent.type',
+    value: 'cloudbeat',
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-generic-entity-alerts`,
   });
 
-  const openGenericEntityDetails = (path) =>
-    openLeftPanel({
+  const openGenericEntityDetails = (path?: SyntheticEvent) => {
+    console.log(path);
+    return openLeftPanel({
       id: GenericEntityDetailsPanelKey,
       params: {
         entityDocId,
-        field: 'agent.type',
-        value: 'cloudbeat',
-        scopeId: 'table',
+        field,
+        value,
+        scopeId,
         isRiskScoreExist: false,
         hasMisconfigurationFindings,
         hasVulnerabilitiesFindings,
@@ -78,6 +81,7 @@ export const useOpenGenericEntityDetailsLeftPanel = ({
         path: path || navigationOptions[panelTab],
       },
     });
+  };
 
   return {
     openGenericEntityDetails,

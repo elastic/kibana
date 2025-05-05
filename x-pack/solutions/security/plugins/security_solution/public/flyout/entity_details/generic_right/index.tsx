@@ -14,7 +14,6 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useDocumentDetailsContext } from '../../document_details/shared/context';
 import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
@@ -41,6 +40,7 @@ export const isCommonError = (error: unknown): error is CommonError => {
 
 export interface GenericEntityPanelProps {
   entityDocId: string;
+  scopeId: string;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
 }
@@ -50,7 +50,7 @@ export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProp
   params: GenericEntityPanelProps;
 }
 
-export const GenericEntityPanel = ({ entityDocId }: GenericEntityPanelProps) => {
+export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelProps) => {
   const { getGenericEntity } = useGetGenericEntity(entityDocId);
   const { getAssetCriticality } = useGenericEntityCriticality({
     enabled: !!getGenericEntity.data?._source?.entity.id,
@@ -58,7 +58,6 @@ export const GenericEntityPanel = ({ entityDocId }: GenericEntityPanelProps) => 
     // @ts-ignore since this query is only enabled when the entity.id exists, we can safely assume that idValue won't be undefined
     idValue: getGenericEntity.data?._source?.entity.id,
   });
-  const { scopeId } = useDocumentDetailsContext();
 
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
     field: 'entity.id',
@@ -123,7 +122,7 @@ export const GenericEntityPanel = ({ entityDocId }: GenericEntityPanelProps) => 
     <>
       <FlyoutNavigation flyoutIsExpandable={true} expandDetails={openGenericEntityDetails} />
       <GenericEntityFlyoutHeader entity={entity} source={source} />
-      <GenericEntityFlyoutContent source={source} entityDocId={entityDocId} />
+      <GenericEntityFlyoutContent source={source} entityDocId={entityDocId} scopeId={scopeId} />
     </>
   );
 };

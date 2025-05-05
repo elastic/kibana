@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { type FlyoutPanelProps, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useDocumentDetailsContext } from '../../document_details/shared/context';
 import type { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 import {
@@ -78,8 +77,8 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
+    scopeId,
   } = params;
-  const { scopeId } = useDocumentDetailsContext();
   const { getGenericEntity } = useGetGenericEntity(entityDocId);
   const source = getGenericEntity.data?._source;
 

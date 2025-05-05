@@ -201,11 +201,13 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   },
   {
     key: GenericEntityPanelKey,
-    component: (props) => (
-      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+    component: (props) => {
+      return (
+        // <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
         <GenericEntityPanel {...(props as GenericEntityPanelExpandableFlyoutProps).params} />
-      </DocumentDetailsProvider>
-    ),
+        // </DocumentDetailsProvider>
+      );
+    },
   },
   {
     key: GenericEntityDetailsPanelKey,

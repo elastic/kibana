@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
-import { useDocumentDetailsContext } from '../../document_details/shared/context';
+import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { useOpenGenericEntityDetailsLeftPanel } from './hooks/use_open_generic_entity_details_left_panel';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { useExpandSection } from '../../document_details/right/hooks/use_expand_section';
@@ -21,16 +21,17 @@ import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 
 interface GenericEntityFlyoutContentProps {
-  source: Record<string, unknown>;
+  source: GenericEntityRecord;
   entityDocId: string;
+  scopeId: string;
 }
 
 export const GenericEntityFlyoutContent = ({
   source,
   entityDocId,
+  scopeId,
 }: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
-  const { scopeId } = useDocumentDetailsContext();
 
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
     field: 'entity.id',
@@ -40,7 +41,7 @@ export const GenericEntityFlyoutContent = ({
     panelTab: 'fields',
   });
 
-  const openDetailsPanel = (path) => {
+  const openDetailsPanel = (path: { tab: string; subTab: string }) => {
     return openGenericEntityDetails(path);
   };
 
@@ -49,10 +50,10 @@ export const GenericEntityFlyoutContent = ({
     defaultValue: true,
   });
 
-  const insightsSectionExpandedState = useExpandSection({
-    title: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_INSIGHTS_SECTION,
-    defaultValue: true,
-  });
+  // const insightsSectionExpandedState = useExpandSection({
+  //   title: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_INSIGHTS_SECTION,
+  //   defaultValue: true,
+  // });
 
   const { pinnedFields } = usePinnedFields(GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS);
 
@@ -111,7 +112,7 @@ export const GenericEntityFlyoutContent = ({
         >
           <FieldsTable
             document={filteredDocument}
-            euiInMemeoryTableProps={{ search: null, pagination: null }}
+            euiInMemoryTableProps={{ search: null, pagination: null }}
           />
         </ExpandablePanel>
       </ExpandableSection>
@@ -119,8 +120,10 @@ export const GenericEntityFlyoutContent = ({
       <EuiHorizontalRule />
 
       <EntityInsight
-        field={'entity.id'}
-        value={source.entity.id}
+        // field={'entity.id'}
+        // value={source.entity.id}
+        field={'agent.type'}
+        value={'cloudbeat'}
         isPreviewMode={false}
         isLinkEnabled={true}
         openDetailsPanel={openDetailsPanel}
