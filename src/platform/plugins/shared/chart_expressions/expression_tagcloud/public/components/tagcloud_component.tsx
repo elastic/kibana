@@ -128,8 +128,7 @@ export const TagCloudChart = ({
     );
 
     return visData.rows.map((row) => {
-      const tagValue = tagColumn === undefined ? undefined : row[tagColumn];
-      const tag = tagColumn === undefined ? 'all' : tagValue;
+      const {value: tagValue, tag } = tagColumn === undefined ? {value: undefined, tag: 'all'} : {value: row[tagColumn], tag: row[tagColumn]};
 
       return {
         text: bucketFormatter ? bucketFormatter.convert(tag, 'text') : tag,
