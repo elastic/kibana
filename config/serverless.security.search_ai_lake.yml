@@ -20,7 +20,7 @@ xpack.features.overrides:
   securitySolutionTimeline.hidden: true
   securitySolutionNotes.hidden: true
   siem.description: null
-  siemV2.description: null
+  siemV3.description: null
   securitySolutionSiemMigrations.hidden: true
 
   ## Fine-tune the security solution essentials feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
