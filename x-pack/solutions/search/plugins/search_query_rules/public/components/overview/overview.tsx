@@ -70,12 +70,12 @@ export const QueryRulesOverview = () => {
                   fill
                   iconType="plusInCircle"
                   onClick={() => {
-                    // Logic to create a new query rule set
+                    setIsCreateModalVisible(true);
                   }}
                 >
                   <FormattedMessage
                     id="xpack.queryRules.queryRulesSetDetail.createButton"
-                    defaultMessage="Create"
+                    defaultMessage="Create ruleset"
                   />
                 </EuiButton>
               </EuiFlexItem>
