@@ -328,9 +328,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceLayers,
           activeData,
         },
-        state: activeDatasourceId ? datasourceStates[activeDatasourceId]?.state : {},
+        state: visualization.state,
       }).groups ?? [],
-    [activeData, activeDatasourceId, activeVisualization, datasourceLayers, datasourceStates]
+    [activeData, visualization.state, activeVisualization, datasourceLayers]
   );
 
   // if the expression is undefined, it means we hit an error that should be displayed to the user

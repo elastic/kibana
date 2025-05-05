@@ -226,9 +226,9 @@ export function LensEditConfigurationFlyout({
       activeVisualization.getConfiguration({
         layerId,
         frame: framePublicAPI,
-        state: datasourceStates[datasourceId].state,
+        state: visualization,
       }).groups,
-    [activeVisualization, datasourceId, datasourceStates, framePublicAPI]
+    [activeVisualization, visualization, framePublicAPI]
   );
 
   const isSaveable = useMemo(() => {
