@@ -209,6 +209,7 @@ export const getRangeAnnotations = (datatable: Datatable) =>
     (row): row is ManualRangeEventAnnotationRow => 'type' in row && row.type === 'range'
   );
 
+export const OUTSIDE_RECT_ANNOTATION_WIDTH = 8;
 export const OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
 
 export const getAnnotationsGroupedByInterval = (
