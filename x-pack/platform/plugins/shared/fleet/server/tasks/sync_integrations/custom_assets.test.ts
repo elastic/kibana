@@ -4,8 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { packagePolicyService } from '../../services';
 
-import { findIntegration, getCustomAssets, installCustomAsset } from './custom_assets';
+import {
+  findIntegration,
+  getCustomAssets,
+  getPipelinesFromVars,
+  installCustomAsset,
+} from './custom_assets';
+
+jest.mock('../../services', () => ({
+  packagePolicyService: {
+    list: jest.fn(),
+  },
+}));
+
+const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
 describe('custom assets', () => {
   const integrations = [
@@ -54,7 +68,11 @@ describe('custom assets', () => {
   describe('getCustomAssets', () => {
     let esClientMock: any;
 
-    beforeEach(() => {});
+    beforeEach(() => {
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [],
+      } as any);
+    });
 
     it('should return custom assets', async () => {
       esClientMock = {
@@ -102,6 +120,7 @@ describe('custom assets', () => {
 
       const customAssets = await getCustomAssets(
         esClientMock,
+        {} as any,
         integrations,
         new AbortController(),
         undefined
@@ -171,6 +190,7 @@ describe('custom assets', () => {
 
       const customAssets = await getCustomAssets(
         esClientMock,
+        {} as any,
         integrations,
         new AbortController(),
         previousSyncIntegrationsData
@@ -218,12 +238,133 @@ describe('custom assets', () => {
 
       const customAssets = await getCustomAssets(
         esClientMock,
+        {} as any,
         integrations,
         new AbortController(),
         previousSyncIntegrationsData
       );
 
       expect(customAssets).toEqual([]);
+    });
+  });
+
+  describe('getPipelinesFromVars', () => {
+    let esClientMock: any;
+
+    beforeEach(() => {
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [
+          {
+            package: {
+              name: 'filestream',
+              version: '1.1.0',
+            },
+            inputs: [
+              {
+                streams: [
+                  {
+                    vars: {
+                      pipeline: {
+                        value: 'filestream-pipeline1',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            package: {
+              name: 'system',
+              version: '1.1.0',
+            },
+            inputs: [],
+          },
+          {
+            package: {
+              name: 'package1',
+              version: '1.1.0',
+            },
+            inputs: [
+              {
+                streams: [],
+              },
+            ],
+          },
+          {
+            package: {
+              name: 'package2',
+              version: '1.1.0',
+            },
+            inputs: [
+              {
+                streams: [
+                  {
+                    vars: {
+                      'data_stream.dataset': {
+                        value: 'package2.generic',
+                        type: 'text',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            package: {
+              name: 'package3',
+              version: '1.1.0',
+            },
+            inputs: [
+              {
+                streams: [
+                  {
+                    vars: {
+                      pipeline: {
+                        value: 'package3-other',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      } as any);
+
+      esClientMock = {
+        ingest: {
+          getPipeline: jest.fn().mockImplementation((request) => {
+            if (request?.id === 'filestream-pipeline1') {
+              return Promise.resolve({
+                [request?.id as string]: {
+                  processors: [],
+                },
+              });
+            } else {
+              return Promise.resolve({});
+            }
+          }),
+        },
+      };
+    });
+
+    it('should return pipelines from vars', async () => {
+      const pipelines = await getPipelinesFromVars(esClientMock, {} as any, new AbortController());
+
+      expect(pipelines).toEqual([
+        {
+          is_deleted: false,
+          name: 'filestream-pipeline1',
+          package_name: 'filestream',
+          package_version: '1.1.0',
+          pipeline: {
+            processors: [],
+          },
+          type: 'ingest_pipeline',
+        },
+      ]);
     });
   });
 

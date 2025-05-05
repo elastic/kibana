@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import {
@@ -25,6 +25,11 @@ const StreamEnrichmentContext = createActorContext(streamEnrichmentMachine);
 export const useStreamsEnrichmentSelector = StreamEnrichmentContext.useSelector;
 
 export type StreamEnrichmentEvents = ReturnType<typeof useStreamEnrichmentEvents>;
+
+export const useGetStreamEnrichmentState = () => {
+  const service = StreamEnrichmentContext.useActorRef();
+  return useCallback(() => service.getSnapshot(), [service]);
+};
 
 export const useStreamEnrichmentEvents = () => {
   const service = StreamEnrichmentContext.useActorRef();

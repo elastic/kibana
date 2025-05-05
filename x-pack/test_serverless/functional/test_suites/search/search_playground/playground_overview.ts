@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await browser.refresh();
         });
         it('show success llm button', async () => {
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMButton();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
         });
       });
 
@@ -201,7 +201,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('show edit context', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens(
             'basic_index',
-            ['baz']
+            ['bar', 'baz', 'baz.keyword', 'foo', 'nestedField', 'nestedField.child']
           );
         });
 

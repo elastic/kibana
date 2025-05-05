@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimeRange } from '@kbn/es-query';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { TabItem } from '@kbn/unified-tabs';
 
 export enum LoadingStatus {
@@ -45,8 +46,11 @@ export interface InternalStateDataRequestParams {
 }
 
 export interface TabState extends TabItem {
-  globalState?: Record<string, unknown>;
-  appState?: Record<string, unknown>;
+  lastPersistedGlobalState: {
+    timeRange?: TimeRange;
+    refreshInterval?: RefreshInterval;
+    filters?: Filter[];
+  };
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;

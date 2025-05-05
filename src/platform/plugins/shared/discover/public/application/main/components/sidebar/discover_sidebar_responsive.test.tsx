@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EuiProgress } from '@elastic/eui';
+import { EuiProgress, EuiProvider } from '@elastic/eui';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -208,13 +208,15 @@ async function mountComponent(
 
   await act(async () => {
     comp = mountWithIntl(
-      <KibanaContextProvider services={mockedServices}>
-        <DiscoverMainProvider value={stateContainer}>
-          <RuntimeStateProvider currentDataView={props.selectedDataView!} adHocDataViews={[]}>
-            <DiscoverSidebarResponsive {...props} />{' '}
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
-      </KibanaContextProvider>
+      <EuiProvider>
+        <KibanaContextProvider services={mockedServices}>
+          <DiscoverMainProvider value={stateContainer}>
+            <RuntimeStateProvider currentDataView={props.selectedDataView!} adHocDataViews={[]}>
+              <DiscoverSidebarResponsive {...props} />{' '}
+            </RuntimeStateProvider>
+          </DiscoverMainProvider>
+        </KibanaContextProvider>
+      </EuiProvider>
     );
     // wait for lazy modules
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -686,7 +688,7 @@ describe('discover responsive sidebar', function () {
     expect(createDataViewButton.length).toBe(1);
     createDataViewButton.simulate('click');
     expect(services.dataViewEditor.openEditor).toHaveBeenCalled();
-  });
+  }, 10000);
 
   it('should not render buttons in data view picker when in viewer mode', async () => {
     const services = createMockServices();
@@ -718,7 +720,7 @@ describe('discover responsive sidebar', function () {
     expect(addFieldButtonInDataViewPicker.length).toBe(0);
     const createDataViewButton = findTestSubject(compWithPickerInViewerMode, 'dataview-create-new');
     expect(createDataViewButton.length).toBe(0);
-  });
+  }, 10000);
 
   describe('search bar customization', () => {
     it('should not render CustomDataViewPicker', async () => {

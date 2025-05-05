@@ -16,14 +16,17 @@ import { useShareTabsContext } from '../../context';
 type IExportTab = IModalTabDeclaration;
 
 const ExportTabContent = () => {
-  const { shareMenuItems, objectType, isDirty, onClose, publicAPIEnabled } = useShareTabsContext()!;
+  const { shareMenuItems, objectType, isDirty, onClose, publicAPIEnabled } = useShareTabsContext(
+    'integration',
+    'export'
+  );
 
   return (
     <ExportContent
       objectType={objectType}
       isDirty={isDirty}
       onClose={onClose}
-      aggregateReportTypes={shareMenuItems}
+      aggregateExportTypes={shareMenuItems}
       publicAPIEnabled={publicAPIEnabled ?? true}
     />
   );

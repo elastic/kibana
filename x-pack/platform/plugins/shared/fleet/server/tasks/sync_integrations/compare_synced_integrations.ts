@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { isEqual } from 'lodash';
+
 import type {
   ElasticsearchClient,
   Logger,
@@ -28,10 +29,10 @@ import type { Installation } from '../../types';
 import type {
   RemoteSyncedIntegrationsStatus,
   GetRemoteSyncedIntegrationsStatusResponse,
-  SyncStatus,
   RemoteSyncedCustomAssetsStatus,
   RemoteSyncedCustomAssetsRecord,
 } from '../../../common/types';
+import { SyncStatus } from '../../../common/types';
 
 import type { IntegrationsData, SyncIntegrationsData, CustomAssetsData } from './model';
 import { getPipeline, getComponentTemplate, CUSTOM_ASSETS_PREFIX } from './custom_assets';
@@ -55,6 +56,16 @@ export const getFollowerIndexInfo = async (
     if (res.follower_indices[0]?.status === 'paused') {
       return { error: `Follower index ${index} paused` };
     }
+
+    const resStats = await esClient.ccr.followStats({
+      index,
+    });
+    if (resStats?.indices[0]?.shards[0]?.fatal_exception) {
+      return {
+        error: `Follower index ${index} fatal exception: ${resStats.indices[0].shards[0].fatal_exception?.reason}`,
+      };
+    }
+
     return { info: res.follower_indices[0] };
   } catch (err) {
     if (err?.body?.error?.type === 'index_not_found_exception') {
@@ -92,6 +103,9 @@ export const fetchAndCompareSyncedIntegrations = async (
     }
     const ccrIndex = searchRes.hits.hits[0]?._source;
     const { integrations: ccrIntegrations, custom_assets: ccrCustomAssets } = ccrIndex;
+    const installedCCRIntegrations = ccrIntegrations?.filter(
+      (integration) => integration.install_status !== 'not_installed'
+    );
 
     // find integrations installed on remote
     const installedIntegrations = await getPackageSavedObjects(savedObjectsClient);
@@ -105,8 +119,16 @@ export const fetchAndCompareSyncedIntegrations = async (
       },
       {} as Record<string, SavedObjectsFindResult<Installation>>
     );
-    const customAssetsStatus = await fetchAndCompareCustomAssets(esClient, logger, ccrCustomAssets);
-    const integrationsStatus = compareIntegrations(ccrIntegrations, installedIntegrationsByName);
+    const customAssetsStatus = await fetchAndCompareCustomAssets(
+      esClient,
+      logger,
+      ccrCustomAssets,
+      installedIntegrationsByName
+    );
+    const integrationsStatus = compareIntegrations(
+      installedCCRIntegrations,
+      installedIntegrationsByName
+    );
     const result = {
       ...integrationsStatus,
       ...(customAssetsStatus && { custom_assets: customAssetsStatus }),
@@ -131,18 +153,22 @@ const compareIntegrations = (
       const localIntegrationSO = installedIntegrationsByName[ccrIntegration.package_name];
       if (!localIntegrationSO) {
         return {
-          ...ccrIntegration,
-          sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+          package_name: ccrIntegration.package_name,
+          package_version: ccrIntegration.package_version,
+          updated_at: ccrIntegration.updated_at,
+          sync_status: SyncStatus.SYNCHRONIZING,
         };
       }
       if (ccrIntegration.package_version !== localIntegrationSO?.attributes.version) {
         return {
-          ...ccrIntegration,
-          sync_status: 'failed' as SyncStatus.FAILED,
+          package_name: ccrIntegration.package_name,
+          package_version: ccrIntegration.package_version,
+          updated_at: ccrIntegration.updated_at,
+          sync_status: SyncStatus.FAILED,
           error: `Found incorrect installed version ${localIntegrationSO?.attributes.version}`,
         };
       }
-      if (localIntegrationSO?.attributes.install_status !== 'installed') {
+      if (localIntegrationSO?.attributes.install_status === 'install_failed') {
         const latestFailedAttemptTime = localIntegrationSO?.attributes
           ?.latest_install_failed_attempts?.[0].created_at
           ? `at ${new Date(
@@ -154,14 +180,20 @@ const compareIntegrations = (
           ? `- reason: ${localIntegrationSO?.attributes?.latest_install_failed_attempts[0].error.message}`
           : '';
         return {
-          ...ccrIntegration,
-          sync_status: 'failed' as SyncStatus.FAILED,
+          package_name: ccrIntegration.package_name,
+          package_version: ccrIntegration.package_version,
+          updated_at: ccrIntegration.updated_at,
+          sync_status: SyncStatus.FAILED,
           error: `Installation status: ${localIntegrationSO?.attributes.install_status} ${latestFailedAttempt} ${latestFailedAttemptTime}`,
         };
       }
       return {
-        ...ccrIntegration,
-        sync_status: 'completed' as SyncStatus.COMPLETED,
+        package_name: ccrIntegration.package_name,
+        package_version: ccrIntegration.package_version,
+        sync_status:
+          localIntegrationSO?.attributes.install_status === 'installed'
+            ? SyncStatus.COMPLETED
+            : SyncStatus.SYNCHRONIZING,
         updated_at: localIntegrationSO?.updated_at,
       };
     }
@@ -172,7 +204,8 @@ const compareIntegrations = (
 const fetchAndCompareCustomAssets = async (
   esClient: ElasticsearchClient,
   logger: Logger,
-  ccrCustomAssets: { [key: string]: CustomAssetsData }
+  ccrCustomAssets: { [key: string]: CustomAssetsData },
+  installedIntegrationsByName: Record<string, SavedObjectsFindResult<Installation>>
 ): Promise<RemoteSyncedCustomAssetsRecord | undefined> => {
   if (!ccrCustomAssets) return;
 
@@ -180,6 +213,16 @@ const fetchAndCompareCustomAssets = async (
 
   try {
     const installedPipelines = await getPipeline(esClient, CUSTOM_ASSETS_PREFIX, abortController);
+
+    for (const [_, ccrCustomAsset] of Object.entries(ccrCustomAssets)) {
+      if (ccrCustomAsset.type === 'ingest_pipeline' && !ccrCustomAsset.name.includes('@custom')) {
+        const response = await getPipeline(esClient, ccrCustomAsset.name, abortController);
+        if (response[ccrCustomAsset.name]) {
+          installedPipelines[ccrCustomAsset.name] = response[ccrCustomAsset.name];
+        }
+      }
+    }
+
     const installedComponentTemplates = await getComponentTemplate(
       esClient,
       CUSTOM_ASSETS_PREFIX,
@@ -205,6 +248,7 @@ const fetchAndCompareCustomAssets = async (
         ccrCustomAsset,
         ingestPipelines: installedPipelines,
         componentTemplates,
+        installedIntegration: installedIntegrationsByName[ccrCustomAsset.package_name],
       });
       result[ccrCustomName] = res;
     });
@@ -219,10 +263,12 @@ const compareCustomAssets = ({
   ccrCustomAsset,
   ingestPipelines,
   componentTemplates,
+  installedIntegration,
 }: {
   ccrCustomAsset: CustomAssetsData;
   ingestPipelines?: IngestGetPipelineResponse;
   componentTemplates?: Record<string, ClusterComponentTemplateSummary>;
+  installedIntegration: SavedObjectsFindResult<Installation> | undefined;
 }): RemoteSyncedCustomAssetsStatus => {
   const result = {
     name: ccrCustomAsset.name,
@@ -231,74 +277,142 @@ const compareCustomAssets = ({
     package_version: ccrCustomAsset.package_version,
   };
 
+  const latestCustomAssetError =
+    installedIntegration?.attributes?.latest_custom_asset_install_failed_attempts?.[
+      `${ccrCustomAsset.type}:${ccrCustomAsset.name}`
+    ];
+
+  const latestFailedAttemptTime = latestCustomAssetError?.created_at
+    ? `at ${new Date(latestCustomAssetError?.created_at).toUTCString()}`
+    : '';
+  const latestFailedAttempt = latestCustomAssetError?.error?.message
+    ? `- reason: ${latestCustomAssetError.error.message}`
+    : '';
+  const latestFailedErrorMessage = `Failed to update ${ccrCustomAsset.type.replaceAll('_', ' ')} ${
+    ccrCustomAsset.name
+  } ${latestFailedAttempt} ${latestFailedAttemptTime}`;
+
   if (ccrCustomAsset.type === 'ingest_pipeline') {
-    if (!ingestPipelines) {
+    const installedPipeline = ingestPipelines?.[ccrCustomAsset.name];
+    if (!installedPipeline) {
       if (ccrCustomAsset.is_deleted === true) {
         return {
           ...result,
-          sync_status: 'completed' as SyncStatus.COMPLETED,
+          is_deleted: true,
+          sync_status: SyncStatus.COMPLETED,
+        };
+      }
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
         };
       }
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
     }
-
-    const installedPipeline = ingestPipelines[ccrCustomAsset?.name];
     if (ccrCustomAsset.is_deleted === true && installedPipeline) {
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          is_deleted: true,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
+        };
+      }
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        is_deleted: true,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
     } else if (
       installedPipeline?.version &&
       installedPipeline.version < ccrCustomAsset.pipeline.version
     ) {
-      return {
-        ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
-      };
-    } else if (isEqual(installedPipeline, ccrCustomAsset?.pipeline)) {
-      return {
-        ...result,
-        sync_status: 'completed' as SyncStatus.COMPLETED,
-      };
-    } else {
-      return {
-        ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
-      };
-    }
-  } else if (ccrCustomAsset.type === 'component_template') {
-    if (!componentTemplates) {
-      if (ccrCustomAsset.is_deleted === true) {
+      if (latestCustomAssetError) {
         return {
           ...result,
-          sync_status: 'completed' as SyncStatus.COMPLETED,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
         };
       }
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
-    }
-
-    const installedCompTemplate = componentTemplates[ccrCustomAsset?.name];
-    if (ccrCustomAsset.is_deleted === true && installedCompTemplate) {
+    } else if (isEqual(installedPipeline, ccrCustomAsset?.pipeline)) {
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        sync_status: SyncStatus.COMPLETED,
+      };
+    } else {
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
+        };
+      }
+      return {
+        ...result,
+        sync_status: SyncStatus.SYNCHRONIZING,
+      };
+    }
+  } else if (ccrCustomAsset.type === 'component_template') {
+    const installedCompTemplate = componentTemplates?.[ccrCustomAsset.name];
+    if (!installedCompTemplate) {
+      if (ccrCustomAsset.is_deleted === true) {
+        return {
+          ...result,
+          is_deleted: true,
+          sync_status: SyncStatus.COMPLETED,
+        };
+      }
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
+        };
+      }
+      return {
+        ...result,
+        sync_status: SyncStatus.SYNCHRONIZING,
+      };
+    }
+    if (ccrCustomAsset.is_deleted === true && installedCompTemplate) {
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          is_deleted: true,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
+        };
+      }
+      return {
+        ...result,
+        is_deleted: true,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
     } else if (isEqual(installedCompTemplate, ccrCustomAsset?.template)) {
       return {
         ...result,
-        sync_status: 'completed' as SyncStatus.COMPLETED,
+        sync_status: SyncStatus.COMPLETED,
       };
     } else {
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
+        };
+      }
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
     }
   }
@@ -329,6 +443,6 @@ export const getRemoteSyncedIntegrationsStatus = async (
     );
     return res;
   } catch (error) {
-    return { error, integrations: [] };
+    return { error: error.message, integrations: [] };
   }
 };

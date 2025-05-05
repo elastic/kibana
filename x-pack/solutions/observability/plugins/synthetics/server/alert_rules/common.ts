@@ -5,7 +5,7 @@
  * 2.0.
  */
 import moment from 'moment';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
 import {

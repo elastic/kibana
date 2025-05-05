@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { isEqual } from 'lodash';
 import type {
@@ -14,6 +14,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { retryTransientEsErrors } from '../../services/epm/elasticsearch/retry';
+
+import { packagePolicyService } from '../../services';
+import { SO_SEARCH_LIMIT } from '../../constants';
 
 import type { CustomAssetsData, IntegrationsData, SyncIntegrationsData } from './model';
 
@@ -68,6 +71,7 @@ export function getPipeline(
 
 export const getCustomAssets = async (
   esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
   integrations: IntegrationsData[],
   abortController: AbortController,
   previousSyncIntegrationsData: SyncIntegrationsData | undefined
@@ -114,12 +118,54 @@ export const getCustomAssets = async (
     []
   );
 
-  const updatedAssets = [...customAssetsComponentTemplates, ...customAssetsIngestPipelines];
+  const customPipelineFromVars = await getPipelinesFromVars(esClient, soClient, abortController);
+
+  const updatedAssets = [
+    ...customAssetsComponentTemplates,
+    ...customAssetsIngestPipelines,
+    ...customPipelineFromVars,
+  ];
 
   const deletedAssets = updateDeletedAssets(previousSyncIntegrationsData, updatedAssets);
 
   return [...updatedAssets, ...deletedAssets];
 };
+
+export async function getPipelinesFromVars(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  abortController: AbortController
+): Promise<CustomAssetsData[]> {
+  const packagePolicies = await packagePolicyService.list(soClient, {
+    perPage: SO_SEARCH_LIMIT,
+    spaceId: '*',
+  });
+  const customPipelineFromVars: CustomAssetsData[] = [];
+  for (const packagePolicy of packagePolicies.items) {
+    for (const input of packagePolicy.inputs) {
+      for (const stream of input.streams) {
+        // find stream vars called `pipeline`
+        if (stream.vars?.pipeline && stream.vars.pipeline.value) {
+          const pipelineName = stream.vars.pipeline.value;
+          // find pipeline definition for the matching var value
+          const pipelineDef = await getPipeline(esClient, pipelineName, abortController);
+
+          if (pipelineDef[pipelineName]) {
+            customPipelineFromVars.push({
+              type: 'ingest_pipeline',
+              name: pipelineName,
+              package_name: packagePolicy.package?.name ?? '',
+              package_version: packagePolicy.package?.version ?? '',
+              is_deleted: false,
+              pipeline: pipelineDef[pipelineName],
+            });
+          }
+        }
+      }
+    }
+  }
+  return customPipelineFromVars;
+}
 
 function updateDeletedAssets(
   previousSyncIntegrationsData: SyncIntegrationsData | undefined,

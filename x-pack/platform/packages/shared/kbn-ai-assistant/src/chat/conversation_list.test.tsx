@@ -20,10 +20,10 @@ jest.mock('../hooks/use_conversations_by_date', () => ({
 }));
 
 jest.mock('../hooks/use_confirm_modal', () => ({
-  useConfirmModal: jest.fn().mockReturnValue({
+  useConfirmModal: jest.fn(() => ({
     element: <div data-test-subj="confirmModal" />,
     confirm: jest.fn(() => Promise.resolve(true)),
-  }),
+  })),
 }));
 
 jest.mock('../hooks/use_conversation_context_menu', () => ({

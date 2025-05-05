@@ -117,12 +117,6 @@ async function expectRerenderOnDataLoader(
     onBrushEnd: jest.fn(),
     onFilter: jest.fn(),
     onTableRowClick: jest.fn(),
-    // Make TS happy
-    removePanel: jest.fn(),
-    replacePanel: jest.fn(),
-    getPanelCount: jest.fn(),
-    children$: new BehaviorSubject({}),
-    addNewPanel: jest.fn(),
     ...parentApiOverrides,
   };
   const api: LensApi = {

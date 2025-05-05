@@ -32,6 +32,7 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
 
+import { LockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import {
   ChatCompletionChunkEvent,
@@ -67,12 +68,15 @@ import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import { populateMissingSemanticTextFieldMigration } from '../startup_migrations/populate_missing_semantic_text_field_migration';
+import { runStartupMigrations } from '../startup_migrations/run_startup_migrations';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
-import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 import { apmInstrumentation } from './operators/apm_instrumentation';
+import { waitForKbModel, warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
+import { populateMissingSemanticTextFieldWithLock } from '../startup_migrations/populate_missing_semantic_text_fields';
+import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
+import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -103,7 +107,7 @@ export class ObservabilityAIAssistantClient {
     conversationId: string
   ): Promise<SearchHit<Conversation> | undefined> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: resourceNames.aliases.conversations,
+      index: resourceNames.writeIndexAlias.conversations,
       query: {
         bool: {
           filter: [
@@ -411,26 +415,24 @@ export class ObservabilityAIAssistantClient {
             return throwError(() => error);
           }),
           tap((event) => {
-            if (this.dependencies.logger.isLevelEnabled('debug')) {
-              switch (event.type) {
-                case StreamingChatResponseEventType.MessageAdd:
-                  this.dependencies.logger.debug(
-                    () => `Added message: ${JSON.stringify(event.message)}`
-                  );
-                  break;
+            switch (event.type) {
+              case StreamingChatResponseEventType.MessageAdd:
+                this.dependencies.logger.debug(
+                  () => `Added message: ${JSON.stringify(event.message)}`
+                );
+                break;
 
-                case StreamingChatResponseEventType.ConversationCreate:
-                  this.dependencies.logger.debug(
-                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
+              case StreamingChatResponseEventType.ConversationCreate:
+                this.dependencies.logger.debug(
+                  () => `Created conversation: ${JSON.stringify(event.conversation)}`
+                );
+                break;
 
-                case StreamingChatResponseEventType.ConversationUpdate:
-                  this.dependencies.logger.debug(
-                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
-              }
+              case StreamingChatResponseEventType.ConversationUpdate:
+                this.dependencies.logger.debug(
+                  () => `Updated conversation: ${JSON.stringify(event.conversation)}`
+                );
+                break;
             }
           }),
           shareReplay()
@@ -513,10 +515,7 @@ export class ObservabilityAIAssistantClient {
         apmInstrumentation(name),
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
-          if (
-            event.type === StreamingChatResponseEventType.ChatCompletionChunk &&
-            this.dependencies.logger.isLevelEnabled('trace')
-          ) {
+          if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
             this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
           }
         }),
@@ -534,7 +533,7 @@ export class ObservabilityAIAssistantClient {
 
   find = async (options?: { query?: string }): Promise<Conversation[]> => {
     const response = await this.dependencies.esClient.asInternalUser.search<Conversation>({
-      index: resourceNames.aliases.conversations,
+      index: resourceNames.writeIndexAlias.conversations,
       allow_no_indices: true,
       query: {
         bool: {
@@ -599,7 +598,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.index({
-      index: resourceNames.aliases.conversations,
+      index: resourceNames.writeIndexAlias.conversations,
       document: createdConversation,
       refresh: true,
     });
@@ -667,53 +666,111 @@ export class ObservabilityAIAssistantClient {
     );
   };
 
-  getKnowledgeBaseStatus = () => {
-    return this.dependencies.knowledgeBaseService.getStatus();
+  getInferenceEndpointsForEmbedding = () => {
+    return this.dependencies.knowledgeBaseService.getInferenceEndpointsForEmbedding();
   };
 
-  setupKnowledgeBase = async (modelId: string | undefined) => {
-    const { esClient, core, logger, knowledgeBaseService } = this.dependencies;
+  getKnowledgeBaseStatus = () => {
+    return this.dependencies.knowledgeBaseService.getModelStatus();
+  };
 
-    if (!modelId) {
-      modelId = await getElserModelId({ core, logger });
-    }
+  setupKnowledgeBase = async (
+    nextInferenceId: string
+  ): Promise<{
+    reindex: boolean;
+    currentInferenceId: string | undefined;
+    nextInferenceId: string;
+  }> => {
+    const { esClient, core, logger } = this.dependencies;
 
-    // setup the knowledge base
-    const res = await knowledgeBaseService.setup(esClient, modelId);
+    logger.debug(`Setting up knowledge base with inference_id: ${nextInferenceId}`);
 
-    populateMissingSemanticTextFieldMigration({
-      core,
-      logger,
-      config: this.dependencies.config,
-    }).catch((e) => {
-      this.dependencies.logger.error(
-        `Failed to populate missing semantic text fields: ${e.message}`
+    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(() => {
+      logger.debug(
+        `Current KB write index does not have an inference_id. This is to be expected for indices created before 8.16`
       );
+      return undefined;
     });
 
-    return res;
+    if (currentInferenceId === nextInferenceId) {
+      logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
+      warmupModel({ esClient, logger, inferenceId: nextInferenceId }).catch(() => {});
+      return { reindex: false, currentInferenceId, nextInferenceId };
+    }
+
+    await createOrUpdateKnowledgeBaseIndexAssets({
+      core: this.dependencies.core,
+      logger: this.dependencies.logger,
+      inferenceId: nextInferenceId,
+    });
+
+    waitForKbModel({
+      core: this.dependencies.core,
+      esClient,
+      logger,
+      config: this.dependencies.config,
+      inferenceId: nextInferenceId,
+    })
+      .then(async () => {
+        logger.info(
+          `Inference ID has changed from "${currentInferenceId}" to "${nextInferenceId}". Re-indexing knowledge base.`
+        );
+
+        await reIndexKnowledgeBaseWithLock({
+          core,
+          logger,
+          esClient,
+          inferenceId: nextInferenceId,
+        });
+        await populateMissingSemanticTextFieldWithLock({
+          core,
+          logger,
+          config: this.dependencies.config,
+          esClient: this.dependencies.esClient,
+        });
+      })
+      .catch((e) => {
+        const isLockAcquisitionError = e instanceof LockAcquisitionError;
+        if (isLockAcquisitionError) {
+          logger.info(e.message);
+        } else {
+          logger.error(
+            `Failed to setup knowledge base with inference_id: ${nextInferenceId}. Error: ${e.message}`
+          );
+          logger.debug(e);
+        }
+      });
+
+    return { reindex: true, currentInferenceId, nextInferenceId };
   };
 
-  resetKnowledgeBase = () => {
-    const { esClient } = this.dependencies;
-    return this.dependencies.knowledgeBaseService.reset(esClient);
+  warmupKbModel = (inferenceId: string) => {
+    return waitForKbModel({
+      core: this.dependencies.core,
+      esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+      config: this.dependencies.config,
+      inferenceId,
+    });
   };
 
-  reIndexKnowledgeBaseWithLock = () => {
+  reIndexKnowledgeBaseWithLock = (inferenceId: string) => {
     return reIndexKnowledgeBaseWithLock({
       core: this.dependencies.core,
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
+      inferenceId,
     });
   };
 
-  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
-    return populateMissingSemanticTextFieldMigration({
+  runStartupMigrations = () => {
+    return runStartupMigrations({
       core: this.dependencies.core,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
   };
+
   addUserInstruction = async ({
     entry,
   }: {

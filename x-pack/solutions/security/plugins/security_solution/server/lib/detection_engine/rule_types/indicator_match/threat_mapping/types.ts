@@ -238,7 +238,7 @@ export interface SignalMatch {
 
 export type GetDocumentListInterface = (params: {
   searchAfter: estypes.SortResults | undefined;
-}) => Promise<estypes.SearchResponse<EventDoc | ThreatListDoc>>;
+}) => Promise<estypes.SearchResponse<EventDoc | ThreatListDoc, unknown>>;
 
 export type CreateSignalInterface = (
   params: EventItem[] | ThreatListItem[]

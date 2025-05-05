@@ -12,8 +12,10 @@ import type {
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
+import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../common/endpoint/service/response_actions/crowdstrike';
+import type { EndpointInternalFleetServicesInterface } from '../../fleet';
 import { stringify } from '../../../utils/stringify';
 import { getDateFilters } from '../..';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
@@ -24,10 +26,11 @@ import type {
   ResponseActionsApiCommandNames,
   ResponseActionType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
+import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../common/endpoint/service/response_actions/microsoft_defender';
 
 export interface FetchActionRequestsOptions {
-  esClient: ElasticsearchClient;
-  logger: Logger;
+  spaceId: string;
+  endpointService: EndpointAppContextService;
   from?: number;
   size?: number;
   startDate?: string;
@@ -63,8 +66,8 @@ interface FetchActionRequestsResponse {
  * @param types
  */
 export const fetchActionRequests = async ({
-  logger,
-  esClient,
+  endpointService,
+  spaceId,
   from = 0,
   size = 10,
   agentTypes,
@@ -76,6 +79,9 @@ export const fetchActionRequests = async ({
   unExpiredOnly = false,
   types,
 }: FetchActionRequestsOptions): Promise<FetchActionRequestsResponse> => {
+  const esClient = endpointService.getInternalEsClient();
+  const logger = endpointService.createLogger('FetchActionRequests');
+  const fleetServices = endpointService.getInternalFleetServices(spaceId);
   const additionalFilters = [];
 
   if (commands?.length) {
@@ -94,13 +100,32 @@ export const fetchActionRequests = async ({
     additionalFilters.push({ range: { expiration: { gte: 'now' } } });
   }
 
-  const must: QueryDslQueryContainer[] = [
-    {
+  const must: QueryDslQueryContainer[] = [];
+
+  // if space awareness is enabled, then add filter for integration policy ids
+  if (endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+    logger.debug(
+      () =>
+        `Space awareness is enabled - adding filter to narrow results to only response actions visible in space [${spaceId}]`
+    );
+
+    must.push({
       bool: {
-        filter: [...getDateFilters({ startDate, endDate }), ...additionalFilters],
+        filter: {
+          terms: {
+            'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices),
+          },
+        },
       },
+    });
+  }
+
+  // Add the date filters
+  must.push({
+    bool: {
+      filter: [...getDateFilters({ startDate, endDate }), ...additionalFilters],
     },
-  ];
+  });
 
   if (userIds?.length) {
     const userIdsKql = userIds.map((userId) => `user_id:${userId}`).join(' or ');
@@ -139,7 +164,14 @@ export const fetchActionRequests = async ({
   return {
     data: (actionRequests?.hits?.hits ?? []).map((esHit) => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return esHit._source!;
+      const action = esHit._source!;
+
+      // Ensure `agent.policy` is an array
+      if (!Array.isArray(action.agent.policy)) {
+        action.agent.policy = action.agent.policy ? [action.agent.policy] : [];
+      }
+
+      return action;
     }),
     size,
     from,
@@ -166,4 +198,40 @@ const getActionTypeFilter = (actionType: string): QueryDslBoolQuery => {
         },
       }
     : {};
+};
+
+/**
+ * Retrieves a list of all integration policy IDs in the active space for integrations that
+ * support responses actions.
+ * @private
+ * @param fleetServices
+ */
+const fetchIntegrationPolicyIds = async (
+  fleetServices: EndpointInternalFleetServicesInterface
+): Promise<string[]> => {
+  const packageNames: string[] = [
+    'endpoint',
+    'sentinel_one',
+    ...Object.keys(CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION),
+    ...Object.keys(MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION),
+  ];
+  const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: (${packageNames.join(' OR ')})`;
+
+  fleetServices.logger.debug(
+    () => `fetchIntegrationPolicyIds(): fetching from fleet using kuery:\n${kuery}`
+  );
+
+  const packagePolicyIterable = await fleetServices.packagePolicy.fetchAllItemIds(
+    fleetServices.getSoClient(),
+    { kuery }
+  );
+  const response: string[] = [];
+
+  for await (const idList of packagePolicyIterable) {
+    response.push(...idList);
+  }
+
+  fleetServices.logger.debug(() => `fetchIntegrationPolicyIds() found:\n${stringify(response)}`);
+
+  return response;
 };
