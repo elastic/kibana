@@ -57,6 +57,10 @@ const getDataViewId = (searchConfiguration?: SearchConfigurationWithExtractedRef
   typeof searchConfiguration?.index === 'string'
     ? searchConfiguration.index
     : searchConfiguration?.index?.title;
+const getDataViewSpec = (searchConfiguration?: SearchConfigurationWithExtractedReferenceType) =>
+  typeof searchConfiguration?.index === 'object' && 'id' in searchConfiguration.index
+    ? searchConfiguration?.index
+    : {};
 
 export const registerObservabilityRuleTypes = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
@@ -99,6 +103,7 @@ export const registerObservabilityRuleTypes = (
         criteria.length === 1 ? criteria[0].metrics : [];
 
       const dataViewId = getDataViewId(searchConfiguration);
+      const dataViewSpec = getDataViewSpec(searchConfiguration);
       return {
         reason: fields[ALERT_REASON] ?? '-',
         link: getViewInAppUrl({
@@ -108,6 +113,7 @@ export const registerObservabilityRuleTypes = (
           metrics,
           searchConfiguration,
           startedAt: fields[ALERT_START],
+          dataViewSpec,
         }),
         hasBasePath: true,
       };
