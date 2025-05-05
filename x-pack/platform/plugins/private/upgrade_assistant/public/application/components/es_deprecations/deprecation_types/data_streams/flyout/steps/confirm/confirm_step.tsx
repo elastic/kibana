@@ -119,10 +119,7 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
             defaultMessage="You can increase the speed of reindexing by changing throttling configuration on ES. Where changing throttling configuration allows you to utilize more resources to speed up the reindexing process. {learnMoreHtml}"
             values={{
               learnMoreHtml: (
-                <EuiLink
-                  href={`${links.elasticsearch.reindexDatastreamApiSettings}`}
-                  target="_blank"
-                >
+                <EuiLink href={links.upgradeAssistant.dataStreamReindex} target="_blank">
                   <FormattedMessage
                     id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.learnMoreLink"
                     defaultMessage="Learn more"
@@ -175,7 +172,12 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="arrowLeft" onClick={hideWarningsStep} flush="left">
+            <EuiButtonEmpty
+              iconType="arrowLeft"
+              onClick={hideWarningsStep}
+              flush="left"
+              data-test-subj="backButton"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.backButtonLabel"
                 defaultMessage="Back"
@@ -183,7 +185,13 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill color="primary" onClick={startAction} disabled={blockAdvance}>
+            <EuiButton
+              fill
+              color="primary"
+              onClick={startAction}
+              disabled={blockAdvance}
+              data-test-subj="startActionButton"
+            >
               {startActionButtonLabel}
             </EuiButton>
           </EuiFlexItem>

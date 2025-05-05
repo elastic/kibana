@@ -314,6 +314,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
       unfreezeApi: `https://www.elastic.co/guide/en/elastic-stack/9.0/release-notes-elasticsearch-9.0.0.html#remove_unfreeze_rest_endpoint`,
       reindexWithPipeline: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-with-an-ingest-pipeline`,
+      logsDatastream: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/logs-data-stream.html`,
+      usingLogsDbIndexModeWithESSecurity: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/detections-logsdb-index-mode-impact.html`,
+      dataStreamReindex: `${ELASTICSEARCH_DOCS}data-stream-reindex-api.html#reindex-data-stream-api-settings`,
     },
     rollupJobs: `${ELASTIC_DOCS}manage-data/lifecycle/rollup/getting-started-kibana`,
     elasticsearch: {
