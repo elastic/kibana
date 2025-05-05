@@ -10222,6 +10222,53 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Visualization.convertToRuntimeState",
+            "type": "Function",
+            "tags": [],
+            "label": "convertToRuntimeState",
+            "description": [],
+            "signature": [
+              "((state: T, datasourceStates?: Record<string, unknown> | undefined) => T) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.convertToRuntimeState.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.convertToRuntimeState.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "datasourceStates",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown> | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Visualization.getUsedDataView",
             "type": "Function",
             "tags": [],
