@@ -921,13 +921,15 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       expectedStatus,
       roleAuthc,
       spaceId,
+      timeout = retryTimeout,
     }: {
       ruleId: string;
       expectedStatus: string;
       roleAuthc: RoleCredentials;
       spaceId?: string;
+      timeout?: number;
     }) {
-      return await retry.tryForTime(retryTimeout, async () => {
+      return await retry.tryForTime(timeout, async () => {
         const response = await supertestWithoutAuth
           .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rule/${ruleId}`)
           .set(roleAuthc.apiKeyHeader)
