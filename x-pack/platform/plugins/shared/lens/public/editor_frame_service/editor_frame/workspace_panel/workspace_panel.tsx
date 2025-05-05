@@ -497,10 +497,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, dispatchLens]);
 
-  const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, {
-    darkMode: false,
-    name: 'amsterdam',
-  }).darkMode;
+  const isDarkMode = useObservable(core.theme.theme$, core.theme.getTheme()).darkMode;
 
   const renderDragDropPrompt = () => {
     if (chartSizeSpec) {
@@ -580,7 +577,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           <img
             aria-hidden={true}
             css={promptIllustrationStyle}
-            src={IS_DARK_THEME ? applyChangesIllustrationDark : applyChangesIllustrationLight}
+            src={isDarkMode ? applyChangesIllustrationDark : applyChangesIllustrationLight}
             alt={applyChangesString}
           />
           <h2>

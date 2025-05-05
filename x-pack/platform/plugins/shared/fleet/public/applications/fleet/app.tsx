@@ -28,6 +28,8 @@ import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { PackageInstallProvider } from '../integrations/hooks';
 import { SpaceSettingsContextProvider } from '../../hooks/use_space_settings_context';
 
+import { ErrorLayout, PermissionsError } from '../../layouts/error';
+
 import { type FleetStatusProviderProps, useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
 import {
@@ -60,7 +62,6 @@ import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
-import { ErrorLayout, PermissionsError } from '../../layouts/error';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -199,8 +200,10 @@ export const FleetAppContext: React.FC<{
     fleetStatus,
   }) => {
     const XXL_BREAKPOINT = 1600;
-    const darkModeObservable = useObservable(startServices.theme.theme$);
-    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
+    const isDarkMode = useObservable(
+      startServices.theme.theme$,
+      startServices.theme.getTheme()
+    ).darkMode;
 
     return (
       <KibanaRenderContextProvider

@@ -36,7 +36,10 @@ export function DashboardEmptyScreen() {
   const isMounted = useMountedState();
   const dashboardApi = useDashboardApi();
   const [isLoading, setIsLoading] = useState(false);
-  const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
+  const isDarkTheme = useObservable(
+    coreServices.theme.theme$,
+    coreServices.theme.getTheme()
+  ).darkMode;
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = useMemo(() => {
     return viewMode === 'edit';

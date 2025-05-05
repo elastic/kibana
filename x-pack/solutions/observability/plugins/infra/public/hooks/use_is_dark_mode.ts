@@ -7,14 +7,11 @@
 
 import type { CoreTheme } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
 import { useKibanaContextForPlugin } from './use_kibana';
-
-const themeDefault: CoreTheme = { darkMode: false, name: 'amsterdam' };
 
 export const useIsDarkMode = () => {
   const { services } = useKibanaContextForPlugin();
-  const { darkMode } = useObservable(services.theme?.theme$ ?? of(themeDefault), themeDefault);
+  const { darkMode } = useObservable<CoreTheme>(services.theme.theme$, services.theme.getTheme());
 
   return darkMode;
 };

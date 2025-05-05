@@ -498,10 +498,7 @@ export const getPieVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
-      darkMode: false,
-      name: 'amsterdam',
-    });
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, kibanaTheme.getTheme());
     const palettes = getKbnPalettes(theme);
     return (
       <DimensionEditor
