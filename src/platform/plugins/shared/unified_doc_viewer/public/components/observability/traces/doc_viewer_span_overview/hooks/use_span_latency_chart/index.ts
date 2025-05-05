@@ -22,27 +22,24 @@ interface GetSpanDistributionChartDataParams {
   spanHistogram?: HistogramItem[];
 }
 
-export function getSpanDistributionChartData({
+export const getSpanDistributionChartData = ({
   euiTheme,
   spanHistogram,
-}: GetSpanDistributionChartDataParams) {
-  const spanDistributionChartData: DurationDistributionChartData[] = [];
-
-  if (Array.isArray(spanHistogram)) {
-    spanDistributionChartData.push({
-      id: i18n.translate(
-        'unifiedDocViewer.observability.traces.useSpanLatencyChart.allSpansLabel',
+}: GetSpanDistributionChartDataParams): DurationDistributionChartData[] =>
+  Array.isArray(spanHistogram)
+    ? [
         {
-          defaultMessage: 'All spans',
-        }
-      ),
-      histogram: spanHistogram,
-      areaSeriesColor: euiTheme.colors.vis.euiColorVis1,
-    });
-  }
-
-  return spanDistributionChartData;
-}
+          id: i18n.translate(
+            'unifiedDocViewer.observability.traces.useSpanLatencyChart.allSpansLabel',
+            {
+              defaultMessage: 'All spans',
+            }
+          ),
+          histogram: spanHistogram,
+          areaSeriesColor: euiTheme.colors.vis.euiColorVis1,
+        },
+      ]
+    : [];
 
 interface GetLatencyChartParams {
   core: CoreStart;
