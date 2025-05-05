@@ -13,10 +13,7 @@ add_ts_nocheck() {
 }
 
 # Add @ts-nocheck to the parser file
-add_ts_nocheck src/antlr/esql_parser.ts
-
-# Add @ts-nocheck to the lexer file
-add_ts_nocheck src/antlr/esql_lexer.ts
+add_ts_nocheck src/ottl/antlr/ottlParser.ts
 
 # Rename the parser listener file if it exists
 if [ -f src/antlr/esql_parserListener.ts ]; then

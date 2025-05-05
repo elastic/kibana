@@ -276,7 +276,7 @@ export class AstBuilderVisitor implements OttlVisitor {
     const name = ctx.LOWERCASE_IDENTIFIER().getText();
     const keysCtx = ctx.keys_list();
     const keys = keysCtx
-      ? (keysCtx.map((kCtx) => this.visit(kCtx) as AST.KeyAccess) as AST.KeyAccess[])
+      ? (keysCtx.flatMap((kCtx) => this.visit(kCtx) as AST.KeyAccess) as AST.KeyAccess[])
       : [];
     return { type: 'Field', name, keys };
   }

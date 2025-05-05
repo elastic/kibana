@@ -8,6 +8,7 @@
 // src/parser.ts
 
 import { CharStreams, CommonTokenStream } from 'antlr4';
+import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { default as OttlLexer } from './antlr/OttlLexer';
 import { default as OttlParser, StatementContext } from './antlr/OttlParser';
 import { AstBuilderVisitor } from './ast_builder_visitor';
@@ -52,6 +53,20 @@ export function parseOttl(ottlScript: string): ParseResult {
 
   return { ast, errors: [] };
 }
+
+export function compile(statement: AST.Statement): IngestProcessorContainer[] {
+  // This function would compile the AST back to a string representation.
+  // For now, we will just return a placeholder.
+  const processors: IngestProcessorContainer[] = [];
+  let tmp_var_counter = 0;
+  // iterate through the AST in post-order
+    // and generate the processors
+ 
+
+  return [];
+}
+
+
 
 // Example Semantic Checker function (you'd expand this)
 function checkForSemanticErrors(ast: AST.Statement): string[] {

@@ -20,7 +20,18 @@ export type AstNode =
   | Argument
   | MapNode
   | ListNode
-  | Literal;
+  | Literal
+  | EnumSymbol
+  | MathExpression
+  | MathAddSubExpression
+  | MathMulDivExpression
+  | MathFactor
+  | MathParenExpression
+  | BooleanAndExpression
+  | BooleanOrExpression
+  | BooleanPrimaryExpression
+  | BooleanParenExpression
+  | IngestPipelineRef;
 
 export type LiteralValue = string | number | boolean | null | Uint8Array;
 
@@ -60,8 +71,26 @@ export interface Argument extends BaseNode {
   value: Value;
 }
 
+/**
+ * This won't be produced by the parser, but is used in the compiler to refer to
+ * an intermediate value.
+ */
+export interface IngestPipelineRef extends BaseNode {
+  type: 'IngestPipelineRef';
+  isValue: boolean;
+  name: string; // Name of the value ref
+}
+
 // Represents any kind of value node in the AST
-export type Value = Literal | Path | Converter | MapNode | ListNode | MathExpression | EnumSymbol;
+export type Value =
+  | Literal
+  | Path
+  | Converter
+  | MapNode
+  | ListNode
+  | MathExpression
+  | EnumSymbol
+  | IngestPipelineRef;
 
 export interface WhereClause extends BaseNode {
   type: 'WhereClause';
@@ -158,7 +187,7 @@ export interface MathMulDivExpression extends BaseNode {
   right: MathTerm;
 }
 
-export type MathFactor = Literal | Path | Converter | MathParenExpression;
+export type MathFactor = Literal | IngestPipelineRef | Path | Converter | MathParenExpression;
 
 export interface MathParenExpression extends BaseNode {
   type: 'MathParenExpression';

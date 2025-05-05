@@ -7,6 +7,7 @@
 
 /* eslint-disable no-console */
 
+import { compile } from './compiler';
 import { parseOttl } from './parser';
 
 describe('OTTL Parser', () => {
@@ -15,7 +16,13 @@ describe('OTTL Parser', () => {
     // Example Usage
     // -----------------------------------------------------------------------------
 
-    const ottlExample1 = `set(resource.abc.attributes[user_id]["xyz"], "test-user") where attributes["http.method"] == "POST"`;
+    const ottlExample1 = `merge_maps(body, ExtractGrokPatterns(body, "%{WORD:abc}", true))`;
+    // const ottlExample1 = `set(resource.attributes["xyz"], attributes[attributes["test"] + attributes["test"]])`;
+    // const ottlExample1 = `set(resource.attributes["xyz"], attributes[attributes["test"]])`;
+    // const ottlExample1 = `delete_key(resource.attributes, attributes["test"])`;
+    // const ottlExample1 = `set(resource.attributes["a"], attributes["test"] + 5)`;
+    // set(resource.attributes[attributes["xxxxxx"]], "test-user")
+    // const ottlExample1 = `set(sum, metric.sum + 100 / Calculate(attributes["input"]))`;
     const ottlExample2 = `replace_all_patterns(body, " PII ", "[REDACTED]")`;
     const ottlExample3 = `keep_keys(attributes, ["http.method", "http.status_code"])`;
     const ottlExample4 = `set(status.code, 1) where IsMatch(name, ".*default.*") or attributes["db.system"] == nil`;
@@ -27,8 +34,12 @@ describe('OTTL Parser', () => {
 
     console.log('--- Example 1 ---');
     const result1 = parseOttl(ottlExample1);
+    console.log(ottlExample1);
     // console.log(result1.ast!.editor.arguments[0].value.fields[0].keys); // Should print "user.id"
-    if (result1.ast) console.log(JSON.stringify(result1.ast, null, 2));
+    console.log(JSON.stringify(result1, null, 2));
+    console.log(ottlExample1);
+    // console.log(result1.ast!.editor.arguments[0].value.fields[0].keys); // Should print "user.id"
+    // console.log(JSON.stringify(compile(result1.ast!), null, 2));
     // if (result1.errors.length > 0) console.error('Errors:', result1.errors);
 
     // console.log('\n--- Example 6 ---');
