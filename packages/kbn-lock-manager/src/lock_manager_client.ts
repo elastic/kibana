@@ -63,12 +63,8 @@ export class LockManager {
     ttl = duration(30, 'seconds').asMilliseconds(),
   }: AcquireOptions = {}): Promise<boolean> {
     let response: Awaited<ReturnType<ElasticsearchClient['update']>>;
-<<<<<<< HEAD:packages/kbn-lock-manager/src/lock_manager_client.ts
 
     await runSetupIndexAssetOnce(this.esClient, this.logger);
-=======
-    await createLocksWriteIndexOnce(this.esClient);
->>>>>>> 624410524f1 ([Obs AI Assistant] Replace Task Manager usage with Lock Manager (#216916)):x-pack/platform/plugins/shared/observability_ai_assistant/server/service/distributed_lock_manager/lock_manager_client.ts
     this.token = uuid();
 
     try {
