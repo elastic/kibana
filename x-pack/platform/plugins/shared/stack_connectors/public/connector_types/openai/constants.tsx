@@ -197,7 +197,6 @@ export const pkiConfig: ConfigFieldSchema[] = [
   {
     id: 'certificateFile',
     label: i18n.CERT_FILE_LABEL,
-    type: 'TEXT',
     isRequired: false,
     helpText: (
       <FormattedMessage
@@ -216,7 +215,6 @@ export const pkiConfig: ConfigFieldSchema[] = [
   {
     id: 'certificateData',
     label: i18n.CERT_DATA_LABEL,
-    type: 'TEXTAREA',
     isRequired: false,
     helpText: (
       <FormattedMessage
@@ -235,7 +233,6 @@ export const pkiConfig: ConfigFieldSchema[] = [
   {
     id: 'privateKeyFile',
     label: i18n.KEY_FILE_LABEL,
-    type: 'TEXT',
     isRequired: false,
     helpText: (
       <FormattedMessage
@@ -254,7 +251,6 @@ export const pkiConfig: ConfigFieldSchema[] = [
   {
     id: 'privateKeyData',
     label: i18n.KEY_DATA_LABEL,
-    type: 'TEXTAREA',
     isRequired: false,
     helpText: (
       <FormattedMessage
