@@ -140,7 +140,7 @@ export function FlameGraph({
         <EuiFlexItem>
           <EuiFlexGroup direction="row">
             {columnarData.viewModel.label.length > 0 && (
-              <EuiFlexItem grow>
+              <EuiFlexItem grow style={{ minHeight: '400px' }}>
                 <Chart key={columnarData.key}>
                   <Settings
                     theme={chartTheme}

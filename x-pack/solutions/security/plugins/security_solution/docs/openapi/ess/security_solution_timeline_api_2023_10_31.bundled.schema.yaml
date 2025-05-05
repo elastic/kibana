@@ -6,7 +6,7 @@ info:
   title: Security Timeline API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -54,7 +54,7 @@ paths:
       summary: Delete a note
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     get:
       description: Get all notes for a given document.
       operationId: GetNotes
@@ -118,7 +118,7 @@ paths:
       summary: Get notes
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     patch:
       description: Add a note to a Timeline or update an existing note.
       operationId: PersistNoteRoute
@@ -143,7 +143,7 @@ paths:
                   type: string
               required:
                 - note
-        description: 'The note to add or update, along with additional metadata.'
+        description: The note to add or update, along with additional metadata.
         required: true
       responses:
         '200':
@@ -165,7 +165,7 @@ paths:
       summary: Add or update a note
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/pinned_event:
     patch:
       description: Pin/unpin an event to/from an existing Timeline.
@@ -194,7 +194,7 @@ paths:
               required:
                 - eventId
                 - timelineId
-        description: 'The pinned event to add or unpin, along with additional metadata.'
+        description: The pinned event to add or unpin, along with additional metadata.
         required: true
       responses:
         '200':
@@ -218,7 +218,7 @@ paths:
       summary: Pin/unpin an event
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline:
     delete:
       description: Delete one or more Timelines or Timeline templates.
@@ -272,7 +272,7 @@ paths:
       summary: Delete Timelines or Timeline templates
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     get:
       description: Get the details of an existing saved Timeline or Timeline template.
       operationId: GetTimeline
@@ -310,7 +310,7 @@ paths:
       summary: Get Timeline or Timeline template details
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     patch:
       description: >-
         Update an existing Timeline. You can update the title, description, date
@@ -346,7 +346,7 @@ paths:
                 - timelineId
                 - version
                 - timeline
-        description: 'The Timeline updates, along with the Timeline ID and version.'
+        description: The Timeline updates, along with the Timeline ID and version.
         required: true
       responses:
         '200':
@@ -374,7 +374,7 @@ paths:
       summary: Update a Timeline
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     post:
       description: Create a new Timeline or Timeline template.
       operationId: CreateTimelines
@@ -440,7 +440,7 @@ paths:
       summary: Create a Timeline or Timeline template
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_copy:
     get:
       description: |
@@ -470,7 +470,7 @@ paths:
       summary: Copies timeline or timeline template
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_draft:
     get:
       description: >-
@@ -493,7 +493,7 @@ paths:
           description: Indicates that the draft Timeline was successfully retrieved.
         '403':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -507,7 +507,7 @@ paths:
             create a draft Timeline.
         '409':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -522,7 +522,7 @@ paths:
       summary: Get draft Timeline or Timeline template details
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
     post:
       description: >
         Create a clean draft Timeline or Timeline template for the current user.
@@ -558,7 +558,7 @@ paths:
             Timeline is cleared and returned.
         '403':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -571,7 +571,7 @@ paths:
             create a draft Timeline.
         '409':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -585,7 +585,7 @@ paths:
       summary: Create a clean draft Timeline or Timeline template
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_export:
     post:
       description: Export Timelines as an NDJSON file.
@@ -632,7 +632,7 @@ paths:
       summary: Export Timelines
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_favorite:
     patch:
       description: Favorite a Timeline or Timeline template for the current user.
@@ -681,7 +681,7 @@ paths:
           description: Indicates the favorite status was successfully updated.
         '403':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -695,7 +695,7 @@ paths:
       summary: Favorite a Timeline or Timeline template
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_import:
     post:
       description: Import Timelines.
@@ -773,7 +773,7 @@ paths:
       summary: Import Timelines
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/_prepackaged:
     post:
       description: Install or update prepackaged Timelines.
@@ -814,7 +814,7 @@ paths:
           description: Indicates the installation of prepackaged Timelines was successful.
         '500':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -828,7 +828,7 @@ paths:
       summary: Install prepackaged Timelines
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timeline/resolve:
     get:
       operationId: ResolveTimeline
@@ -865,7 +865,7 @@ paths:
       summary: Get an existing saved Timeline or Timeline template
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
   /api/timelines:
     get:
       description: Get a list of all saved Timelines or Timeline templates.
@@ -963,7 +963,7 @@ paths:
           description: Indicates that the (template) Timelines were found and returned.
         '400':
           content:
-            'application:json':
+            application:json:
               schema:
                 type: object
                 properties:
@@ -978,7 +978,7 @@ paths:
       summary: Get Timelines or Timeline templates
       tags:
         - Security Timeline API
-        - 'access:securitySolution'
+        - access:securitySolution
 components:
   schemas:
     AssociatedFilterType:
@@ -1183,9 +1183,9 @@ components:
         meta:
           alias: Custom filter name
           disabled: false
-          index: '.alerts-security.alerts-default,logs-*'
+          index: .alerts-security.alerts-default,logs-*
           key: '@timestamp'
-          negate: 'false,'
+          negate: false,
           type: exists
           value: exists
         query: '{"exists":{"field":"@timestamp"}}'
@@ -1352,7 +1352,7 @@ components:
       type: object
       properties:
         created:
-          description: 'The time the note was created, using a 13-digit Epoch timestamp.'
+          description: The time the note was created, using a 13-digit Epoch timestamp.
           example: 1587468588922
           nullable: true
           type: number
@@ -1362,7 +1362,7 @@ components:
           nullable: true
           type: string
         updated:
-          description: 'The last time the note was updated, using a 13-digit Epoch timestamp'
+          description: The last time the note was updated, using a 13-digit Epoch timestamp
           example: 1741344876825
           nullable: true
           type: number
@@ -1551,7 +1551,7 @@ components:
           nullable: true
           type: array
         created:
-          description: 'The time the Timeline was created, using a 13-digit Epoch timestamp.'
+          description: The time the Timeline was created, using a 13-digit Epoch timestamp.
           example: 1587468588922
           nullable: true
           type: number
@@ -1569,7 +1569,7 @@ components:
                 id-d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bcbf66f57d124dcc739c98e6b
               name: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bcbf66f57d124dcc739c98e6b
               queryMatch:
-                field: '_id,'
+                field: _id,
                 operator: ':'
                 value: >-
                   d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bcbf66f57d124dcc739c98e6b,
@@ -1611,7 +1611,7 @@ components:
           description: EQL query that is used in the correlation tab
           example:
             eventCategoryField: event.category
-            query: 'sequence\n[process where process.name == "sudo"]\n[any where true]'
+            query: sequence\n[process where process.name == "sudo"]\n[any where true]
             size: 100
             timestampField: '@timestamp'
           nullable: true
