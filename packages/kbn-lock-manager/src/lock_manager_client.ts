@@ -256,6 +256,19 @@ export class LockManager {
   }
 }
 
+export async function getLock({
+  esClient,
+  logger,
+  lockId,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  lockId: LockId;
+}): Promise<LockDocument | undefined> {
+  const lockManager = new LockManager(lockId, esClient, logger);
+  return lockManager.get();
+}
+
 export async function withLock<T>(
   {
     esClient,
@@ -280,9 +293,7 @@ export async function withLock<T>(
 
   // extend the ttl periodically
   const extendInterval = Math.floor(ttl / 4);
-  logger.debug(
-    `Lock "${lockId}" acquired. Extending TTL every ${prettyMilliseconds(extendInterval)}`
-  );
+  logger.debug(`Extending TTL for lock "${lockId}" every ${prettyMilliseconds(extendInterval)}`);
 
   let extendTTlPromise = Promise.resolve(true);
   const intervalId = setInterval(() => {
