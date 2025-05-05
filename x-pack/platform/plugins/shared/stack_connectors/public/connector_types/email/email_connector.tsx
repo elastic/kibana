@@ -58,7 +58,7 @@ const getEmailConfig = (
     { validator: emptyField(i18n.SENDER_REQUIRED) },
     {
       validator: ({ value }) => {
-        const validatedEmail = validateFunc([value])[0];
+        const validatedEmail = validateFunc([value], { isSender: true })[0];
         if (!validatedEmail.valid) {
           const message =
             validatedEmail.reason === InvalidEmailReason.notAllowed
