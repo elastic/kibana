@@ -40,7 +40,6 @@ export interface UsageStats {
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableServiceGroups': boolean;
-  'observability:apmEnableContinuousRollups': boolean;
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureProfilingIntegration': boolean;
@@ -151,7 +150,6 @@ export interface UsageStats {
   'observability:syntheticsThrottlingEnabled': boolean;
   'observability:enableLegacyUptimeApp': boolean;
   'observability:apmLabsButton': boolean;
-  'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
   'observability:apmTraceExplorerTab': boolean;
