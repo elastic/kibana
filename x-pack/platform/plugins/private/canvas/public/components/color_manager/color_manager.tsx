@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import tinycolor from 'tinycolor2';
+import chroma from 'chroma-js';
 import { i18n } from '@kbn/i18n';
 
 import { ColorDot } from '../color_dot/color_dot';
@@ -54,8 +54,7 @@ export const ColorManager: FC<Props> = ({
   onRemoveColor,
   value = '',
 }) => {
-  const tc = tinycolor(value);
-  const validColor = tc.isValid();
+  const validColor = chroma.valid(value);
 
   let buttons = null;
 
@@ -83,7 +82,7 @@ export const ColorManager: FC<Props> = ({
       <EuiFlexItem grow={false}>
         <ColorDot value={validColor ? value : undefined} />
       </EuiFlexItem>
-      <EuiFlexItem style={{ display: 'inline-block' }}>
+      <EuiFlexItem css={{ display: 'inline-block' }}>
         {/* While the label indicates only hex values are honored, it can accept CSS values. */}
         <EuiFieldText
           value={value}

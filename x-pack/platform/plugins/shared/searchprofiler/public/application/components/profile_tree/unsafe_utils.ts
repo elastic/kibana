@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import tinycolor from 'tinycolor2';
+import chroma from 'chroma-js';
 import _ from 'lodash';
 
 import { BreakdownItem, Index, Operation, Shard, Targets } from '../../types';
@@ -103,7 +103,7 @@ export function normalizeBreakdown(breakdown: Record<string, number>) {
         key,
         time: breakdown[key],
         relative,
-        color: tinycolor.mix('#F5F5F5', '#FFAFAF', relative).toHexString(),
+        color: chroma('#F5F5F5').mix('#FFAFAF', relative).hex(),
         tip: getToolTip(key),
       });
     });
@@ -148,16 +148,16 @@ export function normalizeIndices(indices: IndexMap, target: Targets) {
     index.shards.sort(sortQueryComponents);
     for (const shard of index.shards) {
       shard.relative = ((shard.time / index.time) * 100).toFixed(2);
-      shard.color = tinycolor.mix('#F5F5F5', '#FFAFAF', shard.relative as any).toHexString();
+      shard.color = chroma('#F5F5F5')
+        .mix('#FFAFAF', shard.relative as any)
+        .hex();
     }
   }
 }
 
 export function normalizeTime(operation: Operation, totalTime: number) {
   operation.timePercentage = ((timeInMilliseconds(operation) / totalTime) * 100).toFixed(2);
-  operation.absoluteColor = tinycolor
-    .mix('#F5F5F5', '#FFAFAF', +operation.timePercentage)
-    .toHexString();
+  operation.absoluteColor = chroma('#F5F5F5').mix('#FFAFAF', +operation.timePercentage).hex();
 }
 
 export function initTree<T>(

@@ -6,7 +6,7 @@
  */
 
 import type { ReactText } from 'react';
-import Color from 'color';
+import chroma from 'chroma-js';
 import { get, first, last, min, max } from 'lodash';
 import type {
   InventoryFormatterType,
@@ -76,8 +76,8 @@ export const getChartColor = (seriesOverrides: SeriesOverrides | undefined, seri
   if (!rawColor) {
     return null;
   }
-  const color = new Color(rawColor);
-  return color.hex().toString();
+  const color = chroma(rawColor);
+  return color.hex();
 };
 
 /**

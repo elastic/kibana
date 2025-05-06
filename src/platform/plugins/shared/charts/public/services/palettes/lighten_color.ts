@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import color from 'color';
+import chroma from 'chroma-js';
 
 const MAX_LIGHTNESS = 93;
 const MAX_LIGHTNESS_SPACE = 20;
@@ -17,12 +17,12 @@ export function lightenColor(baseColor: string, step: number, totalSteps: number
     return baseColor;
   }
 
-  const hslColor = color(baseColor, 'hsl');
-  const outputColorLightness = hslColor.lightness();
+  const hslColor = chroma(baseColor);
+  const [_hue, _saturation, outputColorLightness] = hslColor.hcl();
   const lightnessSpace = Math.min(MAX_LIGHTNESS - outputColorLightness, MAX_LIGHTNESS_SPACE);
   const currentLevelTargetLightness =
     outputColorLightness + lightnessSpace * ((step - 1) / (totalSteps - 1));
-  const lightenedColor = hslColor.lightness(currentLevelTargetLightness);
+  const lightenedColor = hslColor.set('hsl.l', currentLevelTargetLightness);
 
   return lightenedColor.hex();
 }

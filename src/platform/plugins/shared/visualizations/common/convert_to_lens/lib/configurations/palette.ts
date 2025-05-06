@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import color from 'color';
+import chroma from 'chroma-js';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { getStopsWithColorsFromRanges, PaletteConfig } from '../../../utils';
 import { PaletteParams } from './types';
@@ -25,11 +25,11 @@ const buildPaletteParams = ({ color: colors, stop }: PaletteConfig): ColorStopsW
     rangeMax: stop[stop.length - 1],
     continuity: 'none',
     colorStops: colorsWithoutStartColor.map((c, index) => ({
-      color: color(c!).hex(),
+      color: chroma(c!).hex(),
       stop: stop[index],
     })),
     stops: colorsWithoutStartColor.map((c, index) => ({
-      color: color(c!).hex(),
+      color: chroma(c!).hex(),
       stop: stop[index + 1],
     })),
   };

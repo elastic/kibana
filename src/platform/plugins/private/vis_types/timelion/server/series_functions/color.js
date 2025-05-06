@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import alter from '../lib/alter';
 import Chainable from '../lib/classes/chainable';
-import tinygradient from 'tinygradient';
+import chroma from 'chroma-js';
 
 export default new Chainable('color', {
   args: [
@@ -41,7 +41,7 @@ colors, and have multiple series, you will get a gradient, e.g., "#00B1CC:#00FF9
       if (colors.length > gradientStops) {
         trimmedColors = colors.slice(0, gradientStops);
       }
-      gradient = tinygradient(trimmedColors).rgb(gradientStops);
+      gradient = chroma.scale(trimmedColors).colors(gradientStops);
     }
 
     let i = 0;

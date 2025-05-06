@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// @ts-ignore
-import colorJS from 'color';
+import chroma from 'chroma-js';
 import { Theme, LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
 function computeRelativeLuminosity(rgb: string) {
-  return colorJS(rgb).luminosity();
+  return chroma(rgb).luminance();
 }
 
 function computeContrast(rgb1: string, rgb2: string) {
-  return colorJS(rgb1).contrast(colorJS(rgb2));
+  return chroma.contrast(rgb1, rgb2);
 }
 
 function getAAARelativeLum(bgColor: string, fgColor: string, ratio = 7) {
@@ -78,7 +77,7 @@ function isValidColor(color: string | null | undefined): color is string {
     return false;
   }
   try {
-    colorJS(color);
+    chroma.valid(color);
     return true;
   } catch {
     return false;

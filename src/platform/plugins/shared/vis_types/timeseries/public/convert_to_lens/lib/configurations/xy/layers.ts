@@ -17,7 +17,7 @@ import {
 import { PaletteOutput } from '@kbn/coloring';
 import { v4 } from 'uuid';
 import { transparentize } from '@elastic/eui';
-import Color from 'color';
+import chroma from 'chroma-js';
 import { euiLightVars } from '@kbn/ui-theme';
 import { groupBy } from 'lodash';
 import { DataViewsPublicPluginStart, DataView } from '@kbn/data-plugin/public/data_views';
@@ -215,7 +215,7 @@ const convertAnnotation = (
     key: {
       type: 'point_in_time',
     },
-    color: new Color(transparentize(annotation.color || euiLightVars.euiColorAccent, 1)).hex(),
+    color: chroma(transparentize(annotation.color || euiLightVars.euiColorAccent, 1)).hex(),
     timeField: annotation.time_field || dataView.timeFieldName,
     icon:
       annotation.icon &&

@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import color from 'color';
+import chroma from 'chroma-js';
 import { getCoreStart } from '../../services';
 
 /**
  * Returns true if the color that is passed has low luminosity
  */
 const isColorDark = (c) => {
-  return color(c).luminosity() < 0.45;
+  return chroma(c).luminosity() < 0.45;
 };
 
 /**
