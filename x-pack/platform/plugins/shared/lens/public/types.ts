@@ -60,7 +60,7 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
-import type { DataViewsState } from './state_management/types';
+import type { DataViewsState, GeneralDatasourceStates } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { LensDocument } from './persistence/saved_object_store';
 import { TableInspectorAdapter } from './editor_frame_service/types';
@@ -1073,12 +1073,14 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     (
       addNewLayer: () => string,
       nonPersistedState?: T,
-      mainPalette?: SuggestionRequest['mainPalette']
+      mainPalette?: SuggestionRequest['mainPalette'],
+      datasourceStates?: GeneralDatasourceStates
     ): T;
     (
       addNewLayer: () => string,
       persistedState: P,
       mainPalette?: SuggestionRequest['mainPalette'],
+      datasourceStates?: GeneralDatasourceStates,
       annotationGroups?: AnnotationGroups,
       references?: SavedObjectReference[]
     ): T;
