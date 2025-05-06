@@ -142,7 +142,7 @@ export const DocViewerTable = ({
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const [dataGridRef, setDataGridRef] = useState<EuiDataGridRefProps | null>(null);
+  const dataGridRef = useRef<EuiDataGridRefProps | null>(null);
   const { fieldFormats, storage, uiSettings, toasts } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
@@ -315,7 +315,7 @@ export const DocViewerTable = ({
         pinnedRows,
         restRows,
       });
-      dataGridRef.setFocusedCell({ rowIndex: position, colIndex: 0 });
+      dataGridRef.current?.setFocusedCell({ rowIndex: position, colIndex: 0 });
     },
     [pinnedRows, restRows, dataGridRef]
   );
@@ -556,7 +556,7 @@ export const DocViewerTable = ({
             })}
             className="kbnDocViewer__fieldsGrid"
             css={styles.fieldsGrid}
-            ref={setDataGridRef}
+            ref={dataGridRef}
             columns={gridColumns}
             toolbarVisibility={false}
             rowCount={rows.length}

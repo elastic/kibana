@@ -12,32 +12,27 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { FieldRow } from './field_row';
 
-function classFabricator<TConstructor extends new (...args: any[]) => any>(
-  ClassConstructor: TConstructor,
-  ...baseArgs: ConstructorParameters<TConstructor>
-) {
-  return (
-    overrides: Partial<ConstructorParameters<TConstructor>[0]> = {}
-  ): InstanceType<TConstructor> => {
-    const finalArgs = [{ ...baseArgs[0], ...overrides }];
-    return new ClassConstructor(...finalArgs);
+export const buildFieldRowMock = (args: Partial<ConstructorParameters<typeof FieldRow>[0]>) => {
+  const defaultArgs = {
+    name: 'field',
+    flattenedValue: { foo: 'bar' },
+    hit: {
+      id: '1',
+      raw: {},
+      flattened: { field: 'value' },
+    },
+    dataView: buildDataViewMock({
+      name: 'dataView',
+      fields: [] as unknown as DataView['fields'],
+      timeFieldName: 'timeField',
+    }),
+    fieldFormats: fieldFormatsMock,
+    isPinned: false,
+    columnsMeta: undefined,
   };
-}
 
-export const fieldRowFabricator = classFabricator(FieldRow, {
-  name: 'field',
-  flattenedValue: { foo: 'bar' },
-  hit: {
-    id: '1',
-    raw: {},
-    flattened: { field: 'value' },
-  },
-  dataView: buildDataViewMock({
-    name: 'dataView',
-    fields: [] as unknown as DataView['fields'],
-    timeFieldName: 'timeField',
-  }),
-  fieldFormats: fieldFormatsMock,
-  isPinned: false,
-  columnsMeta: undefined,
-});
+  return new FieldRow({
+    ...defaultArgs,
+    ...args,
+  });
+};
