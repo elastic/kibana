@@ -19,7 +19,7 @@ To control how data is collected from your {{es}} nodes, you configure [`xpack.m
 For more information, check out [Monitor a cluster](docs-content://deploy-manage/monitor.md).
 
 :::{note}
-If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
 :::
 
 ## General monitoring settings [monitoring-general-settings]
@@ -27,7 +27,7 @@ If a setting is applicable to {{ecloud}} Hosted environments, its name is follow
 `monitoring.cluster_alerts.email_notifications.enabled`
 :   Deprecated in 7.11. When enabled, sends email notifications for Watcher alerts to the specified email address. The default is `true`.
 
-`monitoring.cluster_alerts.email_notifications.email_address` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`monitoring.cluster_alerts.email_notifications.email_address` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Deprecated in 7.11. When enabled, specifies the email address where you want to receive cluster alert notifications.
 
 `monitoring.ui.ccs.enabled`
@@ -72,7 +72,7 @@ These settings control how data is collected from {{kib}}.
 `monitoring.kibana.collection.enabled`
 :   Set to `true` (default) to enable data collection from the {{kib}} NodeJS server for {{kib}} dashboards to be featured in **{{stack-monitor-app}}**.
 
-`monitoring.kibana.collection.interval` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`monitoring.kibana.collection.interval` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specifies the number of milliseconds to wait in between data sampling on the {{kib}} NodeJS server for the metrics that are displayed in the {{kib}} dashboards. Defaults to `10000` (10 seconds).
 
 
@@ -99,7 +99,7 @@ $$$monitoring-ui-enabled$$$ `monitoring.ui.enabled`
 `monitoring.ui.max_bucket_size`
 :   Specifies the number of term buckets to return out of the overall terms list when performing terms aggregations to retrieve index and node metrics. For more information about the `size` parameter, see [Terms Aggregation](elasticsearch://reference/aggregations/search-aggregations-bucket-terms-aggregation.md#search-aggregations-bucket-terms-aggregation-size). Defaults to `10000`.
 
-`monitoring.ui.min_interval_seconds` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`monitoring.ui.min_interval_seconds` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specifies the minimum number of seconds that a time bucket in a chart can represent. Defaults to 10. If you modify the `monitoring.ui.collection.interval` in `elasticsearch.yml`, use the same value in this setting.
 
 `monitoring.ui.kibana.reporting.stale_status_threshold_seconds`
@@ -110,7 +110,7 @@ $$$monitoring-ui-enabled$$$ `monitoring.ui.enabled`
 
 **{{stack-monitor-app}}** exposes the Cgroup statistics that we collect for you to make better decisions about your container performance, rather than guessing based on the overall machine performance. If you are not running your applications in a container, then Cgroup statistics are not useful.
 
-`monitoring.ui.container.elasticsearch.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`monitoring.ui.container.elasticsearch.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   For {{es}} clusters that are running in containers, this setting changes the **Node Listing** to display the CPU utilization based on the reported Cgroup statistics. It also adds the calculated Cgroup CPU utilization to the **Node Overview** page instead of the overall operating system’s CPU utilization. Defaults to `false`.
 
 `monitoring.ui.container.logstash.enabled`

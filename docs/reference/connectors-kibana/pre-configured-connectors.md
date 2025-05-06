@@ -8,7 +8,7 @@ mapped_pages:
 If you are running {{kib}} on-prem, you can preconfigure a connector to have all the information it needs prior to startup by adding it to the `kibana.yml` file.
 
 ::::{note}
-{{ess}} provides a preconfigured email connector but you cannot create additional preconfigured connectors.
+{{ech}} provides a preconfigured email connector but you cannot create additional preconfigured connectors.
 ::::
 
 

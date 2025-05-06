@@ -9,7 +9,7 @@ applies_to:
 # General settings in {{kib}}
 
 :::{note}
-If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
 :::
 
 `console.ui.enabled`
@@ -70,15 +70,15 @@ $$$csp-strict$$$ `csp.strict`
 `csp.warnLegacyBrowsers`
 :   Shows a warning message after loading {{kib}} to any browser that does not enforce even rudimentary CSP rules, though {{kib}} is still accessible. This configuration is effectively ignored when [`csp.strict`](#csp-strict) is enabled. **Default: `true`**
 
-`data.autocomplete.valueSuggestions.terminateAfter` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`data.autocomplete.valueSuggestions.terminateAfter` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specifies the max number of documents loaded by each shard to generate autocomplete suggestions. The default is 100000. Allowed values are between 1 and 10000000.
 % TBD: Applicable only to Elastic Cloud?
 
-`data.autocomplete.valueSuggestions.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`data.autocomplete.valueSuggestions.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specifies the time in milliseconds to wait for autocomplete suggestions from Elasticsearch. The default is 1000. Allowed values are between 1 and 1200000.
 % TBD: Applicable only to Elastic Cloud?
 
-$$$elasticsearch-maxSockets$$$ `elasticsearch.maxSockets` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$elasticsearch-maxSockets$$$ `elasticsearch.maxSockets` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The maximum number of sockets that can be used for communications with {{es}}. **Default: `Infinity`**
     It is available in {{ecloud}} 8.2.0 and later versions.
 
@@ -115,7 +115,7 @@ $$$elasticsearch-requestTimeout$$$ `elasticsearch.requestTimeout`
 `elasticsearch.shardTimeout`
 :   Time in milliseconds for {{es}} to wait for responses from shards. Set to 0 to disable. **Default: `30000`**
 
-`elasticsearch.compression` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`elasticsearch.compression` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specifies whether {{kib}} should use compression for communications with {{es}}.
     **Default: `false`**
     It is available in {{ecloud}} 8.3.0 and later versions.
@@ -184,7 +184,7 @@ $$$elasticsearch-user-passwd$$$ `elasticsearch.username` and `elasticsearch.pass
 $$$elasticsearch-service-account-token$$$ `elasticsearch.serviceAccountToken`
 :   If your {{es}} is protected with basic authentication, this token provides the credentials that the {{kib}} server uses to perform maintenance on the {{kib}} index at startup. This setting is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
-`execution_context.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`execution_context.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Propagate request-specific metadata to Elasticsearch server by way of the `x-opaque-id` header.
     It is available in {{ecloud}} 8.1.0 and later versions.
 % TBD: Available only in Elastic Cloud?
@@ -195,7 +195,7 @@ $$$logging-root$$$ `logging.root`
 $$$logging-root-appenders$$$ `logging.root.appenders`
 :   A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that logs to stdout with a `pattern` layout. This is the configuration that all custom loggers will use unless they’re re-configured explicitly. You can override the default behavior by configuring a different [appender](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md#logging-appenders) to apply to `root`.
 
-$$$logging-root-level$$$ `logging.root.level` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$logging-root-level$$$ `logging.root.level` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Level at which a log record should be logged. Supported levels are: *all*, *fatal*, *error*, *warn*, *info*, *debug*, *trace*, *off*. Levels are ordered from *all* (highest) to *off* and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to [change the overall log level](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#change-overall-log-level). **Default: `info`**.
 
     ::::{tip}
@@ -225,36 +225,36 @@ $$$logging-loggers$$$ `logging.loggers[]`
 `logging.appenders[]`
 :   [Appenders](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md#logging-appenders) define how and where log messages are displayed (eg. **stdout** or console) and stored (eg. file on the disk).
 
-`map.includeElasticMapsService` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`map.includeElasticMapsService` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set to `false` to disable connections to Elastic Maps Service. When `includeElasticMapsService` is turned off, only tile layer configured by [`map.tilemap.url`](#tilemap-url) is available in [Maps](docs-content://explore-analyze/visualize/maps.md). **Default: `true`**
 
 `map.emsUrl`
 :   Specifies the URL of a self hosted [{{hosted-ems}}](docs-content://explore-analyze/visualize/maps/maps-connect-to-ems.md#elastic-maps-server)
 
-$$$tilemap-settings$$$ `map.tilemap.options.attribution` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$tilemap-settings$$$ `map.tilemap.options.attribution` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The map attribution string. Provide attributions in markdown and use `\|` to delimit attributions, for example: `"[attribution 1](https://www.attribution1)\|[attribution 2](https://www.attribution2)"`. **Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`**
 
-$$$tilemap-max-zoom$$$ `map.tilemap.options.maxZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$tilemap-max-zoom$$$ `map.tilemap.options.maxZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The maximum zoom level. **Default: `10`**
 
-$$$tilemap-min-zoom$$$ `map.tilemap.options.minZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$tilemap-min-zoom$$$ `map.tilemap.options.minZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The minimum zoom level. **Default: `1`**
 
-$$$tilemap-subdomains$$$ `map.tilemap.options.subdomains` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$tilemap-subdomains$$$ `map.tilemap.options.subdomains` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   An array of subdomains used by the tile service. Specify the position of the subdomain the URL with the token `{{s}}`.
 
-$$$tilemap-url$$$ `map.tilemap.url` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$tilemap-url$$$ `map.tilemap.url` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The URL to the service that {{kib}} uses as the default basemap in [maps](docs-content://explore-analyze/visualize/maps.md) and [vega maps](docs-content://explore-analyze/visualize/custom-visualizations-with-vega.md#vega-with-a-map). By default, {{kib}} sets a basemap from the [Elastic Maps Service](docs-content://explore-analyze/visualize/maps/maps-connect-to-ems.md), but users can point to their own Tile Map Service. For example: `"https://tiles.elastic.co/v2/default/{{z}}/{x}/{{y}}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
-`migrations.batchSize` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`migrations.batchSize` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Defines the number of documents migrated at a time. The higher the value, the faster the Saved Objects migration process performs at the cost of higher memory consumption. If upgrade migrations results in {{kib}} crashing with an out of memory exception or fails due to an Elasticsearch `circuit_breaking_exception`, use a smaller `batchSize` value to reduce the memory pressure. **Default: `1000`**
 
-`migrations.discardUnknownObjects` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`migrations.discardUnknownObjects` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Discard saved objects with unknown types during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined.
     It is available in {{ecloud}} 8.4.0 and later versions.
 % TBD: Supported only in Elastic Cloud?
 
-`migrations.discardCorruptObjects` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`migrations.discardCorruptObjects` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Discard corrupt saved objects, as well as those that cause transform errors during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined.
     It is available in {{ecloud}} 8.4.0 and later versions.
 % TBD: Supported only in Elastic Cloud?
@@ -302,7 +302,7 @@ $$$savedObjects-maxImportPayloadBytes$$$ `savedObjects.maxImportPayloadBytes`
 $$$server-basePath$$$ `server.basePath`
 :   Enables you to specify a path to mount {{kib}} at if you are running behind a proxy. Use the [`server.rewriteBasePath`](#server-rewriteBasePath) setting to tell {{kib}} if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (`/`).
 
-`server.defaultRoute` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`server.defaultRoute` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Specifies the default route when opening Kibana. You can use this setting to modify the landing page when opening Kibana.
 % TBD: Applicable only to Elastic Cloud?
 
@@ -324,37 +324,40 @@ $$$server-compression$$$ `server.compression.enabled`
 `server.compression.referrerWhitelist`
 :   Specifies an array of trusted hostnames, such as the {{kib}} host, or a reverse proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`. **Default: `none`**
 
-`server.compression.brotli.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`server.compression.brotli.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set to `true` to enable brotli (br) compression format.
 
     :::{note}
     Browsers not supporting brotli compression will fallback to using gzip instead. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`. **Default: `false`**
+    :::
+
+    :::{note}
     It is available in {{ecloud}} 8.6.0 and later versions.
     :::
 
-$$$server-securityResponseHeaders-strictTransportSecurity$$$ `server.securityResponseHeaders.strictTransportSecurity` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$server-securityResponseHeaders-strictTransportSecurity$$$ `server.securityResponseHeaders.strictTransportSecurity` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`Strict-Transport-Security`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. To disable, set to `null`. **Default:** `null`
 
-$$$server-securityResponseHeaders-xContentTypeOptions$$$ `server.securityResponseHeaders.xContentTypeOptions` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$server-securityResponseHeaders-xContentTypeOptions$$$ `server.securityResponseHeaders.xContentTypeOptions` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`X-Content-Type-Options`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `nosniff` or `null`. To disable, set to `null`. **Default:** `"nosniff"`
 
-$$$server-securityResponseHeaders-referrerPolicy$$$ `server.securityResponseHeaders.referrerPolicy` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$server-securityResponseHeaders-referrerPolicy$$$ `server.securityResponseHeaders.referrerPolicy` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `no-referrer`, `no-referrer-when-downgrade`, `origin`, `origin-when-cross-origin`, `same-origin`, `strict-origin`, `strict-origin-when-cross-origin`, `unsafe-url`, or `null`. To disable, set to `null`. **Default:** `"strict-origin-when-cross-origin"`
 
-$$$server-securityResponseHeaders-permissionsPolicy$$$ `server.securityResponseHeaders.permissionsPolicy` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$server-securityResponseHeaders-permissionsPolicy$$$ `server.securityResponseHeaders.permissionsPolicy` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format. To disable, set to `null`. **Default:** `camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
-$$$server-securityResponseHeaders-permissionsPolicyReportOnly$$$ `server.securityResponseHeaders.permissionsPolicyReportOnly` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$server-securityResponseHeaders-permissionsPolicyReportOnly$$$ `server.securityResponseHeaders.permissionsPolicyReportOnly` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
-$$$server-securityResponseHeaders-disableEmbedding$$$`server.securityResponseHeaders.disableEmbedding` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$server-securityResponseHeaders-disableEmbedding$$$`server.securityResponseHeaders.disableEmbedding` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`Content-Security-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) and [`X-Frame-Options`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options) headers are configured to disable embedding {{kib}} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors: 'self'` directive to the `Content-Security-Policy` response header and adds the `X-Frame-Options: SAMEORIGIN` response header. **Default:** `false`
 
-$$$server-securityResponseHeaders-crossOriginOpenerPolicy$$$ `server.securityResponseHeaders.crossOriginOpenerPolicy` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$server-securityResponseHeaders-crossOriginOpenerPolicy$$$ `server.securityResponseHeaders.crossOriginOpenerPolicy` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`Cross-Origin-Opener-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `unsafe-none`, `same-origin-allow-popups`, `same-origin`, or `null`. To disable, set to `null`. **Default:** `"same-origin"`
     It is available in {{ecloud}} 8.7.0 and later versions.
 
-`server.customResponseHeaders` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`server.customResponseHeaders` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Header names and values to send on all responses to the client from the {{kib}} server. **Default: `{}`**
 
 $$$server-shutdownTimeout$$$ `server.shutdownTimeout`
@@ -366,7 +369,7 @@ $$$server-host$$$ `server.host`
 `server.keepaliveTimeout`
 :   The number of milliseconds to wait for additional data before restarting the [`server.socketTimeout`](#server-socketTimeout) counter. **Default: `"120000"`**
 
-$$$server-maxPayload$$$ `server.maxPayload` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$server-maxPayload$$$ `server.maxPayload` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The maximum payload size in bytes for incoming server requests. **Default: `1048576`**
 
 `server.name`
@@ -481,7 +484,7 @@ $$$server-ssl-supportedProtocols$$$ `server.ssl.supportedProtocols`
 $$$server-uuid$$$ `server.uuid`
 :   The unique identifier for this {{kib}} instance. It must be a valid UUIDv4. It gets automatically generated on the first startup if not specified and persisted in the `data` path.
 
-$$$settings-xsrf-allowlist$$$ `server.xsrf.allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$settings-xsrf-allowlist$$$ `server.xsrf.allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   It is not recommended to disable protections for arbitrary API endpoints. Instead, supply the `kbn-xsrf` header. The [`server.xsrf.allowlist`](#settings-xsrf-allowlist) setting requires the following format:
 
     ```text
@@ -504,23 +507,23 @@ $$$settings-telemetry-optIn$$$ `telemetry.optIn`
 
     This setting can be changed at any time in [Advanced Settings](/reference/advanced-settings.md). To prevent users from changing it, set [`telemetry.allowChangingOptInStatus`](#telemetry-allowChangingOptInStatus) to `false`. **Default: `true`**
 
-`unifiedSearch.autocomplete.valueSuggestions.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`unifiedSearch.autocomplete.valueSuggestions.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Time in milliseconds to wait for autocomplete suggestions from {{es}}. This value must be a whole number greater than zero. **Default: `"1000"`**
 
-`unifiedSearch.autocomplete.valueSuggestions.terminateAfter` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`unifiedSearch.autocomplete.valueSuggestions.terminateAfter` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Maximum number of documents loaded by each shard to generate autocomplete suggestions. This value must be a whole number greater than zero. **Default: `"100000"`**
 
     ::::{note}
     To reload the logging settings, send a SIGHUP signal to {{kib}}. For more logging configuration options, see the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide.
     ::::
 
-`vega.enableExternalUrls` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`vega.enableExternalUrls` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set to `true` to allow Vega vizualizations to use data from sources other than the linked Elasticsearch cluster. In version 8.0 and later, the `vega.enableExternalUrls` is not supported. Use `vis_type_vega.enableExternalUrls` instead.
 
-`vis_type_table.legacyVisEnabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`vis_type_table.legacyVisEnabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   For 7.x versions version 7.11 and later, a new version of the datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
 
-`vis_type_vega.enableExternalUrls` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`vis_type_vega.enableExternalUrls` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set this value to true to allow Vega to use any URL to access external data sources and images. When false, Vega can only get data from {{es}}. **Default: `false`**
 
 `xpack.ccr.ui.enabled`
@@ -554,7 +557,7 @@ $$$settings-explore-data-in-chart$$$ `xpack.discoverEnhanced.actions.exploreData
     Rollups are deprecated and will be removed in a future version. Use [downsampling](docs-content://manage-data/data-store/data-streams/downsampling-time-series-data-stream.md) instead.
     ::::
 
-`xpack.securitySolution.maxUploadResponseActionFileBytes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`xpack.securitySolution.maxUploadResponseActionFileBytes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Allow to configure the max file upload size for use with the Upload File Repsonse action available with the Defend Integration.  To learn more, check [Endpoint Response actions](docs-content://solutions/security/endpoint-response-actions.md).
     It is available in {{ecloud}} 8.9.0 and later versions.
 % TBD: Available only in Elastic Cloud?

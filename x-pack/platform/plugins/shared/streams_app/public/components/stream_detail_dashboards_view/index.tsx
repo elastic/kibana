@@ -17,7 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import { AddDashboardFlyout } from './add_dashboard_flyout';
 import { DashboardsTable } from './dashboard_table';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
@@ -30,7 +31,7 @@ import { useKibana } from '../../hooks/use_kibana';
 export function StreamDetailDashboardsView({
   definition,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
 }) {
   const [query, setQuery] = useState('');
 
@@ -56,7 +57,14 @@ export function StreamDetailDashboardsView({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const {
-    core: { featureFlags },
+    core: {
+      featureFlags,
+      application: {
+        capabilities: {
+          streams: { [STREAMS_UI_PRIVILEGES.manage]: canLinkAssets },
+        },
+      },
+    },
   } = useKibana();
 
   const renderContentPackItems = featureFlags.getBooleanValue(
@@ -124,6 +132,7 @@ export function StreamDetailDashboardsView({
                   iconType="importAction"
                   iconSide="left"
                   color="primary"
+                  disabled={!canLinkAssets}
                   onClick={() => setIsPopoverOpen(true)}
                 >
                   {i18n.translate(
@@ -182,6 +191,7 @@ export function StreamDetailDashboardsView({
             <EuiButton
               data-test-subj="streamsAppStreamDetailAddDashboardButton"
               iconType="plusInCircle"
+              disabled={!canLinkAssets}
               onClick={() => {
                 setIsAddDashboardFlyoutOpen(true);
               }}
@@ -199,7 +209,7 @@ export function StreamDetailDashboardsView({
           dashboards={filteredDashboards}
           loading={dashboardsFetch.loading}
           selectedDashboards={selectedDashboards}
-          setSelectedDashboards={setSelectedDashboards}
+          setSelectedDashboards={canLinkAssets ? setSelectedDashboards : undefined}
         />
         {definition && isAddDashboardFlyoutOpen ? (
           <AddDashboardFlyout
