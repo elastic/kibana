@@ -436,9 +436,20 @@ describe('ConnectorFields renders', () => {
     });
 
     it('validates PKI configuration fields', async () => {
+      const preSubmitValidator = jest.fn().mockImplementation((data) => {
+        if (!data.config.certificateFile || !data.config.privateKeyFile) {
+          return { message: 'PKI fields are required' };
+        }
+        return null;
+      });
+
       const { findByTestId } = render(
         <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
-          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+          <ConnectorFields 
+            readOnly={false} 
+            isEdit={false} 
+            registerPreSubmitValidator={() => preSubmitValidator} 
+          />
         </ConnectorFormTestProvider>
       );
 
@@ -454,6 +465,7 @@ describe('ConnectorFields renders', () => {
 
       // Verify validation failed
       await waitFor(() => {
+        expect(preSubmitValidator).toHaveBeenCalled();
         expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...pkiConnector,
@@ -473,9 +485,20 @@ describe('ConnectorFields renders', () => {
     });
 
     it('submits form with valid PKI configuration', async () => {
+      const preSubmitValidator = jest.fn().mockImplementation((data) => {
+        if (!data.config.certificateFile || !data.config.privateKeyFile) {
+          return { message: 'PKI fields are required' };
+        }
+        return null;
+      });
+
       const { findByTestId } = render(
         <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
-          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+          <ConnectorFields 
+            readOnly={false} 
+            isEdit={false} 
+            registerPreSubmitValidator={() => preSubmitValidator} 
+          />
         </ConnectorFormTestProvider>
       );
 
@@ -489,6 +512,7 @@ describe('ConnectorFields renders', () => {
 
       // Verify submission
       await waitFor(() => {
+        expect(preSubmitValidator).toHaveBeenCalled();
         expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...pkiConnector,
