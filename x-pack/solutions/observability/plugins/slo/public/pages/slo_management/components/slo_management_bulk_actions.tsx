@@ -46,7 +46,13 @@ export function SloManagementBulkActions({
         {
           'data-test-subj': 'sloSloManagementTableBulkPurgeButton',
           onClick: () => {
-            triggerAction({ items, type: 'bulk_purge', callback: resetSelectedItems });
+            triggerAction({
+              items,
+              type: 'bulk_purge',
+              onConfirm() {
+                resetSelectedItems();
+              },
+            });
             setIsOpen(false);
           },
           name: i18n.translate(

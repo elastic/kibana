@@ -30,7 +30,6 @@ interface SingleAction extends BaseAction {
 interface BulkAction extends BaseAction {
   type: 'bulk_delete' | 'bulk_purge';
   items: SLODefinitionResponse[];
-  callback?: Function;
 }
 
 interface ActionModalContextValue {
@@ -52,9 +51,6 @@ export function ActionModalProvider({ children }: { children: ReactNode }) {
   function handleOnConfirm() {
     triggerAction(undefined);
     action?.onConfirm?.();
-    if (action && 'callback' in action && action.callback) {
-      action.callback();
-    }
   }
 
   function handleAction() {

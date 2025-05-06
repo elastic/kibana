@@ -63,6 +63,7 @@ export function SloManagementTable() {
   };
 
   const selection: EuiTableSelectionType<SLODefinitionResponse> = {
+    selected: selectedItems,
     selectable: (item: SLODefinitionResponse) => {
       return !tasks.find(
         (task) => task.status === 'in-progress' && task.items.some((i) => i.id === item.id)
