@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { getMaintenanceWindowExpirationDate } from './get_maintenance_window_expiration_date';
 import type { DateRange } from '../../../../common';
 import { Frequency } from '@kbn/rrule';

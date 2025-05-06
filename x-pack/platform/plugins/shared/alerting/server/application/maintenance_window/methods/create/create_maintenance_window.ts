@@ -67,8 +67,8 @@ export async function createMaintenanceWindow(
   const id = SavedObjectsUtils.generateId();
 
   const expirationDate = getMaintenanceWindowExpirationDate({
-    rRule: rRule,
-    duration: duration,
+    rRule,
+    duration,
   });
 
   const modificationMetadata = await getModificationMetadata();
