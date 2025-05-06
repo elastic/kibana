@@ -28,7 +28,7 @@ export const processMonitors = (
   const disabledMonitorQueryIds: string[] = [];
   let disabledCount = 0;
   let disabledMonitorsCount = 0;
-  let maxPeriod = 0;
+  const scheduleInMsMap: Record<string, number> = {};
   let projectMonitorsCount = 0;
   const allIds: string[] = [];
   let listOfLocationsSet = new Set<string>();
@@ -63,12 +63,12 @@ export const processMonitors = (
         : monitorLocIds;
       listOfLocationsSet = new Set([...listOfLocationsSet, ...monitorLocIds]);
 
-      maxPeriod = Math.max(maxPeriod, periodToMs(attrs[ConfigKey.SCHEDULE]));
+      scheduleInMsMap[attrs[ConfigKey.MONITOR_QUERY_ID]] = periodToMs(attrs[ConfigKey.SCHEDULE]);
     }
   }
 
   return {
-    maxPeriod,
+    maxPeriod: Math.max(...Object.values(scheduleInMsMap)),
     allIds,
     enabledMonitorQueryIds,
     disabledMonitorQueryIds,
@@ -78,5 +78,6 @@ export const processMonitors = (
     projectMonitorsCount,
     monitorLocationIds: [...listOfLocationsSet],
     monitorQueryIdToConfigIdMap,
+    scheduleInMsMap,
   };
 };

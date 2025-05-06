@@ -7,40 +7,104 @@
 
 import pMap from 'p-map';
 import { times } from 'lodash';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { intersection } from 'lodash';
-import { AlertStatusMetaData } from '../../../../common/runtime_types/alert_rules/common';
+import moment from 'moment';
 import {
-  FINAL_SUMMARY_FILTER,
-  getRangeFilter,
-  SUMMARY_FILTER,
-} from '../../../../common/constants/client_defaults';
+  AlertStatusConfigs,
+  AlertStatusMetaData,
+  AlertPendingStatusConfigs,
+} from '../../../../common/runtime_types/alert_rules/common';
+
 import { OverviewPing } from '../../../../common/runtime_types';
-import { createEsParams, SyntheticsEsClient } from '../../../lib';
+import { SyntheticsEsClient } from '../../../lib';
+import { getSearchPingsParams } from './get_search_ping_params';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
-const fields = [
-  '@timestamp',
-  'summary',
-  'monitor',
-  'observer',
-  'config_id',
-  'error',
-  'agent',
-  'url',
-  'state',
-  'tags',
-  'service',
-  'labels',
-];
-type StatusConfigs = Record<string, AlertStatusMetaData>;
-
 export interface AlertStatusResponse {
-  upConfigs: StatusConfigs;
-  downConfigs: StatusConfigs;
+  upConfigs: AlertStatusConfigs;
+  downConfigs: AlertStatusConfigs;
+  pendingConfigs: AlertPendingStatusConfigs;
   enabledMonitorQueryIds: string[];
 }
+
+const getPendingConfigs = async ({
+  monitorQueryIds,
+  monitorLocationIds,
+  esClient,
+  includeRetests,
+  upConfigs,
+  downConfigs,
+  monitorLocationsMap,
+}: {
+  monitorQueryIds: string[];
+  monitorLocationIds: string[];
+  esClient: SyntheticsEsClient;
+  includeRetests: boolean;
+  upConfigs: AlertStatusConfigs;
+  downConfigs: AlertStatusConfigs;
+  monitorLocationsMap: Record<string, string[]>;
+}) => {
+  // Check if a config is missing, if it is it means that the monitor is pending
+  const pendingConfigs: AlertPendingStatusConfigs = {};
+  const idsToQuery: Set<string> = new Set();
+  const locationsToQuery: Set<string> = new Set();
+
+  for (const monitorQueryId of monitorQueryIds) {
+    for (const locationId of monitorLocationIds) {
+      const configWithLocationId = `${monitorQueryId}-${locationId}`;
+
+      const isConfigMissing =
+        !upConfigs[configWithLocationId] &&
+        !downConfigs[configWithLocationId] &&
+        monitorLocationsMap[monitorQueryId]?.includes(locationId);
+
+      if (isConfigMissing) {
+        // Add the monitor and location ids to fetch the latest ping
+        // for the pending config
+        idsToQuery.add(monitorQueryId);
+        locationsToQuery.add(locationId);
+        // Add a temporary pending config, this will be updated if a ping is found
+        // If a monitor has no pings the config will not be updated
+        pendingConfigs[configWithLocationId] = {
+          status: 'pending',
+          configId: monitorQueryId,
+          monitorQueryId,
+          locationId,
+        };
+      }
+    }
+  }
+
+  // Get the last ping for the pending configs in the last month
+  const params = getSearchPingsParams({
+    idSize: Array.from(idsToQuery).length,
+    idsToQuery: Array.from(idsToQuery),
+    monitorLocationIds: Array.from(locationsToQuery),
+    numberOfChecks: 1,
+    includeRetests,
+    range: { from: moment().subtract(1, 'M').toISOString(), to: 'now' },
+  });
+
+  const {
+    body: { aggregations },
+  } = await esClient.search<OverviewPing, typeof params>(params);
+
+  aggregations?.id.buckets.forEach(({ location, key: monitorQueryId }) => {
+    location.buckets.forEach(({ key: locationId, totalChecks }) => {
+      const latestPing = totalChecks.hits.hits[0]._source;
+      const configWithLocationId = `${monitorQueryId}-${locationId}`;
+
+      pendingConfigs[configWithLocationId] = {
+        ...pendingConfigs[configWithLocationId],
+        ping: latestPing,
+        timestamp: latestPing['@timestamp'],
+      };
+    });
+  });
+
+  return pendingConfigs;
+};
 
 export async function queryMonitorStatusAlert({
   esClient,
@@ -50,6 +114,8 @@ export async function queryMonitorStatusAlert({
   monitorLocationsMap,
   numberOfChecks,
   includeRetests = true,
+  scheduleInMsMap,
+  waitSecondsBeforeIsPending = 60,
 }: {
   esClient: SyntheticsEsClient;
   monitorLocationIds: string[];
@@ -58,82 +124,27 @@ export async function queryMonitorStatusAlert({
   monitorLocationsMap: Record<string, string[]>;
   numberOfChecks: number;
   includeRetests?: boolean;
+  scheduleInMsMap: Record<string, number>;
+  waitSecondsBeforeIsPending?: number;
 }): Promise<AlertStatusResponse> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
-  const upConfigs: StatusConfigs = {};
-  const downConfigs: StatusConfigs = {};
+  const upConfigs: AlertStatusConfigs = {};
+  const downConfigs: AlertStatusConfigs = {};
 
   await pMap(
     times(pageCount),
     async (i) => {
       const idsToQuery = (monitorQueryIds as string[]).slice(i * idSize, i * idSize + idSize);
-      const params = createEsParams({
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...(includeRetests ? [SUMMARY_FILTER] : [FINAL_SUMMARY_FILTER]),
-              getRangeFilter({ from: range.from, to: range.to }),
-              {
-                terms: {
-                  'monitor.id': idsToQuery,
-                },
-              },
-            ] as QueryDslQueryContainer[],
-          },
-        },
-        aggs: {
-          id: {
-            terms: {
-              field: 'monitor.id',
-              size: idSize,
-            },
-            aggs: {
-              location: {
-                terms: {
-                  field: 'observer.name',
-                  size: monitorLocationIds.length || 100,
-                },
-                aggs: {
-                  downChecks: {
-                    filter: {
-                      range: {
-                        'summary.down': {
-                          gte: '1',
-                        },
-                      },
-                    },
-                  },
-                  totalChecks: {
-                    top_hits: {
-                      size: numberOfChecks,
-                      sort: [
-                        {
-                          '@timestamp': {
-                            order: 'desc',
-                          },
-                        },
-                      ],
-                      _source: {
-                        includes: fields,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
 
-      if (monitorLocationIds.length > 0) {
-        params.query.bool.filter.push({
-          terms: {
-            'observer.name': monitorLocationIds,
-          },
-        });
-      }
+      const params = getSearchPingsParams({
+        idSize,
+        idsToQuery,
+        monitorLocationIds,
+        range,
+        numberOfChecks,
+        includeRetests,
+      });
 
       const { body: result } = await esClient.search<OverviewPing, typeof params>(
         params,
@@ -164,6 +175,16 @@ export async function queryMonitorStatusAlert({
             const configId = latestPing.config_id;
             const monitorQueryId = latestPing.monitor.id;
 
+            const msSinceLastPing =
+              new Date().getTime() - new Date(latestPing['@timestamp']).getTime();
+            const msBeforeIsPending =
+              scheduleInMsMap[monitorQueryId] +
+              moment.duration(waitSecondsBeforeIsPending, 'seconds').asMilliseconds();
+
+            // Example: if a monitor has a schedule of 5m and the waitSecondsBeforeIsPending is 1m the last valid ping can be at (5+1)m
+            // If it's greater than that it means the monitor is pending
+            const isValidPing = msBeforeIsPending - msSinceLastPing > 0;
+
             const meta: AlertStatusMetaData = {
               ping: latestPing,
               configId,
@@ -180,13 +201,13 @@ export async function queryMonitorStatusAlert({
               status: 'up',
             };
 
-            if (downCount > 0) {
+            if (isValidPing && downCount > 0) {
               downConfigs[`${configId}-${monLocationId}`] = {
                 ...meta,
                 status: 'down',
               };
             }
-            if (isLatestPingUp) {
+            if (isValidPing && isLatestPingUp) {
               upConfigs[`${configId}-${monLocationId}`] = {
                 ...meta,
                 status: 'up',
@@ -199,9 +220,20 @@ export async function queryMonitorStatusAlert({
     { concurrency: 5 }
   );
 
+  const pendingConfigs = await getPendingConfigs({
+    monitorQueryIds,
+    monitorLocationIds,
+    esClient,
+    includeRetests,
+    upConfigs,
+    downConfigs,
+    monitorLocationsMap,
+  });
+
   return {
     upConfigs,
     downConfigs,
+    pendingConfigs,
     enabledMonitorQueryIds: monitorQueryIds,
   };
 }

@@ -76,6 +76,7 @@ export const AlertStatusCodec = t.interface({
 
 export type StaleDownConfig = t.TypeOf<typeof StaleAlertStatusMetaDataCodec>;
 export type AlertStatusMetaData = t.TypeOf<typeof AlertStatusMetaDataCodec>;
+type AlertPendingStatusMetaData = t.TypeOf<typeof AlertPendingStatusMetaDataCodec>;
 export type AlertOverviewStatus = t.TypeOf<typeof AlertStatusCodec>;
 export type StatusRuleInspect = AlertOverviewStatus & {
   monitors: Array<{
@@ -86,3 +87,4 @@ export type StatusRuleInspect = AlertOverviewStatus & {
 };
 export type TLSRuleInspect = StatusRuleInspect;
 export type AlertStatusConfigs = Record<string, AlertStatusMetaData>;
+export type AlertPendingStatusConfigs = Record<string, AlertPendingStatusMetaData>;
