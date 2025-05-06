@@ -21,11 +21,15 @@ import type {
 import { Graph } from '.';
 import { MinimapProps } from './types';
 
-// Define a type for our story args that includes custom fields for grid and minimap controls
-interface GraphStoryProps extends Omit<GraphData, 'snapGrid'> {
+// Extract grid controls into a dedicated type
+interface GridControls {
   snapGridX?: number;
   snapGridY?: number;
-  // Add individual minimap properties
+  zoomDuration?: number;
+}
+
+// Extract minimap dot notation controls into a dedicated type
+interface MinimapDotControls {
   'minimap.pannable'?: boolean;
   'minimap.zoomable'?: boolean;
   'minimap.inversePan'?: boolean;
@@ -44,29 +48,12 @@ interface GraphStoryProps extends Omit<GraphData, 'snapGrid'> {
   'minimap.ariaLabel'?: string;
 }
 
+// Define a type for our story args that includes custom fields for grid and minimap controls
+interface GraphStoryProps extends Omit<GraphData, 'snapGrid'>, GridControls, MinimapDotControls {}
+
 // Define a type that extends StoryObj with our custom properties
 type CustomStory = StoryObj<typeof Graph> & {
-  args: {
-    snapGridX?: number;
-    snapGridY?: number;
-    'minimap.pannable'?: boolean;
-    'minimap.zoomable'?: boolean;
-    'minimap.inversePan'?: boolean;
-    'minimap.zoomStep'?: number;
-    'minimap.offsetScale'?: number;
-    'minimap.nodeColor'?: string;
-    'minimap.nodeStrokeColor'?: string;
-    'minimap.nodeBorderRadius'?: number;
-    'minimap.nodeStrokeWidth'?: number;
-    'minimap.nodeClassName'?: string;
-    'minimap.bgColor'?: string;
-    'minimap.maskColor'?: string;
-    'minimap.maskStrokeColor'?: string;
-    'minimap.maskStrokeWidth'?: number;
-    'minimap.position'?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
-    'minimap.ariaLabel'?: string;
-    [key: string]: any;
-  };
+  args: GraphData & GridControls & MinimapDotControls;
 };
 
 // Use a more flexible type assertion approach
@@ -80,6 +67,7 @@ const meta = {
     snapToGrid,
     snapGridX,
     snapGridY,
+    zoomDuration,
     ...rest
   }: GraphStoryProps) => {
     const defaultGridX = 1;
@@ -113,6 +101,7 @@ const meta = {
           minimap={Object.keys(minimapConfig).length > 0 ? minimapConfig : minimap}
           snapToGrid={snapToGrid}
           snapGrid={snapGrid}
+          zoomDuration={zoomDuration}
         />
       </ThemeProvider>
     );
@@ -123,6 +112,7 @@ const meta = {
     snapToGrid: false,
     snapGridX: 1,
     snapGridY: 1,
+    zoomDuration: 500, // Default zoom duration
   },
   argTypes: {
     interactive: { control: 'boolean', defaultValue: true },
@@ -159,13 +149,18 @@ const meta = {
         defaultValue: { summary: '1' },
       },
     },
+    zoomDuration: {
+      control: { type: 'number', min: 0, max: 2000, step: 100 },
+      name: 'Zoom Duration',
+      description: 'Duration of zoom transition in milliseconds',
+      table: {
+        defaultValue: { summary: '500' },
+      },
+    },
     // Hide the actual minimap object control
     minimap: {
       type: 'object',
       control: true,
-      // table: {
-      //   disable: true,
-      // },
     },
     // Add individual controls for minimap properties
     'minimap.pannable': {
@@ -456,6 +451,13 @@ const extractEdges = (
   return { nodes: Object.values(nodes).reverse(), edges };
 };
 
+// Create a typed version of meta.args to use in stories
+const baseArgs = {
+  ...meta.args,
+  interactive: meta.args?.interactive ?? true, // Ensure interactive is always boolean
+  zoomDuration: meta.args?.zoomDuration ?? 500, // Ensure zoomDuration is always a number
+} as const;
+
 export const SimpleAPIMock: CustomStory = {
   args: {
     interactive: true,
@@ -509,12 +511,13 @@ export const SimpleAPIMock: CustomStory = {
     snapToGrid: false,
     snapGridX: 1,
     snapGridY: 1,
+    zoomDuration: 500,
   },
 };
 
 export const GroupWithWarningAPIMock: CustomStory = {
   args: {
-    ...meta.args,
+    ...baseArgs,
     nodes: [
       {
         id: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
@@ -610,6 +613,7 @@ export const GroupWithWarningAPIMock: CustomStory = {
     snapToGrid: false,
     snapGridX: 1,
     snapGridY: 1,
+    zoomDuration: 500,
   },
 };
 
@@ -738,17 +742,18 @@ const baseGraph: EnhancedNodeViewModel[] = [
 
 export const LargeGraph: CustomStory = {
   args: {
-    ...meta.args,
+    ...baseArgs,
     ...extractEdges(baseGraph),
     snapToGrid: false,
     snapGridX: 1,
     snapGridY: 1,
+    zoomDuration: 500,
   },
 };
 
 export const GraphLabelOverlayCases: CustomStory = {
   args: {
-    ...meta.args,
+    ...baseArgs,
     ...extractEdges([
       ...baseGraph,
       {
@@ -778,12 +783,13 @@ export const GraphLabelOverlayCases: CustomStory = {
     snapToGrid: false,
     snapGridX: 1,
     snapGridY: 1,
+    zoomDuration: 500,
   },
 };
 
 export const GraphStackedEdgeCases: CustomStory = {
   args: {
-    ...meta.args,
+    ...baseArgs,
     ...extractEdges([
       ...baseGraph,
       {
@@ -806,12 +812,13 @@ export const GraphStackedEdgeCases: CustomStory = {
     snapToGrid: false,
     snapGridX: 1,
     snapGridY: 1,
+    zoomDuration: 500,
   },
 };
 
 export const GraphLargeStackedEdgeCases: CustomStory = {
   args: {
-    ...meta.args,
+    ...baseArgs,
     ...extractEdges([
       ...baseGraph,
       ...Array(10)
@@ -838,14 +845,15 @@ export const GraphLargeStackedEdgeCases: CustomStory = {
     snapToGrid: false,
     snapGridX: 1,
     snapGridY: 1,
+    zoomDuration: 500,
   },
 };
 
 export const GraphWithMinimap: CustomStory = {
   args: {
-    ...meta.args,
+    ...baseArgs,
     ...extractEdges(baseGraph),
-    // Convert the minimap object properties to dot notation to work with controls
+    // Use the minimap dot controls interface properties
     'minimap.pannable': true,
     'minimap.zoomable': true,
     'minimap.inversePan': false,
@@ -865,6 +873,7 @@ export const GraphWithMinimap: CustomStory = {
     snapToGrid: false,
     snapGridX: 1,
     snapGridY: 1,
+    zoomDuration: 500,
   },
   parameters: {
     docs: {
