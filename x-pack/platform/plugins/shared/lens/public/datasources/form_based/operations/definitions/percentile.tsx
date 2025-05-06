@@ -7,7 +7,7 @@
 
 import { EuiFieldNumber, EuiRange, EuiRangeProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
+import { i18n, TranslateArguments } from '@kbn/i18n';
 import { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import {
   buildExpression,
@@ -18,7 +18,6 @@ import {
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { Formatters } from '@formatjs/intl/node_modules/intl-messageformat/src/formatters';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -53,12 +52,13 @@ function ofName(
   timeShift: string | undefined,
   reducedTimeRange: string | undefined
 ) {
-  const formatters: Formatters = {
+  const formatters: TranslateArguments['formatters'] = {
     getNumberFormat: (locale, opts) =>
       new Intl.NumberFormat(locale, {
         ...opts,
         maximumFractionDigits: 4,
       }),
+    // @ts-expect-error - There’s a small mismatch between @formatjs type and Intl API that only applies to the date function, we’re ignoring that
     getDateTimeFormat: (locale, opts) => new Intl.DateTimeFormat(locale, opts),
     getPluralRules: (locale, opts) =>
       new Intl.PluralRules(locale, {

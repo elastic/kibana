@@ -8,8 +8,7 @@
  */
 
 import { createIntl, createIntlCache, IntlConfig, IntlShape } from '@formatjs/intl';
-import type { MessageDescriptor } from '@formatjs/intl';
-import { Formatters } from '@formatjs/intl/node_modules/intl-messageformat/src/formatters';
+import type { MessageDescriptor, Formatters } from '@formatjs/intl';
 import { handleIntlError } from './error_handler';
 
 import { Translation, TranslationInput } from '../translation';
@@ -102,6 +101,11 @@ export function getLocale() {
   return intl.locale;
 }
 
+type MessageFormatters = Pick<
+  Formatters,
+  'getNumberFormat' | 'getDateTimeFormat' | 'getPluralRules'
+>;
+
 export interface TranslateArguments {
   /**
    * Will be used unless translation was successful
@@ -125,7 +129,7 @@ export interface TranslateArguments {
   /**
    * Custom formatters to override the default intl formatters
    */
-  formatters?: Formatters;
+  formatters?: MessageFormatters;
 }
 
 /**
@@ -158,6 +162,7 @@ export function translate(
         description,
       },
       values,
+      // @ts-expect-error - There’s a small mismatch between @formatjs type and Intl API that only applies to the date function, we’re ignoring that
       { ignoreTag, shouldParseSkeletons: true, formatters }
     );
   } catch (e) {
