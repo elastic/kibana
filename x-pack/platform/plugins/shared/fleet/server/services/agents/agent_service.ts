@@ -29,7 +29,7 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { getAgentsByKuery, getAgentById, getByIds } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
-import { getLatestAvailableAgentVersion } from './versions';
+import { getLatestAvailableAgentVersion, getAvailableVersions } from './versions';
 
 /**
  * A service for interacting with Agent data. See {@link AgentClient} for more information.
@@ -116,6 +116,11 @@ export interface AgentClient {
    * Return the latest agent available version formatted for the docker image
    */
   getLatestAgentAvailableDockerImageVersion(includeCurrentVersion?: boolean): Promise<string>;
+
+  /**
+   * Return all available agent versions
+   */
+  getAvailableVersions(): Promise<string[]>;
 }
 
 /**
@@ -184,6 +189,10 @@ class AgentClientImpl implements AgentClient {
   public async getLatestAgentAvailableVersion(includeCurrentVersion?: boolean) {
     await this.#runPreflight();
     return getLatestAvailableAgentVersion({ includeCurrentVersion });
+  }
+
+  public async getAvailableVersions() {
+    return await getAvailableVersions();
   }
 
   #runPreflight = async () => {
