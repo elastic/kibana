@@ -26,9 +26,15 @@ export interface CategoryAxisPanelProps {
   axis: CategoryAxis;
   onPositionChanged: (position: Position) => void;
   setCategoryAxis: (value: CategoryAxis) => void;
+  disableAxisControls: boolean;
 }
 
-function CategoryAxisPanel({ axis, onPositionChanged, setCategoryAxis }: CategoryAxisPanelProps) {
+function CategoryAxisPanel({
+  axis,
+  onPositionChanged,
+  setCategoryAxis,
+  disableAxisControls,
+}: CategoryAxisPanelProps) {
   const setAxis = useCallback(
     <T extends keyof CategoryAxis>(paramName: T, value: CategoryAxis[T]) => {
       const updatedAxis = {
@@ -96,6 +102,7 @@ function CategoryAxisPanel({ axis, onPositionChanged, setCategoryAxis }: Categor
           axisLabels={axis.labels}
           axisFilterCheckboxName={`xAxisFilterLabelsCheckbox${axis.id}`}
           setAxisLabel={setAxisLabel}
+          disableAxisControls={disableAxisControls}
         />
       )}
     </EuiPanel>
