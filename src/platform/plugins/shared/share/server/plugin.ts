@@ -14,7 +14,11 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { TASK_ID, getDeleteUnusedUrlTask, runDeleteUnusedUrlsTask } from './unused_urls_task';
+import {
+  TASK_ID,
+  getDeleteUnusedUrlTaskInstance,
+  runDeleteUnusedUrlsTask,
+} from './unused_urls_task';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
 import {
@@ -138,10 +142,10 @@ export class SharePlugin
     this.logger.debug('Starting plugin');
 
     if (this.config.url_expiration.enabled && taskManager) {
-      const unusedUrlsTask = getDeleteUnusedUrlTask(
+      const taskInstance = getDeleteUnusedUrlTaskInstance(
         this.config.url_expiration.check_interval_in_seconds
       );
-      taskManager.ensureScheduled(unusedUrlsTask);
+      taskManager.ensureScheduled(taskInstance);
     }
 
     return {

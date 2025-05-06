@@ -27,7 +27,7 @@ export {
 } from './unused_urls_task';
 
 export {
-  getDeleteUnusedUrlTask,
+  getDeleteUnusedUrlTaskInstance,
   deleteUnusedUrls,
   fetchAllUnusedUrls,
   runDeleteUnusedUrlsTask,
