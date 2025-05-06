@@ -24,6 +24,7 @@ import { FailureBadge } from './failure_badge';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
+import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -286,6 +287,7 @@ export function WaterfallItem({
           <PrefixIcon item={item} />
         </SpanActionToolTip>
         {item.isOrphan ? <OrphanItemTooltipIcon docType={item.docType} /> : null}
+        {item.missingDestination ? <SpanMissingDestinationTooltip /> : null}
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
 
