@@ -68,9 +68,10 @@ export interface GraphProps extends CommonProps {
    */
   snapToGrid?: boolean;
   /**
-   * Controls the grid size  - usefull for snapping to grid
+   * Controls the grid size - useful for snapping to grid
+   * First value is horizontal grid size, second is vertical grid size
    */
-  snapGrid?: number;
+  snapGrid?: [number, number];
 }
 
 const nodeTypes = {
@@ -110,7 +111,7 @@ export const Graph = memo<GraphProps>(
     children,
     minimap,
     snapToGrid = true,
-    snapGrid = 1,
+    snapGrid = [1, 1],
     ...rest
   }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
@@ -164,8 +165,7 @@ export const Graph = memo<GraphProps>(
       },
       [interactive]
     );
-    console.log("snapToGrid", snapToGrid);
-    console.log("snapGrid", snapGrid);
+
     return (
       <div {...rest}>
         <SvgDefsMarker />
@@ -180,7 +180,7 @@ export const Graph = memo<GraphProps>(
           edgesFocusable={false}
           onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
           snapToGrid={snapToGrid}
-          snapGrid={[snapGrid, snapGrid]}
+          snapGrid={snapGrid}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           proOptions={{ hideAttribution: true }}
