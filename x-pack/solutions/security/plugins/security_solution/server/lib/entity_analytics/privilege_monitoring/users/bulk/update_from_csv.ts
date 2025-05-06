@@ -6,32 +6,31 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+
 import { Readable } from 'stream';
+import type { Either } from 'fp-ts/Either';
+import { isRight } from 'fp-ts/Either';
+import type { Batch, BulkProcessingError, BulkProcessingResults, Options } from './types';
 
-interface Batch {
-  batch: string[];
-  existingUsers: Record<string, string>;
-}
-
-interface Options {
-  flushBytes: number;
-  retries: number;
-}
-
-interface BulkProcessingError {
-  message: string;
-  username: string;
-}
-
-export const bulkProcessBatch =
+export const bulkBatchUpsertFromCSV =
   (esClient: ElasticsearchClient, index: string, { flushBytes, retries }: Options) =>
   async (batch: Batch) => {
     const errors: BulkProcessingError[] = [];
+    let parsingFailures = 0;
     const { failed, successful } = await esClient.helpers.bulk<string>({
       index,
       flushBytes,
       retries,
-      datasource: Readable.from(batch.batch),
+      datasource: Readable.from(batch.uploaded)
+        .filter((either: Either<string, string>) => {
+          if (isRight(either)) {
+            return true;
+          }
+          errors.push({ message: either.left });
+          parsingFailures++;
+          return false;
+        })
+        .map((e) => e.right),
       refreshOnCompletion: index,
       onDrop: ({ error, document }) => {
         errors.push({
@@ -42,7 +41,7 @@ export const bulkProcessBatch =
       onDocument: (username) => {
         const id = batch.existingUsers[username];
         const labels = {
-          monitoring: { privileged_users: 'monitored' },
+          monitoring: { privileged_users: 'privileged_user_monitored' },
           sources: ['csv'],
         };
         if (!id) {
@@ -67,5 +66,10 @@ export const bulkProcessBatch =
       },
     });
 
-    return { failed, successful, errors, batch };
+    return {
+      failed: failed + parsingFailures,
+      successful,
+      errors,
+      batch,
+    } satisfies BulkProcessingResults;
   };

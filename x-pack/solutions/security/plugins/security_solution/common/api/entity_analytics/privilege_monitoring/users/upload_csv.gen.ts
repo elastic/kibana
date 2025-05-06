@@ -19,7 +19,7 @@ import { z } from '@kbn/zod';
 export type PrivmonUserCsvUploadErrorItem = z.infer<typeof PrivmonUserCsvUploadErrorItem>;
 export const PrivmonUserCsvUploadErrorItem = z.object({
   message: z.string(),
-  index: z.number().int(),
+  username: z.string().optional(),
 });
 
 export type PrivmonUserCsvUploadStats = z.infer<typeof PrivmonUserCsvUploadStats>;
