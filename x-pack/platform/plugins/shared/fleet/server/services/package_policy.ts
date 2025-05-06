@@ -100,7 +100,6 @@ import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
   MAX_CONCURRENT_PACKAGE_ASSETS,
-  MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
 } from '../constants';
 
 import { inputNotAllowedInAgentless } from '../../common/services/agentless_policy_helper';
@@ -132,10 +131,7 @@ import type {
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
 } from './package_policy_service';
-import {
-  installAssetsForInputPackagePolicy,
-  removeAssetsForInputPackagePolicy,
-} from './epm/packages/input_type_packages';
+import { installAssetsForInputPackagePolicy } from './epm/packages/input_type_packages';
 import { auditLoggingService } from './audit_logging';
 import {
   extractAndUpdateSecrets,
@@ -1664,37 +1660,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (secretsToDelete.length > 0) {
       await deleteSecrets({ esClient, soClient, ids: secretsToDelete });
     }
-
-    await pMap(
-      packagePolicies,
-      async (packagePolicy) => {
-        const packageInfo = await getPackageInfo({
-          savedObjectsClient: soClient,
-          pkgName: packagePolicy.package?.name || '',
-          pkgVersion: packagePolicy.package?.version || '',
-        });
-
-        // If input package and the package has no other policies, remove assets.
-        if (packageInfo?.type === 'input') {
-          const packagePolicySO = await soClient.find<PackagePolicySOAttributes>({
-            type: savedObjectType,
-            filter: `${savedObjectType}.attributes.package.name:${escapeSearchQueryPhrase(
-              packageInfo.name
-            )}`,
-            perPage: SO_SEARCH_LIMIT,
-          });
-          if (packagePolicySO.saved_objects.length === 0) {
-            await removeAssetsForInputPackagePolicy({
-              packageInfo,
-              logger,
-              esClient,
-              soClient,
-            });
-          }
-        }
-      },
-      { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
-    );
 
     try {
       await packagePolicyService.runPostDeleteExternalCallbacks(

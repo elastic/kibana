@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
-import type { NewPackagePolicy, PackageInfo } from '../../../types';
+import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../types';
 import { DATASET_VAR_NAME } from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
 
@@ -29,6 +29,9 @@ import { installIndexTemplatesAndPipelines } from './install_index_template_pipe
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import { cleanupAssets } from './remove';
 
+export const getDatasetName = (packagePolicyInput: NewPackagePolicyInput[]): string =>
+  packagePolicyInput[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
+
 // install the assets needed for inputs type packages
 export async function installAssetsForInputPackagePolicy(opts: {
   pkgInfo: PackageInfo;
@@ -42,7 +45,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
 
   if (pkgInfo.type !== 'input') return;
 
-  const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
+  const datasetName = getDatasetName(packagePolicy.inputs);
   const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: dataStream.type,
@@ -68,7 +71,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
       );
     } else {
       logger.info(
-        `Data stream for dataset ${datasetName} already exists, skipping index template creation for ${packagePolicy.id}`
+        `Data stream for dataset ${datasetName} already exists, skipping index template creation`
       );
       return;
     }
@@ -80,18 +83,17 @@ export async function installAssetsForInputPackagePolicy(opts: {
   });
 
   if (existingIndexTemplate) {
-    const indexTemplateOwnnedByDifferentPackage =
+    const indexTemplateOwnedByDifferentPackage =
       existingIndexTemplate._meta?.package?.name !== pkgInfo.name;
-    if (indexTemplateOwnnedByDifferentPackage && !force) {
+    if (indexTemplateOwnedByDifferentPackage && !force) {
       // index template already exists but there is no data stream yet
       // we do not want to override the index template
-
       throw new PackagePolicyValidationError(
         `Index template "${dataStream.type}-${datasetName}" already exist and is not managed by this package, force flag is required`
       );
     } else {
       logger.info(
-        `Index template "${dataStream.type}-${datasetName}" already exists, skipping index template creation for ${packagePolicy.id}`
+        `Index template "${dataStream.type}-${datasetName}" already exists, skipping index template creation`
       );
       return;
     }
@@ -102,6 +104,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
     pkgName: pkgInfo.name,
     logger,
   });
+
   let packageInstallContext: PackageInstallContext | undefined;
   if (!installedPkgWithAssets) {
     throw new PackageNotFoundError(
@@ -153,23 +156,42 @@ export async function installAssetsForInputPackagePolicy(opts: {
 // Remove the assets installed for input-type packages
 export async function removeAssetsForInputPackagePolicy(opts: {
   packageInfo: PackageInfo;
+  datasetName: string;
   logger: Logger;
   esClient: ElasticsearchClient;
-  soClient: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
 }) {
-  const { logger, packageInfo, esClient, soClient } = opts;
+  const { logger, packageInfo, esClient, savedObjectsClient, datasetName } = opts;
 
   if (packageInfo.type === 'input' && packageInfo.status === 'installed') {
     logger.info(`Removing assets for input package ${packageInfo.name}:${packageInfo.version}`);
     try {
       const installation = await getInstallation({
-        savedObjectsClient: soClient,
+        savedObjectsClient,
         pkgName: packageInfo.name,
       });
       if (!installation) {
         throw new FleetError(`${packageInfo.name} is not installed`);
       }
-      await cleanupAssets(installation, esClient, soClient);
+      const {
+        installed_es: installedEs,
+        installed_kibana: installedKibana,
+        es_index_patterns: esIndexPatterns,
+      } = installation;
+      const filteredInstalledEs = installedEs.filter((asset) => asset.id.includes(datasetName));
+      const filteredInstalledKibana = installedKibana.filter((asset) =>
+        asset.id.includes(datasetName)
+      );
+      const filteredEsIndexPatterns: Record<string, string> = {};
+      filteredEsIndexPatterns[datasetName] = esIndexPatterns[datasetName];
+      const installationToDelete = {
+        ...installation,
+        installed_es: filteredInstalledEs,
+        installed_kibana: filteredInstalledKibana,
+        es_index_patterns: filteredEsIndexPatterns,
+        package_assets: [],
+      };
+      await cleanupAssets(installationToDelete, installation, esClient, savedObjectsClient);
     } catch (error) {
       logger.error(
         `Failed to remove assets for input package ${packageInfo.name}:${packageInfo.version}: ${error.message}`

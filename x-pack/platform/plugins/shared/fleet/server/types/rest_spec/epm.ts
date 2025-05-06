@@ -664,6 +664,16 @@ export const DeleteKibanaAssetsRequestSchema = {
   }),
 };
 
+export const DeletePackageInputAssetsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  query: schema.object({
+    packagePolicyId: schema.string(),
+  }),
+};
+
 export const GetInputsRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),

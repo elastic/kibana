@@ -50,6 +50,7 @@ export const EPM_API_ROUTES = {
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
   BULK_ASSETS_PATTERN: `${EPM_API_ROOT}/bulk_assets`,
   INPUTS_PATTERN: `${EPM_API_ROOT}/templates/{pkgName}/{pkgVersion}/inputs`,
+  INPUT_PACKAGES_PATTERN: `${EPM_API_ROOT}/input_packages/{pkgName}/{pkgVersion}`,
 
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
 };

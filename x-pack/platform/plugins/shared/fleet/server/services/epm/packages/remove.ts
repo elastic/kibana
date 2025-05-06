@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { difference } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
 
@@ -340,7 +341,8 @@ async function deleteAssets(
     name,
     version,
   }: Installation,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  isInputPackage?: boolean
 ) {
   const logger = appContextService.getLogger();
   const { indexTemplatesAndPipelines, indexAssets, transformAssets, otherAssets } =
@@ -495,19 +497,24 @@ export function cleanupTransforms(
  * e.g. when a package policy is deleted and the package has no more policies.
  */
 export async function cleanupAssets(
-  installation: Installation,
+  installationToDelete: Installation,
+  originalInstallation: Installation,
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ) {
-  await deleteAssets(installation, esClient);
-  await soClient.update(PACKAGES_SAVED_OBJECT_TYPE, installation.name, {
-    installed_es: [],
-    installed_kibana: [],
+  await deleteAssets(installationToDelete, esClient, true);
+
+  const { installed_es: installedEs, installed_kibana: installedKibana } = originalInstallation;
+  const { installed_es: ESToRemove, installed_kibana: kibanaToRemove } = installationToDelete;
+
+  await soClient.update(PACKAGES_SAVED_OBJECT_TYPE, originalInstallation.name, {
+    installed_es: difference(installedEs, ESToRemove),
+    installed_kibana: difference(installedKibana, kibanaToRemove),
   });
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
-    id: installation.name,
-    name: installation.name,
+    id: originalInstallation.name,
+    name: originalInstallation.name,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 }

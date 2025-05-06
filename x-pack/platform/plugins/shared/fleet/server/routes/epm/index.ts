@@ -61,6 +61,7 @@ import {
   GetOneBulkOperationPackagesResponseSchema,
   BulkUninstallPackagesRequestSchema,
   CustomIntegrationRequestSchema,
+  DeletePackageInputAssetsRequestSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -96,6 +97,7 @@ import {
   postBulkUninstallPackagesHandler,
   getOneBulkOperationPackagesHandler,
 } from './bulk_handler';
+import { deleteInputPackageAssetsHandler } from './input_packages_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -844,5 +846,32 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       updateCustomIntegrationHandler
+    );
+
+  router.versioned
+    .delete({
+      path: EPM_API_ROUTES.INPUT_PACKAGES_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Delete assets for an input package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DeletePackageInputAssetsRequestSchema,
+          response: {
+            200: {
+              body: () => InstallKibanaAssetsResponseSchema, // TODO verify
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      deleteInputPackageAssetsHandler
     );
 };
