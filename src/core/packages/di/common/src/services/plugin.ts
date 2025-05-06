@@ -11,31 +11,38 @@ import type { Container, ServiceIdentifier } from 'inversify';
 
 /**
  * The service identifier for the global service references.
+ * @public
  */
 export const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
 
 /**
  * Plugin's setup contract.
+ * @public
  */
 export const Setup = Symbol.for('Setup') as ServiceIdentifier;
 
 /**
  * Plugin's start contract.
+ * @public
  */
 export const Start = Symbol.for('Start') as ServiceIdentifier;
 
 /**
  * Plugin's setup lifecycle hook.
+ * @public
  */
 export const OnSetup = Symbol.for('OnSetup') as ServiceIdentifier<(container: Container) => void>;
 
 /**
  * Plugin's start lifecycle hook.
+ * @public
  */
 export const OnStart = Symbol.for('OnStart') as ServiceIdentifier<(container: Container) => void>;
 
 /**
  * Plugin's setup dependency.
+ * @param plugin The dependency plugin name.
+ * @public
  */
 export function PluginSetup<T>(plugin: keyof any): ServiceIdentifier<T> {
   return Symbol.for(`plugin.setup.${String(plugin)}`);
@@ -43,6 +50,8 @@ export function PluginSetup<T>(plugin: keyof any): ServiceIdentifier<T> {
 
 /**
  * Plugin's start dependency.
+ * @param plugin The dependency plugin name.
+ * @public
  */
 export function PluginStart<T>(plugin: keyof any): ServiceIdentifier<T> {
   return Symbol.for(`plugin.start.${String(plugin)}`);

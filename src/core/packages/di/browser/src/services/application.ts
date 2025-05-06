@@ -10,17 +10,37 @@
 import type { Newable, ServiceIdentifier } from 'inversify';
 import type { App, AppMount, AppMountParameters } from '@kbn/core-application-browser';
 
-interface ApplicationDefinition<HistoryLocationState = unknown>
+/**
+ * The browser application definition.
+ * @public
+ */
+export interface ApplicationDefinition<HistoryLocationState = unknown>
   extends Omit<App<HistoryLocationState>, 'mount'>,
     Newable<ApplicationHandler<HistoryLocationState>> {}
 
-interface ApplicationHandler<HistoryLocationState = unknown> {
+/**
+ * The browser application mount handler.
+ * @public
+ */
+export interface ApplicationHandler<HistoryLocationState = unknown> {
+  /**
+   * The mount function that will be called when the application is mounted.
+   * The mount parameters can be injected using {@link ApplicationParameters}.
+   */
   mount(): ReturnType<AppMount<HistoryLocationState>>;
 }
 
+/**
+ * The service identifier that is used to register the application.
+ * @public
+ */
 export const Application: ServiceIdentifier<
   ApplicationDefinition & Exclude<ServiceIdentifier<ApplicationHandler>, keyof any>
 > = Symbol.for('Application');
 
+/**
+ * The service identifier of the application mount parameters.
+ * @public
+ */
 export const ApplicationParameters: ServiceIdentifier<AppMountParameters> =
   Symbol.for('ApplicationParameters');

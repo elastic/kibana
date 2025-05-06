@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { type ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { useService } from '@kbn/core-di-browser';
 import {
   EuiHorizontalRule,
@@ -25,8 +25,8 @@ import { EchoService } from './service';
 
 export function App() {
   const service = useService(EchoService);
-  const [input, setInput] = React.useState<string>('');
-  const [output, setOutput] = React.useState<string>('');
+  const [input, setInput] = useState<string>('');
+  const [output, setOutput] = useState<string>('');
 
   useEffect(() => {
     (async () => {
@@ -34,7 +34,7 @@ export function App() {
     })();
   }, [service, input]);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
   }, []);
 
