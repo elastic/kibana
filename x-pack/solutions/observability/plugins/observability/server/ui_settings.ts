@@ -22,7 +22,6 @@ import {
   entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  apmEnableContinuousRollups,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
@@ -116,9 +115,10 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.apmProgressiveLoadingDescription', {
       defaultMessage:
-        'Whether to load data progressively for APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
+        '{technicalPreviewLabel} Whether to load data progressively for APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background',
+      values: { technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>` },
     }),
-    value: ProgressiveLoadingQuality.low,
+    value: ProgressiveLoadingQuality.off,
     schema: schema.oneOf([
       schema.literal(ProgressiveLoadingQuality.off),
       schema.literal(ProgressiveLoadingQuality.low),
@@ -341,21 +341,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.2,
     schema: schema.number({ min: 0 }),
-    solution: 'oblt',
-  },
-  [apmEnableContinuousRollups]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableContinuousRollups', {
-      defaultMessage: 'Continuous rollups',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.apmEnableContinuousRollupsDescription', {
-      defaultMessage:
-        '{betaLabel} When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.',
-      values: { betaLabel: `<em>[${betaLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
     solution: 'oblt',
   },
   [syntheticsThrottlingEnabled]: {
