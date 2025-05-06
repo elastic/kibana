@@ -10,8 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { memoize, isFinite } from 'lodash';
+import type { Maybe } from '@kbn/apm-types-shared';
 import { asDecimalOrInteger, asInteger, NOT_AVAILABLE_LABEL } from './numeric';
-import { Maybe } from '../../typings';
 
 type TimeUnit = 'hours' | 'minutes' | 'seconds' | 'milliseconds';
 type DurationTimeUnit = TimeUnit | 'microseconds';
@@ -116,7 +116,7 @@ function convertTo({
   };
 }
 
-function getDurationUnitKey(max: number, threshold = 10): DurationTimeUnit {
+export function getDurationUnitKey(max: number, threshold = 10): DurationTimeUnit {
   if (max > toMicroseconds(threshold, 'hours')) {
     return 'hours';
   }
@@ -134,7 +134,7 @@ function getDurationUnitKey(max: number, threshold = 10): DurationTimeUnit {
 
 // memoizer with a custom resolver to consider both arguments max/threshold.
 // by default lodash's memoize only considers the first argument.
-const getDurationFormatter: TimeFormatterBuilder = memoize(
+export const getDurationFormatter: TimeFormatterBuilder = memoize(
   (max: number, threshold: number = 10, scalingFactor: number = 1) => {
     const unit = getDurationUnitKey(max, threshold);
     return (value: number, { defaultValue }: FormatterOptions = {}) => {
