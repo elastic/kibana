@@ -18,11 +18,13 @@ import {
 } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useKibana } from '../../common/lib/kibana';
 import * as i18n from '../../common/translations';
 import type { MarkdownEditorRef } from './editor';
 import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
 import { useMarkdownSessionStorage } from './use_markdown_session_storage';
+import { ID as LensPluginId } from './plugins/lens/constants';
 
 /* eslint-disable react/no-unused-prop-types */
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
@@ -67,6 +69,17 @@ export const MarkdownEditorForm = React.memo(
       const conflictWarningText = i18n.VERSION_CONFLICT_WARNING(
         id === 'description' ? id : 'comment'
       );
+      const { services } = useKibana();
+
+      const missingServices = useMemo<string[]>(() => {
+        const isLensPluginRegistered = services.lens !== undefined;
+        // Extend this with more plugin checks if needed — now just checking Lens
+        return isLensPluginRegistered ? [] : [LensPluginId];
+      }, [services]);
+
+      const allDisabledUiPlugins = useMemo<string[]>(() => {
+        return [...new Set([...(disabledUiPlugins ?? []), ...missingServices])];
+      }, [disabledUiPlugins, missingServices]);
 
       const commentEditorContextValue = useMemo(
         () => ({
@@ -96,7 +109,7 @@ export const MarkdownEditorForm = React.memo(
               editorId={id}
               onChange={field.setValue}
               value={field.value}
-              disabledUiPlugins={disabledUiPlugins}
+              disabledUiPlugins={allDisabledUiPlugins}
               data-test-subj={`${dataTestSubj}-markdown-editor`}
             />
           </EuiFormRow>
