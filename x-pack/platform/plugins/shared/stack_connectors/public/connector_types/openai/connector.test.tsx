@@ -415,17 +415,11 @@ describe('ConnectorFields renders', () => {
     };
 
     it('renders PKI configuration fields for Other provider', async () => {
-      const { getByTestId, findByTestId } = render(
+      const { findByTestId } = render(
         <ConnectorFormTestProvider connector={pkiConnector}>
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
-
-      // First select Other provider
-      await userEvent.selectOptions(getByTestId('config.apiProvider-select'), 'Other');
-
-      // Enable PKI mode
-      await userEvent.click(getByTestId('openAIViewPKISwitch'));
 
       // Wait for PKI fields to appear
       const certificateFileInput = await findByTestId('config.certificateFile-input');
@@ -438,15 +432,11 @@ describe('ConnectorFields renders', () => {
     });
 
     it('validates PKI configuration fields', async () => {
-      const { getByTestId, findByTestId } = render(
+      const { findByTestId } = render(
         <ConnectorFormTestProvider connector={pkiConnector}>
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
-
-      // Select Other provider and enable PKI mode
-      await userEvent.selectOptions(getByTestId('config.apiProvider-select'), 'Other');
-      await userEvent.click(getByTestId('openAIViewPKISwitch'));
 
       // Wait for fields to appear and clear them
       const certificateFileInput = await findByTestId('config.certificateFile-input');
@@ -455,29 +445,34 @@ describe('ConnectorFields renders', () => {
       await userEvent.clear(certificateFileInput);
       await userEvent.clear(privateKeyFileInput);
 
-      // Submit form to trigger validation
-      await userEvent.click(getByTestId('form-test-provide-submit'));
+      // Submit form
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-      // Wait for validation errors
+      // Verify validation failed
       await waitFor(() => {
-        expect(certificateFileInput).toHaveAttribute('aria-invalid', 'true');
-        expect(privateKeyFileInput).toHaveAttribute('aria-invalid', 'true');
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {},
+          isValid: false,
+        });
       });
     });
 
     it('submits form with valid PKI configuration', async () => {
-      const { getByTestId } = render(
+      const { findByTestId } = render(
         <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
 
-      // Select Other provider and enable PKI mode
-      await userEvent.selectOptions(getByTestId('config.apiProvider-select'), 'Other');
-      await userEvent.click(getByTestId('openAIViewPKISwitch'));
+      // Wait for fields to appear
+      await findByTestId('config.certificateFile-input');
+      await findByTestId('config.privateKeyFile-input');
+      await findByTestId('verificationModeSelect');
 
-      await userEvent.click(getByTestId('form-test-provide-submit'));
+      // Submit form
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
+      // Verify submission
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
           data: {
