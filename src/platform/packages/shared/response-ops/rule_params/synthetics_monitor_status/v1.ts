@@ -30,6 +30,10 @@ const NumberOfChecksSchema = schema.object({
   }),
 });
 
+const AlertOnNoDataSchema = schema.object({
+  waitSecondsBeforeIsPending: schema.number(),
+});
+
 const StatusRuleConditionSchema = schema.object({
   groupBy: schema.maybe(
     schema.string({
@@ -53,6 +57,7 @@ const StatusRuleConditionSchema = schema.object({
     NumberOfChecksSchema,
   ]),
   includeRetests: schema.maybe(schema.boolean()),
+  alertOnNoData: schema.maybe(AlertOnNoDataSchema),
 });
 
 export const syntheticsMonitorStatusRuleParamsSchema = schema.object(

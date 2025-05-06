@@ -191,6 +191,7 @@ export class StatusRuleExecutor {
       monitorLocationsMap,
       includeRetests: this.params.condition?.includeRetests,
       scheduleInMsMap,
+      waitSecondsBeforeIsPending: this.params.condition?.alertOnNoData?.waitSecondsBeforeIsPending,
     });
 
     const { downConfigs, upConfigs, pendingConfigs } = currentStatus;
