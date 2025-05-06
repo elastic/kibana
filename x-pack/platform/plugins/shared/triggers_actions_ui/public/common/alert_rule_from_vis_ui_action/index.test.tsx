@@ -278,6 +278,43 @@ describe('AlertRuleFromVisAction', () => {
     `);
   });
 
+  it('does not duplicate function column renames when they are included in multiple threshold values', () => {
+    action.execute({
+      embeddable: embeddableMock,
+      data: {
+        query:
+          'FROM logst* | RENAME bytes as `meow bytes` | STATS COUNT(`meow bytes`) BY clientip, extension',
+        thresholdValues: [
+          {
+            values: { 'COUNT(`meow bytes`)': 634, clientip: '131.250.144.62' },
+            yField: 'COUNT(`meow bytes`)',
+          },
+          {
+            values: { 'COUNT(`meow bytes`)': 682, clientip: '7.203.207.131' },
+            yField: 'COUNT(`meow bytes`)',
+          },
+        ],
+        xValues: { extension: 'jpg' },
+      },
+    });
+    expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
+      Object {
+        "params": Object {
+          "esqlQuery": Object {
+            "esql": "// Original ES|QL query derived from the visualization:
+      FROM logst* | RENAME bytes as \`meow bytes\` | STATS COUNT(\`meow bytes\`) BY clientip, extension
+      // Rename the following columns so they can be used as part of the alerting threshold:
+      | RENAME \`COUNT(\`\`meow bytes\`\`)\` as _count_meow_bytes 
+      // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
+      | WHERE extension == \\"jpg\\" AND ((clientip == \\"131.250.144.62\\" AND _count_meow_bytes >= 634) OR (clientip == \\"7.203.207.131\\" AND _count_meow_bytes >= 682))",
+          },
+          "searchType": "esqlQuery",
+          "timeField": "@timestamp",
+        },
+      }
+    `);
+  });
+
   it('escapes string values with backlashes in them', () => {
     action.execute({
       embeddable: embeddableMock,

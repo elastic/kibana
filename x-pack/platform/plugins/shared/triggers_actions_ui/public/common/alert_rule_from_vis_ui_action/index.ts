@@ -114,7 +114,8 @@ export class AlertRuleFromVisAction implements Action<Context> {
         const colName = `_${snakeCase(fieldName)}`;
         const sanitizedFieldName = sanitazeESQLInput(esqlFunction.text);
         // Add this to the renameQuery as a side effect
-        renameQuery += `| RENAME ${sanitizedFieldName} as ${colName} `;
+        const renameClause = `| RENAME ${sanitizedFieldName} as ${colName} `;
+        if (!renameQuery.includes(renameClause)) renameQuery += renameClause;
         return colName;
       }
 
