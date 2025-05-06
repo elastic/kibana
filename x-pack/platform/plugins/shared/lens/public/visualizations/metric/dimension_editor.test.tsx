@@ -290,16 +290,8 @@ describe('dimension editor', () => {
         await userEvent.type(customBaselineTextbox, baseline.toString());
       };
 
-      const getPalettePicker = () => screen.queryByRole('group', { name: 'Color palette' });
-      const pickPalette = async (paletteName: string) => {
-        const palettePicker = getPalettePicker();
-        if (!palettePicker) {
-          throw new Error('palette picker not found');
-        }
-        await userEvent.click(palettePicker);
-        const paletteOption = screen.getByRole('option', { name: paletteName });
-        await userEvent.click(paletteOption);
-      };
+      const getSelectedPalette = (name: string) =>
+        screen.queryByRole('button', { name: new RegExp(name, 'i') });
 
       const colorModeGroup = screen.getByRole('group', { name: /Color by value/i });
       const clickOnColorMode = async (mode: 'none' | 'static' | 'dynamic') => {
@@ -335,8 +327,7 @@ describe('dimension editor', () => {
         getSettingCustom: () => getByTitle(customPrefixGroup, 'custom', { exact: false }),
         getCustomPrefixTextbox,
         typePrefix,
-        getPalettePicker,
-        pickPalette,
+        getSelectedPalette,
         getCustomBaselineTextbox,
         getBaselineGroup,
         typeBaseline,
@@ -466,14 +457,14 @@ describe('dimension editor', () => {
           };
         }
         it('should show no color controls if none is selected', async () => {
-          const { getColorByValueNone, getStaticColorPicker, getPalettePicker } =
+          const { getColorByValueNone, getStaticColorPicker, getSelectedPalette } =
             renderSecondaryMetricEditor({
               state: { ...localState },
             });
           expect(getColorByValueNone()).toHaveAttribute('aria-pressed', 'true');
           // make sure no other color controls are shown
           expect(getStaticColorPicker()).not.toBeInTheDocument();
-          expect(getPalettePicker()).not.toBeInTheDocument();
+          expect(getSelectedPalette('Trend')).not.toBeInTheDocument();
         });
 
         it.each([{ mode: 'static' }, { mode: 'dynamic' }] as Array<{ mode: 'static' | 'dynamic' }>)(
@@ -510,6 +501,23 @@ describe('dimension editor', () => {
 
           // check dynamic button to be disabled
           expect(getColorByValueDynamic()).toBeDisabled();
+        });
+
+        it('should correctly select the reversed Trend color palette based on configuration', async () => {
+          const { getSelectedPalette } = renderSecondaryMetricEditor({
+            state: {
+              ...localState,
+              secondaryTrend: {
+                type: 'dynamic',
+                visuals: 'both',
+                reversed: true,
+                paletteId: 'compare_to',
+                baselineValue: 0,
+              },
+            },
+          });
+
+          expect(getSelectedPalette('Trend reversed')).toBeInTheDocument();
         });
 
         it('should disable the "Primary metric" baseline if the primary is not of number type', async () => {
