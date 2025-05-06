@@ -20,6 +20,7 @@ import { cryptoFactory } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
 import { RruleSchedule } from '@kbn/task-manager-plugin/server';
+import { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
 import { checkParamsVersion } from '../../../lib';
 import { type Counters } from '..';
 import type { ReportingCore } from '../../..';
@@ -55,6 +56,7 @@ export interface RequestParams {
   exportTypeId: string;
   jobParams: BaseParams;
   schedule?: RruleSchedule;
+  notification?: RawNotification;
 }
 
 /**

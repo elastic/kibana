@@ -223,6 +223,30 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       );
   });
 
+  it('returns 400 on empty notification list', async () => {
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
+      .send({
+        jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        notification: {
+          email: {
+            to: [],
+          },
+        },
+      })
+      .expect(400)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot(
+          `"[request body.notification.email.to]: array size is [0], but cannot be smaller than [1]"`
+        )
+      );
+  });
+
   it('returns 403 on when no permanent encryption key', async () => {
     jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
       isSufficientlySecure: true,

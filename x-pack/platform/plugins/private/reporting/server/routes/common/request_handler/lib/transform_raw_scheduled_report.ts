@@ -6,8 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
-import { ScheduledReportType } from '../../../../types';
+import { ScheduledReportApiJSON, ScheduledReportType } from '../../../../types';
 
 export function transformRawScheduledReportToReport(
   rawScheduledReport: SavedObject<ScheduledReportType>
@@ -22,5 +21,6 @@ export function transformRawScheduledReportToReport(
     meta: rawScheduledReport.attributes.meta,
     migration_version: rawScheduledReport.attributes.migrationVersion,
     schedule: rawScheduledReport.attributes.schedule,
+    notification: rawScheduledReport.attributes.notification,
   };
 }
