@@ -179,12 +179,6 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
 
   return (
     <Fragment>
-      <MetricSelector
-        fields={fields}
-        detectorChangeHandler={detectorChangeHandler}
-        selectedOptions={selectedOptions}
-        removeOptions={aggFieldPairList}
-      />
       <ChartGrid
         aggFieldPairList={aggFieldPairList}
         chartSettings={chartSettings}
@@ -196,6 +190,13 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
         deleteDetector={deleteDetector}
         jobType={jobCreator.type}
         loading={loadingData}
+      />
+
+      <MetricSelector
+        fields={fields}
+        detectorChangeHandler={detectorChangeHandler}
+        selectedOptions={selectedOptions}
+        removeOptions={aggFieldPairList}
       />
     </Fragment>
   );

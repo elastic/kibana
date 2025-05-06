@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useContext, useState, useEffect, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFormRow, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import type { Field, AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
 import { i18n } from '@kbn/i18n';
@@ -37,9 +37,7 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   // so they can be removed from the dropdown list
   const removeLabels = removeOptions.map(createLabel);
   const { handleFieldStatsButtonClick, populatedFields } = useFieldStatsTrigger();
-  const titleId = useGeneratedHtmlId({
-    prefix: 'aggSelect',
-  });
+
   const options: DropDownLabel[] = useMemo(
     () => {
       const opts: DropDownLabel[] = [];
@@ -95,33 +93,23 @@ export const AggSelect: FC<Props> = ({ fields, changeHandler, selectedOptions, r
   }, [jobValidatorUpdated]);
 
   return (
-    <>
-      <EuiTitle size="xs">
-        <h3 id={titleId}>
-          {i18n.translate('xpack.ml.newJob.wizard.aggSelect.title', {
-            defaultMessage: 'Select an aggregation',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFormRow
-        fullWidth
-        error={validation.message}
+    <EuiFormRow
+      error={validation.message}
+      isInvalid={validation.valid === false}
+      data-test-subj="mlJobWizardAggSelection"
+    >
+      <OptionListWithFieldStats
+        aria-label={i18n.translate('xpack.ml.newJob.wizard.aggSelect.ariaLabel', {
+          defaultMessage: 'Select an aggregation',
+        })}
+        singleSelection={true}
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={changeHandler}
+        isClearable={false}
         isInvalid={validation.valid === false}
-        data-test-subj="mlJobWizardAggSelection"
-      >
-        <OptionListWithFieldStats
-          singleSelection={true}
-          options={options}
-          selectedOptions={selectedOptions}
-          onChange={changeHandler}
-          isClearable={false}
-          isInvalid={validation.valid === false}
-          titleId={titleId}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="s" />
-    </>
+      />
+    </EuiFormRow>
   );
 };
 
