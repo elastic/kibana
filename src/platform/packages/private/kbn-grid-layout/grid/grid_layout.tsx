@@ -264,38 +264,30 @@ const styles = {
     },
   }),
   hasExpandedPanel: css({
-    '&:has(.kbnGridPanel--expanded)': {
+    ':has(.kbnGridPanel--expanded)': {
       height: '100%',
-      // targets the grid row container that contains the expanded panel
-      '& .kbnGridSectionContainer:has(.kbnGridPanel--expanded)': {
-        '.kbnGridSectionHeader': {
-          height: '0px', // used instead of 'display: none' due to a11y concerns
-          padding: '0px',
-          display: 'block',
-          overflow: 'hidden',
-        },
-        '.kbnGridSection': {
-          display: 'block !important', // overwrite grid display
-          height: '100%',
-          '.kbnGridPanel': {
-            '&.kbnGridPanel--expanded': {
-              height: '100% !important',
-            },
-            // hide the non-expanded panels
-            '&:not(.kbnGridPanel--expanded)': {
-              position: 'absolute',
-              top: '-9999px',
-              left: '-9999px',
-              visibility: 'hidden', // remove hidden panels and their contents from tab order for a11y
-            },
-          },
-        },
+      display: 'block',
+      paddingBottom: 'calc(var(--kbnGridGutterSize) * 1px) !important',
+      '.kbnGridSectionHeader, .kbnGridSectionFooter': {
+        height: '0px', // better than 'display: none' for a11y – header may hold info relevant to the expanded panel
+        padding: '0px',
+        display: 'block',
+        overflow: 'hidden',
       },
-      // targets the grid row containers that **do not** contain the expanded panel
-      '& .kbnGridSectionContainer:not(:has(.kbnGridPanel--expanded))': {
-        position: 'absolute',
-        top: '-9999px',
-        left: '-9999px',
+      '.kbnGridSectionFooter': {
+        visibility: 'hidden',
+      },
+      '.kbnGridPanel': {
+        '&.kbnGridPanel--expanded': {
+          height: '100% !important',
+        },
+        // hide the non-expanded panels
+        '&:not(.kbnGridPanel--expanded)': {
+          position: 'absolute',
+          top: '-9999px',
+          left: '-9999px',
+          visibility: 'hidden', // remove hidden panels and their contents from tab order for a11y
+        },
       },
     },
   }),
