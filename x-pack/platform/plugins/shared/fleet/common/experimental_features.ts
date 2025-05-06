@@ -24,9 +24,21 @@ const _allowedExperimentalValues = {
   subfeaturePrivileges: true,
   advancedPolicySettings: true,
   useSpaceAwareness: false,
+<<<<<<< HEAD
   enableReusableIntegrationPolicies: true,
   asyncDeployPolicies: true,
   enableExportCSV: true,
+||||||| parent of 18b0dc11cad ([Fleet] enable feature flag `enableAutomaticAgentUpgrades` (#219932))
+  enableAutomaticAgentUpgrades: false,
+  enableSyncIntegrationsOnRemote: false,
+  enableSSLSecrets: false,
+  installedIntegrationsTabularUI: false,
+=======
+  enableAutomaticAgentUpgrades: true,
+  enableSyncIntegrationsOnRemote: false,
+  enableSSLSecrets: false,
+  installedIntegrationsTabularUI: false,
+>>>>>>> 18b0dc11cad ([Fleet] enable feature flag `enableAutomaticAgentUpgrades` (#219932))
   enabledUpgradeAgentlessDeploymentsTask: false,
   enableAutomaticAgentUpgrades: false,
 };
