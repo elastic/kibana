@@ -6,7 +6,7 @@
  */
 
 import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SavedObjectsClientContract } from '@kbn/core/packages/saved-objects/api-server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   elasticsearchServiceMock,
   httpServiceMock,
