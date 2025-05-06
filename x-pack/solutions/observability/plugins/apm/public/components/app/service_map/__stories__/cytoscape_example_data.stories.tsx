@@ -15,10 +15,10 @@ import {
   EuiForm,
   EuiToolTip,
 } from '@elastic/eui';
-import type { Meta, Story, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
-import { useArgs } from '@storybook/addons';
+import { useArgs } from '@storybook/preview-api';
 import {
   getPaths,
   getServiceMapNodes,
@@ -42,7 +42,7 @@ const stories: Meta<{}> = {
   decorators: [(wrappedStory) => <MockApmPluginStorybook>{wrappedStory()}</MockApmPluginStorybook>],
 };
 
-export const GenerateMap: Story<{}> = () => {
+export const GenerateMap: StoryFn<{}> = () => {
   const [size, setSize] = useState<number>(10);
   const [json, setJson] = useState<string>('');
   const [elements, setElements] = useState<any[]>(
@@ -109,7 +109,7 @@ const assertJSON: (json?: any) => asserts json is ServiceMapResponse = (json) =>
   }
 };
 
-const MapFromJSONTemplate: Story<MapFromJSONArgs> = (args) => {
+const MapFromJSONTemplate: StoryFn<MapFromJSONArgs> = (args) => {
   const [{ json }, updateArgs] = useArgs();
 
   const [error, setError] = useState<string | undefined>();
@@ -200,7 +200,7 @@ MapFromJSON.argTypes = {
   },
 };
 
-export const TodoApp: Story<{}> = () => {
+export const TodoApp: StoryFn<{}> = () => {
   return (
     <div>
       <Cytoscape elements={exampleResponseTodo.elements} height={window.innerHeight}>
