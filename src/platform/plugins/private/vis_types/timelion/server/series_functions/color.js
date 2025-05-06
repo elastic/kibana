@@ -41,13 +41,13 @@ colors, and have multiple series, you will get a gradient, e.g., "#00B1CC:#00FF9
       if (colors.length > gradientStops) {
         trimmedColors = colors.slice(0, gradientStops);
       }
-      gradient = chroma.scale(trimmedColors).colors(gradientStops);
+      gradient = chroma.scale(trimmedColors).mode('rgb').colors(gradientStops);
     }
 
     let i = 0;
     return alter(args, function (eachSeries) {
       if (gradient) {
-        eachSeries.color = gradient[i++].toHexString();
+        eachSeries.color = gradient[i++];
       } else if (colors.length === 1 || gradientStops === 1) {
         eachSeries.color = colors[0];
       } else {

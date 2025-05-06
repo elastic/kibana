@@ -23,7 +23,7 @@ describe('stdMetric(resp, panel, series)', () => {
       line_width: 1,
       point_size: 1,
       fill: 0,
-      color: 'rgb(255, 0, 0)',
+      color: '#ff0000',
       id: 'test',
       split_mode: 'everything',
       metrics: [{ id: 'avgmetric', type: 'avg', field: 'cpu' }],

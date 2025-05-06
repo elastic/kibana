@@ -14,7 +14,7 @@ import { getCoreStart } from '../../services';
  * Returns true if the color that is passed has low luminosity
  */
 const isColorDark = (c) => {
-  return chroma(c).luminosity() < 0.45;
+  return chroma(c).luminance() < 0.45;
 };
 
 /**

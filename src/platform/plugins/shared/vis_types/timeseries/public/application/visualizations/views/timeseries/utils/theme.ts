@@ -10,17 +10,9 @@
 import chroma from 'chroma-js';
 import { Theme, LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 
-function computeRelativeLuminosity(rgb: string) {
-  return chroma(rgb).luminance();
-}
-
-function computeContrast(rgb1: string, rgb2: string) {
-  return chroma.contrast(rgb1, rgb2);
-}
-
 function getAAARelativeLum(bgColor: string, fgColor: string, ratio = 7) {
-  const relLum1 = computeRelativeLuminosity(bgColor);
-  const relLum2 = computeRelativeLuminosity(fgColor);
+  const relLum1 = chroma(bgColor).luminance();
+  const relLum2 = chroma(fgColor).luminance();
   if (relLum1 > relLum2) {
     // relLum1 is brighter, relLum2 is darker
     return (relLum1 + 0.05 - ratio * 0.05) / ratio;
@@ -55,8 +47,8 @@ function findBestContrastColor(
   darkFgColor: string,
   ratio = 4.5
 ) {
-  const lc = computeContrast(bgColor, lightFgColor);
-  const dc = computeContrast(bgColor, darkFgColor);
+  const lc = chroma.contrast(bgColor, lightFgColor);
+  const dc = chroma.contrast(bgColor, darkFgColor);
   if (lc >= dc) {
     if (lc >= ratio) {
       return lightFgColor;
@@ -95,7 +87,7 @@ export function getBaseTheme(baseTheme: Theme, bgColor?: string | null): Theme {
     return baseTheme;
   }
 
-  const bgLuminosity = computeRelativeLuminosity(bgColor);
+  const bgLuminosity = chroma(bgColor).luminance();
   // TODO check if this still apply
   const mainTheme = bgLuminosity <= 0.179 ? LEGACY_DARK_THEME : LEGACY_LIGHT_THEME;
   const color = findBestContrastColor(
@@ -132,6 +124,6 @@ export function getChartClasses(bgColor?: string) {
   if (typeof bgColor !== 'string') {
     return;
   }
-  const bgLuminosity = computeRelativeLuminosity(bgColor);
+  const bgLuminosity = chroma(bgColor).luminance();
   return bgLuminosity <= 0.179 ? 'tvbVisTimeSeriesDark' : 'tvbVisTimeSeriesLight';
 }

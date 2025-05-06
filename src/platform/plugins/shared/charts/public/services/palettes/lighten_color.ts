@@ -9,20 +9,16 @@
 
 import chroma from 'chroma-js';
 
-const MAX_LIGHTNESS = 93;
-const MAX_LIGHTNESS_SPACE = 20;
+const MAX_LIGHTNESS = 0.93;
+const MAX_LIGHTNESS_SPACE = 0.2;
 
 export function lightenColor(baseColor: string, step: number, totalSteps: number) {
   if (totalSteps === 1) {
     return baseColor;
   }
 
-  const hslColor = chroma(baseColor);
-  const [_hue, _saturation, outputColorLightness] = hslColor.hcl();
-  const lightnessSpace = Math.min(MAX_LIGHTNESS - outputColorLightness, MAX_LIGHTNESS_SPACE);
-  const currentLevelTargetLightness =
-    outputColorLightness + lightnessSpace * ((step - 1) / (totalSteps - 1));
-  const lightenedColor = hslColor.set('hsl.l', currentLevelTargetLightness);
-
-  return lightenedColor.hex();
+  const [h, s, l] = chroma(baseColor).hsl();
+  const lightnessSpace = Math.min(MAX_LIGHTNESS - l, MAX_LIGHTNESS_SPACE);
+  const currentLevelTargetLightness = l + lightnessSpace * ((step - 1) / (totalSteps - 1));
+  return chroma.hsl(h, s, currentLevelTargetLightness).hex();
 }

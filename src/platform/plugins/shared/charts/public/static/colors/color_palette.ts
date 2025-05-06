@@ -48,7 +48,7 @@ export function createColorPalette(num: number): string[] {
   const seedLength = seedColors.length;
 
   _.times(num - seedLength, function (i) {
-    colors.push(chroma.hsl((fraction(i + seedLength + 1) * 360 + offset) % 360, 50, 50).hex());
+    colors.push(chroma.hsl((fraction(i + seedLength + 1) * 360 + offset) % 360, 0.5, 0.5).hex());
   });
 
   return colors;

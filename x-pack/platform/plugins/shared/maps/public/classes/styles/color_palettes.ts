@@ -21,9 +21,19 @@ import { PercentilesFieldMeta } from '../../../common/descriptor_types';
 
 export const DEFAULT_HEATMAP_COLOR_RAMP_NAME = 'theclassic';
 
+/**
+ * This function implement the same darken method as the previously used tinycolor2 library but using chroma-js.
+ * Unfortunately we the two darken functions works slightly differently and to avoid any minimal color change we need to reimplement
+ * the same functionality.
+ */
+function darken(color: string): string {
+  const [h, s, l] = chroma(color).hsl();
+  return chroma.hsl(h, s, Math.min(1, Math.max(0, l - 0.1))).hex();
+}
+
 export const DEFAULT_FILL_COLORS: string[] = euiPaletteColorBlind();
 export const DEFAULT_LINE_COLORS: string[] = [
-  ...DEFAULT_FILL_COLORS.map((color: string) => chroma(color).darken().hex()),
+  ...DEFAULT_FILL_COLORS.map((color: string) => darken(color)),
   // Explicitly add black & white as border color options
   '#000',
   '#FFF',
