@@ -74,6 +74,7 @@ export type EdgeProps = xyEdgeProps<
       sourceColor: NodeColor;
       targetShape: NodeShape;
       targetColor: NodeColor;
+      edgeBorderRadius?: number;
     }
   >
 >;

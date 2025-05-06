@@ -77,6 +77,11 @@ export interface GraphProps extends CommonProps {
    * @default 500
    */
   zoomDuration?: number;
+  /**
+   * Border radius for edges in the graph
+   * @default 15
+   */
+  edgeBorderRadius?: number;
 }
 
 const nodeTypes = {
@@ -117,7 +122,8 @@ export const Graph = memo<GraphProps>(
     minimap,
     snapToGrid = true,
     snapGrid = [1, 1],
-    zoomDuration = 500,
+    zoomDuration = 0,
+    edgeBorderRadius = 15,
     ...rest
   }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
@@ -126,6 +132,7 @@ export const Graph = memo<GraphProps>(
     >(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
+    const prevEdgeBorderRadiusRef = useRef<number>(edgeBorderRadius);
     const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
@@ -137,23 +144,30 @@ export const Graph = memo<GraphProps>(
     }, [minimap]);
 
     useEffect(() => {
-      // On nodes or edges changes reset the graph and re-layout
+      // On nodes, edges, or edgeBorderRadius changes, reset the graph and re-layout
       if (
         !isArrayOfObjectsEqual(nodes, currNodesRef.current) ||
-        !isArrayOfObjectsEqual(edges, currEdgesRef.current)
+        !isArrayOfObjectsEqual(edges, currEdgesRef.current) ||
+        prevEdgeBorderRadiusRef.current !== edgeBorderRadius
       ) {
-        const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
+        const { initialNodes, initialEdges } = processGraph(
+          nodes,
+          edges,
+          isGraphInteractive,
+          edgeBorderRadius
+        );
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
         setNodes(layoutedNodes);
         setEdges(initialEdges);
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
+        prevEdgeBorderRadiusRef.current = edgeBorderRadius;
         setTimeout(() => {
           fitViewRef.current?.();
         }, 30);
       }
-    }, [nodes, edges, setNodes, setEdges, isGraphInteractive]);
+    }, [nodes, edges, setNodes, setEdges, isGraphInteractive, edgeBorderRadius]);
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
@@ -237,7 +251,8 @@ Graph.displayName = 'Graph';
 const processGraph = (
   nodesModel: NodeViewModel[],
   edgesModel: EdgeViewModel[],
-  interactive: boolean
+  interactive: boolean,
+  edgeBorderRadius: number
 ): {
   initialNodes: Array<Node<NodeViewModel>>;
   initialEdges: Array<Edge<EdgeViewModel>>;
@@ -301,6 +316,7 @@ const processGraph = (
           sourceColor: nodesById[edgeData.source].color,
           targetShape: nodesById[edgeData.target].shape,
           targetColor: nodesById[edgeData.target].color,
+          edgeBorderRadius,
         },
       };
     });
