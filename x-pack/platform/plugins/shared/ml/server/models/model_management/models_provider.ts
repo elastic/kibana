@@ -14,6 +14,7 @@ import type {
   InferenceTaskType,
   IngestDocument,
   MlGetTrainedModelsRequest,
+  MlGetTrainedModelsResponse,
   TasksTaskInfo,
   TransformGetTransformTransformSummary,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -228,10 +229,16 @@ export class ModelsProvider {
   /**
    * Merges the list of models with the list of models available for download.
    */
-  async includeModelDownloads(resultItems: TrainedModelUIItem[]): Promise<TrainedModelUIItem[]> {
+  async includeModelDownloads(
+    resultItems: TrainedModelUIItem[],
+    rawModels: MlGetTrainedModelsResponse
+  ): Promise<TrainedModelUIItem[]> {
     const idMap = new Map<string, TrainedModelUIItem>(
       resultItems.map((model) => [model.model_id, model])
     );
+
+    const allExistingModelIds = new Set(rawModels.trained_model_configs.map((m) => m.model_id));
+
     /**
      * Fetches model definitions available for download
      */
@@ -253,13 +260,18 @@ export class ModelsProvider {
         return !idMap.has(modelId) && !hidden;
       })
       .map<ModelDownloadItem>((modelDefinition) => {
+        // Check if this downloadable model already exists in the system, but not in current space
+        const isDownloadedWithinDifferentSpace = allExistingModelIds.has(modelDefinition.model_id);
+
         return {
           model_id: modelDefinition.model_id,
           type: modelDefinition.type,
           tags: modelDefinition.type?.includes(ELASTIC_MODEL_TAG) ? [ELASTIC_MODEL_TAG] : [],
           putModelConfig: modelDefinition.config,
           description: modelDefinition.description,
-          state: MODEL_STATE.NOT_DOWNLOADED,
+          state: isDownloadedWithinDifferentSpace
+            ? MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE
+            : MODEL_STATE.NOT_DOWNLOADED,
           recommended: !!modelDefinition.recommended,
           modelName: modelDefinition.modelName,
           os: modelDefinition.os,
@@ -383,6 +395,10 @@ export class ModelsProvider {
   ): Promise<TrainedModelUIItem[]> {
     const { trainedModelsSpaces } = checksFactory(this._client, mlSavedObjectService);
 
+    const rawModels = await this._client.asInternalUser.ml.getTrainedModels({
+      size: 1000,
+    });
+
     const [models, spaces] = await Promise.all([
       this._mlClient.getTrainedModels({
         size: 1000,
@@ -422,7 +438,7 @@ export class ModelsProvider {
     resultItems = await this.assignModelStats(formattedModels);
 
     if (this._enabledFeatures.nlp) {
-      resultItems = await this.includeModelDownloads(resultItems);
+      resultItems = await this.includeModelDownloads(resultItems, rawModels);
     }
 
     const existingModels = resultItems.filter(isExistingModel);

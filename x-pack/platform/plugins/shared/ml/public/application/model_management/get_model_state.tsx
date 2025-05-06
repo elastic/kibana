@@ -13,6 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   type EuiHealthProps,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MODEL_STATE, type ModelState } from '@kbn/ml-trained-models-utils';
@@ -94,6 +95,33 @@ export const getModelStateColor = (
                 <EuiText size="xs">{this.name}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
+          );
+        },
+      };
+    case MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE:
+      return {
+        color: 'warning',
+        name: i18n.translate(
+          'xpack.ml.trainedModels.modelsList.modelState.downloadedInDifferentSpaceName',
+          {
+            defaultMessage: 'Downloaded in different space',
+          }
+        ),
+        get component() {
+          return (
+            <EuiIconTip
+              aria-label="Warning"
+              size="m"
+              type="warning"
+              color="warning"
+              content={i18n.translate(
+                'xpack.ml.trainedModels.modelsList.modelState.downloadedInDifferentSpaceTooltip',
+                {
+                  defaultMessage:
+                    'The model is downloaded in a different space. Assign it to the current space to deploy it.',
+                }
+              )}
+            />
           );
         },
       };

@@ -222,6 +222,13 @@ export function useModelActions({
             (deployment) => deployment.modelId === item.model_id
           );
 
+          if (
+            isModelDownloadItem(item) &&
+            item.state === MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE
+          ) {
+            return false;
+          }
+
           return canStartStopTrainedModels && !isModelBeingDeployed;
         },
         available: (item) => {
@@ -229,7 +236,8 @@ export function useModelActions({
             isNLPModelItem(item) ||
             (canCreateTrainedModels &&
               isModelDownloadItem(item) &&
-              item.state === MODEL_STATE.NOT_DOWNLOADED)
+              (item.state === MODEL_STATE.NOT_DOWNLOADED ||
+                item.state === MODEL_STATE.DOWNLOADED_IN_DIFFERENT_SPACE))
           );
         },
         onClick: async (item) => {
