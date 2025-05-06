@@ -7,15 +7,15 @@
 
 import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
-import {
-  GroupObjectGetResponse,
-  groupObjectUpsertRequestSchema,
-  GroupStreamUpsertRequest,
-  isGroupStreamDefinition,
-} from '@kbn/streams-schema';
+import { Group, Streams } from '@kbn/streams-schema';
+import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_TYPE, ASSET_UUID } from '../../../lib/streams/assets/fields';
 import { QueryAsset } from '../../../../common/assets';
+
+export interface GroupObjectGetResponse {
+  group: Streams.GroupStream.Definition['group'];
+}
 
 const readGroupRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/_group 2023-10-31',
@@ -29,9 +29,7 @@ const readGroupRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -46,7 +44,7 @@ const readGroupRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(name);
 
-    if (isGroupStreamDefinition(definition)) {
+    if (Streams.GroupStream.Definition.is(definition)) {
       return { group: definition.group };
     }
 
@@ -66,16 +64,16 @@ const upsertGroupRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
     path: z.object({
       name: z.string(),
     }),
-    body: groupObjectUpsertRequestSchema,
+    body: z.object({
+      group: Group.right,
+    }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
     const { streamsClient, assetClient } = await getScopedClients({
@@ -87,9 +85,15 @@ const upsertGroupRoute = createServerRoute({
     }
 
     const { name } = params.path;
-    const assets = await assetClient.getAssets(name);
+    const { group } = params.body;
 
-    const groupUpsertRequest = params.body;
+    const definition = await streamsClient.getStream(name);
+
+    if (!Streams.GroupStream.Definition.is(definition)) {
+      throw badData(`Cannot update group capabilities of non-group stream`);
+    }
+
+    const assets = await assetClient.getAssets(name);
 
     const dashboards = assets
       .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
@@ -99,11 +103,16 @@ const upsertGroupRoute = createServerRoute({
       .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
       .map((asset) => asset.query);
 
-    const upsertRequest = {
+    const { name: _name, ...stream } = definition;
+
+    const upsertRequest: Streams.GroupStream.UpsertRequest = {
       dashboards,
-      stream: groupUpsertRequest,
+      stream: {
+        ...stream,
+        group,
+      },
       queries,
-    } as GroupStreamUpsertRequest;
+    };
 
     return await streamsClient.upsertStream({
       request: upsertRequest,
