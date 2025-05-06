@@ -59,7 +59,7 @@ export async function backfillPackagePolicySupportsAgentless(esClient: Elasticse
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
       })
-  ).saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces));
+  ).saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so));
 
   appContextService
     .getLogger()

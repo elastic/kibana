@@ -27,9 +27,9 @@ import {
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import type { ControlLabelPosition, ParentIgnoreSettings } from '../../../common';
 import { CONTROL_LAYOUT_OPTIONS } from '../../controls/data_controls/editor_constants';
-import type { ControlStateManager } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
 import type { ControlGroupApi, ControlGroupEditorState } from '../types';
 import { ControlSettingTooltipLabel } from './control_setting_tooltip_label';
@@ -38,7 +38,7 @@ interface Props {
   onCancel: () => void;
   onSave: () => void;
   onDeleteAll: () => void;
-  stateManager: ControlStateManager<ControlGroupEditorState>;
+  stateManager: StateManager<ControlGroupEditorState>;
   api: ControlGroupApi; // controls must always have a parent API
 }
 
@@ -51,22 +51,22 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
     selectedIgnoreParentSettings,
   ] = useBatchedPublishingSubjects(
     api.children$,
-    stateManager.labelPosition,
-    stateManager.chainingSystem,
-    stateManager.autoApplySelections,
-    stateManager.ignoreParentSettings
+    stateManager.api.labelPosition$,
+    stateManager.api.chainingSystem$,
+    stateManager.api.autoApplySelections$,
+    stateManager.api.ignoreParentSettings$
   );
 
   const controlCount = useMemo(() => Object.keys(children).length, [children]);
 
   const updateIgnoreSetting = useCallback(
     (newSettings: Partial<ParentIgnoreSettings>) => {
-      stateManager.ignoreParentSettings.next({
+      stateManager.api.setIgnoreParentSettings({
         ...(selectedIgnoreParentSettings ?? {}),
         ...newSettings,
       });
     },
-    [stateManager.ignoreParentSettings, selectedIgnoreParentSettings]
+    [stateManager.api, selectedIgnoreParentSettings]
   );
 
   return (
@@ -86,7 +86,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
               idSelected={selectedLabelPosition}
               legend={ControlGroupStrings.management.labelPosition.getLabelPositionLegend()}
               onChange={(newPosition: string) => {
-                stateManager.labelPosition.next(newPosition as ControlLabelPosition);
+                stateManager.api.setLabelPosition(newPosition as ControlLabelPosition);
               }}
             />
           </EuiFormRow>
@@ -149,7 +149,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
                 }
                 checked={selectedChainingSystem === 'HIERARCHICAL'}
                 onChange={(e) =>
-                  stateManager.chainingSystem.next(e.target.checked ? 'HIERARCHICAL' : 'NONE')
+                  stateManager.api.setChainingSystem(e.target.checked ? 'HIERARCHICAL' : 'NONE')
                 }
               />
               <EuiSpacer size="s" />
@@ -163,7 +163,7 @@ export const ControlGroupEditor = ({ onCancel, onSave, onDeleteAll, stateManager
                   />
                 }
                 checked={selectedAutoApplySelections}
-                onChange={(e) => stateManager.autoApplySelections.next(e.target.checked)}
+                onChange={(e) => stateManager.api.setAutoApplySelections(e.target.checked)}
               />
             </div>
           </EuiFormRow>
