@@ -547,6 +547,7 @@ src/platform/packages/shared/kbn-ui-theme @elastic/kibana-operations
 src/platform/packages/shared/kbn-unified-data-table @elastic/kibana-data-discovery @elastic/security-threat-hunting-investigations
 src/platform/packages/shared/kbn-unified-doc-viewer @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-field-list @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-unified-histogram @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unified-tabs @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-unsaved-changes-prompt @elastic/kibana-management
 src/platform/packages/shared/kbn-use-tracked-promise @elastic/obs-ux-logs-team
@@ -703,7 +704,6 @@ src/platform/plugins/shared/telemetry_management_section @elastic/kibana-core
 src/platform/plugins/shared/ui_actions @elastic/appex-sharedux
 src/platform/plugins/shared/ui_actions_enhanced @elastic/appex-sharedux
 src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
-src/platform/plugins/shared/unified_histogram @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_search @elastic/kibana-presentation
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
 src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-visualizations
@@ -994,6 +994,7 @@ x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-tea
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/uptime @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/ux @elastic/obs-ux-management-team
+x-pack/solutions/observability/test
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
@@ -1452,7 +1453,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/common/services/apm_synthtrace_kibana_client.ts @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /src/platform/test/api_integration/apis/ui_metric/*.ts @elastic/obs-ux-infra_services-team
 /x-pack/test/functional/apps/apm/ @elastic/obs-ux-infra_services-team
-/x-pack/test/apm_api_integration/ @elastic/obs-ux-infra_services-team
+/x-pack/solutions/observability/test/api_integration/apm/ @elastic/obs-ux-infra_services-team
 /x-pack/test/apm_cypress/ @elastic/obs-ux-infra_services-team
 /src/apm.js @elastic/kibana-core @vigneshshanmugam
 /src/platform/packages/shared/kbn-utility-types/src/dot.ts @dgieselaar
@@ -1467,8 +1468,8 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/apps/uptime @elastic/obs-ux-management-team
 /x-pack/test/functional/es_archives/uptime @elastic/obs-ux-management-team
 /x-pack/test/functional/services/uptime @elastic/obs-ux-management-team
-/x-pack/test/api_integration/apis/uptime @elastic/obs-ux-management-team
-/x-pack/test/api_integration/apis/synthetics @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration/apis/uptime @elastic/obs-ux-management-team
+/x-pack/solutions/observability/test/api_integration/apis/synthetics @elastic/obs-ux-management-team
 /x-pack/test/alerting_api_integration/observability/synthetics_rule.ts @elastic/obs-ux-management-team
 /x-pack/test/alerting_api_integration/observability/index.ts @elastic/obs-ux-management-team
 /x-pack/test_serverless/api_integration/test_suites/observability/synthetics @elastic/obs-ux-management-team
@@ -1492,7 +1493,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /src/platform/test/functional/services/selectable.ts @elastic/obs-ux-logs-team
 /x-pack/test/observability_onboarding_api_integration @elastic/obs-ux-logs-team
 /x-pack/test_serverless/api_integration/test_suites/observability/index.feature_flags.ts @elastic/obs-ux-logs-team
-/x-pack/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/api_integration/apis/logs_ui @elastic/obs-ux-logs-team
 /x-pack/test/dataset_quality_api_integration @elastic/obs-ux-logs-team
 /x-pack/test_serverless/api_integration/test_suites/observability/dataset_quality_api_integration @elastic/obs-ux-logs-team
 /x-pack/test/functional/apps/observability_logs_explorer @elastic/obs-ux-logs-team
@@ -1501,7 +1502,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test_serverless/functional/test_suites/observability/dataset_quality @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/discover @elastic/obs-ux-logs-team @elastic/kibana-data-discovery
 /src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
-/x-pack/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
+/x-pack/solutions/observability/test/api_integration/apis/logs_shared @elastic/obs-ux-logs-team
 /src/platform/test/functional/apps/discover/observability/embeddable @elastic/obs-ux-logs-team
 /src/platform/test/functional/apps/discover/observability/logs @elastic/obs-ux-logs-team
 
@@ -2604,6 +2605,7 @@ x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elas
 x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
+x-pack/solutions/security/packages/navigation/src/navigation_tree/entity_analytics_navigation_tree.ts @elastic/security-entity-analytics
 
 ## Security Solution sub teams - GenAI
 x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
@@ -2705,7 +2707,7 @@ x-pack/platform/plugins/private/translations/translations
 x-pack/test/profiling_cypress @elastic/obs-ux-infra_services-team
 
 # Profiling api integration testing
-x-pack/test/profiling_api_integration @elastic/obs-ux-infra_services-team
+x-pack/solutions/observability/test/api_integration/profiling @elastic/obs-ux-infra_services-team
 
 # Observability shared profiling
 x-pack/solutions/observability/plugins/observability_shared/public/components/profiling @elastic/obs-ux-infra_services-team
