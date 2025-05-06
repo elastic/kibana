@@ -373,12 +373,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       connectorUsageCollector
     )) as unknown as IncomingMessage;
-    console.log(
-      `--@@invokeStream res`,
-      JSON.stringify(
-        formatBedrockBody({ messages, stopSequences, system, temperature, tools, toolChoice })
-      )
-    );
     return res;
   }
 
@@ -514,16 +508,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     }: ConverseParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
-    // Set model on per request basis
-    // Application Inference Profile IDs need to be encoded when using the API
-    // Decode first to ensure an existing encoded value is not double encoded
     const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
     const path = `/model/${currentModel}/converse`;
 
-    console.log(`--@@path`, `${this.url}${path}`);
-    // @TODO: remove
-
-    // Format the request body for the converse-stream API
     const requestBody = JSON.stringify({
       messages,
       inferenceConfig: {
@@ -533,17 +520,10 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       toolConfig: {
         tools,
-        toolChoice,
+        toolChoice: { auto: toolChoice },
       },
       system,
-      // stop_sequences: stopSequences,
-      // system,
-      // temperature,
-      // max_tokens: maxTokens,
-      // tools,
-      // tool_choice: toolChoice,
     });
-    console.log(`--@@requestBody`, JSON.stringify(requestBody));
 
     const signed = this.signRequest(requestBody, path, true);
     const requestArgs = {
@@ -554,7 +534,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       signal,
       timeout,
     };
-    // Call request with stream response type
     const response = await this.runApiLatest(requestArgs, connectorUsageCollector);
 
     return response;
@@ -572,19 +551,9 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     timeout = DEFAULT_TIMEOUT_MS,
     connectorUsageCollector,
   }: ConverseStreamParams) {
-    // Set model on per request basis
-    // Application Inference Profile IDs need to be encoded when using the API
-    // Decode first to ensure an existing encoded value is not double encoded
     const currentModel = encodeURIComponent(decodeURIComponent(reqModel ?? this.model));
     const path = `/model/${currentModel}/converse-stream`;
 
-    console.log(
-      `--@@messages`,
-      messages.map((m) => m.content)
-    );
-    // @TODO: remove
-
-    // Format the request body for the converse-stream API
     const requestBody = JSON.stringify({
       messages,
       inferenceConfig: {
@@ -597,18 +566,10 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         toolChoice,
       },
       system,
-      // stop_sequences: stopSequences,
-      // system,
-      // temperature,
-      // max_tokens: maxTokens,
-      // tools,
-      // tool_choice: toolChoice,
     });
-    console.log(`--@@requestBody`, JSON.stringify(requestBody));
 
     const signed = this.signRequest(requestBody, path, true);
 
-    // Call request with stream response type
     const response = await this.request(
       {
         ...signed,
@@ -623,7 +584,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       connectorUsageCollector
     );
 
-    // Return the stream
     return response.data.pipe(new PassThrough()) as unknown as IncomingMessage;
   }
 
@@ -649,8 +609,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     }: ConverseStreamParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
-    // @TODO: remove
-    console.log(`--@@system`, system);
     const res = (await this._converseStream({
       messages,
       model: reqModel,

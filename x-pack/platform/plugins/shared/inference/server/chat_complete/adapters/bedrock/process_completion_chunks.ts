@@ -95,7 +95,6 @@ export function processConverseCompletionChunks() {
   return (source: Observable<CompletionChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
       function handleNext({ type, body: chunkBody }: CompletionChunk) {
-        console.log(`--@@type`, type, chunkBody);
         if (type === 'metadata' && 'metrics' in chunkBody) {
           return emitTokenCountEvent(subscriber, chunkBody);
         }
@@ -118,34 +117,22 @@ export function processConverseCompletionChunks() {
                 },
               };
             }
-            // @TODO: remove
-            console.log(`--@@contentBlockStart toolCallChunk`, toolCallChunk);
             break;
 
           case 'contentBlockDelta':
             if (chunkBody.delta.text) {
               completionChunk = chunkBody.delta.text || '';
             } else if (chunkBody.delta.toolUse) {
-              // @TODO: remove
-              console.log(`--@@chunkBody.delta`, chunkBody.delta);
-              if (toolCallChunk) {
-                toolCallChunk.function.arguments = chunkBody.delta.toolUse.input;
-              } else {
-                // toolCallChunk = {
-                //   index: chunkBody.contentBlockIndex,
-                // toolCallId: '',
-                // function: {
-                //   name: '',
-                //   arguments: chunkBody.delta.toolUse.input,
-                // },
-              }
+              toolCallChunk = {
+                index: chunkBody.contentBlockIndex,
+                toolCallId: '',
+                function: {
+                  name: '',
+                  arguments: chunkBody.delta.toolUse.input,
+                },
+              };
             }
             break;
-
-          // case 'contentBlockStop':
-          //   toolCallChunk = undefined;
-          //   break;
-
           case 'messageDelta':
             completionChunk = chunkBody.delta.stop_sequence || '';
             break;
@@ -155,8 +142,6 @@ export function processConverseCompletionChunks() {
         }
 
         if (completionChunk || toolCallChunk) {
-          console.log(`--@@completionChunk`, completionChunk);
-          console.log(`--@@toolCallChunk`, toolCallChunk);
           subscriber.next({
             type: ChatCompletionEventType.ChatCompletionChunk,
             content: completionChunk,

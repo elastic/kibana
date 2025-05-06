@@ -13,18 +13,14 @@ import {
   ToolChoiceType,
 } from '@kbn/inference-common';
 import { toUtf8 } from '@smithy/util-utf8';
-import { parseSerdeChunkMessage } from './serde_utils';
 import { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
-import type { BedRockImagePart, BedRockMessage, BedRockTextPart } from './types';
+import type { BedRockMessage, BedRockTextPart } from './types';
 import {
   BedrockChunkMember,
   serdeEventstreamIntoObservable,
 } from './serde_eventstream_into_observable';
-import {
-  processCompletionChunks,
-  processConverseCompletionChunks,
-} from './process_completion_chunks';
+import { processConverseCompletionChunks } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
 import { toolChoiceToBedrock, toolsToBedrock } from './convert_tools';
 
@@ -46,8 +42,6 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       role: message.role,
       content: message.rawContent,
     })) as BedrockMessage[];
-    // @TODO: remove
-    console.log(`--@@bedrockClaudeAdapter chatComplete system`, system);
     const systemMessage = noToolUsage
       ? [{ text: addNoToolUsageDirective(system) }]
       : [{ text: system }];
@@ -66,6 +60,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       system: systemMessage,
       messages: converseMessages,
       tools: bedRockTools,
+      // --@@ For invokeStream
       // system: noToolUsage ? addNoToolUsageDirective(system) : system,
       // messages: messagesToBedrock(messages),
       // tools: noToolUsage ? [] : toolsToBedrock(tools, messages),
@@ -124,13 +119,15 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
               return { text: contentPart.text, type: 'text' } satisfies BedRockTextPart;
             }
             return {
-              type: 'image',
-              source: {
-                data: contentPart.source.data,
-                mediaType: contentPart.source.mimeType,
-                type: 'base64',
+              image: {
+                // Convert mimetype = 'image/png' to 'png'
+                // https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_ImageBlock.html
+                format: contentPart.source.mimeType.split('/')[1],
+                source: {
+                  bytes: contentPart.source.data,
+                },
               },
-            } satisfies BedRockImagePart;
+            };
           }),
         };
       case MessageRole.Assistant:
@@ -141,12 +138,13 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
             ...(message.toolCalls
               ? message.toolCalls.map((toolCall) => {
                   return {
-                    type: 'tool_use' as const,
-                    id: toolCall.toolCallId,
-                    name: toolCall.function.name,
-                    input: ('arguments' in toolCall.function
-                      ? toolCall.function.arguments
-                      : {}) as Record<string, unknown>,
+                    toolUse: {
+                      toolUseId: toolCall.toolCallId,
+                      name: toolCall.function.name,
+                      input: ('arguments' in toolCall.function
+                        ? toolCall.function.arguments
+                        : {}) as Record<string, unknown>,
+                    },
                   };
                 })
               : []),
@@ -156,10 +154,20 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
         return {
           role: 'user' as const,
           rawContent: [
+            // @TODO: do proper conversion for content: document | image | text | json
             {
-              type: 'tool_result' as const,
-              tool_use_id: message.toolCallId,
-              content: JSON.stringify(message.response),
+              toolResult: {
+                toolUseId: message.toolCallId,
+                content: [
+                  typeof message.response === 'string'
+                    ? {
+                        text: message.response,
+                      }
+                    : {
+                        json: message.response,
+                      },
+                ],
+              },
             },
           ],
         };
