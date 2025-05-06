@@ -20,7 +20,6 @@ import {
   apmLabsButton,
   apmEnableTableSearchBar,
   entityCentricExperience,
-  enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   apmEnableContinuousRollups,
@@ -244,25 +243,6 @@ export const uiSettings: Record<string, UiSettings> = {
       }
     ),
     schema: schema.boolean(),
-    solution: 'oblt',
-  },
-  [enableAwsLambdaMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableAwsLambdaMetrics', {
-      defaultMessage: 'AWS Lambda Metrics',
-    }),
-    description: i18n.translate('xpack.observability.enableAwsLambdaMetricsDescription', {
-      defaultMessage:
-        '{technicalPreviewLabel} Display Amazon Lambda metrics in the service metrics tab.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
     solution: 'oblt',
   },
   [apmEnableTableSearchBar]: {
