@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const samlAuth = getService('samlAuth');
 
   describe('get_alerts_dataset_info', function () {
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
     let messageAddedEvents: MessageAddEvent[];
@@ -82,7 +82,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         arguments: () => JSON.stringify({ start: 'now-10d', end: 'now' }),
       });
 
-      void llmProxy.interceptConversation(
+      void llmProxy.interceptWithResponse(
         `You have active alerts for the past 10 days. Back to work!`
       );
 

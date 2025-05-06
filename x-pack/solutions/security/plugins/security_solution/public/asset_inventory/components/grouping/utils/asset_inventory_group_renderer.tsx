@@ -133,20 +133,6 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case ASSET_GROUPING_OPTIONS.ENTITY_SOURCE:
-      return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.SOURCE)
-      ) : (
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <EuiText size="s">{getGroupPanelTitle()}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
     default:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.DEFAULT)
