@@ -12,6 +12,7 @@ export const putRuleset = async (
   client: ElasticsearchClient,
   rulesetId: string
 ): Promise<QueryRulesPutRulesetResponse> => {
+  // Adding mandatory default "criteria" and "actions" values, we should manage temporary empty values before release
   return client.queryRules.putRuleset({
     ruleset_id: rulesetId,
     rules: [
