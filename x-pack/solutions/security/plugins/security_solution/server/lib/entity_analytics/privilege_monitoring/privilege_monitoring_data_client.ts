@@ -20,7 +20,8 @@ import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { merge } from 'lodash';
 import Papa from 'papaparse';
-import { Transform } from 'stream';
+import { Readable } from 'stream';
+
 import { getPrivilegedMonitorUsersIndex } from '../../../../common/entity_analytics/privilege_monitoring/constants';
 import type { PrivmonBulkUploadUsersCSVResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import type { HapiReadableStream } from '../../../types';
@@ -54,9 +55,11 @@ import {
 } from '../../telemetry/event_based/events';
 import type { PrivMonUserSource } from './types';
 
-import { csvToUserDoc } from './users/csv_parsing';
-import type { BulkProcessingError } from '../shared/streams/bulk_processing';
-import { bulkProcessingGenerator } from '../shared/streams/bulk_processing';
+import { parseMonitoredPrivilegedUserCsvRow } from './users/csv_parsing';
+
+import { batchPartitions } from '../shared/streams/batching';
+import { queryExistingUsers } from './users/query_existing_users';
+import { bulkProcessBatch } from './users/bulk_processing';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -264,55 +267,31 @@ export class PrivilegeMonitoringDataClient {
       dynamicTyping: true,
       skipEmptyLines: true,
     });
-    const recordsStream = stream
-      .pipe(csvStream)
-      .pipe(new Transform({ transform: csvToUserDoc, objectMode: true }));
 
-    const { generator, getState } = bulkProcessingGenerator<UpsertMonitoredUserDocData>({
-      recordsStream,
-      streamIndexStart: 1, // It is the first line number
-    });
+    const recordsStream = Readable.from(stream.pipe(csvStream))
+      .map(parseMonitoredPrivilegedUserCsvRow)
+      // .map(buildStats)
 
-    const bulkUploadErrors: BulkProcessingError[] = [];
-    const indexedRecords: UpsertMonitoredUserDocData[] = [];
+      .pipe(batchPartitions(100)) // we cant use .map() because we need to hook into the stream flush to finish the last batch
 
-    const { failed, successful } = await this.esClient.helpers.bulk({
-      datasource: generator(),
-      index: this.getIndex(),
-      flushBytes,
-      retries,
-      refreshOnCompletion: this.getIndex(),
-      onSuccess: ({ document }) => indexedRecords.push(document as UpsertMonitoredUserDocData),
-      onDocument: ({ record }) => {
-        return [
-          { update: {} },
-          {
-            doc: {
-              ...record,
-              labels: { sources: ['csv'] },
-              '@timestamp': new Date().toISOString(),
-            },
-            doc_as_upsert: true,
-          },
-        ];
-      },
-      onDrop: ({ document, error }) => {
-        bulkUploadErrors.push({
-          message: error?.reason || 'Unknown error',
-          index: document.index,
-        });
-      },
-    });
+      .map(queryExistingUsers(this.esClient, this.getIndex()))
+      .map(bulkProcessBatch(this.esClient, this.getIndex(), { flushBytes, retries }))
+      .forEach((result) => {
+        // calculate final stats
+      });
 
-    const { errors, stats } = getState();
-    return {
-      errors: errors.concat(bulkUploadErrors),
-      stats: {
-        successful,
-        failed: stats.failed + failed,
-        total: stats.total,
-      },
-    };
+    // const bulkUploadErrors: BulkProcessingError[] = [];
+    // const indexedRecords: UpsertMonitoredUserDocData[] = [];
+
+    // const { errors, stats } = getState();
+    // return {
+    //   errors: errors.concat(bulkUploadErrors),
+    //   stats: {
+    //     successful,
+    //     failed: stats.failed + failed,
+    //     total: stats.total,
+    //   },
+    // };
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {
