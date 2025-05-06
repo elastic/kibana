@@ -11,6 +11,7 @@
 Review important information about the {kib} 8.x releases.
 
 * <<release-notes-8.18.0>>
+* <<release-notes-8.17.6>>
 * <<release-notes-8.17.5>>
 * <<release-notes-8.17.4>>
 * <<release-notes-8.17.3>>
@@ -366,6 +367,46 @@ Machine Learning::
 * Anomaly Explorer: Fixes handling of job group IDs when opening from dashboard panels ({kibana-pull}203224[#203224]).
 * AiOps: Fixes Log Rate Analysis embeddable error on the Alerts page ({kibana-pull}203093[#203093]).
 * Initializes saved objects on trained model page load ({kibana-pull}201426[#201426]).
+
+[[release-notes-8.17.6]]
+== {kib} 8.17.6
+
+The 8.17.6 release includes the following enhancements and fixes.
+
+[float]
+[[enhancement-v8.17.6]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.17.6 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.17.6]]
+=== Fixes
+Dashboards and Visualizations::
+* Fixes an issue with the options list control making two requests instead of one when the page is refreshed ({kibana-pull}219625[#219625]).
+* Updates the HTTP API response from 201 to 200 ({kibana-pull}217054[#217054]).
+Elastic Observability Solution::
+* Prevents an error with reading properties in `custom_link_flyout.tsx` ({kibana-pull}219668[#219668]).
+* Handles missing `trace` in API response ({kibana-pull}219512[#219512]).
+* Displays an error message when creating an anomaly detection job fails ({kibana-pull}219364[#219364]).
+* Ensures that a distinct alert is sent per monitor configuration when *Receive distinct alerts per location* is turned off ({kibana-pull}219291[#219291]).
+* Prevents setting up filters when embeddable dashboard is destroyed ({kibana-pull}219097[#219097]).
+* Fixed error message when using Synthetics monitor status rule controls ({kibana-pull}218994[#218994]).
+* Fixes monitor history histogram and group by location issue ({kibana-pull}218550[#218550]).
+* Fixes pagination for test run logs ({kibana-pull}218458[#218458]).
+* Fixes span url link when `transactionId` is missing in span links ({kibana-pull}218232[#218232]).
+* Sorts the *Environment* dropdown alphabetically ({kibana-pull}217710[#217710]).
+* Prevents other conditions from changing when you change the condition type of a monitor status rule ({kibana-pull}216426[#216426]).
+* Filters out upstream orphans in the waterfall ({kibana-pull}214704[#214704]).
+Elastic Security solution::
+For the Elastic Security 8.17.6 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Ensures simultaneous successful logins when refreshing multiple tabs ({kibana-pull}212148[#212148]).
+Machine Learning::
+* Fixes vCPU usage message in the *Start deployment* dialog ({kibana-pull}218557[#218557]).
+* Improves anomaly charts object safety ({kibana-pull}217552[#217552]).
+Management::
+* Fixes error message when previewing index templates used by data streams ({kibana-pull}217604[#217604]).
 
 [[release-notes-8.17.5]]
 == {kib} 8.17.5
