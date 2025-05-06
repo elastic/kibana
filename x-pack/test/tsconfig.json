@@ -11,10 +11,6 @@
   },
   "include": [
     "**/*",
-    "./api_integration/apis/logstash/pipeline/fixtures/*.json",
-    "./api_integration/apis/logstash/pipelines/fixtures/*.json",
-    "./api_integration/apis/telemetry/fixtures/*.json",
-    "./monitoring_api_integration/fixtures/**/*.json",
     "../../typings/**/*",
     "../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
