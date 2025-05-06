@@ -695,7 +695,7 @@ export const calculateInProgressTimingMetrics = ({
   inProgressAt,
 }: {
   createdAt: string;
-  inProgressAt: string;
+  inProgressAt?: string | null;
 }) => {
   if (createdAt == null || inProgressAt == null) {
     throw new Error('Dates are null');
@@ -704,7 +704,7 @@ export const calculateInProgressTimingMetrics = ({
   const createdAtMillis = new Date(createdAt).getTime();
   const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
 
-  if (isNaN(createdAtMillis) || isNaN(inProgressAtMillis)) {
+  if (inProgressAtMillis == null || isNaN(createdAtMillis) || isNaN(inProgressAtMillis)) {
     throw new Error('Invalid dates');
   }
 
@@ -723,8 +723,8 @@ export const calculateCloseTimingMetrics = ({
   closedAt,
 }: {
   createdAt: string;
-  inProgressAt: string;
-  closedAt: string;
+  inProgressAt?: string | null;
+  closedAt: string | null;
 }) => {
   if (createdAt == null || closedAt == null || inProgressAt == null) {
     throw new Error('Dates are null');
@@ -734,7 +734,12 @@ export const calculateCloseTimingMetrics = ({
   const closedAtMillis = new Date(closedAt).getTime();
   const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
 
-  if (isNaN(createdAtMillis) || isNaN(closedAtMillis) || isNaN(inProgressAtMillis)) {
+  if (
+    inProgressAtMillis == null ||
+    isNaN(createdAtMillis) ||
+    isNaN(closedAtMillis) ||
+    isNaN(inProgressAtMillis)
+  ) {
     throw new Error('Invalid dates');
   }
 
