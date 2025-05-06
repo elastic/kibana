@@ -18,10 +18,17 @@ import type {
   GroupNodeViewModel,
 } from '.';
 import { Graph } from '.';
+import { MinimapProps } from './types';
 
+// Define a type for our story args that includes structured minimap props
+interface GraphStoryProps extends Omit<GraphData, 'minimap'> {
+  minimap?: MinimapProps;
+}
+
+// Create the meta object with a type assertion
 const meta: Meta<typeof Graph> = {
   component: Graph,
-  render: ({ nodes, edges, interactive }: GraphData) => {
+  render: ({ nodes, edges, interactive, minimap, snapToGrid, snapGrid }: GraphData) => {
     return (
       <ThemeProvider theme={{ darkMode: false }}>
         <Graph
@@ -32,16 +39,42 @@ const meta: Meta<typeof Graph> = {
           nodes={nodes}
           edges={edges}
           interactive={interactive}
+          minimap={minimap}
+          snapToGrid={snapToGrid}
+          snapGrid={snapGrid}
         />
       </ThemeProvider>
     );
   },
   title: 'Components/Graph Components/Graph Layout',
-  argTypes: {
-    interactive: { control: { type: 'boolean' } },
-  },
   args: {
     interactive: true,
+    snapToGrid: false,
+    snapGrid: 1,
+  },
+  argTypes: {
+    interactive: { control: 'boolean', defaultValue: true },
+    snapToGrid: {
+      control: 'boolean',
+      defaultValue: true,
+      description: 'Controls whether nodes snap to grid when moving',
+      table: {
+        defaultValue: { summary: 'true' },
+      },
+    },
+    snapGrid: {
+      control: { type: 'number', min: 1, max: 50, step: 1 },
+      defaultValue: 1,
+      description: 'Size of the grid in pixels that nodes will snap to',
+      table: {
+        defaultValue: { summary: '1' },
+      },
+    },
+    // Make the minimap expandable in the controls panel
+    minimap: {
+      control: 'object',
+      expanded: true,
+    },
   },
   decorators: [GlobalStylesStorybookDecorator],
 };
@@ -53,6 +86,9 @@ interface GraphData {
   nodes: NodeViewModel[];
   edges: EdgeViewModel[];
   interactive: boolean;
+  minimap?: MinimapProps;
+  snapToGrid?: boolean;
+  snapGrid?: number;
 }
 
 type EnhancedNodeViewModel =
@@ -185,7 +221,8 @@ const extractEdges = (
 
 export const SimpleAPIMock: Story = {
   args: {
-    interactive: false,
+    interactive: true,
+
     nodes: [
       {
         id: 'admin@example.com',
@@ -210,6 +247,7 @@ export const SimpleAPIMock: Story = {
         shape: 'label',
       },
     ],
+
     edges: [
       {
         id: 'a(admin@example.com)-b(a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole))',
@@ -230,6 +268,9 @@ export const SimpleAPIMock: Story = {
         color: 'primary',
       },
     ],
+
+    snapToGrid: false,
+    snapGrid: 10,
   },
 };
 
@@ -328,6 +369,8 @@ export const GroupWithWarningAPIMock: Story = {
         color: 'primary',
       },
     ],
+    snapToGrid: false,
+    snapGrid: 1,
   },
 };
 
@@ -458,6 +501,8 @@ export const LargeGraph: Story = {
   args: {
     ...meta.args,
     ...extractEdges(baseGraph),
+    snapToGrid: false,
+    snapGrid: 1,
   },
 };
 
@@ -490,6 +535,8 @@ export const GraphLabelOverlayCases: Story = {
         shape: 'label',
       },
     ]),
+    snapToGrid: false,
+    snapGrid: 1,
   },
 };
 
@@ -515,6 +562,8 @@ export const GraphStackedEdgeCases: Story = {
         shape: 'label',
       },
     ]),
+    snapToGrid: false,
+    snapGrid: 1,
   },
 };
 
@@ -544,5 +593,45 @@ export const GraphLargeStackedEdgeCases: Story = {
           shape: 'label',
         })),
     ]),
+    snapToGrid: false,
+    snapGrid: 1,
+  },
+};
+
+export const GraphWithMinimap: Story = {
+  args: {
+    ...meta.args,
+    ...extractEdges(baseGraph),
+    minimap: {
+      pannable: true,
+      zoomable: true,
+      inversePan: false,
+      zoomStep: 10,
+      offsetScale: 5,
+      nodeColor: '#0077cc',
+      nodeStrokeColor: '#000000',
+      nodeBorderRadius: 2,
+      nodeStrokeWidth: 1,
+      nodeClassName: 'custom-minimap-node',
+      bgColor: '#f5f5f5',
+      maskColor: 'rgba(0, 0, 0, 0.1)',
+      maskStrokeColor: '#333333',
+      maskStrokeWidth: 1,
+      position: 'bottom-right',
+      ariaLabel: 'Graph overview minimap',
+    },
+    snapToGrid: false,
+    snapGrid: 1,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Graph with minimap enabled. Configure individual minimap properties through the controls below.',
+      },
+    },
+    controls: {
+      expanded: true,
+    },
   },
 };
