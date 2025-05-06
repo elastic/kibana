@@ -62,6 +62,9 @@ describe('correct agentless policy settings', () => {
       {
         data_output_id: 'es-default-output',
         fleet_server_host_id: 'default-fleet-server',
+      },
+      {
+        force: true,
       }
     );
     expect(agentPolicyService.update).toHaveBeenCalledWith(
