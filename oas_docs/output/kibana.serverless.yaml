@@ -953,6 +953,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -1785,7 +1794,17 @@ paths:
                             type: string
                         required:
                           - id
+                      maxItems: 10
                       type: array
+                    investigation_guide:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        blob:
+                          maxLength: 1000
+                          type: string
+                      required:
+                        - blob
                 consumer:
                   description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                   type: string
@@ -2330,6 +2349,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -3038,7 +3066,17 @@ paths:
                             type: string
                         required:
                           - id
+                      maxItems: 10
                       type: array
+                    investigation_guide:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        blob:
+                          maxLength: 1000
+                          type: string
+                      required:
+                        - blob
                 flapping:
                   additionalProperties: false
                   description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
@@ -3344,6 +3382,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -4747,6 +4794,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -37885,7 +37941,7 @@ paths:
                               - updated_by
                               - created_at
                               - created_by
-                          - additionalProperties: false
+                          - additionalProperties: true
                             type: object
                             properties:
                               additional_datastreams_permissions:
@@ -37894,9 +37950,25 @@ paths:
                                   type: string
                                 nullable: true
                                 type: array
+                              created_at:
+                                type: string
+                              created_by:
+                                type: string
                               description:
                                 description: Package policy description
                                 type: string
+                              elasticsearch:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  privileges:
+                                    additionalProperties: true
+                                    type: object
+                                    properties:
+                                      cluster:
+                                        items:
+                                          type: string
+                                        type: array
                               enabled:
                                 type: boolean
                               errors:
@@ -37920,6 +37992,7 @@ paths:
                                   additionalProperties: false
                                   type: object
                                   properties:
+                                    compiled_input: {}
                                     config:
                                       additionalProperties:
                                         additionalProperties: false
@@ -38040,6 +38113,7 @@ paths:
                                     - type
                                     - enabled
                                     - streams
+                                    - compiled_input
                                 type: array
                               is_managed:
                                 type: boolean
@@ -38115,11 +38189,27 @@ paths:
                                   description: Agent policy IDs where that package policy will be added
                                   type: string
                                 type: array
+                              revision:
+                                type: number
+                              secret_references:
+                                items:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                type: array
                               supports_agentless:
                                 default: false
                                 description: Indicates whether the package policy belongs to an agentless agent policy.
                                 nullable: true
                                 type: boolean
+                              updated_at:
+                                type: string
+                              updated_by:
+                                type: string
                               vars:
                                 additionalProperties:
                                   additionalProperties: false
@@ -38134,6 +38224,8 @@ paths:
                                     - value
                                 description: Package variable (see integration documentation for more information)
                                 type: object
+                              version:
+                                type: string
                             required:
                               - name
                               - enabled
