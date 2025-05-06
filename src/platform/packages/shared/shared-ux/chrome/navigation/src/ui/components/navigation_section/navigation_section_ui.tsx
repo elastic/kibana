@@ -43,6 +43,10 @@ const sectionStyles = {
     paddingInline: euiTheme.size.s,
   }),
   euiCollapsibleNavSection: ({ euiTheme }: Theme) => css`
+    & > .euiCollapsibleNavLink {
+      font-weight: 600;
+    }
+
     .euiCollapsibleNavAccordion.isSelected {
       .euiAccordion__triggerWrapper,
       .euiCollapsibleNavLink {
