@@ -22,8 +22,6 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
-import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
-import { pagePathGetters } from '../../../../../../../constants';
 import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../types';
 import {
   EuiButtonWithTooltip,
@@ -41,6 +39,8 @@ import {
   useDefaultOutput,
 } from '../../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../../services';
+
+import { AddIntegrationFlyout } from './add_integration_flyout';
 
 interface Props {
   packagePolicies: PackagePolicy[];
@@ -71,6 +71,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+  const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
 
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
@@ -388,73 +389,78 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <EuiInMemoryTable<InMemoryPackagePolicy>
-      itemId="id"
-      items={packagePolicies}
-      columns={columns}
-      sorting={{
-        sort: {
-          field: 'name',
-          direction: 'asc',
-        },
-      }}
-      {...rest}
-      search={{
-        toolsRight:
-          agentPolicy.is_managed || agentPolicy.supports_agentless
-            ? []
-            : [
-                <EuiButtonWithTooltip
-                  key="addPackagePolicyButton"
-                  fill
-                  isDisabled={!canWriteIntegrationPolicies}
-                  iconType="plusInCircle"
-                  onClick={() => {
-                    application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-                      path: pagePathGetters.integrations_all({})[1],
-                      state: { forAgentPolicyId: agentPolicy.id },
-                    });
-                  }}
-                  data-test-subj="addPackagePolicyButton"
-                  tooltip={
-                    !canWriteIntegrationPolicies
-                      ? {
-                          content: missingSecurityConfiguration ? (
-                            <FormattedMessage
-                              id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
-                              defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the All privilege for Fleet. Contact your administrator."
-                            />
-                          ) : (
-                            <FormattedMessage
-                              id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
-                              defaultMessage="Elastic Agent Integrations require the All privilege for Agent policies and All privilege for Integrations. Contact your administrator."
-                            />
-                          ),
-                        }
-                      : undefined
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.policyDetails.addPackagePolicyButtonText"
-                    defaultMessage="Add integration"
-                  />
-                </EuiButtonWithTooltip>,
-              ],
-        box: {
-          incremental: true,
-          schema: true,
-        },
-        filters: [
-          {
-            type: 'field_value_selection',
-            field: 'namespace',
-            name: 'Namespace',
-            options: namespaces,
-            multiSelect: 'or',
-            operator: 'exact',
+    <>
+      <EuiInMemoryTable<InMemoryPackagePolicy>
+        itemId="id"
+        items={packagePolicies}
+        columns={columns}
+        sorting={{
+          sort: {
+            field: 'name',
+            direction: 'asc',
           },
-        ],
-      }}
-    />
+        }}
+        {...rest}
+        search={{
+          toolsRight:
+            agentPolicy.is_managed || agentPolicy.supports_agentless
+              ? []
+              : [
+                  <EuiButtonWithTooltip
+                    key="addPackagePolicyButton"
+                    fill
+                    isDisabled={!canWriteIntegrationPolicies}
+                    iconType="plusInCircle"
+                    onClick={() => {
+                      setShowAddIntegrationFlyout(true);
+                    }}
+                    data-test-subj="addPackagePolicyButton"
+                    tooltip={
+                      !canWriteIntegrationPolicies
+                        ? {
+                            content: missingSecurityConfiguration ? (
+                              <FormattedMessage
+                                id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
+                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the All privilege for Fleet. Contact your administrator."
+                              />
+                            ) : (
+                              <FormattedMessage
+                                id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
+                                defaultMessage="Elastic Agent Integrations require the All privilege for Agent policies and All privilege for Integrations. Contact your administrator."
+                              />
+                            ),
+                          }
+                        : undefined
+                    }
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.policyDetails.addPackagePolicyButtonText"
+                      defaultMessage="Add integration"
+                    />
+                  </EuiButtonWithTooltip>,
+                ],
+          box: {
+            incremental: true,
+            schema: true,
+          },
+          filters: [
+            {
+              type: 'field_value_selection',
+              field: 'namespace',
+              name: 'Namespace',
+              options: namespaces,
+              multiSelect: 'or',
+              operator: 'exact',
+            },
+          ],
+        }}
+      />
+      {showAddIntegrationFlyout && (
+        <AddIntegrationFlyout
+          onClose={() => setShowAddIntegrationFlyout(false)}
+          agentPolicy={agentPolicy}
+        />
+      )}
+    </>
   );
 };
