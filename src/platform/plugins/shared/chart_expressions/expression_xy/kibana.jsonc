@@ -17,14 +17,12 @@
       "data",
       "fieldFormats",
       "uiActions",
-      "eventAnnotation"
+      "eventAnnotation",
+      "visualizations"
     ],
     "optionalPlugins": [
-      "visualizations",
       "usageCollection"
     ],
-    "requiredBundles": [
-      "visualizations"
-    ]
+    "requiredBundles": []
   }
 }

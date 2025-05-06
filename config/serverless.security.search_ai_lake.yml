@@ -9,20 +9,20 @@ xpack.lens.enabled: false
 
 ### Disable Visualizations
 visualizations.enabled: false
-vis_type_gauge.enabled: false
-vis_type_heatmap.enabled: false
-vis_type_markdown.enabled: false
-vis_type_metric.enabled: false
-vis_type_pie.enabled: false
-vis_type_table.enabled: false
-vis_type_tagcloud.enabled: false
-vis_type_timelion.enabled: false
-vis_type_timeseries.enabled: false
-vis_type_vislib.enabled: false
-vis_type_xy.enabled: false
-vis_type_vega.enabled: false
-input_control_vis.enabled: false
-xpack.graph.enabled: false
+#vis_type_gauge.enabled: false
+#vis_type_heatmap.enabled: false
+#vis_type_markdown.enabled: false
+#vis_type_metric.enabled: false
+#vis_type_pie.enabled: false
+#vis_type_table.enabled: false
+#vis_type_tagcloud.enabled: false
+#vis_type_timelion.enabled: false
+#vis_type_timeseries.enabled: false
+#vis_type_vislib.enabled: false
+#vis_type_xy.enabled: false
+#vis_type_vega.enabled: false
+#input_control_vis.enabled: false
+#xpack.graph.enabled: false
 
 ## Disable plugin features
 xpack.alerting.maintenanceWindow.enabled: false

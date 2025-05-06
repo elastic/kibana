@@ -16,13 +16,13 @@
       "eventAnnotation",
       "data",
       "presentationUtil",
+      "visualizations",
       "dataViews",
       "unifiedSearch",
       "kibanaUtils",
       "contentManagement"
     ],
     "optionalPlugins": [
-      "visualizations",
       "savedObjectsTagging",
       "lens"
     ],

@@ -20,14 +20,14 @@
       "presentationUtil",
       "uiActions",
       "uiActionsEnhanced",
+      "visualizations"
     ],
     "optionalPlugins": [
-      "visualizations",
       "triggersActionsUi",
       "usageCollection"
     ],
     "requiredBundles": [
-      "savedObjects",
+      "savedObjects"
     ]
   }
 }

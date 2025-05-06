@@ -74,7 +74,7 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/content-management-utils",
     "@kbn/react-hooks",
-    "@kbn/presentation-panel-plugin",
+    "@kbn/presentation-panel-plugin"
   ],
   "exclude": ["target/**/*"]
 }

@@ -35,7 +35,7 @@ export interface EventAnnotationListingStartDependencies {
 }
 
 interface SetupDependencies {
-  visualizations?: VisualizationsSetup;
+  visualizations: VisualizationsSetup;
 }
 
 /** @public */
@@ -56,7 +56,7 @@ export class EventAnnotationListingPlugin
     core: CoreSetup<EventAnnotationListingStartDependencies>,
     dependencies: SetupDependencies
   ) {
-    dependencies.visualizations?.listingViewRegistry.add({
+    dependencies.visualizations.listingViewRegistry.add({
       title: i18n.translate('eventAnnotationListing.listingViewTitle', {
         defaultMessage: 'Annotation groups',
       }),

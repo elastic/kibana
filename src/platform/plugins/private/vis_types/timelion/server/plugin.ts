@@ -75,7 +75,7 @@ export class TimelionPlugin
 
     const { readOnly } = this.initializerContext.config.get<TimelionConfig>();
     if (readOnly) {
-      plugins.visualizations?.registerReadOnlyVisType(TIMELION_VIS_NAME);
+      plugins.visualizations.registerReadOnlyVisType(TIMELION_VIS_NAME);
     }
   }
 

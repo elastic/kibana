@@ -15,16 +15,15 @@
       "charts",
       "data",
       "expressions",
+      "visualizations",
       "fieldFormats",
       "presentationUtil"
     ],
     "optionalPlugins": [
-      "visualizations",
       "usageCollection"
     ],
     "requiredBundles": [
-      "kibanaUtils",
-      "visualizations"
+      "kibanaUtils"
     ],
     "extraPublicDirs": [
       "common"

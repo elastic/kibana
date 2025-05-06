@@ -42,7 +42,7 @@ import { getTimeseriesVisRenderer } from './timeseries_vis_renderer';
 /** @internal */
 export interface MetricsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
-  visualizations?: VisualizationsSetup;
+  visualizations: VisualizationsSetup;
 }
 
 /** @internal */
@@ -80,7 +80,7 @@ export class MetricsPlugin implements Plugin<void, void> {
   public setup(core: CoreSetup, { expressions, visualizations }: MetricsPluginSetupDependencies) {
     const { readOnly } = this.initializerContext.config.get<VisTypeTimeseriesPublicConfig>();
 
-    visualizations?.visEditorsRegistry.register(TSVB_EDITOR_NAME, EditorController);
+    visualizations.visEditorsRegistry.register(TSVB_EDITOR_NAME, EditorController);
     expressions.registerFunction(createMetricsFn);
     expressions.registerRenderer(
       getTimeseriesVisRenderer({
@@ -89,7 +89,7 @@ export class MetricsPlugin implements Plugin<void, void> {
       })
     );
     setUISettings(core.uiSettings);
-    visualizations?.createBaseVisualization({
+    visualizations.createBaseVisualization({
       ...metricsVisDefinition,
       disableCreate: Boolean(readOnly),
       disableEdit: Boolean(readOnly),

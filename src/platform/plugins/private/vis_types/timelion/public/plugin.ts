@@ -53,7 +53,7 @@ export interface TimelionVisDependencies extends Partial<CoreStart> {
 /** @internal */
 export interface TimelionVisSetupDependencies {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
-  visualizations?: VisualizationsSetup;
+  visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
   charts: ChartsPluginSetup;
 }
@@ -97,7 +97,7 @@ export class TimelionVisPlugin
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
     expressions.registerRenderer(getTimelionVisRenderer(dependencies));
     const { readOnly } = this.initializerContext.config.get<TimelionPublicConfig>();
-    visualizations?.createBaseVisualization({
+    visualizations.createBaseVisualization({
       ...getTimelionVisDefinition(dependencies),
       disableCreate: Boolean(readOnly),
       disableEdit: Boolean(readOnly),

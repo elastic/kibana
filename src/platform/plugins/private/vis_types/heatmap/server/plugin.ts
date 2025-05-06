@@ -62,7 +62,7 @@ export class VisTypeHeatmapServerPlugin implements Plugin<object, object> {
 
     const { readOnly } = this.initializerContext.config.get<HeatmapConfig>();
     if (readOnly) {
-      plugins.visualizations?.registerReadOnlyVisType('heatmap');
+      plugins.visualizations.registerReadOnlyVisType('heatmap');
     }
 
     return {};

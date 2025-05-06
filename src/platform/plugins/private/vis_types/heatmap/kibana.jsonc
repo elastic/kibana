@@ -15,17 +15,14 @@
       "charts",
       "data",
       "expressions",
+      "visualizations",
       "usageCollection",
       "fieldFormats",
       "dataViews"
     ],
-    "optionalPlugins": [
-      "visualizations"
-    ],
     "requiredBundles": [
       "visDefaultEditor",
-      "kibanaUtils",
-      "visualizations"
+      "kibanaUtils"
     ],
     "extraPublicDirs": [
       "common"

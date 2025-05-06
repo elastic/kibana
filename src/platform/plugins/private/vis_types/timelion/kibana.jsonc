@@ -12,6 +12,7 @@
     "browser": true,
     "server": true,
     "requiredPlugins": [
+      "visualizations",
       "data",
       "expressions",
       "charts",
@@ -19,14 +20,12 @@
       "fieldFormats"
     ],
     "optionalPlugins": [
-      "visualizations",
       "usageCollection"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "visDefaultEditor",
-      "visualizations"
+      "visDefaultEditor"
     ]
   }
 }

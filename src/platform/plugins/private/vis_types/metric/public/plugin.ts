@@ -16,7 +16,7 @@ import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
-  visualizations?: VisualizationsSetup;
+  visualizations: VisualizationsSetup;
 }
 
 /** @internal */
@@ -36,7 +36,7 @@ export class MetricVisPlugin
 
   public setup(core: CoreSetup, { visualizations }: MetricVisPluginSetupDependencies) {
     const { readOnly } = this.initializerContext.config.get<MetricPublicConfig>();
-    visualizations?.createBaseVisualization({
+    visualizations.createBaseVisualization({
       ...createMetricVisTypeDefinition(),
       disableCreate: Boolean(readOnly),
       disableEdit: Boolean(readOnly),

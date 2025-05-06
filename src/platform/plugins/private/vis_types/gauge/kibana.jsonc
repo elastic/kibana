@@ -15,17 +15,16 @@
       "charts",
       "data",
       "expressions",
+      "visualizations",
       "dataViews"
     ],
     "optionalPlugins": [
-      "expressionGauge",
-      "visualizations"
+      "expressionGauge"
     ],
     "requiredBundles": [
       "visDefaultEditor",
       "expressionGauge",
-      "kibanaUtils",
-      "visualizations"
+      "kibanaUtils"
     ],
     "extraPublicDirs": [
       "common"

@@ -41,7 +41,7 @@ export interface EventAnnotationStartDependencies {
 
 interface SetupDependencies {
   expressions: ExpressionsSetup;
-  visualizations?: VisualizationsSetup;
+  visualizations: VisualizationsSetup;
   contentManagement: ContentManagementPublicSetup;
 }
 

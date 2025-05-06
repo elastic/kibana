@@ -15,16 +15,13 @@
       "data",
       "expressions",
       "visDefaultEditor",
+      "visualizations",
       "unifiedSearch",
       "uiActions"
     ],
-    "optionalPlugins": [
-      "visualizations"
-    ],
     "requiredBundles": [
       "kibanaReact",
-      "embeddable",
-      "visualizations"
+      "embeddable"
     ]
   }
 }

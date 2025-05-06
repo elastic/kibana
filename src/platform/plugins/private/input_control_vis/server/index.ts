@@ -27,7 +27,7 @@ export const plugin = async (initializerContext: PluginInitializerContext) => ({
   setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     const { readOnly } = initializerContext.config.get<InputControlConfig>();
     if (readOnly) {
-      plugins.visualizations?.registerReadOnlyVisType('input_control_vis');
+      plugins.visualizations.registerReadOnlyVisType('input_control_vis');
     }
 
     return {};

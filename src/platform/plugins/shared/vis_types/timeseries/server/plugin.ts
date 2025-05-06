@@ -140,7 +140,7 @@ export class VisTypeTimeseriesPlugin
 
     const { readOnly } = this.initializerContext.config.get<VisTypeTimeseriesConfig>();
     if (readOnly) {
-      plugins.visualizations?.registerReadOnlyVisType(VIS_TYPE);
+      plugins.visualizations.registerReadOnlyVisType(VIS_TYPE);
     }
 
     return {

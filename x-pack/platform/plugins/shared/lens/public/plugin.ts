@@ -156,7 +156,7 @@ export interface LensPluginSetupDependencies {
   data: DataPublicPluginSetup;
   fieldFormats: FieldFormatsSetup;
   embeddable?: EmbeddableSetup;
-  visualizations?: VisualizationsSetup;
+  visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;

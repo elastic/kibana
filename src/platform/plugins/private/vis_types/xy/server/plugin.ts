@@ -23,10 +23,10 @@ export class VisTypeXYServerPlugin implements Plugin {
   public setup(core: CoreSetup, plugins: PluginSetupDependencies) {
     const { readOnly } = this.initializerContext.config.get<XyConfig>();
     if (readOnly) {
-      plugins.visualizations?.registerReadOnlyVisType('area');
-      plugins.visualizations?.registerReadOnlyVisType('histogram');
-      plugins.visualizations?.registerReadOnlyVisType('horizontal_bar');
-      plugins.visualizations?.registerReadOnlyVisType('line');
+      plugins.visualizations.registerReadOnlyVisType('area');
+      plugins.visualizations.registerReadOnlyVisType('histogram');
+      plugins.visualizations.registerReadOnlyVisType('horizontal_bar');
+      plugins.visualizations.registerReadOnlyVisType('line');
     }
 
     return {};

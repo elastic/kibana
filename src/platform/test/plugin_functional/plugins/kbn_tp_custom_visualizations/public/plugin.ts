@@ -18,7 +18,7 @@ import { toExpressionAst } from './to_ast';
 
 export interface SetupDependencies {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
-  visualizations?: VisualizationsSetup;
+  visualizations: VisualizationsSetup;
 }
 
 export class CustomVisualizationsPublicPlugin

@@ -255,7 +255,7 @@ const useTableListViewProps = (
     findItems: fetchItems,
     deleteItems,
     contentEditor: {
-      isReadonly: !visualizeCapabilities?.save,
+      isReadonly: !visualizeCapabilities.save,
       onSave: onContentEditorSave,
       customValidators: contentEditorValidators,
     },
@@ -263,7 +263,7 @@ const useTableListViewProps = (
     emptyPrompt: noItemsFragment,
     createItem: createNewVis,
     rowItemActions: ({ managed, attributes: { readOnly } }) =>
-      !visualizeCapabilities?.save || readOnly
+      !visualizeCapabilities.save || readOnly
         ? {
             edit: {
               enabled: false,

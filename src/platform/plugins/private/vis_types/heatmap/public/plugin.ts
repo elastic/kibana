@@ -21,7 +21,7 @@ import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface VisTypeHeatmapSetupDependencies {
-  visualizations?: VisualizationsSetup;
+  visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
@@ -50,7 +50,7 @@ export class VisTypeHeatmapPlugin {
   ) {
     if (!core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
       const { readOnly } = this.initializerContext.config.get<HeatmapPublicConfig>();
-      visualizations?.createBaseVisualization({
+      visualizations.createBaseVisualization({
         ...heatmapVisType({
           showElasticChartsOptions: true,
           palettes: charts.palettes,

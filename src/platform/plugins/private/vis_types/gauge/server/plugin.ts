@@ -51,8 +51,8 @@ export class VisTypeGaugeServerPlugin implements Plugin<object, object> {
 
     const { readOnly } = this.initializerContext.config.get<GaugeConfig>();
     if (readOnly) {
-      plugins.visualizations?.registerReadOnlyVisType('gauge');
-      plugins.visualizations?.registerReadOnlyVisType('goal');
+      plugins.visualizations.registerReadOnlyVisType('gauge');
+      plugins.visualizations.registerReadOnlyVisType('goal');
     }
 
     return {};

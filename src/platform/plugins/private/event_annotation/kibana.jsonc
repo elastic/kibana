@@ -15,13 +15,13 @@
       "expressions",
       "data",
       "presentationUtil",
+      "visualizations",
       "dataViews",
       "unifiedSearch",
       "kibanaUtils",
       "contentManagement"
     ],
     "optionalPlugins": [
-      "visualizations",
       "savedObjectsTagging"
     ],
     "requiredBundles": [
