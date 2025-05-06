@@ -16,8 +16,6 @@ export const apmTraceExplorerTab = 'observability:apmTraceExplorerTab';
 export const apmLabsButton = 'observability:apmLabsButton';
 export const enableInfrastructureProfilingIntegration =
   'observability:enableInfrastructureProfilingIntegration';
-export const enableInfrastructureAssetCustomDashboards =
-  'observability:enableInfrastructureAssetCustomDashboards';
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
 export const entityCentricExperience = 'observability:entityCentricExperience';
