@@ -17,7 +17,7 @@ const assetCriticalityMapping = {
 };
 
 // Upgrade this value to force a mappings update on the next Kibana startup
-export const ASSET_CRITICALITY_MAPPINGS_VERSIONS = 3;
+export const ASSET_CRITICALITY_MAPPINGS_VERSIONS = 4;
 
 export const assetCriticalityFieldMap: FieldMap = {
   '@timestamp': {

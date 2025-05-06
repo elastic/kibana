@@ -43,7 +43,7 @@ describe('AssetCriticalityDataClient', () => {
           index: '.asset-criticality.asset-criticality-default',
           mappings: {
             _meta: {
-              version: 3,
+              version: 4,
             },
             dynamic: 'strict',
             properties: {
@@ -106,6 +106,20 @@ describe('AssetCriticalityDataClient', () => {
                 },
               },
               user: {
+                properties: {
+                  asset: {
+                    properties: {
+                      criticality: {
+                        type: 'keyword',
+                      },
+                    },
+                  },
+                  name: {
+                    type: 'keyword',
+                  },
+                },
+              },
+              generic: {
                 properties: {
                   asset: {
                     properties: {

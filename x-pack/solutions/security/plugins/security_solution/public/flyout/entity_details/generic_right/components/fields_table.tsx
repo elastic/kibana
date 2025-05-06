@@ -83,6 +83,7 @@ export const usePinnedFields = (storageKey: string) => {
 
     setPinnedFieldsInLocalStorage(storageKey, updatedPinnedFields);
     queryClient.setQueryData(['pinnedFields', storageKey], updatedPinnedFields);
+    queryClient.invalidateQueries(['pinnedFields', storageKey]);
   };
 
   return {
