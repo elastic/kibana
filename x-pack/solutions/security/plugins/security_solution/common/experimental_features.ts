@@ -260,7 +260,7 @@ export const allowedExperimentalValues = Object.freeze({
   newDataViewPickerEnabled: false,
 
   /**
-   * Enables the SOC trends timerange and stats on D&R page
+   * Automatically installs the security AI prompts package
    */
   securityAIPromptsEnabled: false,
 });
