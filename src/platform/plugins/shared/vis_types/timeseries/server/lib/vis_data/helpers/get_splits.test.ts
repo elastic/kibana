@@ -24,7 +24,7 @@ describe('getSplits(resp, panel, series)', () => {
     const panel = { type: 'timeseries' } as Panel;
     const series = {
       id: 'SERIES',
-      color: '#ff0000',,
+      color: '#ff0000',
       split_mode: 'everything',
       metrics: [
         { id: 'AVG', type: 'avg', field: 'cpu' },
