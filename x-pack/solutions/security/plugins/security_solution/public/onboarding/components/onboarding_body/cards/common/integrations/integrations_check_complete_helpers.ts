@@ -83,6 +83,7 @@ export const getAgentsData = async (services: StartServices, isComplete: boolean
   });
 
   const agentsDataAvailable = !!agentsData?.rawResponse?.hits?.total;
-  const isAgentRequired = isComplete && !agentsDataAvailable;
+  // If the integration card is complete (has one active integration), we don't need to check for agents data
+  const isAgentRequired = !isComplete && !agentsDataAvailable;
   return { isAgentRequired, agentsData };
 };

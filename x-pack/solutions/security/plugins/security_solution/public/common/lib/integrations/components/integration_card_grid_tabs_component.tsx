@@ -25,21 +25,17 @@ import {
   SEARCH_FILTER_CATEGORIES,
   TELEMETRY_INTEGRATION_TAB,
 } from '../constants';
-import type { AvailablePackagesResult } from '../types';
+import type { AvailablePackagesResult, TopCalloutRenderer } from '../types';
 import { IntegrationTabId } from '../types';
 import type { UseSelectedTabReturn } from '../hooks/use_selected_tab';
 import { useStoredIntegrationSearchTerm } from '../hooks/use_stored_state';
 import { useIntegrationContext } from '../hooks/integration_context';
 
 export interface IntegrationsCardGridTabsProps {
-  installedIntegrationsCount: number;
+  activeIntegrationsCount: number;
   isAgentRequired?: boolean;
   availablePackagesResult: AvailablePackagesResult;
-  topCalloutRenderer?: React.FC<{
-    installedIntegrationsCount: number;
-    isAgentRequired?: boolean;
-    selectedTabId: IntegrationTabId;
-  }>;
+  topCalloutRenderer?: TopCalloutRenderer;
   integrationList: IntegrationCardItem[];
   selectedTabResult: UseSelectedTabReturn;
   packageListGridOptions?: {
@@ -59,7 +55,7 @@ export const PackageListGrid = lazy(async () => ({
 export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGridTabsProps>(
   ({
     isAgentRequired,
-    installedIntegrationsCount,
+    activeIntegrationsCount,
     topCalloutRenderer: TopCallout,
     integrationList,
     availablePackagesResult,
@@ -180,7 +176,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
                 TopCallout ? (
                   <TopCallout
                     isAgentRequired={isAgentRequired}
-                    installedIntegrationsCount={installedIntegrationsCount}
+                    activeIntegrationsCount={activeIntegrationsCount}
                     selectedTabId={selectedTab.id}
                   />
                 ) : null

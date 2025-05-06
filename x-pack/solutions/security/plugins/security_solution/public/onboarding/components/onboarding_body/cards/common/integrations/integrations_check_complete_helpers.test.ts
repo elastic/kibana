@@ -136,7 +136,7 @@ describe('getAgentsData', () => {
     };
     mockLastValueFrom.mockResolvedValue(mockAgentsData);
 
-    const result = await getAgentsData(mockService, true);
+    const result = await getAgentsData(mockService, false);
 
     expect(result).toEqual({
       isAgentRequired: true,
@@ -148,6 +148,22 @@ describe('getAgentsData', () => {
     const mockAgentsData = {
       rawResponse: {
         hits: { total: 1 },
+      },
+    };
+    mockLastValueFrom.mockResolvedValue(mockAgentsData);
+
+    const result = await getAgentsData(mockService, true);
+
+    expect(result).toEqual({
+      isAgentRequired: false,
+      agentsData: mockAgentsData,
+    });
+  });
+
+  it('returns isAgentRequired as false when agent data is Not available and isComplete is true', async () => {
+    const mockAgentsData = {
+      rawResponse: {
+        hits: { total: 0 },
       },
     };
     mockLastValueFrom.mockResolvedValue(mockAgentsData);

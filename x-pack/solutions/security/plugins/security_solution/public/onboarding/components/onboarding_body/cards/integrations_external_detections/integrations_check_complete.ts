@@ -23,7 +23,7 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
     AI_FOR_SOC_INTEGRATIONS
   );
 
-  const installedIntegrationsCount = activeIntegrations.length;
+  const activeIntegrationsCount = activeIntegrations.length;
 
   if (!isComplete) {
     return {
@@ -34,7 +34,7 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
 
   return {
     isComplete,
-    completeBadgeText: getCompleteBadgeText(installedIntegrationsCount),
+    completeBadgeText: getCompleteBadgeText(activeIntegrationsCount),
     metadata: {
       activeIntegrations,
     },

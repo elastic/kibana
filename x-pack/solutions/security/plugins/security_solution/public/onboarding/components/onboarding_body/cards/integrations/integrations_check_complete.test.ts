@@ -38,7 +38,7 @@ describe('checkIntegrationsCardComplete', () => {
     jest.clearAllMocks();
   });
 
-  it('returns isComplete as false when no packages are installed', async () => {
+  it('returns isComplete as false when no packages are active', async () => {
     mockHttpGet.mockResolvedValue({
       items: [],
     });
@@ -54,13 +54,13 @@ describe('checkIntegrationsCardComplete', () => {
     expect(result).toEqual({
       isComplete: false,
       metadata: {
-        isAgentRequired: false,
+        isAgentRequired: true,
         activeIntegrations: [],
       },
     });
   });
 
-  it('returns isComplete as true when packages are installed but no agent data is available', async () => {
+  it('returns isComplete as true when packages are active but no agent data is available', async () => {
     const mockActiveIntegrations = [
       {
         status: installationStatuses.Installed,
@@ -88,7 +88,7 @@ describe('checkIntegrationsCardComplete', () => {
       isComplete: true,
       completeBadgeText: '1 integration added',
       metadata: {
-        isAgentRequired: true,
+        isAgentRequired: false,
         activeIntegrations: mockActiveIntegrations,
       },
     });
@@ -141,6 +141,11 @@ describe('checkIntegrationsCardComplete', () => {
   it('renders an error toast when fetching integrations data fails', async () => {
     const err = new Error('Failed to fetch integrations data');
     mockHttpGet.mockRejectedValue(err);
+    mockLastValueFrom.mockResolvedValue({
+      rawResponse: {
+        hits: { total: 0 },
+      },
+    });
 
     const res = await checkIntegrationsCardComplete(mockService);
 
@@ -150,13 +155,17 @@ describe('checkIntegrationsCardComplete', () => {
     expect(res).toEqual({
       isComplete: false,
       metadata: {
-        isAgentRequired: false,
+        isAgentRequired: true,
         activeIntegrations: [],
       },
     });
   });
 
   it('renders an error toast when fetching agents data fails', async () => {
+    mockHttpGet.mockResolvedValue({
+      items: [],
+    });
+
     const err = new Error('Failed to fetch agents data');
     mockLastValueFrom.mockRejectedValue(err);
 
@@ -171,7 +180,7 @@ describe('checkIntegrationsCardComplete', () => {
     expect(res).toEqual({
       isComplete: false,
       metadata: {
-        isAgentRequired: false,
+        isAgentRequired: true,
         activeIntegrations: [],
       },
     });

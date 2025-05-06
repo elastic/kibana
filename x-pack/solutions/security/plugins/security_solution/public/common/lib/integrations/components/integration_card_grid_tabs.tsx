@@ -27,12 +27,12 @@ export const IntegrationsCardGridTabs: RenderChildrenType = ({
     integrationsList: allowedIntegrations,
     featuredCardIds: selectedTabResult.selectedTab?.featuredCardIds,
   });
-  const installedIntegrationsCount = activeIntegrations?.length ?? 0;
+  const activeIntegrationsCount = activeIntegrations?.length ?? 0;
 
   return (
     <IntegrationsCardGridTabsComponent
       isAgentRequired={isAgentRequired}
-      installedIntegrationsCount={installedIntegrationsCount}
+      activeIntegrationsCount={activeIntegrationsCount}
       topCalloutRenderer={topCalloutRenderer}
       integrationList={list}
       availablePackagesResult={availablePackagesResult}

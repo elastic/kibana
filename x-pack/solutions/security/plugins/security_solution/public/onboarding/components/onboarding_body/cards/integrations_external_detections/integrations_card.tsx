@@ -36,12 +36,12 @@ const IntegrationsCardGridTabs: RenderChildrenType = ({
     showCompressedInstallationStatus: true,
     returnPath: ONBOARDING_PATH,
   });
-  const installedIntegrationsCount = activeIntegrations?.length ?? 0;
+  const activeIntegrationsCount = activeIntegrations?.length ?? 0;
   return (
     <IntegrationsCardGridTabsComponent
       isAgentRequired={isAgentRequired}
-      installedIntegrationsCount={installedIntegrationsCount}
-      topCalloutRenderer={installedIntegrationsCount ? ManageIntegrationsCallout : undefined}
+      activeIntegrationsCount={activeIntegrationsCount}
+      topCalloutRenderer={activeIntegrationsCount ? ManageIntegrationsCallout : undefined}
       integrationList={list}
       availablePackagesResult={availablePackagesResult}
       selectedTabResult={selectedTabResult}

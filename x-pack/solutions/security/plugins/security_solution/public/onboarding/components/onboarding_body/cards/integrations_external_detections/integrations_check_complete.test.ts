@@ -35,7 +35,7 @@ describe('checkIntegrationsCardComplete', () => {
     jest.clearAllMocks();
   });
 
-  it('returns isComplete as false when no packages are installed', async () => {
+  it('returns isComplete as false when no packages are active', async () => {
     mockHttpGet.mockResolvedValue({
       items: [],
     });
@@ -50,11 +50,11 @@ describe('checkIntegrationsCardComplete', () => {
     });
   });
 
-  it('returns isComplete as true when packages are installed but no agent data is available', async () => {
+  it('returns isComplete as true when packages are active', async () => {
     const mockActiveIntegrations = [
       {
-        name: 'test-package',
-        title: 'Test Package',
+        name: 'splunk',
+        title: 'splunk',
         version: '1.0.0',
         status: installationStatuses.Installed,
         dataStreams: [{ name: 'test-data-stream', title: 'Test Data Stream' }],
@@ -69,43 +69,6 @@ describe('checkIntegrationsCardComplete', () => {
     expect(result).toEqual({
       isComplete: true,
       completeBadgeText: '1 integration added',
-      metadata: {
-        activeIntegrations: mockActiveIntegrations,
-      },
-    });
-  });
-
-  it('returns isComplete as true when packages are available', async () => {
-    const mockActiveIntegrations = [
-      {
-        name: 'test-package1',
-        title: 'Test Package1',
-        version: '1.0.0',
-        status: installationStatuses.Installed,
-        dataStreams: [{ name: 'test-data-stream 1', title: 'Test Data Stream 1' }],
-      },
-      {
-        name: 'test-package2',
-        title: 'Test Package2',
-        version: '1.0.0',
-        status: installationStatuses.InstallFailed,
-        dataStreams: [
-          {
-            name: 'test-data-stream 2',
-            title: 'Test Data Stream 2',
-          },
-        ],
-      },
-    ];
-    mockHttpGet.mockResolvedValue({
-      items: mockActiveIntegrations,
-    });
-
-    const result = await checkIntegrationsCardComplete(mockService);
-
-    expect(result).toEqual({
-      isComplete: true,
-      completeBadgeText: '2 integrations added',
       metadata: {
         activeIntegrations: mockActiveIntegrations,
       },

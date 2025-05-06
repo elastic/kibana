@@ -7,6 +7,4 @@
 
 import React from 'react';
 
-export const InstalledIntegrationsCallout = () => (
-  <div data-test-subj="installedIntegrationsCallout" />
-);
+export const ActiveIntegrationsCallout = () => <div data-test-subj="activeIntegrationsCallout" />;

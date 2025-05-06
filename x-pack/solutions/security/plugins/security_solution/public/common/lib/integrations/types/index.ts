@@ -38,7 +38,7 @@ export enum IntegrationTabId {
 }
 
 export type TopCalloutRenderer = React.FC<{
-  installedIntegrationsCount: number;
+  activeIntegrationsCount: number;
   isAgentRequired?: boolean;
   selectedTabId: IntegrationTabId;
 }>;

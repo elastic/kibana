@@ -9,21 +9,17 @@ import React from 'react';
 import { AgentRequiredCallout } from './agent_required_callout';
 import { ManageIntegrationsCallout } from './manage_integrations_callout';
 
-export const InstalledIntegrationsCalloutComponent: React.FC<{
-  installedIntegrationsCount: number;
+export const ActiveIntegrationsCalloutComponent: React.FC<{
+  activeIntegrationsCount: number;
   isAgentRequired?: boolean;
-}> = ({ installedIntegrationsCount, isAgentRequired }) => {
-  if (!installedIntegrationsCount) {
-    return null;
-  }
-
+}> = ({ activeIntegrationsCount, isAgentRequired }) => {
   return isAgentRequired ? (
     <AgentRequiredCallout />
   ) : (
-    <ManageIntegrationsCallout installedIntegrationsCount={installedIntegrationsCount} />
+    <ManageIntegrationsCallout activeIntegrationsCount={activeIntegrationsCount} />
   );
 };
 
-export const InstalledIntegrationsCallout = React.memo(InstalledIntegrationsCalloutComponent);
+export const ActiveIntegrationsCallout = React.memo(ActiveIntegrationsCalloutComponent);
 
-InstalledIntegrationsCallout.displayName = 'InstalledIntegrationsCallout';
+ActiveIntegrationsCallout.displayName = 'ActiveIntegrationsCallout';
