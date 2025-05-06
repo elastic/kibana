@@ -35,6 +35,8 @@ export const CopyLegacySource: Task = {
       'x-pack/.i18nrc.json',
       'x-pack/package.json',
 
+      'oas_docs/output/**',
+
       '!**/jest*',
       '!**/*.{story,stories}.{js,ts}',
       '!**/{test_mocks,stubs}.ts',
