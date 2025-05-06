@@ -65,36 +65,50 @@ export function MonitoringElasticsearchNodesProvider({ getService, getPageObject
     }
 
     async clickNameCol() {
-      await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_NAME_COL}"] > button`);
+      await find.clickByCssSelector(
+        `[data-test-subj="${SUBJ_TABLE_SORT_NAME_COL}"] [data-test-subj="tableHeaderSortButton"]`
+      );
       await this.waitForTableToFinishLoading();
     }
 
     async clickStatusCol() {
-      await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_STATUS_COL}"] > button`);
+      await find.clickByCssSelector(
+        `[data-test-subj="${SUBJ_TABLE_SORT_STATUS_COL}"] [data-test-subj="tableHeaderSortButton"]`
+      );
       await this.waitForTableToFinishLoading();
     }
 
     async clickCpuCol() {
-      await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_CPU_COL}"] > button`);
+      await find.clickByCssSelector(
+        `[data-test-subj="${SUBJ_TABLE_SORT_CPU_COL}"] [data-test-subj="tableHeaderSortButton"]`
+      );
       await this.waitForTableToFinishLoading();
     }
 
     async clickLoadCol() {
-      await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_LOAD_COL}"] > button`);
+      await find.clickByCssSelector(
+        `[data-test-subj="${SUBJ_TABLE_SORT_LOAD_COL}"] [data-test-subj="tableHeaderSortButton"]`
+      );
       await this.waitForTableToFinishLoading();
     }
 
     async clickMemoryCol() {
-      await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_MEM_COL}"] > button`);
+      await find.clickByCssSelector(
+        `[data-test-subj="${SUBJ_TABLE_SORT_MEM_COL}"] [data-test-subj="tableHeaderSortButton"]`
+      );
       await this.waitForTableToFinishLoading();
     }
     async clickDiskCol() {
-      await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_DISK_COL}"] > button`);
+      await find.clickByCssSelector(
+        `[data-test-subj="${SUBJ_TABLE_SORT_DISK_COL}"] [data-test-subj="tableHeaderSortButton"]`
+      );
       await this.waitForTableToFinishLoading();
     }
 
     async clickShardsCol() {
-      await find.clickByCssSelector(`[data-test-subj="${SUBJ_TABLE_SORT_SHARDS_COL}"] > button`);
+      await find.clickByCssSelector(
+        `[data-test-subj="${SUBJ_TABLE_SORT_SHARDS_COL}"] [data-test-subj="tableHeaderSortButton"]`
+      );
       await this.waitForTableToFinishLoading();
     }
 
