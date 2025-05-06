@@ -216,6 +216,94 @@ const getScoreAggregationQuery = () => ({
   },
 });
 
+const getScoreAggregationQuery = () => ({
+  score_by_policy_template: {
+    terms: {
+      field: 'safe_posture_type',
+    },
+    aggs: {
+      total_findings: {
+        value_count: {
+          field: 'result.evaluation',
+        },
+      },
+      passed_findings: {
+        filter: {
+          term: {
+            'result.evaluation': 'passed',
+          },
+        },
+      },
+      failed_findings: {
+        filter: {
+          term: {
+            'result.evaluation': 'failed',
+          },
+        },
+      },
+      score_by_cluster_id: {
+        terms: {
+          field: 'asset_identifier',
+        },
+        aggs: {
+          total_findings: {
+            value_count: {
+              field: 'result.evaluation',
+            },
+          },
+          passed_findings: {
+            filter: {
+              term: {
+                'result.evaluation': 'passed',
+              },
+            },
+          },
+          failed_findings: {
+            filter: {
+              term: {
+                'result.evaluation': 'failed',
+              },
+            },
+          },
+        },
+      },
+      score_by_benchmark_id: {
+        terms: {
+          field: 'rule.benchmark.id',
+        },
+        aggs: {
+          benchmark_versions: {
+            terms: {
+              field: 'rule.benchmark.version',
+            },
+            aggs: {
+              total_findings: {
+                value_count: {
+                  field: 'result.evaluation',
+                },
+              },
+              passed_findings: {
+                filter: {
+                  term: {
+                    'result.evaluation': 'passed',
+                  },
+                },
+              },
+              failed_findings: {
+                filter: {
+                  term: {
+                    'result.evaluation': 'failed',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
 const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest => ({
   index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   size: 0,

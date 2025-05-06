@@ -82,7 +82,12 @@ export const createMockPluginStart = async (
     },
     licensing: {
       ...licensingMock.createStart(),
-      license$: new BehaviorSubject({ isAvailable: true, isActive: true, type: 'basic' }),
+      license$: new BehaviorSubject({
+        isAvailable: true,
+        isActive: true,
+        type: 'basic',
+        getFeature: () => true,
+      }),
     },
     securityService: coreStartMock.security, // we need authc from core.security start
     logger,
