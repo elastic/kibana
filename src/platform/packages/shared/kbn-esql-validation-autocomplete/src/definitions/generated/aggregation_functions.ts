@@ -1708,26 +1708,6 @@ const valuesDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'cartesian_point',
-          optional: false,
-        },
-      ],
-      returnType: 'cartesian_point',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'cartesian_shape',
-          optional: false,
-        },
-      ],
-      returnType: 'cartesian_shape',
-    },
-    {
-      params: [
-        {
-          name: 'field',
           type: 'date',
           optional: false,
         },
@@ -1753,26 +1733,6 @@ const valuesDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'geo_point',
-          optional: false,
-        },
-      ],
-      returnType: 'geo_point',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'geo_shape',
-          optional: false,
-        },
-      ],
-      returnType: 'geo_shape',
     },
     {
       params: [
@@ -1838,7 +1798,7 @@ const valuesDefinition: FunctionDefinition = {
   locationsAvailable: [Location.STATS],
   validate: undefined,
   examples: [
-    'FROM employees\n| EVAL first_letter = SUBSTRING(first_name, 0, 1)\n| STATS first_name = MV_SORT(VALUES(first_name)) BY first_letter\n| SORT first_letter',
+    '  FROM employees\n| EVAL first_letter = SUBSTRING(first_name, 0, 1)\n| STATS first_name=MV_SORT(VALUES(first_name)) BY first_letter\n| SORT first_letter',
   ],
 };
 
@@ -1991,7 +1951,7 @@ const weightedAvgDefinition: FunctionDefinition = {
   locationsAvailable: [Location.STATS],
   validate: undefined,
   examples: [
-    'FROM employees\n| STATS w_avg = WEIGHTED_AVG(salary, height) BY languages\n| EVAL w_avg = ROUND(w_avg)\n| KEEP w_avg, languages\n| SORT languages',
+    'FROM employees\n| STATS w_avg = WEIGHTED_AVG(salary, height) by languages\n| EVAL w_avg = ROUND(w_avg)\n| KEEP w_avg, languages\n| SORT languages',
   ],
 };
 export const aggFunctionDefinitions = [

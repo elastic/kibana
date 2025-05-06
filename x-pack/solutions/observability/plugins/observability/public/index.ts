@@ -42,6 +42,7 @@ export {
   enableInfrastructureContainerAssetView,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
+  apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';
 export {
   alertsLocatorID,
