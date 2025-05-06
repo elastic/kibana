@@ -118,8 +118,8 @@ describe('InstallationStatus', () => {
     userEvent.hover(calloutText);
 
     await waitFor(() => {
-      const tooltip = getByTestId('installed-failed-tooltip');
-      expect(tooltip).toBeInTheDocument();
+      const test = getByText('This package is installed but failed.');
+      expect(test).toBeInTheDocument();
     });
   });
 
@@ -163,7 +163,7 @@ describe('InstallationStatus', () => {
   });
 
   it('renders the compressed installed status', async () => {
-    const { getByTestId } = render(
+    const { getByTestId, getByText } = render(
       <InstallationStatus
         installStatus={installationStatuses.Installed}
         showInstallationStatus={true}
@@ -181,6 +181,9 @@ describe('InstallationStatus', () => {
     await waitFor(() => {
       const tooltip = getByTestId('compressed-installed-tooltip');
       expect(tooltip).toBeInTheDocument();
+
+      const test = getByText('This package is installed but no data streams exist.');
+      expect(test).toBeInTheDocument();
     });
   });
 

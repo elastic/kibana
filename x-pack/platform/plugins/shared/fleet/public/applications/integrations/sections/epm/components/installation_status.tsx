@@ -74,7 +74,11 @@ const getCalloutText = ({
         <EuiToolTip
           data-test-subj="installed-tooltip"
           position="bottom"
-          content={installationStatuses.Installed ? installedTooltip : installFailedTooltip}
+          content={
+            installStatus === installationStatuses.Installed
+              ? installedTooltip
+              : installFailedTooltip
+          }
         >
           <>{installedLabel}</>
         </EuiToolTip>
