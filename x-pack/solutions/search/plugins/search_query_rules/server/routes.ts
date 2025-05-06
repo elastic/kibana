@@ -14,6 +14,7 @@ import { errorHandler } from './utils/error_handler';
 import { fetchQueryRulesSets } from './lib/fetch_query_rules_sets';
 import { DEFAULT_PAGE_VALUE } from '../common/pagination';
 import { fetchQueryRulesRuleset } from './lib/fetch_query_rules_ruleset';
+import { isQueryRulesetExist } from './lib/is_query_ruleset_exist';
 import { putRuleset } from './lib/put_query_rules_ruleset_set';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
@@ -161,7 +162,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       }
       const rulesetId = request.params.ruleset_id;
       const forceWrite = request.query.forceWrite;
-      const isExisting = await fetchQueryRulesRuleset(asCurrentUser, rulesetId);
+      const isExisting = await isQueryRulesetExist(asCurrentUser, rulesetId);
       if (isExisting && !forceWrite) {
         return response.customError({
           statusCode: 409,
