@@ -85,16 +85,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .delete(`/api/actions/connector/${actionId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(internalReqHeader);
-      await esClient.deleteByQuery({
-        index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-        conflicts: 'proceed',
-      });
-      await esClient.deleteByQuery({
-        index: '.kibana-event-log-*',
-        query: { term: { 'rule.id': ruleId } },
-        conflicts: 'proceed',
-      });
+      if (ruleId) {
+        await esClient.deleteByQuery({
+          index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
+          query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+          conflicts: 'proceed',
+        });
+        await esClient.deleteByQuery({
+          index: '.kibana-event-log-*',
+          query: { term: { 'rule.id': ruleId } },
+          conflicts: 'proceed',
+        });
+      }
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
         roleAuthc,
@@ -372,6 +374,212 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         } catch (error) {
           expect(error.message).to.contain('timeout');
         }
+      });
+    });
+
+    describe('Custom threshold - Rule execution - consumer infrastructure', () => {
+      const consumer = 'infrastructure';
+      it('creates rule successfully', async () => {
+        actionId = await alertingApi.createIndexConnector({
+          roleAuthc,
+          name: 'Index Connector: Threshold API test',
+          indexName: ALERT_ACTION_INDEX,
+        });
+
+        const createdRule = await alertingApi.createRule({
+          roleAuthc,
+          ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
+        });
+        ruleId = createdRule.id;
+        expect(ruleId).not.to.be(undefined);
+      });
+
+      it('should find the created rule with correct information about the consumer', async () => {
+        const match = await alertingApi.findInRules(roleAuthc, ruleId);
+        expect(match).not.to.be(undefined);
+        expect(match.consumer).to.be(consumer);
+      });
+
+      it('should be active and visible from admin role', async () => {
+        const executionStatus = await alertingApi.waitForRuleStatus({
+          roleAuthc,
+          ruleId,
+          expectedStatus: 'active',
+        });
+        expect(executionStatus).to.be('active');
+      });
+
+      it('should be active and visible from infra only role', async () => {
+        await samlAuth.setCustomRole(ROLES.infra_only);
+
+        const infraOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+        const executionStatus = await alertingApi.waitForRuleStatus({
+          roleAuthc: infraOnlyRole,
+          ruleId,
+          expectedStatus: 'active',
+        });
+        expect(executionStatus).to.be('active');
+      });
+
+      it('should NOT be visible from logs only role', async () => {
+        await samlAuth.setCustomRole(ROLES.logs_only);
+        const logsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+        try {
+          await alertingApi.waitForRuleStatus({
+            roleAuthc: logsOnlyRole,
+            ruleId,
+            expectedStatus: 'active',
+            timeout: 1000 * 3,
+          });
+          throw new Error('Expected rule to not be visible, but it was visible');
+        } catch (error) {
+          expect(error.message).to.contain('timeout');
+        }
+      });
+
+      it('should NOT visible from synthetics only role', async () => {
+        await samlAuth.setCustomRole(ROLES.synthetics_only);
+        const syntheticsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+        try {
+          await alertingApi.waitForRuleStatus({
+            roleAuthc: syntheticsOnlyRole,
+            ruleId,
+            expectedStatus: 'active',
+            timeout: 1000 * 3,
+          });
+          throw new Error('Expected rule to not be visible, but it was visible');
+        } catch (error) {
+          expect(error.message).to.contain('timeout');
+        }
+      });
+
+      it('should NOT visible from stack alerts only role', async () => {
+        await samlAuth.setCustomRole(ROLES.stack_alerts_only);
+        const stackAlertsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+        try {
+          await alertingApi.waitForRuleStatus({
+            roleAuthc: stackAlertsOnlyRole,
+            ruleId,
+            expectedStatus: 'active',
+            timeout: 1000 * 3,
+          });
+          throw new Error('Expected rule to not be visible, but it was visible');
+        } catch (error) {
+          expect(error.message).to.contain('timeout');
+        }
+      });
+    });
+
+    describe('Custom threshold - Rule execution - consumer stackAlerts', () => {
+      const consumer = 'stackAlerts';
+      it('creates rule successfully', async () => {
+        actionId = await alertingApi.createIndexConnector({
+          roleAuthc,
+          name: 'Index Connector: Threshold API test',
+          indexName: ALERT_ACTION_INDEX,
+        });
+
+        const createdRule = await alertingApi.createRule({
+          roleAuthc,
+          ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
+        });
+        ruleId = createdRule.id;
+        expect(ruleId).not.to.be(undefined);
+      });
+
+      it('should find the created rule with correct information about the consumer', async () => {
+        const match = await alertingApi.findInRules(roleAuthc, ruleId);
+        expect(match).not.to.be(undefined);
+        expect(match.consumer).to.be(consumer);
+      });
+
+      it('should be active and visible from admin role', async () => {
+        const executionStatus = await alertingApi.waitForRuleStatus({
+          roleAuthc,
+          ruleId,
+          expectedStatus: 'active',
+        });
+        expect(executionStatus).to.be('active');
+      });
+
+      it('should be active and visible from stack alerts only role', async () => {
+        await samlAuth.setCustomRole(ROLES.stack_alerts_only);
+
+        const stackAlertsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+        const executionStatus = await alertingApi.waitForRuleStatus({
+          roleAuthc: stackAlertsOnlyRole,
+          ruleId,
+          expectedStatus: 'active',
+        });
+        expect(executionStatus).to.be('active');
+      });
+
+      it('should NOT visible from logs only role', async () => {
+        await samlAuth.setCustomRole(ROLES.logs_only);
+        const logsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+        try {
+          await alertingApi.waitForRuleStatus({
+            roleAuthc: logsOnlyRole,
+            ruleId,
+            expectedStatus: 'active',
+            timeout: 1000 * 3,
+          });
+          throw new Error('Expected rule to not be visible, but it was visible');
+        } catch (error) {
+          expect(error.message).to.contain('timeout');
+        }
+      });
+
+      it('should NOT visible from synthetics only role', async () => {
+        await samlAuth.setCustomRole(ROLES.synthetics_only);
+        const syntheticsOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+        try {
+          await alertingApi.waitForRuleStatus({
+            roleAuthc: syntheticsOnlyRole,
+            ruleId,
+            expectedStatus: 'active',
+            timeout: 1000 * 3,
+          });
+          throw new Error('Expected rule to not be visible, but it was visible');
+        } catch (error) {
+          expect(error.message).to.contain('timeout');
+        }
+      });
+
+      it('should NOT visible from infra only role', async () => {
+        await samlAuth.setCustomRole(ROLES.infra_only);
+        const infraOnlyRole = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+        try {
+          await alertingApi.waitForRuleStatus({
+            roleAuthc: infraOnlyRole,
+            ruleId,
+            expectedStatus: 'active',
+            timeout: 1000 * 3,
+          });
+          throw new Error('Expected rule to not be visible, but it was visible');
+        } catch (error) {
+          expect(error.message).to.contain('timeout');
+        }
+      });
+    });
+
+    describe('Custom threshold - Rule execution - consumer notavalidconsumer', () => {
+      const consumer = 'notavalidconsumer';
+      it('creates rule successfully', async () => {
+        actionId = await alertingApi.createIndexConnector({
+          roleAuthc,
+          name: 'Index Connector: Threshold API test',
+          indexName: ALERT_ACTION_INDEX,
+        });
+
+        const createdRule = await alertingApi.createRule({
+          roleAuthc,
+          ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
+        });
+        expect(createdRule.statusCode).to.be(403);
+        expect(createdRule.message).to.be(
+          'Unauthorized by "notavalidconsumer" to create "observability.rules.custom_threshold" rule'
+        );
       });
     });
   });
