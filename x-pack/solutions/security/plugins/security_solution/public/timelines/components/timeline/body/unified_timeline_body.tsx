@@ -8,6 +8,8 @@
 import type { ComponentProps, ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { DataViewErrorComponent } from '../../../../common/components/with_data_view/data_view_error';
 import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_components/styles';
@@ -41,10 +43,15 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     leadingControlColumns,
     onUpdatePageIndex,
   } = props;
-  const dataView = useGetScopedSourcererDataView({
+  const oldDataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.timeline,
   });
   const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
+
+  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   return (
     <StyledTableFlexGroup direction="column" gutterSize="s">
