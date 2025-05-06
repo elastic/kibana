@@ -58,7 +58,7 @@ export const DefaultEdge = memo(
       targetX: tX,
       targetY: tY,
       targetPosition,
-      borderRadius: 15,
+      borderRadius: data?.edgeBorderRadius ?? 15,
       offset: 0,
     });
 

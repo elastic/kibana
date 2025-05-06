@@ -26,6 +26,7 @@ interface GridControls {
   snapGridX?: number;
   snapGridY?: number;
   zoomDuration?: number;
+  edgeBorderRadius?: number;
 }
 
 // Extract minimap dot notation controls into a dedicated type
@@ -68,6 +69,7 @@ const meta = {
     snapGridX,
     snapGridY,
     zoomDuration,
+    edgeBorderRadius,
     ...rest
   }: GraphStoryProps) => {
     const defaultGridX = 1;
@@ -102,6 +104,7 @@ const meta = {
           snapToGrid={snapToGrid}
           snapGrid={snapGrid}
           zoomDuration={zoomDuration}
+          edgeBorderRadius={edgeBorderRadius}
         />
       </ThemeProvider>
     );
@@ -113,6 +116,7 @@ const meta = {
     snapGridX: 1,
     snapGridY: 1,
     zoomDuration: 500, // Default zoom duration
+    edgeBorderRadius: 15, // Default edge border radius
   },
   argTypes: {
     interactive: { control: 'boolean', defaultValue: true },
@@ -155,6 +159,15 @@ const meta = {
       description: 'Duration of zoom transition in milliseconds',
       table: {
         defaultValue: { summary: '500' },
+      },
+    },
+    edgeBorderRadius: {
+      control: { type: 'number', min: 0, max: 30, step: 1 },
+      name: 'Edge Border Radius',
+      description: 'Border radius of the edges in pixels',
+      table: {
+        category: 'Edge Appearance',
+        defaultValue: { summary: '15' },
       },
     },
     // Hide the actual minimap object control
@@ -456,6 +469,7 @@ const baseArgs = {
   ...meta.args,
   interactive: meta.args?.interactive ?? true, // Ensure interactive is always boolean
   zoomDuration: meta.args?.zoomDuration ?? 500, // Ensure zoomDuration is always a number
+  edgeBorderRadius: meta.args?.edgeBorderRadius ?? 15, // Ensure edgeBorderRadius is always a number
 } as const;
 
 export const SimpleAPIMock: CustomStory = {
@@ -512,6 +526,7 @@ export const SimpleAPIMock: CustomStory = {
     snapGridX: 1,
     snapGridY: 1,
     zoomDuration: 500,
+    edgeBorderRadius: 15,
   },
 };
 
