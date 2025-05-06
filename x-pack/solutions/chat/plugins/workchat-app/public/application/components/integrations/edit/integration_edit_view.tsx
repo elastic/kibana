@@ -46,7 +46,7 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
   const breadcrumb = useMemo(() => {
     return [
-      { text: 'Tools', path: appPaths.tools.list },
+      { text: toolLabels.breadcrumb.toolsPill, path: appPaths.tools.list },
       integrationId
         ? { text: toolLabels.editView.editToolTitle }
         : { text: toolLabels.editView.createToolTitle },
