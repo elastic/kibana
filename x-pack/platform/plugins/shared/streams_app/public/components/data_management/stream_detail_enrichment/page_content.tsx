@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   DragDropContextProps,
   EuiAccordion,
@@ -20,11 +20,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { BehaviorSubject } from 'rxjs';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
@@ -41,24 +43,42 @@ import {
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
 interface StreamDetailEnrichmentContentProps {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
 }
 
 export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
   const { core, dependencies } = useKibana();
   const {
-    data,
     streams: { streamsRepositoryClient },
   } = dependencies.start;
+
+  const timefilterHook = useTimefilter();
+
+  const timeState$ = useMemo(() => {
+    const subject = new BehaviorSubject(timefilterHook.timeState);
+    return subject;
+    // No need to ever recreate this observable, as we subscribe to it in the
+    // useEffect below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const subscription = timefilterHook.timeState$.subscribe((value) =>
+      timeState$.next(value.timeState)
+    );
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [timeState$, timefilterHook.timeState$]);
 
   return (
     <StreamEnrichmentContextProvider
       definition={props.definition}
       refreshDefinition={props.refreshDefinition}
       core={core}
-      data={data}
       streamsRepositoryClient={streamsRepositoryClient}
+      timeState$={timeState$}
     >
       <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>

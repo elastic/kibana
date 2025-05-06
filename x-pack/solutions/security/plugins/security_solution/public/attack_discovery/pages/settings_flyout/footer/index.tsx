@@ -22,6 +22,7 @@ const FooterComponent: React.FC<Props> = ({ closeModal, actionButtons }) => {
       data-test-subj="footer"
       gutterSize="none"
       justifyContent="spaceBetween"
+      responsive={false}
     >
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty data-test-subj="close" onClick={closeModal} size="s">

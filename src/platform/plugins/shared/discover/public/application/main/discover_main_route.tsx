@@ -21,7 +21,6 @@ import {
   createInternalStateStore,
   createRuntimeStateManager,
   internalStateActions,
-  CurrentTabProvider,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -34,9 +33,8 @@ import {
 } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-
-// TEMPORARY: This is a temporary flag to enable/disable tabs in Discover until the feature is fully implemented.
-export const TABS_ENABLED = false;
+import { TABS_ENABLED } from '../../constants';
+import { ChartPortalsRenderer } from './components/chart';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -144,13 +142,13 @@ export const DiscoverMainRoute = ({
   return (
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
-        {TABS_ENABLED ? (
-          <TabsView {...sessionViewProps} />
-        ) : (
-          <CurrentTabProvider currentTabId={internalState.getState().tabs.unsafeCurrentId}>
+        <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
+          {TABS_ENABLED ? (
+            <TabsView {...sessionViewProps} />
+          ) : (
             <DiscoverSessionView {...sessionViewProps} />
-          </CurrentTabProvider>
-        )}
+          )}
+        </ChartPortalsRenderer>
       </rootProfileState.AppWrapper>
     </InternalStateProvider>
   );
