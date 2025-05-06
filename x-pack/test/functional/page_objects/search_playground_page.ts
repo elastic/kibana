@@ -19,7 +19,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
     await testSubjects.click('addDataSourcesButton');
     await testSubjects.existOrFail('selectIndicesFlyout');
     await testSubjects.click('sourceIndex-0');
-    await testSubjects.click('saveButton');
+    await testSubjects.clickWhenNotDisabled('saveButton');
   };
   const selectIndexByName = async (indexName: string) => {
     await testSubjects.existOrFail('addDataSourcesButton');
@@ -229,6 +229,16 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('euiFlyoutCloseButton');
       },
 
+      async openQueryMode() {
+        await testSubjects.existOrFail('queryMode');
+        await testSubjects.click('queryMode');
+      },
+
+      async openChatMode() {
+        await testSubjects.existOrFail('chatMode');
+        await testSubjects.click('chatMode');
+      },
+
       async expectViewQueryHasFields() {
         await testSubjects.existOrFail('queryMode');
         await testSubjects.click('queryMode');
@@ -236,13 +246,12 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
         expect(fields.length).to.be(1);
 
-        const codeBlock = await testSubjects.find('ViewElasticsearchQueryResult');
-        const code = await codeBlock.getVisibleText();
+        const codeEditor = await testSubjects.find('ViewElasticsearchQueryResult');
+        const editorViewDiv = await codeEditor.findByClassName('view-lines');
+        const code = await editorViewDiv.getVisibleText();
         expect(code.replace(/ /g, '')).to.be(
           '{\n"retriever":{\n"standard":{\n"query":{\n"multi_match":{\n"query":"{query}",\n"fields":[\n"baz"\n]\n}\n}\n}\n}\n}'
         );
-
-        await testSubjects.click('chatMode');
       },
 
       async expectEditContextOpens(

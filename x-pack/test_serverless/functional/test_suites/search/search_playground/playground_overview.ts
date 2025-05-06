@@ -196,6 +196,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('show fields and code in view query', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.expectViewQueryHasFields();
+          await pageObjects.searchPlayground.PlaygroundChatPage.openChatMode();
         });
 
         it('show edit context', async () => {
