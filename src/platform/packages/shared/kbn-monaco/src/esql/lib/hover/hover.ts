@@ -15,17 +15,12 @@ import {
   isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
 import {
-<<<<<<< HEAD:src/platform/packages/shared/kbn-monaco/src/esql/lib/hover/hover.ts
-=======
   ESQLFieldWithMetadata,
   collectUserDefinedColumns,
->>>>>>> c89c1ee30dd ([ES|QL] Renames the ESQLRealField type to ESQLFieldWithMetadata (#219894)):src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/hover/hover.ts
   getFunctionDefinition,
   getFunctionSignatures,
   type ESQLCallbacks,
   getPolicyHelper,
-  collectUserDefinedColumns,
-  ESQLRealField,
 } from '@kbn/esql-validation-autocomplete';
 import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
 import {
@@ -182,17 +177,12 @@ async function getHintForFunctionArg(
   if (!fnDefinition) {
     return [];
   }
-<<<<<<< HEAD:src/platform/packages/shared/kbn-monaco/src/esql/lib/hover/hover.ts
-  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
-  const anyVariables = collectUserDefinedColumns(root.commands, fieldsMap, query);
-=======
   const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
   const anyUserDefinedColumns = collectUserDefinedColumns(root.commands, fieldsMap, query);
->>>>>>> c89c1ee30dd ([ES|QL] Renames the ESQLRealField type to ESQLFieldWithMetadata (#219894)):src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/hover/hover.ts
 
   const references = {
     fields: fieldsMap,
-    userDefinedColumns: anyVariables,
+    userDefinedColumns: anyUserDefinedColumns,
   };
 
   const { typesToSuggestNext, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(
