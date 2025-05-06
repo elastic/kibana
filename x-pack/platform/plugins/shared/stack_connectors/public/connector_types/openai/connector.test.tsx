@@ -414,6 +414,10 @@ describe('ConnectorFields renders', () => {
       },
     };
 
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('renders PKI configuration fields for Other provider', async () => {
       const { findByTestId } = render(
         <ConnectorFormTestProvider connector={pkiConnector}>
@@ -433,7 +437,7 @@ describe('ConnectorFields renders', () => {
 
     it('validates PKI configuration fields', async () => {
       const { findByTestId } = render(
-        <ConnectorFormTestProvider connector={pkiConnector}>
+        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
@@ -451,7 +455,18 @@ describe('ConnectorFields renders', () => {
       // Verify validation failed
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
-          data: {},
+          data: {
+            ...pkiConnector,
+            config: {
+              ...pkiConnector.config,
+              certificateFile: '',
+              privateKeyFile: '',
+            },
+            __internal__: {
+              hasHeaders: false,
+              hasPKI: true,
+            },
+          },
           isValid: false,
         });
       });
