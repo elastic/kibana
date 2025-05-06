@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { getLatestAgentVersionInRange } from './get_agent_version';
+import { getLatestAgentVersionForPattern } from './get_agent_version';
 
 describe('getLatestAgentVersionInRange()', () => {
-  it('returns agent version within the specified range', () => {
+  it('returns the latest agent version that matches the provided version pattern', () => {
     const agentVersionList = [
       '10.0.0',
       '9.1.0',
@@ -20,31 +20,19 @@ describe('getLatestAgentVersionInRange()', () => {
       '8.17.0',
     ];
     const kibanaVersion = '8.18.0';
-    const fromVersion = '9.0.0';
-    const upToVersion = '10.0.0';
+    const versionPattern = '9.x.x';
 
-    const result = getLatestAgentVersionInRange(
-      agentVersionList,
-      kibanaVersion,
-      fromVersion,
-      upToVersion
-    );
+    const result = getLatestAgentVersionForPattern(agentVersionList, kibanaVersion, versionPattern);
 
     expect(result).toBe('9.1.0');
   });
 
-  it('returns the kibana version if there is no compatible agent version', () => {
+  it('returns the kibana version if there is no agent version matching the provided version pattern', () => {
     const agentVersionList = ['10.0.0', '9.1.0', '9.0.1', '9.0.0'];
     const kibanaVersion = '8.18.0';
-    const fromVersion = '8.0.0';
-    const upToVersion = '9.0.0';
+    const versionPattern = '8.x.x';
 
-    const result = getLatestAgentVersionInRange(
-      agentVersionList,
-      kibanaVersion,
-      fromVersion,
-      upToVersion
-    );
+    const result = getLatestAgentVersionForPattern(agentVersionList, kibanaVersion, versionPattern);
 
     expect(result).toBe('8.18.0');
   });

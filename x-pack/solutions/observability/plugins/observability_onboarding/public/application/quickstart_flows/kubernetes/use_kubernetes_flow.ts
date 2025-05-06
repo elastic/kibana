@@ -14,10 +14,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 export function useKubernetesFlow(
   onboardingFlowType: 'kubernetes_otel' | 'kubernetes' = 'kubernetes',
   options?: {
-    agentVersionRange?: {
-      versionFrom: string;
-      versionUpTo: string;
-    };
+    agentVersionPattern?: string;
   }
 ) {
   const {
@@ -32,12 +29,12 @@ export function useKubernetesFlow(
         params: {
           body: {
             pkgName: onboardingFlowType,
-            agentVersionRange: options?.agentVersionRange,
+            agentVersionPattern: options?.agentVersionPattern,
           },
         },
       });
     },
-    [onboardingFlowType, options?.agentVersionRange],
+    [onboardingFlowType, options?.agentVersionPattern],
     { showToastOnError: false }
   );
 

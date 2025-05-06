@@ -65,16 +65,13 @@ export const OtelLogsPanel: React.FC = () => {
         query: {
           /**
            * This only needed for stateful deployments
-           * of the stack version >=v8.18.0.
+           * of the stack version >=v8.18.0 <9.0.0.
            * On those clusters we cannot reference agent version
            * v8.x because those versions are not GA.
            * Instead we need to "manually" point to the GA
-           * version, which starts from v9.0.0. Additionally,
-           * we're clamping to v10.0.0 to avoid potential breaking changes
-           * in the future.
+           * version, which starts from v9.0.0.
            */
-          agentVersionFrom: '9.0.0',
-          agentVersionUpTo: '10.0.0',
+          agentVersionPattern: '9.x.x',
         },
       },
     });

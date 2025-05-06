@@ -12,8 +12,7 @@ import { ElasticAgentVersionInfo } from '../../common/types';
 export async function getAgentVersionInfo(
   fleetStart: FleetStartContract,
   kibanaVersion: string,
-  fromVersion?: string,
-  upToVersion?: string
+  versionPattern?: string
 ): Promise<ElasticAgentVersionInfo> {
   // If undefined, we will follow fleet's strategy to select latest available version:
   // for serverless we will use the latest published version, for statefull we will use
@@ -27,15 +26,13 @@ export async function getAgentVersionInfo(
     agentClient.getLatestAgentAvailableBaseVersion(includeCurrentVersion),
     agentClient.getLatestAgentAvailableDockerImageVersion(includeCurrentVersion),
   ]);
-  const agentTargetVersion =
-    fromVersion && upToVersion
-      ? getLatestAgentVersionInRange(
-          await agentClient.getAvailableVersions(),
-          kibanaVersion,
-          fromVersion,
-          upToVersion
-        )
-      : undefined;
+  const agentTargetVersion = versionPattern
+    ? getLatestAgentVersionForPattern(
+        await agentClient.getAvailableVersions(),
+        kibanaVersion,
+        versionPattern
+      )
+    : undefined;
   return {
     agentVersion,
     agentBaseVersion,
@@ -44,15 +41,14 @@ export async function getAgentVersionInfo(
   };
 }
 
-export function getLatestAgentVersionInRange(
+export function getLatestAgentVersionForPattern(
   agentVersionList: string[],
   kibanaVersion: string,
-  fromVersion: string,
-  upToVersion: string
+  versionPattern: string
 ): string {
   return (
     agentVersionList.find((version) => {
-      return semver.satisfies(version, `>=${fromVersion} <${upToVersion}`);
+      return semver.satisfies(version, versionPattern);
     }) ?? kibanaVersion
   );
 }

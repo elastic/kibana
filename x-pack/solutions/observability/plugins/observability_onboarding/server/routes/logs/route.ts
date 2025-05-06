@@ -38,8 +38,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/environment',
   params: t.partial({
     query: t.type({
-      agentVersionFrom: t.string,
-      agentVersionUpTo: t.string,
+      agentVersionPattern: t.string,
     }),
   }),
   options: { tags: [] },
@@ -61,8 +60,7 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
     const elasticAgentVersionInfo = await getAgentVersionInfo(
       fleetPluginStart,
       kibanaVersion,
-      params?.query?.agentVersionFrom,
-      params?.query?.agentVersionUpTo
+      params?.query?.agentVersionPattern
     );
     const kibanaUrl = getKibanaUrl(core.setup, plugins.cloud?.setup);
     const scriptDownloadUrl = new URL(
