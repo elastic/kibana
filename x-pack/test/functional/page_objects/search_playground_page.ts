@@ -239,21 +239,6 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
       },
 
-      async expectViewQueryHasFields() {
-        await testSubjects.existOrFail('queryMode');
-        await testSubjects.click('queryMode');
-        const fields = await testSubjects.findAll('fieldName');
-
-        expect(fields.length).to.be(1);
-
-        const codeEditor = await testSubjects.find('ViewElasticsearchQueryResult');
-        const editorViewDiv = await codeEditor.findByClassName('view-lines');
-        const code = await editorViewDiv.getVisibleText();
-        expect(code.replace(/ /g, '')).to.be(
-          '{\n"retriever":{\n"standard":{\n"query":{\n"multi_match":{\n"query":"{query}",\n"fields":[\n"baz"\n]\n}\n}\n}\n}\n}'
-        );
-      },
-
       async expectEditContextOpens(
         indexName: string = 'basic_index',
         expectedSelectedFields: string[] = ['baz']
@@ -279,6 +264,8 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
         await testSubjects.click('queryMode');
         await testSubjects.existOrFail('field-baz-false');
+        await testSubjects.click('field-baz-false');
+        await testSubjects.existOrFail('field-baz-true');
         await testSubjects.click('chatMode');
       },
 
@@ -381,6 +368,67 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         expect(result.length).to.be(1);
         expect(typeof result[0]).to.be('string');
         return result[0];
+      },
+    },
+    PlaygroundQueryPage: {
+      async openQueryMode() {
+        await testSubjects.existOrFail('queryMode');
+        await testSubjects.click('queryMode');
+      },
+
+      async expectQueryCodeToBe(text: string) {
+        await testSubjects.existOrFail('ViewElasticsearchQueryResult');
+        const codeEditor = await testSubjects.find('ViewElasticsearchQueryResult');
+        const editorViewDiv = await codeEditor.findByClassName('view-lines');
+        const code = await editorViewDiv.getVisibleText();
+        expect(code.replace(/ /g, '')).to.be(text);
+      },
+
+      async expectViewQueryHasFields() {
+        const fields = await testSubjects.findAll('fieldName');
+
+        expect(fields.length).to.be(1);
+
+        await this.expectQueryCodeToBe(
+          '{\n"retriever":{\n"standard":{\n"query":{\n"multi_match":{\n"query":"{query}",\n"fields":[\n"baz"\n]\n}\n}\n}\n}\n}'
+        );
+      },
+
+      async expectCanEditElasticsearchQuery(newQuery: string) {
+        await testSubjects.existOrFail('ViewElasticsearchQueryResult');
+        const codeEditor = await testSubjects.find('ViewElasticsearchQueryResult');
+        const editorTextArea = await codeEditor.findByTagName('textarea');
+        await editorTextArea.clickMouseButton();
+        await editorTextArea.clearValueWithKeyboard();
+        await editorTextArea.type(newQuery);
+        await this.expectQueryCodeToBe(newQuery);
+      },
+
+      async resetElasticsearchQuery() {
+        await testSubjects.existOrFail('ResetElasticsearchQueryButton');
+        await testSubjects.click('ResetElasticsearchQueryButton');
+      },
+
+      async setQueryModeQuestion(question: string) {
+        await testSubjects.existOrFail('searchPlaygroundChatQuestionFieldText');
+        const questionInput = await testSubjects.find('searchPlaygroundChatQuestionFieldText');
+        await questionInput.type(question);
+      },
+
+      async expectCanRunQuery() {
+        await testSubjects.existOrFail('RunElasticsearchQueryButton');
+        await testSubjects.waitForEnabled('RunElasticsearchQueryButton');
+        await testSubjects.click('RunElasticsearchQueryButton');
+
+        await testSubjects.existOrFail('ViewElasticsearchQueryResponse');
+      },
+
+      async expectQueryModeResultsContains(text: string) {
+        await testSubjects.existOrFail('ViewElasticsearchQueryResponse');
+        const codeEditor = await testSubjects.find('ViewElasticsearchQueryResponse');
+        const editorViewDiv = await codeEditor.findByClassName('view-lines');
+        const queryResponse = await editorViewDiv.getVisibleText();
+        expect(queryResponse).to.contain(text);
       },
     },
   };

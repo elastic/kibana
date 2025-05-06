@@ -163,10 +163,21 @@ export default function (ftrContext: FtrProviderContext) {
         });
 
         it('show fields and code in view query', async () => {
-          await pageObjects.searchPlayground.PlaygroundChatPage.expectViewQueryHasFields();
+          await pageObjects.searchPlayground.PlaygroundQueryPage.openQueryMode();
+          await pageObjects.searchPlayground.PlaygroundQueryPage.expectViewQueryHasFields();
+        });
+
+        it('allows running the elasticsearch query', async () => {
+          await pageObjects.searchPlayground.PlaygroundQueryPage.openQueryMode();
+          await pageObjects.searchPlayground.PlaygroundQueryPage.setQueryModeQuestion('foo');
+          await pageObjects.searchPlayground.PlaygroundQueryPage.expectCanRunQuery();
+          await pageObjects.searchPlayground.PlaygroundQueryPage.expectQueryModeResultsContains(
+            '"hits"'
+          );
         });
 
         it('show edit context', async () => {
+          await pageObjects.searchPlayground.PlaygroundChatPage.openChatMode();
           await pageObjects.searchPlayground.PlaygroundChatPage.expectEditContextOpens(
             'basic_index',
             ['bar', 'baz', 'baz.keyword', 'foo', 'nestedField', 'nestedField.child']
@@ -179,6 +190,18 @@ export default function (ftrContext: FtrProviderContext) {
 
         it('click on manage connector button', async () => {
           await pageObjects.searchPlayground.PlaygroundChatPage.clickManageButton();
+        });
+
+        it('allows user to edit the elasticsearch query', async () => {
+          await pageObjects.searchPlayground.PlaygroundQueryPage.openQueryMode();
+          const newQuery = `{"query":{"multi_match":{"query":"{query}","fields":["baz"]}}}`;
+          await pageObjects.searchPlayground.PlaygroundQueryPage.expectCanEditElasticsearchQuery(
+            newQuery
+          );
+          await pageObjects.searchPlayground.PlaygroundQueryPage.resetElasticsearchQuery();
+          await pageObjects.searchPlayground.PlaygroundQueryPage.expectQueryCodeToBe(
+            '{\n"retriever":{\n"standard":{\n"query":{\n"multi_match":{\n"query":"{query}",\n"fields":[\n"baz"\n]\n}\n}\n}\n}\n}'
+          );
         });
       });
 
