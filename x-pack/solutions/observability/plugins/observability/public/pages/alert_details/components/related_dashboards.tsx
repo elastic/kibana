@@ -107,7 +107,7 @@ export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboard
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <DashboardActions dashboardId={dashboard.id} />
+              <DashboardActions dashboardTitle={dashboard.title} dashboardId={dashboard.id} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="xs" />
