@@ -52,11 +52,10 @@ export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
 type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps | NetworkQueryTabBodyProps;
 
-export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
+export type EventsQueryTabBodyComponentProps = Omit<QueryTabBodyProps, 'setQuery'> & {
   additionalFilters: Filter[];
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   indexNames: string[];
-  setQuery: GlobalTimeArgs['setQuery'];
   tableId: TableId;
 };
 
@@ -76,7 +75,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   deleteQuery,
   endDate,
   filterQuery,
-  setQuery,
   startDate,
   tableId,
 }) => {
@@ -191,7 +189,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           startDate={startDate}
           endDate={endDate}
           filterQuery={filterQuery}
-          setQuery={setQuery}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
         />

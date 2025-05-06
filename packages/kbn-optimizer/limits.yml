@@ -10,7 +10,7 @@ pageLoadAssetSize:
   banners: 17946
   canvas: 29355
   cases: 180037
-  charts: 55000
+  charts: 60000
   cloud: 21076
   cloudDataMigration: 19170
   cloudExperiments: 109746
@@ -168,7 +168,6 @@ pageLoadAssetSize:
   uiActions: 35121
   uiActionsEnhanced: 38494
   unifiedDocViewer: 25099
-  unifiedHistogram: 19928
   unifiedSearch: 23000
   upgradeAssistant: 81241
   uptime: 60000
