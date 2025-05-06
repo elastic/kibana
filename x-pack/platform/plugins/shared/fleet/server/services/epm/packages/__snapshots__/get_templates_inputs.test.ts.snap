@@ -41,7 +41,7 @@ exports[`Fleet - getTemplateInputs should work for integration package 1`] = `
         metricsets:
           - key
         hosts:
-          - '127.0.0.1:6379'
+          - 127.0.0.1:6379
         idle_timeout: 20s
         key.patterns:
           - limit: 20
@@ -66,12 +66,12 @@ exports[`Fleet - getTemplateInputs should work for package with dynamic ids 1`] 
     type: filestream
     streams:
       # Collect Docker container logs: Collect Docker container logs
-      - id: 'docker-container-logs-\${docker.container.name}-\${docker.container.id}'
+      - id: docker-container-logs-\${docker.container.name}-\${docker.container.id}
         data_stream:
           dataset: docker.container_logs
           type: logs
         paths:
-          - '/var/lib/docker/containers/\${docker.container.id}/*-json.log'
+          - /var/lib/docker/containers/\${docker.container.id}/*-json.log
         parsers:
           - container:
               stream: all
