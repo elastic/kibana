@@ -52,5 +52,6 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/aiops-test-utils",
     "@kbn/ml-agg-utils",
+    "@kbn/bfetch-plugin",
   ]
 }
