@@ -14,6 +14,7 @@ import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+import { useFormContext } from 'react-hook-form';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
@@ -443,23 +444,13 @@ describe('ConnectorFields renders', () => {
         return null;
       });
 
-      const TestComponent = ({ registerPreSubmitValidator }: { registerPreSubmitValidator: (validator: any) => void }) => {
-        useEffect(() => {
-          registerPreSubmitValidator(preSubmitValidator);
-        }, [registerPreSubmitValidator]);
-
-        return (
+      const { findByTestId } = render(
+        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
           <ConnectorFields 
             readOnly={false} 
             isEdit={false} 
-            registerPreSubmitValidator={registerPreSubmitValidator} 
+            registerPreSubmitValidator={preSubmitValidator} 
           />
-        );
-      };
-
-      const { findByTestId } = render(
-        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
-          <TestComponent registerPreSubmitValidator={(validator) => validator} />
         </ConnectorFormTestProvider>
       );
 
@@ -502,23 +493,13 @@ describe('ConnectorFields renders', () => {
         return null;
       });
 
-      const TestComponent = ({ registerPreSubmitValidator }: { registerPreSubmitValidator: (validator: any) => void }) => {
-        useEffect(() => {
-          registerPreSubmitValidator(preSubmitValidator);
-        }, [registerPreSubmitValidator]);
-
-        return (
+      const { findByTestId } = render(
+        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
           <ConnectorFields 
             readOnly={false} 
             isEdit={false} 
-            registerPreSubmitValidator={registerPreSubmitValidator} 
+            registerPreSubmitValidator={preSubmitValidator} 
           />
-        );
-      };
-
-      const { findByTestId } = render(
-        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
-          <TestComponent registerPreSubmitValidator={(validator) => validator} />
         </ConnectorFormTestProvider>
       );
 
