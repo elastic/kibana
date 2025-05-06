@@ -41,7 +41,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         id: 'index_id',
         document: { bar: 'foo' },
       });
-      void llmProxy.interceptConversation('Hello from LLM Proxy');
+      void llmProxy.interceptWithResponse('Hello from LLM Proxy');
       const responseBody = await invokeChatCompleteWithFunctionRequest({
         connectorId,
         observabilityAIAssistantAPIClient,
