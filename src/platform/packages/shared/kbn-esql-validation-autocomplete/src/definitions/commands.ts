@@ -9,10 +9,8 @@
 import {
   ESQLCommandMode,
   ESQLCommandOption,
-  Walker,
   isFunctionExpression,
   isWhereExpression,
-  type ESQLAstRenameExpression,
   type ESQLColumn,
   type ESQLCommand,
   type ESQLFunction,
