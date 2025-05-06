@@ -86,7 +86,7 @@ const applyCustomDisplayOrder = (
 
 export const useEnhancedIntegrationCards = (
   integrationsList: IntegrationCardItem[],
-  activeIntegrations: GetInstalledPackagesResponse['items'],
+  activeIntegrations?: GetInstalledPackagesResponse['items'],
   options?: EnhancedCardOptions
 ): { available: IntegrationCardItem[]; installed: IntegrationCardItem[] } => {
   const sorted = applyCustomDisplayOrder(integrationsList);
@@ -96,7 +96,7 @@ export const useEnhancedIntegrationCards = (
       sorted.map((card) =>
         applyCategoryBadgeAndStyling(card, IntegrationsFacets.available, {
           ...options,
-          hasDataStreams: activeIntegrations.find(
+          hasDataStreams: activeIntegrations?.find(
             (activeIntegration) => activeIntegration.name === card.name
           )
             ? true
