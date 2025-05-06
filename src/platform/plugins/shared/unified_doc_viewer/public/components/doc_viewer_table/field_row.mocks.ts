@@ -8,24 +8,16 @@
  */
 
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { FieldRow } from './field_row';
 
 export const buildFieldRowMock = (args: Partial<ConstructorParameters<typeof FieldRow>[0]>) => {
   const defaultArgs = {
     name: 'field',
     flattenedValue: { foo: 'bar' },
-    hit: {
-      id: '1',
-      raw: {},
-      flattened: { field: 'value' },
-    },
-    dataView: buildDataViewMock({
-      name: 'dataView',
-      fields: [] as unknown as DataView['fields'],
-      timeFieldName: 'timeField',
-    }),
+    hit: buildDataTableRecord({}),
+    dataView: buildDataViewMock({}),
     fieldFormats: fieldFormatsMock,
     isPinned: false,
     columnsMeta: undefined,
