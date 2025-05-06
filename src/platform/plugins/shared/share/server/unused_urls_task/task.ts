@@ -22,7 +22,7 @@ import { Logger } from '@kbn/logging';
 import { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import { MAX_PAGE_SIZE, SAVED_OBJECT_TYPE, TASK_ID } from './constants';
 
-export const getDeleteUnsuedUrlTask = (interval: string): TaskInstanceWithId => ({
+export const getDeleteUnusedUrlTask = (interval: string): TaskInstanceWithId => ({
   id: TASK_ID,
   taskType: TASK_ID,
   params: {},

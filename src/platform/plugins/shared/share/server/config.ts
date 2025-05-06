@@ -10,11 +10,20 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 const relativeTimeRegex = /^[0-9]+[smhdwMy]$/;
+const intervalRegex = /^[0-9]+s$/;
 
-const validate = (value: string) => {
+const validateRelativeTime = (value: string) => {
   if (!relativeTimeRegex.test(value)) {
     throw new Error(
       `Invalid value "${value}" for relative time. Must be a number followed by one of the following units: s, m, h, d, w, M, y`
+    );
+  }
+};
+
+const validateInterval = (value: string) => {
+  if (!intervalRegex.test(value)) {
+    throw new Error(
+      `Invalid value "${value}" for interval. Must be a number followed by "s" (seconds)`
     );
   }
 };
@@ -31,15 +40,16 @@ export const configSchema = schema.object({
     }),
     duration: schema.string({
       defaultValue: '1y',
-      validate,
+      validate: validateRelativeTime,
     }),
-    check_interval: schema.string({
-      defaultValue: '7d',
-      validate,
+    // Task manager only supports intervals in seconds or minutes and for some reason the minimum is 30 seconds
+    check_interval_in_seconds: schema.string({
+      defaultValue: '604800s', // 7 days
+      validate: validateInterval,
     }),
     pit_keep_alive: schema.string({
       defaultValue: '10m',
-      validate,
+      validate: validateRelativeTime,
     }),
   }),
 });

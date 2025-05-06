@@ -14,7 +14,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { TASK_ID, getDeleteUnsuedUrlTask, runDeleteUnusedUrlsTask } from './unused_urls_task';
+import { TASK_ID, getDeleteUnusedUrlTask, runDeleteUnusedUrlsTask } from './unused_urls_task';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
 import {
@@ -126,7 +126,7 @@ export class SharePlugin
         url_expiration: {
           enabled: urlExpirationEnabled,
           duration: urlExpirationDuration,
-          check_interval: urlExpirationCheckInterval,
+          check_interval_in_seconds: urlExpirationCheckIntervalInSeconds,
           pit_keep_alive: urlExpirationPitKeepAlive,
         },
       },
@@ -157,7 +157,7 @@ export class SharePlugin
         },
       });
 
-      const unusedUrlsTask = getDeleteUnsuedUrlTask(urlExpirationCheckInterval);
+      const unusedUrlsTask = getDeleteUnusedUrlTask(urlExpirationCheckIntervalInSeconds);
 
       taskManager.ensureScheduled(unusedUrlsTask);
     }
