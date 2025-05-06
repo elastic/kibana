@@ -476,18 +476,20 @@ export interface ExpressionWrapperProps {
 
 export type GetStateType = () => LensRuntimeState;
 
-/**
- * Custom Lens component exported by the plugin
- * For better DX of Lens component consumers, expose a typed version of the serialized state
- */
+export interface StructuredDatasourceStates {
+  formBased?: FormBasedPersistedState;
+  textBased?: TextBasedPersistedState;
+}
 
-/** Utility function to build typed version for each chart */
+/** Utility type to build typed version for each chart */
 type TypedLensAttributes<TVisType, TVisState> = Simplify<
   Omit<LensDocument, 'savedObjectId' | 'type' | 'state' | 'visualizationType'> & {
     visualizationType: TVisType;
     state: Simplify<
       Omit<LensDocument['state'], 'datasourceStates' | 'visualization'> & {
         datasourceStates: {
+          // This is of type StructuredDatasourceStates but does not conform to Record<string, unknown>
+          // so I am leaving this alone until we improve this datasource typing structure.
           formBased?: FormBasedPersistedState;
           textBased?: TextBasedPersistedState;
         };
