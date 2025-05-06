@@ -144,9 +144,6 @@ export const DataLayers: FC<Props> = ({
             ? JSON.parse(columnToLabel)
             : {};
 
-          // what if row values are not primitive? That is the case of, for instance, Ranges
-          // remaps them to their serialized version with the formatHint metadata
-          // In order to do it we need to make a copy of the table as the raw one is required for more features (filters, etc...) later on
           const formattedDatatableInfo = formattedDatatables[layerId];
 
           const yAxis = yAxesConfiguration.find((axisConfiguration) =>

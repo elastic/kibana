@@ -292,10 +292,10 @@ describe('createInitialState', () => {
         "maxBatchSizeBytes": 104857600,
         "maxReadBatchSizeBytes": 524288000,
         "migrationDocLinks": Object {
-          "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
-          "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
-          "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
-          "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
+          "clusterShardLimitExceeded": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#cluster-shard-limit-exceeded",
+          "repeatedTimeoutRequests": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#_repeated_time_out_requests_that_eventually_fail",
+          "resolveMigrationFailures": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures",
+          "routingAllocationDisabled": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#routing-allocation-disabled",
         },
         "mustRelocateDocuments": true,
         "outdatedDocumentsQuery": Object {
