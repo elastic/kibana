@@ -266,21 +266,22 @@ export interface RruleSchedule {
 }
 
 interface RruleCommon {
-  freq?: Frequency;
+  freq: Frequency;
   interval: number;
   tzid: string;
 }
 interface RruleMonthly extends RruleCommon {
   freq: Frequency.MONTHLY;
+  bymonthday?: number[];
   byhour?: number[];
   byminute?: number[];
   byweekday?: string[];
 }
 interface RruleWeekly extends RruleCommon {
   freq: Frequency.WEEKLY;
+  byweekday?: string[];
   byhour?: number[];
   byminute?: number[];
-  byweekday?: string[];
   bymonthday?: never;
 }
 interface RruleDaily extends RruleCommon {
