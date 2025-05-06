@@ -35,7 +35,6 @@ import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SloManagementBulkActions } from './slo_management_bulk_actions';
 import { SloManagementSearchBar } from './slo_management_search_bar';
 
-
 export function SloManagementTable() {
   const { state, onStateChange } = useUrlSearchState();
   const { search, page, perPage, tags, includeOutdatedOnly } = state;
@@ -244,7 +243,6 @@ export function SloManagementTable() {
     }
   };
 
-
   const pagination = {
     pageIndex: page,
     pageSize: perPage,
@@ -254,7 +252,6 @@ export function SloManagementTable() {
   };
 
   return (
-
     <EuiPanel hasBorder={true}>
       <SloManagementSearchBar onRefresh={refetch} />
       <EuiSpacer size="m" />

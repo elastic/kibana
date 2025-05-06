@@ -13,7 +13,6 @@ import { useFetchSLOSuggestions } from '../../slo_edit/hooks/use_fetch_suggestio
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 
-
 interface Props {
   onRefresh: () => void;
 }
