@@ -29,7 +29,7 @@ import {
   type DraggableProvidedDragHandleProps,
   keys,
   useGeneratedHtmlId,
-  EuiLoadingSpinner,
+  EuiProgress,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
@@ -201,7 +201,9 @@ export const Tab: React.FC<TabProps> = (props) => {
             />
           ) : (
             <div css={getTabLabelContainerCss(euiTheme)} className="unifiedTabs__tabLabel">
-              {previewData.status === TabStatus.RUNNING && <EuiLoadingSpinner size="m" />}
+              {previewData.status === TabStatus.RUNNING && (
+                <EuiProgress size="xs" color="accent" position="absolute" />
+              )}
               <EuiText id={tabLabelId} color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
                 {item.label}
               </EuiText>
