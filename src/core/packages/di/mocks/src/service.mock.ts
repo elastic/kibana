@@ -65,10 +65,35 @@ function createInternalStartContract(): jest.MockedObjectDeep<InternalCoreDiServ
   return createStartContract();
 }
 
+/**
+ * Mocks for the Dependency Injection service.
+ * @public
+ */
 export const injectionServiceMock = {
+  /**
+   * Creates a mocked instance of the dependency-injection service.
+   */
   create,
+
+  /**
+   * Creates a mocked instance of the setup contract.
+   */
   createSetupContract,
+
+  /**
+   * Creates a mocked instance of the start contract.
+   */
   createStartContract,
+
+  /**
+   * Creates a mocked instance of the internal setup contract.
+   * @internal
+   */
   createInternalSetupContract,
+
+  /**
+   * Creates a mocked instance of the internal start contract.
+   * @internal
+   */
   createInternalStartContract,
 };

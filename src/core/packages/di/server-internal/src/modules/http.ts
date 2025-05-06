@@ -13,6 +13,7 @@ import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/cor
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { Global, OnSetup } from '@kbn/core-di';
 
+/** @internal */
 export const http = new ContainerModule(({ bind, onActivation }) => {
   onActivation(Route, ({ get }, route) => {
     const router = get(Router);

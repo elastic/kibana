@@ -13,6 +13,7 @@ import { AppUnmount } from '@kbn/core-application-browser';
 import { Application, ApplicationParameters, CoreSetup, CoreStart } from '@kbn/core-di-browser';
 import { Global, OnSetup } from '@kbn/core-di';
 
+/** @internal */
 export const application = new ContainerModule(({ bind, onActivation }) => {
   onActivation(Application, ({ get }, definition) => {
     get(CoreSetup('application')).register({

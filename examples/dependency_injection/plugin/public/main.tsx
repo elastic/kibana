@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ContextType } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { inject, injectable } from 'inversify';
-import { AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
+import type { AppMountParameters, AppUnmount } from '@kbn/core-application-browser';
 import type { CoreDiServiceStart } from '@kbn/core-di';
 import { ApplicationParameters, Context, CoreStart } from '@kbn/core-di-browser';
 import { App } from './app';
@@ -29,7 +29,7 @@ export class Main {
   mount(): AppUnmount {
     const { element } = this.params;
     ReactDOM.render(
-      <Context.Provider value={this.di.getContainer() as ContextType<typeof Context>}>
+      <Context.Provider value={this.di.getContainer()}>
         <App />
       </Context.Provider>,
       element

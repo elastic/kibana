@@ -14,9 +14,26 @@ import type {
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 import { toServiceIdentifier } from '@kbn/core-di-internal';
 
+/**
+ * The service identifier of {@link PluginInitializerContext}.
+ * @param key The service key in the context.
+ * @public
+ */
 export const PluginInitializer = toServiceIdentifier<PluginInitializerContext>(
   'plugin',
   'initializer'
 );
+
+/**
+ * The service identifier of {@link CoreSetupContext}.
+ * @param key The service key in the context.
+ * @public
+ */
 export const CoreSetup = toServiceIdentifier<CoreSetupContext>('core', 'setup');
+
+/**
+ * The service identifier of {@link CoreStartContext}.
+ * @param key The service key in the context.
+ * @public
+ */
 export const CoreStart = toServiceIdentifier<CoreStartContext>('core', 'start');
