@@ -26,9 +26,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { formatRulesetName } from '../../utils/query_rules_utils';
 import { usePutRuleset } from '../../hooks/use_put_query_rules_ruleset';
-// import { useUsageTracker } from '../../hooks/use_usage_tracker';
-// import { AnalyticsEvents } from '../../analytics/constants';
-
 interface CreateRulesetModalProps {
   onClose: () => void;
 }
@@ -49,7 +46,6 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
       setConflictError(true);
     }
   );
-  // const usageTracker = useUsageTracker();
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
@@ -67,7 +63,6 @@ export const CreateRulesetModal = ({ onClose }: CreateRulesetModalProps) => {
           component="form"
           onSubmit={(e) => {
             e.preventDefault();
-            // usageTracker?.click(AnalyticsEvents.new_set_created);
             createRuleset({ rulesetId: name, forceWrite });
           }}
         >
