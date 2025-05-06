@@ -8,6 +8,7 @@
 import React, { useState, Fragment, memo, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +18,6 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiButtonEmpty,
-  htmlIdGenerator,
 } from '@elastic/eui';
 
 import type {
@@ -157,8 +157,6 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       [packageInputStreamShouldBeVisible, packageInputStreams, packagePolicyInput.streams]
     );
 
-    const titleElementId = useMemo(() => htmlIdGenerator()(), []);
-
     return (
       <>
         {/* Header / input-level toggle */}
@@ -170,10 +168,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
-                      <h3
-                        data-test-subj="PackagePolicy.InputStreamConfig.title"
-                        id={titleElementId}
-                      >
+                      <h3 data-test-subj="PackagePolicy.InputStreamConfig.title">
                         {packageInput.title || packageInput.type}
                       </h3>
                     </EuiTitle>
@@ -217,7 +212,15 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
                   iconSide="right"
                   aria-expanded={isShowingStreams}
-                  aria-labelledby={titleElementId}
+                  aria-label={i18n.translate(
+                    'xpack.fleet.createPackagePolicy.stepConfigure.expandAriaLabel',
+                    {
+                      defaultMessage: 'Change default settings for {title}',
+                      values: {
+                        title: packageInput.title || packageInput.type,
+                      },
+                    }
+                  )}
                 >
                   {
                     <FormattedMessage
