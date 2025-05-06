@@ -78,7 +78,7 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
       order++;
     } else {
       const sectionId = id;
-      const section = layout[sectionId] as GridSectionData;
+      const { row, ...section } = layout[sectionId] as GridSectionData; // omit row
       orderedLayout[sectionId] = { ...section, order, isMainSection: false };
       mainRow++;
       order++;

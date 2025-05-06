@@ -40,24 +40,14 @@ export const useLayoutStyles = () => {
         ${euiTheme.border.width.thin} 0 ${euiTheme.colors.vis.euiColorVis0},
         0 -${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
 
-      &.kbnGrid {
-        // remove margin top + bottom on grid in favour of padding in row
-        padding-bottom: 0px;
-      }
-
-      .kbnGridRow {
-        // use padding in grid row so that dotted grid is not cut off
-        padding-bottom: calc(var(--kbnGridGutterSize) * 1px);
-
-        &--targeted {
-          background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
-            calc((var(--kbnGridGutterSize) / 2) * -1px);
-          background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
-            calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
-          background-image: ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
-            ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
-          background-origin: content-box;
-        }
+      .kbnGridSection--targeted {
+        background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
+          calc((var(--kbnGridGutterSize) / 2) * -1px);
+        background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
+          calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
+        background-image: ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
+          ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
+        background-origin: content-box;
       }
 
       .kbnGridPanel--dragPreview {

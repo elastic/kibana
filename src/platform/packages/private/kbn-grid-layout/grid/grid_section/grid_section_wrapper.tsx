@@ -66,9 +66,9 @@ export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) =
       ref={(rowRef: HTMLDivElement | null) => {
         gridLayoutStateManager.sectionRefs.current[sectionId] = rowRef;
       }}
-      className={'kbnGridSectionBackground'}
+      className={'kbnGridSection'}
     />
   );
 });
 
-GridSectionWrapper.displayName = 'KbnGridLayoutRowWrapper';
+GridSectionWrapper.displayName = 'KbnGridLayoutSectionwWrapper';

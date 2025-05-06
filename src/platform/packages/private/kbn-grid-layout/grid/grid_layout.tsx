@@ -10,6 +10,7 @@
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest } from 'rxjs';
+import { cloneDeep } from 'lodash';
 
 import { css } from '@emotion/react';
 
@@ -27,7 +28,6 @@ import { useGridLayoutState } from './use_grid_layout_state';
 import { getPanelKeysInOrder, resolveGridSection } from './utils/resolve_grid_section';
 import { getOrderedLayout } from './utils/conversions';
 import { isOrderedLayoutEqual } from './utils/equality_checks';
-import { cloneDeep } from 'lodash';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;

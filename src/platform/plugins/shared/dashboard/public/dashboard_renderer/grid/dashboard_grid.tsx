@@ -50,22 +50,17 @@ export const DashboardGrid = ({
   const appFixedViewport = useAppFixedViewport();
 
   const currentLayout: GridLayoutData = useMemo(() => {
-    const singleRow: GridLayoutData[string] = {
-      id: firstRowId.current,
-      order: 0,
-      title: '', // we only support a single section currently, and it does not have a title
-      isCollapsed: false,
-      panels: {},
-    };
+    const singleRow: GridLayoutData = {};
 
     Object.keys(panels).forEach((panelId) => {
       const gridData = panels[panelId].gridData;
-      singleRow.panels[panelId] = {
+      singleRow[panelId] = {
         id: panelId,
         row: gridData.y,
         column: gridData.x,
         width: gridData.w,
         height: gridData.h,
+        type: 'panel',
       };
       // update `data-grid-row` attribute for all panels because it is used for some styling
       const panelRef = panelRefs.current[panelId];
@@ -74,7 +69,7 @@ export const DashboardGrid = ({
       }
     });
 
-    return { [firstRowId.current]: singleRow };
+    return singleRow;
   }, [panels]);
 
   const onLayoutChange = useCallback(
@@ -82,21 +77,25 @@ export const DashboardGrid = ({
       if (viewMode !== 'edit') return;
 
       const currentPanels = dashboardApi.panels$.getValue();
-      const updatedPanels: { [key: string]: DashboardPanelState } = Object.values(
-        newLayout[firstRowId.current].panels
-      ).reduce((updatedPanelsAcc, panelLayout) => {
-        updatedPanelsAcc[panelLayout.id] = {
-          ...currentPanels[panelLayout.id],
-          gridData: {
-            i: panelLayout.id,
-            y: panelLayout.row,
-            x: panelLayout.column,
-            w: panelLayout.width,
-            h: panelLayout.height,
-          },
-        };
-        return updatedPanelsAcc;
-      }, {} as { [key: string]: DashboardPanelState });
+      const updatedPanels: { [key: string]: DashboardPanelState } = Object.values(newLayout).reduce(
+        (updatedPanelsAcc, widget) => {
+          if (widget.type === 'section') {
+            return updatedPanelsAcc; // sections currently aren't supported
+          }
+          updatedPanelsAcc[widget.id] = {
+            ...currentPanels[widget.id],
+            gridData: {
+              i: widget.id,
+              y: widget.row,
+              x: widget.column,
+              w: widget.width,
+              h: widget.height,
+            },
+          };
+          return updatedPanelsAcc;
+        },
+        {} as { [key: string]: DashboardPanelState }
+      );
       if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
         dashboardApi.setPanels(updatedPanels);
       }
