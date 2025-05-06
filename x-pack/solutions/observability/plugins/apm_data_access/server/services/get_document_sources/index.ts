@@ -10,7 +10,6 @@ import { getDocumentSources, type DocumentSourcesRequest } from './get_document_
 export function createGetDocumentSources({ apmEventClient }: ApmDataAccessServicesParams) {
   return async ({
     enableContinuousRollups,
-    enableServiceTransactionMetrics,
     end,
     kuery,
     start,
@@ -18,7 +17,6 @@ export function createGetDocumentSources({ apmEventClient }: ApmDataAccessServic
     return getDocumentSources({
       apmEventClient,
       enableContinuousRollups,
-      enableServiceTransactionMetrics,
       end,
       kuery,
       start,
