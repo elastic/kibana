@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { escapeRegExp } from 'lodash';
 import { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
+import { parse, Walker } from '@kbn/esql-ast';
 import { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -116,12 +117,30 @@ export function initializeAlertRules(
     },
   };
 }
+
 function parseEsqlVariables(query: AggregateQuery | undefined, variables: ESQLControlVariable[]) {
   if (!query) return query;
   let parsedQuery = query.esql;
 
-  variables.forEach(({ key, value }) => {
-    parsedQuery = parsedQuery.replace(`??${key}`, String(value));
+  const variableLookup: Record<string, string | number> = variables.reduce(
+    (result, { key, value }) => ({
+      ...result,
+      [key]: value,
+    }),
+    {}
+  );
+
+  const { root } = parse(query.esql);
+  const params = Walker.params(root);
+
+  params.forEach(({ value: variableName, text }) => {
+    if (variableName in variableLookup) {
+      const value = variableLookup[variableName];
+      // Do NOT use a global regexp, `params` lists all variables in the query in the order they occur, including duplicates
+      // We want to make sure we replace params one by one, in order, in case any param is a substring of a longer param
+      // e.g. ??field and ??field1
+      parsedQuery = parsedQuery.replace(new RegExp(escapeRegExp(text)), String(value));
+    }
   });
 
   return { esql: parsedQuery };

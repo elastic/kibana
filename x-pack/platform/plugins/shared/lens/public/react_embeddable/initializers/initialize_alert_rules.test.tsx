@@ -84,13 +84,16 @@ describe('Alert rules API', () => {
       parentApiMock.esqlVariables$.next([
         { type: ESQLVariableType.FIELDS, key: 'field', value: 'field.zero' },
         { type: ESQLVariableType.FIELDS, key: 'field1', value: 'field.one' },
+        { type: ESQLVariableType.TIME_LITERAL, key: 'interval', value: '5 minutes' },
       ]);
       api.createAlertRule(
         {
           params: {
             searchType: 'esqlQuery',
             esqlQuery: {
-              esql: 'FROM index | STATS aggregatedFields = ??field, ??field1',
+              // Put ??field1 before ??field intentionally; /field/ is a part of /field1/ so we want to ensure
+              // regexp logic doesn't accidentally replace /??field/1 instead of /??field1/
+              esql: 'FROM index | STATS aggregatedFields = ??field1, ??field BY BUCKET(@timestamp, ?interval)',
             },
           },
         },
@@ -103,7 +106,7 @@ describe('Alert rules API', () => {
           "name": "Elasticsearch query rule from visualization",
           "params": Object {
             "esqlQuery": Object {
-              "esql": "FROM index | STATS aggregatedFields = field.zero, field.one",
+              "esql": "FROM index | STATS aggregatedFields = field.one, field.zero BY BUCKET(@timestamp, 5 minutes)",
             },
             "searchType": "esqlQuery",
           },
