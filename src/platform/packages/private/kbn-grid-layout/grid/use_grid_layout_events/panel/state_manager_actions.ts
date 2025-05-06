@@ -120,7 +120,6 @@ export const moveAction = (
     }
     return highestOverlapSectionId;
   })();
-  console.log({ targetSectionId });
 
   // calculate the requested grid position
   const gridLayoutRect = gridLayoutElement?.getBoundingClientRect();
