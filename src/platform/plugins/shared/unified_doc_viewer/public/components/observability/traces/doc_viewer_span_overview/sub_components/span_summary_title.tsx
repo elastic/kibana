@@ -9,38 +9,34 @@
 
 import { EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { SPAN_ID_FIELD, SPAN_NAME_FIELD } from '@kbn/discover-utils';
 import { FieldHoverActionPopover } from '../../components/field_with_actions/field_hover_popover_action';
 
-interface SpanSummaryField {
-  field: string;
-  value?: string;
-}
-
 export interface SpanSummaryTitleProps {
-  name: SpanSummaryField;
-  id: Required<SpanSummaryField>;
+  name?: string;
+  id: string;
 }
 
 export const SpanSummaryTitle = ({ name, id }: SpanSummaryTitleProps) => {
-  return name?.value ? (
+  return name ? (
     <>
       <div>
-        <FieldHoverActionPopover title={name.value} value={name.value} field={name.field}>
+        <FieldHoverActionPopover title={name} value={name} field={SPAN_NAME_FIELD}>
           <EuiTitle size="xs">
-            <h2>{name.value}</h2>
+            <h2>{name}</h2>
           </EuiTitle>
         </FieldHoverActionPopover>
       </div>
-      <FieldHoverActionPopover title={id.value} value={id.value} field={id.field}>
+      <FieldHoverActionPopover title={id} value={id} field={SPAN_ID_FIELD}>
         <EuiText size="xs" color="subdued">
-          {id.value}
+          {id}
         </EuiText>
       </FieldHoverActionPopover>
     </>
   ) : (
-    <FieldHoverActionPopover title={id.value!} value={id.value} field={id.field}>
+    <FieldHoverActionPopover title={id} value={id} field={SPAN_ID_FIELD}>
       <EuiTitle size="xs">
-        <h2>{id.value}</h2>
+        <h2>{id}</h2>
       </EuiTitle>
     </FieldHoverActionPopover>
   );

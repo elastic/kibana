@@ -54,10 +54,7 @@ export function SpanOverview({
       >
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
-          <SpanSummaryTitle
-            name={{ value: parsedDoc[SPAN_NAME_FIELD], field: SPAN_NAME_FIELD }}
-            id={{ value: parsedDoc[SPAN_ID_FIELD], field: SPAN_ID_FIELD }}
-          />
+          <SpanSummaryTitle name={parsedDoc[SPAN_NAME_FIELD]} id={parsedDoc[SPAN_ID_FIELD]} />
           <EuiSpacer size="m" />
           {spanFields.map((fieldId) => (
             <SpanSummaryField
