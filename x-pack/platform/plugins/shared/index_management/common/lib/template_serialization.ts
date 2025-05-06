@@ -25,7 +25,7 @@ const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
 export function serializeTemplate(
   templateDeserialized: TemplateDeserialized,
-  datataStreamOptions?: object | undefined
+  dataStreamOptions?: object | undefined
 ): TemplateSerialized {
   const {
     version,
@@ -55,7 +55,7 @@ export function serializeTemplate(
       },
       // If the existing template contains data stream options, we need to persist them.
       // Otherwise, they will be lost when the template is updated.
-      ...(datataStreamOptions && { data_stream_options: datataStreamOptions }),
+      ...(dataStreamOptions && { data_stream_options: dataStreamOptions }),
     },
     index_patterns: indexPatterns,
     data_stream: dataStream,
