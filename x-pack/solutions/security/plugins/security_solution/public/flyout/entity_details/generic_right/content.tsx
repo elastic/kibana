@@ -15,6 +15,7 @@ import {
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
 } from '../shared/components/left_panel/left_panel_header';
+import type { CloudPostureEntityIdentifier } from '../../../cloud_security_posture/components/entity_insight';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 import { useExpandSection } from '../../document_details/right/hooks/use_expand_section';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
@@ -26,7 +27,7 @@ import { ExpandablePanel } from '../../shared/components/expandable_panel';
 interface GenericEntityFlyoutContentProps {
   source: GenericEntityRecord;
   openGenericEntityDetailsPanelByPath: (path: EntityDetailsPath) => void;
-  insightsField: string;
+  insightsField: CloudPostureEntityIdentifier;
   insightsValue: string;
 }
 
