@@ -1,0 +1,14 @@
+{
+  "id": "kibanaPendo",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Martello",
+    "githubTeam": ""
+  },
+  "description": "Allows us to get product analytics in iframes",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["navigation"],
+  "optionalPlugins": []
+}
