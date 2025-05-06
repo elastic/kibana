@@ -14,7 +14,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { TASK_ID, runDeleteUnusedUrlsTask } from './unused_urls_task';
+import { TASK_ID, getDeleteUnsuedUrlTask, runDeleteUnusedUrlsTask } from './unused_urls_task';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
 import {
@@ -122,13 +122,21 @@ export class SharePlugin
     const {
       logger,
       taskManagerSetup,
-      config: { urlExpiryDuration },
+      config: {
+        url_expiration: {
+          enabled: urlExpirationEnabled,
+          duration: urlExpirationDuration,
+          check_interval: urlExpirationCheckInterval,
+          pit_keep_alive: urlExpirationPitKeepAlive,
+        },
+      },
     } = this;
     logger.debug('Starting plugin');
 
-    if (taskManagerSetup && urlExpiryDuration) {
+    if (taskManagerSetup && urlExpirationEnabled) {
+      // TODO: Check handling different spaces
       const savedObjectsRepository = core.savedObjects.createInternalRepository();
-      const filter = `url.attributes.accessDate <= now-${urlExpiryDuration}`;
+      const filter = `url.attributes.accessDate <= now-${urlExpirationDuration}`;
 
       taskManagerSetup.registerTaskDefinitions({
         [TASK_ID]: {
@@ -141,12 +149,17 @@ export class SharePlugin
                   savedObjectsRepository,
                   filter,
                   logger,
+                  pitKeepAlive: urlExpirationPitKeepAlive,
                 });
               },
             };
           },
         },
       });
+
+      const unusedUrlsTask = getDeleteUnsuedUrlTask(urlExpirationCheckInterval);
+
+      taskManager.ensureScheduled(unusedUrlsTask);
     }
 
     return {

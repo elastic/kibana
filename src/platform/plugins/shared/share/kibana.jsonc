@@ -16,6 +16,6 @@
     ],
     // "requiredPlugins": [
     //   "taskManager"
-    // ], < causes a circular dependency
+    // ],
   }
 }

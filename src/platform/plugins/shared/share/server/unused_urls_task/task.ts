@@ -17,9 +17,20 @@
  */
 
 import { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { ISavedObjectsRepository, SavedObjectsFindResult } from '@kbn/core/server';
+import { ISavedObjectsRepository } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
-import { MAX_PAGE_SIZE, PIT_KEEP_ALIVE, SAVED_OBJECT_TYPE } from './constants';
+import { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
+import { MAX_PAGE_SIZE, SAVED_OBJECT_TYPE, TASK_ID } from './constants';
+
+export const getDeleteUnsuedUrlTask = (interval: string): TaskInstanceWithId => ({
+  id: TASK_ID,
+  taskType: TASK_ID,
+  params: {},
+  state: {},
+  schedule: {
+    interval,
+  },
+});
 
 export const deleteUnusedUrls = async ({
   savedObjectsRepository,
@@ -48,15 +59,17 @@ export const fetchAllUnusedUrls = async ({
   savedObjectsRepository,
   filter,
   logger,
+  pitKeepAlive,
 }: {
   savedObjectsRepository: ISavedObjectsRepository;
   filter: string;
   logger: Logger;
+  pitKeepAlive: string;
 }) => {
-  const results: SavedObjectsFindResult[] = [];
+  const results: Array<{ id: string }> = [];
 
   const { id: pitId } = await savedObjectsRepository.openPointInTimeForType(SAVED_OBJECT_TYPE, {
-    keepAlive: PIT_KEEP_ALIVE,
+    keepAlive: pitKeepAlive,
   });
 
   try {
@@ -67,12 +80,12 @@ export const fetchAllUnusedUrls = async ({
       const response = await savedObjectsRepository.find({
         type: SAVED_OBJECT_TYPE,
         filter,
-        pit: { id: pitId, keepAlive: PIT_KEEP_ALIVE },
+        pit: { id: pitId, keepAlive: pitKeepAlive },
         searchAfter,
         perPage: MAX_PAGE_SIZE,
       });
 
-      results.push(...response.saved_objects);
+      results.push(...response.saved_objects.map(({ id }) => ({ id })));
       hasMore = response.saved_objects.length === MAX_PAGE_SIZE;
 
       if (hasMore) {
@@ -95,11 +108,14 @@ export const runDeleteUnusedUrlsTask = async ({
   savedObjectsRepository,
   filter,
   logger,
+  pitKeepAlive,
 }: {
   savedObjectsRepository: ISavedObjectsRepository;
   filter: string;
   logger: Logger;
+  pitKeepAlive: string;
 }) => {
+  // TODO: Check if it should run in trycatch
   try {
     logger.info('Unused URLs cleanup started');
 
@@ -107,6 +123,7 @@ export const runDeleteUnusedUrlsTask = async ({
       savedObjectsRepository,
       filter,
       logger,
+      pitKeepAlive,
     });
 
     logger.info(`Found ${unusedUrls.length} unused URL(s)`);

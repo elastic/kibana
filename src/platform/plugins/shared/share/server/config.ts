@@ -9,22 +9,39 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
+const relativeTimeRegex = /^[0-9]+[smhdwMy]$/;
+
+const validate = (value: string) => {
+  if (!relativeTimeRegex.test(value)) {
+    throw new Error(
+      `Invalid value "${value}" for relative time. Must be a number followed by one of the following units: s, m, h, d, w, M, y`
+    );
+  }
+};
+
 export const configSchema = schema.object({
   new_version: schema.object({
     enabled: schema.boolean({
       defaultValue: false,
     }),
   }),
-  urlExpiryDuration: schema.maybe(
-    schema.string({
-      validate: (value) => {
-        const rangeRegex = /\d+[yMwdhms]/;
-        if (!rangeRegex.test(value)) {
-          return `Invalid value: ${value}. Expected format: <number><unit>, where unit is one of y, M, w, d, h, m, s.`;
-        }
-      },
-    })
-  ),
+  url_expiration: schema.object({
+    enabled: schema.boolean({
+      defaultValue: false,
+    }),
+    duration: schema.string({
+      defaultValue: '1y',
+      validate,
+    }),
+    check_interval: schema.string({
+      defaultValue: '7d',
+      validate,
+    }),
+    pit_keep_alive: schema.string({
+      defaultValue: '10m',
+      validate,
+    }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

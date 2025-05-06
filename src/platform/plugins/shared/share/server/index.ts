@@ -17,16 +17,14 @@ export type {
 
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
 
-export { deleteUnusedUrls, fetchAllUnusedUrls, runDeleteUnusedUrlsTask } from './unused_urls_task';
-
 export {
-  TASK_ID,
-  TASK_SCHEDULE_INTERVAL,
-  SAVED_OBJECT_TYPE,
-  PIT_KEEP_ALIVE,
-  MAX_PAGE_SIZE,
-  DELETE_UNUSED_URLS_TASK,
+  getDeleteUnsuedUrlTask,
+  deleteUnusedUrls,
+  fetchAllUnusedUrls,
+  runDeleteUnusedUrlsTask,
 } from './unused_urls_task';
+
+export { TASK_ID, SAVED_OBJECT_TYPE, MAX_PAGE_SIZE } from './unused_urls_task';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { SharePlugin } = await import('./plugin');
