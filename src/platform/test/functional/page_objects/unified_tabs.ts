@@ -61,8 +61,8 @@ export class UnifiedTabsPageObject extends FtrService {
 
   public async createNewTab() {
     const numberOfTabs = await this.getNumberOfTabs();
+    await this.testSubjects.click('unifiedTabs_tabsBar_newTabBtn');
     await this.retry.waitFor('the new tab to appear', async () => {
-      await this.testSubjects.click('unifiedTabs_tabsBar_newTabBtn');
       const newNumberOfTabs = await this.getNumberOfTabs();
       return (
         newNumberOfTabs === numberOfTabs + 1 &&
