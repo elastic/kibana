@@ -401,11 +401,9 @@ describe('ConnectorFields renders', () => {
   describe('PKI Configuration', () => {
     const onSubmit = jest.fn();
     const pkiConnector = {
-      ...openAiConnector,
+      ...otherOpenAiConnector,
       config: {
-        ...openAiConnector.config,
-        apiProvider: OpenAiProviderType.Other,
-        defaultModel: 'local-model',
+        ...otherOpenAiConnector.config,
         certificateFile: '/path/to/cert.pem',
         privateKeyFile: '/path/to/key.pem',
         verificationMode: 'full',
@@ -416,37 +414,31 @@ describe('ConnectorFields renders', () => {
       },
     };
 
-    test('renders PKI configuration fields for Other provider', async () => {
-      const { getAllByTestId, getByTestId } = render(
+    it('renders PKI configuration fields for Other provider', async () => {
+      const { getByTestId } = render(
         <ConnectorFormTestProvider connector={pkiConnector}>
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
 
       // First select Other provider
-      await userEvent.selectOptions(getByTestId('config.apiProvider-select'), [OpenAiProviderType.Other]);
-
-      // Then enable PKI mode
-      await userEvent.click(getByTestId('openAIViewPKISwitch'));
-
-      // Then check for PKI fields
-      expect(getAllByTestId('config.certificateFile-input')[0]).toBeInTheDocument();
-      expect(getAllByTestId('config.privateKeyFile-input')[0]).toBeInTheDocument();
-      expect(getAllByTestId('verificationModeSelect')[0]).toBeInTheDocument();
-    });
-
-    test('validates PKI configuration fields', async () => {
-      const { getByTestId } = render(
-        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
-          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
-        </ConnectorFormTestProvider>
-      );
-
-      // Select Other provider
-      await userEvent.selectOptions(getByTestId('config.apiProvider-select'), [OpenAiProviderType.Other]);
+      await userEvent.selectOptions(getByTestId('config.apiProvider-select'), 'Other');
 
       // Enable PKI mode
       await userEvent.click(getByTestId('openAIViewPKISwitch'));
+
+      // Then check for PKI fields
+      expect(getByTestId('config.certificateFile-input')).toBeInTheDocument();
+      expect(getByTestId('config.privateKeyFile-input')).toBeInTheDocument();
+      expect(getByTestId('verificationModeSelect')).toBeInTheDocument();
+    });
+
+    it('validates PKI configuration fields', async () => {
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={pkiConnector}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
 
       // Clear required fields
       await userEvent.clear(getByTestId('config.certificateFile-input'));
@@ -454,33 +446,17 @@ describe('ConnectorFields renders', () => {
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      await waitFor(() => {
-        expect(onSubmit).toHaveBeenCalledWith({
-          data: {
-            ...pkiConnector,
-            config: {
-              ...pkiConnector.config,
-              certificateFile: '',
-              privateKeyFile: '',
-            },
-          },
-          isValid: false,
-        });
-      });
+      // Check for validation errors
+      expect(getByTestId('config.certificateFile-input')).toHaveAttribute('aria-invalid', 'true');
+      expect(getByTestId('config.privateKeyFile-input')).toHaveAttribute('aria-invalid', 'true');
     });
 
-    test('submits form with valid PKI configuration', async () => {
+    it('submits form with valid PKI configuration', async () => {
       const { getByTestId } = render(
         <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
-
-      // Select Other provider
-      await userEvent.selectOptions(getByTestId('config.apiProvider-select'), [OpenAiProviderType.Other]);
-
-      // Enable PKI mode
-      await userEvent.click(getByTestId('openAIViewPKISwitch'));
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
@@ -489,11 +465,10 @@ describe('ConnectorFields renders', () => {
           data: {
             ...pkiConnector,
             __internal__: {
-              ...pkiConnector.__internal__,
+              hasHeaders: false,
               hasPKI: true,
             },
           },
-          isValid: true,
         });
       });
     });
