@@ -23,7 +23,6 @@ export interface DocumentSourcesRequest {
   start: number;
   end: number;
   kuery: string;
-  enableServiceTransactionMetrics: boolean;
 }
 
 const getRequest = ({
@@ -60,16 +59,14 @@ export async function getDocumentSources({
   start,
   end,
   kuery,
-  enableServiceTransactionMetrics,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   kuery: string;
-  enableServiceTransactionMetrics: boolean;
 }): Promise<TimeRangeMetadata['sources']> {
   const documentTypesToCheck = [
-    ...(enableServiceTransactionMetrics ? [ApmDocumentType.ServiceTransactionMetric as const] : []),
+    ApmDocumentType.ServiceTransactionMetric as const,
     ApmDocumentType.TransactionMetric as const,
   ];
 

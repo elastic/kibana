@@ -96,7 +96,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             query: {
               start: endLegacy.toISOString(),
               end: end.toISOString(),
-              enableServiceTransactionMetrics: true,
               useSpanName: false,
               kuery: '',
             },
@@ -123,7 +122,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             query: {
               start: startLegacy.toISOString(),
               end: endLegacy.toISOString(),
-              enableServiceTransactionMetrics: true,
               useSpanName: false,
               kuery: '',
             },
@@ -144,7 +142,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             query: {
               start: startLegacy.toISOString(),
               end: end.toISOString(),
-              enableServiceTransactionMetrics: true,
               useSpanName: false,
               kuery: '',
             },

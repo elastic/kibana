@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = moment('2022-01-01T00:00:00.000Z');
   const end = moment('2022-01-02T00:00:00.000Z').subtract(1, 'millisecond');
 
-  async function getTimeRangeMedata(
+  async function getTimeRangeMetadata(
     overrides: Partial<
       Omit<
         APIClientRequestParamsOf<'GET /internal/apm/time_range_metadata'>['params']['query'],
@@ -39,7 +39,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         query: {
           start: overrides.start.toISOString(),
           end: overrides.end.toISOString(),
-          enableServiceTransactionMetrics: true,
           useSpanName: false,
           kuery: '',
           ...omit(overrides, 'start', 'end'),
@@ -57,7 +56,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     describe('without data', () => {
       it('handles empty state', async () => {
-        const response = await getTimeRangeMedata({
+        const response = await getTimeRangeMetadata({
           start,
           end,
         });
@@ -107,7 +106,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         describe('aggregators and summary field support', () => {
           it('returns support only for legacy transactionMetrics 1m without duration summary field', async () => {
-            const response = await getTimeRangeMedata({
+            const response = await getTimeRangeMetadata({
               start: withoutSummaryFieldStart,
               end: withoutSummaryFieldEnd,
             });
@@ -157,7 +156,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           it('returns support for all document types with duration summary field', async () => {
-            const response = await getTimeRangeMedata({
+            const response = await getTimeRangeMetadata({
               start: withSummaryFieldStart,
               end: withSummaryFieldEnd,
             });
@@ -207,7 +206,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           it('returns support only for transaction 1m when timerange includes both new and legacy documents', async () => {
-            const response = await getTimeRangeMedata({
+            const response = await getTimeRangeMetadata({
               start: withoutSummaryFieldStart,
               end: withSummaryFieldEnd,
             });
@@ -280,7 +279,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('with default settings', () => {
         it('returns all available document sources', async () => {
-          const response = await getTimeRangeMedata({
+          const response = await getTimeRangeMetadata({
             start,
             end,
           });
@@ -304,43 +303,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               hasDocs: true,
               hasDurationSummaryField: true,
             },
-            {
-              documentType: ApmDocumentType.TransactionEvent,
-              rollupInterval: RollupInterval.None,
-              hasDocs: true,
-              hasDurationSummaryField: false,
-            },
-            {
-              documentType: ApmDocumentType.TransactionMetric,
-              rollupInterval: RollupInterval.TenMinutes,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-            {
-              documentType: ApmDocumentType.TransactionMetric,
-              rollupInterval: RollupInterval.OneMinute,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-            {
-              documentType: ApmDocumentType.TransactionMetric,
-              rollupInterval: RollupInterval.SixtyMinutes,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-          ]);
-        });
-      });
-
-      describe('with service metrics disabled', () => {
-        it('only returns tx metrics and events as available sources', async () => {
-          const response = await getTimeRangeMedata({
-            start,
-            end,
-            enableServiceTransactionMetrics: false,
-          });
-
-          expect(response.sources).to.eql([
             {
               documentType: ApmDocumentType.TransactionEvent,
               rollupInterval: RollupInterval.None,
@@ -371,7 +333,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('when data is available before the time range', () => {
         it('marks all those sources as available', async () => {
-          const response = await getTimeRangeMedata({
+          const response = await getTimeRangeMetadata({
             start: moment(start).add(12, 'hours'),
             end: moment(end).add(12, 'hours'),
           });
@@ -425,7 +387,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('when data is not available before the time range, but is within the time range', () => {
         it('marks those sources as available', async () => {
-          const response = await getTimeRangeMedata({
+          const response = await getTimeRangeMetadata({
             start: moment(start).add(6, 'hours'),
             end: moment(end).add(6, 'hours'),
           });
@@ -505,7 +467,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         );
 
         it('marks service transaction metrics as unavailable', async () => {
-          const response = await getTimeRangeMedata({
+          const response = await getTimeRangeMetadata({
             start,
             end,
           });
@@ -553,7 +515,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('marks that data source as unavailable', async () => {
-          const response = await getTimeRangeMedata({
+          const response = await getTimeRangeMetadata({
             start,
             end,
           });
