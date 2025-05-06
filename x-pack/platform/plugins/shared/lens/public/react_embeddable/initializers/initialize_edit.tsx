@@ -10,7 +10,6 @@ import {
   HasSupportedTriggers,
   PublishesDisabledActionIds,
   PublishesViewMode,
-  ViewMode,
   apiHasAppContext,
   apiPublishesDisabledActionIds,
 } from '@kbn/presentation-publishing';

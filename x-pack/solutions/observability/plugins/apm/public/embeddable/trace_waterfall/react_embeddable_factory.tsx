@@ -6,14 +6,18 @@
  */
 import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
-import { initializeTitleManager, titleComparators, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  initializeTitleManager,
+  titleComparators,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ApmEmbeddableContext } from '../embeddable_context';
 import type { EmbeddableDeps } from '../types';
 import { APM_TRACE_WATERFALL_EMBEDDABLE } from './constant';
 import { TraceWaterfallEmbeddable } from './trace_waterfall_embeddable';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 
 export interface ApmTraceWaterfallEmbeddableProps extends SerializedTitles {
   serviceName: string;
@@ -65,7 +69,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           entryTransactionId$,
           rangeFrom$,
           rangeTo$,
-          displayLimit$,
+          displayLimit$
         ).pipe(map(() => undefined)),
         getComparators: () => {
           return {

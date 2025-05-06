@@ -147,7 +147,6 @@ import {
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
-import { deserializeState } from './react_embeddable/helper';
 import { ACTION_CREATE_ESQL_CHART } from './trigger_actions/open_lens_config/constants';
 
 export type { SaveProps } from './app_plugin';

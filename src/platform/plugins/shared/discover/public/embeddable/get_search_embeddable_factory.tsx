@@ -202,9 +202,7 @@ export const getSearchEmbeddableFactory = ({
             defaultMessage: 'Discover session',
           }),
         canLinkToLibrary: async () => {
-          return (
-            discoverServices.capabilities.discover.save && !Boolean(savedObjectId$.getValue())
-          );
+          return discoverServices.capabilities.discover.save && !Boolean(savedObjectId$.getValue());
         },
         canUnlinkFromLibrary: async () => Boolean(savedObjectId$.getValue()),
         saveToLibrary: async (title: string) => {

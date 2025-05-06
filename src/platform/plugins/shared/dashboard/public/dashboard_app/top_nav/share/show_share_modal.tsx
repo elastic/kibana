@@ -220,9 +220,7 @@ export function ShowShareModal({
         component: EmbedUrlParamExtension,
       },
     ],
-    snapshotShareWarning: hasPanelChanges
-      ? shareModalStrings.getSnapshotShareWarning()
-      : undefined,
+    snapshotShareWarning: hasPanelChanges ? shareModalStrings.getSnapshotShareWarning() : undefined,
     toasts: coreServices.notifications.toasts,
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(
