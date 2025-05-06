@@ -69,7 +69,10 @@ Reporting generates reports on the {{kib}} server as background tasks, and jobs 
     This setting was deprecated in 8.15.0.
     :::
 
-    How often Reporting creates a new index to store report jobs and file contents. Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`. **NOTE**: This setting exists for backwards compatibility, but is unused. Use the built-in ILM policy provided for the reporting plugin to customize the rollover of Reporting data.
+    How often Reporting creates a new index to store report jobs and file contents. Valid values are `year`, `month`, `week`, `day`, and `hour`. Defaults to `week`. 
+    :::{note}
+    This setting exists for backwards compatibility, but is unused. Use the built-in ILM policy provided for the reporting plugin to customize the rollover of Reporting data.
+    :::
 
 $$$xpack-reportingQueue-pollEnabled$$$ `xpack.reporting.queue.pollEnabled`
 :   When `true`, enables the {{kib}} instance to poll {{es}} for pending jobs and claim them for execution. When `false`, allows the {{kib}} instance to only add new jobs to the reporting queue, list jobs, and provide the downloads to completed reports through the UI. This requires a deployment where at least one other {{kib}} instance in the Elastic cluster has this setting to `true`. The default is `true`.

@@ -360,7 +360,7 @@ let change: SavedObjectsModelUnsafeTransformChange = {
 ```
 
 :::{note}
-Using such transformations is potentially unsafe, given the migration system will have no knowledge of which kind of operations will effectively be executed against the documents. Those should only be used when there’s no other way to cover one’s migration needs.* **Please reach out to the development team if you think you need to use this, as you theoretically shouldn’t.**
+Using such transformations is potentially unsafe, given the migration system will have no knowledge of which kind of operations will effectively be executed against the documents. Those should only be used when there’s no other way to cover one’s migration needs. **Please reach out to the development team if you think you need to use this, as you theoretically shouldn’t.**
 :::
 
 
