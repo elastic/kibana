@@ -268,8 +268,12 @@ Unlike the Canvas example, Dev Tools does not require access to any saved object
 server.route({
  path: '/api/console/proxy',
  method: 'POST',
+ security: {
+  authz: {
+    requiredPrivileges: ['console'],
+  },
+ },
  config: {
-   tags: ['access:console'],
    handler: async (req, h) => {
      // ...
    }
