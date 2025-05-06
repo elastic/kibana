@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { isQueryRulesetExist } from './is_query_ruleset_exist';
 
-export const fetchQueryRulesRuleset = async (
+export const isQueryRulesetExist = async (
   client: ElasticsearchClient,
   rulesetId: string
-): Promise<QueryRulesQueryRuleset | null> => {
-  if (await isQueryRulesetExist(client, rulesetId)) {
+): Promise<boolean> => {
+  try {
     const ruleset = await client.queryRules.getRuleset({
       ruleset_id: rulesetId,
     });
-    return ruleset;
+    if (ruleset) {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    if (error.meta?.statusCode === 404) return false;
+    throw error;
   }
-  return null;
 };
