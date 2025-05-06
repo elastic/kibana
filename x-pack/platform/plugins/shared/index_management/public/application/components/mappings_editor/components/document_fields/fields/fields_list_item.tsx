@@ -14,10 +14,8 @@ import {
   EuiToolTip,
   EuiIcon,
   useEuiTheme,
-  EuiThemeComputed,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { NormalizedField, NormalizedFields, State } from '../../../types';
 
 import { getTypeLabelFromField } from '../../../lib';
@@ -26,6 +24,7 @@ import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '.
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
 import { DeleteFieldProvider } from './delete_field_provider';
+import { getListItemStyle } from '../common/listItemStyle';
 
 const i18nTexts = {
   addMultiFieldButtonLabel: i18n.translate(
@@ -47,51 +46,6 @@ const i18nTexts = {
     defaultMessage: 'Field shadowed by a runtime field with the same name.',
   }),
 };
-
-const getListItemStyle = ({ border, colors, size }: EuiThemeComputed<{}>) => ({
-  dotted: css`
-    border-bottom-style: dashed;
-  `,
-  field: css`
-    border-bottom: ${border.thin};
-    height: calc(${size.xl} * 2);
-    margin-top: ${size.xs};
-  `,
-  fieldEnabled: css`
-    &:hover {
-      background-color: ${colors.backgroundBaseHighlighted};
-    }
-  `,
-  fieldHighlighted: css`
-    background-color: ${colors.backgroundBaseHighlighted};
-  `,
-  fieldDim: css`
-    opacity: 0.3;
-    &:hover {
-      background-color: initial;
-    }
-  `,
-  wrapper: css`
-    padding-left: ${size.xs};
-  `,
-  wrapperIndent: css`
-    padding-left: ${size};
-  `,
-  content: css`
-    height: calc(${size.xl} * 2);
-    position: relative;
-  `,
-  contentIndent: css`
-    padding-left: ${size.xl};
-  `,
-  toggle: css`
-    padding-left: ${size.xs};
-    width: ${size.l};
-  `,
-  actions: css`
-    padding-left: ${size.s};
-  `,
-});
 
 interface Props {
   field: NormalizedField;

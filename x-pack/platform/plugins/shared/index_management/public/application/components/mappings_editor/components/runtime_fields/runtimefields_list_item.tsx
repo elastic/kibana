@@ -6,14 +6,21 @@
  */
 
 import React from 'react';
-import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiButtonIcon,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedRuntimeField } from '../../types';
 import { getTypeLabelFromField } from '../../lib';
 
 import { DeleteRuntimeFieldProvider } from './delete_field_provider';
+import { getListItemStyle } from '../document_fields/common/listItemStyle';
 
 interface Props {
   field: NormalizedRuntimeField;
@@ -28,6 +35,9 @@ function RuntimeFieldsListItemComponent(
   ref: React.Ref<HTMLLIElement>
 ) {
   const { source } = field;
+
+  const { euiTheme } = useEuiTheme();
+  const styles = getListItemStyle(euiTheme);
 
   const renderActionButtons = () => {
     if (!areActionButtonsVisible) {
@@ -49,7 +59,7 @@ function RuntimeFieldsListItemComponent(
     );
 
     return (
-      <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">
+      <EuiFlexGroup gutterSize="s" css={styles.actions}>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={editButtonLabel}>
             <EuiButtonIcon
@@ -81,25 +91,18 @@ function RuntimeFieldsListItemComponent(
   };
 
   return (
-    <li className="mappingsEditor__fieldsListItem" data-test-subj="runtimeFieldsListItem">
+    <li data-test-subj="runtimeFieldsListItem">
       <div
-        className={classNames('mappingsEditor__fieldsListItem__field', {
-          'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
-          'mappingsEditor__fieldsListItem__field--highlighted': isHighlighted,
-          'mappingsEditor__fieldsListItem__field--dim': isDimmed,
-        })}
+        css={[
+          styles.field,
+          areActionButtonsVisible && styles.fieldEnabled,
+          isHighlighted && styles.fieldHighlighted,
+          isDimmed && styles.fieldDim,
+        ]}
       >
-        <div className="mappingsEditor__fieldsListItem__wrapper mappingsEditor__fieldsListItem__wrapper--indent">
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            className="mappingsEditor__fieldsListItem__content"
-          >
-            <EuiFlexItem
-              grow={false}
-              className="mappingsEditor__fieldsListItem__name"
-              data-test-subj="fieldName"
-            >
+        <div css={styles.wrapperIndent}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" css={styles.content}>
+            <EuiFlexItem grow={false} data-test-subj="fieldName">
               {source.name}
             </EuiFlexItem>
 
