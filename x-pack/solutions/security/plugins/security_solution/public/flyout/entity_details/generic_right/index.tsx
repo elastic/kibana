@@ -65,7 +65,7 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
   });
 
   const { openGenericEntityDetails } = useOpenGenericEntityDetailsLeftPanel({
-    field: EntityIdentifierFields.generic,
+    field: EntityIdentifierFields.related,
     value: getGenericEntity.data?._source?.entity.id || '',
     entityDocId,
     scopeId,

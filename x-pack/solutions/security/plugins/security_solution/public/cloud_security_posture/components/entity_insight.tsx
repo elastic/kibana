@@ -23,7 +23,10 @@ import type { EntityDetailsPath } from '../../flyout/entity_details/shared/compo
 
 export type CloudPostureEntityIdentifier = Extract<
   EntityIdentifierFields,
-  EntityIdentifierFields.hostName | EntityIdentifierFields.userName | EntityIdentifierFields.generic
+  | EntityIdentifierFields.hostName
+  | EntityIdentifierFields.userName
+  | EntityIdentifierFields.generic
+  | EntityIdentifierFields.related
 >;
 
 export const EntityInsight = <T,>({
