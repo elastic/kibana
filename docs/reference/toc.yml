@@ -32,6 +32,7 @@ toc:
       - file: connectors-kibana/cases-action-type.md
       - file: connectors-kibana/crowdstrike-action-type.md
       - file: connectors-kibana/d3security-action-type.md
+      - file: connectors-kibana/elastic-managed-llm-md
       - file: connectors-kibana/email-action-type.md
       - file: connectors-kibana/gemini-action-type.md
       - file: connectors-kibana/resilient-action-type.md
