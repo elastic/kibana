@@ -134,6 +134,7 @@ export const serializeState = async ({
     rawState: {
       ...serializeTitles(),
       ...serializeTimeRange(),
+      ...serializeDynamicActions?.(),
       ...(state as unknown as SavedSearchAttributes),
     },
     references,
