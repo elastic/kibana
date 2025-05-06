@@ -30,6 +30,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { ElasticAgentVersionInfo } from '../../../../common/types';
 import { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
@@ -59,7 +60,21 @@ export const OtelLogsPanel: React.FC = () => {
   );
 
   const { data: setup } = useFetcher((callApi) => {
-    return callApi('GET /internal/observability_onboarding/logs/setup/environment');
+    return callApi('GET /internal/observability_onboarding/logs/setup/environment', {
+      params: {
+        query: {
+          /**
+           * This only needed for stateful deployments
+           * of the stack version >=v8.18.0 <9.0.0.
+           * On those clusters we cannot reference agent version
+           * v8.x because those versions are not GA.
+           * Instead we need to "manually" point to the GA
+           * version, which starts from v9.0.0.
+           */
+          agentVersionPattern: '9.x.x',
+        },
+      },
+    });
   }, []);
 
   const {
@@ -81,8 +96,11 @@ export const OtelLogsPanel: React.FC = () => {
   }, [apiKeyData, onPageReady, setup]);
 
   const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
-  const agentVersion =
-    isServerless && setup ? setup.elasticAgentVersionInfo.agentVersion : stackVersion;
+  const agentVersion = selectAgentVersion(
+    isServerless,
+    stackVersion,
+    setup?.elasticAgentVersionInfo
+  );
   const urlEncodedAgentVersion = encodeURIComponent(agentVersion);
 
   const allDatasetsLocator =
@@ -382,4 +400,20 @@ function CopyableCodeBlock({ content }: { content: string }) {
       </EuiCopy>
     </>
   );
+}
+
+function selectAgentVersion(
+  isServerless: boolean,
+  stackVersion: string,
+  agentVersionInfo?: ElasticAgentVersionInfo
+): string {
+  if (!agentVersionInfo) {
+    return stackVersion;
+  }
+
+  if (isServerless) {
+    return agentVersionInfo.agentVersion;
+  }
+
+  return agentVersionInfo.agentTargetVersion ?? stackVersion;
 }
