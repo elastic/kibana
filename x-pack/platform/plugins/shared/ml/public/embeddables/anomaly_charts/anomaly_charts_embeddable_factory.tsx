@@ -69,7 +69,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
       function serializeState() {
         return {
           rawState: {
-            timeRange: undefined,
             ...titleManager.getLatestState(),
             ...timeRangeManager.getLatestState(),
             ...chartsManager.getLatestState(),

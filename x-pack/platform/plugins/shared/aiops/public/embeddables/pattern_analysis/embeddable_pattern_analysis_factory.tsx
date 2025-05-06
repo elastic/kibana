@@ -85,7 +85,6 @@ export const getPatternAnalysisEmbeddableFactory = (
         const dataViewId = patternAnalysisControlsApi.dataViewId.getValue();
         return {
           rawState: {
-            timeRange: undefined,
             ...titleManager.getLatestState(),
             ...timeRangeManager.getLatestState(),
             ...serializePatternAnalysisChartState(),

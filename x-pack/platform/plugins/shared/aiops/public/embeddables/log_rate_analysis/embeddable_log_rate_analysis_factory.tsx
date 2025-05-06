@@ -88,7 +88,6 @@ export const getLogRateAnalysisEmbeddableFactory = (
         const dataViewId = logRateAnalysisControlsApi.dataViewId.getValue();
         return {
           rawState: {
-            timeRange: undefined,
             ...titleManager.getLatestState(),
             ...timeRangeManager.getLatestState(),
             ...serializeLogRateAnalysisChartState(),

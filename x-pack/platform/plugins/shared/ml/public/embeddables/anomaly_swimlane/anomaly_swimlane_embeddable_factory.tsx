@@ -137,7 +137,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       function serializeState() {
         return {
           rawState: {
-            timeRange: undefined,
             ...titleManager.getLatestState(),
             ...timeRangeManager.getLatestState(),
             ...swimlaneManager.getLatestState(),
