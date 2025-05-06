@@ -100,7 +100,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private key: string;
   private openAI: OpenAI;
   private headers: Record<string, string>;
-  private configAny: any;
+  private configAny: Config & {
+    certificateFile?: string | string[];
+    certificateData?: string;
+    privateKeyFile?: string | string[];
+    privateKeyData?: string;
+    verificationMode?: 'full' | 'certificate' | 'none';
+  };
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -120,7 +126,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     };
 
     // Assign configAny for dynamic property access
-    this.configAny = this.config as any;
+    this.configAny = this.config as Config & {
+      certificateFile?: string | string[];
+      certificateData?: string;
+      privateKeyFile?: string | string[];
+      privateKeyData?: string;
+      verificationMode?: 'full' | 'certificate' | 'none';
+    };
     this.logger.debug(
       `Provider: ${this.provider}, certificateFile: ${this.configAny.certificateFile}, certificateData: ${this.configAny.certificateData}, privateKeyFile: ${this.configAny.privateKeyFile}, privateKeyData: ${this.configAny.privateKeyData}`
     );

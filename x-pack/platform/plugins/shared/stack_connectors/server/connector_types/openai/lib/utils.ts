@@ -91,7 +91,13 @@ export const getAxiosOptions = (
   config?: Config
 ): { headers: Record<string, string>; httpsAgent?: https.Agent; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
-  const configAny = config as any;
+  const configAny = config as Config & {
+    certificateFile?: string | string[];
+    certificateData?: string;
+    privateKeyFile?: string | string[];
+    privateKeyData?: string;
+    verificationMode?: 'full' | 'certificate' | 'none';
+  };
 
   switch (provider) {
     case OpenAiProviderType.OpenAi:
