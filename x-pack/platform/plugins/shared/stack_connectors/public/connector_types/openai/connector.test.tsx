@@ -397,4 +397,80 @@ describe('ConnectorFields renders', () => {
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
   });
+
+  describe('PKI Configuration', () => {
+    const pkiConnector = {
+      ...otherOpenAiConnector,
+      config: {
+        ...otherOpenAiConnector.config,
+        certificateFile: '/path/to/cert.pem',
+        privateKeyFile: '/path/to/key.pem',
+        verificationMode: 'full',
+      },
+    };
+
+    it('renders PKI configuration fields for Other provider', async () => {
+      const { getAllByTestId } = render(
+        <ConnectorFormTestProvider connector={pkiConnector}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      expect(getAllByTestId('config.certificateFile-input')[0]).toBeInTheDocument();
+      expect(getAllByTestId('config.privateKeyFile-input')[0]).toBeInTheDocument();
+      expect(getAllByTestId('config.verificationMode-select')[0]).toBeInTheDocument();
+    });
+
+    it('does not render PKI fields for non-Other providers', async () => {
+      const { queryByTestId } = render(
+        <ConnectorFormTestProvider connector={openAiConnector}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      expect(queryByTestId('config.certificateFile-input')).not.toBeInTheDocument();
+      expect(queryByTestId('config.privateKeyFile-input')).not.toBeInTheDocument();
+      expect(queryByTestId('config.verificationMode-select')).not.toBeInTheDocument();
+    });
+
+    it('validates PKI configuration fields', async () => {
+      const onSubmit = jest.fn();
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      // Clear required fields
+      await userEvent.clear(getByTestId('config.certificateFile-input'));
+      await userEvent.clear(getByTestId('config.privateKeyFile-input'));
+
+      await userEvent.click(getByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {},
+          isValid: false,
+        });
+      });
+    });
+
+    it('submits form with valid PKI configuration', async () => {
+      const onSubmit = jest.fn();
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(getByTestId('form-test-provide-submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: pkiConnector,
+          isValid: true,
+        });
+      });
+    });
+  });
 });

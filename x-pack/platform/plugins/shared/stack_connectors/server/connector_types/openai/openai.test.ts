@@ -1223,6 +1223,100 @@ describe('OpenAIConnector', () => {
         );
       });
     });
+
+    describe('PKI Configuration', () => {
+      const connector = new OpenAIConnector({
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        config: {
+          apiUrl: 'https://localhost:1234/v1/chat/completions',
+          apiProvider: OpenAiProviderType.Other,
+          defaultModel: DEFAULT_OTHER_OPENAI_MODEL,
+          certificateFile: '/path/to/cert.pem',
+          privateKeyFile: '/path/to/key.pem',
+          verificationMode: 'full',
+        },
+        secrets: { apiKey: '123' },
+        logger,
+        services: actionsMock.createServices(),
+      });
+
+      beforeEach(() => {
+        // @ts-ignore
+        connector.request = mockRequest;
+        jest.clearAllMocks();
+      });
+
+      it('initializes with PKI configuration', () => {
+        expect(connector).toBeDefined();
+        // @ts-ignore
+        expect(connector.configAny.certificateFile).toBe('/path/to/cert.pem');
+        // @ts-ignore
+        expect(connector.configAny.privateKeyFile).toBe('/path/to/key.pem');
+        // @ts-ignore
+        expect(connector.configAny.verificationMode).toBe('full');
+      });
+
+      it('handles PKI certificate validation errors', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+        // @ts-ignore
+        connector.configAny.certificateFile = undefined;
+        // @ts-ignore
+        connector.configAny.certificateData = undefined;
+
+        await expect(
+          connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
+        ).rejects.toThrow('Either certificate file or certificate data must be provided for PKI');
+      });
+
+      it('handles PKI private key validation errors', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+        // @ts-ignore
+        connector.configAny.privateKeyFile = undefined;
+        // @ts-ignore
+        connector.configAny.privateKeyData = undefined;
+
+        await expect(
+          connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
+        ).rejects.toThrow('Either private key file or private key data must be provided for PKI');
+      });
+
+      it('handles invalid certificate format', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+        // @ts-ignore
+        connector.configAny.certificateData = 'invalid-certificate-data';
+
+        await expect(
+          connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
+        ).rejects.toThrow('Invalid certificate format: Must be PEM-encoded');
+      });
+
+      it('handles invalid private key format', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+        // @ts-ignore
+        connector.configAny.privateKeyData = 'invalid-key-data';
+
+        await expect(
+          connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
+        ).rejects.toThrow('Invalid private key format: Must be PEM-encoded');
+      });
+
+      it('handles certificate verification errors', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+        const error = new Error('UNABLE_TO_VERIFY_LEAF_SIGNATURE') as Error & { code?: string };
+        error.code = 'UNABLE_TO_VERIFY_LEAF_SIGNATURE';
+        mockError.mockRejectedValueOnce(error);
+
+        await expect(
+          connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
+        ).rejects.toThrow('Certificate error: UNABLE_TO_VERIFY_LEAF_SIGNATURE');
+      });
+    });
   });
 
   describe('AzureAI', () => {
