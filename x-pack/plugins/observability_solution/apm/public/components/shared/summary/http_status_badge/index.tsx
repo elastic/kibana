@@ -29,4 +29,3 @@ export function HttpStatusBadge({ status }: HttpStatusBadgeProps) {
     </EuiToolTip>
   );
 }
-
