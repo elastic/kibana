@@ -28,6 +28,7 @@ import type {
 import { DEFAULT_MAX_ALERTS } from '../config';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { MaintenanceWindowsService } from '../task_runner/maintenance_windows';
+import type { MaintenanceWindow } from '../application/maintenance_window/types';
 import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { determineFlappingAlerts } from '../lib/flapping/determine_flapping_alerts';
 import { determineDelayedAlerts } from '../lib/determine_delayed_alerts';
@@ -159,13 +160,19 @@ export class LegacyAlertsClient<
         keys(processedAlertsActive).length > 0 ||
         keys(processedAlertsRecovered).length > 0
       ) {
-        const { maintenanceWindowsWithoutScopedQueryIds } =
+        const { maintenanceWindowsWithoutScopedQueryIds, maintenanceWindows } =
           await this.options.maintenanceWindowsService.getMaintenanceWindows({
             eventLogger: this.options.alertingEventLogger,
             request: this.options.request,
             ruleTypeCategory: this.options.ruleType.category,
             spaceId: this.options.spaceId,
           });
+
+        this.removeExpiredMaintenanceWindows({
+          processedAlertsActive,
+          processedAlertsRecovered,
+          maintenanceWindows,
+        });
 
         for (const id in processedAlertsNew) {
           if (Object.hasOwn(processedAlertsNew, id)) {
@@ -283,5 +290,33 @@ export class LegacyAlertsClient<
   }
   public getTrackedExecutions() {
     return new Set([]);
+  }
+
+  private removeExpiredMaintenanceWindows({
+    processedAlertsActive,
+    processedAlertsRecovered,
+    maintenanceWindows,
+  }: {
+    processedAlertsActive: Record<string, Alert<State, Context, ActionGroupIds>>;
+    processedAlertsRecovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
+    maintenanceWindows: MaintenanceWindow[];
+  }) {
+    const maintenanceWindowIds = maintenanceWindows.map((mw) => mw.id);
+
+    const clearMws = (
+      alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
+    ) => {
+      for (const id in alerts) {
+        if (Object.hasOwn(alerts, id)) {
+          const existingMaintenanceWindowIds = alerts[id].getMaintenanceWindowIds();
+          const activeMaintenanceWindowIds = existingMaintenanceWindowIds.filter((mw) => {
+            return maintenanceWindowIds.includes(mw);
+          });
+          alerts[id].setMaintenanceWindowIds(activeMaintenanceWindowIds);
+        }
+      }
+    };
+    clearMws(processedAlertsActive);
+    clearMws(processedAlertsRecovered);
   }
 }
