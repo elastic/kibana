@@ -417,6 +417,31 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.BulkDeleteResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "BulkDeleteResponse",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/slo-schema",
+            "id": "def-common.BulkDeleteResponse.taskId",
+            "type": "string",
+            "tags": [],
+            "label": "taskId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/bulk_delete.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.BulkDeleteResult",
         "type": "Interface",
         "tags": [],
