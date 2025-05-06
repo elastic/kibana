@@ -2313,17 +2313,7 @@
     "@elastic/search-ui" "^1.23.1"
     "@searchkit/sdk" "^3.0.0"
 
-"@elastic/search-ui@^1.23.0":
-  version "1.23.0"
-  resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.23.0.tgz#0859d86d1f5051d12a634a5c0044579d03192336"
-  integrity sha512-JdQLeFkeQhSrGxhRkbRaJRHs+C7kgm3LAQSpByIudSUEvzUeitSsZVq6rdtHoXNaP/3NpgqujkUukqF3K92NLQ==
-  dependencies:
-    date-fns "^1.30.1"
-    deep-equal "^1.0.1"
-    history "^4.9.0"
-    qs "^6.9.7"
-
-"@elastic/search-ui@^1.23.1":
+"@elastic/search-ui@^1.23.0", "@elastic/search-ui@^1.23.1":
   version "1.23.1"
   resolved "https://registry.yarnpkg.com/@elastic/search-ui/-/search-ui-1.23.1.tgz#50881faa930c4eff6d3c446d187fad2bd00b441c"
   integrity sha512-NyM/We+MSoevN7NeVIaFMuqYpEsf62bhH0ic/tng45fAZFm8DI3wzrYu+h9YQheoohzGce+Ho0k666qroKaCHg==
