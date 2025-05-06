@@ -46,7 +46,8 @@ describe('Component templates API', () => {
     };
     it('updates a component template with data_stream_options successfully', async () => {
       (
-        router.contextMock.core.elasticsearch.client.asCurrentUser.transport.request as jest.Mock
+        router.contextMock.core.elasticsearch.client.asCurrentUser.transport
+          .request as unknown as jest.Mock
       ).mockResolvedValue({
         index_templates: [
           {
@@ -99,7 +100,8 @@ describe('Component templates API', () => {
     });
     it('updates a component template without data_stream_options successfully', async () => {
       (
-        router.contextMock.core.elasticsearch.client.asCurrentUser.transport.request as jest.Mock
+        router.contextMock.core.elasticsearch.client.asCurrentUser.transport
+          .request as unknown as jest.Mock
       ).mockResolvedValue({
         index_templates: [
           {
