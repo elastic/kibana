@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -14,12 +14,10 @@ import {
   EuiPanel,
   EuiFlexItem,
   EuiLink,
-  EuiBadge,
 } from '@elastic/eui';
 import {
   GroupStreamGetResponse,
   IngestStreamGetResponse,
-  isGroupStreamDefinition,
   isGroupStreamGetResponse,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -34,6 +32,7 @@ import { RedirectTo } from '../redirect_to';
 import { QuickLinks } from '../stream_detail_overview/quick_links';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
+import { StreamsGraph } from '../streams_graph';
 
 const getStreamDetailTabs = ({
   definition,
@@ -199,7 +198,6 @@ const GroupStreamDetailView = () => {
         streams: { streamsRepositoryClient },
       },
     },
-    core,
   } = useKibana();
 
   const streamsListFetch = useStreamsAppFetch(
@@ -212,17 +210,6 @@ const GroupStreamDetailView = () => {
     [streamsRepositoryClient]
   );
 
-  const groupStreamToCategoryMap = useMemo(() => {
-    const map = new Map<string, string>();
-    streamsListFetch.value?.forEach((s) => {
-      if (isGroupStreamDefinition(s.stream)) {
-        map.set(s.stream.name, s.stream.group.category);
-      }
-    });
-    return map;
-  }, [streamsListFetch.value]);
-
-  const router = useStreamsAppRouter();
   const renderLinks = (links: string[]) =>
     links.length
       ? links
@@ -261,51 +248,7 @@ const GroupStreamDetailView = () => {
               <EuiPanel hasShadow={false} hasBorder>
                 <EuiText>Related Streams:</EuiText>
                 <EuiFlexGroup direction="column" gutterSize="m">
-                  {stream.group.relationships.map((relationship) => (
-                    <EuiFlexItem key={relationship.name}>
-                      <EuiText size="s">
-                        <EuiLink
-                          data-test-subj="streamsAppStreamNodeLink"
-                          href={router.link('/{key}', { path: { key: relationship.name } })}
-                        >
-                          {relationship.name}{' '}
-                          {groupStreamToCategoryMap.get(relationship.name) && (
-                            <EuiBadge color="hollow">
-                              {groupStreamToCategoryMap.get(relationship.name)}
-                            </EuiBadge>
-                          )}
-                        </EuiLink>
-                      </EuiText>
-                    </EuiFlexItem>
-                  ))}
-                  {streamsListFetch.value
-                    ?.filter((s) => {
-                      if (!isGroupStreamDefinition(s.stream)) {
-                        return false;
-                      }
-                      return s.stream.group.relationships.some((relationship) => {
-                        return relationship.name === stream.name;
-                      });
-                    })
-                    .map((s) => {
-                      const groupStream = s.stream;
-                      if (!isGroupStreamDefinition(groupStream)) {
-                        return null;
-                      }
-                      return (
-                        <EuiFlexItem key={s.stream.name}>
-                          <EuiText size="s">
-                            <EuiLink
-                              data-test-subj="streamsAppStreamNodeLink"
-                              href={router.link('/{key}', { path: { key: s.stream.name } })}
-                            >
-                              {s.stream.name}{' '}
-                              <EuiBadge color="hollow">{groupStream.group.category}</EuiBadge>
-                            </EuiLink>
-                          </EuiText>
-                        </EuiFlexItem>
-                      );
-                    })}
+                  <StreamsGraph streams={streamsListFetch.value} currentStream={stream} />
                 </EuiFlexGroup>
               </EuiPanel>
             </EuiFlexItem>
