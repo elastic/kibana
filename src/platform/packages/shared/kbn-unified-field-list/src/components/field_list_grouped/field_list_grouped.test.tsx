@@ -10,7 +10,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiText, EuiLoadingSpinner, EuiThemeProvider } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ReactWrapper } from 'enzyme';
@@ -76,6 +76,9 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     hookParams: Omit<GroupedFieldsParams<DataViewField>, 'services'>;
   }
 
+  const mountComponent = async (component: React.ReactElement) =>
+    await mountWithIntl(<EuiThemeProvider>{component}</EuiThemeProvider>);
+
   async function mountGroupedList({ listProps, hookParams }: WrapperProps): Promise<ReactWrapper> {
     const Wrapper: React.FC<WrapperProps> = (props) => {
       const {
@@ -87,10 +90,10 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
       });
 
       return (
-        <>
+        <EuiThemeProvider>
           <FieldListFilters {...fieldListFiltersProps} />
           <FieldListGrouped {...props.listProps} fieldGroups={fieldGroups} />
-        </>
+        </EuiThemeProvider>
       );
     };
 
@@ -105,8 +108,8 @@ describe('UnifiedFieldList FieldListGrouped + useGroupedFields()', () => {
     return wrapper!;
   }
 
-  it('renders correctly in empty state', () => {
-    const wrapper = mountWithIntl(
+  it('renders correctly in empty state', async () => {
+    const wrapper = await mountComponent(
       <FieldListGrouped
         {...defaultProps}
         fieldGroups={{}}
