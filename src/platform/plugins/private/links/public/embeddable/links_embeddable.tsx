@@ -209,7 +209,7 @@ export const getLinksEmbeddableFactory = () => {
           return id;
         },
         getSerializedStateByValue: serializeByValue,
-        getSerializedStateByReference: (newId: string) => serializeByReference(newId),
+        getSerializedStateByReference: serializeByReference,
         canLinkToLibrary: async () => !isByReference,
         canUnlinkFromLibrary: async () => isByReference,
         checkForDuplicateTitle: async (
