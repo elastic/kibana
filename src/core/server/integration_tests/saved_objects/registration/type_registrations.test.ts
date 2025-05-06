@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-base-server-internal';
 import { createRoot } from '@kbn/core-test-helpers-kbn-server';
 
 // Types should NEVER be removed from this array

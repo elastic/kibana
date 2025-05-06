@@ -12,6 +12,7 @@ import * as Option from 'fp-ts/Option';
 import * as TaskEither from 'fp-ts/TaskEither';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-base-server-internal';
 import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
@@ -58,7 +59,6 @@ import type {
 import { createDelayFn } from './common/utils';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
-import { REMOVED_TYPES } from './core';
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 
