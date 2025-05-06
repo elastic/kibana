@@ -10,19 +10,16 @@ import type { Either } from 'fp-ts/Either';
 import * as E from 'fp-ts/Either';
 
 import { i18n } from '@kbn/i18n';
-import type { UpsertMonitoredUserDocData } from './model';
 
 export const csvToUserDoc: TransformOptions['transform'] = function (
   chunk: string[],
   encoding: string,
-  callback: (error: Error | null, data?: Either<string, UpsertMonitoredUserDocData>) => void
+  callback: (error: Error | null, data?: Either<string, string>) => void
 ) {
   callback(null, parseMonitoredPrivilegedUserCsvRow(chunk));
 };
 
-export const parseMonitoredPrivilegedUserCsvRow = (
-  row: string[]
-): Either<string, UpsertMonitoredUserDocData> => {
+export const parseMonitoredPrivilegedUserCsvRow = (row: string[]): Either<string, string> => {
   if (row.length !== 1) {
     return E.left(expectedColumnsError(row.length));
   }
@@ -32,13 +29,7 @@ export const parseMonitoredPrivilegedUserCsvRow = (
     return E.left(missingUserNameError());
   }
 
-  return E.right({
-    user: { name: username },
-    labels: {
-      monitoring: { privileged_users: 'monitored' },
-      sources: ['csv'],
-    },
-  });
+  return E.right(username);
 };
 
 const expectedColumnsError = (rowLength: number) =>

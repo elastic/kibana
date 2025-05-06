@@ -32,7 +32,7 @@ paths:
                 example:
                   errors:
                     - message: "Invalid monitored field"
-                      index: 0
+                      username: "john.doe"
                   stats:
                     successful: 1
                     failed: 1
@@ -57,11 +57,10 @@ components:
       properties:
         message:
           type: string
-        index:
-          type: integer
+        username:
+          type: string
       required:
         - message
-        - index
 
     PrivmonUserCsvUploadStats:
       type: object
