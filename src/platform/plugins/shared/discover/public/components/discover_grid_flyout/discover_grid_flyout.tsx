@@ -88,7 +88,7 @@ export function DiscoverGridFlyout({
     }));
 
     return getDocViewer({ record: actualHit });
-  }, [flyoutCustomization, getDocViewerAccessor, actualHit]);
+  }, [getDocViewerAccessor, actualHit, flyoutCustomization]);
 
   useEffect(() => {
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);

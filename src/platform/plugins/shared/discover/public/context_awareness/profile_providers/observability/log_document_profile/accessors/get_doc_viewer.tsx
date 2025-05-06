@@ -9,13 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
-import React from 'react';
-import type { DocumentProfileProvider } from '../../../../profiles';
+import React, { useEffect, useState } from 'react';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
+import type { LogDocumentProfileProvider } from '../profile';
 
 export const createGetDocViewer =
-  (services: ProfileProviderServices): DocumentProfileProvider['profile']['getDocViewer'] =>
-  (prev) =>
+  (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
+  (prev, { context }) =>
   (params) => {
     const prevDocViewer = prev(params);
 
@@ -34,13 +34,26 @@ export const createGetDocViewer =
             defaultMessage: 'Log overview',
           }),
           order: 0,
-          component: (props) => (
-            <UnifiedDocViewerLogsOverview
-              {...props}
-              renderAIAssistant={logsAIAssistantFeature?.render}
-              renderStreamsField={streamsFeature?.renderStreamsField}
-            />
-          ),
+          component: function LogOverviewTab(props) {
+            const [initialAccordionSection] = useState(() =>
+              context.initialLogOverviewAccordionSection$.getValue()
+            );
+
+            useEffect(() => {
+              context.initialLogOverviewAccordionSection$.next(undefined);
+            }, []);
+
+            return (
+              <UnifiedDocViewerLogsOverview
+                {...props}
+                docViewerAccordionState={
+                  initialAccordionSection ? { [initialAccordionSection]: true } : {}
+                }
+                renderAIAssistant={logsAIAssistantFeature?.render}
+                renderStreamsField={streamsFeature?.renderStreamsField}
+              />
+            );
+          },
         });
 
         return prevDocViewer.docViewsRegistry(registry);

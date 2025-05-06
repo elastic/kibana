@@ -23,6 +23,7 @@ import { LogsOverviewStacktraceSection } from './logs_overview_stacktrace_sectio
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
+  docViewerAccordionState?: Record<string, boolean>;
   renderStreamsField?: (deps: StreamsFeatureRenderDeps) => JSX.Element;
 };
 
@@ -34,6 +35,7 @@ export function LogsOverview({
   onAddColumn,
   onRemoveColumn,
   renderAIAssistant,
+  docViewerAccordionState,
   renderStreamsField,
 }: LogsOverviewProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
@@ -41,6 +43,7 @@ export function LogsOverview({
   const LogsOverviewAIAssistant = renderAIAssistant;
   const stacktraceFields = getStacktraceFields(hit as LogDocument);
   const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
+  const isStacktraceSectionExpanded = docViewerAccordionState?.stacktrace ?? false;
 
   return (
     <FieldActionsProvider
@@ -58,7 +61,13 @@ export function LogsOverview({
         renderStreamsField={renderStreamsField}
       />
       <LogsOverviewDegradedFields rawDoc={hit.raw} />
-      {isStacktraceAvailable && <LogsOverviewStacktraceSection hit={hit} dataView={dataView} />}
+      {isStacktraceAvailable && (
+        <LogsOverviewStacktraceSection
+          hit={hit}
+          dataView={dataView}
+          isExpanded={isStacktraceSectionExpanded}
+        />
+      )}
       {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
     </FieldActionsProvider>
   );
