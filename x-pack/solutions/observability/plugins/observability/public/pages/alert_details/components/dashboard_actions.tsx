@@ -51,7 +51,9 @@ export function DashboardActions({ dashboardId, dashboardTitle }: DashboardActio
   });
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
-  const [dashboardToUnlink, setDashboardToUnlink] = useState<string | undefined>(undefined);
+  const [dashboardToUnlink, setDashboardToUnlink] = useState<{ dashboardId: string } | undefined>(
+    undefined
+  );
   const [isDashboardUnlinking, setIsDashboardUnlinking] = useState(false);
 
   const handleGoToDashboard = async () => {
@@ -63,7 +65,7 @@ export function DashboardActions({ dashboardId, dashboardTitle }: DashboardActio
   };
 
   const handleUnlinkDashboard = async () => {
-    setDashboardToUnlink({ dashboardId, ruleId });
+    setDashboardToUnlink({ dashboardId });
   };
 
   const btn = (

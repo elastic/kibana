@@ -8,15 +8,16 @@
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { updateRule } from '@kbn/response-ops-rule-form';
+import type { Rule } from '@kbn/response-ops-rule-form';
+import { Dashboard } from '@kbn/alerting-types';
 import { useKibana } from '../utils/kibana_react';
-
 export function useUnlinkDashboard(initialData: any) {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
 
-  const unlinkDashboard = useMutation<string, string, { ruleId: string; dashboardId: string }>(
+  const unlinkDashboard = useMutation<Rule, string, { ruleId: string; dashboardId: string }>(
     ['unlinkDashboard'],
     ({ ruleId, dashboardId }) => {
       try {
@@ -28,7 +29,7 @@ export function useUnlinkDashboard(initialData: any) {
             artifacts: {
               ...initialData.artifacts,
               dashboards: initialData.artifacts.dashboards.filter(
-                (dashboard) => dashboard.id !== dashboardId
+                (dashboard: Dashboard) => dashboard.id !== dashboardId
               ),
             },
           },
@@ -50,7 +51,6 @@ export function useUnlinkDashboard(initialData: any) {
         );
       },
       onSuccess: () => {
-        console.log('Unlinked dashboard');
         toasts.addSuccess(
           i18n.translate(
             'xpack.observability.relatedDashboards.unlinkConfirmationModal.successNotification.descriptionText',

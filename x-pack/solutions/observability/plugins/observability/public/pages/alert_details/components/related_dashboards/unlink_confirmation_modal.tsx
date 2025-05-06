@@ -38,8 +38,9 @@ export function UnlinkDashboardConfirmationModal({
       setIsVisible(false);
 
       onDeleting();
-
-      await unlinkDashboard({ ruleId, dashboardId });
+      if (ruleId && dashboardId) {
+        await unlinkDashboard({ ruleId, dashboardId });
+      }
 
       onDeleted();
     }
