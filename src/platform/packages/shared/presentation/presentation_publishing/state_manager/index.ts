@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ComparatorFunction, ComparatorDefinition, StateComparators } from './types';
-export { getInitialValuesFromComparators, runComparators } from './state_comparators';
-export { getUnchangingComparator } from './fallback_comparator';
+export { areComparatorsEqual, diffComparators, runComparator } from './state_comparators';
+export { initializeStateManager } from './state_manager';
+export type { ComparatorFunction, StateComparators, WithAllKeys } from './types';
