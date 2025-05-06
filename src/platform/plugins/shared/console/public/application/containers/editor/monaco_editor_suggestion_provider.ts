@@ -31,9 +31,9 @@ export const getSuggestionProvider = (
       const fullText = model.getValue();
       const cursorOffset = model.getOffsetAt(position);
       const textBeforeCursor = fullText.slice(0, cursorOffset);
-      const isInsideEsqlQuery = isInsideTripleQuotes(textBeforeCursor);
+      const { insideQuery } = isInsideTripleQuotes(textBeforeCursor);
       const lastChar = fullText.at(cursorOffset - 1);
-      if (esqlCallbacks && isInsideEsqlQuery && ESQL_TRIGGER_CHARS.includes(lastChar)) {
+      if (esqlCallbacks && insideQuery && ESQL_TRIGGER_CHARS.includes(lastChar)) {
         const queryStartOffset = textBeforeCursor.lastIndexOf('"""') + 3;
         const esqlSuggestions = await suggest(
           textBeforeCursor.slice(queryStartOffset, cursorOffset),

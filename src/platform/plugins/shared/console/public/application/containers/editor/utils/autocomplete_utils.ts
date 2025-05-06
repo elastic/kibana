@@ -32,6 +32,7 @@ import {
   newLineRegex,
   propertyNameRegex,
   propertyValueRegex,
+  queryRegex,
 } from './constants';
 
 /*
@@ -466,7 +467,8 @@ export const shouldTriggerSuggestions = (lineContent: string): boolean => {
     methodWhitespaceRegex.test(lineContent) ||
     methodWithUrlRegex.test(lineContent) ||
     propertyNameRegex.test(lineContent) ||
-    propertyValueRegex.test(lineContent)
+    propertyValueRegex.test(lineContent) ||
+    queryRegex.test(lineContent)
   );
 };
 
@@ -498,17 +500,21 @@ export const hasUnclosedQuote = (lineContent: string): boolean => {
 };
 
 export const isInsideTripleQuotes = (text: string) => {
-  let insideTripleQuote = false;
+  let insideTripleQuotes = false;
+  let isCurrentTripleQuoteQuery = false;
   let i = 0;
 
   while (i < text.length) {
     if (text.startsWith('"""', i)) {
-      insideTripleQuote = !insideTripleQuote;
+      insideTripleQuotes = !insideTripleQuotes;
+      if (insideTripleQuotes) {
+        isCurrentTripleQuoteQuery = /.*"query"\s*:\s*/.test(text.slice(0, i));
+      }
       i += 3; // Skip the triple quotes
     } else {
       i++;
     }
   }
 
-  return insideTripleQuote;
+  return { insideTripleQuotes, insideQuery: insideTripleQuotes && isCurrentTripleQuoteQuery };
 };

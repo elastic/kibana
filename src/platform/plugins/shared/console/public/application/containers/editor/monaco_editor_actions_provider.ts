@@ -801,7 +801,8 @@ export class MonacoEditorActionsProvider {
           endColumn: position.column,
         });
 
-        if (isInsideTripleQuotes(requestContentBefore)) {
+        const { insideTripleQuotes, insideQuery } = isInsideTripleQuotes(requestContentBefore);
+        if (insideTripleQuotes && !insideQuery) {
           return true;
         }
       }

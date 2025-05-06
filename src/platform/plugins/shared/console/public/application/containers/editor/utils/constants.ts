@@ -60,6 +60,10 @@ export const propertyNameRegex = /^\s*"$/;
  * In this case autocomplete suggestions should be triggered for a property value.
  */
 export const propertyValueRegex = /^\s*"[a-zA-Z0-9_]+"\s*:\s*"?$/;
+/*
+ * This regex matches a triple-quote query string.
+ */
+export const queryRegex = /^\s*"query"\s*:\s*(""")?\s*$/;
 
 /*
  * i18n for autocomplete labels
