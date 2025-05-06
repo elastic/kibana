@@ -10,6 +10,7 @@ import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import {
+  EuiAccordion,
   EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
@@ -976,6 +977,40 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           fields={integrationFields}
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
+
+        {/* Namespace selector */}
+        <EuiSpacer size="s" />
+
+        <EuiAccordion
+          id="advancedOptions"
+          buttonContent={
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.advancedOptionsLabel"
+              defaultMessage="Advanced options"
+            />
+          }
+          paddingSize="m"
+          buttonClassName="advancedOptionsButton" // Add a custom class for styling
+        >
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.csp.fleetIntegration.namespaceLabel"
+                defaultMessage="Namespace"
+              />
+            }
+            isInvalid={!!validationResults?.namespace}
+            error={validationResults?.namespace || null}
+          >
+            <EuiFieldText
+              isInvalid={!!validationResults?.namespace}
+              value={newPolicy.namespace || ''}
+              onChange={(event) => {
+                updatePolicy({ ...newPolicy, namespace: event.target.value });
+              }}
+            />
+          </EuiFormRow>
+        </EuiAccordion>
 
         {shouldRenderAgentlessSelector && (
           <SetupTechnologySelector
