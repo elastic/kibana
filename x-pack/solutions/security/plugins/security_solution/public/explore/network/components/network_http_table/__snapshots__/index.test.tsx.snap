@@ -305,26 +305,30 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="Requests"
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
                   >
-                    Requests
-                  </span>
-                  <span
-                    class="euiTableSortIcon"
-                    data-euiicon-type="sortDown"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="Requests"
+                    >
+                      Requests
+                    </span>
+                    <span
+                      class="euiTableSortIcon"
+                      data-euiicon-type="sortDown"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
           </tr>
         </thead>
