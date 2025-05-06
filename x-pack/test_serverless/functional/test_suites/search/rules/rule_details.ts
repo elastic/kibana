@@ -43,7 +43,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const navigateToConnectors = async () => {
     await svlSearchNavigation.navigateToLandingPage();
-    await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
+    await svlCommonNavigation.sidenav.openSection(
+      'search_project_nav_footer.project_settings_project_nav'
+    );
     await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
     await testSubjects.click('app-card-triggersActionsConnectors');
   };
