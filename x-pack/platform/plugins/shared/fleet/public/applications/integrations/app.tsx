@@ -33,14 +33,14 @@ import { SpaceSettingsContextProvider } from '../../hooks/use_space_settings_con
 
 import { FleetServerFlyout } from '../fleet/components';
 
-import { ErrorLayout, PermissionsError } from '../../layouts/error';
-
 import { AgentPolicyContextProvider, useFlyoutContext } from './hooks';
 import { FLEET_ROUTING_PATHS, INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
+
+import { ErrorLayout, PermissionsError } from '../../layouts/error';
 
 import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
@@ -78,10 +78,8 @@ export const IntegrationsAppContext: React.FC<{
     fleetStatus,
   }) => {
     const XXL_BREAKPOINT = 1600;
-    const isDarkMode = useObservable(
-      startServices.theme.theme$,
-      startServices.theme.getTheme()
-    ).darkMode;
+    const darkModeObservable = useObservable(startServices.theme.theme$);
+    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
 
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
