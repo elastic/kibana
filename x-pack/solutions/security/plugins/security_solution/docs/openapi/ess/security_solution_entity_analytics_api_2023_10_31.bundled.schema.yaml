@@ -342,14 +342,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                is_monitored:
-                  description: Whether the user is actively monitored.
-                  type: boolean
-                user_name:
-                  description: The name of the user.
-                  type: string
+              $ref: '#/components/schemas/UserName'
         required: true
       responses:
         '200':
@@ -477,12 +470,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                is_monitored:
-                  type: boolean
-                user_name:
-                  type: string
+              $ref: '#/components/schemas/MonitoredUserDoc'
         required: true
       responses:
         '200':
@@ -1910,6 +1898,15 @@ components:
       required:
         - user
         - entity
+    UserName:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            name:
+              description: The name of the user.
+              type: string
   securitySchemes:
     BasicAuth:
       scheme: basic
