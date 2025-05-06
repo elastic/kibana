@@ -468,6 +468,29 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       })
   );
 
+  const filteredBarLayers = dataLayers.filter((layer) => layer.seriesType.includes('bar'));
+  const chartHasMoreThanOneBarSeries =
+    filteredBarLayers.length > 1 ||
+    filteredBarLayers.some((layer) => layer.accessors.length > 1 || layer.splitAccessor);
+
+  const isTimeHistogramModeEnabled = dataLayers.some(
+    ({ xAccessor, layerId, seriesType, splitAccessor }) => {
+      if (!xAccessor) {
+        return false;
+      }
+      const xAccessorOp =
+        props.frame.datasourceLayers[layerId]?.getOperationForColumnId(xAccessor) ?? null;
+      return (
+        getScaleType(xAccessorOp, ScaleType.Linear) === ScaleType.Time &&
+        xAccessorOp?.isBucketed &&
+        (seriesType.includes('stacked') || !splitAccessor) &&
+        (seriesType.includes('stacked') ||
+          !seriesType.includes('bar') ||
+          !chartHasMoreThanOneBarSeries)
+      );
+    }
+  );
+
   const hasNumberHistogram = dataLayers.some(({ layerId, xAccessor }) =>
     hasNumericHistogramDimension(props.frame.datasourceLayers[layerId], xAccessor)
   );
@@ -559,6 +582,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             setCurrentTimeMarkerVisibility={onChangeCurrentTimeMarkerVisibility}
             hasBarOrAreaOnAxis={false}
             hasPercentageAxis={false}
+            useMultilayerTimeAxis={isTimeHistogramModeEnabled && !shouldRotate}
             extent={hasNumberHistogram ? state?.xExtent || { mode: 'dataBounds' } : undefined}
             setExtent={setExtentFn('xExtent')}
             dataBounds={xDataBounds}

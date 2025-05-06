@@ -24,8 +24,10 @@ import {
   ToolbarTitleSettings,
   AxisBoundsControl,
   AxisTicksSettings,
+  AxisLabelOrientationSelector,
+  allowedOrientations,
 } from '../../../shared_components';
-import type { AxesSettingsConfigKeys } from '../../../shared_components';
+import type { Orientation, AxesSettingsConfigKeys } from '../../../shared_components';
 import { XYLayerConfig } from '../types';
 
 import { validateExtent } from '../../../shared_components/axis/extent/helpers';
@@ -207,6 +209,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   hasBarOrAreaOnAxis,
   hasPercentageAxis,
   dataBounds,
+  useMultilayerTimeAxis,
   scale,
   setScale,
   setScaleWithExtent,
@@ -276,6 +279,19 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         }}
         isAxisLabelVisible={areTickLabelsVisible}
       />
+      {!useMultilayerTimeAxis && areTickLabelsVisible && (
+        <AxisLabelOrientationSelector
+          axis={axis}
+          selectedLabelOrientation={
+            allowedOrientations.includes(orientation as Orientation)
+              ? (orientation as Orientation)
+              : 0 // Default to 0 if the value is not valid
+          }
+          setLabelOrientation={(newOrientation) => {
+            setOrientation(axis, newOrientation);
+          }}
+        />
+      )}
       {setEndzoneVisibility && (
         <EuiFormRow
           display="columnCompressed"
