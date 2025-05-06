@@ -127,7 +127,7 @@ const DraggablePatternInput = ({
       draggableId={id}
       hasInteractiveChildren
       customDragHandle
-      style={{
+      css={{
         paddingLeft: 0,
         paddingRight: 0,
       }}
