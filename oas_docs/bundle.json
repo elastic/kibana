@@ -1111,6 +1111,19 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blob"
+                          ],
+                          "type": "object"
                         }
                       },
                       "type": "object"
@@ -2210,7 +2223,21 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 10,
                         "type": "array"
+                      },
+                      "investigation_guide": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "blob": {
+                            "maxLength": 1000,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "blob"
+                        ],
+                        "type": "object"
                       }
                     },
                     "type": "object"
@@ -2879,6 +2906,19 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blob"
+                          ],
+                          "type": "object"
                         }
                       },
                       "type": "object"
@@ -3821,7 +3861,21 @@
                           ],
                           "type": "object"
                         },
+                        "maxItems": 10,
                         "type": "array"
+                      },
+                      "investigation_guide": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "blob": {
+                            "maxLength": 1000,
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "blob"
+                        ],
+                        "type": "object"
                       }
                     },
                     "type": "object"
@@ -4221,6 +4275,19 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blob"
+                          ],
+                          "type": "object"
                         }
                       },
                       "type": "object"
@@ -6158,6 +6225,19 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "blob": {
+                              "description": "User-created content that describes alert causes and remdiation.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blob"
+                          ],
+                          "type": "object"
                         }
                       },
                       "type": "object"
@@ -40700,7 +40780,7 @@
                               "type": "object"
                             },
                             {
-                              "additionalProperties": false,
+                              "additionalProperties": true,
                               "properties": {
                                 "additional_datastreams_permissions": {
                                   "description": "Additional datastream permissions, that will be added to the agent policy.",
@@ -40710,9 +40790,33 @@
                                   "nullable": true,
                                   "type": "array"
                                 },
+                                "created_at": {
+                                  "type": "string"
+                                },
+                                "created_by": {
+                                  "type": "string"
+                                },
                                 "description": {
                                   "description": "Package policy description",
                                   "type": "string"
+                                },
+                                "elasticsearch": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "privileges": {
+                                      "additionalProperties": true,
+                                      "properties": {
+                                        "cluster": {
+                                          "items": {
+                                            "type": "string"
+                                          },
+                                          "type": "array"
+                                        }
+                                      },
+                                      "type": "object"
+                                    }
+                                  },
+                                  "type": "object"
                                 },
                                 "enabled": {
                                   "type": "boolean"
@@ -40745,6 +40849,7 @@
                                   "items": {
                                     "additionalProperties": false,
                                     "properties": {
+                                      "compiled_input": {},
                                       "config": {
                                         "additionalProperties": {
                                           "additionalProperties": false,
@@ -40916,7 +41021,8 @@
                                     "required": [
                                       "type",
                                       "enabled",
-                                      "streams"
+                                      "streams",
+                                      "compiled_input"
                                     ],
                                     "type": "object"
                                   },
@@ -41026,11 +41132,35 @@
                                   },
                                   "type": "array"
                                 },
+                                "revision": {
+                                  "type": "number"
+                                },
+                                "secret_references": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
                                 "supports_agentless": {
                                   "default": false,
                                   "description": "Indicates whether the package policy belongs to an agentless agent policy.",
                                   "nullable": true,
                                   "type": "boolean"
+                                },
+                                "updated_at": {
+                                  "type": "string"
+                                },
+                                "updated_by": {
+                                  "type": "string"
                                 },
                                 "vars": {
                                   "additionalProperties": {
@@ -41051,6 +41181,9 @@
                                   },
                                   "description": "Package variable (see integration documentation for more information)",
                                   "type": "object"
+                                },
+                                "version": {
+                                  "type": "string"
                                 }
                               },
                               "required": [
