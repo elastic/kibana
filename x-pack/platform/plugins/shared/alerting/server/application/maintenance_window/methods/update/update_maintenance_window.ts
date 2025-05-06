@@ -17,7 +17,8 @@ import {
   generateMaintenanceWindowEvents,
   shouldRegenerateEvents,
   mergeEvents,
-} from '../../lib/generate_maintenance_window_events';
+  getMaintenanceWindowExpirationDate,
+} from '../../lib';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import {
   transformMaintenanceWindowAttributesToMaintenanceWindow,
@@ -98,15 +99,10 @@ async function updateWithOCC(
       throw Boom.badRequest('Cannot edit archived maintenance windows');
     }
 
-    let expirationDate;
-    if (maintenanceWindow.rRule.interval || maintenanceWindow.rRule.freq) {
-      expirationDate = moment().utc().add(1, 'year').toISOString();
-    } else {
-      expirationDate = moment(maintenanceWindow.rRule.dtstart)
-        .utc()
-        .add(duration, 'ms')
-        .toISOString();
-    }
+    const expirationDate = getMaintenanceWindowExpirationDate({
+      rRule: maintenanceWindow.rRule,
+      duration: maintenanceWindow.duration,
+    });
 
     const modificationMetadata = await getModificationMetadata();
 

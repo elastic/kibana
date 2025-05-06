@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
@@ -22,6 +21,7 @@ import {
 } from '../../transforms';
 import { createMaintenanceWindowSo } from '../../../../data/maintenance_window';
 import { createMaintenanceWindowParamsSchema } from './schemas';
+import { getMaintenanceWindowExpirationDate } from '../../lib';
 
 export async function createMaintenanceWindow(
   context: MaintenanceWindowClientContext,
@@ -65,12 +65,11 @@ export async function createMaintenanceWindow(
   }
 
   const id = SavedObjectsUtils.generateId();
-  let expirationDate;
-  if (rRule.interval || rRule.freq) {
-    expirationDate = moment().utc().add(1, 'year').toISOString();
-  } else {
-    expirationDate = moment(rRule.dtstart).utc().add(duration, 'ms').toISOString();
-  }
+
+  const expirationDate = getMaintenanceWindowExpirationDate({
+    rRule: rRule,
+    duration: duration,
+  });
 
   const modificationMetadata = await getModificationMetadata();
 
