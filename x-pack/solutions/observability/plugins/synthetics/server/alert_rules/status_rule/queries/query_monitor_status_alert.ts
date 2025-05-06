@@ -21,11 +21,17 @@ import { getSearchPingsParams } from './get_search_ping_params';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
+interface ConfigStats {
+  up: number;
+  down: number;
+  pending: number;
+}
 export interface AlertStatusResponse {
   upConfigs: AlertStatusConfigs;
   downConfigs: AlertStatusConfigs;
   pendingConfigs: AlertPendingStatusConfigs;
   enabledMonitorQueryIds: string[];
+  configStats: Record<string, ConfigStats>;
 }
 
 const getPendingConfigs = async ({
@@ -104,6 +110,50 @@ const getPendingConfigs = async ({
   });
 
   return pendingConfigs;
+};
+
+const getConfigStats = ({
+  monitorQueryIds,
+  upConfigs,
+  downConfigs,
+  pendingConfigs,
+}: {
+  monitorQueryIds: string[];
+  upConfigs: AlertStatusConfigs;
+  downConfigs: AlertStatusConfigs;
+  pendingConfigs: AlertPendingStatusConfigs;
+}) => {
+  // Pre-organize configs by monitorId for faster lookup
+  const configsByMonitor = new Map<string, ConfigStats>();
+
+  // Initialize all monitors with zero counts
+  for (const monitorId of monitorQueryIds) {
+    configsByMonitor.set(monitorId, { up: 0, down: 0, pending: 0 });
+  }
+
+  // Count up configs
+  for (const configKey of Object.keys(upConfigs)) {
+    const monitorId = upConfigs[configKey].monitorQueryId;
+    const stats = configsByMonitor.get(monitorId);
+    if (stats) stats.up++;
+  }
+
+  // Count down configs
+  for (const configKey of Object.keys(downConfigs)) {
+    const monitorId = downConfigs[configKey].monitorQueryId;
+    const stats = configsByMonitor.get(monitorId);
+    if (stats) stats.down++;
+  }
+
+  // Count pending configs
+  for (const configKey of Object.keys(pendingConfigs)) {
+    const monitorId = pendingConfigs[configKey].monitorQueryId;
+    const stats = configsByMonitor.get(monitorId);
+    if (stats) stats.pending++;
+  }
+
+  // Convert Map to the expected Record structure
+  return Object.fromEntries(configsByMonitor.entries());
 };
 
 export async function queryMonitorStatusAlert({
@@ -235,10 +285,13 @@ export async function queryMonitorStatusAlert({
     monitorsData,
   });
 
+  const configStats = getConfigStats({ downConfigs, upConfigs, pendingConfigs, monitorQueryIds });
+
   return {
     upConfigs,
     downConfigs,
     pendingConfigs,
     enabledMonitorQueryIds: monitorQueryIds,
+    configStats,
   };
 }

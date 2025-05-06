@@ -10,7 +10,7 @@ import {
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
-import { intersection, isEmpty, uniq } from 'lodash';
+import { intersection, isEmpty } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
@@ -188,7 +188,7 @@ export class StatusRuleExecutor {
       monitorsData,
     });
 
-    const { downConfigs, upConfigs, pendingConfigs } = currentStatus;
+    const { downConfigs, upConfigs, pendingConfigs, configStats } = currentStatus;
 
     this.debug(
       `Found ${Object.keys(downConfigs).length} down configs, ${
@@ -196,15 +196,10 @@ export class StatusRuleExecutor {
       } up configs and ${Object.keys(pendingConfigs).length} pending configs`
     );
 
-    const downConfigsById = getConfigsByIds(downConfigs);
-    const upConfigsById = getConfigsByIds(upConfigs);
-
-    uniq([...downConfigsById.keys(), ...upConfigsById.keys()]).forEach((configId) => {
-      const downCount = downConfigsById.get(configId)?.length ?? 0;
-      const upCount = upConfigsById.get(configId)?.length ?? 0;
+    Object.entries(configStats).forEach(([configId, configStat]) => {
       const name = this.monitors.find((m) => m.id === configId)?.attributes.name ?? configId;
       this.debug(
-        `Monitor: ${name} with id ${configId} has ${downCount} down check and ${upCount} up check`
+        `Monitor: ${name} with id ${configId} has ${configStat.down} down check, ${configStat.up} up check and ${configStat.pending} pending check`
       );
     });
 
