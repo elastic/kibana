@@ -140,7 +140,7 @@
           },
           ") => boolean"
         ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -160,7 +160,7 @@
                 "text": "NodeViewModel"
               }
             ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
