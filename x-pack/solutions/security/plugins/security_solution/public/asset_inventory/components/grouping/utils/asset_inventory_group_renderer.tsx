@@ -106,7 +106,7 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
                     `}
                     title={bucket.entityType?.buckets?.[0]?.key as string}
                   >
-                    {getGroupPanelTitle('entityType')}
+                    {getGroupPanelTitle()}
                   </EuiTextBlockTruncate>
                 </EuiText>
               </EuiFlexItem>
@@ -121,32 +121,13 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {cloudProvider && (
             <EuiFlexItem grow={0}>
-              <CloudProviderIcon cloudProvider={cloudProvider} />
+              <CloudProviderIcon size="xl" cloudProvider={cloudProvider} />
             </EuiFlexItem>
           )}
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
                 <EuiText size="s">{getGroupPanelTitle('accountName')}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    case ASSET_GROUPING_OPTIONS.ENTITY_SOURCE:
-      return nullGroupMessage ? (
-        renderNullGroup(NULL_GROUPING_MESSAGES.SOURCE)
-      ) : (
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <EuiText size="s">{getGroupPanelTitle('source')}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs" color="subdued">
-                  {bucket.source?.buckets?.[0]?.key}
-                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

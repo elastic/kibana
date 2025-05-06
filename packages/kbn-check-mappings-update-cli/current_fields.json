@@ -21,6 +21,9 @@
     "actions.actionTypeId",
     "actions.group",
     "alertTypeId",
+    "artifacts",
+    "artifacts.investigation_guide",
+    "artifacts.investigation_guide.blob",
     "consumer",
     "createdAt",
     "createdBy",
@@ -931,6 +934,9 @@
     "username"
   ],
   "search-telemetry": [],
+  "search_playground": [
+    "name"
+  ],
   "security-ai-prompt": [
     "description",
     "model",

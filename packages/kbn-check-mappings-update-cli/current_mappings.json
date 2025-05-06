@@ -71,6 +71,17 @@
       "alertTypeId": {
         "type": "keyword"
       },
+      "artifacts": {
+        "properties": {
+          "investigation_guide": {
+            "properties": {
+              "blob": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
       "consumer": {
         "type": "keyword"
       },
@@ -3080,6 +3091,19 @@
   "search-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "search_playground": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      }
+    }
   },
   "security-ai-prompt": {
     "dynamic": false,

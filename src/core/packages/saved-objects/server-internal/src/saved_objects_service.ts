@@ -45,6 +45,7 @@ import {
   type IKibanaMigrator,
   DEFAULT_INDEX_TYPES_MAP,
   HASH_TO_VERSION_MAP,
+  REMOVED_TYPES,
 } from '@kbn/core-saved-objects-base-server-internal';
 import {
   SavedObjectsClient,
@@ -124,7 +125,7 @@ export class SavedObjectsService
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
-  private typeRegistry = new SavedObjectTypeRegistry();
+  private typeRegistry = new SavedObjectTypeRegistry({ legacyTypes: REMOVED_TYPES });
   private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
