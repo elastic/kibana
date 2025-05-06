@@ -18,6 +18,7 @@ export const existingDashboardFileNames = new Set([
   'classic_apm-edot-dotnet',
   'otel_native-edot-python',
   'otel_native-edot-nodejs',
+  'otel_native-edot-golang',
 ]);
 
 // The new dashboard files should be mapped here
