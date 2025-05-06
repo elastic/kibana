@@ -136,6 +136,7 @@ export const serializeState = ({
     rawState: {
       ...serializeTitles(),
       ...serializeTimeRange(),
+      ...serializeDynamicActions?.(),
       ...(state as unknown as SavedSearchAttributes),
     },
     references,
