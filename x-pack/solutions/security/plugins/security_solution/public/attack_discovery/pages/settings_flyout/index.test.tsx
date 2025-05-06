@@ -29,10 +29,12 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const defaultProps = {
+  connectorId: undefined,
   end: undefined,
   filters: undefined,
   localStorageAttackDiscoveryMaxAlerts: undefined,
   onClose: jest.fn(),
+  onConnectorIdSelected: jest.fn(),
   query: undefined,
   setEnd: jest.fn(),
   setFilters: jest.fn(),
@@ -40,9 +42,11 @@ const defaultProps = {
   setQuery: jest.fn(),
   setStart: jest.fn(),
   start: undefined,
+  stats: null,
 };
 
 const customProps = {
+  connectorId: undefined,
   end: 'now-15m',
   filters: [
     {
@@ -67,6 +71,7 @@ const customProps = {
   ],
   localStorageAttackDiscoveryMaxAlerts: '123',
   onClose: jest.fn(),
+  onConnectorIdSelected: jest.fn(),
   query: { query: 'user.name : "user1" ', language: 'kuery' },
   setEnd: jest.fn(),
   setFilters: jest.fn(),
@@ -74,6 +79,7 @@ const customProps = {
   setQuery: jest.fn(),
   setStart: jest.fn(),
   start: 'now-45m',
+  stats: null,
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;

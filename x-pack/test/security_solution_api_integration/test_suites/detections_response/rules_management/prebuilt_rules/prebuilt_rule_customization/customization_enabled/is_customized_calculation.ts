@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
         const prebuiltRule = findResult.data[0];
-        expect(prebuiltRule).not.toBeNull();
+        expect(prebuiltRule).toBeDefined();
         expect(prebuiltRule.rule_source.is_customized).toEqual(false);
 
         const { body: bulkResult } = await securitySolutionApi
@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
         const prebuiltRule = findResult.data[0];
-        expect(prebuiltRule).not.toBeNull();
+        expect(prebuiltRule).toBeDefined();
         expect(prebuiltRule.rule_source.is_customized).toEqual(false);
 
         const { body: bulkResult } = await securitySolutionApi
@@ -142,7 +142,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
           .expect(200);
         const prebuiltRule = findResult.data[0];
-        expect(prebuiltRule).not.toBeNull();
+        expect(prebuiltRule).toBeDefined();
         expect(prebuiltRule.rule_source.is_customized).toEqual(false);
 
         // Add a tag to the rule

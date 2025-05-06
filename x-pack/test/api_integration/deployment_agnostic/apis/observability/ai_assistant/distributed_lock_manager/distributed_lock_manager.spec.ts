@@ -8,22 +8,27 @@
 import expect from '@kbn/expect';
 import { v4 as uuid } from 'uuid';
 import prettyMilliseconds from 'pretty-ms';
-import {
-  LockId,
-  ensureTemplatesAndIndexCreated,
-  LockManager,
-  LockDocument,
-  LOCKS_CONCRETE_INDEX_NAME,
-  createLocksWriteIndex,
-  withLock,
-} from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_client';
 import nock from 'nock';
 import { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
+import {
+  LockId,
+  LockManager,
+  LockDocument,
+  withLock,
+  runSetupIndexAssetEveryTime,
+} from '@kbn/lock-manager/src/lock_manager_client';
+import {
+  LOCKS_COMPONENT_TEMPLATE_NAME,
+  LOCKS_CONCRETE_INDEX_NAME,
+  LOCKS_INDEX_TEMPLATE_NAME,
+  setupLockManagerIndex,
+} from '@kbn/lock-manager/src/setup_lock_manager_index';
+
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { getLoggerMock } from '../utils/logger';
+import { getLoggerMock } from '../utils/kibana_mocks';
 import { dateAsTimestamp, durationAsMs, sleep } from '../utils/time';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -32,11 +37,23 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const logger = getLoggerMock(log);
 
   describe('LockManager', function () {
+    // see details: https://github.com/elastic/kibana/issues/219091
+    this.tags(['failsOnMKI']);
+    before(async () => {
+      // delete existing index mappings to ensure we start from a clean state
+      await deleteLockIndexAssets(es, log);
+
+      // ensure that the index and templates are created
+      runSetupIndexAssetEveryTime();
+    });
+
+    after(async () => {
+      await deleteLockIndexAssets(es, log);
+    });
+
     describe('Manual locking API', function () {
       this.tags(['failsOnMKI']);
       before(async () => {
-        await ensureTemplatesAndIndexCreated(es);
-        await createLocksWriteIndex(es);
         await clearAllLocks(es, log);
       });
 
@@ -439,8 +456,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('withLock API', function () {
       this.tags(['failsOnMKI']);
       before(async () => {
-        await ensureTemplatesAndIndexCreated(es);
-        await createLocksWriteIndex(es);
         await clearAllLocks(es, log);
       });
 
@@ -642,7 +657,123 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
     });
+
+    describe('index assets', () => {
+      describe('when lock index is created with incorrect mappings', () => {
+        before(async () => {
+          await deleteLockIndexAssets(es, log);
+          await es.index({
+            refresh: true,
+            index: LOCKS_CONCRETE_INDEX_NAME,
+            id: 'my_lock_with_incorrect_mappings',
+            document: {
+              token: 'my token',
+              expiresAt: new Date(Date.now() + 100000),
+              createdAt: new Date(),
+              metadata: { foo: 'bar' },
+            },
+          });
+        });
+
+        it('should delete the index and re-create it', async () => {
+          const mappingsBefore = await getMappings(es);
+          log.debug(`Mappings before: ${JSON.stringify(mappingsBefore)}`);
+          expect(mappingsBefore.properties?.token.type).to.eql('text');
+
+          // Simulate a scenario where the index mappings are incorrect and a lock is added
+          // it should delete the index and re-create it with the correct mappings
+          await withLock({ esClient: es, lockId: uuid(), logger }, async () => {});
+
+          const mappingsAfter = await getMappings(es);
+          log.debug(`Mappings after: ${JSON.stringify(mappingsAfter)}`);
+          expect(mappingsAfter.properties?.token.type).to.be('keyword');
+        });
+      });
+
+      describe('when lock index is created with correct mappings', () => {
+        before(async () => {
+          await withLock({ esClient: es, lockId: uuid(), logger }, async () => {});
+
+          // wait for the index to be created
+          await es.indices.refresh({ index: LOCKS_CONCRETE_INDEX_NAME });
+        });
+
+        it('should have the correct mappings for the lock index', async () => {
+          const mappings = await getMappings(es);
+
+          const expectedMapping = {
+            dynamic: 'false',
+            properties: {
+              token: { type: 'keyword' },
+              expiresAt: { type: 'date' },
+              createdAt: { type: 'date' },
+              metadata: { enabled: false, type: 'object' },
+            },
+          };
+
+          expect(mappings).to.eql(expectedMapping);
+        });
+
+        it('has the right number_of_replicas', async () => {
+          const settings = await getSettings(es);
+          expect(settings?.index?.auto_expand_replicas).to.eql('0-1');
+        });
+
+        it('does not delete the index when adding a new lock', async () => {
+          const settingsBefore = await getSettings(es);
+
+          await withLock({ esClient: es, lockId: uuid(), logger }, async () => {});
+
+          const settingsAfter = await getSettings(es);
+          expect(settingsAfter?.uuid).to.be(settingsBefore?.uuid);
+        });
+      });
+
+      describe('when setting up index assets', () => {
+        beforeEach(async () => {
+          await deleteLockIndexAssets(es, log);
+        });
+
+        it('can run in parallel', async () => {
+          try {
+            await Promise.all([
+              setupLockManagerIndex(es, logger),
+              setupLockManagerIndex(es, logger),
+              setupLockManagerIndex(es, logger),
+            ]);
+          } catch (error) {
+            expect().fail(`Parallel setup should not throw but got error: ${error.message}`);
+          }
+
+          const indexExists = await es.indices.exists({ index: LOCKS_CONCRETE_INDEX_NAME });
+          expect(indexExists).to.be(true);
+        });
+
+        it('can run in sequence', async () => {
+          try {
+            await setupLockManagerIndex(es, logger);
+            await setupLockManagerIndex(es, logger);
+            await setupLockManagerIndex(es, logger);
+          } catch (error) {
+            expect().fail(`Sequential setup should not throw but got error: ${error.message}`);
+          }
+
+          const indexExists = await es.indices.exists({ index: LOCKS_CONCRETE_INDEX_NAME });
+          expect(indexExists).to.be(true);
+        });
+      });
+    });
   });
+}
+
+async function deleteLockIndexAssets(es: Client, log: ToolingLog) {
+  log.debug(`Deleting index assets`);
+  await es.indices.delete({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [404] });
+  await es.indices.deleteIndexTemplate({ name: LOCKS_INDEX_TEMPLATE_NAME }, { ignore: [404] });
+  await es.cluster.deleteComponentTemplate(
+    { name: LOCKS_COMPONENT_TEMPLATE_NAME },
+    { ignore: [404] }
+  );
 }
 
 function clearAllLocks(es: Client, log: ToolingLog) {
@@ -695,4 +826,16 @@ async function getLockById(esClient: Client, lockId: LockId): Promise<LockDocume
   );
 
   return res._source;
+}
+
+async function getMappings(es: Client) {
+  const res = await es.indices.getMapping({ index: LOCKS_CONCRETE_INDEX_NAME });
+  const { mappings } = res[LOCKS_CONCRETE_INDEX_NAME];
+  return mappings;
+}
+
+async function getSettings(es: Client) {
+  const res = await es.indices.getSettings({ index: LOCKS_CONCRETE_INDEX_NAME });
+  const { settings } = res[LOCKS_CONCRETE_INDEX_NAME];
+  return settings;
 }
