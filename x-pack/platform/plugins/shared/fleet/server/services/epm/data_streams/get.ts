@@ -32,7 +32,7 @@ export async function getDataStreams(options: {
       const isResponseError = err instanceof errors.ResponseError;
       if (isResponseError && err?.body?.error?.type === 'security_exception') {
         throw new FleetUnauthorizedError(
-          `Not enough permissions to query datastreams: ${err.message}`
+          `Unauthorized to query datastreams: ${err.message}`
         );
       }
       throw err;
