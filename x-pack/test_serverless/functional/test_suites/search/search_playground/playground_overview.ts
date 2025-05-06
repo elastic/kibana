@@ -213,10 +213,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('allows running the elasticsearch query', async () => {
           await pageObjects.searchPlayground.PlaygroundQueryPage.openQueryMode();
-          await pageObjects.searchPlayground.PlaygroundQueryPage.setQueryModeQuestion('foo');
+          await pageObjects.searchPlayground.PlaygroundQueryPage.setQueryModeQuestion('hello');
           await pageObjects.searchPlayground.PlaygroundQueryPage.expectCanRunQuery();
           await pageObjects.searchPlayground.PlaygroundQueryPage.expectQueryModeResultsContains(
-            '"hits"'
+            '"took":'
           );
         });
 
