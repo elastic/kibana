@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   // Failing: See https://github.com/elastic/kibana/issues/218820
   describe.skip('retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     const supertest = getService('supertest');
     const USER_PROMPT = 'What is Kibana Lens?';
 

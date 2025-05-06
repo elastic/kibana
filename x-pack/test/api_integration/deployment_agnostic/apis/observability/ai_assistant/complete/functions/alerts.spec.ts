@@ -48,7 +48,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('alerts', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let proxy: LlmProxy;
     let connectorId: string;
     let alertsEvents: MessageAddEvent[];
