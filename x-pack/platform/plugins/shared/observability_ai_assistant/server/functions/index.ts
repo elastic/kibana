@@ -96,6 +96,8 @@ ${
     inferenceClient.listMcpToolsViaHub(),
   ]);
 
+  // console.log('mcpTools', mcpTools);
+
   const isKnowledgeBaseReady = kbState === KnowledgeBaseState.READY;
 
   mcpTools.servers.forEach((server) => {
@@ -107,14 +109,15 @@ ${
           parameters: tool.inputSchema as CompatibleJSONSchema,
         },
         async ({ arguments: args }) => {
-          const result = await inferenceClient.callMCPTool({
+          const result = await inferenceClient.callMcpToolViaHub({
             connectorId: server.connectorId,
+            serverName: server.serverName,
             name: tool.name,
             arguments: args as Record<string, any>,
           });
 
           return {
-            content: result.content.map((part) => part.text).join(''),
+            content: result?.content?.map((part) => part.text).join(''),
           };
         }
       );

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { OpenAPIV3 } from 'openapi-types';
+import type { OpenAPIV3 } from 'openapi-types';
 
 export interface CallToolRequest {
   name: string;
@@ -32,4 +32,17 @@ export interface Tool {
 
 export interface ListToolsResponse {
   tools: Tool[];
+}
+
+export interface CallToolViaHubRequest {
+  serverName: string;
+  name: string;
+  arguments?: Record<string, any>;
+}
+
+export interface ListToolsViaHubResponse {
+  servers: Array<{
+    serverName: string;
+    tools: Tool[];
+  }>;
 }

@@ -14,7 +14,9 @@ import type {
   InferenceListToolsResponse,
   InferenceCallToolRequest,
   InferenceCallToolResponseResolved,
+  InferenceListToolsViaHubResponse,
 } from '@kbn/inference-common';
+import { InferenceCallToolViaHubRequest } from '@kbn/inference-common/src/mcp/tools';
 
 /**
  * An inference client, scoped to a request, that can be used to interact with LLMs.
@@ -50,7 +52,16 @@ export interface InferenceClient {
   /**
    * `listMcpToolsViaHub` returns the available tools from the MCP Hub.
    */
-  listMcpToolsViaHub: () => Promise<InferenceListToolsResponse>;
+  listMcpToolsViaHub: () => Promise<InferenceListToolsViaHubResponse>;
+  /**
+   * `callMcpToolViaHub` executes a MCP tool by sending a request to the
+   * specified MCP Server via the MCP hub.
+   * @param request
+   * @returns
+   */
+  callMcpToolViaHub: (
+    request: InferenceCallToolViaHubRequest
+  ) => Promise<InferenceCallToolResponseResolved>;
 }
 
 /**

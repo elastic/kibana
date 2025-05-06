@@ -11,4 +11,6 @@ export type {
   InferenceCallToolResponse,
   InferenceListToolsResponse,
   InferenceMCPConnector,
+  InferenceListToolsViaHubResponse,
+  InferenceCallToolViaHubRequest,
 } from './tools';

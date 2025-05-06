@@ -76,7 +76,7 @@ const BASIC_AUTH_SECRETS_SCHEMA: SecretsFieldSchema[] = [
 ];
 
 export function HTTPServiceFields({ readOnly, isEdit }: { readOnly: boolean; isEdit: boolean }) {
-  const [{ config, secrets }] = useFormData<ConnectorFormData>();
+  const [{ config }] = useFormData<ConnectorFormData>();
   const authType = config?.service?.authType || MCP_CONNECTOR_AUTH_TYPE_NONE;
 
   const secretsSchema: SecretsFieldSchema[] =

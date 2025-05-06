@@ -9,6 +9,7 @@ import {
   CallToolRequest,
   CallToolResponseResolved,
 } from '@kbn/mcp-connector-common';
+import { CallToolViaHubRequest } from '@kbn/mcp-connector-common/src/client';
 
 export interface InferenceMCPConnector {
   connectorId: string;
@@ -27,3 +28,11 @@ export interface InferenceCallToolResponseResolved extends CallToolResponseResol
 }
 
 export type InferenceCallToolResponse = InferenceCallToolResponseResolved;
+
+export interface InferenceCallToolViaHubRequest extends CallToolViaHubRequest {
+  connectorId: string;
+}
+
+export interface InferenceListToolsViaHubResponse {
+  servers: Array<{ connectorId: string; serverName: string; tools: ListToolsResponse['tools'] }>;
+}

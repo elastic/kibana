@@ -111,6 +111,8 @@ export type {
   InferenceCallToolResponse,
   InferenceListToolsResponse,
   InferenceMCPConnector,
+  InferenceListToolsViaHubResponse,
+  InferenceCallToolViaHubRequest,
 } from './src/mcp';
 
 export { truncateList } from './src/truncate_list';

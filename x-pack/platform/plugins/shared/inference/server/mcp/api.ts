@@ -23,7 +23,12 @@ import {
   MCP_CONNECTOR_SUB_ACTION_TYPE_CALL_TOOL,
   MCP_CONNECTOR_SUB_ACTION_TYPE_LIST_TOOLS,
 } from '@kbn/mcp-connector-common';
-import { MCPListToolsViaHubParams } from '@kbn/mcp-connector-common/src/connector';
+import {
+  MCPCallToolViaHubParams,
+  MCPListToolsViaHubParams,
+} from '@kbn/mcp-connector-common/src/connector';
+import { ListToolsViaHubResponse, Tool } from '@kbn/mcp-connector-common/src/client';
+import { InferenceListToolsViaHubResponse } from '@kbn/inference-common/src/mcp/tools';
 import { InferenceClient } from '../inference_client';
 import { getMCPConnectors } from './get_mcp_connectors';
 
@@ -39,7 +44,7 @@ export function createMCPApis({
   logger,
 }: CreateMCPApiOptions): Pick<
   InferenceClient,
-  'callMCPTool' | 'listMCPTools' | 'listMcpToolsViaHub'
+  'callMCPTool' | 'listMCPTools' | 'listMcpToolsViaHub' | 'callMcpToolViaHub'
 > {
   const getActionsClient = once(() => {
     return actions.getActionsClientWithRequest(request);
@@ -120,7 +125,7 @@ export function createMCPApis({
         }),
       };
     },
-    listMcpToolsViaHub: async (): Promise<InferenceListToolsResponse> => {
+    listMcpToolsViaHub: async (): Promise<InferenceListToolsViaHubResponse> => {
       const [actionsClient, connectors] = await Promise.all([getActionsClient(), getConnectors()]);
 
       const results = await Promise.allSettled(
@@ -134,10 +139,12 @@ export function createMCPApis({
           });
 
           if (result.status === 'ok') {
-            return {
+            const serverToolsResponse = result.data as ListToolsViaHubResponse;
+            return serverToolsResponse.servers.map(({ serverName, tools }) => ({
               connectorId,
-              ...(result.data as ListToolsResponse),
-            };
+              serverName,
+              tools,
+            }));
           } else {
             // Do nothing for now.
             // Connectors created for MCP JSON-RPC will fail
@@ -145,14 +152,53 @@ export function createMCPApis({
         })
       );
 
-      return {
-        servers: results.flatMap((r) => {
-          if (r.status === 'fulfilled' && r.value) {
-            return [r.value];
-          }
-          return [];
-        }),
-      };
+      const successful = results.filter(
+        (
+          r
+        ): r is PromiseFulfilledResult<
+          Array<{ connectorId: string; serverName: string; tools: Tool[] }>
+        > => r.status === 'fulfilled'
+      );
+
+      const servers = successful.flatMap((r) => r.value);
+
+      return { servers };
+    },
+    callMcpToolViaHub: async ({
+      connectorId,
+      serverName,
+      name,
+      arguments: args,
+    }: {
+      connectorId: string;
+      serverName: string;
+      name: string;
+      arguments?: Record<string, unknown>;
+    }): Promise<InferenceCallToolResponse> => {
+      const actionsClient = await getActionsClient();
+
+      const result = await actionsClient.execute({
+        actionId: connectorId,
+        params: {
+          subAction: 'callToolViaHub',
+          subActionParams: { serverName, name, arguments: args },
+        } satisfies MCPCallToolViaHubParams,
+      });
+
+      if (result.status === 'ok') {
+        const response = result.data as CallToolResponse;
+
+        return {
+          connectorId,
+          content: response.content,
+        };
+      }
+
+      throw new InferenceTaskError(
+        InferenceTaskErrorCode.requestError,
+        result.message ?? result.serviceMessage ?? result.errorSource ?? 'Unknown error',
+        {}
+      );
     },
   };
 }

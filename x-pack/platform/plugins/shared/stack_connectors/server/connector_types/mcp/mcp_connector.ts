@@ -26,6 +26,7 @@ import type { OpenAPIV3 } from 'openapi-types';
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { format } from 'node:util';
+import type { ListToolsViaHubResponse } from '@kbn/mcp-connector-common/src/client';
 
 const callToolSchema: Type<CallToolRequest> = schema.object({
   name: schema.string({ minLength: 1 }),
@@ -122,6 +123,7 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
     // REST-via-MCP-Hub sub-action
     this.registerSubAction({ method: 'listToolsViaHub', name: 'listToolsViaHub', schema: null });
+    this.registerSubAction({ method: 'callToolViaHub', name: 'callToolViaHub', schema: null });
   }
 
   public async listTools(): Promise<ListToolsResponse> {
@@ -173,7 +175,7 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     };
   }
 
-  public async listToolsViaHub(): Promise<ListToolsResponse> {
+  public async listToolsViaHub(): Promise<ListToolsViaHubResponse> {
     const serviceConfig = this.config.service as MCPConnectorHTTPServiceConfig;
     const baseUrl = serviceConfig.http.url.replace(/\/+$/, '');
     const headers = this.buildAuthHeaders();
@@ -184,37 +186,79 @@ export class MCPConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
         `${baseUrl}/api/servers`,
         { headers }
       );
-      const { servers } = serversResponse.data;
 
-      const allTools: Tool[] = [];
+      const serverNames = serversResponse.data.servers.map((s) => s.name);
 
-      for (const { name: serverName } of servers) {
-        try {
-          const infoResponse = await axiosInstance.post(
-            `${baseUrl}/api/servers/info`,
-            { server_name: serverName },
-            { headers }
-          );
+      const servers = await Promise.all(
+        serverNames.map(async (serverName) => {
+          try {
+            const infoRes = await axiosInstance.post<{
+              server: {
+                capabilities: {
+                  tools: Array<{
+                    name: string;
+                    description: string;
+                    inputSchema: OpenAPIV3.NonArraySchemaObject;
+                  }>;
+                };
+              };
+            }>(`${baseUrl}/api/servers/info`, { server_name: serverName }, { headers });
 
-          const toolDefinitions = infoResponse.data.server.capabilities.tools;
+            const toolDefinitions = infoRes.data.server.capabilities.tools;
 
-          for (const tool of toolDefinitions) {
-            allTools.push({
+            const tools: Tool[] = toolDefinitions.map((tool) => ({
               name: tool.name,
               description: tool.description,
               inputSchema: tool.inputSchema as OpenAPIV3.NonArraySchemaObject,
-            });
-          }
-        } catch (err) {
-          this.logger.error(
-            `Failed to fetch tools for server "${serverName}": ${(err as AxiosError).message}`
-          );
-        }
-      }
+            }));
 
-      return { tools: allTools };
+            return { serverName, tools };
+          } catch (err) {
+            this.logger.error(
+              `Failed fetching tools for server "${serverName}": ${(err as AxiosError).message}`
+            );
+            return null;
+          }
+        })
+      );
+
+      return {
+        servers: servers.filter((s): s is { serverName: string; tools: Tool[] } => s !== null),
+      };
     } catch (err) {
       throw new Error(`Failed to list Hub servers: ${(err as AxiosError).message}`);
+    }
+  }
+
+  public async callToolViaHub({
+    serverName,
+    name,
+    arguments: args,
+  }: {
+    serverName: string;
+    name: string;
+    arguments?: Record<string, unknown>;
+  }): Promise<CallToolResponse> {
+    const serviceConfig = this.config.service as MCPConnectorHTTPServiceConfig;
+    const base = serviceConfig.http.url.replace(/\/+$/, '');
+    const headers = this.buildAuthHeaders();
+    const axiosInstance: AxiosInstance = axios.create();
+
+    try {
+      const toolExecutionResponse = await axiosInstance.post(
+        `${base}/api/servers/tools`,
+        { server_name: serverName, tool: name, arguments: args ?? {} },
+        { headers }
+      );
+
+      return {
+        content: toolExecutionResponse.data.result.content,
+      };
+    } catch (err) {
+      const msg = (err as AxiosError).message;
+
+      this.logger.error(`callToolViaHub failed for ${serverName}.${name}: ${msg}`);
+      throw new Error(`Failed to call tool via hub: ${msg}`);
     }
   }
 
