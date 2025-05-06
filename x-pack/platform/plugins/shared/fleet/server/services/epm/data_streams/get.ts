@@ -31,9 +31,7 @@ export async function getDataStreams(options: {
     .catch((err) => {
       const isResponseError = err instanceof errors.ResponseError;
       if (isResponseError && err?.body?.error?.type === 'security_exception') {
-        throw new FleetUnauthorizedError(
-          `Unauthorized to query datastreams: ${err.message}`
-        );
+        throw new FleetUnauthorizedError(`Unauthorized to query datastreams: ${err.message}`);
       }
       throw err;
     });
