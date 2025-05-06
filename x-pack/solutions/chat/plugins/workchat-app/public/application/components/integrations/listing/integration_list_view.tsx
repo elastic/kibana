@@ -11,7 +11,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
-import { integrationLabels } from '../i18n';
+import { toolLabels } from '../i18n';
 
 export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
   const { navigateToWorkchatUrl } = useNavigation();
@@ -20,22 +20,22 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
     return [
       {
         id: 'active',
-        label: i18n.translate('workchatApp.integrations.listView.activeTab', {
+        label: i18n.translate('workchatApp.tools.listView.activeTab', {
           defaultMessage: 'Active',
         }),
         isSelected: tab === 'active',
         onClick: () => {
-          navigateToWorkchatUrl(appPaths.integrations.list);
+          navigateToWorkchatUrl(appPaths.tools.list);
         },
       },
       {
         id: 'catalog',
-        label: i18n.translate('workchatApp.integrations.listView.catalogTab', {
+        label: i18n.translate('workchatApp.tools.listView.catalogTab', {
           defaultMessage: 'Catalog',
         }),
         isSelected: tab === 'catalog',
         onClick: () => {
-          navigateToWorkchatUrl(appPaths.integrations.catalog);
+          navigateToWorkchatUrl(appPaths.tools.catalog);
         },
       },
     ];
@@ -43,8 +43,8 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
 
   return (
     <KibanaPageTemplate.Header
-      pageTitle={integrationLabels.breadcrumb.integrationsPill}
-      description={i18n.translate('workchatApp.integrations.listView.description', {
+      pageTitle={toolLabels.breadcrumb.toolsPill}
+      description={i18n.translate('workchatApp.tools.listView.description', {
         defaultMessage:
           'Connect to your tools and data so you can easily find, understand, and act on the information that matters.',
       })}
@@ -52,13 +52,13 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
       rightSideItems={[
         <EuiButton
           onClick={() => {
-            return navigateToWorkchatUrl(appPaths.integrations.create);
+            return navigateToWorkchatUrl(appPaths.tools.create);
           }}
           iconType="plusInCircle"
           color="primary"
           fill
         >
-          {integrationLabels.listView.addIntegrationLabel}
+          {toolLabels.listView.addToolLabel}
         </EuiButton>,
       ]}
     />

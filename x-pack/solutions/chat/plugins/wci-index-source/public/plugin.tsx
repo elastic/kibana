@@ -29,7 +29,7 @@ export class WCIIndexSourcePlugin
     core: CoreSetup<WCIIndexSourcePluginStartDependencies, WCIIndexSourcePluginStart>,
     { workchatApp }: WCIIndexSourcePluginSetupDependencies
   ): WCIIndexSourcePluginSetup {
-    workchatApp.integrations.register(indexSourceIntegrationComponents());
+    workchatApp.tools.register(indexSourceIntegrationComponents());
 
     return {};
   }
