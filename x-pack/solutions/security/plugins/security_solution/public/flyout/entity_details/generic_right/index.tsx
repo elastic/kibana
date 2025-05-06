@@ -138,6 +138,8 @@ export const GenericEntityPanel = ({ entityDocId, scopeId }: GenericEntityPanelP
       <GenericEntityFlyoutContent
         source={source}
         openGenericEntityDetailsPanelByPath={openGenericEntityDetailsPanelByPath}
+        insightsField={EntityIdentifierFields.related}
+        insightsValue={source.entity.id}
       />
     </>
   );

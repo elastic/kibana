@@ -126,6 +126,7 @@ export const buildEntityAlertsQuery = ({
   severity,
   sortField,
   sortDirection,
+  runtimeMappings,
 }: BuildEntityAlertsQueryParams) => {
   return {
     size: size || 0,
@@ -182,6 +183,12 @@ export const buildEntityAlertsQuery = ({
             },
           },
         ].filter(Boolean),
+      },
+    },
+    // TODO: Asset Inventory - remove temp runtime mappings
+    runtime_mappings: {
+      'related.entity': {
+        type: 'keyword',
       },
     },
   };
