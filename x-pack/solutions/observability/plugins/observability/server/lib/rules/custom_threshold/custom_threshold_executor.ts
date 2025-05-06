@@ -17,7 +17,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { getEcsGroups } from '@kbn/alerting-rule-utils';
+import { getEcsGroups, getFormattedGroupBy, getGroupByObject } from '@kbn/alerting-rule-utils';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
@@ -41,9 +41,7 @@ import {
   hasAdditionalContext,
   validGroupByForContext,
   flattenAdditionalContext,
-  getFormattedGroupBy,
   getContextForRecoveredAlerts,
-  getGroupByObject,
 } from './utils';
 
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
@@ -302,7 +300,7 @@ export const createCustomThresholdExecutor = ({
     alertsClient.setAlertLimitReached(hasReachedLimit);
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 
-    let groupingObjectForRecovered: Record<string, object> = {};
+    let groupingObjectForRecovered: Record<string, unknown> = {};
 
     // extracing group by fields from kibana.alert.rule.params,
     // since all recovered alert documents will have same group by fields,
