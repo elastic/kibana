@@ -296,14 +296,10 @@ export function AlertDetails() {
     {
       id: 'investigationguide',
       name: (
-        <>
-          <FormattedMessage
-            id="xpack.observability.alertDetails.tab.investigationGuideLabel"
-            defaultMessage="Investigation Guide"
-          />
-          &nbsp;
-          <BetaBadge size="s" iconType="beta" style={{ verticalAlign: 'middle' }} />
-        </>
+        <FormattedMessage
+          id="xpack.observability.alertDetails.tab.investigationGuideLabel"
+          defaultMessage="Investigation Guide"
+        />
       ),
       'data-test-subj': 'investigationGuideTab',
       disabled: !rule?.artifacts?.investigation_guide?.blob,
