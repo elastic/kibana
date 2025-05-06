@@ -436,6 +436,7 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       docLinks: core.docLinks,
       alertingConfig: this.config,
+      core,
     });
 
     return {
@@ -730,18 +731,6 @@ export class AlertingPlugin {
         areApiKeysEnabled: async () => {
           const [, { security }] = await core.getStartServices();
           return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
-        },
-        hasRequiredPrivilegeGrantedInAllSpaces: async ({
-          requiredPrivilege,
-          spaceIds,
-          request: req,
-        }) => {
-          const [, { security }] = await core.getStartServices();
-          const result = await security?.authz.checkPrivilegesWithRequest(req).atSpaces(spaceIds, {
-            kibana: [security.authz.actions.api.get(`${requiredPrivilege}`)],
-          });
-
-          return result?.hasAllRequested ?? false;
         },
       };
     };

@@ -81,11 +81,6 @@ export interface AlertingApiRequestHandlerContext {
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
-  hasRequiredPrivilegeGrantedInAllSpaces: ({
-    spaceIds,
-    requiredPrivilege,
-    request,
-  }: HasRequiredPrivilegeGrantedInAllSpaces) => Promise<boolean>;
 }
 
 /**

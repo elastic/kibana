@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DocLinksServiceSetup, IRouter } from '@kbn/core/server';
+import type { CoreSetup, DocLinksServiceSetup, IRouter } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
@@ -90,6 +90,8 @@ import { fillGapByIdRoute } from './gaps/apis/fill/fill_gap_by_id_route';
 import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_rule_ids_with_gaps_route';
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
+import type { AlertingPluginsStart } from '../plugin';
+
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
   licenseState: ILicenseState;
@@ -100,6 +102,7 @@ export interface RouteOptions {
   isServerless?: boolean;
   docLinks: DocLinksServiceSetup;
   alertingConfig: AlertingConfig;
+  core: CoreSetup<AlertingPluginsStart, unknown>;
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -111,6 +114,7 @@ export function defineRoutes(opts: RouteOptions) {
     config$,
     getAlertIndicesAlias,
     alertingConfig,
+    core,
   } = opts;
 
   createRuleRoute(opts);
@@ -152,7 +156,7 @@ export function defineRoutes(opts: RouteOptions) {
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
   alertDeletePreviewRoute(router, licenseState);
-  alertDeleteScheduleRoute(router, licenseState);
+  alertDeleteScheduleRoute(router, licenseState, core);
 
   if (alertingConfig.maintenanceWindow.enabled) {
     // Maintenance Window - Internal APIs

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
+import type { CoreSetup, IRouter } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import Boom from '@hapi/boom';
+import type { AlertingPluginsStart } from '../../../../plugin';
+import { hasRequiredPrivilegeGrantedInAllSpaces } from '../../../../lib/has_required_privilege_granted_in_all_spaces';
 import { alertDeleteScheduleQuerySchemaV1 } from '../../../../../common/routes/alert_delete';
 import type { ILicenseState } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
@@ -18,7 +20,8 @@ import { transformRequestToAlertDeleteScheduleV1 } from '../../transforms';
 
 export const alertDeleteScheduleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  core: CoreSetup<AlertingPluginsStart, unknown>
 ) => {
   router.post(
     {
@@ -41,12 +44,13 @@ export const alertDeleteScheduleRoute = (
         const { spaceIds, ...settings } = transformRequestToAlertDeleteScheduleV1(req.body);
 
         if (spaceIds && spaceIds.length > 0) {
-          const hasRequiredPrivilegeGranted =
-            await alertingContext.hasRequiredPrivilegeGrantedInAllSpaces({
-              request: req,
-              spaceIds,
-              requiredPrivilege: API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS,
-            });
+          const [, { security }] = await core.getStartServices();
+          const hasRequiredPrivilegeGranted = await hasRequiredPrivilegeGrantedInAllSpaces({
+            request: req,
+            spaceIds,
+            requiredPrivilege: API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS,
+            authz: security?.authz,
+          });
 
           if (!hasRequiredPrivilegeGranted) {
             throw Boom.forbidden(
