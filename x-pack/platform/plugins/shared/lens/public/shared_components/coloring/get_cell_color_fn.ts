@@ -10,12 +10,14 @@ import {
   PaletteOutput,
   PaletteRegistry,
   getSpecialString,
+  getValueKey,
 } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { KbnPalettes } from '@kbn/palettes';
+import { RawValue } from '@kbn/data-plugin/common';
 import { getColorAccessorFn } from './color_mapping_accessor';
 
-export type CellColorFn = (value?: number | string | null) => string | null;
+export type CellColorFn = (value: RawValue) => string | null;
 
 export function getCellColorFn(
   paletteService: PaletteRegistry,
@@ -41,17 +43,17 @@ export function getCellColorFn(
     if (colorMapping) {
       return getColorAccessorFn(palettes, colorMapping, data, isDarkMode);
     } else if (palette) {
-      return (category) => {
-        if (category === undefined || category === null) return null;
+      return (value: RawValue) => {
+        if (value === undefined || value === null) return null;
 
-        const strCategory = String(category); // can be a number as a string
+        const key = getValueKey(value);
 
         return paletteService.get(palette.name).getCategoricalColor(
           [
             {
-              name: getSpecialString(strCategory), // needed to sync special categories (i.e. '')
+              name: getSpecialString(key), // needed to sync special categories (i.e. '')
               rankAtDepth: Math.max(
-                data.categories.findIndex((v) => v === strCategory),
+                data.categories.findIndex((v) => v === key),
                 0
               ),
               totalSeriesAtDepth: data.categories.length || 1,
