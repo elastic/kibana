@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import { isEmpty, uniq } from 'lodash';
 import { z } from '@kbn/zod';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { isEmpty } from 'lodash';
 
 export interface ProcessingDateSuggestionsParams {
   path: {
@@ -38,15 +38,28 @@ export const handleProcessingDateSuggestions = async ({
   const { dates } = params.body;
 
   try {
-    /* 0. Run structure detection against sample dates */
-    const textStructureResponse =
-      await scopedClusterClient.asCurrentUser.textStructure.findMessageStructure({
-        messages: dates,
-        format: 'semi_structured_text',
-        ecs_compatibility: 'v1',
-      });
+    /**
+     * 1. Run structure detection against sample dates
+     * The `findMessageStructure` API is used to detect the structure of the date strings.
+     * One limitation of this API is that it uses a single detection pattern that matches the first message, so upcoming messages with a much different structure would cause a generic failure.
+     * To work around this, we run the detection against all sample dates individually and collect the unique formats.
+     */
+    const textStructureResponses = await Promise.allSettled(
+      dates.map((date) =>
+        scopedClusterClient.asCurrentUser.textStructure.findMessageStructure({
+          messages: [date],
+          format: 'semi_structured_text',
+          ecs_compatibility: 'v1',
+        })
+      )
+    );
 
-    const formats = textStructureResponse.java_timestamp_formats;
+    const formats = uniq(
+      textStructureResponses
+        .filter(isFulfilled) // Filter out any rejected promises
+        .flatMap((textStructureResponse) => textStructureResponse.value.java_timestamp_formats) // Flatten the array of detected formats
+        .filter((format): format is string => Boolean(format)) // Filter out any undefined values
+    );
 
     if (!formats || isEmpty(formats)) {
       return prepareEmptyResponse();
@@ -61,3 +74,7 @@ export const handleProcessingDateSuggestions = async ({
 const prepareEmptyResponse = () => ({
   formats: [],
 });
+
+function isFulfilled<T>(item: PromiseSettledResult<T>): item is PromiseFulfilledResult<T> {
+  return item.status === 'fulfilled';
+}
