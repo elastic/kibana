@@ -38,11 +38,15 @@ export function getFirstRunAt({
   return nowString;
 }
 
+// This function checks if the rrule has fixed time by checking if it has any fields other than
+// 'freq', 'interval', and 'tzid'. If it does, it means the rrule has fixed time.
+// The first run of a rule that has a fixed time has to be on the expected time,
+// therefore should be calculated using the rrule library, otherwise it can be `now`.
 function rruleHasFixedTime(schedule: RruleSchedule['rrule']): boolean {
   const keys = Object.keys(schedule);
   const baseFields = ['freq', 'interval', 'tzid'];
 
-  if (keys.length === 3 && keys.every((key) => baseFields.includes(key))) {
+  if (keys.length === baseFields.length && keys.every((key) => baseFields.includes(key))) {
     return false;
   }
 
