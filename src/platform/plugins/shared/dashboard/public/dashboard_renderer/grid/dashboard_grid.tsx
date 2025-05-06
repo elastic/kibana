@@ -54,7 +54,7 @@ export const DashboardGrid = ({
     const singleRow: GridLayoutData = {};
 
     Object.keys(layout).forEach((panelId) => {
-      const gridData = panels[panelId].gridData;
+      const gridData = layout[panelId].gridData;
       singleRow[panelId] = {
         id: panelId,
         row: gridData.y,
@@ -70,34 +70,33 @@ export const DashboardGrid = ({
       }
     });
 
-    return singleRow ;
+    return singleRow;
   }, [layout]);
-
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
       if (viewMode !== 'edit') return;
 
       const currentPanels = dashboardInternalApi.layout$.getValue();
-      const updatedPanels: DashboardLayout = Object.values(
-        newLayout[firstRowId.current].panels
-      ).reduce((updatedPanelsAcc, widget) => {
-        if (widget.type === 'section') {
-          return updatedPanelsAcc; // sections currently aren't supported
-        }
-        updatedPanelsAcc[widget.id] = {
-          ...currentPanels[widget.id],
-          gridData: {
-            i: widget.id,
-            y: widget.row,
-            x: widget.column,
-            w: widget.width,
-            h: widget.height,
-          },
-        };
-        return updatedPanelsAcc;
-      }, {} as DashboardLayout);
-
+      const updatedPanels: DashboardLayout = Object.values(newLayout).reduce(
+        (updatedPanelsAcc, widget) => {
+          if (widget.type === 'section') {
+            return updatedPanelsAcc; // sections currently aren't supported
+          }
+          updatedPanelsAcc[widget.id] = {
+            ...currentPanels[widget.id],
+            gridData: {
+              i: widget.id,
+              y: widget.row,
+              x: widget.column,
+              w: widget.width,
+              h: widget.height,
+            },
+          };
+          return updatedPanelsAcc;
+        },
+        {} as DashboardLayout
+      );
       if (!arePanelLayoutsEqual(currentPanels, updatedPanels)) {
         dashboardInternalApi.layout$.next(updatedPanels);
       }
