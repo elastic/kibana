@@ -11,7 +11,7 @@ import {
   type IWaterfallLegend,
   WaterfallLegendType,
 } from './waterfall/waterfall_helpers/waterfall_helpers';
-import { EuiThemeProvider } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 const createLegend = (overrides: Partial<IWaterfallLegend>): IWaterfallLegend => ({
   type: WaterfallLegendType.ServiceName,
@@ -28,7 +28,7 @@ describe('WaterfallLegends', () => {
     ];
 
     const { getByText } = render(
-      <EuiThemeProvider>
+      <EuiThemeProvider darkMode={false}>
         <WaterfallLegends legends={legends} type={WaterfallLegendType.ServiceName} />
       </EuiThemeProvider>
     );
@@ -45,7 +45,7 @@ describe('WaterfallLegends', () => {
     ];
 
     const { getByText } = render(
-      <EuiThemeProvider>
+      <EuiThemeProvider darkMode={false}>
         <WaterfallLegends legends={legends} type={WaterfallLegendType.SpanType} />
       </EuiThemeProvider>
     );
@@ -61,7 +61,7 @@ describe('WaterfallLegends', () => {
     ];
 
     const { queryByText } = render(
-      <EuiThemeProvider>
+      <EuiThemeProvider darkMode={false}>
         <WaterfallLegends legends={legends} type={WaterfallLegendType.ServiceName} />
       </EuiThemeProvider>
     );
@@ -73,7 +73,7 @@ describe('WaterfallLegends', () => {
   it('uses serviceName as a fallback if legend value is empty', () => {
     const legends: IWaterfallLegend[] = [createLegend({ value: '' })];
     const { getByText } = render(
-      <EuiThemeProvider>
+      <EuiThemeProvider darkMode={false}>
         <WaterfallLegends
           legends={legends}
           type={WaterfallLegendType.ServiceName}

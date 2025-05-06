@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import {
   TimelineAxisContainer,
@@ -28,8 +29,8 @@ const Container = styled.div`
   position: relative;
 `;
 
-const WaterfallItemsContainer = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.euiTheme.colors.mediumShade};
+const WaterfallItemsContainer = euiStyled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
 interface Props {
