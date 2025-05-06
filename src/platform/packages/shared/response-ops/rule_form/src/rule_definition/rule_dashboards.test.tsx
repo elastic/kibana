@@ -46,15 +46,6 @@ const { dashboardServiceProvider: mockDashboardServiceProvider } =
 
 describe('RuleDashboards', () => {
   const plugins = {
-    featureFlags: {
-      getBooleanValue: jest.fn(),
-      appendContext: jest.fn(),
-      getStringValue: jest.fn(),
-      getNumberValue: jest.fn(),
-      getBooleanValue$: jest.fn(),
-      getStringValue$: jest.fn(),
-      getNumberValue$: jest.fn(),
-    },
     dashboard: {
       findDashboardsService: jest.fn(),
       registerDashboardPanelPlacementSetting: jest.fn(),
@@ -75,20 +66,7 @@ describe('RuleDashboards', () => {
     jest.clearAllMocks();
   });
 
-  it('does not render linked dashboards combo box when feature flag is disabled', () => {
-    plugins.featureFlags.getBooleanValue.mockReturnValue(false);
-
-    render(<RuleDashboards plugins={plugins} />);
-
-    expect(screen.queryByText(/Link dashboard\(s\)/i)).not.toBeInTheDocument();
-    expect(mockDashboardServiceProvider).not.toHaveBeenCalled();
-    expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
-    expect(mockDashboardServiceProvider().fetchDashboard).not.toHaveBeenCalled();
-  });
-
-  it('renders linked dashboards combo box when feature flag is enabled', async () => {
-    plugins.featureFlags.getBooleanValue.mockReturnValue(true);
-
+  it('renders linked dashboards combo box', async () => {
     render(
       <IntlProvider locale="en">
         <RuleDashboards plugins={plugins} />
@@ -104,11 +82,9 @@ describe('RuleDashboards', () => {
   });
 
   it('fetches and displays dashboard titles', async () => {
-    plugins.featureFlags.getBooleanValue.mockReturnValue(true);
-
     useRuleFormState.mockReturnValue({
       formData: {
-        attachments: {
+        artifacts: {
           dashboards: [
             {
               id: '1',
@@ -133,11 +109,9 @@ describe('RuleDashboards', () => {
   });
 
   it('dispatches selected dashboards on change', async () => {
-    plugins.featureFlags.getBooleanValue.mockReturnValue(true);
-
     useRuleFormState.mockReturnValue({
       formData: {
-        attachments: {
+        artifacts: {
           dashboards: [
             {
               id: '1',
@@ -172,7 +146,7 @@ describe('RuleDashboards', () => {
     expect(mockOnChange).toHaveBeenCalledWith({
       type: 'setRuleProperty',
       payload: {
-        property: 'attachments',
+        property: 'artifacts',
         value: { dashboards: [{ id: '1' }, { id: '2' }] },
       },
     });
