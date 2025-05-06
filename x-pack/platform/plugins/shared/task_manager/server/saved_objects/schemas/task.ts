@@ -64,16 +64,6 @@ export const taskSchemaV4 = taskSchemaV3.extends({
       apiKeyCreatedByUser: schema.boolean(),
     })
   ),
-  schedule: schema.maybe(
-    schema.oneOf([
-      schema.object({
-        interval: schema.string({ validate: validateDuration }),
-      }),
-      schema.object({
-        rrule: rruleSchedule,
-      }),
-    ])
-  ),
 });
 
 export const taskSchemaV5 = taskSchemaV4.extends({

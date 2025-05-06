@@ -69,35 +69,6 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
               apiKeyId: { type: 'keyword' },
             },
           },
-          schedule: {
-            properties: {
-              rrule: {
-                properties: {
-                  freq: {
-                    type: 'integer',
-                  },
-                  interval: {
-                    type: 'integer',
-                  },
-                  tzid: {
-                    type: 'keyword',
-                  },
-                  bymonthday: {
-                    type: 'integer',
-                  },
-                  byweekday: {
-                    type: 'integer',
-                  },
-                  byhour: {
-                    type: 'integer',
-                  },
-                  byminute: {
-                    type: 'integer',
-                  },
-                },
-              },
-            },
-          },
         },
       },
     ],
