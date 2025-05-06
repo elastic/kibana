@@ -14,6 +14,7 @@ import {
   ReactFlow,
   useEdgesState,
   useNodesState,
+  MiniMap,
 } from '@xyflow/react';
 import type { Edge, FitViewOptions, Node, ReactFlowInstance } from '@xyflow/react';
 import { useGeneratedHtmlId } from '@elastic/eui';
@@ -30,7 +31,7 @@ import {
 } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
-import type { EdgeViewModel, NodeViewModel } from '../types';
+import type { EdgeViewModel, NodeViewModel, MinimapProps } from '../types';
 import { ONLY_RENDER_VISIBLE_ELEMENTS } from './constants';
 
 import '@xyflow/react/dist/style.css';
@@ -58,6 +59,18 @@ export interface GraphProps extends CommonProps {
    * Additional children to be rendered inside the graph component.
    */
   children?: React.ReactNode;
+  /**
+   * Configuration for the minimap
+   */
+  minimap?: MinimapProps;
+  /**
+   * Controls whether nodes snap to grid when moving
+   */
+  snapToGrid?: boolean;
+  /**
+   * Controls the grid size  - usefull for snapping to grid
+   */
+  snapGrid?: number;
 }
 
 const nodeTypes = {
@@ -89,7 +102,17 @@ const edgeTypes = {
  * @returns {JSX.Element} The rendered Graph component.
  */
 export const Graph = memo<GraphProps>(
-  ({ nodes, edges, interactive, isLocked = false, children, ...rest }: GraphProps) => {
+  ({
+    nodes,
+    edges,
+    interactive,
+    isLocked = false,
+    children,
+    minimap,
+    snapToGrid = true,
+    snapGrid = 1,
+    ...rest
+  }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
     const fitViewRef = useRef<
       ((fitViewOptions?: FitViewOptions<Node> | undefined) => Promise<boolean>) | null
@@ -99,6 +122,12 @@ export const Graph = memo<GraphProps>(
     const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
     const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
+    const [minimapConfig, setMinimapConfig] = useState<GraphProps['minimap']>(minimap);
+
+    useEffect(() => {
+      // Update minimap configuration when props change
+      setMinimapConfig(minimap);
+    }, [minimap]);
 
     useEffect(() => {
       // On nodes or edges changes reset the graph and re-layout
@@ -135,7 +164,8 @@ export const Graph = memo<GraphProps>(
       },
       [interactive]
     );
-
+    console.log("snapToGrid", snapToGrid);
+    console.log("snapGrid", snapGrid);
     return (
       <div {...rest}>
         <SvgDefsMarker />
@@ -149,8 +179,8 @@ export const Graph = memo<GraphProps>(
           nodesConnectable={false}
           edgesFocusable={false}
           onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
-          snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
-          snapGrid={[1, 1]}
+          snapToGrid={snapToGrid}
+          snapGrid={[snapGrid, snapGrid]}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           proOptions={{ hideAttribution: true }}
@@ -170,6 +200,26 @@ export const Graph = memo<GraphProps>(
           )}
           {children}
           <Background id={backgroundId} />
+          {minimapConfig && (
+            <MiniMap
+              pannable={minimapConfig.pannable}
+              zoomable={minimapConfig.zoomable}
+              nodeColor={minimapConfig.nodeColor}
+              nodeStrokeColor={minimapConfig.nodeStrokeColor}
+              nodeClassName={minimapConfig.nodeClassName}
+              nodeBorderRadius={minimapConfig.nodeBorderRadius}
+              nodeStrokeWidth={minimapConfig.nodeStrokeWidth}
+              bgColor={minimapConfig.bgColor}
+              maskColor={minimapConfig.maskColor}
+              maskStrokeColor={minimapConfig.maskStrokeColor}
+              maskStrokeWidth={minimapConfig.maskStrokeWidth}
+              position={minimapConfig.position}
+              ariaLabel={minimapConfig.ariaLabel}
+              inversePan={minimapConfig.inversePan}
+              zoomStep={minimapConfig.zoomStep}
+              offsetScale={minimapConfig.offsetScale}
+            />
+          )}
         </ReactFlow>
       </div>
     );
