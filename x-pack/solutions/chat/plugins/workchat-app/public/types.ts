@@ -10,7 +10,7 @@ import type { IntegrationComponentDescriptor } from '@kbn/wci-browser';
 
 export interface WorkChatAppPluginSetup {
   integrations: {
-    register: (integrationComponents: IntegrationComponentDescriptor) => void;
+    register: (integration: IntegrationComponentDescriptor) => void;
   };
 }
 
