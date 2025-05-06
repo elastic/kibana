@@ -9,6 +9,7 @@ import type { AxiosResponse, ResponseType } from 'axios';
 import type { IncomingMessage } from 'http';
 import fs from 'fs';
 import https from 'https';
+import type { Logger } from '@kbn/logging';
 import { OpenAiProviderType } from '../../../../common/openai/constants';
 import type { Config } from '../../../../common/openai/types';
 import {
@@ -229,4 +230,80 @@ export const validatePKICertificates = (
   } catch (error) {
     return false;
   }
+};
+
+export function formatPEMContent(
+  pemContent: string,
+  type: 'CERTIFICATE' | 'PRIVATE KEY',
+  logger: Logger
+): string {
+  if (!pemContent) return pemContent;
+  if (
+    pemContent.includes('\n') &&
+    pemContent.startsWith(`-----BEGIN ${type}-----`) &&
+    pemContent.endsWith(`-----END ${type}-----`)
+  ) {
+    return pemContent; // Skip reformatting if already valid
+  }
+  // Normalize input by replacing all whitespace with a single space
+  const normalizedContent = pemContent.replace(/\s+/g, ' ').trim();
+
+  // Define header and footer
+  const header = `-----BEGIN ${type}-----`;
+  const footer = `-----END ${type}-----`;
+
+  // Verify header and footer
+  if (!normalizedContent.startsWith(header) || !normalizedContent.endsWith(footer)) {
+    logger.debug(`Invalid PEM format for ${type}: Missing header or footer`);
+    return pemContent;
+  }
+
+  // Extract base64 content between header and footer
+  const base64Content = normalizedContent
+    .slice(header.length, normalizedContent.length - footer.length)
+    .trim();
+
+  // Remove all whitespace from base64 content
+  const cleanBase64 = base64Content.replace(/\s+/g, '');
+
+  // Split into 64-character lines
+  const formattedBase64 = cleanBase64.match(/.{1,64}/g)?.join('\n') || cleanBase64;
+
+  // Assemble formatted PEM with newlines
+  return `${header}\n${formattedBase64}\n${footer}`;
+}
+
+export const getKeyAndCert = ({
+  certificateFile,
+  certificateData,
+  privateKeyFile,
+  privateKeyData,
+  logger,
+}: {
+  certificateFile?: string | string[];
+  certificateData?: string;
+  privateKeyFile?: string | string[];
+  privateKeyData?: string;
+  logger: Logger;
+}) => {
+  const readFile = (file: string | string[]) =>
+    fs.readFileSync(Array.isArray(file) ? file[0] : file, 'utf8');
+
+  const cert = certificateFile
+    ? readFile(certificateFile)
+    : certificateData
+    ? formatPEMContent(certificateData, 'CERTIFICATE', logger)
+    : (() => {
+        throw new Error('No certificate file or data provided');
+      })();
+
+  const key = privateKeyFile
+    ? readFile(privateKeyFile)
+    : privateKeyData
+    ? formatPEMContent(privateKeyData, 'PRIVATE KEY', logger)
+    : (() => {
+        throw new Error('No private key file or data provided');
+      })();
+
+  return { cert, key };
 };

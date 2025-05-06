@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -14,7 +14,6 @@ import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
-import { useFormContext } from 'react-hook-form';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
@@ -400,123 +399,94 @@ describe('ConnectorFields renders', () => {
   });
 
   describe('PKI Configuration', () => {
-    const onSubmit = jest.fn();
-    const pkiConnector = {
-      ...otherOpenAiConnector,
-      config: {
-        ...otherOpenAiConnector.config,
-        certificateFile: '/path/to/cert.pem',
-        privateKeyFile: '/path/to/key.pem',
-        verificationMode: 'full',
-      },
-      __internal__: {
-        hasHeaders: false,
-        hasPKI: true,
-      },
-    };
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('renders PKI configuration fields for Other provider', async () => {
-      const { findByTestId } = render(
-        <ConnectorFormTestProvider connector={pkiConnector}>
+    it('toggles pki as expected', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={testFormData}>
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
 
-      // Wait for PKI fields to appear
-      const certificateFileInput = await findByTestId('config.certificateFile-input');
-      const privateKeyFileInput = await findByTestId('config.privateKeyFile-input');
-      const verificationModeSelect = await findByTestId('verificationModeSelect');
+      const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
 
-      expect(certificateFileInput).toBeInTheDocument();
-      expect(privateKeyFileInput).toBeInTheDocument();
-      expect(verificationModeSelect).toBeInTheDocument();
+      expect(screen.queryByTestId('config.certificateFile-input')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('config.privateKeyFile-input')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('config.certificateData-input')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('config.privateKeyData-input')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('verificationModeSelect')).not.toBeInTheDocument();
+      expect(pkiToggle).toBeInTheDocument();
+
+      await userEvent.click(pkiToggle);
+      expect(screen.getByTestId('config.certificateFile-input')).toBeInTheDocument();
+      expect(screen.getByTestId('config.privateKeyFile-input')).toBeInTheDocument();
+      expect(screen.getByTestId('config.certificateData-input')).toBeInTheDocument();
+      expect(screen.getByTestId('config.privateKeyData-input')).toBeInTheDocument();
+      expect(screen.getByTestId('verificationModeSelect')).toBeInTheDocument();
     });
-
-    it('validates PKI configuration fields', async () => {
-      const preSubmitValidator = jest.fn().mockImplementation((data) => {
-        if (!data.config.certificateFile || !data.config.privateKeyFile) {
-          return { message: 'PKI fields are required' };
-        }
-        return null;
-      });
-
-      const { findByTestId } = render(
-        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
-          <ConnectorFields 
-            readOnly={false} 
-            isEdit={false} 
-            registerPreSubmitValidator={() => preSubmitValidator} 
-          />
+    it('succeeds without pki', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
 
-      // Wait for fields to appear and clear them
-      const certificateFileInput = await findByTestId('config.certificateFile-input');
-      const privateKeyFileInput = await findByTestId('config.privateKeyFile-input');
-
-      await userEvent.clear(certificateFileInput);
-      await userEvent.clear(privateKeyFileInput);
-
-      // Submit form
-      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-
-      // Verify validation failed
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
       await waitFor(() => {
-        expect(preSubmitValidator).toHaveBeenCalled();
         expect(onSubmit).toHaveBeenCalledWith({
           data: {
-            ...pkiConnector,
-            config: {
-              ...pkiConnector.config,
-              certificateFile: '',
-              privateKeyFile: '',
-            },
-            __internal__: {
-              hasHeaders: false,
-              hasPKI: true,
-            },
+            ...testFormData,
           },
-          isValid: false,
+          isValid: true,
         });
       });
     });
-
-    it('submits form with valid PKI configuration', async () => {
-      const preSubmitValidator = jest.fn().mockImplementation((data) => {
-        if (!data.config.certificateFile || !data.config.privateKeyFile) {
-          return { message: 'PKI fields are required' };
-        }
-        return null;
-      });
-
-      const { findByTestId } = render(
-        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
-          <ConnectorFields 
-            readOnly={false} 
-            isEdit={false} 
-            registerPreSubmitValidator={() => preSubmitValidator} 
-          />
+    it('succeeds with pki', async () => {
+      const testFormData = {
+        ...otherOpenAiConnector,
+        __internal__: {
+          hasHeaders: false,
+          hasPKI: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
-
-      // Wait for fields to appear
-      await findByTestId('config.certificateFile-input');
-      await findByTestId('config.privateKeyFile-input');
-      await findByTestId('verificationModeSelect');
-
-      // Submit form
-      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
-
-      // Verify submission
+      const pkiToggle = await screen.findByTestId('openAIViewPKISwitch');
+      await userEvent.click(pkiToggle);
+      await userEvent.type(screen.getByTestId('config.certificateFile-input'), 'hello');
+      await userEvent.type(screen.getByTestId('config.privateKeyFile-input'), 'world');
+      await userEvent.type(screen.getByTestId('config.certificateData-input'), 'hello');
+      await userEvent.type(screen.getByTestId('config.privateKeyData-input'), 'world');
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
       await waitFor(() => {
-        expect(preSubmitValidator).toHaveBeenCalled();
         expect(onSubmit).toHaveBeenCalledWith({
           data: {
-            ...pkiConnector,
+            ...testFormData,
+            config: {
+              ...testFormData.config,
+              certificateFile: 'hello',
+              certificateData: 'hello',
+              privateKeyFile: 'world',
+              privateKeyData: 'world',
+              verificationMode: 'full',
+            },
             __internal__: {
               hasHeaders: false,
               hasPKI: true,
