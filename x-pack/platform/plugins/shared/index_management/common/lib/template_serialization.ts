@@ -23,7 +23,10 @@ import {
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
-export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
+export function serializeTemplate(
+  templateDeserialized: TemplateDeserialized,
+  datataStreamOptions?: object | undefined
+): TemplateSerialized {
   const {
     version,
     priority,
@@ -50,6 +53,9 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
           mode: indexMode,
         },
       },
+      // If the existing template contains data stream options, we need to persist them.
+      // Otherwise, they will be lost when the template is updated.
+      ...(datataStreamOptions && { data_stream_options: datataStreamOptions }),
     },
     index_patterns: indexPatterns,
     data_stream: dataStream,

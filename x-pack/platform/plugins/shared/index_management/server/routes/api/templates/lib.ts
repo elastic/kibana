@@ -37,7 +37,13 @@ export const saveTemplate = async ({
 }) => {
   const serializedTemplate = isLegacy
     ? serializeLegacyTemplate(template)
-    : serializeTemplate(template);
+    : serializeTemplate(
+        template,
+        await getTemplateDataStreamOptions({
+          name: template.name,
+          client,
+        })
+      );
 
   if (isLegacy) {
     const { settings } = serializedTemplate as LegacyTemplateSerialized;
@@ -59,16 +65,10 @@ export const saveTemplate = async ({
 export const getTemplateDataStreamOptions = async ({
   name,
   client,
-  isLegacy,
 }: {
   name: string;
   client: IScopedClusterClient;
-  isLegacy?: boolean;
 }) => {
-  // Legacy templates do not support data stream options
-  if (isLegacy) {
-    return undefined;
-  }
   const existingTemplate = await client.asCurrentUser.transport.request<{
     index_templates?: Array<{
       index_template?: { template?: { data_stream_options?: unknown } };

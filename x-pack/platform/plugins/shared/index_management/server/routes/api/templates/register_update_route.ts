@@ -11,7 +11,7 @@ import { TemplateDeserialized } from '../../../../common';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 import { templateSchema } from './validate_schemas';
-import { saveTemplate, doesTemplateExist, getTemplateDataStreamOptions } from './lib';
+import { saveTemplate, doesTemplateExist } from './lib';
 
 const bodySchema = templateSchema;
 const paramsSchema = schema.object({
@@ -33,12 +33,12 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { name } = request.params as typeof paramsSchema.type;
-      const indexTemplate = request.body as TemplateDeserialized;
+      const template = request.body as TemplateDeserialized;
 
       try {
         const {
           _kbnMeta: { isLegacy },
-        } = indexTemplate;
+        } = template;
 
         // Verify the template exists (ES will throw 404 if not)
         const templateExists = await doesTemplateExist({ name, client, isLegacy });
@@ -47,25 +47,9 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
           return response.notFound();
         }
 
-        const datataStreamOptions = await getTemplateDataStreamOptions({
-          name,
-          client,
-          isLegacy,
-        });
-
-        // If the existing template contains data stream options, we need to persist them.
-        // Otherwise, they will be lost when the template is updated.
-        const updatedIndexTemplate = {
-          ...indexTemplate,
-          template: {
-            ...indexTemplate.template,
-            ...(datataStreamOptions && { data_stream_options: datataStreamOptions }),
-          },
-        };
-
         // Next, update index template
         const responseBody = await saveTemplate({
-          template: updatedIndexTemplate,
+          template,
           client,
           isLegacy,
         });
