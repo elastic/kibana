@@ -11,6 +11,10 @@ import { PartialTheme, Theme } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useMemo } from 'react';
 
+/* This duplicates useChartThemes from @kbn/observability-shared-plugin/public.
+We're considering extracting parts of that plugin into a platform-level package,
+so this duplication might be temporary depending on how that evolves. */
+
 export function useChartThemes(): { baseTheme: Theme; theme: PartialTheme[] } {
   const baseTheme = useElasticChartsTheme();
 
