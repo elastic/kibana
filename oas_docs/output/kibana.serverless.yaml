@@ -13363,14 +13363,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                is_monitored:
-                  description: Whether the user is actively monitored.
-                  type: boolean
-                user_name:
-                  description: The name of the user.
-                  type: string
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_UserName'
         required: true
       responses:
         '200':
@@ -13496,12 +13489,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                is_monitored:
-                  type: boolean
-                user_name:
-                  type: string
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
         required: true
       responses:
         '200':
@@ -63625,6 +63613,15 @@ components:
       required:
         - user
         - entity
+    Security_Entity_Analytics_API_UserName:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            name:
+              description: The name of the user.
+              type: string
     Security_Exceptions_API_CreateExceptionListItemComment:
       type: object
       properties:
