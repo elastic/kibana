@@ -1,5 +1,4 @@
 # Security Complete tier config
 xpack.features.overrides:
   ### The following features are hidden in Role management since they're automatically granted by SIEM feature.
-  maps.hidden: true
   maps_v2.hidden: true

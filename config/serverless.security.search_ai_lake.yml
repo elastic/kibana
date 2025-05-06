@@ -1,28 +1,14 @@
 # Security Search AI Lake tier config
 
-## Disable plugins
+## Disable xpack plugins
 xpack.osquery.enabled: false
 xpack.maps.enabled: false
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
 xpack.lens.enabled: false
 
-### Disable Visualizations
+### Disable shared plugins
 visualizations.enabled: false
-#vis_type_gauge.enabled: false
-#vis_type_heatmap.enabled: false
-#vis_type_markdown.enabled: false
-#vis_type_metric.enabled: false
-#vis_type_pie.enabled: false
-#vis_type_table.enabled: false
-#vis_type_tagcloud.enabled: false
-#vis_type_timelion.enabled: false
-#vis_type_timeseries.enabled: false
-#vis_type_vislib.enabled: false
-#vis_type_xy.enabled: false
-#vis_type_vega.enabled: false
-#input_control_vis.enabled: false
-#xpack.graph.enabled: false
 
 ## Disable plugin features
 xpack.alerting.maintenanceWindow.enabled: false
@@ -37,35 +23,48 @@ xpack.features.overrides:
   siemV2.description: null
   securitySolutionSiemMigrations.hidden: true
 
-## Fine-tune the security solution essentials feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
+  ## Fine-tune the security solution essentials feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
   dashboard:
     privileges:
+      ## We do not need to compose dashboard from maps and visualizations because these functionalities are disabled in this tier
       ## Setting to empty array so the values from serverless.yml or serverless.security.yml are overwritten
       all.composedOf: []
       read.composedOf: []
   dashboard_v2:
     privileges:
       ## Setting to empty array so the values from serverless.yml or serverless.security.yml are overwritten
+      ## We do not need to compose dashboard from maps and visualizations because these functionalities are disabled in this tier
       all.composedOf: []
       read.composedOf: []
   siemV2:
     privileges:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
+        ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
         - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "dashboard_v2"
           privileges: [ "all" ]
       read.composedOf:
         - feature: "discover_v2"
           privileges: [ "read" ]
+        - feature: "dashboard_v2"
+          privileges: [ "read" ]
   siem:
     privileges:
       all.composedOf:
+        ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
+        ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
         - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "dashboard_v2"
           privileges: [ "all" ]
         - feature: "savedQueryManagement"
           privileges: [ "all" ]
       read.composedOf:
         - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "dashboard_v2"
           privileges: [ "read" ]
         - feature: "savedQueryManagement"
           privileges: [ "read" ]

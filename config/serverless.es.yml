@@ -50,6 +50,8 @@ xpack.features.overrides:
   dev_tools.category: "enterpriseSearch"
   ### Discover feature is moved from Analytics category to the Search one.
   discover_v2.category: "enterpriseSearch"
+  ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
+  maps_v2.hidden: true
   ### Machine Learning feature is moved from Analytics category to the Management one.
   ml.category: "management"
   ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
