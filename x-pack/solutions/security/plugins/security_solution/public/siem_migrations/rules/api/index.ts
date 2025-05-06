@@ -208,7 +208,7 @@ export const getRuleMigrations = async ({
   signal,
 }: GetRuleMigrationParams): Promise<GetRuleMigrationRulesResponse> => {
   return KibanaServices.get().http.get<GetRuleMigrationRulesResponse>(
-    replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
+    replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId }),
     {
       version: '1',
       query: {
