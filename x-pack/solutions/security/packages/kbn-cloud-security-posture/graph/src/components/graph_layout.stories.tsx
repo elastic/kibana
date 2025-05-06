@@ -21,10 +21,27 @@ import type {
 import { Graph } from '.';
 import { MinimapProps } from './types';
 
-// Define a type for our story args that includes custom fields for snapGrid controls
+// Define a type for our story args that includes custom fields for grid and minimap controls
 interface GraphStoryProps extends Omit<GraphData, 'snapGrid'> {
   snapGridX?: number;
   snapGridY?: number;
+  // Add individual minimap properties
+  'minimap.pannable'?: boolean;
+  'minimap.zoomable'?: boolean;
+  'minimap.inversePan'?: boolean;
+  'minimap.zoomStep'?: number;
+  'minimap.offsetScale'?: number;
+  'minimap.nodeColor'?: string;
+  'minimap.nodeStrokeColor'?: string;
+  'minimap.nodeBorderRadius'?: number;
+  'minimap.nodeStrokeWidth'?: number;
+  'minimap.nodeClassName'?: string;
+  'minimap.bgColor'?: string;
+  'minimap.maskColor'?: string;
+  'minimap.maskStrokeColor'?: string;
+  'minimap.maskStrokeWidth'?: number;
+  'minimap.position'?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  'minimap.ariaLabel'?: string;
 }
 
 // Define a type that extends StoryObj with our custom properties
@@ -32,6 +49,22 @@ type CustomStory = StoryObj<typeof Graph> & {
   args: {
     snapGridX?: number;
     snapGridY?: number;
+    'minimap.pannable'?: boolean;
+    'minimap.zoomable'?: boolean;
+    'minimap.inversePan'?: boolean;
+    'minimap.zoomStep'?: number;
+    'minimap.offsetScale'?: number;
+    'minimap.nodeColor'?: string;
+    'minimap.nodeStrokeColor'?: string;
+    'minimap.nodeBorderRadius'?: number;
+    'minimap.nodeStrokeWidth'?: number;
+    'minimap.nodeClassName'?: string;
+    'minimap.bgColor'?: string;
+    'minimap.maskColor'?: string;
+    'minimap.maskStrokeColor'?: string;
+    'minimap.maskStrokeWidth'?: number;
+    'minimap.position'?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    'minimap.ariaLabel'?: string;
     [key: string]: any;
   };
 };
@@ -47,12 +80,25 @@ const meta = {
     snapToGrid,
     snapGridX,
     snapGridY,
-  }: GraphStoryProps & Record<string, any>) => {
+    ...rest
+  }: GraphStoryProps) => {
     const defaultGridX = 1;
     const defaultGridY = 1;
 
-    // Use the individual X and Y values and applay them to the snapGrid param
+    // Use the individual X and Y values and apply them to the snapGrid param
     const snapGrid: [number, number] = [snapGridX ?? defaultGridX, snapGridY ?? defaultGridY];
+
+    // Process individual minimap properties from rest
+    const minimapConfig: MinimapProps = { ...minimap };
+
+    // Extract minimap properties from the props
+    Object.entries(rest).forEach(([key, value]) => {
+      if (key.startsWith('minimap.')) {
+        const propName = key.replace('minimap.', '') as keyof MinimapProps;
+        // @ts-ignore
+        minimapConfig[propName] = value;
+      }
+    });
 
     return (
       <ThemeProvider theme={{ darkMode: false }}>
@@ -64,7 +110,7 @@ const meta = {
           nodes={nodes}
           edges={edges}
           interactive={interactive}
-          minimap={minimap}
+          minimap={Object.keys(minimapConfig).length > 0 ? minimapConfig : minimap}
           snapToGrid={snapToGrid}
           snapGrid={snapGrid}
         />
@@ -113,23 +159,170 @@ const meta = {
         defaultValue: { summary: '1' },
       },
     },
+    // Hide the actual minimap object control
     minimap: {
-      control: 'object',
-      expanded: true,
+      type: 'object',
+      control: true,
+      // table: {
+      //   disable: true,
+      // },
     },
-  },
+    // Add individual controls for minimap properties
+    'minimap.pannable': {
+      control: 'boolean',
+      name: 'Minimap: Pannable',
+      description: 'Enable panning in the minimap',
+      table: {
+        category: 'Minimap Interaction',
+        defaultValue: { summary: 'true' },
+      },
+    },
+    'minimap.zoomable': {
+      control: 'boolean',
+      name: 'Minimap: Zoomable',
+      description: 'Enable zooming in the minimap',
+      table: {
+        category: 'Minimap Interaction',
+        defaultValue: { summary: 'true' },
+      },
+    },
+    'minimap.inversePan': {
+      control: 'boolean',
+      name: 'Minimap: Inverse Pan',
+      description: 'Invert the panning direction',
+      table: {
+        category: 'Minimap Interaction',
+        defaultValue: { summary: 'false' },
+      },
+    },
+    'minimap.zoomStep': {
+      control: { type: 'number', min: 1, max: 100, step: 1 },
+      name: 'Minimap: Zoom Step',
+      description: 'Step size for zooming',
+      table: {
+        category: 'Minimap Interaction',
+        defaultValue: { summary: '10' },
+      },
+    },
+    'minimap.offsetScale': {
+      control: { type: 'number', min: 1, max: 20, step: 1 },
+      name: 'Minimap: Offset Scale',
+      description: 'Scale offset for the minimap',
+      table: {
+        category: 'Minimap Interaction',
+        defaultValue: { summary: '5' },
+      },
+    },
+    'minimap.nodeColor': {
+      control: 'color',
+      name: 'Minimap: Node Color',
+      description: 'Color for nodes in the minimap',
+      table: {
+        category: 'Minimap Node Appearance',
+        defaultValue: { summary: '#0077cc' },
+      },
+    },
+    'minimap.nodeStrokeColor': {
+      control: 'color',
+      name: 'Minimap: Node Stroke Color',
+      description: 'Stroke color for nodes',
+      table: {
+        category: 'Minimap Node Appearance',
+        defaultValue: { summary: '#000000' },
+      },
+    },
+    'minimap.nodeBorderRadius': {
+      control: { type: 'number', min: 0, max: 20, step: 1 },
+      name: 'Minimap: Node Border Radius',
+      description: 'Border radius for nodes (px)',
+      table: {
+        category: 'Minimap Node Appearance',
+        defaultValue: { summary: '2' },
+      },
+    },
+    'minimap.nodeStrokeWidth': {
+      control: { type: 'number', min: 0, max: 10, step: 1 },
+      name: 'Minimap: Node Stroke Width',
+      description: 'Stroke width for nodes (px)',
+      table: {
+        category: 'Minimap Node Appearance',
+        defaultValue: { summary: '1' },
+      },
+    },
+    'minimap.nodeClassName': {
+      control: 'text',
+      name: 'Minimap: Node Class Name',
+      description: 'Custom CSS class for nodes',
+      table: {
+        category: 'Minimap Node Appearance',
+        defaultValue: { summary: 'custom-minimap-node' },
+      },
+    },
+    'minimap.bgColor': {
+      control: 'color',
+      name: 'Minimap: Background Color',
+      description: 'Background color of the minimap',
+      table: {
+        category: 'Minimap Appearance',
+        defaultValue: { summary: '#f5f5f5' },
+      },
+    },
+    'minimap.maskColor': {
+      control: 'text',
+      name: 'Minimap: Mask Color',
+      description: 'Color for the mask overlay (use rgba for transparency)',
+      table: {
+        category: 'Minimap Appearance',
+        defaultValue: { summary: 'rgba(0, 0, 0, 0.1)' },
+      },
+    },
+    'minimap.maskStrokeColor': {
+      control: 'color',
+      name: 'Minimap: Mask Stroke Color',
+      description: 'Stroke color for the mask',
+      table: {
+        category: 'Minimap Appearance',
+        defaultValue: { summary: '#333333' },
+      },
+    },
+    'minimap.maskStrokeWidth': {
+      control: { type: 'number', min: 0, max: 10, step: 1 },
+      name: 'Minimap: Mask Stroke Width',
+      description: 'Stroke width for the mask (px)',
+      table: {
+        category: 'Minimap Appearance',
+        defaultValue: { summary: '1' },
+      },
+    },
+    'minimap.position': {
+      control: 'select',
+      options: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+      name: 'Minimap: Position',
+      description: 'Position of the minimap panel',
+      table: {
+        category: 'Minimap Position',
+        defaultValue: { summary: 'bottom-right' },
+      },
+    },
+    'minimap.ariaLabel': {
+      control: 'text',
+      name: 'Minimap: Aria Label',
+      description: 'Accessibility label for the minimap',
+      table: {
+        category: 'Minimap Accessibility',
+        defaultValue: { summary: 'Graph overview minimap' },
+      },
+    },
+  } as ArgTypesWithDotNotation,
   decorators: [GlobalStylesStorybookDecorator],
 } as Meta<typeof Graph>;
-/*
- * Use type assertion rather than declaration - this allows for more flexibility
- * in the types of the props passed to the component.
- * This is especially useful for the `args` property, which can be a complex object.
- * By using `as Meta<typeof Graph>`, we ensure that the component is correctly typed
- * while still allowing for the flexibility needed in the story.
- */
+
+// Interface to allow dot notation in argTypes
+interface ArgTypesWithDotNotation {
+  [key: string]: any;
+}
 
 export default meta;
-// type Story = StoryObj<typeof Graph>;
 
 interface GraphData {
   nodes: NodeViewModel[];
@@ -652,24 +845,23 @@ export const GraphWithMinimap: CustomStory = {
   args: {
     ...meta.args,
     ...extractEdges(baseGraph),
-    minimap: {
-      pannable: true,
-      zoomable: true,
-      inversePan: false,
-      zoomStep: 10,
-      offsetScale: 5,
-      nodeColor: '#0077cc',
-      nodeStrokeColor: '#000000',
-      nodeBorderRadius: 2,
-      nodeStrokeWidth: 1,
-      nodeClassName: 'custom-minimap-node',
-      bgColor: '#f5f5f5',
-      maskColor: 'rgba(0, 0, 0, 0.1)',
-      maskStrokeColor: '#333333',
-      maskStrokeWidth: 1,
-      position: 'bottom-right',
-      ariaLabel: 'Graph overview minimap',
-    },
+    // Convert the minimap object properties to dot notation to work with controls
+    'minimap.pannable': true,
+    'minimap.zoomable': true,
+    'minimap.inversePan': false,
+    'minimap.zoomStep': 10,
+    'minimap.offsetScale': 5,
+    'minimap.nodeColor': '#0077cc',
+    'minimap.nodeStrokeColor': '#000000',
+    'minimap.nodeBorderRadius': 2,
+    'minimap.nodeStrokeWidth': 1,
+    'minimap.nodeClassName': 'custom-minimap-node',
+    'minimap.bgColor': '#f5f5f5',
+    'minimap.maskColor': 'rgba(0, 0, 0, 0.1)',
+    'minimap.maskStrokeColor': '#333333',
+    'minimap.maskStrokeWidth': 1,
+    'minimap.position': 'bottom-right',
+    'minimap.ariaLabel': 'Graph overview minimap',
     snapToGrid: false,
     snapGridX: 1,
     snapGridY: 1,

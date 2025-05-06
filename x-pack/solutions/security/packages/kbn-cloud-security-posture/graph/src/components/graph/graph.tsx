@@ -200,7 +200,7 @@ export const Graph = memo<GraphProps>(
           )}
           {children}
           <Background id={backgroundId} />
-          {minimapConfig && (
+          {!isEmpty(minimapConfig) && (
             <MiniMap
               pannable={minimapConfig.pannable}
               zoomable={minimapConfig.zoomable}
