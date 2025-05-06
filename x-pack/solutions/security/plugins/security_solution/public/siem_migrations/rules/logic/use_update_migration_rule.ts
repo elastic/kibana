@@ -11,7 +11,7 @@ import type {
   RuleMigrationRule,
   UpdateRuleMigrationRule,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/constants';
+import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../common/siem_migrations/constants';
 import type { UpdateRuleMigrationResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
@@ -20,7 +20,7 @@ import { useInvalidateGetMigrationRules } from './use_get_migration_rules';
 import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
 import { updateMigrationRules } from '../api';
 
-export const UPDATE_MIGRATION_RULE_MUTATION_KEY = ['PUT', SIEM_RULE_MIGRATION_PATH];
+export const UPDATE_MIGRATION_RULE_MUTATION_KEY = ['PUT', SIEM_RULE_MIGRATION_RULES_PATH];
 
 export const useUpdateMigrationRule = (ruleMigration: RuleMigrationRule) => {
   const { addError } = useAppToasts();

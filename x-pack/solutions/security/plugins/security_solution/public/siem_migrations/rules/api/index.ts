@@ -17,7 +17,6 @@ import {
   SIEM_RULE_MIGRATIONS_PATH,
   SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
   SIEM_RULE_MIGRATION_INSTALL_PATH,
-  SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_START_PATH,
   SIEM_RULE_MIGRATION_STATS_PATH,
   SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH,
@@ -331,8 +330,8 @@ export const updateMigrationRules = async ({
   rulesToUpdate,
   signal,
 }: UpdateRulesParams): Promise<UpdateRuleMigrationResponse> => {
-  return KibanaServices.get().http.put<UpdateRuleMigrationResponse>(
-    replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
+  return KibanaServices.get().http.patch<UpdateRuleMigrationResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId }),
     { version: '1', body: JSON.stringify(rulesToUpdate), signal }
   );
 };
