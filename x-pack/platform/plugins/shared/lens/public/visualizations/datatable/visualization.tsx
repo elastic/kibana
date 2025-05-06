@@ -130,7 +130,7 @@ export const getDatatableVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
 
   initialize(addNewLayer, state, mainPalette, datasourceStates) {
-    if (state) return convertToRuntimeState(state, datasourceStates);
+    if (state) return convertToRuntimeState(state, kibanaTheme.getTheme(), datasourceStates);
 
     return {
       columns: [],
@@ -140,7 +140,7 @@ export const getDatatableVisualization = ({
   },
 
   convertToRuntimeState(state, datasourceStates) {
-    return convertToRuntimeState(state, datasourceStates);
+    return convertToRuntimeState(state, kibanaTheme.getTheme(), datasourceStates);
   },
 
   onDatasourceUpdate(state, frame) {

@@ -117,7 +117,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   // need to tell the helper that the colorStops are required to display
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
-  if (activePalette.name !== CUSTOM_PALETTE && activePalette.params?.stops) {
+  if (!showColorByTerms && activePalette.name !== CUSTOM_PALETTE && activePalette.params?.stops) {
     activePalette.params.stops = applyPaletteParams(
       props.paletteService,
       activePalette,
@@ -216,7 +216,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 const params: Partial<ColumnType> = {
                   colorMode: newMode,
                 };
-                if (!column?.palette && newMode !== 'none') {
+                if (!showColorByTerms && !column?.palette && newMode !== 'none') {
                   params.palette = {
                     ...activePalette,
                     params: {
@@ -242,16 +242,11 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
               <ColorMappingByTerms
                 isDarkMode={isDarkMode}
                 colorMapping={column.colorMapping}
-                palette={activePalette}
                 palettes={props.palettes}
                 isInlineEditing={isInlineEditing}
-                setPalette={(palette) => {
-                  updateColumnState(accessor, { palette });
-                }}
                 setColorMapping={(colorMapping) => {
                   updateColumnState(accessor, { colorMapping });
                 }}
-                paletteService={props.paletteService}
                 panelRef={props.panelRef}
                 categories={getColorCategories(currentData?.rows, accessor, [null])}
                 formatter={formatter}

@@ -20,7 +20,7 @@ export interface DataBounds {
   fallback?: boolean;
 }
 
-export interface PaletteOutput<T = { [key: string]: unknown }> {
+export interface PaletteOutput<T = Record<string, unknown>> {
   type: 'palette' | 'system_palette';
   name: string;
   params?: T;

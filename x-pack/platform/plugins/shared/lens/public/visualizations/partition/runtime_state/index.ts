@@ -7,6 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 
+import { CoreTheme } from '@kbn/core/public';
 import { PieVisualizationState } from '../../../../common/types';
 import { GeneralDatasourceStates } from '../../../state_management';
 
@@ -14,9 +15,10 @@ import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: PieVisualizationState,
+  theme: CoreTheme,
   datasourceStates?: Readonly<GeneralDatasourceStates>
 ): PieVisualizationState {
-  return getRuntimeConverters(datasourceStates).reduce(
+  return getRuntimeConverters(theme, datasourceStates).reduce(
     (newState, fn) => fn(newState),
     cloneDeep(state)
   );

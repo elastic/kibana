@@ -166,7 +166,7 @@ export const getPieVisualization = ({
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   initialize(addNewLayer, state, mainPalette, datasourceStates) {
-    if (state) return convertToRuntimeState(state, datasourceStates);
+    if (state) return convertToRuntimeState(state, kibanaTheme.getTheme(), datasourceStates);
 
     return {
       shape: PieChartTypes.DONUT,
@@ -181,7 +181,7 @@ export const getPieVisualization = ({
   },
 
   convertToRuntimeState(state, datasourceStates) {
-    return convertToRuntimeState(state, datasourceStates);
+    return convertToRuntimeState(state, kibanaTheme.getTheme(), datasourceStates);
   },
 
   getMainPalette: (state) => {

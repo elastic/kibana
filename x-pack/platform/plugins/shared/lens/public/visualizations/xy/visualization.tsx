@@ -310,7 +310,7 @@ export const getXyVisualization = ({
   ) {
     if (persistedState) {
       const convertedState = convertPersistedState(persistedState, annotationGroups, references);
-      return convertToRuntimeState(convertedState, datasourceStates);
+      return convertToRuntimeState(convertedState, kibanaTheme.getTheme(), datasourceStates);
     }
 
     return {
@@ -335,7 +335,7 @@ export const getXyVisualization = ({
   },
 
   convertToRuntimeState(state, datasourceStates) {
-    return convertToRuntimeState(state, datasourceStates);
+    return convertToRuntimeState(state, kibanaTheme.getTheme(), datasourceStates);
   },
 
   getLayerType(layerId, state) {

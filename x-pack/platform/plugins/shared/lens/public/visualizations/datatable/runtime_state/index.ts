@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { CoreTheme } from '@kbn/core/public';
 import { GeneralDatasourceStates } from '../../../state_management';
 import { DatatableVisualizationState } from '../datatable_visualization';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: DatatableVisualizationState,
+  theme: CoreTheme,
   datasourceStates?: Readonly<GeneralDatasourceStates>
 ): DatatableVisualizationState {
-  return getRuntimeConverters(datasourceStates).reduce((newState, fn) => fn(newState), state);
+  return getRuntimeConverters(theme, datasourceStates).reduce(
+    (newState, fn) => fn(newState),
+    state
+  );
 }

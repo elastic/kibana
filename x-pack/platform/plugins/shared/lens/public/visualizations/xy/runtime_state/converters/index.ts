@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import { CoreTheme } from '@kbn/core/public';
+
 import { GeneralDatasourceStates } from '../../../../state_management';
 import { convertToLegendStats } from './legend_stats';
 import { convertToRawColorMappingsFn } from './raw_color_mappings';
+import { convertPaletteToColorMappingConfigFn } from './palette_to_color_mapping_config';
 
-export const getRuntimeConverters = (datasourceStates?: Readonly<GeneralDatasourceStates>) => [
+export const getRuntimeConverters = (
+  theme: CoreTheme,
+  datasourceStates?: Readonly<GeneralDatasourceStates>
+) => [
   convertToLegendStats,
   convertToRawColorMappingsFn(datasourceStates),
+  convertPaletteToColorMappingConfigFn(theme),
 ];

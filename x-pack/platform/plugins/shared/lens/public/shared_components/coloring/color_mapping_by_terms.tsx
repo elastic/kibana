@@ -5,46 +5,28 @@
  * 2.0.
  */
 
-import React, { MutableRefObject, useState } from 'react';
+import React, { MutableRefObject } from 'react';
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import {
   ColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
   CategoricalColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
-  PaletteOutput,
-  PaletteRegistry,
-  CustomPaletteParams,
+  getColorsFromMapping,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { KbnPalettes } from '@kbn/palettes';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializedValue } from '@kbn/data-plugin/common';
-import { trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { PalettePicker } from '../palette_picker';
 import { PalettePanelContainer } from './palette_panel_container';
-import { getPaletteDisplayColors } from './utils';
 
 interface ColorMappingByTermsProps {
   isDarkMode: boolean;
   colorMapping?: ColorMapping.Config;
-  palette?: PaletteOutput<CustomPaletteParams>;
   palettes: KbnPalettes;
   isInlineEditing?: boolean;
-  setPalette: (palette: PaletteOutput) => void;
   setColorMapping: (colorMapping?: ColorMapping.Config) => void;
-  paletteService: PaletteRegistry;
   panelRef: MutableRefObject<HTMLDivElement | null>;
   categories: SerializedValue[];
   formatter?: IFieldFormat;
@@ -53,48 +35,30 @@ interface ColorMappingByTermsProps {
 
 export function ColorMappingByTerms({
   isDarkMode,
-  colorMapping,
-  palette,
-  palettes,
-  isInlineEditing,
-  setPalette,
-  setColorMapping,
-  paletteService,
   panelRef,
+  palettes,
+  colorMapping = { ...DEFAULT_COLOR_MAPPING_CONFIG },
+  setColorMapping,
   categories,
   formatter,
+  isInlineEditing,
   allowCustomMatch,
 }: ColorMappingByTermsProps) {
-  const { euiTheme } = useEuiTheme();
-  const [useNewColorMapping, setUseNewColorMapping] = useState(Boolean(colorMapping));
-
   return (
     <EuiFormRow
       display="columnCompressed"
       label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
         defaultMessage: 'Color mapping',
       })}
-      style={{ alignItems: 'center' }}
+      css={{ alignItems: 'center' }}
       fullWidth
     >
       <PalettePanelContainer
-        palette={getPaletteDisplayColors(
-          paletteService,
-          palettes,
-          isDarkMode,
-          palette,
-          colorMapping
-        )}
         siblingRef={panelRef}
-        title={
-          useNewColorMapping
-            ? i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
-                defaultMessage: 'Assign colors to terms',
-              })
-            : i18n.translate('xpack.lens.colorMapping.editColorsTitle', {
-                defaultMessage: 'Edit colors',
-              })
-        }
+        palette={getColorsFromMapping(palettes, isDarkMode, colorMapping)}
+        title={i18n.translate('xpack.lens.colorMapping.editColorMappingTitle', {
+          defaultMessage: 'Assign colors to terms',
+        })}
         isInlineEditing={isInlineEditing}
       >
         <div
@@ -103,68 +67,19 @@ export function ColorMappingByTerms({
         >
           <EuiFlexGroup direction="column" gutterSize="s" justifyContent="flexStart">
             <EuiFlexItem>
-              <EuiSwitch
-                label={
-                  <EuiText size="xs">
-                    <span>
-                      {i18n.translate('xpack.lens.colorMapping.tryLabel', {
-                        defaultMessage: 'Use the new Color Mapping feature',
-                      })}{' '}
-                      {(colorMapping?.assignments.length ?? 0) > 0 && (
-                        <EuiIconTip
-                          content={i18n.translate(
-                            'xpack.lens.colorMapping.helpIncompatibleFieldDotLabel',
-                            {
-                              defaultMessage: 'Disabling Color Mapping will clear all assignments',
-                            }
-                          )}
-                          position="top"
-                          size="s"
-                          type="dot"
-                          color={euiTheme.colors.warning}
-                        />
-                      )}{' '}
-                      <EuiBadge color="hollow">
-                        {i18n.translate('xpack.lens.colorMapping.techPreviewLabel', {
-                          defaultMessage: 'Tech preview',
-                        })}
-                      </EuiBadge>
-                    </span>
-                  </EuiText>
-                }
-                data-test-subj="lns_colorMappingOrLegacyPalette_switch"
-                compressed
-                checked={useNewColorMapping}
-                onChange={({ target: { checked } }) => {
-                  trackUiCounterEvents(`color_mapping_switch_${checked ? 'enabled' : 'disabled'}`);
-                  setColorMapping(checked ? { ...DEFAULT_COLOR_MAPPING_CONFIG } : undefined);
-                  setUseNewColorMapping(checked);
+              <CategoricalColorMapping
+                isDarkMode={isDarkMode}
+                model={colorMapping}
+                onModelUpdate={setColorMapping}
+                specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
+                palettes={palettes}
+                formatter={formatter}
+                allowCustomMatch={allowCustomMatch}
+                data={{
+                  type: 'categories',
+                  categories,
                 }}
               />
-              <EuiSpacer size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {useNewColorMapping ? (
-                <CategoricalColorMapping
-                  isDarkMode={isDarkMode}
-                  model={colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
-                  onModelUpdate={setColorMapping}
-                  specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
-                  palettes={palettes}
-                  formatter={formatter}
-                  allowCustomMatch={allowCustomMatch}
-                  data={{
-                    type: 'categories',
-                    categories,
-                  }}
-                />
-              ) : (
-                <PalettePicker
-                  palettes={paletteService}
-                  activePalette={palette}
-                  setPalette={setPalette}
-                />
-              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>

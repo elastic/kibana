@@ -6,3 +6,4 @@
  */
 
 export * from './converters/raw_color_mappings';
+export * from './converters/palette_to_color_mapping';

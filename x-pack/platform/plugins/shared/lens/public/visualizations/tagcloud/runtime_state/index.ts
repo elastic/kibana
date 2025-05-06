@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import { CoreTheme } from '@kbn/core/public';
 import { GeneralDatasourceStates } from '../../../state_management';
 import { TagcloudState } from '../types';
 import { getRuntimeConverters } from './converters';
 
 export function convertToRuntimeState(
   state: TagcloudState,
+  theme: CoreTheme,
   datasourceStates?: Readonly<GeneralDatasourceStates>
 ): TagcloudState {
-  return getRuntimeConverters(datasourceStates).reduce((newState, fn) => fn(newState), state);
+  return getRuntimeConverters(theme, datasourceStates).reduce(
+    (newState, fn) => fn(newState),
+    state
+  );
 }
