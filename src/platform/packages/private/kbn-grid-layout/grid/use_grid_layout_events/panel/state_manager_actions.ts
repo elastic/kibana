@@ -171,7 +171,7 @@ export const moveAction = (
     if (!nextLayout[targetSectionId]) {
       // section doesn't exist, so add it
       const { order: nextOrder } =
-        targetSectionId === 'main-0' ? { order: 0 } : nextLayout[previousSection!];
+        targetSectionId === 'main-0' ? { order: -1 } : nextLayout[previousSection!];
 
       // push other sections down
       Object.keys(nextLayout).forEach((sectionId) => {
