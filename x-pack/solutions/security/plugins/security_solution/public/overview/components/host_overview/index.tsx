@@ -10,6 +10,7 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
+import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -18,7 +19,6 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { buildHostNamesFilter, type HostItem } from '../../../../common/search_strategy';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
-import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { hostIdRenderer } from '../../../timelines/components/field_renderers/field_renderers';
 import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/default_renderer';
@@ -85,7 +85,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const darkMode = useDarkMode();
+    const darkMode = useKibanaDarkMode();
     const filterQuery = useMemo(
       () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
       [hostName]

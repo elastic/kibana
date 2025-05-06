@@ -8,7 +8,6 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
@@ -20,6 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
 
 import useMountedState from 'react-use/lib/useMountedState';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
@@ -36,10 +36,7 @@ export function DashboardEmptyScreen() {
   const isMounted = useMountedState();
   const dashboardApi = useDashboardApi();
   const [isLoading, setIsLoading] = useState(false);
-  const isDarkTheme = useObservable(
-    coreServices.theme.theme$,
-    coreServices.theme.getTheme()
-  ).darkMode;
+  const isDarkTheme = useKibanaDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = useMemo(() => {
     return viewMode === 'edit';

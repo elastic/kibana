@@ -22,9 +22,9 @@ import {
   EuiBadge,
   type EuiBasicTableColumn,
   useEuiTheme,
-  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
+import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
@@ -52,8 +52,8 @@ const headerStyle = css`
 `;
 
 const useCompleteBadgeStyles = () => {
-  const { euiTheme, colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaDarkMode();
   return css`
     background-color: ${isDarkMode
       ? euiTheme.colors.success
@@ -147,7 +147,7 @@ export const MigrationResultPanel = React.memo<MigrationResultPanelProps>(
                       ) : (
                         translationStats && (
                           <>
-                            <EuiText size="m" style={{ textAlign: 'center' }}>
+                            <EuiText size="m" css={{ textAlign: 'center' }}>
                               <b>{i18n.RULE_MIGRATION_SUMMARY_CHART_TITLE}</b>
                             </EuiText>
                             <TranslationResultsChart translationStats={translationStats} />

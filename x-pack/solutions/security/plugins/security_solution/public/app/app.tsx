@@ -17,13 +17,14 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { APP_NAME } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import { KibanaContextProvider, useKibana, useDarkMode } from '../common/lib/kibana';
+import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import type { State } from '../common/store';
 import type { StartServices } from '../types';
 import { PageRouter } from './routes';
@@ -47,7 +48,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
     upselling,
   } = services;
 
-  const darkMode = useDarkMode();
+  const darkMode = useKibanaDarkMode();
 
   return (
     <KibanaRenderContextProvider {...services}>

@@ -6,10 +6,10 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
+import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
 import {
@@ -497,7 +497,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [suggestionForDraggedField, dispatchLens]);
 
-  const isDarkMode = useObservable(core.theme.theme$, core.theme.getTheme()).darkMode;
+  const isDarkMode = useKibanaDarkMode();
 
   const renderDragDropPrompt = () => {
     if (chartSizeSpec) {

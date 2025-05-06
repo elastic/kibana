@@ -6,7 +6,7 @@
  */
 
 import type { FC, PropsWithChildren } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -17,6 +17,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -62,6 +63,7 @@ export function getLogStreamEmbeddableFactory(services: Services) {
       return {
         api,
         Component: () => {
+          const darkMode = useKibanaDarkMode();
           const { filters, query, timeRange } = useFetchContext(api);
           const { startTimestamp, endTimestamp } = useMemo(() => {
             return {
@@ -69,14 +71,6 @@ export function getLogStreamEmbeddableFactory(services: Services) {
               endTimestamp: timeRange ? datemathToEpochMillis(timeRange.to, 'up') : undefined,
             };
           }, [timeRange]);
-
-          const [darkMode, setDarkMode] = useState(false);
-          useEffect(() => {
-            const subscription = services.coreStart.theme.theme$.subscribe((theme) => {
-              setDarkMode(theme.darkMode);
-            });
-            return () => subscription.unsubscribe();
-          }, []);
 
           return !startTimestamp || !endTimestamp ? null : (
             <LogStreamEmbeddableProviders

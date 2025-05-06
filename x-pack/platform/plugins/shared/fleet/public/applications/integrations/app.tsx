@@ -13,11 +13,12 @@ import { Redirect, useRouteMatch } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import useObservable from 'react-use/lib/useObservable';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+
+import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
@@ -33,6 +34,8 @@ import { SpaceSettingsContextProvider } from '../../hooks/use_space_settings_con
 
 import { FleetServerFlyout } from '../fleet/components';
 
+import { ErrorLayout, PermissionsError } from '../../layouts/error';
+
 import { AgentPolicyContextProvider, useFlyoutContext } from './hooks';
 import { FLEET_ROUTING_PATHS, INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
@@ -40,12 +43,11 @@ import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
 
-import { ErrorLayout, PermissionsError } from '../../layouts/error';
-
 import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
 import { AgentEnrollmentFlyout } from './components';
 import { ReadOnlyContextProvider } from './hooks/use_read_only_context';
+
 const queryClient = new QueryClient();
 
 const EmptyContext = () => <></>;
@@ -78,8 +80,7 @@ export const IntegrationsAppContext: React.FC<{
     fleetStatus,
   }) => {
     const XXL_BREAKPOINT = 1600;
-    const darkModeObservable = useObservable(startServices.theme.theme$);
-    const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
+    const isDarkMode = useKibanaDarkMode();
 
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 

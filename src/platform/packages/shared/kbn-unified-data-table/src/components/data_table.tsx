@@ -10,8 +10,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { of } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
 import './data_table.scss';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
@@ -52,6 +50,7 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
+import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -99,7 +98,6 @@ import {
 import { useSorting } from '../hooks/use_sorting';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
-const THEME_DEFAULT = { darkMode: false };
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
   // Allowing some additional rows to be rendered outside
   // the view minimizes pop-in when scrolling quickly
@@ -520,7 +518,7 @@ export const UnifiedDataTable = ({
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
-  const { darkMode } = useObservable(services.theme?.theme$ ?? of(THEME_DEFAULT), THEME_DEFAULT);
+  const darkMode = useKibanaDarkMode();
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);

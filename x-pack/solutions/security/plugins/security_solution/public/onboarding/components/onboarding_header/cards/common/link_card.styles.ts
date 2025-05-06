@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { COLOR_MODES_STANDARD, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
+import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+
 export const useCardStyles = () => {
-  const { euiTheme, colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const { euiTheme } = useEuiTheme();
+  const isDarkMode = useKibanaDarkMode();
 
   return css`
     min-width: 315px;
