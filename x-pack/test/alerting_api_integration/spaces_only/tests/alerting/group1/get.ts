@@ -221,6 +221,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           apiKeyOwner: null,
           artifacts: {
             dashboards: [],
+            investigation_guide: { blob: '' },
           },
           apiKeyCreatedByUser: null,
           throttle: '1m',
