@@ -18,6 +18,7 @@ import { DataSourceType, isDataSourceType } from '../../../../../common/data_sou
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { useExampleContext } from '../example_context';
+import { getRowIndicatorProvider } from '../../observability/logs_data_source_profile/accessors';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
   formatRecord: (flattenedRecord: Record<string, unknown>) => string;
@@ -259,6 +260,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       ...prev(),
       paginationMode: 'singlePage',
     }),
+    getRowIndicatorProvider,
   },
   resolve: (params) => {
     let indexPattern: string | undefined;
