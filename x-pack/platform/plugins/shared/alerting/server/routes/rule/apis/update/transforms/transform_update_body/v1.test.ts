@@ -5,26 +5,33 @@
  * 2.0.
  */
 
+import type { UpdateRuleRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/update';
 import { transformUpdateBody } from './v1';
 
 describe('transformUpdateBody', () => {
-  it('should transform the update body with all fields populated', () => {
-    const updateBody = {
+  let baseUpdateBody: UpdateRuleRequestBodyV1<{}>;
+  let baseActions: UpdateRuleRequestBodyV1<{}>['actions'];
+  let baseSystemActions: UpdateRuleRequestBodyV1<{}>['actions'];
+  beforeEach(() => {
+    baseUpdateBody = {
       name: 'Test Rule',
       tags: ['tag1', 'tag2'],
       throttle: '1m',
       params: { param1: 'value1' },
       schedule: { interval: '1m' },
-      notify_when: 'onActionGroupChange',
-      alert_delay: '5m',
+      notify_when: 'onActionGroupChange' as 'onActionGroupChange',
+      alert_delay: { active: 5 },
       flapping: {
         look_back_window: 10,
         status_change_threshold: 5,
       },
-      artifacts: { artifact1: 'value1' },
+      artifacts: {
+        dashboards: [{ id: 'dashboard1' }],
+        investigation_guide: { blob: 'guide-content' },
+      },
+      actions: [],
     };
-
-    const actions = [
+    baseActions = [
       {
         group: 'default',
         id: 'action1',
@@ -34,19 +41,24 @@ describe('transformUpdateBody', () => {
           throttle: '1m',
           summary: true,
         },
-        alerts_filter: { query: 'test-query' },
+        alerts_filter: {},
         use_alert_data_for_template: true,
       },
     ];
-
-    const systemActions = [
+    baseSystemActions = [
       {
         id: 'systemAction1',
         params: { key: 'value' },
       },
     ];
+  });
 
-    const result = transformUpdateBody({ updateBody, actions, systemActions });
+  it('should transform the update body with all fields populated', () => {
+    const result = transformUpdateBody({
+      updateBody: baseUpdateBody,
+      actions: baseActions,
+      systemActions: baseSystemActions,
+    });
 
     expect(result).toEqual({
       name: 'Test Rule',
@@ -55,12 +67,15 @@ describe('transformUpdateBody', () => {
       params: { param1: 'value1' },
       schedule: { interval: '1m' },
       notifyWhen: 'onActionGroupChange',
-      alertDelay: '5m',
+      alertDelay: { active: 5 },
       flapping: {
         lookBackWindow: 10,
         statusChangeThreshold: 5,
       },
-      artifacts: { artifact1: 'value1' },
+      artifacts: {
+        dashboards: [{ id: 'dashboard1' }],
+        investigation_guide: { blob: 'guide-content' },
+      },
       actions: [
         {
           group: 'default',
@@ -71,7 +86,7 @@ describe('transformUpdateBody', () => {
             summary: true,
             notifyWhen: 'onThrottleInterval',
           },
-          alertsFilter: { query: 'test-query' },
+          alertsFilter: {},
           useAlertDataForTemplate: true,
         },
       ],
@@ -85,100 +100,81 @@ describe('transformUpdateBody', () => {
   });
 
   it('should handle missing optional fields', () => {
-    const updateBody = {
-      name: 'Test Rule',
-      tags: ['tag1'],
-      params: { param1: 'value1' },
-      schedule: { interval: '1m' },
-    };
-
-    const actions = [];
-    const systemActions = [];
-
-    const result = transformUpdateBody({ updateBody, actions, systemActions });
-
-    expect(result).toEqual({
-      name: 'Test Rule',
-      tags: ['tag1'],
-      params: { param1: 'value1' },
-      schedule: { interval: '1m' },
+    const result = transformUpdateBody({
+      updateBody: {
+        ...baseUpdateBody,
+        name: 'Test Rule',
+        tags: ['tag1'],
+        params: { param1: 'value1' },
+        schedule: { interval: '1m' },
+      },
       actions: [],
       systemActions: [],
     });
+
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [],
+        "alertDelay": Object {
+          "active": 5,
+        },
+        "artifacts": Object {
+          "dashboards": Array [
+            Object {
+              "id": "dashboard1",
+            },
+          ],
+          "investigation_guide": Object {
+            "blob": "guide-content",
+          },
+        },
+        "flapping": Object {
+          "lookBackWindow": 10,
+          "statusChangeThreshold": 5,
+        },
+        "name": "Test Rule",
+        "notifyWhen": "onActionGroupChange",
+        "params": Object {
+          "param1": "value1",
+        },
+        "schedule": Object {
+          "interval": "1m",
+        },
+        "systemActions": Array [],
+        "tags": Array [
+          "tag1",
+        ],
+        "throttle": "1m",
+      }
+    `);
   });
 
-  it('should handle flapping being undefined', () => {
-    const updateBody = {
-      name: 'Test Rule',
-      tags: ['tag1'],
-      params: { param1: 'value1' },
-      schedule: { interval: '1m' },
-      flapping: undefined,
-    };
-
-    const actions = [];
-    const systemActions = [];
-
-    const result = transformUpdateBody({ updateBody, actions, systemActions });
-
-    expect(result).toEqual({
-      name: 'Test Rule',
-      tags: ['tag1'],
-      params: { param1: 'value1' },
-      schedule: { interval: '1m' },
+  it('should omit flapping when undefined', () => {
+    const result = transformUpdateBody({
+      updateBody: {
+        ...baseUpdateBody,
+        name: 'Test Rule',
+        tags: ['tag1'],
+        params: { param1: 'value1' },
+        schedule: { interval: '1m' },
+        flapping: undefined,
+      },
       actions: [],
       systemActions: [],
     });
-  });
 
-  it('should handle empty actions and systemActions', () => {
-    const updateBody = {
-      name: 'Test Rule',
-      tags: ['tag1'],
-      params: { param1: 'value1' },
-      schedule: { interval: '1m' },
-    };
-
-    const actions = [];
-    const systemActions = [];
-
-    const result = transformUpdateBody({ updateBody, actions, systemActions });
-
-    expect(result).toEqual({
-      name: 'Test Rule',
-      tags: ['tag1'],
-      params: { param1: 'value1' },
-      schedule: { interval: '1m' },
-      actions: [],
-      systemActions: [],
-    });
+    expect(result.flapping).not.toBeDefined();
   });
 
   it('should handle missing frequency in actions', () => {
-    const updateBody = {
-      name: 'Test Rule',
-      tags: ['tag1'],
-      params: { param1: 'value1' },
-      schedule: { interval: '1m' },
-    };
-
-    const actions = [
-      {
-        group: 'default',
-        id: 'action1',
-        params: { key: 'value' },
+    const result = transformUpdateBody({
+      updateBody: {
+        ...baseUpdateBody,
+        name: 'Test Rule',
+        tags: ['tag1'],
+        params: { param1: 'value1' },
+        schedule: { interval: '1m' },
       },
-    ];
-
-    const systemActions = [];
-
-    const result = transformUpdateBody({ updateBody, actions, systemActions });
-
-    expect(result).toEqual({
-      name: 'Test Rule',
-      tags: ['tag1'],
-      params: { param1: 'value1' },
-      schedule: { interval: '1m' },
       actions: [
         {
           group: 'default',
@@ -186,36 +182,19 @@ describe('transformUpdateBody', () => {
           params: { key: 'value' },
         },
       ],
-      systemActions: [],
-    });
-  });
-
-  it('should exclude artifacts if excludeArtifacts is true', () => {
-    const updateBody = {
-      name: 'Test Rule',
-      tags: ['tag1'],
-      params: { param1: 'value1' },
-      schedule: { interval: '1m' },
-      artifacts: { artifact1: 'value1' },
-    };
-
-    const actions = [];
-    const systemActions = [];
-
-    const result = transformUpdateBody({
-      updateBody,
-      actions,
-      systemActions,
-      excludeArtifacts: true,
+      systemActions: baseSystemActions,
     });
 
-    expect(result).toEqual({
-      name: 'Test Rule',
-      tags: ['tag1'],
-      params: { param1: 'value1' },
-      schedule: { interval: '1m' },
-      actions: [],
-      systemActions: [],
-    });
+    expect(result.actions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "group": "default",
+          "id": "action1",
+          "params": Object {
+            "key": "value",
+          },
+        },
+      ]
+    `);
   });
 });

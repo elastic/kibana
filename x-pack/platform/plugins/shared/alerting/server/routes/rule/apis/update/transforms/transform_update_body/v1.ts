@@ -90,7 +90,6 @@ export const transformUpdateBody = <Params extends RuleParams = never>({
   updateBody: UpdateRuleRequestBodyV1<Params>;
   actions: UpdateRuleRequestBodyV1<Params>['actions'];
   systemActions: UpdateRuleRequestBodyV1<Params>['actions'];
-  excludeArtifacts?: boolean;
 }): UpdateRuleData<Params> => {
   return {
     name: updateBody.name,
