@@ -97,10 +97,16 @@ export const configValidator = (configObject: Config, validatorServices: Validat
       }
 
       // Validate PEM format for raw data
-      if (configObject.certificateData && !configObject.certificateData.includes('-----BEGIN CERTIFICATE-----')) {
+      if (
+        configObject.certificateData &&
+        !configObject.certificateData.includes('-----BEGIN CERTIFICATE-----')
+      ) {
         throw new Error('Certificate data must be PEM-encoded');
       }
-      if (configObject.privateKeyData && !configObject.privateKeyData.includes('-----BEGIN PRIVATE KEY-----')) {
+      if (
+        configObject.privateKeyData &&
+        !configObject.privateKeyData.includes('-----BEGIN PRIVATE KEY-----')
+      ) {
         throw new Error('Private key data must be PEM-encoded');
       }
     }

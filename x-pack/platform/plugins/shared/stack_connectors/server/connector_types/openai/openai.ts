@@ -18,6 +18,9 @@ import type {
 } from 'openai/resources/chat/completions';
 import type { Stream } from 'openai/streaming';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import fs from 'fs';
+import https from 'https';
+import type { Logger } from '@kbn/logging';
 import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
   RunActionParamsSchema,
@@ -55,11 +58,12 @@ import {
   sanitizeRequest,
   validatePKICertificates,
 } from './lib/utils';
-import fs from 'fs';
-import https from 'https';
-import { Logger } from '@kbn/logging';
 
-function formatPEMContent(pemContent: string, type: 'CERTIFICATE' | 'PRIVATE KEY', logger: Logger): string {
+function formatPEMContent(
+  pemContent: string,
+  type: 'CERTIFICATE' | 'PRIVATE KEY',
+  logger: Logger
+): string {
   if (!pemContent) return pemContent;
 
   // Normalize input by replacing all whitespace with a single space
@@ -76,7 +80,9 @@ function formatPEMContent(pemContent: string, type: 'CERTIFICATE' | 'PRIVATE KEY
   }
 
   // Extract base64 content between header and footer
-  const base64Content = normalizedContent.slice(header.length, normalizedContent.length - footer.length).trim();
+  const base64Content = normalizedContent
+    .slice(header.length, normalizedContent.length - footer.length)
+    .trim();
 
   // Remove all whitespace from base64 content
   const cleanBase64 = base64Content.replace(/\s+/g, '');
@@ -115,7 +121,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
     // Assign configAny for dynamic property access
     this.configAny = this.config as any;
-    this.logger.debug(`Provider: ${this.provider}, certificateFile: ${this.configAny.certificateFile}, certificateData: ${this.configAny.certificateData}, privateKeyFile: ${this.configAny.privateKeyFile}, privateKeyData: ${this.configAny.privateKeyData}`);
+    this.logger.debug(
+      `Provider: ${this.provider}, certificateFile: ${this.configAny.certificateFile}, certificateData: ${this.configAny.certificateData}, privateKeyFile: ${this.configAny.privateKeyFile}, privateKeyData: ${this.configAny.privateKeyData}`
+    );
 
     try {
       if (
@@ -171,19 +179,28 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           key,
           rejectUnauthorized: this.configAny.verificationMode === 'none',
           checkServerIdentity:
-            this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
+            this.configAny.verificationMode === 'certificate' ||
+            this.configAny.verificationMode === 'none'
               ? () => undefined
               : undefined,
         });
 
         // Debug log the agent configuration
         this.logger.debug('HTTPS Agent configuration:');
-        this.logger.debug(JSON.stringify({
-          cert: cert.slice(0, 100) + '...',
-          key: key.slice(0, 100) + '...',
-          rejectUnauthorized: this.configAny.verificationMode === 'none',
-          checkServerIdentity: this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
-        }, null, 2));
+        this.logger.debug(
+          JSON.stringify(
+            {
+              cert: cert.slice(0, 100) + '...',
+              key: key.slice(0, 100) + '...',
+              rejectUnauthorized: this.configAny.verificationMode === 'none',
+              checkServerIdentity:
+                this.configAny.verificationMode === 'certificate' ||
+                this.configAny.verificationMode === 'none',
+            },
+            null,
+            2
+          )
+        );
 
         try {
           this.openAI = new OpenAI({
@@ -305,7 +322,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             ...sanitizedBody,
             model:
               sanitizedBody.model ??
-              ('defaultModel' in this.configAny ? this.configAny.defaultModel : DEFAULT_OPENAI_MODEL),
+              ('defaultModel' in this.configAny
+                ? this.configAny.defaultModel
+                : DEFAULT_OPENAI_MODEL),
           },
           {
             signal,
@@ -370,7 +389,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             ...sanitizedBody,
             model:
               sanitizedBody.model ??
-              ('defaultModel' in this.configAny ? this.configAny.defaultModel : DEFAULT_OPENAI_MODEL),
+              ('defaultModel' in this.configAny
+                ? this.configAny.defaultModel
+                : DEFAULT_OPENAI_MODEL),
             stream,
           },
           {
@@ -379,7 +400,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           }
         );
         this.logger.debug(`PKI OpenAI Streaming Response (streamApi): ${JSON.stringify(response)}`);
-        return stream ? (response as unknown as RunActionResponse) : (response as RunActionResponse);
+        return stream
+          ? (response as unknown as RunActionResponse)
+          : (response as RunActionResponse);
       } catch (error) {
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
           throw new Error(

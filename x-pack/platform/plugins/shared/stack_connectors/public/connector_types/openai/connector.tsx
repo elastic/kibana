@@ -32,6 +32,7 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18nAuth from '../../common/auth/translations';
 import DashboardLink from './dashboard_link';
 import { OpenAiProviderType } from '../../../common/openai/constants';
@@ -46,7 +47,6 @@ import {
   openAiConfig,
   pkiConfig,
 } from './constants';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 const { emptyField } = fieldValidators;
 

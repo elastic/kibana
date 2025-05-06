@@ -7,6 +7,8 @@
 
 import type { AxiosResponse, ResponseType } from 'axios';
 import type { IncomingMessage } from 'http';
+import fs from 'fs';
+import https from 'https';
 import { OpenAiProviderType } from '../../../../common/openai/constants';
 import type { Config } from '../../../../common/openai/types';
 import {
@@ -21,8 +23,6 @@ import {
   sanitizeRequest as otherOpenAiSanitizeRequest,
   getRequestWithStreamOption as otherOpenAiGetRequestWithStreamOption,
 } from './other_openai_utils';
-import fs from 'fs';
-import https from 'https';
 
 export const sanitizeRequest = (
   provider: string,
@@ -134,7 +134,9 @@ export const getAxiosOptions = (
 
         if (configAny.privateKeyFile) {
           key = fs.readFileSync(
-            Array.isArray(configAny.privateKeyFile) ? configAny.privateKeyFile[0] : configAny.privateKeyFile
+            Array.isArray(configAny.privateKeyFile)
+              ? configAny.privateKeyFile[0]
+              : configAny.privateKeyFile
           );
         } else {
           key = configAny.privateKeyData!;
