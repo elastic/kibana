@@ -34,6 +34,8 @@ export interface ControlsProps extends CommonProps {
   showFitView?: boolean;
   showCenter?: boolean;
   fitViewOptions?: FitViewOptions;
+  /** Duration of zoom transition in milliseconds */
+  zoomDuration?: number;
   /** Callback when zoom in button is clicked */
   onZoomIn?: () => void;
   /** Callback when zoom out button is clicked */
@@ -62,6 +64,7 @@ export const Controls = ({
   showFitView = true,
   showCenter = true,
   fitViewOptions,
+  zoomDuration = 500,
   onZoomIn,
   onZoomOut,
   onCenter,
@@ -73,12 +76,12 @@ export const Controls = ({
   const { maxZoomReached, minZoomReached } = useStore(selector);
 
   const onZoomInHandler = () => {
-    zoomIn();
+    zoomIn({ duration: zoomDuration });
     onZoomIn?.();
   };
 
   const onZoomOutHandler = () => {
-    zoomOut();
+    zoomOut({ duration: zoomDuration });
     onZoomOut?.();
   };
 

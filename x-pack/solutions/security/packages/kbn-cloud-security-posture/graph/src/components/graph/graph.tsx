@@ -72,6 +72,11 @@ export interface GraphProps extends CommonProps {
    * First value is horizontal grid size, second is vertical grid size
    */
   snapGrid?: [number, number];
+  /**
+   * Duration of zoom animations in milliseconds
+   * @default 500
+   */
+  zoomDuration?: number;
 }
 
 const nodeTypes = {
@@ -112,6 +117,7 @@ export const Graph = memo<GraphProps>(
     minimap,
     snapToGrid = true,
     snapGrid = [1, 1],
+    zoomDuration = 500,
     ...rest
   }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
@@ -195,7 +201,7 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls showCenter={false} />
+              <Controls showCenter={false} zoomDuration={zoomDuration} />
             </Panel>
           )}
           {children}
