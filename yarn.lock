@@ -26346,7 +26346,7 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
-puppeteer-core@24.8.1:
+puppeteer-core@24.8.1, puppeteer-core@^24.3.0:
   version "24.8.1"
   resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.8.1.tgz#20728f431f4ed2daba23515df1f1a586c663b4ba"
   integrity sha512-UP/VIxVk/Akrgql3a55ZAIuAIx7+yQevz6qEXFUtSTIynEcgsCJ6tlRdi7uKAAlovmNQG4iNMzq9f8WxZLnGGg==
@@ -26357,18 +26357,6 @@ puppeteer-core@24.8.1:
     devtools-protocol "0.0.1439962"
     typed-query-selector "^2.12.0"
     ws "^8.18.2"
-
-puppeteer-core@^24.3.0:
-  version "24.4.0"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.4.0.tgz#a301c58344fe939b487704593681ea9f913fe6f8"
-  integrity sha512-eFw66gCnWo0X8Hyf9KxxJtms7a61NJVMiSaWfItsFPzFBsjsWdmcNlBdsA1WVwln6neoHhsG+uTVesKmTREn/g==
-  dependencies:
-    "@puppeteer/browsers" "2.8.0"
-    chromium-bidi "2.1.2"
-    debug "^4.4.0"
-    devtools-protocol "0.0.1413902"
-    typed-query-selector "^2.12.0"
-    ws "^8.18.1"
 
 puppeteer@24.8.1:
   version "24.8.1"
@@ -32335,12 +32323,7 @@ ws@^7.0.0, ws@^7.2.0, ws@^7.3.1, ws@^7.4.2:
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.5.10.tgz#58b5c20dc281633f6c19113f39b349bd8bd558d9"
   integrity sha512-+dbF1tHwZpXcbOJdVOkzLDxZP1ailvSxM6ZweXTegylPny803bFhA+vqBYw4s31NSAk4S2Qz+AKXK9a4wkdjcQ==
 
-ws@^8.16.0, ws@^8.18.0, ws@^8.18.1, ws@^8.2.3, ws@^8.9.0:
-  version "8.18.1"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.1.tgz#ea131d3784e1dfdff91adb0a4a116b127515e3cb"
-  integrity sha512-RKW2aJZMXeMxVpnZ6bck+RswznaxmzdULiBr6KY7XkTnW8uvt0iT9H5DkHUChXrc+uurzwa0rVI16n/Xzjdz1w==
-
-ws@^8.18.2:
+ws@^8.16.0, ws@^8.18.0, ws@^8.18.1, ws@^8.18.2, ws@^8.2.3, ws@^8.9.0:
   version "8.18.2"
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.2.tgz#42738b2be57ced85f46154320aabb51ab003705a"
   integrity sha512-DMricUmwGZUVr++AEAe2uiVM7UoO9MAVZMDu05UQOaUII0lp+zOzLLU4Xqh/JvTqklB1T4uELaaPBKyjE1r4fQ==
