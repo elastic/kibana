@@ -9,7 +9,7 @@
 
 import { inject, injectable } from 'inversify';
 import { CoreStart } from '@kbn/core-di-browser';
-import { HttpStart } from '@kbn/core-http-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 
 @injectable()
 export class EchoService {

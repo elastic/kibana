@@ -9,6 +9,7 @@
 
 import { ContainerModule, type ServiceIdentifier } from 'inversify';
 
+/** @internal */
 export function toContainerModule<T extends object>(
   object: T,
   iteratee = toServiceIdentifier<T>()
@@ -20,6 +21,7 @@ export function toContainerModule<T extends object>(
   });
 }
 
+/** @internal */
 export function toServiceIdentifier<T>(
   ...prefix: string[]
 ): <K extends keyof T>(key: K) => ServiceIdentifier<T[K]> {
