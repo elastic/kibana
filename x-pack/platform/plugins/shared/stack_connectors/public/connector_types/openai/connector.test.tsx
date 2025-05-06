@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -443,13 +443,23 @@ describe('ConnectorFields renders', () => {
         return null;
       });
 
-      const { findByTestId } = render(
-        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
+      const TestComponent = ({ registerPreSubmitValidator }: { registerPreSubmitValidator: (validator: any) => void }) => {
+        useEffect(() => {
+          registerPreSubmitValidator(preSubmitValidator);
+        }, [registerPreSubmitValidator]);
+
+        return (
           <ConnectorFields 
             readOnly={false} 
             isEdit={false} 
-            registerPreSubmitValidator={() => preSubmitValidator} 
+            registerPreSubmitValidator={registerPreSubmitValidator} 
           />
+        );
+      };
+
+      const { findByTestId } = render(
+        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
+          <TestComponent registerPreSubmitValidator={(validator) => validator} />
         </ConnectorFormTestProvider>
       );
 
@@ -492,13 +502,23 @@ describe('ConnectorFields renders', () => {
         return null;
       });
 
-      const { findByTestId } = render(
-        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
+      const TestComponent = ({ registerPreSubmitValidator }: { registerPreSubmitValidator: (validator: any) => void }) => {
+        useEffect(() => {
+          registerPreSubmitValidator(preSubmitValidator);
+        }, [registerPreSubmitValidator]);
+
+        return (
           <ConnectorFields 
             readOnly={false} 
             isEdit={false} 
-            registerPreSubmitValidator={() => preSubmitValidator} 
+            registerPreSubmitValidator={registerPreSubmitValidator} 
           />
+        );
+      };
+
+      const { findByTestId } = render(
+        <ConnectorFormTestProvider connector={pkiConnector} onSubmit={onSubmit}>
+          <TestComponent registerPreSubmitValidator={(validator) => validator} />
         </ConnectorFormTestProvider>
       );
 
