@@ -126,7 +126,6 @@ export const buildEntityAlertsQuery = ({
   severity,
   sortField,
   sortDirection,
-  runtimeMappings,
 }: BuildEntityAlertsQueryParams) => {
   return {
     size: size || 0,

@@ -190,6 +190,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
         runtimeMappings,
       })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setAlertsQuery, from, to, entityFilter, additionalFilters]);
 
   useEffect(() => {

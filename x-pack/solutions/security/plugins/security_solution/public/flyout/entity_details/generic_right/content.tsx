@@ -26,7 +26,7 @@ import { ExpandablePanel } from '../../shared/components/expandable_panel';
 interface GenericEntityFlyoutContentProps {
   source: GenericEntityRecord;
   openGenericEntityDetailsPanelByPath: (path: EntityDetailsPath) => void;
-  insightField: string;
+  insightsField: string;
   insightsValue: string;
 }
 
