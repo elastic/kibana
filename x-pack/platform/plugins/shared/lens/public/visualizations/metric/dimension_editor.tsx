@@ -140,6 +140,7 @@ type SecondaryTrendConfigByType<T extends SecondaryTrendType> = Extract<
   { type: T }
 >;
 
+const reversePostfix = '--reversed';
 function useTrendPalettes(): { defaultPalette: TrendPalette; allPalettes: TrendPalette[] } {
   const palettes = useKbnPalettes();
   const computedPalettes = useMemo(() => {
@@ -158,7 +159,7 @@ function useTrendPalettes(): { defaultPalette: TrendPalette; allPalettes: TrendP
         defaultPalette,
         {
           ...defaultPalette,
-          id: `${KbnPalette.CompareTo}--reversed`,
+          id: `${KbnPalette.CompareTo}${reversePostfix}`,
           name: i18n.translate(
             'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.trendReversed.label',
             {
@@ -182,6 +183,8 @@ function useTrendPalettes(): { defaultPalette: TrendPalette; allPalettes: TrendP
   }, [palettes]);
   return computedPalettes;
 }
+
+function findPalette(paletteId: string, palettes: TrendPalette[]) {}
 
 function TrendEditor({
   accessor,
@@ -217,8 +220,8 @@ function TrendEditor({
 
   const selectedPalette = secondaryTrend
     ? allPalettes.find(
-        ({ id, reversed }) =>
-          id === secondaryTrend.paletteId && reversed === secondaryTrend.reversed
+        ({ paletteId, reversed }) =>
+          paletteId === secondaryTrend.paletteId && reversed === secondaryTrend.reversed
       ) || defaultPalette
     : defaultPalette;
 
