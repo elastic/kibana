@@ -7,14 +7,18 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
+import { merge } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  initializeTimeRange,
+  initializeTimeRangeManager,
   initializeTitleManager,
+  timeRangeComparators,
+  titleComparators,
   useFetchContext,
 } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -29,35 +33,42 @@ import { useKibanaContextForPluginProvider } from '../../hooks/use_kibana';
 import type { InfraClientStartDeps, InfraClientStartExports } from '../../types';
 
 export function getLogStreamEmbeddableFactory(services: Services) {
-  const factory: ReactEmbeddableFactory<
-    LogStreamSerializedState,
-    LogStreamSerializedState,
-    LogStreamApi
-  > = {
+  const factory: EmbeddableFactory<LogStreamSerializedState, LogStreamApi> = {
     type: LOG_STREAM_EMBEDDABLE,
-    deserializeState: (state) => state.rawState,
-    buildEmbeddable: async (state, buildApi) => {
-      const timeRangeContext = initializeTimeRange(state);
-      const titleManager = initializeTitleManager(state);
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const timeRangeContext = initializeTimeRangeManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState.rawState);
 
-      const api = buildApi(
-        {
-          ...timeRangeContext.api,
-          ...titleManager.api,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...timeRangeContext.serialize(),
-                ...titleManager.serialize(),
-              },
-            };
+      function serializeState() {
+        return {
+          rawState: {
+            ...timeRangeContext.getLatestState(),
+            ...titleManager.getLatestState(),
           },
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges({
+        uuid,
+        parentApi,
+        serializeState,
+        anyStateChange$: merge(timeRangeContext.anyStateChange$, titleManager.anyStateChange$),
+        getComparators: () => ({
+          ...timeRangeComparators,
+          ...titleComparators,
+        }),
+        onReset: (lastSaved) => {
+          timeRangeContext.reinitializeState(lastSaved?.rawState);
+          titleManager.reinitializeState(lastSaved?.rawState);
         },
-        {
-          ...timeRangeContext.comparators,
-          ...titleManager.comparators,
-        }
-      );
+      });
+
+      const api = finalizeApi({
+        ...timeRangeContext.api,
+        ...titleManager.api,
+        ...unsavedChangesApi,
+        serializeState,
+      });
 
       return {
         api,

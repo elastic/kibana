@@ -139,6 +139,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/apm-sources-access-plugin",
+    "@kbn/presentation-containers",
     "@kbn/object-utils",
   ],
   "exclude": ["target/**/*"]

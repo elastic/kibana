@@ -42,7 +42,5 @@ export interface EmbeddableAlertsTablePublicStartDependencies {
 
 export type EmbeddableAlertsTableSerializedState = SerializedTitles & SerializedTimeRange;
 
-export type EmbeddableAlertsTableRuntimeState = EmbeddableAlertsTableSerializedState;
-
 export type EmbeddableAlertsTableApi = DefaultEmbeddableApi<EmbeddableAlertsTableSerializedState> &
   PublishesDataLoading;
