@@ -92,6 +92,12 @@ export async function loadDashboardFile(filename: string) {
         './otel_native-edot-nodejs.json'
       );
     }
+    case 'otel_native-edot-golang': {
+      return import(
+        /* webpackChunkName: "lazyGolangOtelNativeDashboard" */
+        './otel_native-edot-golang.json'
+      );
+    }
     default: {
       break;
     }
