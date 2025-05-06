@@ -31,7 +31,7 @@ examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 examples/response_stream @elastic/ml-ui
 examples/routing_example @elastic/kibana-core
-examples/screenshot_mode_example @elastic/appex-sharedux
+examples/screenshot_mode_example @elastic/response-ops
 examples/search_examples @elastic/kibana-data-discovery
 examples/share_examples @elastic/appex-sharedux
 examples/sse_example @elastic/kibana-core
@@ -318,7 +318,7 @@ src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-gen-ai-functional-testing @elastic/appex-ai-infra
-src/platform/packages/private/kbn-generate-csv @elastic/appex-sharedux
+src/platform/packages/private/kbn-generate-csv @elastic/response-ops
 src/platform/packages/private/kbn-get-repo-files @elastic/kibana-operations
 src/platform/packages/private/kbn-grid-layout @elastic/kibana-presentation
 src/platform/packages/private/kbn-handlebars @elastic/kibana-security
@@ -340,21 +340,21 @@ src/platform/packages/private/kbn-peggy @elastic/kibana-operations
 src/platform/packages/private/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
 src/platform/packages/private/kbn-repo-packages @elastic/kibana-operations
 src/platform/packages/private/kbn-repo-path @elastic/kibana-operations
-src/platform/packages/private/kbn-reporting/common @elastic/appex-sharedux
-src/platform/packages/private/kbn-reporting/export_types/csv @elastic/appex-sharedux
-src/platform/packages/private/kbn-reporting/export_types/csv_common @elastic/appex-sharedux
-src/platform/packages/private/kbn-reporting/export_types/pdf @elastic/appex-sharedux
-src/platform/packages/private/kbn-reporting/export_types/pdf_common @elastic/appex-sharedux
-src/platform/packages/private/kbn-reporting/export_types/png @elastic/appex-sharedux
-src/platform/packages/private/kbn-reporting/export_types/png_common @elastic/appex-sharedux
-src/platform/packages/private/kbn-reporting/get_csv_panel_actions @elastic/appex-sharedux
-src/platform/packages/private/kbn-reporting/mocks_server @elastic/appex-sharedux
-src/platform/packages/private/kbn-reporting/public @elastic/appex-sharedux
-src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
+src/platform/packages/private/kbn-reporting/common @elastic/response-ops
+src/platform/packages/private/kbn-reporting/export_types/csv @elastic/response-ops
+src/platform/packages/private/kbn-reporting/export_types/csv_common @elastic/response-ops
+src/platform/packages/private/kbn-reporting/export_types/pdf @elastic/response-ops
+src/platform/packages/private/kbn-reporting/export_types/pdf_common @elastic/response-ops
+src/platform/packages/private/kbn-reporting/export_types/png @elastic/response-ops
+src/platform/packages/private/kbn-reporting/export_types/png_common @elastic/response-ops
+src/platform/packages/private/kbn-reporting/get_csv_panel_actions @elastic/response-ops
+src/platform/packages/private/kbn-reporting/mocks_server @elastic/response-ops
+src/platform/packages/private/kbn-reporting/public @elastic/response-ops
+src/platform/packages/private/kbn-reporting/server @elastic/response-ops
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
-src/platform/packages/private/kbn-screenshotting-server @elastic/appex-sharedux
+src/platform/packages/private/kbn-screenshotting-server @elastic/response-ops
 src/platform/packages/private/kbn-some-dev-log @elastic/kibana-operations
 src/platform/packages/private/kbn-stdio-dev-helpers @elastic/kibana-operations
 src/platform/packages/private/kbn-telemetry-tools @elastic/kibana-core
@@ -685,7 +685,7 @@ src/platform/plugins/shared/saved_objects_finder @elastic/kibana-data-discovery
 src/platform/plugins/shared/saved_objects_management @elastic/kibana-core
 src/platform/plugins/shared/saved_objects_tagging_oss @elastic/appex-sharedux
 src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
-src/platform/plugins/shared/screenshot_mode @elastic/appex-sharedux
+src/platform/plugins/shared/screenshot_mode @elastic/response-ops
 src/platform/plugins/shared/share @elastic/appex-sharedux
 src/platform/plugins/shared/telemetry @elastic/kibana-core
 src/platform/plugins/shared/telemetry_collection_manager @elastic/kibana-core
@@ -750,7 +750,7 @@ x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
 x-pack/examples/gen_ai_streaming_response_example @elastic/response-ops
 x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
 x-pack/examples/lens_embeddable_inline_editing_example @elastic/kibana-visualizations
-x-pack/examples/screenshotting_example @elastic/appex-sharedux
+x-pack/examples/screenshotting_example @elastic/response-ops
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_maps_source_example @elastic/kibana-presentation
@@ -860,9 +860,10 @@ x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
 x-pack/platform/plugins/private/logstash @elastic/logstash
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
+x-pack/platform/plugins/private/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
-x-pack/platform/plugins/private/reporting @elastic/appex-sharedux
+x-pack/platform/plugins/private/reporting @elastic/response-ops
 x-pack/platform/plugins/private/rollup @elastic/kibana-management
 x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 x-pack/platform/plugins/private/snapshot_restore @elastic/kibana-management
@@ -945,7 +946,6 @@ x-pack/solutions/observability/plugins/logs_explorer @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
-x-pack/solutions/observability/plugins/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
@@ -985,6 +985,7 @@ x-pack/solutions/security/packages/features @elastic/security-threat-hunting-exp
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common @elastic/security-detection-engine
 x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
@@ -1222,22 +1223,25 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Global Experience
 
-### Global Experience Reporting
-/x-pack/test/functional/apps/dashboard/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/apps/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/apps/reporting_management/ @elastic/appex-sharedux
-/x-pack/test/examples/screenshotting/ @elastic/appex-sharedux
-/x-pack/test/functional/es_archives/lens/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/es_archives/reporting/ @elastic/appex-sharedux
-/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/appex-sharedux
-/x-pack/test/reporting_api_integration/ @elastic/appex-sharedux
-/x-pack/test/reporting_functional/ @elastic/appex-sharedux
-/x-pack/test/stack_functional_integration/apps/reporting/ @elastic/appex-sharedux
-/docs/user/reporting @elastic/appex-sharedux
-/docs/settings/reporting-settings.asciidoc @elastic/appex-sharedux
-/docs/setup/configuring-reporting.asciidoc @elastic/appex-sharedux
-/x-pack/test_serverless/**/test_suites/common/reporting/ @elastic/appex-sharedux
-/x-pack/test/accessibility/apps/group3/reporting.ts @elastic/appex-sharedux
+### Reporting
+/x-pack/test/functional/apps/dashboard/reporting/ @elastic/response-ops
+/x-pack/test/functional/apps/reporting/ @elastic/response-ops
+/x-pack/test/functional/apps/reporting_management/ @elastic/response-ops
+/x-pack/test/examples/screenshotting/ @elastic/response-ops
+/x-pack/test/functional/es_archives/lens/reporting/ @elastic/response-ops
+/x-pack/test/functional/es_archives/reporting/ @elastic/response-ops
+/x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/response-ops
+/x-pack/test/reporting_api_integration/ @elastic/response-ops
+/x-pack/test/reporting_functional/ @elastic/response-ops
+/x-pack/test/stack_functional_integration/apps/reporting/ @elastic/response-ops
+/docs/user/reporting @elastic/response-ops
+/docs/settings/reporting-settings.asciidoc @elastic/response-ops
+/docs/setup/configuring-reporting.asciidoc @elastic/response-ops
+/x-pack/test_serverless/**/test_suites/common/reporting/ @elastic/response-ops
+/x-pack/test/accessibility/apps/group3/reporting.ts @elastic/response-ops
+/x-pack/test/functional/page_objects/reporting_page.ts @elastic/response-ops
+/x-pack/test/upgrade/apps/reporting @elastic/response-ops
+/x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting @elastic/response-ops
 
 ### Global Experience Tagging
 /x-pack/test/saved_object_tagging/ @elastic/appex-sharedux
@@ -1591,10 +1595,14 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.devcontainer/ @elastic/kibana-operations
 /.eslintrc.js @elastic/kibana-operations
 /.eslintignore @elastic/kibana-operations
+/.ci/.storybook @elastic/kibana-operations
 
 # QA - Appex QA
+.buildkite/scout_ci_config.yml @elastic/appex-qa
 /x-pack/platform/plugins/shared/maps/ui_tests @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/ui_tests/ @elastic/appex-qa # temporarily
+/x-pack/platform/plugins/private/discover_enhanced/ui_tests/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
+/x-pack/platform/plugins/private/painless_lab/ui_tests # temporarily
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
 /x-pack/test/functional/es_archives/filebeat @elastic/appex-qa
@@ -2635,10 +2643,8 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/test/functional_solution_sidenav/index.ts @elastic/appex-sharedux
 /x-pack/test/functional_cloud @elastic/appex-sharedux
 /x-pack/test/functional/services/user_menu.js @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/179270
-/x-pack/test/functional/page_objects/reporting_page.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
 /x-pack/test/accessibility/apps/**/index.ts @elastic/appex-sharedux
-/x-pack/test/upgrade/apps/reporting @elastic/appex-sharedux
 /x-pack/test/functional/apps/advanced_settings @elastic/appex-sharedux
 /test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /x-pack/test/functional/fixtures/kbn_archiver/global_search @elastic/appex-sharedux
@@ -2664,7 +2670,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 packages/react @elastic/appex-sharedux
 test/functional/page_objects/solution_navigation.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
-/x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting @elastic/appex-sharedux
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
 

@@ -1447,6 +1447,7 @@ module.exports = {
       files: [
         'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
+        'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
         'src/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/solutions/**/plugins/**/ui_tests/**/*.ts',
@@ -1474,7 +1475,8 @@ module.exports = {
         'playwright/no-slowed-test': 'error',
         'playwright/no-standalone-expect': 'error',
         'playwright/no-unsafe-references': 'error',
-        'playwright/no-wait-for-selector': 'warn',
+        'playwright/no-useless-await': 'error',
+        'playwright/no-wait-for-selector': 'error',
         'playwright/max-nested-describe': ['error', { max: 1 }],
         'playwright/missing-playwright-await': 'error',
         'playwright/prefer-comparison-matcher': 'error',

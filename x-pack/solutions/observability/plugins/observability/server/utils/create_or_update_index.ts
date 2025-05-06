@@ -60,7 +60,7 @@ export async function createOrUpdateIndex({
       }
     );
   } catch (e) {
-    logger.error(`Could not create index: '${index}'. Error: ${e.message}.`);
+    logger.error(`Could not create index: '${index}'`, { error: e });
   }
 }
 

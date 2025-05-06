@@ -8,7 +8,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useAssistantContext, type Conversation } from '@kbn/elastic-assistant';
+import {
+  useAssistantContext,
+  type Conversation,
+  useAssistantLastConversation,
+} from '@kbn/elastic-assistant';
 import { useCurrentConversation } from '@kbn/elastic-assistant/impl/assistant/use_current_conversation';
 import { useDataStreamApis } from '@kbn/elastic-assistant/impl/assistant/use_data_stream_apis';
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
@@ -62,8 +66,10 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     http,
     assistantAvailability: { isAssistantEnabled },
     baseConversations,
-    getLastConversationId,
   } = useAssistantContext();
+  const { getLastConversationId } = useAssistantLastConversation({
+    spaceId,
+  });
   const {
     allSystemPrompts,
     conversations,
@@ -113,6 +119,10 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
             provider: apiProvider,
             model,
           },
+        }).catch(() => {
+          // If the conversation is not found, it means the connector was deleted
+          // and return null to avoid setting the conversation
+          return null;
         });
 
         if (conversation && onConversationChange != null) {

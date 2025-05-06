@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
 import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
 import { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
-import { ElasticAssistantPluginRouter, GetElser } from '../types';
+import { ElasticAssistantPluginRouter } from '../types';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
 import { readConversationRoute } from './user_conversations/read_route';
@@ -41,15 +41,16 @@ import {
 import { deleteKnowledgeBaseEntryRoute } from './knowledge_base/entries/delete_route';
 import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_route';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
+import type { ConfigSchema } from '../config_schema';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  getElserId: GetElser
+  config: ConfigSchema
 ) => {
   /** PUBLIC */
   // Chat
-  chatCompleteRoute(router, getElserId);
+  chatCompleteRoute(router, config);
 
   /** INTERNAL */
   // Capabilities
@@ -82,11 +83,11 @@ export const registerRoutes = (
   bulkActionKnowledgeBaseEntriesRoute(router);
 
   // Actions Connector Execute (LLM Wrapper)
-  postActionsConnectorExecuteRoute(router, getElserId);
+  postActionsConnectorExecuteRoute(router, config);
 
   // Evaluate
   getEvaluateRoute(router);
-  postEvaluateRoute(router, getElserId);
+  postEvaluateRoute(router);
 
   // Prompts
   bulkPromptsRoute(router, logger);

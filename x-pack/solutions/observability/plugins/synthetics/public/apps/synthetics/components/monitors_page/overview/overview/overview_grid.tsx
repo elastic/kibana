@@ -150,7 +150,7 @@ export const OverviewGrid = memo(() => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <div style={{ height: listHeight }}>
+      <div style={groupField === 'none' ? { height: listHeight } : undefined}>
         {groupField === 'none' ? (
           loaded && monitorsSortedByStatus.length ? (
             <EuiAutoSizer>

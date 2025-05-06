@@ -62,13 +62,13 @@ export async function createCloudApmPackgePolicy({
     fleetPluginStart,
     apmIndices,
   });
-  logger.info(`Fleet migration on Cloud - apmPackagePolicy create start`);
+  logger.debug(`Fleet migration on Cloud - apmPackagePolicy create start`);
   const apmPackagePolicy = await fleetPluginStart.packagePolicyService.create(
     savedObjectsClient,
     esClient,
     mergedAPMPackagePolicy,
     { id: ELASTIC_CLOUD_APM_AGENT_POLICY_ID, force: true, bumpRevision: true }
   );
-  logger.info(`Fleet migration on Cloud - apmPackagePolicy create end`);
+  logger.debug(`Fleet migration on Cloud - apmPackagePolicy create end`);
   return apmPackagePolicy;
 }

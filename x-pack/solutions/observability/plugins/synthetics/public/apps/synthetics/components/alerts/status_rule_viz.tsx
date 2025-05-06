@@ -11,14 +11,17 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useSelector, useDispatch } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { RuleMonitorsTable } from './rule_monitors_table';
 import { apiService } from '../../../../utils/api_service';
 import { inspectStatusRuleAction } from '../../state/alert_rules';
@@ -31,15 +34,17 @@ export const StatusRuleViz = ({
 }: {
   ruleParams: StatusRuleParamsProps['ruleParams'];
 }) => {
-  const { data } = useSelector(selectInspectStatusRule);
+  const { data, loading } = useSelector(selectInspectStatusRule);
   const dispatch = useDispatch();
   const {
-    services: { inspector },
+    services: { inspector, uiSettings },
   } = useKibana<ClientPluginsStart>();
 
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
   const { inspectorAdapters, addInspectorRequest } = useInspectorContext();
+
+  const isInspectorEnabled = uiSettings.get<boolean>(enableInspectEsQueries);
 
   const inspect = () => {
     inspector.open(inspectorAdapters);
@@ -55,9 +60,22 @@ export const StatusRuleViz = ({
     dispatch(inspectStatusRuleAction.get(ruleParams));
   }, [ruleParams, dispatch, inspectorAdapters?.requests]);
 
+  const detailsButton = (
+    <EuiButtonEmpty
+      data-test-subj="syntheticsStatusRuleVizInspectButton"
+      onClick={inspect}
+      iconType="inspect"
+      size="xs"
+    >
+      {i18n.translate('xpack.synthetics.rules.details', {
+        defaultMessage: 'Details',
+      })}
+    </EuiButtonEmpty>
+  );
+
   return (
     <EuiCallOut iconType="search" size="s">
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFlexItemLabel', {
             defaultMessage: 'Rule applies to ',
@@ -68,17 +86,19 @@ export const StatusRuleViz = ({
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
             button={
-              <EuiButtonEmpty
-                data-test-subj="syntheticsStatusRuleVizMonitorQueryIDsButton"
-                size="xs"
-                onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-              >
-                {i18n.translate('xpack.synthetics.statusRuleViz.monitorQueryIdsPopoverButton', {
-                  defaultMessage:
-                    '{total} existing {total, plural, one {monitor} other {monitors}}',
-                  values: { total: data?.monitors.length },
-                })}
-              </EuiButtonEmpty>
+              loading ? undefined : (
+                <EuiButtonEmpty
+                  data-test-subj="syntheticsStatusRuleVizMonitorQueryIDsButton"
+                  size="xs"
+                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                >
+                  {i18n.translate('xpack.synthetics.statusRuleViz.monitorQueryIdsPopoverButton', {
+                    defaultMessage:
+                      '{total} existing {total, plural, one {monitor} other {monitors}}',
+                    values: { total: data?.monitors.length },
+                  })}
+                </EuiButtonEmpty>
+              )
             }
           >
             <EuiPopoverTitle>
@@ -93,21 +113,25 @@ export const StatusRuleViz = ({
             <RuleMonitorsTable />
           </EuiPopover>
         </EuiFlexItem>
+        {loading && (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="s" />
+          </EuiFlexItem>
+        )}
         {/* to push detail button to end*/}
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="syntheticsStatusRuleVizInspectButton"
-            onClick={inspect}
-            iconType="inspect"
-            size="xs"
-          >
-            {i18n.translate('xpack.synthetics.rules.details', {
-              defaultMessage: 'Details',
-            })}
-          </EuiButtonEmpty>
+          {isInspectorEnabled ? (
+            detailsButton
+          ) : (
+            <EuiToolTip content={inspectorDisabledTooltip}>{detailsButton}</EuiToolTip>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCallOut>
   );
 };
+
+const inspectorDisabledTooltip = i18n.translate('xpack.synthetics.rules.inspectorDisabled', {
+  defaultMessage: 'Enable "Inspect ES queries" in Advanced Settings to see Details',
+});

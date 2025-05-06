@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { MetricTile } from './metric_tiles';
 import { Metric } from '../lib';
 
@@ -50,27 +50,41 @@ const metricWithMeta: Metric = {
 
 describe('MetricTile', () => {
   it('correct displays an untyped metric', () => {
-    const component = shallow(<MetricTile metric={untypedMetric} />);
-    expect(component).toMatchSnapshot();
+    render(<MetricTile metric={untypedMetric} />);
+    expect(screen.getByTestId('serverMetric-a-metric')).toBeInTheDocument();
+    expect(screen.getByText('A metric')).toBeInTheDocument();
+    expect(screen.getByText('1.80')).toBeInTheDocument();
   });
-
   it('correct displays a byte metric', () => {
-    const component = shallow(<MetricTile metric={byteMetric} />);
-    expect(component).toMatchSnapshot();
+    render(<MetricTile metric={byteMetric} />);
+    expect(screen.getByTestId('serverMetric-heap-total')).toBeInTheDocument();
+    expect(screen.getByText('Heap Total')).toBeInTheDocument();
+    expect(screen.getByText('1.40 GB')).toBeInTheDocument();
   });
 
   it('correct displays a float metric', () => {
-    const component = shallow(<MetricTile metric={floatMetric} />);
-    expect(component).toMatchSnapshot();
+    render(<MetricTile metric={floatMetric} />);
+    expect(screen.getByText('Load')).toBeInTheDocument();
+    expect(screen.getByText('4.05, 3.37, 3.12')).toBeInTheDocument();
   });
 
   it('correct displays a time metric', () => {
-    const component = shallow(<MetricTile metric={timeMetric} />);
-    expect(component).toMatchSnapshot();
+    const { getByTestId } = render(<MetricTile metric={timeMetric} />);
+    const card = getByTestId('serverMetric-response-time-max');
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveTextContent('Response Time Max');
+    expect(card).toHaveTextContent('1234.00 ms');
   });
 
   it('correctly displays a metric with metadata', () => {
-    const component = shallow(<MetricTile metric={metricWithMeta} />);
-    expect(component).toMatchSnapshot();
+    const { getByTestId } = render(<MetricTile metric={metricWithMeta} />);
+    const card = getByTestId('serverMetric-delay');
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveTextContent('Delay avg');
+    expect(card).toHaveTextContent('1.00 ms');
+    expect(card).toHaveTextContent('Percentiles');
+    expect(card).toHaveTextContent('50: 1.00 ms; 95: 5.00 ms; 99: 10.00 ms', {
+      normalizeWhitespace: true,
+    });
   });
 });

@@ -187,7 +187,6 @@ export const TIMELION_MIN_INTERVAL_ID = 'timelion:min_interval';
 export const TIMELION_TARGET_BUCKETS_ID = 'timelion:target_buckets';
 
 // Visualization settings
-export const VISUALIZATION_COLOR_MAPPING_ID = 'visualization:colorMapping';
 export const VISUALIZATION_HEATMAP_MAX_BUCKETS_ID = 'visualization:heatmap:maxBuckets';
 export const VISUALIZATION_USE_LEGACY_TIME_AXIS_ID = 'visualization:useLegacyTimeAxis';
 export const VISUALIZATION_LEGACY_GAUGE_CHARTS_LIBRARY_ID =

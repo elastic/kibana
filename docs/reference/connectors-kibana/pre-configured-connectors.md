@@ -8,7 +8,7 @@ mapped_pages:
 If you are running {{kib}} on-prem, you can preconfigure a connector to have all the information it needs prior to startup by adding it to the `kibana.yml` file.
 
 ::::{note}
-{{ess}} provides a preconfigured email connector but you cannot create additional preconfigured connectors.
+{{ech}} provides a preconfigured email connector but you cannot create additional preconfigured connectors.
 ::::
 
 
@@ -66,10 +66,8 @@ Sensitive properties, such as passwords, can also be stored in the [{{kib}} keys
 
 go to the **{{connectors-ui}}** page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search). Preconfigured connectors appear regardless of which space you are in. They are tagged as “preconfigured”, and you cannot delete them.
 
-:::{image} ../../images/preconfigured-connectors-managing.png
-:alt: Connectors managing tab with pre-configured
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Connectors managing tab with pre-configured](../images/preconfigured-connectors-managing.png)
 
 Clicking a preconfigured connector shows the description, but not the configuration.
 
@@ -93,10 +91,8 @@ This functionality is in technical preview and may be changed or removed in a fu
 
 When you subsequently create rules, you can use the `Alert history Elasticsearch index (preconfigured)` connector.
 
-:::{image} ../../images/pre-configured-alert-history-connector.png
-:alt: Creating a rule action that uses the pre-configured alert history connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Creating a rule action that uses the pre-configured alert history connector](../images/pre-configured-alert-history-connector.png)
 
 Documents are indexed using a preconfigured schema that captures the [action variables](docs-content://explore-analyze/alerts-cases/alerts/create-manage-rules.md#defining-rules-actions-variables) available for the rule. By default, these documents are indexed into the `kibana-alert-history-default` index, but you can specify a different index. Index names must start with `kibana-alert-history-` to take advantage of the preconfigured alert history index template.
 

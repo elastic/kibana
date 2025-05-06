@@ -10,6 +10,10 @@
 import fastGlob from 'fast-glob';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
+import fs from 'fs';
+import yaml from 'js-yaml';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 export const DEFAULT_TEST_PATH_PATTERNS = ['src/platform/plugins', 'x-pack/**/plugins'];
 
@@ -87,4 +91,57 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
   });
 
   return pluginsWithConfigs;
+};
+
+export const validateWithScoutCiConfig = (
+  log: ToolingLog,
+  pluginsWithConfigs: Map<string, PluginScoutConfig>
+) => {
+  const scoutCiConfigRelPath = path.join('.buildkite', 'scout_ci_config.yml');
+  const scoutCiConfigPath = path.resolve(REPO_ROOT, scoutCiConfigRelPath);
+  const ciConfig = yaml.load(fs.readFileSync(scoutCiConfigPath, 'utf8')) as {
+    ui_tests: {
+      enabled?: string[];
+      disabled?: string[];
+    };
+  };
+
+  const enabledPlugins = new Set(ciConfig.ui_tests.enabled || []);
+  const disabledPlugins = new Set(ciConfig.ui_tests.disabled || []);
+  const allRegisteredPlugins = new Set([...enabledPlugins, ...disabledPlugins]);
+
+  const unregisteredPlugins: string[] = [];
+  const runnablePlugins = new Map<string, PluginScoutConfig>();
+
+  for (const [pluginName, config] of pluginsWithConfigs.entries()) {
+    if (!allRegisteredPlugins.has(pluginName)) {
+      unregisteredPlugins.push(pluginName);
+    } else if (enabledPlugins.has(pluginName)) {
+      runnablePlugins.set(pluginName, config);
+    }
+  }
+
+  if (unregisteredPlugins.length > 0) {
+    throw createFailError(
+      `The following plugins are not registered in Scout CI config '${scoutCiConfigRelPath}':\n${unregisteredPlugins
+        .map((plugin) => {
+          return `- ${plugin}`;
+        })
+        .join('\n')}\nRead more: src/platform/packages/shared/kbn-scout/README.md`
+    );
+  }
+
+  if (disabledPlugins.size > 0) {
+    log.warning(
+      `The following plugins are disabled in '${scoutCiConfigRelPath}' and will be excluded from CI run\n${[
+        ...disabledPlugins,
+      ]
+        .map((plugin) => {
+          return `- ${plugin}`;
+        })
+        .join('\n')}`
+    );
+  }
+
+  return runnablePlugins;
 };

@@ -20,6 +20,7 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
+import { SubItemTitle } from './subitem_title';
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../utils';
 import type { BasePathService, NavigateToUrlFn } from '../../types';
@@ -117,7 +118,6 @@ const serializeNavNode = (
   const serialized: ChromeProjectNavigationNode = {
     ...navNode,
   };
-
   serialized.renderAs = getRenderAs(serialized, { isSideNavCollapsed });
   serialized.spaceBefore = getSpaceBefore(serialized, {
     isSideNavCollapsed,
@@ -257,7 +257,7 @@ const getEuiProps = (
   // if it is the highest match in the URL, not if one of its children is also active.
   const onlyIfHighestMatch = isAccordion && !isCollapsible;
   const isActive = isActiveFromUrl(navNode.path, activeNodes, onlyIfHighestMatch);
-  const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
+  const isExternal = Boolean(href) && navNode.isExternalLink && isAbsoluteLink(href!);
   const isAccordionExpanded = !getIsCollapsed(path);
 
   let isSelected = isActive;
@@ -368,7 +368,7 @@ function nodeToEuiCollapsibleNavProps(
     _navNode,
     deps
   );
-  const { id, path, href, renderAs, isCollapsible, spaceBefore } = navNode;
+  const { id, path, href, renderAs, isCollapsible, spaceBefore, isExternalLink } = navNode;
 
   if (navNode.renderItem) {
     // Leave the rendering to the consumer
@@ -402,14 +402,17 @@ function nodeToEuiCollapsibleNavProps(
       isSelected,
       onClick,
       icon: navNode.icon,
-      title: navNode.title,
+      // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
+      title: navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
       ['data-test-subj']: dataTestSubj,
       iconProps: { size: deps.treeDepth === 0 ? 'm' : 's' },
 
       // Render as an accordion or a link (handled by EUI) depending if
       // "items" is undefined or not. If it is undefined --> a link, otherwise an
       // accordion is rendered.
-      ...(subItems ? { items: subItems, isCollapsible } : { href, linkProps }),
+      ...(subItems
+        ? { items: subItems, isCollapsible }
+        : { href, ...linkProps, external: isExternalLink }),
     },
   ];
 

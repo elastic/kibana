@@ -5090,13 +5090,13 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
-        "id": "def-common.TRANSACTION_AGENT_MARKS",
+        "id": "def-common.TRANSACTION_MARKS_AGENT",
         "type": "string",
         "tags": [],
-        "label": "TRANSACTION_AGENT_MARKS",
+        "label": "TRANSACTION_MARKS_AGENT",
         "description": [],
         "signature": [
-          "\"transaction.agent.marks\""
+          "\"transaction.marks.agent\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,

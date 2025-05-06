@@ -102,6 +102,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         globalStyles,
         utilityClasses: globalStyles,
         theme: _theme,
+        highContrastMode: false,
       }}
     >
       {children}

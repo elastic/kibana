@@ -26,3 +26,11 @@ export const SCOUT_TEST_EVENTS_INDEX_PATTERN =
   process.env.SCOUT_TEST_EVENTS_INDEX_PATTERN || `${SCOUT_TEST_EVENTS_TEMPLATE_NAME}-*`;
 export const SCOUT_TEST_EVENTS_DATA_STREAM_NAME =
   process.env.SCOUT_TEST_EVENTS_DATA_STREAM_NAME || `${SCOUT_TEST_EVENTS_TEMPLATE_NAME}-kibana`;
+
+export enum ScoutTestRunConfigCategory {
+  UI_TEST = 'ui-test',
+  API_TEST = 'api-test',
+  UNIT_TEST = 'unit-test',
+  UNIT_INTEGRATION_TEST = 'unit-integration-test',
+  UNKNOWN = 'unknown',
+}

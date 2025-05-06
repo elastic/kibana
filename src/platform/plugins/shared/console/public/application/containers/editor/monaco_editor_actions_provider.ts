@@ -37,6 +37,7 @@ import {
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
+  isInsideTripleQuotes,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
@@ -620,7 +621,11 @@ export class MonacoEditorActionsProvider {
   /**
    * This function applies indentations to the request in the selected text.
    */
-  public async autoIndent() {
+  public async autoIndent(context: ContextValue) {
+    const {
+      services: { notifications },
+    } = context;
+    const { toasts } = notifications;
     const parsedRequests = await this.getSelectedParsedRequests();
     const selectionStartLineNumber = parsedRequests[0].startLineNumber;
     const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
@@ -638,7 +643,12 @@ export class MonacoEditorActionsProvider {
     const selectedText = this.getTextInRange(selectedRange);
     const allText = this.getTextInRange();
 
-    const autoIndentedText = getAutoIndentedRequests(parsedRequests, selectedText, allText);
+    const autoIndentedText = getAutoIndentedRequests(
+      parsedRequests,
+      selectedText,
+      allText,
+      (text) => toasts.addWarning(text)
+    );
 
     this.editor.executeEdits(AUTO_INDENTATION_ACTION_LABEL, [
       {
@@ -730,22 +740,61 @@ export class MonacoEditorActionsProvider {
     return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
   }
 
+  private async isPositionInsideScript(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position
+  ): Promise<boolean> {
+    const selectedRequests = await this.getSelectedParsedRequests();
+
+    for (const request of selectedRequests) {
+      if (
+        request.startLineNumber <= position.lineNumber &&
+        request.endLineNumber >= position.lineNumber
+      ) {
+        const requestContentBefore = model.getValueInRange({
+          startLineNumber: request.startLineNumber,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+
+        if (isInsideTripleQuotes(requestContentBefore)) {
+          return true;
+        }
+      }
+      if (request.startLineNumber > position.lineNumber) {
+        // Stop iteration once we pass the cursor position
+        return false;
+      }
+    }
+
+    // Return false if no match
+    return false;
+  }
+
   private triggerSuggestions() {
     const model = this.editor.getModel();
     const position = this.editor.getPosition();
     if (!model || !position) {
       return;
     }
-    const lineContentBefore = model.getValueInRange({
-      startLineNumber: position.lineNumber,
-      startColumn: 1,
-      endLineNumber: position.lineNumber,
-      endColumn: position.column,
+    this.isPositionInsideScript(model, position).then((isCursorInsideScript) => {
+      if (isCursorInsideScript) {
+        // Don't trigger autocomplete suggestions inside scripts
+        return;
+      }
+
+      const lineContentBefore = model.getValueInRange({
+        startLineNumber: position.lineNumber,
+        startColumn: 1,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column,
+      });
+      // if the line is empty or it matches specified regex, trigger suggestions
+      if (!lineContentBefore.trim() || shouldTriggerSuggestions(lineContentBefore)) {
+        this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
+      }
     });
-    // if the line is empty or it matches specified regex, trigger suggestions
-    if (!lineContentBefore.trim() || shouldTriggerSuggestions(lineContentBefore)) {
-      this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
-    }
   }
 
   /*

@@ -152,14 +152,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     if (!error.response?.status) {
       return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
     }
+    // LM Studio returns error.response?.data?.error as string
+    const errorMessage = error.response?.data?.error?.message ?? error.response?.data?.error;
     if (error.response.status === 401) {
-      return `Unauthorized API Error${
-        error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
-      }`;
+      return `Unauthorized API Error${errorMessage ? ` - ${errorMessage}` : ''}`;
     }
-    return `API Error: ${error.response?.statusText}${
-      error.response?.data?.error?.message ? ` - ${error.response.data.error?.message}` : ''
-    }`;
+    return `API Error: ${error.response?.statusText}${errorMessage ? ` - ${errorMessage}` : ''}`;
   }
   /**
    * responsible for making a POST request to the external API endpoint and returning the response data

@@ -544,11 +544,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         transform: 'translate(-50%,-50%)',
                       }}
                     >
-                      <EuiLoadingChart
-                        size="xl"
-                        mono={true}
-                        data-test-subj="mlSwimLaneLoadingIndicator"
-                      />
+                      <EuiLoadingChart size="xl" data-test-subj="mlSwimLaneLoadingIndicator" />
                     </EuiText>
                   )}
                 </div>

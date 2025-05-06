@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
@@ -67,13 +66,13 @@ describe('User Summary Component', () => {
   });
 
   test('it renders the default User Summary', () => {
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <UserOverview {...mockProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('UserOverview')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders the panel view User Summary', () => {
@@ -82,13 +81,13 @@ describe('User Summary Component', () => {
       isInDetailsSidePanel: true,
     };
 
-    const wrapper = shallow(
+    const { container } = render(
       <TestProviders>
         <UserOverview {...panelViewProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('UserOverview')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders user risk score and level', () => {

@@ -21,5 +21,8 @@ export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_enrich',
 ];
 
+// Privileges required for the transform to run
+export const ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES = ['read', 'view_index_metadata'];
+
 // The index pattern for the entity store has to support '.entities.v1.latest.noop' index
 export const ENTITY_STORE_INDEX_PATTERN = '.entities.v1.latest.*';

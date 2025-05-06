@@ -71,6 +71,20 @@ describe('reassignAgent', () => {
       // does not call ES update
       expect(esClient.update).toBeCalledTimes(0);
     });
+
+    it('update namespaces with reassign', async () => {
+      const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = mocks;
+
+      await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
+
+      // calls ES update with correct values
+      expect(esClient.update).toBeCalledTimes(1);
+      const calledWith = esClient.update.mock.calls[0];
+      expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
+      expect((calledWith[0] as estypes.UpdateRequest)?.doc).toHaveProperty('namespaces', [
+        'space1',
+      ]);
+    });
   });
 
   describe('reassignAgents (plural)', () => {
@@ -99,11 +113,13 @@ describe('reassignAgent', () => {
       );
 
       // calls ES update with correct values
-      const calledWith = esClient.bulk.mock.calls[0][0];
+      const calledWith = esClient.bulk.mock.calls[0][0] as estypes.BulkRequest;
+      const operations = calledWith.operations ?? [];
       // only 1 are regular and bulk write two line per update
-      expect((calledWith as estypes.BulkRequest).operations?.length).toBe(2);
+      expect(operations.length).toBe(2);
       // @ts-expect-error
-      expect(calledWith.operations[0].update._id).toEqual(agentInRegularDoc._id);
+      expect(operations[0].update._id).toEqual(agentInRegularDoc._id);
+      expect((operations[1] as any)?.doc).toHaveProperty('namespaces', ['space1', 'default']);
 
       // hosted policy is updated in action results with error
       const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;

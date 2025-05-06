@@ -8,6 +8,7 @@
     "public/**/*",
     "server/**/*",
     "scripts/**/*",
+    "ui_tests/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -237,6 +238,8 @@
     "@kbn/charts-theme",
     "@kbn/product-doc-base-plugin",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/security-ai-prompts"
+    "@kbn/security-ai-prompts",
+    "@kbn/scout-security",
+    "@kbn/inference-endpoint-ui-common",
   ]
 }

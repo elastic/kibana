@@ -34,7 +34,12 @@ export const QuerySearchBar = memo(
     range: TimeRange;
     setRange: (range: TimeRange) => void;
   }) => {
-    const { SearchBar } = useKibana().services.unifiedSearch.ui;
+    const {
+      unifiedSearch: {
+        ui: { SearchBar },
+      },
+      data: dataService,
+    } = useKibana().services;
 
     const { control } = useFormContext<CreateSLOForm>();
 
@@ -129,6 +134,8 @@ export const QuerySearchBar = memo(
                       };
                     });
 
+                    dataService.query.filterManager.setFilters(updatedFilters);
+
                     if (kqlQuerySchema.is(field.value)) {
                       field.onChange({
                         filters: updatedFilters,
@@ -158,6 +165,7 @@ export const QuerySearchBar = memo(
                   disableQueryLanguageSwitcher={true}
                   onClearSavedQuery={() => {}}
                   filters={kqlQuerySchema.is(field.value) ? [] : field.value?.filters ?? []}
+                  allowSavingQueries={true}
                 />
               </div>
             </EuiFormRow>

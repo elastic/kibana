@@ -26,17 +26,3 @@ export const ONBOARDING_PAGE_DESCRIPTION = i18n.translate(
     defaultMessage: `A SIEM with AI-driven security analytics, XDR and Cloud Security.`,
   }
 );
-
-export const ONBOARDING_PAGE_DEFAULT_TOPIC = i18n.translate(
-  'xpack.securitySolution.onboarding.topic.default',
-  {
-    defaultMessage: 'Set up security',
-  }
-);
-
-export const ONBOARDING_PAGE_SIEM_MIGRATIONS_TOPIC = i18n.translate(
-  'xpack.securitySolution.onboarding.topic.siemMigrations',
-  {
-    defaultMessage: 'SIEM Rule migration',
-  }
-);

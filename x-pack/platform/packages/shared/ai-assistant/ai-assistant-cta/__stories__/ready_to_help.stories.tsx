@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 
 import { ReadyToHelp as Component } from '../ready_to_help';
 
 export default {
   title: 'Layout/Call to Action/Types',
   component: Component,
+  args: {
+    type: 'stack',
+  },
   argTypes: {
     type: {
       control: 'radio',
@@ -20,6 +23,6 @@ export default {
       defaultValue: 'stack',
     },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
-export const ReadyToHelp: ComponentStory<typeof Component> = (args) => <Component {...args} />;
+export const ReadyToHelp: StoryFn<typeof Component> = (args) => <Component {...args} />;

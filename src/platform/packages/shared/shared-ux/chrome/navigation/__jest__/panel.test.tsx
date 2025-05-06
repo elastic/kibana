@@ -500,5 +500,120 @@ describe('Panel', () => {
       expect(queryByTestId(/panelNavItem-id-item1/)).toBeVisible();
       expect(queryByTestId(/panelNavItem-id-item3/)).toBeVisible();
     });
+
+    test('allows panel to contain a mix of ungrouped items and grouped items', () => {
+      const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            path: 'root',
+            isCollapsible: false,
+            children: [
+              {
+                id: 'group1',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    id: 'item0',
+                    title: 'Item 0',
+                    href: '/app/item0',
+                    path: 'root.group1.foo.item0',
+                  },
+                  {
+                    id: 'foo',
+                    title: 'Group 1',
+                    path: 'root.group1.foo',
+                    children: [
+                      {
+                        id: 'item1',
+                        href: '/app/item1',
+                        path: 'root.group1.foo.item1',
+                        title: 'Item 1',
+                      },
+                      {
+                        id: 'item2',
+                        href: '/app/item2',
+                        path: 'root.group1.foo.item2',
+                        title: 'Item 2',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { queryByTestId } = renderNavigation({
+        navTreeDef: of(navTree),
+      });
+
+      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+
+      expect(queryByTestId(/panelGroupId-foo/)).toBeVisible(); // no crash
+    });
+
+    test('allows panel items to use custom rendering', () => {
+      const componentSpy = jest.fn();
+
+      const Custom: React.FC = () => {
+        componentSpy();
+        return <>Hello</>;
+      };
+
+      const navTree: NavigationTreeDefinitionUI = {
+        id: 'es',
+        body: [
+          {
+            id: 'root',
+            title: 'Root',
+            path: 'root',
+            isCollapsible: false,
+            children: [
+              {
+                id: 'group1',
+                title: 'Group 1',
+                path: 'root.group1',
+                href: '/app/item1',
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    id: 'foo',
+                    title: 'Group 1',
+                    path: 'root.group1.foo',
+                    children: [
+                      {
+                        id: 'item1',
+                        title: 'Item 1',
+                        path: 'root.group1.foo.item1',
+                        renderItem: () => {
+                          return <Custom />;
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { queryByTestId } = renderNavigation({
+        navTreeDef: of(navTree),
+      });
+
+      expect(componentSpy).not.toHaveBeenCalled();
+
+      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+
+      expect(componentSpy).toHaveBeenCalled();
+    });
   });
 });

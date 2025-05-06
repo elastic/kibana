@@ -133,6 +133,9 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
         type: 'object',
         properties: fileInfoProperties,
       },
+      category: {
+        type: 'keyword',
+      },
     },
   },
 };
