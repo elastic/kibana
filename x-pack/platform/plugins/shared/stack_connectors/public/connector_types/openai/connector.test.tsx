@@ -449,7 +449,7 @@ describe('ConnectorFields renders', () => {
           <ConnectorFields 
             readOnly={false} 
             isEdit={false} 
-            registerPreSubmitValidator={preSubmitValidator} 
+            registerPreSubmitValidator={() => preSubmitValidator} 
           />
         </ConnectorFormTestProvider>
       );
@@ -498,7 +498,7 @@ describe('ConnectorFields renders', () => {
           <ConnectorFields 
             readOnly={false} 
             isEdit={false} 
-            registerPreSubmitValidator={preSubmitValidator} 
+            registerPreSubmitValidator={() => preSubmitValidator} 
           />
         </ConnectorFormTestProvider>
       );
