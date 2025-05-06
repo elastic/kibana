@@ -6,16 +6,13 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import pLimit from 'p-limit';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { uniq } from 'lodash';
 import { LockManagerService } from '@kbn/lock-manager';
-import { KnowledgeBaseEntry } from '../../../common';
+import pRetry from 'p-retry';
 import { resourceNames } from '..';
 import { waitForKbModel } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
-import { sleep } from '../util/sleep';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
 const POPULATE_MISSING_SEMANTIC_TEXT_FIELDS_LOCK_ID = 'populate_missing_semantic_text_fields';
@@ -32,13 +29,12 @@ export async function populateMissingSemanticTextFieldWithLock({
 }) {
   const lmService = new LockManagerService(core, logger);
   await lmService.withLock(POPULATE_MISSING_SEMANTIC_TEXT_FIELDS_LOCK_ID, async () =>
-    populateMissingSemanticTextFieldRecursively({ core, esClient, logger, config })
+    populateMissingSemanticTextField({ core, esClient, logger, config })
   );
 }
 
 // Ensures that every doc has populated the `semantic_text` field.
-// It retrieves entries without the field, updates them in batches, and continues until no entries remain.
-async function populateMissingSemanticTextFieldRecursively({
+async function populateMissingSemanticTextField({
   core,
   esClient,
   logger,
@@ -53,60 +49,26 @@ async function populateMissingSemanticTextFieldRecursively({
     'Checking for remaining entries without semantic_text field that need to be migrated'
   );
 
-  const response = await esClient.asInternalUser.search<KnowledgeBaseEntry>({
-    size: 100,
-    track_total_hits: true,
-    index: [resourceNames.writeIndexAlias.kb],
-    query: {
-      bool: {
-        must_not: {
-          exists: {
-            field: 'semantic_text',
+  await pRetry(
+    async () => {
+      const inferenceId = await getInferenceIdFromWriteIndex(esClient);
+      await waitForKbModel({ core, esClient, logger, config, inferenceId });
+
+      await esClient.asInternalUser.updateByQuery({
+        index: resourceNames.writeIndexAlias.kb,
+        requests_per_second: 100,
+        script: {
+          source: `ctx._source.semantic_text = ctx._source.text`,
+          lang: 'painless',
+        },
+        query: {
+          bool: {
+            filter: { exists: { field: 'text' } },
+            must_not: { exists: { field: 'semantic_text' } },
           },
         },
-      },
-    },
-    _source: {
-      excludes: ['ml.tokens'],
-    },
-  });
-
-  if (response.hits.hits.length === 0) {
-    logger.debug('No remaining entries to migrate');
-    return;
-  }
-
-  const inferenceId = await getInferenceIdFromWriteIndex(esClient);
-  await waitForKbModel({ core, esClient, logger, config, inferenceId });
-
-  const indicesWithOutdatedEntries = uniq(response.hits.hits.map((hit) => hit._index));
-  logger.debug(
-    `Found ${response.hits.hits.length} entries without semantic_text field in "${indicesWithOutdatedEntries}". Updating now...`
-  );
-
-  // Limit the number of concurrent requests to avoid overloading the cluster
-  const limiter = pLimit(20);
-  const promises = response.hits.hits.map((hit) => {
-    return limiter(() => {
-      if (!hit._source || !hit._id) {
-        return;
-      }
-
-      return esClient.asInternalUser.update({
-        refresh: 'wait_for',
-        index: resourceNames.writeIndexAlias.kb,
-        id: hit._id,
-        doc: {
-          ...hit._source,
-          semantic_text: hit._source.text ?? 'No text',
-        },
       });
-    });
-  });
-
-  await Promise.all(promises);
-  logger.debug(`Updated ${promises.length} entries`);
-
-  await sleep(100);
-  await populateMissingSemanticTextFieldRecursively({ core, esClient, logger, config });
+    },
+    { retries: 10, minTimeout: 10_000 }
+  );
 }
