@@ -31,6 +31,8 @@ import {
   addKibanaInformationToDescription,
   fillMissingCustomFields,
   normalizeCreateCaseRequest,
+  getInProgressInfoForUpdate,
+  getTimingMetricsForUpdate,
 } from './utils';
 import type { CaseCustomFields, CustomFieldsConfiguration } from '../../../common/types/domain';
 import {
@@ -1070,6 +1072,164 @@ describe('utils', () => {
 
     it('returns undefined if the status is not provided', async () => {
       expect(getClosedInfoForUpdate({ closedDate: date, user })).toBe(undefined);
+    });
+  });
+
+  describe('getInProgressInfoForUpdate', () => {
+    const date = '2021-02-03T17:41:26.108Z';
+
+    it('returns the correct in_progress_at info when the case is marked as in-progress', async () => {
+      expect(
+        getInProgressInfoForUpdate({ status: CaseStatuses['in-progress'], updatedAt: date })
+      ).toEqual({
+        in_progress_at: date,
+      });
+    });
+
+    it('returns the correct in_progress_at info when the case is reopened', async () => {
+      expect(getInProgressInfoForUpdate({ status: CaseStatuses.open, updatedAt: date })).toEqual({
+        in_progress_at: null,
+      });
+    });
+
+    it('returns undefined if the status is not provided', async () => {
+      expect(getInProgressInfoForUpdate({ updatedAt: date })).toBe(undefined);
+    });
+  });
+
+  describe('getTimingMetricsForUpdate', () => {
+    const createdAt = '2021-11-23T19:00:00Z';
+    const inProgressAt = '2021-11-23T19:00:10Z';
+    const updatedAt = '2021-11-23T19:00:20Z';
+
+    it('should return the correct time_to_acknowledge when the case is marked as in-progress', () => {
+      expect(
+        getTimingMetricsForUpdate({
+          status: CaseStatuses['in-progress'],
+          createdAt,
+          updatedAt,
+        })
+      ).toEqual({
+        time_to_acknowledge: 20,
+      });
+    });
+
+    it('should not overwrite time_to_acknowledge', () => {
+      expect(
+        getTimingMetricsForUpdate({
+          status: CaseStatuses['in-progress'],
+          createdAt,
+          inProgressAt,
+          updatedAt,
+          timeToAcknowledge: 1,
+        })
+      ).toBeUndefined();
+    });
+
+    it('should return the correct time_to_investigate and time_to_resolve when the case closes', () => {
+      expect(
+        getTimingMetricsForUpdate({
+          status: CaseStatuses.closed,
+          createdAt,
+          inProgressAt,
+          updatedAt,
+        })
+      ).toEqual({
+        time_to_investigate: 10,
+        time_to_resolve: 20,
+      });
+    });
+
+    it('should not overwrite time_to_investigate and time_to_resolve', () => {
+      const timings = getTimingMetricsForUpdate({
+        status: CaseStatuses.closed,
+        createdAt,
+        inProgressAt,
+        updatedAt,
+        timeToInvestigate: 1,
+        timeToResolve: 1,
+      });
+      expect(timings).not.toHaveProperty('time_to_investigate');
+      expect(timings).not.toHaveProperty('time_to_resolve');
+    });
+
+    it('returns undefined if the status is not provided', async () => {
+      expect(
+        getTimingMetricsForUpdate({
+          createdAt,
+          inProgressAt,
+          updatedAt,
+        })
+      ).toBe(undefined);
+    });
+
+    it.each([['invalid'], [null]])(
+      'returns undefined if the createdAt date is %s',
+      (createdAtInvalid) => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses['in-progress'],
+            // @ts-expect-error
+            createdAt: createdAtInvalid,
+            inProgressAt,
+            updatedAt,
+          })
+        ).toBeUndefined();
+      }
+    );
+
+    it.each([['invalid'], [null]])(
+      'returns undefined if the updatedAt date is %s',
+      (updatedAtInvalid) => {
+        expect(
+          getTimingMetricsForUpdate({
+            status: CaseStatuses.closed,
+            createdAt,
+            inProgressAt,
+            // @ts-expect-error
+            updatedAt: updatedAtInvalid,
+          })
+        ).toBeUndefined();
+      }
+    );
+
+    it('returns undefined if created_at > updated_at', async () => {
+      expect(
+        getTimingMetricsForUpdate({
+          status: CaseStatuses.closed,
+          createdAt: '2021-11-23T19:05:00Z',
+          inProgressAt,
+          updatedAt: '2021-11-23T19:00:00Z',
+        })
+      ).toBeUndefined();
+    });
+
+    it('rounds the seconds correctly', () => {
+      expect(
+        getTimingMetricsForUpdate({
+          status: CaseStatuses.closed,
+          createdAt: '2022-04-11T15:56:00.087Z',
+          inProgressAt: '2022-04-11T15:58:00.043Z',
+          updatedAt: '2022-04-11T16:00:00.056Z',
+        })
+      ).toEqual({
+        time_to_investigate: 120,
+        time_to_resolve: 239,
+      });
+    });
+
+    it('rounds the zero correctly', () => {
+      expect(
+        getTimingMetricsForUpdate({
+          status: CaseStatuses.closed,
+          createdAt: '2022-04-11T15:56:00.087Z',
+          inProgressAt: '2022-04-11T15:56:00.187Z',
+          updatedAt: '2022-04-11T15:56:00.287Z',
+        })
+      ).toEqual({
+        time_to_investigate: 0,
+        time_to_resolve: 0,
+      });
     });
   });
 

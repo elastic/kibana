@@ -418,6 +418,9 @@ export const getInProgressInfoForUpdate = ({
   }
 };
 
+const checkInProgressCaseDates = (createdAtMillis: number, updatedAtMillis: number) =>
+  !isNaN(createdAtMillis) && !isNaN(updatedAtMillis) && updatedAtMillis >= createdAtMillis;
+
 const checkClosedCaseDates = (
   createdAtMillis: number,
   updatedAtMillis: number,
@@ -433,12 +436,20 @@ const checkClosedCaseDates = (
 
 export const getTimingMetricsForUpdate = ({
   status,
-  caseAttributes,
+  createdAt,
+  inProgressAt,
   updatedAt,
+  timeToAcknowledge,
+  timeToInvestigate,
+  timeToResolve,
 }: {
   status?: CaseStatuses;
-  caseAttributes: CaseAttributes;
+  createdAt: string;
   updatedAt: string;
+  inProgressAt?: string | null;
+  timeToAcknowledge?: number | null;
+  timeToInvestigate?: number | null;
+  timeToResolve?: number | null;
 }):
   | Partial<
       Pick<
@@ -448,17 +459,15 @@ export const getTimingMetricsForUpdate = ({
     >
   | undefined => {
   try {
-    const createdAtMillis = new Date(caseAttributes.created_at).getTime();
+    const createdAtMillis = new Date(createdAt).getTime();
     const updatedAtMillis = new Date(updatedAt).getTime();
-    const inProgressAtMillis = caseAttributes.in_progress_at
-      ? new Date(caseAttributes.in_progress_at).getTime()
-      : null;
+    const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
 
-    if (status && status === CaseStatuses['in-progress'] && !caseAttributes.time_to_acknowledge) {
+    if (status && status === CaseStatuses['in-progress'] && !timeToAcknowledge) {
       if (
-        !isNaN(createdAtMillis) &&
-        !isNaN(updatedAtMillis) &&
-        updatedAtMillis >= createdAtMillis
+        createdAt != null &&
+        updatedAt != null &&
+        checkInProgressCaseDates(createdAtMillis, updatedAtMillis)
       ) {
         return {
           time_to_acknowledge: Math.floor((updatedAtMillis - createdAtMillis) / 1000),
@@ -466,12 +475,16 @@ export const getTimingMetricsForUpdate = ({
       }
     }
     if (status && status === CaseStatuses.closed) {
-      if (checkClosedCaseDates(createdAtMillis, updatedAtMillis, inProgressAtMillis)) {
+      if (
+        createdAt != null &&
+        updatedAt != null &&
+        checkClosedCaseDates(createdAtMillis, updatedAtMillis, inProgressAtMillis)
+      ) {
         return {
-          ...(!caseAttributes.time_to_investigate
+          ...(!timeToInvestigate
             ? { time_to_investigate: Math.floor((updatedAtMillis - inProgressAtMillis) / 1000) }
             : {}),
-          ...(!caseAttributes.time_to_resolve
+          ...(!timeToResolve
             ? { time_to_resolve: Math.floor((updatedAtMillis - createdAtMillis) / 1000) }
             : {}),
         };

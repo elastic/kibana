@@ -241,6 +241,9 @@ export const push = async (
                 updatedAt: pushedDate,
                 createdAt: theCase.created_at,
                 inProgressAt: theCase.in_progress_at,
+                timeToAcknowledge: theCase.time_to_acknowledge,
+                timeToInvestigate: theCase.time_to_investigate,
+                timeToResolve: theCase.time_to_resolve,
               })
             : {}),
           external_service: externalService,

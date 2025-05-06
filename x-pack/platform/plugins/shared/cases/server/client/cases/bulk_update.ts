@@ -664,8 +664,12 @@ const createPatchCasesPayload = ({
           }),
           ...getTimingMetricsForUpdate({
             status: trimmedCaseAttributes.status,
-            caseAttributes: originalCase.attributes,
             updatedAt: updatedDt,
+            createdAt: originalCase.attributes.created_at,
+            inProgressAt: originalCase.attributes.in_progress_at,
+            timeToAcknowledge: originalCase.attributes.time_to_acknowledge,
+            timeToInvestigate: originalCase.attributes.time_to_investigate,
+            timeToResolve: originalCase.attributes.time_to_resolve,
           }),
           updated_at: updatedDt,
           updated_by: user,
