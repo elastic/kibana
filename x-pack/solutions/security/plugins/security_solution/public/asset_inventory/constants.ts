@@ -50,7 +50,6 @@ export const ASSET_FIELDS = {
   ENTITY_ID: 'entity.id',
   ENTITY_NAME: 'entity.name',
   ENTITY_RISK: 'entity.risk',
-  ENTITY_SOURCE: 'entity.source',
   ENTITY_SUB_TYPE: 'entity.sub_type',
   ENTITY_TYPE: 'entity.type',
   TIMESTAMP: '@timestamp',
@@ -61,5 +60,4 @@ export const ASSET_GROUPING_OPTIONS = {
   ASSET_CRITICALITY: ASSET_FIELDS.ASSET_CRITICALITY,
   ENTITY_TYPE: ASSET_FIELDS.ENTITY_TYPE,
   CLOUD_ACCOUNT: ASSET_FIELDS.CLOUD_ACCOUNT_ID,
-  ENTITY_SOURCE: ASSET_FIELDS.ENTITY_SOURCE,
 };
