@@ -20,8 +20,11 @@ import { RunActionResponseSchema, StreamingResponseSchema } from '../../../commo
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { PassThrough, Transform } from 'stream';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import type { Config, Secrets } from '../../../common/openai/types';
 
 const DEFAULT_OTHER_OPENAI_MODEL = 'local-model';
+const mockRequest = jest.fn();
 
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 const mockTee = jest.fn();
@@ -46,6 +49,38 @@ jest.mock('openai', () => ({
     },
   })),
 }));
+
+class TestOpenAIConnector extends OpenAIConnector {
+  public request: typeof mockRequest;
+  public esClient: any; // Expose esClient for testing
+
+  constructor(params: ServiceParams<Config, Secrets>) {
+    super(params);
+    this.request = mockRequest;
+    this.esClient = (params.services as any).elasticsearchClient;
+  }
+
+  public getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
+    return super.getResponseErrorMessage(error);
+  }
+
+  // Expose protected methods for testing
+  public getConfig() {
+    return this.config;
+  }
+
+  public getConfigAny() {
+    return (this as any).configAny;
+  }
+
+  // Helper method to set PKI config for testing
+  public setPKIConfig(config: Partial<Config>) {
+    (this as any).configAny = {
+      ...(this as any).configAny,
+      ...config
+    };
+  }
+}
 
 describe('OpenAIConnector', () => {
   let mockRequest: jest.Mock;
@@ -90,7 +125,7 @@ describe('OpenAIConnector', () => {
   });
 
   describe('OpenAI', () => {
-    const connector = new OpenAIConnector({
+    const connector = new TestOpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: {
@@ -117,7 +152,6 @@ describe('OpenAIConnector', () => {
     };
 
     beforeEach(() => {
-      // @ts-ignore
       connector.request = mockRequest;
       jest.clearAllMocks();
     });
@@ -234,7 +268,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
         connector.request = mockError;
 
         await expect(
@@ -356,7 +389,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
         connector.request = mockError;
 
         await expect(
@@ -383,7 +415,6 @@ describe('OpenAIConnector', () => {
         return mockRequest;
       };
       beforeEach(() => {
-        // @ts-ignore
         connector.request = mockStream();
       });
 
@@ -467,7 +498,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
         connector.request = mockError;
 
         await expect(
@@ -476,7 +506,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('responds with a readable stream', async () => {
-        // @ts-ignore
         connector.request = mockStream();
         const response = await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
         expect(response instanceof PassThrough).toEqual(true);
@@ -554,7 +583,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
         connector.request = mockError;
 
         await expect(connector.invokeAI(sampleOpenAiBody, connectorUsageCollector)).rejects.toThrow(
@@ -610,16 +638,29 @@ describe('OpenAIConnector', () => {
       });
     });
     describe('getResponseErrorMessage', () => {
+      const connector = new TestOpenAIConnector({
+        configurationUtilities: actionsConfigMock.create(),
+        connector: { id: '1', type: OPENAI_CONNECTOR_ID },
+        config: {
+          apiUrl: 'https://api.openai.com/v1/chat/completions',
+          apiProvider: OpenAiProviderType.OpenAi,
+          defaultModel: DEFAULT_OPENAI_MODEL,
+        },
+        secrets: { apiKey: '123' },
+        logger,
+        services: actionsMock.createServices(),
+      });
+
       it('returns an unknown error message', () => {
-        // @ts-expect-error expects an axios error as the parameter
-        expect(connector.getResponseErrorMessage({})).toEqual(
+        const error = {} as unknown as AxiosError<{ error?: { message?: string } }>;
+        expect(connector.getResponseErrorMessage(error)).toEqual(
           `Unexpected API Error:  - Unknown error`
         );
       });
 
       it('returns the error.message', () => {
-        // @ts-expect-error expects an axios error as the parameter
-        expect(connector.getResponseErrorMessage({ message: 'a message' })).toEqual(
+        const error = { message: 'a message' } as unknown as AxiosError<{ error?: { message?: string } }>;
+        expect(connector.getResponseErrorMessage(error)).toEqual(
           `Unexpected API Error:  - a message`
         );
       });
@@ -636,11 +677,8 @@ describe('OpenAIConnector', () => {
               },
             },
           },
-        } as AxiosError<{ error?: { message?: string } }>;
-        expect(
-          // @ts-expect-error expects an axios error as the parameter
-          connector.getResponseErrorMessage(err)
-        ).toEqual(`API Error: Resource Not Found - Resource not found`);
+        } as unknown as AxiosError<{ error?: { message?: string } }>;
+        expect(connector.getResponseErrorMessage(err)).toEqual(`API Error: Resource Not Found - Resource not found`);
       });
 
       it('returns the error.response.data.error', () => {
@@ -653,14 +691,11 @@ describe('OpenAIConnector', () => {
               error: 'Resource not found',
             },
           },
-        } as AxiosError<{ error?: string }>;
-        expect(
-          // @ts-expect-error expects an axios error as the parameter
-          connector.getResponseErrorMessage(err)
-        ).toEqual(`API Error: Resource Not Found - Resource not found`);
+        } as unknown as AxiosError<{ error?: { message?: string } }>;
+        expect(connector.getResponseErrorMessage(err)).toEqual(`API Error: Resource Not Found - Resource not found`);
       });
 
-      it('returns auhtorization error', () => {
+      it('returns authorization error', () => {
         const err = {
           response: {
             headers: {},
@@ -672,9 +707,8 @@ describe('OpenAIConnector', () => {
               },
             },
           },
-        } as AxiosError<{ error?: { message?: string } }>;
+        } as unknown as AxiosError<{ error?: { message?: string } }>;
 
-        // @ts-expect-error expects an axios error as the parameter
         expect(connector.getResponseErrorMessage(err)).toEqual(
           `Unauthorized API Error - The api key was invalid.`
         );
@@ -682,7 +716,7 @@ describe('OpenAIConnector', () => {
     });
   });
   describe('OpenAI with special headers', () => {
-    const connector = new OpenAIConnector({
+    const connector = new TestOpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: {
@@ -711,7 +745,6 @@ describe('OpenAIConnector', () => {
     };
 
     beforeEach(() => {
-      // @ts-ignore
       connector.request = mockRequest;
       jest.clearAllMocks();
     });
@@ -745,7 +778,7 @@ describe('OpenAIConnector', () => {
   });
 
   describe('OpenAI without headers', () => {
-    const connector = new OpenAIConnector({
+    const connector = new TestOpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: {
@@ -768,7 +801,6 @@ describe('OpenAIConnector', () => {
     };
 
     beforeEach(() => {
-      // @ts-ignore
       connector.request = mockRequest;
       jest.clearAllMocks();
     });
@@ -801,7 +833,7 @@ describe('OpenAIConnector', () => {
   });
 
   describe('Other OpenAI', () => {
-    const connector = new OpenAIConnector({
+    const connector = new TestOpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: {
@@ -829,7 +861,6 @@ describe('OpenAIConnector', () => {
     };
 
     beforeEach(() => {
-      // @ts-ignore
       connector.request = mockRequest;
       jest.clearAllMocks();
     });
@@ -901,7 +932,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
         connector.request = mockError;
 
         await expect(
@@ -1020,7 +1050,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
         connector.request = mockError;
 
         await expect(
@@ -1047,7 +1076,6 @@ describe('OpenAIConnector', () => {
         return mockRequest;
       };
       beforeEach(() => {
-        // @ts-ignore
         connector.request = mockStream();
       });
 
@@ -1125,7 +1153,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
         connector.request = mockError;
 
         await expect(
@@ -1134,7 +1161,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('responds with a readable stream', async () => {
-        // @ts-ignore
         connector.request = mockStream();
         const response = await connector.invokeStream(sampleOpenAiBody, connectorUsageCollector);
         expect(response instanceof PassThrough).toEqual(true);
@@ -1215,7 +1241,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
         connector.request = mockError;
 
         await expect(connector.invokeAI(sampleOpenAiBody, connectorUsageCollector)).rejects.toThrow(
@@ -1225,7 +1250,7 @@ describe('OpenAIConnector', () => {
     });
 
     describe('PKI Configuration', () => {
-      const connector = new OpenAIConnector({
+      const connector = new TestOpenAIConnector({
         configurationUtilities: actionsConfigMock.create(),
         connector: { id: '1', type: OPENAI_CONNECTOR_ID },
         config: {
@@ -1242,28 +1267,24 @@ describe('OpenAIConnector', () => {
       });
 
       beforeEach(() => {
-        // @ts-ignore
         connector.request = mockRequest;
         jest.clearAllMocks();
       });
 
       it('initializes with PKI configuration', () => {
         expect(connector).toBeDefined();
-        // @ts-ignore
-        expect(connector.configAny.certificateFile).toBe('/path/to/cert.pem');
-        // @ts-ignore
-        expect(connector.configAny.privateKeyFile).toBe('/path/to/key.pem');
-        // @ts-ignore
-        expect(connector.configAny.verificationMode).toBe('full');
+        const config = connector.getConfigAny();
+        expect(config.certificateFile).toBe('/path/to/cert.pem');
+        expect(config.privateKeyFile).toBe('/path/to/key.pem');
+        expect(config.verificationMode).toBe('full');
       });
 
       it('handles PKI certificate validation errors', async () => {
-        // @ts-ignore
         connector.request = mockError;
-        // @ts-ignore
-        connector.configAny.certificateFile = undefined;
-        // @ts-ignore
-        connector.configAny.certificateData = undefined;
+        connector.setPKIConfig({
+          certificateFile: undefined,
+          certificateData: undefined
+        });
 
         await expect(
           connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
@@ -1271,12 +1292,11 @@ describe('OpenAIConnector', () => {
       });
 
       it('handles PKI private key validation errors', async () => {
-        // @ts-ignore
         connector.request = mockError;
-        // @ts-ignore
-        connector.configAny.privateKeyFile = undefined;
-        // @ts-ignore
-        connector.configAny.privateKeyData = undefined;
+        connector.setPKIConfig({
+          privateKeyFile: undefined,
+          privateKeyData: undefined
+        });
 
         await expect(
           connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
@@ -1284,10 +1304,10 @@ describe('OpenAIConnector', () => {
       });
 
       it('handles invalid certificate format', async () => {
-        // @ts-ignore
         connector.request = mockError;
-        // @ts-ignore
-        connector.configAny.certificateData = 'invalid-certificate-data';
+        connector.setPKIConfig({
+          certificateData: 'invalid-certificate-data'
+        });
 
         await expect(
           connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
@@ -1295,10 +1315,10 @@ describe('OpenAIConnector', () => {
       });
 
       it('handles invalid private key format', async () => {
-        // @ts-ignore
         connector.request = mockError;
-        // @ts-ignore
-        connector.configAny.privateKeyData = 'invalid-key-data';
+        connector.setPKIConfig({
+          privateKeyData: 'invalid-key-data'
+        });
 
         await expect(
           connector.runApi({ body: JSON.stringify(sampleOpenAiBody) }, connectorUsageCollector)
@@ -1306,7 +1326,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('handles certificate verification errors', async () => {
-        // @ts-ignore
         connector.request = mockError;
         const error = new Error('UNABLE_TO_VERIFY_LEAF_SIGNATURE') as Error & { code?: string };
         error.code = 'UNABLE_TO_VERIFY_LEAF_SIGNATURE';
@@ -1320,7 +1339,7 @@ describe('OpenAIConnector', () => {
   });
 
   describe('AzureAI', () => {
-    const connector = new OpenAIConnector({
+    const connector = new TestOpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: {
@@ -1343,7 +1362,6 @@ describe('OpenAIConnector', () => {
     };
 
     beforeEach(() => {
-      // @ts-ignore
       connector.request = mockRequest;
       jest.clearAllMocks();
     });
@@ -1402,7 +1420,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
         connector.request = mockError;
 
         await expect(
@@ -1512,7 +1529,6 @@ describe('OpenAIConnector', () => {
       });
 
       it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
         connector.request = mockError;
 
         await expect(
@@ -1526,7 +1542,7 @@ describe('OpenAIConnector', () => {
   });
 
   describe('Token dashboard', () => {
-    const connector = new OpenAIConnector({
+    const connector = new TestOpenAIConnector({
       configurationUtilities: actionsConfigMock.create(),
       connector: { id: '1', type: OPENAI_CONNECTOR_ID },
       config: { apiUrl: 'https://example.com/api', apiProvider: OpenAiProviderType.AzureAi },
@@ -1536,7 +1552,6 @@ describe('OpenAIConnector', () => {
     });
     const mockGenAi = initDashboard as jest.Mock;
     beforeEach(() => {
-      // @ts-ignore
       connector.esClient.transport.request = mockRequest;
       mockRequest.mockResolvedValue({ has_all_requested: true });
       mockGenAi.mockResolvedValue({ success: true });

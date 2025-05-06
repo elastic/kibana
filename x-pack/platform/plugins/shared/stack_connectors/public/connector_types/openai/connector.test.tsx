@@ -405,6 +405,7 @@ describe('ConnectorFields renders', () => {
       config: {
         ...openAiConnector.config,
         apiProvider: OpenAiProviderType.Other,
+        defaultModel: 'local-model',
         certificateFile: '/path/to/cert.pem',
         privateKeyFile: '/path/to/key.pem',
         verificationMode: 'full',
@@ -422,7 +423,10 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      // First enable PKI mode
+      // First select Other provider
+      await userEvent.selectOptions(getByTestId('config.apiProvider-select'), [OpenAiProviderType.Other]);
+
+      // Then enable PKI mode
       await userEvent.click(getByTestId('openAIViewPKISwitch'));
 
       // Then check for PKI fields
@@ -437,6 +441,9 @@ describe('ConnectorFields renders', () => {
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
+
+      // Select Other provider
+      await userEvent.selectOptions(getByTestId('config.apiProvider-select'), [OpenAiProviderType.Other]);
 
       // Enable PKI mode
       await userEvent.click(getByTestId('openAIViewPKISwitch'));
@@ -469,6 +476,9 @@ describe('ConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
+      // Select Other provider
+      await userEvent.selectOptions(getByTestId('config.apiProvider-select'), [OpenAiProviderType.Other]);
+
       // Enable PKI mode
       await userEvent.click(getByTestId('openAIViewPKISwitch'));
 
@@ -476,7 +486,13 @@ describe('ConnectorFields renders', () => {
 
       await waitFor(() => {
         expect(onSubmit).toHaveBeenCalledWith({
-          data: pkiConnector,
+          data: {
+            ...pkiConnector,
+            __internal__: {
+              ...pkiConnector.__internal__,
+              hasPKI: true,
+            },
+          },
           isValid: true,
         });
       });
