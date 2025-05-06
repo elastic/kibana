@@ -456,15 +456,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmEnableServiceMetrics': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmEnableContinuousRollups': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmAgentExplorerView': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -585,10 +577,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:apmServiceGroupMaxNumberOfServices': {
     type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmServiceInventoryOptimizedSorting': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmTraceExplorerTab': {

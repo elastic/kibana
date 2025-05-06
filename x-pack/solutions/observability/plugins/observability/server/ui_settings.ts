@@ -15,16 +15,13 @@ import {
   maxSuggestions,
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
-  apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmLabsButton,
-  enableAgentExplorerView,
   apmEnableTableSearchBar,
   entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
@@ -165,28 +162,6 @@ export const uiSettings: Record<string, UiSettings> = {
     showInLabs: true,
     solution: 'oblt',
   },
-  [apmServiceInventoryOptimizedSorting]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
-      defaultMessage: 'Optimize services list load performance in APM',
-    }),
-    description: i18n.translate(
-      'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
-      {
-        defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name.',
-        values: {
-          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-        },
-      }
-    ),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: false,
-    type: 'boolean',
-    showInLabs: true,
-    solution: 'oblt',
-  },
   [apmServiceGroupMaxNumberOfServices]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.serviceGroupMaxServicesUiSettingName', {
@@ -268,23 +243,6 @@ export const uiSettings: Record<string, UiSettings> = {
       }
     ),
     schema: schema.boolean(),
-    solution: 'oblt',
-  },
-  [enableAgentExplorerView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableAgentExplorer', {
-      defaultMessage: 'Agent explorer',
-    }),
-    description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
-      defaultMessage: '{betaLabel} Enables Agent explorer view.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
     solution: 'oblt',
   },
   [apmEnableTableSearchBar]: {
@@ -383,21 +341,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.2,
     schema: schema.number({ min: 0 }),
-    solution: 'oblt',
-  },
-  [apmEnableServiceMetrics]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableServiceMetrics', {
-      defaultMessage: 'Service transaction metrics',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.apmEnableServiceMetricsDescription', {
-      defaultMessage:
-        '{betaLabel} Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.',
-      values: { betaLabel: `<em>[${betaLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
     solution: 'oblt',
   },
   [apmEnableContinuousRollups]: {
