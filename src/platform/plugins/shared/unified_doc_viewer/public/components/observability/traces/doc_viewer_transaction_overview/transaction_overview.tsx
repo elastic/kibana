@@ -14,9 +14,10 @@ import {
   SERVICE_NAME_FIELD,
   TRACE_ID_FIELD,
   TRANSACTION_DURATION_FIELD,
-  TRANSACTION_ID_FIELD,
   TRANSACTION_NAME_FIELD,
-  getTraceDocumentOverview,
+  TRANSACTION_TYPE_FIELD,
+  getTransactionDocumentOverview,
+  TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields } from './resources/fields';
@@ -39,7 +40,7 @@ export function TransactionOverview({
   onRemoveColumn,
   tracesIndexPattern,
 }: TransactionOverviewProps) {
-  const parsedDoc = useMemo(() => getTraceDocumentOverview(hit), [hit]);
+  const parsedDoc = useMemo(() => getTransactionDocumentOverview(hit), [hit]);
   const transactionDuration = parsedDoc[TRANSACTION_DURATION_FIELD];
   const traceId = parsedDoc[TRACE_ID_FIELD];
   const fieldConfigurations = useMemo(
@@ -72,10 +73,15 @@ export function TransactionOverview({
             />
           ))}
 
-          {transactionDuration && (
+          {transactionDuration !== undefined && (
             <>
               <EuiSpacer size="m" />
-              <TransactionDurationSummary duration={transactionDuration} />
+              <TransactionDurationSummary
+                transactionDuration={transactionDuration}
+                transactionName={parsedDoc[TRANSACTION_NAME_FIELD]}
+                transactionType={parsedDoc[TRANSACTION_TYPE_FIELD]}
+                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+              />
             </>
           )}
           {traceId && transactionId ? (

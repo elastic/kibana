@@ -424,6 +424,30 @@ export class DataGridService extends FtrService {
     return (await this.getBodyRows(options, selector))[options.rowIndex || 0];
   }
 
+  public async clickQualityIssueLeadingControl(rowIndex: number) {
+    const buttons = await this.testSubjects.findAll('docTableDegradedDocExist');
+    const selectedButton = rowIndex < buttons.length ? buttons[rowIndex] : undefined;
+
+    if (selectedButton) {
+      await selectedButton.moveMouseTo();
+      await selectedButton.click();
+    } else {
+      throw new Error(`Unable to find quality issue leading control for row index ${rowIndex}`);
+    }
+  }
+
+  public async clickStacktraceLeadingControl(rowIndex: number) {
+    const buttons = await this.testSubjects.findAll('docTableStacktraceExist');
+    const selectedButton = rowIndex < buttons.length ? buttons[rowIndex] : undefined;
+
+    if (selectedButton) {
+      await selectedButton.moveMouseTo();
+      await selectedButton.click();
+    } else {
+      throw new Error(`Unable to find stacktrace leading control for row index ${rowIndex}`);
+    }
+  }
+
   public async clickRowToggle(
     { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string | false } = {
       isAnchorRow: false,
