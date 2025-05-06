@@ -99,7 +99,7 @@ export const moveAction = (
     Object.keys(currentLayout).forEach((sectionId) => {
       const section = currentLayout[sectionId];
       const sectionElement =
-        !section.isMainSection && section.isCollapsed
+        !section.isMainSection && (section.isCollapsed || Object.keys(section.panels).length === 0)
           ? gridHeaderElements[sectionId]
           : gridSectionElements[sectionId];
       if (!sectionElement) return;
@@ -120,6 +120,7 @@ export const moveAction = (
     }
     return highestOverlapSectionId;
   })();
+  console.log({ targetSectionId });
 
   // calculate the requested grid position
   const gridLayoutRect = gridLayoutElement?.getBoundingClientRect();
