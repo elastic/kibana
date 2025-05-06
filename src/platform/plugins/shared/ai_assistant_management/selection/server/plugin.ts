@@ -38,23 +38,45 @@ export class AIAssistantManagementSelectionPlugin
     >
 {
   private readonly config: AIAssistantManagementSelectionConfig;
+  isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
+    
     core.uiSettings.register({
       [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-          defaultMessage: 'AI Assistant for Observability and Search visibility',
-        }),
+        name: this.isServerless ? i18n.translate(
+          'aiAssistantManagementSelection.preferredAIAssistantTypeSettingNameServerless',
+          {
+            defaultMessage: 'AI Assistant for Observability visibility',
+          }
+        ) : 
+        i18n.translate(
+          'aiAssistantManagementSelection.preferredAIAssistantTypeSettingName',
+          {
+            defaultMessage: 'AI Assistant for Observability and Search visibility',
+          }
+        ),
         category: [DEFAULT_APP_CATEGORIES.observability.id],
         value: this.config.preferredAIAssistantType,
-        description: i18n.translate(
+        description: this.isServerless ? i18n.translate(
+          'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescriptionServerless',
+          {
+            defaultMessage:
+              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in Observability, everywhere, or nowhere.',
+            values: {
+              em: (chunks) => `<em>${chunks}</em>`,
+            },
+          }
+        ) : 
+        i18n.translate(
           'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
           {
             defaultMessage:
@@ -75,7 +97,10 @@ export class AIAssistantManagementSelectionPlugin
         options: [AIAssistantType.Default, AIAssistantType.Observability, AIAssistantType.Never],
         type: 'select',
         optionLabels: {
-          [AIAssistantType.Default]: i18n.translate(
+          [AIAssistantType.Default]: this.isServerless ? i18n.translate(
+            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefaultServerless',
+            { defaultMessage: 'Observability only (default)' }
+          ) : i18n.translate(
             'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
             { defaultMessage: 'Observability and Search only (default)' }
           ),
