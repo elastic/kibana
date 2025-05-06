@@ -83,7 +83,6 @@ export const getChangePointChartEmbeddableFactory = (
         const dataViewId = changePointManager.api.dataViewId.getValue();
         return {
           rawState: {
-            timeRange: undefined,
             ...titleManager.getLatestState(),
             ...timeRangeManager.getLatestState(),
             ...changePointManager.getLatestState(),

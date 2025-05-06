@@ -58,7 +58,6 @@ export const getSingleMetricViewerEmbeddableFactory = (
       function serializeState() {
         return {
           rawState: {
-            timeRange: undefined,
             ...titleManager.getLatestState(),
             ...timeRangeManager.getLatestState(),
             ...singleMetricManager.getLatestState(),
