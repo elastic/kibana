@@ -554,7 +554,7 @@ const useEnsureDefaultNamespace = ({
   useEffect(() => {
     if (newPolicy.namespace === POSTURE_NAMESPACE) return;
 
-    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: POSTURE_NAMESPACE };
+    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: newPolicy.namespace };
     updatePolicy(policy);
   }, [newPolicy, input, updatePolicy]);
 };
@@ -825,8 +825,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
 
-    useEnsureDefaultNamespace({ newPolicy, input, updatePolicy });
-
     useCloudFormationTemplate({
       packageInfo,
       updatePolicy,
@@ -1004,7 +1002,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           >
             <EuiFieldText
               isInvalid={!!validationResults?.namespace}
-              value={newPolicy.namespace || ''}
+              defaultValue={newPolicy.namespace || ''}
               onChange={(event) => {
                 updatePolicy({ ...newPolicy, namespace: event.target.value });
               }}
