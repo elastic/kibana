@@ -28,10 +28,7 @@ export const alertDeleteScheduleRoute = (
       },
       security: {
         authz: {
-          requiredPrivileges: [
-            `${API_PRIVILEGES.READ_ALERT_DELETE_SETTINGS}`,
-            `${API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS}`,
-          ],
+          requiredPrivileges: [`${API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS}`],
         },
       },
       options: {

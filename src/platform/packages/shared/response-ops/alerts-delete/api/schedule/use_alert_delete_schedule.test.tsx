@@ -10,7 +10,7 @@
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { useAlertDeleteSchedule } from './use_alert_delete_schedule';
-import { postAlertDeleteSchedule } from './post_alert_delete_schedule';
+import { createAlertDeleteSchedule } from './create_alert_delete_schedule';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -18,12 +18,18 @@ import type { AlertDeleteParams } from '@kbn/alerting-types';
 
 const http = httpServiceMock.createStartContract();
 
-jest.mock('./post_alert_delete_schedule');
+jest.mock('./create_alert_delete_schedule');
 
 describe('useAlertDeleteSchedule', () => {
   const mockOnSuccess = jest.fn();
   const mockOnError = jest.fn();
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -39,7 +45,7 @@ describe('useAlertDeleteSchedule', () => {
       inactiveAlertDeleteThreshold: 10,
       categoryIds: ['management'],
     };
-    (postAlertDeleteSchedule as jest.Mock).mockResolvedValueOnce({ success: true });
+    (createAlertDeleteSchedule as jest.Mock).mockResolvedValueOnce({ success: true });
 
     const { result } = renderHook(
       () =>
@@ -55,12 +61,39 @@ describe('useAlertDeleteSchedule', () => {
       await result.current.mutateAsync(mockRequestBody);
     });
 
-    expect(postAlertDeleteSchedule).toHaveBeenCalledWith({
+    expect(createAlertDeleteSchedule).toHaveBeenCalledWith({
       services: { http },
       requestBody: mockRequestBody,
     });
     expect(mockOnSuccess).toHaveBeenCalled();
     expect(mockOnError).not.toHaveBeenCalled();
+  });
+});
+
+describe('useAlertDeleteSchedule with muted console.errors', () => {
+  const mockOnSuccess = jest.fn();
+  const mockOnError = jest.fn();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+    logger: {
+      // eslint-disable-next-line no-console
+      log: console.log,
+      // eslint-disable-next-line no-console
+      warn: console.warn,
+      error: () => {},
+    },
+  });
+
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should call onError when the mutation fails', async () => {
@@ -78,7 +111,7 @@ describe('useAlertDeleteSchedule', () => {
       request: {} as unknown as Request,
       message: 'Internal Server Error',
     };
-    (postAlertDeleteSchedule as jest.Mock).mockRejectedValueOnce(mockError);
+    (createAlertDeleteSchedule as jest.Mock).mockRejectedValueOnce(mockError);
 
     const { result } = renderHook(
       () =>
@@ -98,7 +131,7 @@ describe('useAlertDeleteSchedule', () => {
       }
     });
 
-    expect(postAlertDeleteSchedule).toHaveBeenCalledWith({
+    expect(createAlertDeleteSchedule).toHaveBeenCalledWith({
       services: { http },
       requestBody: mockRequestBody,
     });

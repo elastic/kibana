@@ -8,7 +8,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { postAlertDeleteSchedule } from './post_alert_delete_schedule';
+import { createAlertDeleteSchedule } from './create_alert_delete_schedule';
 
 const http = httpServiceMock.createStartContract();
 
@@ -20,7 +20,7 @@ describe('alertDeletePreviewApiCall', () => {
   it('sends the correct HTTP request and parses the response', async () => {
     http.post.mockResolvedValue(null);
 
-    await postAlertDeleteSchedule({
+    await createAlertDeleteSchedule({
       services: { http },
       requestBody: {
         activeAlertDeleteThreshold: 10,
@@ -45,7 +45,7 @@ describe('alertDeletePreviewApiCall', () => {
     http.post.mockRejectedValue(new Error('API Error'));
 
     await expect(() =>
-      postAlertDeleteSchedule({
+      createAlertDeleteSchedule({
         services: { http },
         requestBody: {
           activeAlertDeleteThreshold: 1,

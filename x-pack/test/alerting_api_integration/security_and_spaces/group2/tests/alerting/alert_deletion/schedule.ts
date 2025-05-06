@@ -15,7 +15,13 @@ import {
   createEsDocument,
 } from '../../../../../spaces_only/tests/alerting/create_test_data';
 import type { Space } from '../../../../../common/types';
-import { Space1, SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../../scenarios';
+import {
+  Space1,
+  Space2,
+  SuperuserAtSpace1,
+  Space1AllAtSpace1,
+  UserAtSpaceScenarios,
+} from '../../../../scenarios';
 import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
@@ -1435,6 +1441,24 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         });
 
         await cleanupEventLog();
+      });
+    });
+
+    it('should throw when attempting to delete alerts in a space without permission', async () => {
+      const response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Space1.id)}/internal/alerting/rules/settings/_alert_delete_schedule`)
+        .set('kbn-xsrf', 'foo')
+        .auth(Space1AllAtSpace1.user.username, Space1AllAtSpace1.user.password)
+        .send({
+          active_alert_delete_threshold: undefined,
+          inactive_alert_delete_threshold: 90,
+          space_ids: [Space1.id, Space2.id], // no space2 privileges
+        });
+
+      expect(response.body).to.eql({
+        error: 'Forbidden',
+        message: `Insufficient privileges to delete alerts in the specified spaces`,
+        statusCode: 403,
       });
     });
   });

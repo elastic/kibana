@@ -6,7 +6,7 @@
  */
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { alertDeleteScheduleRoute } from './post_alert_delete_schedule_route';
+import { alertDeleteScheduleRoute } from './create_alert_delete_schedule_route';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { alertDeletionClientMock } from '../../../../alert_deletion/alert_deletion_client.mock';
 import { rulesClientMock } from '../../../../rules_client.mock';

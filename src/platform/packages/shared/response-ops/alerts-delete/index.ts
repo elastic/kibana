@@ -25,6 +25,6 @@ export {
   useAlertDeleteSchedule,
 } from './api/schedule/use_alert_delete_schedule';
 export {
-  type PostAlertDeleteScheduleParams,
-  postAlertDeleteSchedule,
-} from './api/schedule/post_alert_delete_schedule';
+  type CreateAlertDeleteScheduleParams,
+  createAlertDeleteSchedule,
+} from './api/schedule/create_alert_delete_schedule';

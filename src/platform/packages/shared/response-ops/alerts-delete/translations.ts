@@ -103,3 +103,7 @@ export const ALERT_DELETE_SUCCESS = i18n.translate('responseOpsAlertDelete.alert
 export const ALERT_DELETE_FAILURE = i18n.translate('responseOpsAlertDelete.alertDeleteFailure', {
   defaultMessage: 'Failed to start clean up task',
 });
+
+export const UNKNOWN_ERROR = i18n.translate('responseOpsAlertDelete.unknownError', {
+  defaultMessage: 'Unknown error',
+});

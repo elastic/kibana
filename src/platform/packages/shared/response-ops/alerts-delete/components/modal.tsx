@@ -186,7 +186,7 @@ export const AlertDeleteModal = ({
     },
   });
 
-  const { mutate: alertDeleteScheduleSubmit } = useAlertDeleteSchedule({
+  const { mutate: createAlertDeleteSchedule } = useAlertDeleteSchedule({
     services: { http },
     onSuccess: () => {
       notifications.toasts.addSuccess(i18n.ALERT_DELETE_SUCCESS);
@@ -195,7 +195,7 @@ export const AlertDeleteModal = ({
     onError: (error: IHttpFetchError<ResponseErrorBody>) => {
       notifications.toasts.addDanger({
         title: i18n.ALERT_DELETE_FAILURE,
-        text: error.body?.message || JSON.stringify(error),
+        text: error.body?.message || i18n.UNKNOWN_ERROR,
       });
     },
   });
@@ -249,7 +249,7 @@ export const AlertDeleteModal = ({
   const onScheduleCleanUpTask = (ev: React.FormEvent) => {
     ev.preventDefault();
 
-    alertDeleteScheduleSubmit({
+    createAlertDeleteSchedule({
       activeAlertDeleteThreshold: validations.isActiveThresholdValid
         ? getThresholdInDays(activeState.threshold, activeState.thresholdUnit)
         : undefined,

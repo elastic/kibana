@@ -11,7 +11,7 @@ import { useMutation } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { AlertDeleteParams } from '@kbn/alerting-types';
-import { postAlertDeleteSchedule } from './post_alert_delete_schedule';
+import { createAlertDeleteSchedule } from './create_alert_delete_schedule';
 
 export interface UseAlertDeleteScheduleParams {
   services: { http: HttpStart };
@@ -25,7 +25,7 @@ export const useAlertDeleteSchedule = ({
 }: UseAlertDeleteScheduleParams) => {
   const mutation = useMutation({
     mutationFn: async (requestBody: AlertDeleteParams) => {
-      return postAlertDeleteSchedule({
+      return createAlertDeleteSchedule({
         services: { http },
         requestBody,
       });

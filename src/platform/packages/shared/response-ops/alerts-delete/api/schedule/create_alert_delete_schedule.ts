@@ -11,14 +11,14 @@ import type { HttpStart } from '@kbn/core/public';
 import type { AlertDeleteParams } from '@kbn/alerting-types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
-export interface PostAlertDeleteScheduleParams {
+export interface CreateAlertDeleteScheduleParams {
   services: { http: HttpStart };
   requestBody: AlertDeleteParams;
 }
-export const postAlertDeleteSchedule = async ({
+export const createAlertDeleteSchedule = async ({
   services: { http },
   requestBody: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds },
-}: PostAlertDeleteScheduleParams) => {
+}: CreateAlertDeleteScheduleParams) => {
   return http.post(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_alert_delete_schedule`, {
     body: JSON.stringify({
       active_alert_delete_threshold: activeAlertDeleteThreshold,
