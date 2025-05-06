@@ -38,7 +38,7 @@ export class CustomVisualizationsPublicPlugin
     /**
      * Create the visualization type with definition
      */
-    visualizations?.createBaseVisualization<SelfChangingVisParams>({
+    visualizations.createBaseVisualization<SelfChangingVisParams>({
       name: 'self_changing_vis',
       title: 'Self Changing Vis',
       icon: 'controlsHorizontal',

@@ -445,7 +445,7 @@ export class LensPlugin {
       );
     }
 
-    visualizations?.registerAlias(lensVisTypeAlias);
+    visualizations.registerAlias(lensVisTypeAlias);
 
     uiActionsEnhanced.registerDrilldown(
       new OpenInDiscoverDrilldown({

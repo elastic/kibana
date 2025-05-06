@@ -92,14 +92,14 @@ export function ListingRoute({
     <TableListView<GraphUserContent>
       id="graph"
       headingId="graphListingHeading"
-      createItem={capabilities.graph?.save ? createItem : undefined}
+      createItem={capabilities.graph.save ? createItem : undefined}
       findItems={findItems}
-      deleteItems={capabilities.graph?.delete ? deleteItems : undefined}
-      editItem={capabilities.graph?.save ? editItem : undefined}
+      deleteItems={capabilities.graph.delete ? deleteItems : undefined}
+      editItem={capabilities.graph.save ? editItem : undefined}
       initialFilter={initialFilter}
       initialPageSize={initialPageSize}
       emptyPrompt={getNoItemsMessage(
-        capabilities.graph?.save === false,
+        capabilities.graph.save === false,
         createItem,
         coreStart.application
       )}
