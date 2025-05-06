@@ -2,12 +2,6 @@
 
 exports[`trace queries fetches a trace 1`] = `
 Object {
-  "_source": Array [
-    "error.log.message",
-    "error.exception.message",
-    "error.exception.handled",
-    "error.exception.type",
-  ],
   "apm": Object {
     "sources": Array [
       Object {
@@ -16,48 +10,56 @@ Object {
       },
     ],
   },
-  "fields": Array [
-    "timestamp.us",
-    "trace.id",
-    "service.name",
-    "error.id",
-    "error.grouping_key",
-    "processor.event",
-    "parent.id",
-    "transaction.id",
-    "span.id",
-    "span.destination.service.resource",
-    "error.culprit",
-    "error.log.message",
-    "error.exception.message",
-    "error.exception.handled",
-    "error.exception.type",
-  ],
-  "query": Object {
-    "bool": Object {
-      "filter": Array [
-        Object {
-          "term": Object {
-            "trace.id": "foo",
-          },
-        },
-        Object {
-          "range": Object {
-            "@timestamp": Object {
-              "format": "epoch_millis",
-              "gte": 0,
-              "lte": 50000,
+  "body": Object {
+    "_source": Array [
+      "error.log.message",
+      "error.exception.message",
+      "error.exception.handled",
+      "error.exception.type",
+    ],
+    "fields": Array [
+      "timestamp.us",
+      "trace.id",
+      "service.name",
+      "error.id",
+      "error.grouping_key",
+      "processor.event",
+      "parent.id",
+      "transaction.id",
+      "span.id",
+      "span.destination.service.resource",
+      "error.culprit",
+      "error.log.message",
+      "error.exception.message",
+      "error.exception.handled",
+      "error.exception.type",
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "trace.id": "foo",
             },
           },
-        },
-      ],
-      "must_not": Object {
-        "terms": Object {
-          "error.log.level": Array [
-            "debug",
-            "info",
-            "warning",
-          ],
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+        ],
+        "must_not": Object {
+          "terms": Object {
+            "error.log.level": Array [
+              "debug",
+              "info",
+              "warning",
+            ],
+          },
         },
       },
     },
