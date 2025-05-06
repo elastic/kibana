@@ -18,7 +18,13 @@ import {
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { VisualizeEditorContext } from '../../types';
-import { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer, CombinedFormBasedPersistedState, isPersistedFormBasedLayer } from './types';
+import {
+  FormBasedPersistedState,
+  FormBasedPrivateState,
+  FormBasedLayer,
+  CombinedFormBasedPersistedState,
+  isPersistedFormBasedLayer,
+} from './types';
 
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';

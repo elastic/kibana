@@ -35,7 +35,11 @@ import type {
   VisualizationInfo,
 } from '../../types';
 import { renewIDs } from '../../utils';
-import type { CombinedFormBasedPersistedState, FormBasedLayer, FormBasedPrivateState } from './types';
+import type {
+  CombinedFormBasedPersistedState,
+  FormBasedLayer,
+  FormBasedPrivateState,
+} from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 import {

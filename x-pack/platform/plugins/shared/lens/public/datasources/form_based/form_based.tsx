@@ -88,7 +88,11 @@ import {
   getReferenceRoot,
   reorderByGroups,
 } from './operations/layer_helpers';
-import { FormBasedPrivateState, DataViewDragDropOperation, CombinedFormBasedPersistedState } from './types';
+import {
+  FormBasedPrivateState,
+  DataViewDragDropOperation,
+  CombinedFormBasedPersistedState,
+} from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
 import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
@@ -220,7 +224,11 @@ export function getFormBasedDatasource({
   const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
-  const formBasedDatasource: Datasource<FormBasedPrivateState, CombinedFormBasedPersistedState, Query> = {
+  const formBasedDatasource: Datasource<
+    FormBasedPrivateState,
+    CombinedFormBasedPersistedState,
+    Query
+  > = {
     id: DATASOURCE_ID,
     alias: ALIAS_IDS,
 

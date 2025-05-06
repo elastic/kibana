@@ -5,11 +5,16 @@
  * 2.0.
  */
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
-import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
-import type { IndexPattern, IndexPatternField, DragDropOperation, VisualizeEditorContext } from '../../types';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { AggregateQuery } from '@kbn/es-query';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type {
+  IndexPattern,
+  IndexPatternField,
+  DragDropOperation,
+  VisualizeEditorContext,
+} from '../../types';
+import type { IncompleteColumn, GenericIndexPatternColumn } from './operations';
 import { ValueFormatConfig } from './operations/definitions/column_types';
 
 export type {
@@ -91,14 +96,10 @@ export interface CombinedFormBasedPersistedState {
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }
 
-export function isTextBasedLayer(
-  layer: FormBasedLayer | TextBasedLayer
-): layer is TextBasedLayer {
+export function isTextBasedLayer(layer: FormBasedLayer | TextBasedLayer): layer is TextBasedLayer {
   return layer.type === 'esql';
 }
-export function isFormBasedLayer(
-  layer: FormBasedLayer | TextBasedLayer
-): layer is FormBasedLayer {
+export function isFormBasedLayer(layer: FormBasedLayer | TextBasedLayer): layer is FormBasedLayer {
   return !layer.type || layer.type === 'form';
 }
 
