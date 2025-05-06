@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { FieldDescription } from './field_description';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY } from './field_description';
 
@@ -52,18 +53,14 @@ describe('FieldDescription', () => {
     render(<FieldDescription field={{ name: 'bytes', type: 'number', customDescription }} />);
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
 
-    act(() => {
-      screen.queryByTestId('toggleFieldDescription-bytes')?.click();
-    });
+    await userEvent.click(screen.getByTestId('toggleFieldDescription-bytes'));
 
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(
       `${customDescription}View less`
     );
     expect(mockSetLocalStorage).toHaveBeenCalledWith(false);
 
-    act(() => {
-      screen.queryByTestId('toggleFieldDescription-bytes')?.click();
-    });
+    await userEvent.click(screen.getByTestId('toggleFieldDescription-bytes'));
 
     expect(screen.queryByTestId('fieldDescription-bytes')).toHaveTextContent(customDescription);
     expect(mockSetLocalStorage).toHaveBeenCalledWith(true);
