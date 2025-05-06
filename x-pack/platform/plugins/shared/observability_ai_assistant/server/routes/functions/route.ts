@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { notImplemented } from '@hapi/boom';
+
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import { context as otelContext } from '@opentelemetry/api';
 import * as t from 'io-ts';
@@ -159,10 +159,6 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
       body: { queries, categories },
     } = resources.params;
 
-    if (!client) {
-      throw notImplemented();
-    }
-
     const entries = await client.recall({ queries, categories });
     return { entries };
   },
@@ -187,10 +183,6 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
 
     const {
       title,
