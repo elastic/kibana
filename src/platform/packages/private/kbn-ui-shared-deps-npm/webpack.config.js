@@ -20,6 +20,8 @@ const WEBPACK_SRC = require.resolve('webpack');
 
 const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
 
+const useEuiAmsterdamRelease = process.env.EUI_AMSTERDAM === 'true';
+
 /** @returns {import('webpack').Configuration} */
 module.exports = (_, argv) => {
   const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
@@ -142,10 +144,12 @@ module.exports = (_, argv) => {
         // that points to special EUI releases bundled with Amsterdam set as the default theme
         // and meant to be used with Kibana 8.x. Kibana 9.0 and later use the Borealis theme
         // and should import from the regular @elastic/eui package.
-        '@elastic/eui$':
-          process.env.EUI_AMSTERDAM === 'true'
-            ? '@elastic/eui-amsterdam/optimize/es'
-            : '@elastic/eui/optimize/es',
+        '@elastic/eui$': useEuiAmsterdamRelease
+          ? '@elastic/eui-amsterdam/optimize/es'
+          : '@elastic/eui/optimize/es',
+        '@elastic/eui/optimize/es/*': useEuiAmsterdamRelease
+          ? '@elastic/eui-amsterdam/optimize/es/*'
+          : '@elastic/eui/optimize/es/*',
         moment: MOMENT_SRC,
         // NOTE: Used to include react profiling on bundles
         // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
