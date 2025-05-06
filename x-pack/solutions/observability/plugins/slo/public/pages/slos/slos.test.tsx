@@ -45,7 +45,6 @@ jest.mock('../../hooks/use_delete_slo');
 jest.mock('../../hooks/use_delete_slo_instance');
 jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_permissions');
-jest.mock('../../hooks/use_capabilities');
 jest.mock('../../hooks/use_create_data_view');
 jest.mock('@kbn/ebt-tools');
 
@@ -72,8 +71,8 @@ const mockDeleteSlo = jest.fn();
 const mockDeleteInstance = jest.fn();
 
 useCreateSloMock.mockReturnValue({ mutate: mockCreateSlo });
-useDeleteSloMock.mockReturnValue({ mutateAsync: mockDeleteSlo });
-useDeleteSloInstanceMock.mockReturnValue({ mutateAsync: mockDeleteInstance });
+useDeleteSloMock.mockReturnValue({ mutate: mockDeleteSlo });
+useDeleteSloInstanceMock.mockReturnValue({ mutate: mockDeleteInstance });
 useCreateDataViewMock.mockReturnValue({});
 
 const mockNavigate = jest.fn();
