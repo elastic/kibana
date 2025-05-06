@@ -20,6 +20,8 @@ import { queryClient } from '../query_client';
 
 const checkRuleTypesPermissions = async (http: CoreStart['http']) => {
   try {
+    // If the user can access at least one rule type (with any authorizedConsumer, in any app) then
+    // they can create alerts visualizations
     const ruleTypes = await getInternalRuleTypes({ http });
     // We cannot use the `useGetInternalRuleTypesQuery` hook since this check happens outside
     // of React but we can set the query data in the client to avoid duplicated requests

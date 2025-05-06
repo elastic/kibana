@@ -25,7 +25,7 @@ export const isOperator = (
 ): item is { operator: AlertsFiltersExpressionOperator } => item != null && 'operator' in item;
 
 export const isEmptyExpression = (expression: AlertsFiltersExpression) => {
-  // An expression is empty if it does not have any elements
+  // An expression is considered empty if it does not have any elements
   if (!Boolean(expression?.length)) {
     return true;
   }

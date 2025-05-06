@@ -176,6 +176,114 @@ describe('EmbeddableAlertsTable', () => {
     );
   });
 
+  it('should render the alerts table with the correct time range and filters query', async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <EmbeddableAlertsTable
+          id={TABLE_ID}
+          timeRange={{
+            from: '2025-01-01T00:00:00.000Z',
+            to: '2025-01-01T01:00:00.000Z',
+          }}
+          query={{
+            type: 'alertsFilters',
+            filters: [
+              { filter: { type: 'ruleTags', value: ['tag1'] } },
+              { operator: 'and' },
+              { filter: { type: 'ruleTypes', value: ['type1'] } },
+            ],
+          }}
+          services={services}
+        />
+      </QueryClientProvider>
+    );
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+    expect(mockAlertsTable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: TABLE_ID,
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      range: {
+                        'kibana.alert.time_range': {
+                          format: 'strict_date_optional_time',
+                          gte: '2025-01-01T00:00:00.000Z',
+                          lte: '2025-01-01T01:00:00.000Z',
+                        },
+                      },
+                    },
+                    {
+                      range: {
+                        '@timestamp': {
+                          format: 'strict_date_optional_time',
+                          gte: '2025-01-01T00:00:00.000Z',
+                          lte: '2025-01-01T01:00:00.000Z',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              'kibana.alert.rule.tags': 'tag1',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            match: {
+                              'kibana.alert.rule.rule_type_id': 'type1',
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        showAlertStatusWithFlapping: true,
+        toolbarVisibility: {
+          showFullScreenSelector: false,
+          showColumnSelector: false,
+          showSortSelector: false,
+          showKeyboardShortcuts: false,
+          showDisplaySelector: false,
+        },
+        casesConfiguration: {
+          featureId: 'alerts',
+          owner: [GENERAL_CASES_OWNER],
+        },
+        emptyStateHeight: 'flex',
+        emptyStateVariant: 'transparent',
+        flyoutOwnsFocus: true,
+        openLinksInNewTab: true,
+        browserFields: {},
+      }),
+      {}
+    );
+  });
+
   it.each(['observability', 'stack', 'security'] as RuleTypeSolution[])(
     'should pass the correct rule type ids to the table when `solution` is %s',
     async (solution) => {

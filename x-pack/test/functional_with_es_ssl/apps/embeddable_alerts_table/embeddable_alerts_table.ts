@@ -179,6 +179,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.dashboard.gotoDashboardURL();
     });
 
+    after(async () => {
+      await pageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await pageObjects.home.addSampleDataSet('logs');
+      await objectRemover.removeAll();
+    });
+
     describe('Config editor', () => {
       it('should show the solution picker when multiple solutions are available', async () => {
         await toasts.dismissIfExists();
@@ -328,14 +336,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await retry.try(async () =>
         expect((await testSubjects.findAll('alertsTableEmptyState')).length).to.equal(1)
       );
-    });
-
-    after(async () => {
-      await pageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
-        useActualUrl: true,
-      });
-      await pageObjects.home.addSampleDataSet('logs');
-      await objectRemover.removeAll();
     });
   });
 };
