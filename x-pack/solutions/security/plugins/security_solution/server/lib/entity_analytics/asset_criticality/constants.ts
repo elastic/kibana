@@ -46,12 +46,6 @@ export const assetCriticalityFieldMap: FieldMap = {
     array: false,
     required: true,
   },
-  'generic.name': {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  'generic.asset.criticality': assetCriticalityMapping,
   'host.name': {
     type: 'keyword',
     array: false,
@@ -75,6 +69,12 @@ export const assetCriticalityFieldMap: FieldMap = {
     required: false,
   },
   'service.asset.criticality': assetCriticalityMapping,
+  'generic.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'generic.asset.criticality': assetCriticalityMapping,
 } as const;
 
 export const CRITICALITY_VALUES: { readonly [K in CriticalityValues as Uppercase<K>]: K } = {
