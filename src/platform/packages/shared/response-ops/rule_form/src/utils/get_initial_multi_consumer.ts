@@ -55,11 +55,6 @@ export const getInitialMultiConsumer = ({
     return validConsumers[0];
   }
 
-  // If o11y is in the valid consumers and it is serverless, just use that
-  if (isServerless && validConsumers.includes(AlertConsumers.OBSERVABILITY)) {
-    return AlertConsumers.OBSERVABILITY;
-  }
-
   const selectedAvailableRuleType = ruleTypes.find((availableRuleType) => {
     return availableRuleType.id === ruleType.id;
   });
@@ -87,7 +82,7 @@ export const getInitialMultiConsumer = ({
     validConsumers,
   });
 
-  // If validated consumer exists and no o11y in valid consumers, just use that
+  // If validated consumer exists just use that
   if (validatedConsumer) {
     return validatedConsumer;
   }
