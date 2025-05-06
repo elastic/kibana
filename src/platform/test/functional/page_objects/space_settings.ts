@@ -44,7 +44,5 @@ export class SpaceSettingsPageObject extends FtrService {
     await this.testSubjects.click(solutionSpecificTestSubjectMap[solution]);
     await this.testSubjects.click('save-space-button');
     await this.testSubjects.click('confirmModalConfirmButton');
-
-    await this.common.navigateToUrl('discover');
   }
 }
