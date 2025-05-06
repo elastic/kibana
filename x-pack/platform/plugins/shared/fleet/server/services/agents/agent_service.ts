@@ -66,6 +66,11 @@ export interface AgentClient {
   getAgent(agentId: string): Promise<Agent>;
 
   /**
+   * Migrate a single agent to another cluster
+   * @param agentId
+   */
+  migrateAgent(agentId: string): Promise<Agent>;
+  /**
    * Get multiple agents by id
    * @param agentIds
    */
@@ -131,6 +136,11 @@ class AgentClientImpl implements AgentClient {
     private readonly preflightCheck?: () => void | Promise<void>,
     private readonly spaceId?: string
   ) {}
+
+  public async migrateAgent(): Promise<Agent> {
+    // Implementation for migrating an agent
+    throw new Error('Method not implemented.');
+  }
 
   public async listAgents(
     options: ListWithKuery & {

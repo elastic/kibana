@@ -86,7 +86,21 @@ export const GetAgentsRequestSchema = {
     }
   ),
 };
-
+export const MigrateOptionsSchema = {
+  ca_sha256: schema.maybe(schema.string()),
+  certificate_authorities: schema.maybe(schema.string()),
+  elastic_agent_cert: schema.maybe(schema.string()),
+  elastic_agent_cert_key: schema.maybe(schema.string()),
+  elastic_agent_cert_key_passphrase: schema.maybe(schema.string()),
+  headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  insecure: schema.maybe(schema.boolean()),
+  proxy_disabled: schema.maybe(schema.boolean()),
+  proxy_headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  proxy_url: schema.maybe(schema.string()),
+  staging: schema.maybe(schema.boolean()),
+  tags: schema.maybe(schema.arrayOf(schema.string())),
+  replace_token: schema.maybe(schema.boolean()),
+};
 export const AgentComponentStateSchema = schema.oneOf([
   schema.literal('STARTING'),
   schema.literal('CONFIGURING'),
@@ -521,6 +535,16 @@ export const UpdateAgentRequestSchema = {
   body: schema.object({
     user_provided_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     tags: schema.maybe(schema.arrayOf(schema.string())),
+  }),
+};
+export const MigrateSingleAgentRequestSchema = {
+  params: schema.object({
+    agentId: schema.string(),
+  }),
+  body: schema.object({
+    uri: schema.uri(),
+    enrollment_token: schema.string(),
+    settings: schema.maybe(schema.object(MigrateOptionsSchema)),
   }),
 };
 
