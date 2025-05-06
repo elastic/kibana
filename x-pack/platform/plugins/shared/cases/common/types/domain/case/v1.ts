@@ -119,7 +119,7 @@ export const CaseAttributesRt = rt.intersection([
   CaseBasicRt,
   rt.strict({
     duration: rt.union([rt.number, rt.null]),
-    in_progress_at: rt.union([rt.string, rt.null]),
+    in_progress_at: rt.union([rt.string, rt.null, rt.undefined]),
     closed_at: rt.union([rt.string, rt.null]),
     closed_by: rt.union([UserRt, rt.null]),
     created_at: rt.string,
@@ -127,9 +127,9 @@ export const CaseAttributesRt = rt.intersection([
     external_service: rt.union([ExternalServiceRt, rt.null]),
     updated_at: rt.union([rt.string, rt.null]),
     updated_by: rt.union([UserRt, rt.null]),
-    time_to_acknowledge: rt.union([rt.number, rt.null]),
-    time_to_investigate: rt.union([rt.number, rt.null]),
-    time_to_resolve: rt.union([rt.number, rt.null]),
+    time_to_acknowledge: rt.union([rt.number, rt.null, rt.undefined]),
+    time_to_investigate: rt.union([rt.number, rt.null, rt.undefined]),
+    time_to_resolve: rt.union([rt.number, rt.null, rt.undefined]),
   }),
 ]);
 

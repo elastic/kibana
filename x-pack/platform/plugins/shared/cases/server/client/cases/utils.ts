@@ -398,15 +398,46 @@ export const getClosedInfoForUpdate = ({
   }
 };
 
-export const getTimingMetricsForUpdate = ({
+export const getInProgressInfoForUpdate = ({
   status,
-  createdAt,
-  inProgressAt,
   updatedAt,
 }: {
   status?: CaseStatuses;
-  createdAt: CaseAttributes['created_at'];
-  inProgressAt: CaseAttributes['in_progress_at'];
+  updatedAt: string;
+}): Partial<Pick<CaseAttributes, 'in_progress_at'>> | undefined => {
+  if (status && status === CaseStatuses['in-progress']) {
+    return {
+      in_progress_at: updatedAt,
+    };
+  }
+
+  if (status && status === CaseStatuses.open) {
+    return {
+      in_progress_at: null,
+    };
+  }
+};
+
+const checkClosedCaseDates = (
+  createdAtMillis: number,
+  updatedAtMillis: number,
+  inProgressAtMillis: number | null
+): inProgressAtMillis is number =>
+  !isNaN(createdAtMillis) &&
+  !isNaN(updatedAtMillis) &&
+  inProgressAtMillis != null &&
+  !isNaN(inProgressAtMillis) &&
+  updatedAtMillis >= createdAtMillis &&
+  inProgressAtMillis >= createdAtMillis &&
+  updatedAtMillis >= inProgressAtMillis;
+
+export const getTimingMetricsForUpdate = ({
+  status,
+  caseAttributes,
+  updatedAt,
+}: {
+  status?: CaseStatuses;
+  caseAttributes: CaseAttributes;
   updatedAt: string;
 }):
   | Partial<
@@ -417,38 +448,33 @@ export const getTimingMetricsForUpdate = ({
     >
   | undefined => {
   try {
-    const createdAtMillis = new Date(createdAt).getTime();
+    const createdAtMillis = new Date(caseAttributes.created_at).getTime();
     const updatedAtMillis = new Date(updatedAt).getTime();
-    const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
+    const inProgressAtMillis = caseAttributes.in_progress_at
+      ? new Date(caseAttributes.in_progress_at).getTime()
+      : null;
 
-    if (status) {
-      if (status === CaseStatuses['in-progress']) {
-        if (
-          !isNaN(createdAtMillis) &&
-          !isNaN(updatedAtMillis) &&
-          updatedAtMillis >= createdAtMillis
-        ) {
-          return {
-            in_progress_at: updatedAt,
-            time_to_acknowledge: Math.floor((updatedAtMillis - createdAtMillis) / 1000),
-          };
-        }
+    if (status && status === CaseStatuses['in-progress'] && !caseAttributes.time_to_acknowledge) {
+      if (
+        !isNaN(createdAtMillis) &&
+        !isNaN(updatedAtMillis) &&
+        updatedAtMillis >= createdAtMillis
+      ) {
+        return {
+          time_to_acknowledge: Math.floor((updatedAtMillis - createdAtMillis) / 1000),
+        };
       }
-      if (status === CaseStatuses.closed) {
-        if (
-          !isNaN(createdAtMillis) &&
-          !isNaN(updatedAtMillis) &&
-          inProgressAtMillis != null &&
-          !isNaN(inProgressAtMillis) &&
-          updatedAtMillis >= createdAtMillis &&
-          inProgressAtMillis >= createdAtMillis &&
-          updatedAtMillis >= inProgressAtMillis
-        ) {
-          return {
-            time_to_investigate: Math.floor((updatedAtMillis - inProgressAtMillis) / 1000),
-            time_to_resolve: Math.floor((updatedAtMillis - createdAtMillis) / 1000),
-          };
-        }
+    }
+    if (status && status === CaseStatuses.closed) {
+      if (checkClosedCaseDates(createdAtMillis, updatedAtMillis, inProgressAtMillis)) {
+        return {
+          ...(!caseAttributes.time_to_investigate
+            ? { time_to_investigate: Math.floor((updatedAtMillis - inProgressAtMillis) / 1000) }
+            : {}),
+          ...(!caseAttributes.time_to_resolve
+            ? { time_to_resolve: Math.floor((updatedAtMillis - createdAtMillis) / 1000) }
+            : {}),
+        };
       }
     }
   } catch (err) {

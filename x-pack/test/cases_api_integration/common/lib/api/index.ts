@@ -690,6 +690,68 @@ export const calculateDuration = (closedAt: string | null, createdAt: string | n
   return Math.floor(Math.abs((closedAtMillis - createdAtMillis) / 1000));
 };
 
+export const calculateInProgressTimingMetrics = ({
+  createdAt,
+  inProgressAt,
+}: {
+  createdAt: string;
+  inProgressAt: string;
+}) => {
+  if (createdAt == null || inProgressAt == null) {
+    throw new Error('Dates are null');
+  }
+
+  const createdAtMillis = new Date(createdAt).getTime();
+  const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
+
+  if (isNaN(createdAtMillis) || isNaN(inProgressAtMillis)) {
+    throw new Error('Invalid dates');
+  }
+
+  if (inProgressAtMillis < createdAtMillis) {
+    throw new Error('Invalid dates relation');
+  }
+
+  return {
+    timeToAcknowledge: Math.floor((inProgressAtMillis - createdAtMillis) / 1000),
+  };
+};
+
+export const calculateCloseTimingMetrics = ({
+  createdAt,
+  inProgressAt,
+  closedAt,
+}: {
+  createdAt: string;
+  inProgressAt: string;
+  closedAt: string;
+}) => {
+  if (createdAt == null || closedAt == null || inProgressAt == null) {
+    throw new Error('Dates are null');
+  }
+
+  const createdAtMillis = new Date(createdAt).getTime();
+  const closedAtMillis = new Date(closedAt).getTime();
+  const inProgressAtMillis = inProgressAt ? new Date(inProgressAt).getTime() : null;
+
+  if (isNaN(createdAtMillis) || isNaN(closedAtMillis) || isNaN(inProgressAtMillis)) {
+    throw new Error('Invalid dates');
+  }
+
+  if (
+    closedAtMillis < createdAtMillis ||
+    inProgressAtMillis < createdAtMillis ||
+    closedAtMillis < inProgressAtMillis
+  ) {
+    throw new Error('Invalid dates relation');
+  }
+
+  return {
+    timeToInvestigate: Math.floor((closedAtMillis - inProgressAtMillis) / 1000),
+    timeToResolve: Math.floor((closedAtMillis - createdAtMillis) / 1000),
+  };
+};
+
 export const getCasesMetrics = async ({
   supertest,
   features,

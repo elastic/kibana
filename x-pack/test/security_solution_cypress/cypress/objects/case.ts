@@ -77,7 +77,6 @@ export const getCaseResponse = (): Case => ({
   tags: ['Tag1', 'Tag2'],
   description: 'This is the case description',
   created_at: '2023-05-11T06:41:41.479Z',
-  in_progress_at: null,
   created_by: { username: 'elastic', full_name: 'Elastic', email: 'elastic@elastic.co' },
   owner: 'securitySolution',
   status: CaseStatuses.open,
@@ -105,9 +104,6 @@ export const getCaseResponse = (): Case => ({
   version: 'test-version',
   category: null,
   observables: [],
-  time_to_acknowledge: null,
-  time_to_investigate: null,
-  time_to_resolve: null,
 });
 
 export const getServiceNowConnector = (): Connector => ({

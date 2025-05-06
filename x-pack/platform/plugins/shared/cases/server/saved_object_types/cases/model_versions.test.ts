@@ -85,6 +85,9 @@ describe('Model versions', () => {
       Array [
         Object {
           "addedMappings": Object {
+            "in_progress_at": Object {
+              "type": "date",
+            },
             "time_to_acknowledge": Object {
               "type": "unsigned_long",
             },

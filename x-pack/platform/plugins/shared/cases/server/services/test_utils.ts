@@ -106,7 +106,6 @@ export const basicESCaseFields: CasePersistedAttributes = {
   closed_at: null,
   closed_by: null,
   created_at: '2019-11-25T21:54:48.952Z',
-  in_progress_at: null,
   created_by: {
     full_name: 'elastic',
     email: 'testemail@elastic.co',
@@ -134,16 +133,12 @@ export const basicESCaseFields: CasePersistedAttributes = {
   total_alerts: -1,
   total_comments: -1,
   category: null,
-  time_to_acknowledge: null,
-  time_to_investigate: null,
-  time_to_resolve: null,
 };
 
 export const basicCaseFields: CaseAttributes = {
   closed_at: null,
   closed_by: null,
   created_at: '2019-11-25T21:54:48.952Z',
-  in_progress_at: null,
   created_by: {
     full_name: 'elastic',
     email: 'testemail@elastic.co',
@@ -171,9 +166,6 @@ export const basicCaseFields: CaseAttributes = {
   category: null,
   customFields: [],
   observables: [],
-  time_to_acknowledge: null,
-  time_to_investigate: null,
-  time_to_resolve: null,
 };
 
 export const createCaseSavedObjectResponse = ({

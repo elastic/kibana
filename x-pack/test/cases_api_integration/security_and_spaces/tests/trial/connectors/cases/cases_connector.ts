@@ -1422,7 +1422,6 @@ const createCaseWithId = async ({
       severity: SEVERITY_EXTERNAL_TO_ESMODEL[req?.severity ?? CaseSeverity.low],
       closed_at: null,
       closed_by: null,
-      in_progress_at: null,
       updated_at: null,
       updated_by: null,
       created_at: new Date().toISOString(),
@@ -1432,9 +1431,6 @@ const createCaseWithId = async ({
       total_alerts: 0,
       total_comments: 0,
       observables: [],
-      time_to_acknowledge: null,
-      time_to_investigate: null,
-      time_to_resolve: null,
     },
     overwrite: false,
   });

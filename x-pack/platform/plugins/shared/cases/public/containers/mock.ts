@@ -230,7 +230,6 @@ export const basicCase: CaseUI = {
   comments: [basicComment],
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
-  inProgressAt: null,
   connector: {
     id: 'none',
     name: 'My Connector',
@@ -257,9 +256,6 @@ export const basicCase: CaseUI = {
   category: null,
   customFields: [],
   observables: [],
-  timeToAcknowledge: null,
-  timeToInvestigate: null,
-  timeToResolve: null,
 };
 
 export const basicFileMock: FileJSON = {
@@ -359,7 +355,6 @@ export const mockCase: CaseUI = {
   comments: [basicComment],
   createdAt: basicCreatedAt,
   createdBy: elasticUser,
-  inProgressAt: basicCreatedAt,
   connector: {
     id: 'none',
     name: 'My Connector',
@@ -385,9 +380,6 @@ export const mockCase: CaseUI = {
   category: null,
   customFields: [],
   observables: [],
-  timeToAcknowledge: null,
-  timeToInvestigate: null,
-  timeToResolve: null,
 };
 
 export const basicCasePost: CaseUI = {
@@ -561,7 +553,6 @@ export const persistableStateAttachmentSnake: Attachment = {
 export const basicCaseSnake: Case = {
   ...basicCase,
   status: CaseStatuses.open,
-  in_progress_at: null,
   closed_at: null,
   closed_by: null,
   comments: [basicCommentSnake],
@@ -574,9 +565,6 @@ export const basicCaseSnake: Case = {
   updated_by: elasticUserSnake,
   owner: SECURITY_SOLUTION_OWNER,
   customFields: [],
-  time_to_acknowledge: null,
-  time_to_investigate: null,
-  time_to_resolve: null,
 } as Case;
 
 export const caseWithAlertsSnake = {
