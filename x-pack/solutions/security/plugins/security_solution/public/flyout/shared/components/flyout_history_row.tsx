@@ -32,11 +32,15 @@ import {
   GENERIC_HISTORY_ROW_TEST_ID,
   HISTORY_ROW_LOADING_TEST_ID,
   HOST_HISTORY_ROW_TEST_ID,
+  MISCONFIGURATION_HISTORY_ROW_TEST_ID,
   NETWORK_HISTORY_ROW_TEST_ID,
   RULE_HISTORY_ROW_TEST_ID,
   USER_HISTORY_ROW_TEST_ID,
+  VULNERABILITY_HISTORY_ROW_TEST_ID,
 } from './test_ids';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
+import { VulnerabilityFindingsPanelKey } from '../../csp_details/vulnerabilities_flyout/constants';
+import { MisconfigurationFindingsPanelKey } from '../../csp_details/findings_flyout/constants';
 
 const MAX_WIDTH = 300; // px
 
@@ -92,6 +96,28 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
           icon={'globe'}
           name={'Network'}
           dataTestSubj={NETWORK_HISTORY_ROW_TEST_ID}
+        />
+      );
+    case MisconfigurationFindingsPanelKey:
+      return (
+        <GenericHistoryRow
+          item={item}
+          index={index}
+          title={String(item?.panel?.params?.resourceId)}
+          icon={'document'}
+          name={'Resource Id'}
+          dataTestSubj={MISCONFIGURATION_HISTORY_ROW_TEST_ID}
+        />
+      );
+    case VulnerabilityFindingsPanelKey:
+      return (
+        <GenericHistoryRow
+          item={item}
+          index={index}
+          title={String(item?.panel?.params?.resourceId)}
+          icon={'document'}
+          name={'Resource Id'}
+          dataTestSubj={VULNERABILITY_HISTORY_ROW_TEST_ID}
         />
       );
     default:
