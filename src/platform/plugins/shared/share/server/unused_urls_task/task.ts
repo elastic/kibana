@@ -7,17 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
- */
-
 import { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { ISavedObjectsRepository } from '@kbn/core/server';
+import { CoreSetup, ISavedObjectsRepository, SavedObjectsBulkDeleteObject } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
 import { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import { MAX_PAGE_SIZE, SAVED_OBJECT_TYPE, TASK_ID } from './constants';
@@ -38,7 +29,7 @@ export const deleteUnusedUrls = async ({
   logger,
 }: {
   savedObjectsRepository: ISavedObjectsRepository;
-  unusedUrls: Array<{ id: string; type: string }>;
+  unusedUrls: SavedObjectsBulkDeleteObject[];
   logger: Logger;
 }) => {
   const total = unusedUrls.length;
@@ -66,7 +57,7 @@ export const fetchAllUnusedUrls = async ({
   logger: Logger;
   pitKeepAlive: string;
 }) => {
-  const results: Array<{ id: string }> = [];
+  const results: SavedObjectsBulkDeleteObject[] = [];
 
   const { id: pitId } = await savedObjectsRepository.openPointInTimeForType(SAVED_OBJECT_TYPE, {
     keepAlive: pitKeepAlive,
@@ -77,7 +68,7 @@ export const fetchAllUnusedUrls = async ({
     let hasMore = true;
 
     while (hasMore) {
-      const response = await savedObjectsRepository.find({
+      const { saved_objects: savedObjects } = await savedObjectsRepository.find({
         type: SAVED_OBJECT_TYPE,
         filter,
         pit: { id: pitId, keepAlive: pitKeepAlive },
@@ -85,11 +76,11 @@ export const fetchAllUnusedUrls = async ({
         perPage: MAX_PAGE_SIZE,
       });
 
-      results.push(...response.saved_objects.map(({ id }) => ({ id })));
-      hasMore = response.saved_objects.length === MAX_PAGE_SIZE;
+      results.push(...savedObjects.map(({ id }) => ({ id, type: SAVED_OBJECT_TYPE })));
+      hasMore = savedObjects.length === MAX_PAGE_SIZE;
 
       if (hasMore) {
-        searchAfter = response.saved_objects[response.saved_objects.length - 1].sort;
+        searchAfter = savedObjects[savedObjects.length - 1].sort;
       }
     }
   } catch (e) {
@@ -98,26 +89,29 @@ export const fetchAllUnusedUrls = async ({
     await savedObjectsRepository.closePointInTime(pitId);
   }
 
-  return results.map(({ id }) => ({
-    id,
-    type: SAVED_OBJECT_TYPE,
-  }));
+  return results;
 };
 
 export const runDeleteUnusedUrlsTask = async ({
-  savedObjectsRepository,
-  filter,
+  core,
+  urlExpirationDuration,
   logger,
   pitKeepAlive,
 }: {
-  savedObjectsRepository: ISavedObjectsRepository;
-  filter: string;
+  core: CoreSetup;
+  urlExpirationDuration: string;
   logger: Logger;
   pitKeepAlive: string;
 }) => {
   // TODO: Check if it should run in trycatch
   try {
     logger.info('Unused URLs cleanup started');
+    const [coreStart] = await core.getStartServices();
+
+    // TODO: Check handling different spaces
+    const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
+
+    const filter = `url.attributes.accessDate <= now-${urlExpirationDuration}`;
 
     const unusedUrls = await fetchAllUnusedUrls({
       savedObjectsRepository,
@@ -128,7 +122,7 @@ export const runDeleteUnusedUrlsTask = async ({
 
     logger.info(`Found ${unusedUrls.length} unused URL(s)`);
 
-    if (unusedUrls.length > 0) {
+    if (unusedUrls.length) {
       await deleteUnusedUrls({
         savedObjectsRepository,
         unusedUrls,

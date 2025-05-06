@@ -8,23 +8,18 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import {
+  DEFAULT_URL_EXPIRATION_CHECK_INTERVAL_IN_SECONDS,
+  DEFAULT_URL_EXPIRATION_DURATION,
+  DEFAULT_URL_EXPIRATION_PIT_KEEP_ALIVE,
+} from './unused_urls_task';
 
 const relativeTimeRegex = /^[0-9]+[smhdwMy]$/;
 const intervalRegex = /^[0-9]+s$/;
 
 const validateRelativeTime = (value: string) => {
   if (!relativeTimeRegex.test(value)) {
-    throw new Error(
-      `Invalid value "${value}" for relative time. Must be a number followed by one of the following units: s, m, h, d, w, M, y`
-    );
-  }
-};
-
-const validateInterval = (value: string) => {
-  if (!intervalRegex.test(value)) {
-    throw new Error(
-      `Invalid value "${value}" for interval. Must be a number followed by "s" (seconds)`
-    );
+    return `Invalid value: "${value}". Must be a positive integer followed by one of the following units: s, m, h, d, w, M, y`;
   }
 };
 
@@ -39,16 +34,20 @@ export const configSchema = schema.object({
       defaultValue: false,
     }),
     duration: schema.string({
-      defaultValue: '1y',
+      defaultValue: DEFAULT_URL_EXPIRATION_DURATION,
       validate: validateRelativeTime,
     }),
-    // Task manager only supports intervals in seconds or minutes and for some reason the minimum is 30 seconds
+    // Task manager only supports intervals in seconds or minutes and the minimum is 30 seconds
     check_interval_in_seconds: schema.string({
-      defaultValue: '604800s', // 7 days
-      validate: validateInterval,
+      defaultValue: DEFAULT_URL_EXPIRATION_CHECK_INTERVAL_IN_SECONDS,
+      validate: (value: string) => {
+        if (!intervalRegex.test(value)) {
+          return `Invalid value: "${value}". Must be a number positive integer followed by "s" (seconds)`;
+        }
+      },
     }),
     pit_keep_alive: schema.string({
-      defaultValue: '10m',
+      defaultValue: DEFAULT_URL_EXPIRATION_PIT_KEEP_ALIVE,
       validate: validateRelativeTime,
     }),
   }),

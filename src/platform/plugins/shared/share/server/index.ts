@@ -18,13 +18,20 @@ export type {
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
 
 export {
-  getDeleteUnsuedUrlTask,
+  TASK_ID,
+  SAVED_OBJECT_TYPE,
+  MAX_PAGE_SIZE,
+  DEFAULT_URL_EXPIRATION_CHECK_INTERVAL_IN_SECONDS,
+  DEFAULT_URL_EXPIRATION_DURATION,
+  DEFAULT_URL_EXPIRATION_PIT_KEEP_ALIVE,
+} from './unused_urls_task';
+
+export {
+  getDeleteUnusedUrlTask,
   deleteUnusedUrls,
   fetchAllUnusedUrls,
   runDeleteUnusedUrlsTask,
 } from './unused_urls_task';
-
-export { TASK_ID, SAVED_OBJECT_TYPE, MAX_PAGE_SIZE } from './unused_urls_task';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { SharePlugin } = await import('./plugin');

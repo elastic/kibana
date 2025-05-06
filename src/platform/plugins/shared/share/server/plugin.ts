@@ -55,10 +55,9 @@ export class SharePlugin
     >
 {
   private url?: ServerUrlService;
-  private version: string;
+  private readonly version: string;
   private readonly logger: Logger;
   private readonly config: ConfigSchema;
-  private taskManagerSetup: TaskManagerSetupContract | undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.version = initializerContext.env.packageInfo.version;
@@ -111,54 +110,37 @@ export class SharePlugin
       },
     });
 
-    this.taskManagerSetup = taskManager;
+    if (this.config.url_expiration.enabled && taskManager) {
+      taskManager.registerTaskDefinitions({
+        [TASK_ID]: {
+          title: 'Unused URLs Cleanup',
+          description: "Deletes unused saved objects of type 'url'",
+          createTaskRunner: () => ({
+            run: async () => {
+              runDeleteUnusedUrlsTask({
+                core,
+                urlExpirationDuration: this.config.url_expiration.duration,
+                logger: this.logger,
+                pitKeepAlive: this.config.url_expiration.pit_keep_alive,
+              });
+            },
+          }),
+        },
+      });
+    }
 
     return {
       url: this.url,
     };
   }
 
-  public start(core: CoreStart, { taskManager }: SharePublicStartDependencies) {
-    const {
-      logger,
-      taskManagerSetup,
-      config: {
-        url_expiration: {
-          enabled: urlExpirationEnabled,
-          duration: urlExpirationDuration,
-          check_interval_in_seconds: urlExpirationCheckIntervalInSeconds,
-          pit_keep_alive: urlExpirationPitKeepAlive,
-        },
-      },
-    } = this;
-    logger.debug('Starting plugin');
+  public start(_core: CoreStart, { taskManager }: SharePublicStartDependencies) {
+    this.logger.debug('Starting plugin');
 
-    if (taskManagerSetup && urlExpirationEnabled) {
-      // TODO: Check handling different spaces
-      const savedObjectsRepository = core.savedObjects.createInternalRepository();
-      const filter = `url.attributes.accessDate <= now-${urlExpirationDuration}`;
-
-      taskManagerSetup.registerTaskDefinitions({
-        [TASK_ID]: {
-          title: 'Unused URLs Cleanup',
-          description: `Deletes unused (unaccessed for 1 year - configurable via unused_urls_cleanup.maxAge config) saved objects of type 'url' once a week.`,
-          createTaskRunner: () => {
-            return {
-              async run() {
-                runDeleteUnusedUrlsTask({
-                  savedObjectsRepository,
-                  filter,
-                  logger,
-                  pitKeepAlive: urlExpirationPitKeepAlive,
-                });
-              },
-            };
-          },
-        },
-      });
-
-      const unusedUrlsTask = getDeleteUnusedUrlTask(urlExpirationCheckIntervalInSeconds);
-
+    if (this.config.url_expiration.enabled && taskManager) {
+      const unusedUrlsTask = getDeleteUnusedUrlTask(
+        this.config.url_expiration.check_interval_in_seconds
+      );
       taskManager.ensureScheduled(unusedUrlsTask);
     }
 
