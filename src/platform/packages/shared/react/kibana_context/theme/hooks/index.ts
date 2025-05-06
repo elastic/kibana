@@ -7,9 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { KibanaThemeProvider, type KibanaThemeProviderProps } from './theme_provider';
-export { wrapWithTheme } from './with_theme';
-export { useKibanaCoreTheme, useKibanaDarkMode } from './hooks';
-
-// Re-exporting from @kbn/react-kibana-context-common for convenience to consumers.
-export { defaultTheme, type KibanaTheme } from '@kbn/react-kibana-context-common';
+export { useKibanaCoreTheme } from './use_kibana_core_theme';
+export { useKibanaDarkMode } from './use_kibana_dark_mode';
