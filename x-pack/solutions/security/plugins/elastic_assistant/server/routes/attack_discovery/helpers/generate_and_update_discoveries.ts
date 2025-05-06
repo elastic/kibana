@@ -14,7 +14,11 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AttackDiscoveryGenerationConfig, Replacements } from '@kbn/elastic-assistant-common';
+import {
+  AttackDiscoveryGenerationConfig,
+  CreateAttackDiscoveryAlertsParams,
+  Replacements,
+} from '@kbn/elastic-assistant-common';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 
@@ -25,6 +29,7 @@ import { generateAttackDiscoveries } from './generate_discoveries';
 
 export interface GenerateAndUpdateAttackDiscoveriesParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
+  attackDiscoveryAlertsEnabled?: boolean;
   authenticatedUser: AuthenticatedUser;
   config: AttackDiscoveryGenerationConfig;
   dataClient: AttackDiscoveryDataClient;
@@ -37,6 +42,7 @@ export interface GenerateAndUpdateAttackDiscoveriesParams {
 
 export const generateAndUpdateAttackDiscoveries = async ({
   actionsClient,
+  attackDiscoveryAlertsEnabled,
   authenticatedUser,
   config,
   dataClient,
@@ -49,7 +55,7 @@ export const generateAndUpdateAttackDiscoveries = async ({
   const startTime = moment(); // start timing the generation
 
   // get parameters from the request body
-  const { apiConfig, end, filter, replacements, size, start } = config;
+  const { apiConfig, connectorName, end, filter, replacements, size, start } = config;
 
   let latestReplacements: Replacements = { ...replacements };
 
@@ -83,6 +89,25 @@ export const generateAndUpdateAttackDiscoveries = async ({
       startTime,
       telemetry,
     });
+
+    if (attackDiscoveryAlertsEnabled) {
+      const alertsContextCount = anonymizedAlerts.length;
+
+      const createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams = {
+        alertsContextCount,
+        anonymizedAlerts,
+        apiConfig,
+        attackDiscoveries: attackDiscoveries ?? [],
+        connectorName: connectorName ?? apiConfig.connectorId,
+        generationUuid: executionUuid,
+        replacements: latestReplacements,
+      };
+
+      await dataClient.createAttackDiscoveryAlerts({
+        authenticatedUser,
+        createAttackDiscoveryAlertsParams,
+      });
+    }
 
     return { anonymizedAlerts, attackDiscoveries, replacements: latestReplacements };
   } catch (err) {
