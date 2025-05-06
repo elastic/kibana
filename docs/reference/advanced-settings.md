@@ -309,9 +309,6 @@ $$$apm-aws-price$$$`observability:apmAWSLambdaPriceFactor`
 $$$apm-aws-request$$$`observability:apmAWSLambdaRequestCostPerMillion`
 :   Set the AWS Lambda cost per million requests.
 
-$$$apm-continuous-rollups$$$`observability:apmEnableContinuousRollups`
-:   [beta] When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.
-
 $$$observability-apm-labs$$$`observability:apmLabsButton`
 :   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
 
