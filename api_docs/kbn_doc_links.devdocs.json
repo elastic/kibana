@@ -213,7 +213,7 @@
             "label": "console",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly serverlessGuide: string; }"
+              "{ readonly guide: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -448,7 +448,7 @@
             "label": "kibana",
             "description": [],
             "signature": [
-              "{ readonly askElastic: string; readonly createGithubIssue: string; readonly feedback: string; readonly guide: string; readonly autocompleteSuggestions: string; readonly secureSavedObject: string; readonly xpackSecurity: string; readonly dashboardImportExport: string; readonly upgradeNotes: string; }"
+              "{ readonly askElastic: string; readonly createGithubIssue: string; readonly feedback: string; readonly guide: string; readonly autocompleteSuggestions: string; readonly secureSavedObject: string; readonly xpackSecurity: string; readonly upgradeNotes: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -462,7 +462,7 @@
             "label": "upgradeAssistant",
             "description": [],
             "signature": [
-              "{ readonly overview: string; readonly batchReindex: string; readonly indexBlocks: string; readonly remoteReindex: string; readonly unfreezeApi: string; readonly reindexWithPipeline: string; }"
+              "{ readonly overview: string; readonly batchReindex: string; readonly indexBlocks: string; readonly remoteReindex: string; readonly unfreezeApi: string; readonly reindexWithPipeline: string; readonly logsDatastream: string; readonly usingLogsDbIndexModeWithESSecurity: string; readonly dataStreamReindex: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -515,7 +515,7 @@
             "label": "server",
             "description": [],
             "signature": [
-              "{ readonly protocol: string; }"
+              "{ readonly protocol: string; readonly publicBaseUrl: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -543,7 +543,7 @@
             "label": "securitySolution",
             "description": [],
             "signature": [
-              "{ readonly aiAssistant: string; readonly artifactControl: string; readonly avcResults: string; readonly bidirectionalIntegrations: string; readonly trustedApps: string; readonly eventFilters: string; readonly eventMerging: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly updatePrebuiltDetectionRules: string; readonly prebuiltRuleCustomizationPromoBlog: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; }; readonly detectionEngineOverview: string; readonly signalsMigrationApi: string; readonly legacyEndpointManagementApiDeprecations: string; readonly legacyRuleManagementBulkApiDeprecations: string; readonly siemMigrations: string; readonly llmPerformanceMatrix: string; }"
+              "{ readonly aiAssistant: string; readonly artifactControl: string; readonly avcResults: string; readonly bidirectionalIntegrations: string; readonly trustedApps: string; readonly eventFilters: string; readonly eventMerging: string; readonly blocklist: string; readonly endpointArtifacts: string; readonly policyResponseTroubleshooting: { full_disk_access: string; macos_system_ext: string; linux_deadlock: string; }; readonly packageActionTroubleshooting: { es_connection: string; }; readonly threatIntelInt: string; readonly responseActions: string; readonly configureEndpointIntegrationPolicy: string; readonly exceptions: { value_lists: string; }; readonly privileges: string; readonly manageDetectionRules: string; readonly createDetectionRules: string; readonly updatePrebuiltDetectionRules: string; readonly prebuiltRuleCustomizationPromoBlog: string; readonly createEsqlRuleType: string; readonly ruleUiAdvancedParams: string; readonly entityAnalytics: { readonly riskScorePrerequisites: string; readonly entityRiskScoring: string; readonly assetCriticality: string; }; readonly detectionEngineOverview: string; readonly signalsMigrationApi: string; readonly siemMigrations: string; readonly llmPerformanceMatrix: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -739,7 +739,7 @@
             "label": "security",
             "description": [],
             "signature": [
-              "{ readonly apiKeyServiceSettings: string; readonly clusterPrivileges: string; readonly definingRoles: string; readonly elasticsearchSettings: string; readonly elasticsearchEnableSecurity: string; readonly elasticsearchEnableApiKeys: string; readonly indicesPrivileges: string; readonly kibanaTLS: string; readonly kibanaPrivileges: string; readonly mappingRoles: string; readonly mappingRolesFieldRules: string; readonly runAsPrivilege: string; readonly deprecatedV1Endpoints: string; readonly enableElasticSearchSecurityFeatures: string; }"
+              "{ readonly apiKeyServiceSettings: string; readonly clusterPrivileges: string; readonly definingRoles: string; readonly elasticsearchSettings: string; readonly elasticsearchEnableSecurity: string; readonly elasticsearchEnableApiKeys: string; readonly indicesPrivileges: string; readonly kibanaTLS: string; readonly kibanaPrivileges: string; readonly mappingRoles: string; readonly mappingRolesFieldRules: string; readonly runAsPrivilege: string; readonly enableElasticSearchSecurityFeatures: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,

@@ -52,7 +52,7 @@ export const AIAssistantSection = memo(({ getPromptContext }: AIAssistantSection
           <h2>{AI_ASSISTANT}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <Conversations id={eventId} />
+        <Conversations alertId={eventId} />
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={SUGGESTED_PROMPTS_SECTION_TEST_ID}>
         <EuiTitle size="xxs">

@@ -8,7 +8,6 @@
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { keyBy, omit } from 'lodash';
 import React from 'react';
 import {
@@ -80,14 +79,12 @@ const logsOnlyOrderedTabs: Array<Tab['key']> = [
 export function isMetricsTabHidden({
   agentName,
   serverlessType,
-  isAwsLambdaEnabled,
 }: {
   agentName?: string;
   serverlessType?: ServerlessType;
-  isAwsLambdaEnabled?: boolean;
 }) {
   if (isAWSLambdaAgentName(serverlessType)) {
-    return !isAwsLambdaEnabled;
+    return false;
   }
   return !agentName || isRumAgentName(agentName) || isAzureFunctionsAgentName(serverlessType);
 }
@@ -114,7 +111,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, serverlessType, serviceEntitySummary } = useApmServiceContext();
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
-  const isAwsLambdaEnabled = core.uiSettings.get<boolean>(enableAwsLambdaMetrics, true);
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
   const isInfraTabAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfrastructureTabAvailable);
   const isProfilingIntegrationEnabled = useProfilingIntegrationSetting();
@@ -200,7 +196,6 @@ export function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       hidden: isMetricsTabHidden({
         agentName,
         serverlessType,
-        isAwsLambdaEnabled,
       }),
     },
     {
