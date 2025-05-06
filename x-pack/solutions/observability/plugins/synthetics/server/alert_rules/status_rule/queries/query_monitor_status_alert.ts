@@ -35,7 +35,7 @@ const getPendingConfigs = async ({
   includeRetests,
   upConfigs,
   downConfigs,
-  monitorLocationsMap,
+  monitorsData,
 }: {
   monitorQueryIds: string[];
   monitorLocationIds: string[];
@@ -43,7 +43,7 @@ const getPendingConfigs = async ({
   includeRetests: boolean;
   upConfigs: AlertStatusConfigs;
   downConfigs: AlertStatusConfigs;
-  monitorLocationsMap: Record<string, string[]>;
+  monitorsData: Record<string, { scheduleInMs: number; locations: string[] }>;
 }) => {
   // Check if a config is missing, if it is it means that the monitor is pending
   const pendingConfigs: AlertPendingStatusConfigs = {};
@@ -57,7 +57,7 @@ const getPendingConfigs = async ({
       const isConfigMissing =
         !upConfigs[configWithLocationId] &&
         !downConfigs[configWithLocationId] &&
-        monitorLocationsMap[monitorQueryId]?.includes(locationId);
+        monitorsData[monitorQueryId].locations.includes(locationId);
 
       if (isConfigMissing) {
         // Add the monitor and location ids to fetch the latest ping
@@ -111,26 +111,31 @@ export async function queryMonitorStatusAlert({
   monitorLocationIds,
   range,
   monitorQueryIds,
-  monitorLocationsMap,
   numberOfChecks,
   includeRetests = true,
-  scheduleInMsMap,
   waitSecondsBeforeIsPending = 60,
+  monitorsData,
 }: {
   esClient: SyntheticsEsClient;
   monitorLocationIds: string[];
   range: { from: string; to: string };
   monitorQueryIds: string[];
-  monitorLocationsMap: Record<string, string[]>;
   numberOfChecks: number;
   includeRetests?: boolean;
-  scheduleInMsMap: Record<string, number>;
   waitSecondsBeforeIsPending?: number;
+  monitorsData: Record<string, { scheduleInMs: number; locations: string[] }>;
 }): Promise<AlertStatusResponse> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
   const upConfigs: AlertStatusConfigs = {};
   const downConfigs: AlertStatusConfigs = {};
+
+  monitorQueryIds.forEach((monitorQueryId) => {
+    if (monitorsData[monitorQueryId] === undefined) {
+      // Here we need to make sure that the monitorQueryId is in the monitorsData, how should we handle this?
+      throw new Error(`Monitor ${monitorQueryId} not found in monitorsData`);
+    }
+  });
 
   await pMap(
     times(pageCount),
@@ -160,7 +165,7 @@ export async function queryMonitorStatusAlert({
 
         // discard any locations that are not in the monitorLocationsMap for the given monitor as well as those which are
         // in monitorLocationsMap but not in listOfLocations
-        const monLocations = monitorLocationsMap?.[queryId];
+        const monLocations = monitorsData[queryId].locations;
         const monQueriedLocations = intersection(monLocations, monitorLocationIds);
         monQueriedLocations?.forEach((monLocationId) => {
           const locationSummary = locationSummaries.find(
@@ -178,7 +183,7 @@ export async function queryMonitorStatusAlert({
             const msSinceLastPing =
               new Date().getTime() - new Date(latestPing['@timestamp']).getTime();
             const msBeforeIsPending =
-              scheduleInMsMap[monitorQueryId] +
+              monitorsData[monitorQueryId].scheduleInMs +
               moment.duration(waitSecondsBeforeIsPending, 'seconds').asMilliseconds();
 
             // Example: if a monitor has a schedule of 5m and the waitSecondsBeforeIsPending is 1m the last valid ping can be at (5+1)m
@@ -227,7 +232,7 @@ export async function queryMonitorStatusAlert({
     includeRetests,
     upConfigs,
     downConfigs,
-    monitorLocationsMap,
+    monitorsData,
   });
 
   return {

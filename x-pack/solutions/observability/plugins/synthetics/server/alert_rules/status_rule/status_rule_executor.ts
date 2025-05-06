@@ -150,13 +150,8 @@ export class StatusRuleExecutor {
   }
 
   async getDownChecks(prevDownConfigs: AlertStatusConfigs = {}): Promise<AlertOverviewStatus> {
-    const {
-      enabledMonitorQueryIds,
-      maxPeriod,
-      monitorLocationIds,
-      monitorLocationsMap,
-      scheduleInMsMap,
-    } = await this.init();
+    const { enabledMonitorQueryIds, maxPeriod, monitorLocationIds, monitorsData } =
+      await this.init();
 
     const range = this.getRange(maxPeriod);
 
@@ -188,10 +183,9 @@ export class StatusRuleExecutor {
       range,
       monitorQueryIds: enabledMonitorQueryIds,
       numberOfChecks,
-      monitorLocationsMap,
       includeRetests: this.params.condition?.includeRetests,
-      scheduleInMsMap,
       waitSecondsBeforeIsPending: this.params.condition?.alertOnNoData?.waitSecondsBeforeIsPending,
+      monitorsData,
     });
 
     const { downConfigs, upConfigs, pendingConfigs } = currentStatus;
