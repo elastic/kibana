@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { FILTER_CLOSED } from '@kbn/securitysolution-data-table/common/types';
+import { EntityIdentifierFields } from '../../../common/entity_analytics/types';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsByStatus } from '../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../overview/components/detection_response/alerts_by_status/types';
@@ -35,6 +36,11 @@ export const useNonClosedAlerts = ({
     queryId,
     to,
     from,
+    runtimeMappings: {
+      [EntityIdentifierFields.related]: {
+        type: 'keyword',
+      },
+    },
   });
 
   const filteredAlertsData: ParsedAlertsData = alertsData

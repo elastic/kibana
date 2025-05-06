@@ -36,6 +36,11 @@ export const useOpenGenericEntityDetailsLeftPanel = ({
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-generic-entity-alerts`,
+    runtimeMappings: {
+      'related.entity': {
+        type: 'keyword',
+      },
+    },
   });
 
   const openGenericEntityDetails = (path: EntityDetailsPath) => {
