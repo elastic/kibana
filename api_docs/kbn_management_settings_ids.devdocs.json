@@ -1059,21 +1059,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID",
-        "description": [],
-        "signature": [
-          "\"observability:apmAgentExplorerView\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_AWS_LAMBDA_PRICE_FACTOR_ID",
         "type": "string",
         "tags": [],
@@ -1134,21 +1119,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_APM_ENABLE_CRITICAL_PATH_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_APM_ENABLE_CRITICAL_PATH_ID",
-        "description": [],
-        "signature": [
-          "\"observability:apmEnableCriticalPath\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID",
         "type": "string",
         "tags": [],
@@ -1171,21 +1141,6 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableServiceInventoryTableSearchBar\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID",
-        "description": [],
-        "signature": [
-          "\"observability:apmEnableServiceMetrics\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1246,21 +1201,6 @@
         "description": [],
         "signature": [
           "\"observability:apmServiceGroupMaxNumberOfServices\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_APM_SERVICE_INVENTORY_OPTIMIZED_SORTING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_APM_SERVICE_INVENTORY_OPTIMIZED_SORTING_ID",
-        "description": [],
-        "signature": [
-          "\"observability:apmServiceInventoryOptimizedSorting\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

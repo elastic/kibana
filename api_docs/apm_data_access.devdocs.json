@@ -1704,17 +1704,6 @@
           },
           {
             "parentPluginId": "apmDataAccess",
-            "id": "def-server.DocumentSourcesRequest.enableServiceTransactionMetrics",
-            "type": "boolean",
-            "tags": [],
-            "label": "enableServiceTransactionMetrics",
-            "description": [],
-            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_document_sources/get_document_sources.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "apmDataAccess",
             "id": "def-server.DocumentSourcesRequest.enableContinuousRollups",
             "type": "boolean",
             "tags": [],
@@ -1932,7 +1921,7 @@
         "label": "ApmDataAccessServices",
         "description": [],
         "signature": [
-          "{ getDocumentSources: ({ enableContinuousRollups, enableServiceTransactionMetrics, end, kuery, start, }: Omit<",
+          "{ getDocumentSources: ({ enableContinuousRollups, end, kuery, start, }: Omit<",
           {
             "pluginId": "apmDataAccess",
             "scope": "server",
@@ -2108,7 +2097,7 @@
               "section": "def-server.ApmDataAccessServicesParams",
               "text": "ApmDataAccessServicesParams"
             },
-            ") => { getDocumentSources: ({ enableContinuousRollups, enableServiceTransactionMetrics, end, kuery, start, }: Omit<",
+            ") => { getDocumentSources: ({ enableContinuousRollups, end, kuery, start, }: Omit<",
             {
               "pluginId": "apmDataAccess",
               "scope": "server",

@@ -1827,7 +1827,7 @@
                 "section": "def-common.KnowledgeBaseState",
                 "text": "KnowledgeBaseState"
               },
-              "; }> & { refresh: () => void; }"
+              "; currentInferenceId: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }> & { refresh: () => void; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
@@ -1863,13 +1863,72 @@
             "label": "install",
             "description": [],
             "signature": [
-              "() => Promise<void>"
+              "(inferenceId: string) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseKnowledgeBaseResult.install.$1",
+                "type": "string",
+                "tags": [],
+                "label": "inferenceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.warmupModel",
+            "type": "Function",
+            "tags": [],
+            "label": "warmupModel",
+            "description": [],
+            "signature": [
+              "(inferenceId: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseKnowledgeBaseResult.warmupModel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "inferenceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.isWarmingUpModel",
+            "type": "boolean",
+            "tags": [],
+            "label": "isWarmingUpModel",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
