@@ -184,8 +184,6 @@ function useTrendPalettes(): { defaultPalette: TrendPalette; allPalettes: TrendP
   return computedPalettes;
 }
 
-function findPalette(paletteId: string, palettes: TrendPalette[]) {}
-
 function TrendEditor({
   accessor,
   idPrefix,
