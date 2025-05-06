@@ -11,7 +11,7 @@ exports[`ChecklistFlyout renders 1`] = `
           values={
             Object {
               "docsLink": <EuiLink
-                href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex"
+                href="https://www.elastic.co/docs/api/doc/elasticsearch/v9/operation/operation-reindex"
                 target="_blank"
               >
                 Learn more
@@ -99,7 +99,7 @@ exports[`ChecklistFlyout renders for frozen indices 1`] = `
           values={
             Object {
               "docsLink": <EuiLink
-                href="https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex"
+                href="https://www.elastic.co/docs/api/doc/elasticsearch/v9/operation/operation-reindex"
                 target="_blank"
               >
                 Learn more
