@@ -7,8 +7,15 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import { RowHeightSettings, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
+import {
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFormRow,
+  EuiI18n,
+  EuiSwitch,
+  EuiToolTip,
+} from '@elastic/eui';
+import { DataGridDensity, RowHeightSettings, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import { ToolbarPopover } from '../../../shared_components';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
@@ -86,6 +93,16 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
     });
   }, [setState, state]);
 
+  const onChangeDensity = useCallback(
+    (density: DataGridDensity) => {
+      setState({
+        ...state,
+        density,
+      });
+    },
+    [setState, state]
+  );
+
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <ToolbarPopover
@@ -97,6 +114,10 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         buttonDataTestSubj="lnsVisualOptionsButton"
         data-test-subj="lnsVisualOptionsPopover"
       >
+        <DensitySettings
+          dataGridDensity={state.density ?? DataGridDensity.NORMAL}
+          onChange={onChangeDensity}
+        />
         <RowHeightSettings
           rowHeight={state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT}
           label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
@@ -157,3 +178,56 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
     </EuiFlexGroup>
   );
 }
+
+const DensitySettings = ({
+  dataGridDensity,
+  onChange,
+}: {
+  dataGridDensity: DataGridDensity;
+  onChange: (density: DataGridDensity) => void;
+}) => {
+  const tokens = [
+    'euiDisplaySelector.densityLabel',
+    'euiDisplaySelector.labelCompact',
+    'euiDisplaySelector.labelNormal',
+    'euiDisplaySelector.labelExpanded',
+  ];
+
+  const setDensity = useCallback(
+    (density: string) => {
+      onChange(density as DataGridDensity);
+    },
+    [onChange]
+  );
+
+  return (
+    <EuiI18n tokens={tokens} defaults={['Density', 'Compact', 'Normal', 'Expanded']}>
+      {([densityLabel, labelCompact, labelNormal, labelExpanded]: string[]) => (
+        <EuiFormRow label={densityLabel} display="columnCompressed">
+          <EuiButtonGroup
+            legend={densityLabel}
+            buttonSize="compressed"
+            isFullWidth
+            options={[
+              {
+                id: `${DataGridDensity.COMPACT}`,
+                label: labelCompact,
+              },
+              {
+                id: `${DataGridDensity.NORMAL}`,
+                label: labelNormal,
+              },
+              {
+                id: `${DataGridDensity.EXPANDED}`,
+                label: labelExpanded,
+              },
+            ]}
+            onChange={setDensity}
+            idSelected={dataGridDensity}
+            data-test-subj="lnsDensityButtonGroup"
+          />
+        </EuiFormRow>
+      )}
+    </EuiI18n>
+  );
+};
