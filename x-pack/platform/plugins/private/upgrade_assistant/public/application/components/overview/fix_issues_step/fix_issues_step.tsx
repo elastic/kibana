@@ -38,10 +38,10 @@ const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem grow={false} css={{ width: 350 }}>
+      <EuiFlexItem grow={false} style={{ width: 350 }}>
         <EsDeprecationIssuesPanel setIsFixed={setIsEsFixed} />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} css={{ width: 350 }}>
+      <EuiFlexItem grow={false} style={{ width: 350 }}>
         <KibanaDeprecationIssuesPanel setIsFixed={setIsKibanaFixed} />
       </EuiFlexItem>
     </EuiFlexGroup>

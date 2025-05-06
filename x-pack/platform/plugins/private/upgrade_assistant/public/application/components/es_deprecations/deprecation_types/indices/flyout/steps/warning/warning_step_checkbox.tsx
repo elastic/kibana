@@ -88,7 +88,7 @@ const InfoPopover: React.FunctionComponent<{
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="leftCenter"
     >
-      <EuiText size="s" css={{ width: 300 }}>
+      <EuiText size="s" style={{ width: 300 }}>
         {children}
       </EuiText>
     </EuiPopover>

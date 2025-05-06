@@ -92,7 +92,7 @@ export const Match: React.FC<{
     .filter(isNotNull);
 
   return (
-    <EuiFlexItem css={{ minWidth: 1, width: 1 }}>
+    <EuiFlexItem style={{ minWidth: 1, width: 1 }}>
       <EuiComboBox
         isClearable
         data-test-subj={`lns-colorMapping-assignmentsItem${index}`}

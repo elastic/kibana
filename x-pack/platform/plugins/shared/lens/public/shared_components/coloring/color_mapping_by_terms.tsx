@@ -74,7 +74,7 @@ export function ColorMappingByTerms({
       label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
         defaultMessage: 'Color mapping',
       })}
-      css={{ alignItems: 'center' }}
+      style={{ alignItems: 'center' }}
       fullWidth
     >
       <PalettePanelContainer

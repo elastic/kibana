@@ -63,7 +63,7 @@ export function Container({
         </EuiFlexGroup>
       </EuiFlexItem>
       {colorMode.type === 'gradient' && (
-        <EuiFlexItem css={{ position: 'relative' }}>
+        <EuiFlexItem style={{ position: 'relative' }}>
           <div
             css={css`
               position: absolute;

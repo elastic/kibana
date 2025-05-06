@@ -67,7 +67,7 @@ const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
           })}
       </ol>
       <EuiFlyout
-        css={{ width: 350, minInlineSize: 366, padding: '8px', overflow: 'auto' }}
+        style={{ width: 350, minInlineSize: 366, padding: '8px', overflow: 'auto' }}
         onClose={() => {}}
         hideCloseButton
         ownFocus={false}

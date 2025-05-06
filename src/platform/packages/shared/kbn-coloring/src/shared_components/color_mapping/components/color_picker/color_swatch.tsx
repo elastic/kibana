@@ -170,7 +170,7 @@ export const ColorSwatch = ({
         defaultMessage: 'Computed gradient color',
       })}
       disabled
-      css={{
+      style={{
         // the color swatch can't pickup colors written in rgb/css standard
         backgroundColor: colorHex,
         cursor: 'not-allowed',
