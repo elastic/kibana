@@ -16,7 +16,7 @@ import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { Disclaimer } from './disclaimer';
 import { WelcomeMessageConnectors } from './welcome_message_connectors';
-import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
+import { WelcomeMessageKnowledgeBase } from '../knowledge_base/welcome_message_knowledge_base';
 import { StarterPrompts } from './starter_prompts';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -59,10 +59,6 @@ export function WelcomeMessage({
 
     if (isSupportedConnectorType(createdConnector.actionTypeId)) {
       connectors.reloadConnectors();
-    }
-
-    if (!knowledgeBase.status.value || knowledgeBase.status.value?.ready === false) {
-      knowledgeBase.install();
     }
   };
 

@@ -1595,6 +1595,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Trained model deleted');
     },
 
+    async startTrainedModelDeploymentES(modelId: string) {
+      log.debug(`Starting trained model deployment with id "${modelId}"`);
+      const url = `/_ml/trained_models/${modelId}/deployment/_start`;
+
+      const { body, status } = await esSupertest.post(url);
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model deployment started');
+    },
+
     async deleteAllTrainedModelsES() {
       log.debug(`Deleting all trained models`);
       const getModelsRsp = await this.getTrainedModelsES();

@@ -9,6 +9,7 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { Dictionary } from 'lodash';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
+import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
 import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
 import type {
   WaterfallError,
@@ -76,6 +77,7 @@ interface IWaterfallItemBase<TDocument, TDoctype> {
   legendValues: Record<WaterfallLegendType, string>;
   spanLinksCount: SpanLinksCount;
   isOrphan?: boolean;
+  missingDestination?: boolean;
 }
 
 export type IWaterfallError = Omit<
@@ -628,6 +630,18 @@ function buildTree({
           childrenToLoad: 0,
           hasInitializedChildren: false,
         };
+
+        // It is missing a destination when a child (currentNode) is a transaction
+        // and its parent (node) is a span without destination for Otel agents.
+
+        if (
+          currentNode.item.docType === 'transaction' &&
+          node.item.docType === 'span' &&
+          !node.item.doc.span?.destination?.service?.resource &&
+          isOpenTelemetryAgentName(node.item.doc.agent.name)
+        ) {
+          node.item.missingDestination = true;
+        }
 
         node.children.push(currentNode);
         queue.push(currentNode);
