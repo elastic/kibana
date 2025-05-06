@@ -41,7 +41,8 @@
     "@kbn/apm-types",
     "@kbn/event-stacktrace",
     "@kbn/data-view-utils",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/embeddable-plugin"
   ],
   "exclude": [
     "target/**/*",
