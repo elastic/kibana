@@ -152,7 +152,7 @@ export class LlmProxy {
       }
     );
 
-    const waitForIntercept = () => {
+    const waitForIntercept = (): Promise<LlmResponseSimulator> => {
       return new Promise<LlmResponseSimulator>((resolve, reject) => {
         const timeoutHandle = setTimeout(
           () =>
@@ -169,7 +169,7 @@ export class LlmProxy {
     };
 
     if (responseChunks === undefined) {
-      return { waitForIntercept };
+      return { waitForIntercept } as any;
     }
 
     const parsedChunks = Array.isArray(responseChunks)
