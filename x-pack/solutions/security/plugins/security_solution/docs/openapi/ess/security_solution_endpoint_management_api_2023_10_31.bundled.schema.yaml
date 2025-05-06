@@ -4,7 +4,7 @@ info:
   title: Security Endpoint Management API (Elastic Cloud and self-hosted)
   version: '2023-10-31'
 servers:
-  - url: 'http://{kibana_host}:{port}'
+  - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
@@ -76,7 +76,7 @@ paths:
       summary: Get response actions
       tags:
         - Security Endpoint Management API
-  '/api/endpoint/action_log/{agent_id}':
+  /api/endpoint/action_log/{agent_id}:
     get:
       deprecated: true
       description: Get an action request log for the specified agent ID.
@@ -125,7 +125,7 @@ paths:
       summary: Get response actions status
       tags:
         - Security Endpoint Management API
-  '/api/endpoint/action/{action_id}':
+  /api/endpoint/action/{action_id}:
     get:
       description: Get the details of a response action using the action ID.
       operationId: EndpointGetActionsDetails
@@ -147,7 +147,7 @@ paths:
       summary: Get action details
       tags:
         - Security Endpoint Management API
-  '/api/endpoint/action/{action_id}/file/{file_id}':
+  /api/endpoint/action/{action_id}/file/{file_id}:
     get:
       description: Get information for the specified file using the file ID.
       operationId: EndpointFileInfo
@@ -172,7 +172,7 @@ paths:
       summary: Get file information
       tags:
         - Security Endpoint Management API
-  '/api/endpoint/action/{action_id}/file/{file_id}/download':
+  /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
       description: Download a file from an endpoint.
       operationId: EndpointFileDownload
@@ -250,7 +250,7 @@ paths:
               multiple_endpoints:
                 summary: Isolates several hosts; includes a comment
                 value:
-                  comment: 'Locked down, pending further investigation'
+                  comment: Locked down, pending further investigation
                   endpoint_ids:
                     - 9972d10e-4b9e-41aa-a534-a85e2a28ea42
                     - bc0e4f0c-3bca-4633-9fee-156c0b505d16
@@ -417,7 +417,7 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/unisolate:
     post:
-      description: 'Release an isolated endpoint, allowing it to rejoin a network.'
+      description: Release an isolated endpoint, allowing it to rejoin a network.
       operationId: EndpointUnisolateAction
       requestBody:
         content:
@@ -426,7 +426,7 @@ paths:
               multipleHosts:
                 summary: 'Releases several hosts; includes a comment:'
                 value:
-                  comment: 'Benign process identified, releasing group'
+                  comment: Benign process identified, releasing group
                   endpoint_ids:
                     - 9972d10e-4b9e-41aa-a534-a85e2a28ea42
                     - bc0e4f0c-3bca-4633-9fee-156c0b505d16
@@ -443,7 +443,7 @@ paths:
                 value:
                   case_ids:
                     - 4976be38-c134-4554-bd5e-0fd89ce63667
-                  comment: 'Remediation complete, restoring network'
+                  comment: Remediation complete, restoring network
                   endpoint_ids:
                     - 1aa1f8fd-0fb0-4fe4-8c30-92068272d3f0
                     - b30a11bf-1395-4707-b508-fbb45ef9793e
@@ -589,7 +589,7 @@ paths:
       summary: Get a metadata list
       tags:
         - Security Endpoint Management API
-  '/api/endpoint/metadata/{id}':
+  /api/endpoint/metadata/{id}:
     get:
       operationId: GetEndpointMetadata
       parameters:
@@ -671,7 +671,7 @@ paths:
       summary: Get an agent policy summary
       tags:
         - Security Endpoint Management API
-  '/api/endpoint/protection_updates_note/{package_policy_id}':
+  /api/endpoint/protection_updates_note/{package_policy_id}:
     get:
       operationId: GetProtectionUpdatesNote
       parameters:
@@ -717,7 +717,7 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
-  '/api/endpoint/suggestions/{suggestion_type}':
+  /api/endpoint/suggestions/{suggestion_type}:
     post:
       deprecated: true
       operationId: GetEndpointSuggestions
@@ -1010,11 +1010,11 @@ components:
             id: 17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5
             ip:
               - 10.0.2.15
-              - 'fe80::21a6:63d3:d70e:e3ad'
+              - fe80::21a6:63d3:d70e:e3ad
               - 127.0.0.1
               - '::1'
             mac:
-              - '08:00:27:b1:1d:5a'
+              - 08:00:27:b1:1d:5a
             name: WinDev2104Eval
             os:
               Ext:
@@ -1498,9 +1498,9 @@ components:
                   - 127.0.0.1
                   - '::1'
                   - 10.0.2.15
-                  - 'fe80::2ac7:8e15:b957:2fa1'
+                  - fe80::2ac7:8e15:b957:2fa1
                 mac:
-                  - '08:00:27:e6:78:8b'
+                  - 08:00:27:e6:78:8b
                 name: david-Xubuntu
                 os:
                   Ext:
@@ -1582,11 +1582,11 @@ components:
                 id: 17d9cabc-7edd-43bc-bacb-8da5f5e6c0e5
                 ip:
                   - 10.0.2.15
-                  - 'fe80::21a6:63d3:d70e:e3ad'
+                  - fe80::21a6:63d3:d70e:e3ad
                   - 127.0.0.1
                   - '::1'
                 mac:
-                  - '08:00:27:b1:1d:5a'
+                  - 08:00:27:b1:1d:5a
                 name: WinDev2104Eval
                 os:
                   Ext:

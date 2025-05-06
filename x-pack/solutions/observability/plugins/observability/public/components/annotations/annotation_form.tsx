@@ -18,7 +18,7 @@ import { AnnotationRange } from './components/annotation_range';
 import { AnnotationAppearance } from './annotation_apearance';
 
 export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation | null }) {
-  const { control, formState, watch, trigger, unregister, setValue } =
+  const { control, formState, watch, unregister, setValue } =
     useFormContext<CreateAnnotationForm>();
 
   const timestampStart = watch('@timestamp');
@@ -77,11 +77,6 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
               isInvalid={fieldState.invalid}
               compressed
               data-test-subj="annotationTitle"
-              onBlur={() => {
-                field.onBlur();
-                // this is done to avoid too many re-renders, watch on name is expensive
-                trigger();
-              }}
             />
           )}
         />
@@ -106,11 +101,6 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
               isInvalid={fieldState.invalid}
               compressed
               data-test-subj="annotationMessage"
-              onBlur={() => {
-                field.onBlur();
-                // this is done to avoid too many re-renders, watch on name is expensive
-                trigger();
-              }}
             />
           )}
         />

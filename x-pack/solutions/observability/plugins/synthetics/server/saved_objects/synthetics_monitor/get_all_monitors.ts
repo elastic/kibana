@@ -20,7 +20,9 @@ import {
   SourceType,
 } from '../../../common/runtime_types';
 
-export const getAllMonitors = async ({
+export const getAllMonitors = async <
+  T extends EncryptedSyntheticsMonitorAttributes = EncryptedSyntheticsMonitorAttributes
+>({
   soClient,
   search,
   fields,
@@ -36,7 +38,7 @@ export const getAllMonitors = async ({
   showFromAllSpaces?: boolean;
 } & Pick<SavedObjectsFindOptions, 'sortField' | 'sortOrder' | 'fields' | 'searchFields'>) => {
   return withApmSpan('get_all_monitors', async () => {
-    const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
+    const finder = soClient.createPointInTimeFinder<T>({
       type: syntheticsMonitorType,
       perPage: 5000,
       search,
@@ -48,7 +50,7 @@ export const getAllMonitors = async ({
       ...(showFromAllSpaces && { namespaces: ['*'] }),
     });
 
-    const hits: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
+    const hits: Array<SavedObjectsFindResult<T>> = [];
     for await (const result of finder.find()) {
       hits.push(...result.saved_objects);
     }
