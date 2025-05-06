@@ -309,9 +309,6 @@ $$$apm-aws-price$$$`observability:apmAWSLambdaPriceFactor`
 $$$apm-aws-request$$$`observability:apmAWSLambdaRequestCostPerMillion`
 :   Set the AWS Lambda cost per million requests.
 
-$$$apm-continuous-rollups$$$`observability:apmEnableContinuousRollups`
-:   [beta] When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.
-
 $$$observability-apm-labs$$$`observability:apmLabsButton`
 :   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
 
@@ -332,9 +329,6 @@ $$$observability-profiling-show-error-frames$$$`observability:profilingShowError
 
 $$$observability-apm-enable-table-search-bar$$$`observability:apmEnableTableSearchBar`
 :   [beta] Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions, and Errors.
-
-$$$observability-enable-aws-lambda-metrics$$$`observability:enableAwsLambdaMetrics`
-:   [preview] Display Amazon Lambda metrics in the service metrics tab.
 
 $$$observability-enable-legacy-uptime-app$$$`observability:enableLegacyUptimeApp`
 :   Shows the Uptime app even if there is no recent Heartbeat data.
