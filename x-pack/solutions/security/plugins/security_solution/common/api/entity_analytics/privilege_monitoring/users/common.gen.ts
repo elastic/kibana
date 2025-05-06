@@ -16,6 +16,18 @@
 
 import { z } from '@kbn/zod';
 
+export type UserName = z.infer<typeof UserName>;
+export const UserName = z.object({
+  user: z
+    .object({
+      /**
+       * The name of the user.
+       */
+      name: z.string().optional(),
+    })
+    .optional(),
+});
+
 export type MonitoredUserDoc = z.infer<typeof MonitoredUserDoc>;
 export const MonitoredUserDoc = z.object({
   id: z.string().optional(),

@@ -14,7 +14,7 @@ export const PrivMonUtils = (
   const api = getService('securitySolutionApi');
   const log = getService('log');
 
-  log.info(`Privilege Monitoring: Using namespace ${namespace}`);
+  log.info(`Monitoring: Privileged Users: Using namespace ${namespace}`);
 
   const initPrivMonEngine = async () => {
     log.info(`Initializing Privilege Monitoring engine in namespace ${namespace || 'default'}`);

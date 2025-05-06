@@ -14,21 +14,12 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 
-import { MonitoredUserDoc } from './common.gen';
+import { UserName, MonitoredUserDoc } from './common.gen';
 
 export type CreatePrivMonUserRequestBody = z.infer<typeof CreatePrivMonUserRequestBody>;
-export const CreatePrivMonUserRequestBody = z.object({
-  /**
-   * The name of the user.
-   */
-  user_name: z.string().optional(),
-  /**
-   * Whether the user is actively monitored.
-   */
-  is_monitored: z.boolean().optional(),
-});
+export const CreatePrivMonUserRequestBody = UserName;
 export type CreatePrivMonUserRequestBodyInput = z.input<typeof CreatePrivMonUserRequestBody>;
 
 export type CreatePrivMonUserResponse = z.infer<typeof CreatePrivMonUserResponse>;

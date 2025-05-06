@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create a user', async () => {
         log.info(`creating a user`);
         const res = await api.createPrivMonUser({
-          body: { is_monitored: true, user_name: 'test_user' },
+          body: { user: { name: 'test_user' } },
         });
 
         if (res.status !== 200) {
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should retrieve a user', async () => {
         log.info(`retrieving a user`);
         const { body } = await api.createPrivMonUser({
-          body: { is_monitored: true, user_name: 'test_user' },
+          body: { user: { name: 'test_user' } },
         });
 
         const res = await api.getPrivMonUser({ params: { id: body.id } });
@@ -62,10 +62,10 @@ export default ({ getService }: FtrProviderContext) => {
       it('should update a user', async () => {
         log.info(`updating a user`);
         const { body } = await api.createPrivMonUser({
-          body: { is_monitored: true, user_name: 'test_user' },
+          body: { user: { name: 'test_user' } },
         });
         const res = await api.updatePrivMonUser({
-          body: { is_monitored: false, user_name: 'updated' },
+          body: { user: { name: 'updated' } },
           params: { id: body.id },
         });
 
@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should delete a user', async () => {
         log.info(`deleting a user`);
         const { body } = await api.createPrivMonUser({
-          body: { is_monitored: true, user_name: 'test_user' },
+          body: { user: { name: 'test_user' } },
         });
         const res = await api.deletePrivMonUser({ params: { id: body.id } });
 

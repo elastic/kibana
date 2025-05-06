@@ -15,14 +15,8 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                user_name:
-                  type: string
-                  description: The name of the user.
-                is_monitored:
-                  type: boolean
-                  description: Whether the user is actively monitored.
+              $ref: "./common.schema.yaml#/components/schemas/UserName"
+
       responses:
         "200":
           description: User created successfully

@@ -21,12 +21,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                user_name:
-                  type: string
-                is_monitored:
-                  type: boolean
+              $ref: "./common.schema.yaml#/components/schemas/MonitoredUserDoc"
 
       responses:
         "200":

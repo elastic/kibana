@@ -25,10 +25,7 @@ export const UpdatePrivMonUserRequestParams = z.object({
 export type UpdatePrivMonUserRequestParamsInput = z.input<typeof UpdatePrivMonUserRequestParams>;
 
 export type UpdatePrivMonUserRequestBody = z.infer<typeof UpdatePrivMonUserRequestBody>;
-export const UpdatePrivMonUserRequestBody = z.object({
-  user_name: z.string().optional(),
-  is_monitored: z.boolean().optional(),
-});
+export const UpdatePrivMonUserRequestBody = MonitoredUserDoc;
 export type UpdatePrivMonUserRequestBodyInput = z.input<typeof UpdatePrivMonUserRequestBody>;
 
 export type UpdatePrivMonUserResponse = z.infer<typeof UpdatePrivMonUserResponse>;

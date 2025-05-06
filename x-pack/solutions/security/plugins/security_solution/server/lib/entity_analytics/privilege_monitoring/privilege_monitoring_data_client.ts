@@ -48,7 +48,6 @@ import {
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import type { PrivMonUserSource } from './types';
-import { fromRequestBody } from './users/model';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -185,15 +184,22 @@ export class PrivilegeMonitoringDataClient {
     user: CreatePrivMonUserRequestBody,
     source: PrivMonUserSource
   ): Promise<CreatePrivMonUserResponse> {
-    const doc = merge(fromRequestBody(user), {
-      labels: { sources: [source] },
+    const doc = merge(user, {
+      labels: {
+        monitoring: { privileged_users: 'monitored' },
+        sources: [source],
+      },
     });
     const res = await this.esClient.index({
       index: this.getIndex(),
       document: doc,
     });
 
-    return { ...doc, id: res._id };
+    const newUser = await this.getUser(res._id);
+    if (!newUser) {
+      throw new Error(`Failed to create user: ${res._id}`);
+    }
+    return newUser;
   }
 
   public async getUser(id: string): Promise<MonitoredUserDoc | undefined> {
@@ -213,7 +219,7 @@ export class PrivilegeMonitoringDataClient {
     await this.esClient.update<MonitoredUserDoc>({
       index: this.getIndex(),
       id,
-      doc: fromRequestBody(user),
+      doc: user,
     });
     return this.getUser(id);
   }
