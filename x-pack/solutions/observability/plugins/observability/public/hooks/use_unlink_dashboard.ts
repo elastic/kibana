@@ -7,6 +7,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
+import { updateRule } from '@kbn/response-ops-rule-form';
 import { useKibana } from '../utils/kibana_react';
 
 export function useUnlinkDashboard(initialData: any) {
@@ -19,24 +20,18 @@ export function useUnlinkDashboard(initialData: any) {
     ['unlinkDashboard'],
     ({ ruleId, dashboardId }) => {
       try {
-        const updatedData = {
-          name: initialData.name,
-          tags: initialData.tags,
-          params: initialData.params,
-          schedule: initialData.schedule,
-          actions: initialData.actions,
-          throttle: initialData.throttle,
-          notify_when: initialData.notifyWhen,
-          artifacts: {
-            ...initialData.artifacts,
-            dashboards: initialData.artifacts.dashboards.filter(
-              (dashboard) => dashboard.id !== dashboardId
-            ),
+        return updateRule({
+          id: ruleId,
+          http,
+          rule: {
+            ...initialData,
+            artifacts: {
+              ...initialData.artifacts,
+              dashboards: initialData.artifacts.dashboards.filter(
+                (dashboard) => dashboard.id !== dashboardId
+              ),
+            },
           },
-        };
-        return http.put(`/api/alerting/rule/${ruleId}`, {
-          method: 'PUT',
-          body: JSON.stringify(updatedData),
         });
       } catch (e) {
         throw new Error(`Unable to parse id: ${e}`);
