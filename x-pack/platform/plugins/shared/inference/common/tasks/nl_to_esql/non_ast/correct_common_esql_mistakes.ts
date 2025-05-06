@@ -101,10 +101,7 @@ function removeColumnQuotesAndEscape(column: string) {
 
 const getFunctionDefinitionMap = memoize(() => {
   const functionDefinitionMap = new Map<string, FunctionDefinition>();
-  const allFunctionDefinitions = [
-    ...scalarFunctionDefinitions,
-    ...aggregationFunctionDefinitions,
-  ];
+  const allFunctionDefinitions = [...scalarFunctionDefinitions, ...aggregationFunctionDefinitions];
   allFunctionDefinitions.forEach((definition) => {
     const functionName = definition.name.toLowerCase();
     if (!functionDefinitionMap.has(functionName)) {
