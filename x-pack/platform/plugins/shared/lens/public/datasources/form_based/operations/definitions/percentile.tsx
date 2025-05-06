@@ -18,6 +18,7 @@ import {
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
+import { memoize } from 'lodash';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -53,18 +54,22 @@ function ofName(
   reducedTimeRange: string | undefined
 ) {
   const formatters: TranslateArguments['formatters'] = {
-    getNumberFormat: (locale, opts) =>
-      new Intl.NumberFormat(locale, {
-        ...opts,
-        maximumFractionDigits: 4,
-      }),
+    getNumberFormat: memoize(
+      (locale, opts) =>
+        new Intl.NumberFormat(locale, {
+          ...opts,
+          maximumFractionDigits: 4,
+        })
+    ),
     // @ts-expect-error - There’s a small mismatch between @formatjs type and Intl API that only applies to the date function, we’re ignoring that
-    getDateTimeFormat: (locale, opts) => new Intl.DateTimeFormat(locale, opts),
-    getPluralRules: (locale, opts) =>
-      new Intl.PluralRules(locale, {
-        ...opts,
-        maximumFractionDigits: 4,
-      }),
+    getDateTimeFormat: memoize((locale, opts) => new Intl.DateTimeFormat(locale, opts)),
+    getPluralRules: memoize(
+      (locale, opts) =>
+        new Intl.PluralRules(locale, {
+          ...opts,
+          maximumFractionDigits: 4,
+        })
+    ),
   };
 
   return adjustTimeScaleLabelSuffix(
