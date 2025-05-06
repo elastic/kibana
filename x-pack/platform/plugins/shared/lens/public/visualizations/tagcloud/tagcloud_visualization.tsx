@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -21,6 +22,7 @@ import { IconChartTagcloud } from '@kbn/chart-icons';
 import { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { getKbnPalettes } from '@kbn/palettes';
+import { FormatFactory } from '@kbn/visualization-ui-components';
 import type { OperationMetadata, Visualization } from '../..';
 import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
@@ -29,6 +31,7 @@ import { TagcloudToolbar } from './tagcloud_toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { convertToRuntimeState } from './runtime_state';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -36,9 +39,11 @@ const METRIC_GROUP_ID = 'metric';
 export const getTagcloudVisualization = ({
   paletteService,
   kibanaTheme,
+  formatFactory,
 }: {
   paletteService: PaletteRegistry;
   kibanaTheme: ThemeServiceStart;
+  formatFactory: FormatFactory;
 }): Visualization<TagcloudState> => ({
   id: 'lnsTagcloud',
 
@@ -104,16 +109,20 @@ export const getTagcloudVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
-  initialize(addNewLayer, state, mainPalette) {
-    return (
-      state || {
-        layerId: addNewLayer(),
-        layerType: LayerTypes.DATA,
-        ...DEFAULT_STATE,
-        colorMapping:
-          mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
-      }
-    );
+  initialize(addNewLayer, state, mainPalette, datasourceStates) {
+    if (state) return convertToRuntimeState(state, datasourceStates);
+
+    return {
+      layerId: addNewLayer(),
+      layerType: LayerTypes.DATA,
+      ...DEFAULT_STATE,
+      colorMapping:
+        mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
+    };
+  },
+
+  convertToRuntimeState(state, datasourceStates) {
+    return convertToRuntimeState(state, datasourceStates);
   },
 
   getConfiguration({ state }) {
@@ -313,6 +322,7 @@ export const getTagcloudVisualization = ({
           frame={props.frame}
           panelRef={props.panelRef}
           isInlineEditing={props.isInlineEditing}
+          formatFactory={formatFactory}
         />
       );
     }
