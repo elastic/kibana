@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeDump } from 'js-yaml';
+import { dump } from 'js-yaml';
 
 import type { AssetsMap } from '../../../../common/types';
 
@@ -14,7 +14,7 @@ import type { RegistryDataStream } from '../../../../common';
 import { resolveDataStreamFields } from './utils';
 
 describe('resolveDataStreamFields', () => {
-  const statusAssetYml = safeDump([
+  const statusAssetYml = dump([
     {
       name: 'apache.status',
       type: 'group',

@@ -12,6 +12,9 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
 jest.mock('./use_kibana');
 jest.mock('./use_ai_assistant_app_service');
+jest.mock('p-retry', () => {
+  return (fn: () => Promise<any>) => fn();
+});
 
 describe('useKnowledgeBase', () => {
   const mockCallApi = jest.fn();
@@ -47,8 +50,6 @@ describe('useKnowledgeBase', () => {
     const { result } = renderHook(() => useKnowledgeBase());
 
     expect(result.current.status.value).toBeUndefined();
-    expect(result.current.isInstalling).toBe(false);
-    expect(result.current.installError).toBeUndefined();
   });
 
   it('calls GET /status once on mount', async () => {
@@ -65,27 +66,47 @@ describe('useKnowledgeBase', () => {
     });
   });
 
-  it('install() handles error and sets installError state', async () => {
-    const error = new Error('Setup failed');
+  it('calls install function', async () => {
+    const successResponse = { ready: true };
     mockCallApi
       .mockResolvedValueOnce({ ready: false }) // Initial GET /status
-      .mockRejectedValueOnce(error); // POST /setup fails
+      .mockResolvedValueOnce(successResponse); // POST /setup succeeds
 
     const { result } = renderHook(() => useKnowledgeBase());
 
-    // Trigger install
+    // Trigger setup
     act(() => {
-      result.current.install();
+      result.current.install('.elser-2-elasticsearch');
     });
 
-    // Wait for error state
+    // Verify that the install was called
     await waitFor(() => {
-      expect(result.current.isInstalling).toBe(false);
-      expect(result.current.installError).toBe(error);
+      expect(mockCallApi).toHaveBeenCalledWith(
+        'POST /internal/observability_ai_assistant/kb/setup',
+        {
+          params: {
+            query: {
+              inference_id: '.elser-2-elasticsearch',
+            },
+          },
+          signal: null,
+        }
+      );
+    });
+  });
+
+  it('shows an error toast on install failure', async () => {
+    const error = new Error('setup failed');
+
+    mockCallApi.mockResolvedValueOnce({ kbState: 'NOT_INSTALLED' }).mockRejectedValueOnce(error);
+
+    const { result } = renderHook(() => useKnowledgeBase());
+
+    await act(async () => {
+      await result.current.install('failing-id');
     });
 
-    // Verify the error toast was shown
-    expect(mockAddError).toHaveBeenCalledWith(error, {
+    expect(mockAddError).toHaveBeenCalledWith(expect.any(Error), {
       title: expect.any(String),
     });
   });
