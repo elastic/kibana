@@ -65,6 +65,10 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         {
           breadcrumbStatus: 'hidden',
           children: [
+            {
+              id: SecurityPageName.assetInventory,
+              link: securityLink(SecurityPageName.assetInventory),
+            },
             defaultNavigationTree.assets(services),
             defaultNavigationTree.entityAnalytics(),
           ],
