@@ -25,8 +25,11 @@ export const getOnAddSearchEmbeddable =
       discoverServices,
     });
 
-    container.addNewPanel({
-      panelType: SEARCH_EMBEDDABLE_TYPE,
-      initialState,
-    });
+    container.addNewPanel(
+      {
+        panelType: SEARCH_EMBEDDABLE_TYPE,
+        initialState,
+      },
+      true
+    );
   };

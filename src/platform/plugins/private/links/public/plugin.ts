@@ -66,10 +66,13 @@ export class LinksPlugin
         onAdd: async (container, savedObject) => {
           const { deserializeLinksSavedObject } = await import('./lib/deserialize_from_library');
           const initialState = await deserializeLinksSavedObject(savedObject);
-          container.addNewPanel<LinksRuntimeState>({
-            panelType: CONTENT_ID,
-            initialState,
-          });
+          container.addNewPanel<LinksRuntimeState>(
+            {
+              panelType: CONTENT_ID,
+              initialState,
+            },
+            true
+          );
         },
         savedObjectType: CONTENT_ID,
         savedObjectName: APP_NAME,
