@@ -2635,22 +2635,17 @@
     {
       "query": "from a_index | rename key* as keywords",
       "error": [
-        "Using wildcards (*) in RENAME is not allowed [key*]",
         "Unknown column [keywords]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | rename s* as strings",
-      "error": [
-        "Using wildcards (*) in RENAME is not allowed [s*]",
-        "Unknown column [s*]",
-        "Unknown column [strings]"
-      ],
+      "query": "row a = 10 | rename a as `this``is fine`",
+      "error": [],
       "warning": []
     },
     {
-      "query": "row a = 10 | rename a as `this``is fine`",
+      "query": "ROW `C*OUNT` = 5 | RENAME `C*OUNT` AS meow",
       "error": [],
       "warning": []
     },

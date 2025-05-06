@@ -356,6 +356,14 @@ async function searchAvailableTasks({
 
 interface ClaimPartitions {
   unlimitedTypes: string[];
+  // Map where key is a limited concurrency task type and value is the current capacity
+  // Key can also be a comma-delimited list of limited concurrency task types that share the same concurrency.
+  //   In this case, the value is the minimum available capacity across all shared concurrency task types.
+  //   For example, if taskTypeA and taskTypeB share concurrency and taskTypeA has a capacity of 2 while taskTypeB
+  //     has a capacity of 4, the Map value will be
+  //     Map {
+  //       'taskTypeA,taskTypeB' => 2
+  //     }
   limitedTypes: Map<string, number>;
 }
 
