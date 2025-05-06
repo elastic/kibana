@@ -22856,6 +22856,68 @@ paths:
       summary: Update an agent policy
       tags:
         - Elastic Agent policies
+  /api/fleet/agent_policies/{agentPolicyId}/auto_upgrade_agents_status:
+    get:
+      description: 'Get auto upgrade agent status<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.'
+      operationId: get-fleet-agent-policies-agentpolicyid-auto-upgrade-agents-status
+      parameters:
+        - in: path
+          name: agentPolicyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  currentVersions:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        agents:
+                          type: number
+                        failedUpgradeAgents:
+                          type: number
+                        version:
+                          type: string
+                      required:
+                        - version
+                        - agents
+                        - failedUpgradeAgents
+                    type: array
+                  totalAgents:
+                    type: number
+                required:
+                  - currentVersions
+                  - totalAgents
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Get auto upgrade agent status
+      tags:
+        - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/copy:
     post:
       description: 'Copy an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all.'
