@@ -247,10 +247,10 @@ const internalTraverseAndMutateDoc = <T extends SourceFieldRecord>({
     }
 
     // We're keeping the field, but maybe we want to copy it to a different field as well
-    if (!deleted && fullPath.split('.')[0] === 'event' && topLevel) {
+    if (!deleted && topLevel && pathNeedsCopying(fullPath)) {
       // The value might have changed above when we `set` after traversing an array
       const valueRefetch = document[key];
-      const newKey = `${ALERT_ORIGINAL_EVENT}${fullPath.replace('event', '')}`;
+      const newKey = getCopyDestinationPath(fullPath);
       if (isPlainObject(valueRefetch)) {
         const flattenedObject = flattenWithPrefix(newKey, valueRefetch);
         for (const [k, v] of Object.entries(flattenedObject)) {
@@ -258,7 +258,7 @@ const internalTraverseAndMutateDoc = <T extends SourceFieldRecord>({
         }
       } else {
         fieldsToAdd.push({
-          key: `${ALERT_ORIGINAL_EVENT}${fullPath.replace('event', '')}`,
+          key: newKey,
           value: valueRefetch,
         });
       }
@@ -304,4 +304,47 @@ const traverseArray = ({
       return true;
     }
   });
+};
+
+const getTopLevelPath = (fullPath: string): string => fullPath.split('.')[0];
+
+/**
+ *
+ * A map of ECS namespaces to their additional alerting namespaces. In cases
+ * where the alert metadata may overwrite this source data, or where there is
+ * not an appropriate mapping in ECS, we copy those fields to these additional
+ * locations so as to preserve them.
+ */
+const alertingNamespaceCopyMap = {
+  event: ALERT_ORIGINAL_EVENT,
+};
+
+/**
+ *
+ * @param fullPath The full path to the field in the document
+ * @returns whether the path needs to be copied to an additional location
+ */
+const pathNeedsCopying = (fullPath: string): boolean => {
+  const topLevelPath = getTopLevelPath(fullPath);
+  if (!topLevelPath) {
+    return false;
+  }
+  return topLevelPath in alertingNamespaceCopyMap;
+};
+
+/**
+ *
+ * @param fullPath The full path to the field in the document
+ * @returns the destination path to copy the field to
+ */
+const getCopyDestinationPath = (fullPath: string): string => {
+  const topLevelPath = getTopLevelPath(fullPath);
+  const copyPathRoot =
+    alertingNamespaceCopyMap[topLevelPath as keyof typeof alertingNamespaceCopyMap];
+
+  if (!copyPathRoot) {
+    throw new Error(`No copy destination path found for path '${fullPath}'`);
+  }
+
+  return `${copyPathRoot}${fullPath.replace(topLevelPath, '')}`;
 };
