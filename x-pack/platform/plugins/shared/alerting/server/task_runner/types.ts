@@ -138,6 +138,7 @@ export type Executable<
 export interface RuleTypeRunnerContext {
   alertingEventLogger: AlertingEventLogger;
   flappingSettings?: RulesSettingsFlappingProperties;
+  logger: Logger;
   maintenanceWindowsService?: MaintenanceWindowsService;
   namespace?: string;
   queryDelaySec?: number;
