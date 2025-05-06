@@ -24,6 +24,7 @@ import type {
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -64,6 +65,7 @@ import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
 import { API_PRIVILEGES } from './features';
 
 export interface ReportingInternalSetup {
+  actions: ActionsPluginSetupContract;
   basePath: Pick<IBasePath, 'set'>;
   docLinks: DocLinksServiceSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
@@ -388,6 +390,13 @@ export class ReportingCore {
         })
       )
     );
+  }
+
+  public validateNotificationEmails(emails: string[]): string | undefined {
+    const pluginSetupDeps = this.getPluginSetupDeps();
+    return pluginSetupDeps.actions
+      .getActionsConfigurationUtilities()
+      .validateEmailAddresses(emails);
   }
 
   /*

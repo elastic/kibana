@@ -8,7 +8,7 @@
  */
 
 import {
-  ESQLRealField,
+  ESQLFieldWithMetadata,
   getFunctionDefinition,
   getFunctionSignatures,
 } from '@kbn/esql-validation-autocomplete';
@@ -20,7 +20,7 @@ import { getHoverItem } from './hover';
 
 const types: FieldType[] = ['keyword', 'double', 'date', 'boolean', 'ip'];
 
-const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
+const fields: Array<ESQLFieldWithMetadata & { suggestedAs?: string }> = [
   ...types.map((type) => ({
     name: `${type}Field`,
     type,
@@ -61,7 +61,7 @@ const policies = [
 ];
 
 function createCustomCallbackMocks(
-  customFields: ESQLRealField[] | undefined,
+  customFields: ESQLFieldWithMetadata[] | undefined,
   customSources: Array<{ name: string; hidden: boolean }> | undefined,
   customPolicies:
     | Array<{

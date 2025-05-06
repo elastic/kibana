@@ -49,11 +49,13 @@ export function registerScheduleRoutesInternal(reporting: ReportingCore, logger:
           });
           const jobParams = requestHandler.getJobParams();
           const schedule = requestHandler.getSchedule();
+          const notification = requestHandler.getNotification();
 
           return await requestHandler.handleRequest({
             exportTypeId: req.params.exportType,
             jobParams,
             schedule,
+            notification,
           });
         } catch (err) {
           if (err instanceof KibanaResponse) {

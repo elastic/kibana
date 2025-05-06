@@ -8,8 +8,13 @@
 import { taskManagerMock } from '../mocks';
 
 import { getNextRunAt } from './get_next_run_at';
+import { loggerMock } from '@kbn/logging-mocks';
+const mockLogger = loggerMock.create();
 
 describe('getNextRunAt', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
   test('should use startedAt when the task delay is greater than the threshold', () => {
     const now = new Date();
     // Use time in the past to ensure the task delay calculation isn't relative to "now"
@@ -21,7 +26,8 @@ describe('getNextRunAt', () => {
         runAt: fiveSecondsAgo,
         startedAt: fourSecondsAgo,
       }),
-      500
+      500,
+      mockLogger
     );
     expect(nextRunAt).toEqual(new Date(fourSecondsAgo.getTime() + 60000));
   });
@@ -37,7 +43,8 @@ describe('getNextRunAt', () => {
         runAt: fiveSecondsAgo,
         startedAt: aBitLessThanFiveSecondsAgo,
       }),
-      500
+      500,
+      mockLogger
     );
     expect(nextRunAt).toEqual(new Date(fiveSecondsAgo.getTime() + 60000));
   });
@@ -51,7 +58,8 @@ describe('getNextRunAt', () => {
         runAt: fiveMinsAgo,
         startedAt: fiveMinsAgo,
       }),
-      0
+      0,
+      mockLogger
     );
     expect(nextRunAt.getTime()).toBeGreaterThanOrEqual(testStart.getTime());
   });
@@ -74,7 +82,8 @@ describe('getNextRunAt', () => {
         runAt: testRunAt,
         startedAt: testStart,
       }),
-      0
+      0,
+      mockLogger
     );
 
     const currentDay = testStart.getUTCDay();
@@ -111,12 +120,43 @@ describe('getNextRunAt', () => {
         runAt: testRunAt,
         startedAt: testStart,
       }),
-      0
+      0,
+      mockLogger
     );
 
     const oneDay = 24 * 60 * 60 * 1000;
     const expectedNextRunAt = new Date(testStart.getTime() + oneDay);
 
     expect(nextRunAt).toEqual(expectedNextRunAt);
+  });
+
+  test('should throw an error if the next runAt cannot be calculated', () => {
+    const now = new Date();
+    const testStart = now;
+    const testRunAt = new Date(now.getTime() - 1000);
+
+    expect(() =>
+      getNextRunAt(
+        taskManagerMock.createTask({
+          schedule: {
+            rrule: {
+              freq: 3, // Daily
+              interval: 1,
+              tzid: 'UTC',
+              // @ts-ignore
+              count: 1, // Invalid field for rrule
+            },
+          },
+          runAt: testRunAt,
+          startedAt: testStart,
+        }),
+        0,
+        mockLogger
+      )
+    ).toThrow(`Cannot read properties of null (reading 'getTime')`);
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      "The next runAt for the task with a fixed time schedule could not be calculated: TypeError: Cannot read properties of null (reading 'getTime')"
+    );
   });
 });

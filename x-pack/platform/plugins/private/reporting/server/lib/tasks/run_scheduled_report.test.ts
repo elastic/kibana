@@ -26,7 +26,7 @@ import {
 } from '@kbn/core/server';
 import { Frequency } from '@kbn/rrule';
 import { ReportingStore, SavedReport } from '../store';
-import { RawScheduledReport } from '../../saved_objects/scheduled_report/schemas/latest';
+import { ScheduledReportType } from '../../types';
 
 interface StreamMock {
   getSeqNo: () => number;
@@ -79,7 +79,7 @@ const payload = {
   version: '8.0.0',
 };
 
-const reportSO: SavedObject<RawScheduledReport> = {
+const reportSO: SavedObject<ScheduledReportType> = {
   id: 'report-so-id',
   attributes: {
     createdAt: new Date().toISOString(),
@@ -300,7 +300,7 @@ describe('Run Scheduled Report Task', () => {
         created_by: 'test-user',
         payload: {
           headers: '',
-          title: 'Test Report',
+          title: expect.any(String),
           browserTimezone: '',
           objectType: 'test',
           version: '8.0.0',

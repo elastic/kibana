@@ -150,17 +150,23 @@ export class TaskTypeDictionary {
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
   public registerTaskDefinitions(taskDefinitions: TaskDefinitionRegistry) {
-    const duplicate = Object.keys(taskDefinitions).find((type) => this.definitions.has(type));
+    const taskTypesToRegister = Object.keys(taskDefinitions);
+    const duplicate = taskTypesToRegister.find((type) => this.definitions.has(type));
     if (duplicate) {
       throw new Error(`Task ${duplicate} is already defined!`);
     }
 
-    const removed = Object.keys(taskDefinitions).find((type) => REMOVED_TYPES.indexOf(type) >= 0);
+    const invalidTaskType = taskTypesToRegister.find((type) => type.includes(','));
+    if (invalidTaskType) {
+      throw new Error(`Task type "${invalidTaskType}" cannot contain a comma.`);
+    }
+
+    const removed = taskTypesToRegister.find((type) => REMOVED_TYPES.indexOf(type) >= 0);
     if (removed) {
       throw new Error(`Task ${removed} has been removed from registration!`);
     }
 
-    for (const taskType of Object.keys(taskDefinitions)) {
+    for (const taskType of taskTypesToRegister) {
       if (taskDefinitions[taskType].maxConcurrency !== undefined) {
         if (!CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE.includes(taskType)) {
           // maxConcurrency is designed to limit how many tasks of the same type a single Kibana

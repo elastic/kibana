@@ -135,6 +135,7 @@ describe('Handle request to schedule', () => {
             "objectType": "cool_object_type",
           },
           "migration_version": "unknown",
+          "notification": undefined,
           "schedule": Object {
             "rrule": Object {
               "freq": 1,
@@ -184,6 +185,79 @@ describe('Handle request to schedule', () => {
         id: 'foo',
         jobtype: 'printable_pdf_v2',
         schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+      });
+    });
+
+    test('creates a scheduled report saved object with notification', async () => {
+      const report = await requestHandler.enqueueJob({
+        exportTypeId: 'printablePdfV2',
+        jobParams: mockJobParams,
+        schedule: { rrule: { freq: 1, interval: 2, tzid: 'UTC' } },
+        notification: { email: { to: ['a@b.com'] } },
+      });
+
+      const { id, created_at: _created_at, payload, ...snapObj } = report;
+      expect(snapObj).toMatchInlineSnapshot(`
+        Object {
+          "created_by": "testymcgee",
+          "jobtype": "printable_pdf_v2",
+          "meta": Object {
+            "isDeprecated": false,
+            "layout": "preserve_layout",
+            "objectType": "cool_object_type",
+          },
+          "migration_version": "unknown",
+          "notification": Object {
+            "email": Object {
+              "to": Array [
+                "a@b.com",
+              ],
+            },
+          },
+          "schedule": Object {
+            "rrule": Object {
+              "freq": 1,
+              "interval": 2,
+              "tzid": "UTC",
+            },
+          },
+        }
+      `);
+      expect(payload).toMatchInlineSnapshot(`
+        Object {
+          "browserTimezone": "UTC",
+          "isDeprecated": false,
+          "layout": Object {
+            "id": "preserve_layout",
+          },
+          "locatorParams": Array [],
+          "objectType": "cool_object_type",
+          "title": "cool_title",
+          "version": "unknown",
+        }
+      `);
+
+      expect(soClient.create).toHaveBeenCalledWith('scheduled_report', {
+        jobType: 'printable_pdf_v2',
+        createdAt: expect.any(String),
+        createdBy: 'testymcgee',
+        title: 'cool_title',
+        enabled: true,
+        payload: JSON.stringify(payload),
+        schedule: {
+          rrule: {
+            freq: 1,
+            interval: 2,
+            tzid: 'UTC',
+          },
+        },
+        migrationVersion: 'unknown',
+        meta: {
+          objectType: 'cool_object_type',
+          layout: 'preserve_layout',
+          isDeprecated: false,
+        },
+        notification: { email: { to: ['a@b.com'] } },
       });
     });
   });
@@ -325,6 +399,79 @@ describe('Handle request to schedule', () => {
 
       expect(error?.statusCode).toBe(400);
       expect(error?.body).toBe('A schedule is required to create a scheduled report.');
+    });
+  });
+
+  describe('getNotification', () => {
+    test('parse notification from body', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        notification: { email: { to: ['a@b.com'] } },
+      };
+      expect(requestHandler.getNotification()).toEqual({ email: { to: ['a@b.com'] } });
+    });
+
+    test('returns undefined if notification object is empty', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        notification: {},
+      };
+      expect(requestHandler.getNotification()).toBeUndefined();
+    });
+
+    test('returns undefined if notification object is null', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        notification: null,
+      };
+      expect(requestHandler.getNotification()).toBeUndefined();
+    });
+
+    test('returns undefined if notification.email object is empty', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        notification: { email: {} },
+      };
+      expect(requestHandler.getNotification()).toBeUndefined();
+    });
+
+    test('returns undefined if notification.email object is null', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        notification: { email: null },
+      };
+      expect(requestHandler.getNotification()).toBeUndefined();
+    });
+
+    test('handles invalid email address', () => {
+      jest
+        .spyOn(reportingCore, 'validateNotificationEmails')
+        .mockReturnValueOnce('not valid emails: foo');
+      let error: { statusCode: number; body: string } | undefined;
+      try {
+        // @ts-ignore body is a read-only property
+        mockRequest.body = {
+          jobParams: rison.encode(mockJobParams),
+          schedule: { rrule: { freq: 1, interval: 2 } },
+          notification: { email: { to: ['foo'] } },
+        };
+        requestHandler.getNotification();
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error?.statusCode).toBe(400);
+      expect(error?.body).toBe('Invalid email address(es): not valid emails: foo');
     });
   });
 

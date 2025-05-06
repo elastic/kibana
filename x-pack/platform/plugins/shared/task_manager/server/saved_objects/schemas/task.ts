@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isInterval } from '../../lib/intervals';
 import { rruleSchedule } from './rrule';
@@ -73,9 +72,8 @@ export const taskSchemaV4 = taskSchemaV3.extends({
       apiKeyCreatedByUser: schema.boolean(),
     })
   ),
-  schedule: schema.maybe(schema.oneOf([scheduleIntervalSchema, scheduleRruleSchema])),
 });
 
-type Mutable<T> = { -readonly [P in keyof T]: T[P] extends object ? Mutable<T[P]> : T[P] };
-
-export type RruleSchedule = Mutable<TypeOf<typeof scheduleRruleSchema>>;
+export const taskSchemaV5 = taskSchemaV4.extends({
+  schedule: schema.maybe(schema.oneOf([scheduleIntervalSchema, scheduleRruleSchema])),
+});
