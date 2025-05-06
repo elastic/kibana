@@ -142,7 +142,7 @@ export const useInvestigateInTimeline = ({
   indicator,
 }: UseInvestigateInTimelineParam): UseInvestigateInTimelineValue => {
   const { key, value } = getIndicatorFieldAndValue(indicator, RawIndicatorFieldId.Name);
-  const sourceEventField = IndicatorFieldEventEnrichmentMap[key];
+  const sourceEventField = IndicatorFieldEventEnrichmentMap[key] ?? [];
 
   const dataProviders: DataProvider[] = [...sourceEventField, key].map((e: string) =>
     generateDataProvider(e, value as string)
