@@ -24,7 +24,10 @@ import {
 import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
-import { getPanelKeysInOrder } from './utils/resolve_grid_section';
+import { getPanelKeysInOrder, resolveGridSection } from './utils/resolve_grid_section';
+import { getOrderedLayout } from './utils/conversions';
+import { isOrderedLayoutEqual } from './utils/equality_checks';
+import { cloneDeep } from 'lodash';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -63,21 +66,21 @@ export const GridLayout = ({
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
-  // useEffect(() => {
-  //   const orderedLayout = getOrderedLayout(layout);
-  //   if (!isOrderedLayoutEqual(orderedLayout, gridLayoutStateManager.gridLayout$.getValue())) {
-  //     const newLayout = cloneDeep(orderedLayout);
-  //     /**
-  //      * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
-  //      * so, we need to loop through each row and ensure it is compacted
-  //      */
-  //     Object.entries(newLayout).forEach(([sectionId, row]) => {
-  //       newLayout[sectionId] = resolveGridSection(row);
-  //     });
-  //     gridLayoutStateManager.gridLayout$.next(newLayout);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [layout]);
+  useEffect(() => {
+    const orderedLayout = getOrderedLayout(layout);
+    if (!isOrderedLayoutEqual(orderedLayout, gridLayoutStateManager.gridLayout$.getValue())) {
+      const newLayout = cloneDeep(orderedLayout);
+      /**
+       * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
+       * so, we need to loop through each row and ensure it is compacted
+       */
+      Object.entries(newLayout).forEach(([sectionId, row]) => {
+        newLayout[sectionId].panels = resolveGridSection(row.panels);
+      });
+      gridLayoutStateManager.gridLayout$.next(newLayout);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layout]);
 
   useEffect(() => {
     /**
