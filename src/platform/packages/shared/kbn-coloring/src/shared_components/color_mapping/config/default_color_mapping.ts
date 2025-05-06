@@ -22,9 +22,11 @@ export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
   assignments: [],
   specialAssignments: [
     {
-      rule: {
-        type: 'other',
-      },
+      rules: [
+        {
+          type: 'other',
+        },
+      ],
       color: {
         type: 'loop',
       },
