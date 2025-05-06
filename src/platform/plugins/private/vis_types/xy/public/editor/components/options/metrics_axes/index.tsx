@@ -11,8 +11,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { cloneDeep, get } from 'lodash';
 
 import { EuiSpacer } from '@elastic/eui';
+import { Position } from '@elastic/charts';
 
-import { IAggConfig } from '@kbn/data-plugin/public';
+import { BUCKET_TYPES, IAggConfig } from '@kbn/data-plugin/public';
 
 import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
@@ -288,6 +289,18 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
     updateAxisTitle(updatedSeries);
   }, [firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle, aggs, schemaName]);
 
+  const isTimeViz = aggs?.aggs.some(
+    (agg) =>
+      agg.schema === 'segment' && agg.enabled && agg.type?.name === BUCKET_TYPES.DATE_HISTOGRAM
+  );
+  const xAxisIsHorizontal =
+    stateParams.categoryAxes[0].position === Position.Bottom ||
+    stateParams.categoryAxes[0].position === Position.Top;
+  const linearOrStackedBars = stateParams.seriesParams.every(
+    ({ mode, type }) => type !== 'histogram' || (type === 'histogram' && mode === 'stacked')
+  );
+  const disableAxisControls = xAxisIsHorizontal && isTimeViz && linearOrStackedBars;
+
   return isTabSelected ? (
     <>
       <SeriesPanel
@@ -312,6 +325,7 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
         axis={stateParams.categoryAxes[0]}
         onPositionChanged={onCategoryAxisPositionChanged}
         setCategoryAxis={setCategoryAxis}
+        disableAxisControls={disableAxisControls}
       />
     </>
   ) : null;
