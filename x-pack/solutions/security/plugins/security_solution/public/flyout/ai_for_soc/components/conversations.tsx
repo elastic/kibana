@@ -21,13 +21,32 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAssistantContext, useFetchCurrentUserConversations } from '@kbn/elastic-assistant';
-import * as i18n from '../constants/translations';
+import { i18n } from '@kbn/i18n';
 
-interface Props {
-  id?: string;
+export const LOADING_SKELETON_TEST_ID = 'ai-for-soc-alert-flyout-conversation-loading-skeleton';
+export const CONVERSATION_COUNT_TEST_ID = 'ai-for-soc-alert-flyout-conversation-count';
+export const VIEW_CONVERSATIONS_BUTTON_TEST_ID = 'ai-for-soc-alert-flyout-view-conversations';
+
+const YOUR_CONVERSATIONS = i18n.translate('xpack.securitySolution.aiAssistant.yourConversations', {
+  defaultMessage: 'Your conversations',
+});
+const VIEW = i18n.translate('xpack.securitySolution.aiAssistant.view', {
+  defaultMessage: 'View',
+});
+
+interface ConversationsProps {
+  /**
+   * Id of the alert for which we will retrieve current user conversations
+   */
+  alertId?: string;
 }
 
-export const Conversations = memo(({ id }: Props) => {
+/**
+ * Component rendered in the AI assistant section of the AI for SOC alert flyout.
+ * It fetches user conversations related to the alertId passed as input.
+ * If no id is provided, we display a list of default conversations.
+ */
+export const Conversations = memo(({ alertId }: ConversationsProps) => {
   const { euiTheme } = useEuiTheme();
   const {
     http,
@@ -37,7 +56,7 @@ export const Conversations = memo(({ id }: Props) => {
   const { data: conversations, isFetched: conversationsLoaded } = useFetchCurrentUserConversations({
     http,
     isAssistantEnabled,
-    filter: `messages:{ content : "${id}" }`,
+    filter: `messages:{ content : "${alertId}" }`,
   });
   const conversationCount = useMemo(() => Object.keys(conversations).length, [conversations]);
 
@@ -61,7 +80,7 @@ export const Conversations = memo(({ id }: Props) => {
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <p>{i18n.YOUR_CONVERSATIONS}</p>
+                    <p>{YOUR_CONVERSATIONS}</p>
                   </EuiText>
                 </EuiFlexItem>
 
@@ -71,7 +90,7 @@ export const Conversations = memo(({ id }: Props) => {
                     css={css`
                       color: ${euiTheme.colors.textPrimary};
                     `}
-                    data-test-subj="conversation-count"
+                    data-test-subj={CONVERSATION_COUNT_TEST_ID}
                   >
                     {conversationCount}
                   </EuiBadge>
@@ -83,12 +102,12 @@ export const Conversations = memo(({ id }: Props) => {
                 <EuiPopover
                   button={
                     <EuiButtonEmpty
-                      data-test-subj="view-conversations"
+                      data-test-subj={VIEW_CONVERSATIONS_BUTTON_TEST_ID}
                       iconSide="right"
                       iconType="arrowDown"
                       onClick={togglePopover}
                     >
-                      {i18n.VIEW}
+                      {VIEW}
                     </EuiButtonEmpty>
                   }
                   isOpen={isPopoverOpen}
@@ -110,7 +129,7 @@ export const Conversations = memo(({ id }: Props) => {
             )}
           </EuiFlexGroup>
         ) : (
-          <EuiSkeletonText data-test-subj="loading-skeleton" lines={1} size="xs" />
+          <EuiSkeletonText data-test-subj={LOADING_SKELETON_TEST_ID} lines={1} size="xs" />
         )}
       </EuiPanel>
     </>
