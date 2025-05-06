@@ -118,7 +118,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 
-    describe('Rule creation', () => {
+    describe('Rule creation', function () {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
           roleAuthc: adminRoleAuthc,
@@ -337,7 +337,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Burn rate rule - slo consumer', () => {
+    describe('Burn rate rule - slo consumer', function () {
       this.tags(['skipMKI']);
       const consumer = 'slo';
       const sloId = uuidv4();
@@ -430,7 +430,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Burn rate rule - consumer alerts', () => {
+    describe('Burn rate rule - consumer alerts', function () {
       this.tags(['skipMKI']);
       const consumer = 'alerts';
       const sloId = uuidv4();
@@ -523,7 +523,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('Burn rate rule - consumer observability', () => {
+    describe('Burn rate rule - consumer observability', function () {
       this.tags(['skipMKI']);
       const consumer = 'observability';
       const sloId = uuidv4();

@@ -26,7 +26,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const config = getService('config');
   const isServerless = config.get('serverless');
 
-  describe('consumers', function () {
+  describe('Custom Threshold Rule - consumers', function () {
     // skip until custom roles are supported in serverless
     this.tags(['skipMKI']);
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
@@ -36,7 +36,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const DATA_VIEW_NAME = 'data-view-name';
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
-    let actionId: string;
     let ruleId: string;
     let alertId: string;
 
@@ -81,10 +80,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .delete(`/api/alerting/rule/${ruleId}`)
         .set(roleAuthc.apiKeyHeader)
         .set(internalReqHeader);
-      await supertestWithoutAuth
-        .delete(`/api/actions/connector/${actionId}`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(internalReqHeader);
       if (ruleId) {
         await esClient.deleteByQuery({
           index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
@@ -109,12 +104,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Custom threshold - Rule creation - consumer observability', () => {
       const consumer = 'observability';
       it('creates rule successfully', async () => {
-        actionId = await alertingApi.createIndexConnector({
-          roleAuthc,
-          name: 'Index Connector: Threshold API test',
-          indexName: ALERT_ACTION_INDEX,
-        });
-
         const createdRule = await alertingApi.createRule({
           roleAuthc,
           ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
@@ -198,12 +187,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Custom threshold - Rule execution - consumer alerts', () => {
       const consumer = 'alerts';
       it('creates rule successfully', async () => {
-        actionId = await alertingApi.createIndexConnector({
-          roleAuthc,
-          name: 'Index Connector: Threshold API test',
-          indexName: ALERT_ACTION_INDEX,
-        });
-
         const createdRule = await alertingApi.createRule({
           roleAuthc,
           ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
@@ -287,12 +270,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Custom threshold - Rule execution - consumer logs', () => {
       const consumer = 'logs';
       it('creates rule successfully', async () => {
-        actionId = await alertingApi.createIndexConnector({
-          roleAuthc,
-          name: 'Index Connector: Threshold API test',
-          indexName: ALERT_ACTION_INDEX,
-        });
-
         const createdRule = await alertingApi.createRule({
           roleAuthc,
           ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
@@ -380,12 +357,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Custom threshold - Rule execution - consumer infrastructure', () => {
       const consumer = 'infrastructure';
       it('creates rule successfully', async () => {
-        actionId = await alertingApi.createIndexConnector({
-          roleAuthc,
-          name: 'Index Connector: Threshold API test',
-          indexName: ALERT_ACTION_INDEX,
-        });
-
         const createdRule = await alertingApi.createRule({
           roleAuthc,
           ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
@@ -473,12 +444,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Custom threshold - Rule execution - consumer stackAlerts', () => {
       const consumer = 'stackAlerts';
       it('creates rule successfully', async () => {
-        actionId = await alertingApi.createIndexConnector({
-          roleAuthc,
-          name: 'Index Connector: Threshold API test',
-          indexName: ALERT_ACTION_INDEX,
-        });
-
         const createdRule = await alertingApi.createRule({
           roleAuthc,
           ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
@@ -566,12 +531,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Custom threshold - Rule execution - consumer notavalidconsumer', () => {
       const consumer = 'notavalidconsumer';
       it('creates rule successfully', async () => {
-        actionId = await alertingApi.createIndexConnector({
-          roleAuthc,
-          name: 'Index Connector: Threshold API test',
-          indexName: ALERT_ACTION_INDEX,
-        });
-
         const createdRule = await alertingApi.createRule({
           roleAuthc,
           ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
@@ -579,6 +538,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(createdRule.statusCode).to.be(403);
         expect(createdRule.message).to.be(
           'Unauthorized by "notavalidconsumer" to create "observability.rules.custom_threshold" rule'
+        );
+      });
+    });
+
+    describe('Custom threshold - Rule execution - consumer undefined', function () {
+      const consumer = undefined;
+      it('creates rule successfully', async () => {
+        const createdRule = await alertingApi.createRule({
+          roleAuthc,
+          ...getRuleConfiguration({ dataViewId: DATA_VIEW_ID, consumer }),
+        });
+        expect(createdRule.statusCode).to.be(400);
+        expect(createdRule.message).to.be(
+          '[request body.consumer]: expected value of type [string] but got [undefined]'
         );
       });
     });
