@@ -34,11 +34,10 @@ import {
   getReindexingMigratorTestKit,
   getUpToDateMigratorTestKit,
 } from '../kibana_migrator_test_kit.fixtures';
-import { delay, getDocVersion } from '../test_utils';
+import { delay } from '../test_utils';
 import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test_kit.expect';
 
 const logFilePath = join(__dirname, 'v2_migration.log');
-const docVersion = getDocVersion();
 
 describe('v2 migration', () => {
   let esServer: TestElasticsearchUtils;
@@ -146,7 +145,7 @@ describe('v2 migration', () => {
         await expect(unknownTypesKit.runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
           "Unable to complete saved object migrations for the [.kibana_migrator] index: Migration failed because some documents were found which use unknown saved object types: deprecated
           To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
-          Please refer to https://www.elastic.co/guide/en/kibana/${docVersion}/resolve-migrations-failures.html for more information."
+          Please refer to https://www.elastic.co/docs/troubleshoot/kibana/migration-failures for more information."
         `);
         logs = await readLog(logFilePath);
         expect(logs).toMatch(
