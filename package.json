@@ -123,7 +123,7 @@
     "@elastic/ecs": "^8.11.5",
     "@elastic/elasticsearch": "^8.17.0",
     "@elastic/ems-client": "8.6.3",
-    "@elastic/eui": "102.0.0",
+    "@elastic/eui": "102.1.0",
     "@elastic/eui-theme-borealis": "1.0.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "^1.2.3",
