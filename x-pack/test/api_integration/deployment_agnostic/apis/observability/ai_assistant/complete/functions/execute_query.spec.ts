@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const synthtrace = getService('synthtrace');
 
   describe('execute_query', function () {
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
 
