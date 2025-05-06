@@ -71,51 +71,6 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
     );
   };
 
-  const registerInternalGetListScheduled = () => {
-    // list scheduled jobs in the queue, paginated
-    const path = JOBS.LIST_SCHEDULED;
-    router.get(
-      {
-        path,
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
-        validate: {
-          query: schema.object({
-            page: schema.string({ defaultValue: '1' }),
-            size: schema.string({ defaultValue: '10' }),
-          }),
-        },
-        options: { access: 'internal' },
-      },
-      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
-
-        // ensure the async dependencies are loaded
-        if (!context.reporting) {
-          return handleUnavailable(res);
-        }
-
-        const { page: queryPage = '1', size: querySize = '10' } = req.query;
-        const page = parseInt(queryPage, 10) || 1;
-        const size = Math.min(100, parseInt(querySize, 10) || 10);
-        const results = await jobsQuery.listScheduled(req, user, page, size);
-
-        counters.usageCounter();
-
-        return res.ok({
-          body: results,
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
-      })
-    );
-  };
-
   const registerInternalGetCount = () => {
     // return the count of all jobs in the queue
     const path = JOBS.COUNT;
@@ -246,7 +201,6 @@ export function registerJobInfoRoutesInternal(reporting: ReportingCore) {
   };
 
   registerInternalGetList();
-  registerInternalGetListScheduled();
   registerInternalGetCount();
   registerInternalGetInfo();
   registerInternalDownloadReport();

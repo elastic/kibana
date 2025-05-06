@@ -6,24 +6,17 @@
  */
 
 import { TransportResult, errors, estypes } from '@elastic/elasticsearch';
-import type {
-  ElasticsearchClient,
-  KibanaRequest,
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-} from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type { ReportApiJSON, ReportSource } from '@kbn/reporting-common/types';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
-import { RawScheduledReport } from '../../../saved_objects/scheduled_report/schemas/latest';
 import type { ReportingCore } from '../../..';
 import { Report } from '../../../lib/store';
 import { runtimeFieldKeys, runtimeFields } from '../../../lib/store/runtime_fields';
 import type { ReportingUser } from '../../../types';
 import type { Payload } from './get_document_payload';
 import { getDocumentPayloadFactory } from './get_document_payload';
-import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 
 const defaultSize = 10;
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
@@ -52,12 +45,6 @@ export interface JobsQueryFactory {
     size: number,
     jobIds: string[] | null
   ): Promise<ReportApiJSON[]>;
-  listScheduled(
-    req: KibanaRequest,
-    user: ReportingUser,
-    page: number,
-    size: number
-  ): Promise<SavedObjectsFindResponse<RawScheduledReport>>;
   count(user: ReportingUser): Promise<number>;
   get(user: ReportingUser, id: string): Promise<ReportApiJSON | void>;
   getError(id: string): Promise<string>;
@@ -74,22 +61,6 @@ export function jobsQueryFactory(
   >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
     try {
       const { asInternalUser: client } = await reportingCore.getEsClient();
-
-      return await callback(client);
-    } catch (error) {
-      if (error instanceof errors.ResponseError && [401, 403, 404].includes(error.statusCode!)) {
-        return;
-      }
-
-      throw error;
-    }
-  }
-
-  async function execSoQuery<
-    T extends (client: SavedObjectsClientContract) => Promise<Awaited<ReturnType<T>> | undefined>
-  >(req: KibanaRequest, callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
-    try {
-      const client = await reportingCore.getSoClient(req);
 
       return await callback(client);
     } catch (error) {
@@ -136,29 +107,6 @@ export function jobsQueryFactory(
           return reportInstance.toApiJSON();
         }) ?? []
       );
-    },
-
-    async listScheduled(req, user, page = 1, size = defaultSize) {
-      const username = getUsername(user);
-
-      // if user has Manage Reporting privileges, we can list
-      // scheduled reports for all users in this space, otherwise
-      // we will filter only to the scheduled reports created by the user
-      const canManageReporting = await reportingCore.canManageReportingForSpace(req);
-      console.log(`canManageReporting: ${canManageReporting}`);
-
-      const response = await execSoQuery(req, (soClient) =>
-        soClient.find<RawScheduledReport>({
-          type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-          page,
-          perPage: size,
-          ...(!canManageReporting ? { filter: `createdBy: "${username}` } : {}),
-        })
-      );
-
-      console.log(`response ${JSON.stringify(response)}`);
-
-      return response as SavedObjectsFindResponse<RawScheduledReport>;
     },
 
     async count(user) {

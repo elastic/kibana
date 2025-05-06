@@ -13,6 +13,7 @@ import { registerHealthRoute } from './internal/health';
 import { registerGenerationRoutesInternal } from './internal/generate/generate_from_jobparams';
 import { registerScheduleRoutesInternal } from './internal/schedule/schedule_from_jobparams';
 import { registerJobInfoRoutesInternal } from './internal/management/jobs';
+import { registerScheduledRoutesInternal } from './internal/management/scheduled';
 import { registerGenerationRoutesPublic } from './public/generate_from_jobparams';
 import { registerJobInfoRoutesPublic } from './public/jobs';
 
@@ -23,6 +24,7 @@ export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerGenerationRoutesInternal(reporting, logger);
   registerScheduleRoutesInternal(reporting, logger);
   registerJobInfoRoutesInternal(reporting);
+  registerScheduledRoutesInternal(reporting);
   registerGenerationRoutesPublic(reporting, logger);
   registerJobInfoRoutesPublic(reporting);
 }
