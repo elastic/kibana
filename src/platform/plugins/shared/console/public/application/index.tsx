@@ -15,7 +15,6 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Redirect, RouteComponentProps, useLocation } from 'react-router-dom';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
-import { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
 import {
@@ -44,7 +43,6 @@ export interface BootDependencies extends ConsoleStartServices {
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   application: ApplicationStart;
-  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   dataViews: DataViewsPublicPluginStart;
   element: HTMLElement;
   history: RouteComponentProps['history'];
@@ -58,7 +56,6 @@ export async function renderApp({
   docLinkVersion,
   usageCollection,
   application,
-  indexManagementApiService,
   dataViews,
   element,
   history,
@@ -103,7 +100,6 @@ export async function renderApp({
             objectStorageClient,
             http,
             autocompleteInfo,
-            indexManagementApiService,
             application,
             dataViews,
           },

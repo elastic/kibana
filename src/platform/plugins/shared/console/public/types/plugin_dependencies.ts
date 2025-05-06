@@ -35,7 +35,6 @@ export interface AppSetupUIPluginDependencies {
   devTools: DevToolsSetup;
   share: SharePluginSetup;
   usageCollection?: UsageCollectionSetup;
-  indexManagement?: IndexManagementPluginSetup;
 }
 
 export interface PluginStartDependencies {

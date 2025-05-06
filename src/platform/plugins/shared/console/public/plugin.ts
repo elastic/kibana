@@ -54,7 +54,7 @@ export class ConsoleUIPlugin
 
   public setup(
     { notifications, getStartServices, http }: CoreSetup<PluginStartDependencies>,
-    { devTools, home, share, usageCollection, indexManagement }: AppSetupUIPluginDependencies
+    { devTools, home, share, usageCollection }: AppSetupUIPluginDependencies
   ): ConsolePluginSetup {
     const {
       ui: { enabled: isConsoleUiEnabled },
@@ -109,7 +109,6 @@ export class ConsoleUIPlugin
             dataViews,
             notifications,
             usageCollection,
-            indexManagementApiService: indexManagement?.apiService,
             element,
             history,
             autocompleteInfo: this.autocompleteInfo,

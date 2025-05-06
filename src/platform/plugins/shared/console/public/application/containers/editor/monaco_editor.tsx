@@ -51,7 +51,6 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       settings: settingsService,
       autocompleteInfo,
       dataViews,
-      indexManagementApiService,
       application,
     },
     docLinkVersion,
@@ -157,20 +156,19 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       getSources: async () => {
         // TODO: Add logic for correct check
         const areRemoteIndicesAvailable = false;
-        const sources = await memoizedSources(dataViews, { application, http }, areRemoteIndicesAvailable).result;
+        const sources = await memoizedSources(
+          dataViews,
+          { application, http },
+          areRemoteIndicesAvailable
+        ).result;
         return getESQLSources(dataViews, { application, http }, areRemoteIndicesAvailable);
       },
-      getPolicies: async () => {
-        const { data: policies, error } =
-          (await indexManagementApiService?.getAllEnrichPolicies()) || {};
-        if (error || !policies) {
-          return [];
-        }
-        return policies.map(({ type, query, ...rest }) => rest);
+      getPolicies: () => {
+        return [];
       },
     };
     return callbacks;
-  }, [application, http, memoizedSources, dataViews, indexManagementApiService]);
+  }, [application, http, memoizedSources, dataViews]);
 
   const suggestionProvider = useMemo(() => {
     return getSuggestionProvider(actionsProvider, esqlCallbacks);
@@ -218,7 +216,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         id="ConAppEditorActions"
         gutterSize="xs"
         responsive={false}
-        style={editorActionsCss}
+        css={editorActionsCss}
         justifyContent="center"
         alignItems="center"
       >

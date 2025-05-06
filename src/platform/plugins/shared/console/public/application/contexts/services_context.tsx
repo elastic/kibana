@@ -32,7 +32,6 @@ interface ContextServices {
   autocompleteInfo: AutocompleteInfo;
   dataViews: DataViewsPublicPluginStart;
   application: ApplicationStart;
-  indexManagementApiService?: Pick<IndexManagementPluginSetup, 'apiService'>;
 }
 
 export interface ContextValue extends ConsoleStartServices {

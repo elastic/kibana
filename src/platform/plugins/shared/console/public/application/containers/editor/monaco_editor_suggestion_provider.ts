@@ -10,25 +10,11 @@
 import { ESQLCallbacks, monaco } from '@kbn/monaco';
 import { MutableRefObject } from 'react';
 import { suggest } from '@kbn/esql-validation-autocomplete';
-import { getEsqlCompletionItems } from './utils';
+import { getEsqlCompletionItems, isInsideTripleQuotes } from './utils';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 
-function isInTripleQuotedQuery(text: string, position: monaco.Position): boolean {
-  const lines = text.split('\n');
-  let charCount = 0;
-
-  for (let i = 0; i < position.lineNumber - 1; i++) {
-    charCount += lines[i].length + 1;
-  }
-  charCount += position.column - 1;
-  const textUpToPosition = text.slice(0, charCount);
-  const tripleQuoteMatches = [...textUpToPosition.matchAll(/"""/g)];
-  const numTripleQuotes = tripleQuoteMatches.length;
-  return numTripleQuotes % 2 === 1;
-}
-
 const CONSOLE_TRIGGER_CHARS = ['/', '.', '_', ',', '?', '=', '&', '"'];
-const ESQL_TRIGGER_CHARS = ['\n', '(', ' ', '[', '?', '"'];
+const ESQL_TRIGGER_CHARS = ['(', ' ', '[', '?', '"'];
 
 export const getSuggestionProvider = (
   actionsProvider: MutableRefObject<MonacoEditorActionsProvider | null>,
@@ -43,20 +29,15 @@ export const getSuggestionProvider = (
       context: monaco.languages.CompletionContext
     ) => {
       const fullText = model.getValue();
-      const previousText = model.getValueInRange({
-        startLineNumber: 0,
-        startColumn: 0,
-        endColumn: position.column,
-        endLineNumber: position.lineNumber,
-      });
-      const offset = model.getOffsetAt(position);
-      const lastChar = fullText.at(offset - 1);
-      const isInsideEsqlQuery = isInTripleQuotedQuery(fullText, position);
+      const cursorOffset = model.getOffsetAt(position);
+      const textBeforeCursor = fullText.slice(0, cursorOffset);
+      const isInsideEsqlQuery = isInsideTripleQuotes(textBeforeCursor);
+      const lastChar = fullText.at(cursorOffset - 1);
       if (esqlCallbacks && isInsideEsqlQuery && ESQL_TRIGGER_CHARS.includes(lastChar)) {
-        console.log(previousText.slice(previousText.lastIndexOf('"""') + 3, offset));
+        const queryStartOffset = textBeforeCursor.lastIndexOf('"""') + 3;
         const esqlSuggestions = await suggest(
-          previousText.slice(previousText.lastIndexOf('"""') + 3, offset),
-          offset,
+          textBeforeCursor.slice(queryStartOffset, cursorOffset),
+          cursorOffset - queryStartOffset,
           context,
           esqlCallbacks
         );
