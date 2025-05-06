@@ -10,11 +10,11 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
-import { getUnifiedDocViewerServices } from '../../../../../plugin';
-import { TransactionProvider, useTransactionContext } from './use_transaction';
+import { getUnifiedDocViewerServices } from '../../../../../../plugin';
+import { TransactionProvider, useTransactionContext } from '.';
 import { TRANSACTION_DURATION_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
 
-jest.mock('../../../../../plugin', () => ({
+jest.mock('../../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 

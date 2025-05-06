@@ -389,6 +389,8 @@ src/platform/packages/private/default-nav/management @elastic/kibana-management
 src/platform/packages/private/default-nav/ml @elastic/ml-ui
 src/platform/packages/shared/kbn-management/delete_managed_assets_callout @elastic/kibana-management
 packages/kbn-dependency-usage @elastic/kibana-security
+src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-dev-cli-errors @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-cli-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-proc-runner @elastic/kibana-operations
