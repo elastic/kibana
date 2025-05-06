@@ -8,6 +8,7 @@
  */
 
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { SavedObjectAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
 import { LastSavedState } from '../types';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =
@@ -21,6 +22,9 @@ export const DEFAULT_STATE: LastSavedState = {
   panelsState: [],
 };
 
+const isByValue = (rawState: object): rawState is SavedObjectAttributesWithReferences<any> =>
+  'attributes' in rawState;
+
 export const lastSavedStateSessionStorage = {
   clear: () => {
     sessionStorage.removeItem(SAVED_STATE_SESSION_STORAGE_KEY);
@@ -31,6 +35,9 @@ export const lastSavedStateSessionStorage = {
       ? (JSON.parse(savedState) as LastSavedState)
       : { ...DEFAULT_STATE };
     const transformedPanels = panelsState.map((panel) => {
+      const { rawState } = panel.panelState;
+      if (!isByValue(rawState)) return panel;
+
       // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
       const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
         panel.type
@@ -38,7 +45,7 @@ export const lastSavedStateSessionStorage = {
       const { savedObjectToItem } =
         embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
       if (!savedObjectToItem) return panel;
-      const newState = savedObjectToItem(panel.panelState.rawState);
+      const newState = savedObjectToItem(rawState);
       return {
         ...panel,
         panelState: {
@@ -50,6 +57,9 @@ export const lastSavedStateSessionStorage = {
   },
   save: (state: LastSavedState, embeddable: EmbeddableStart) => {
     const transformedPanels = state.panelsState.map((panel) => {
+      const { rawState } = panel.panelState;
+      if (!isByValue(rawState)) return panel;
+
       // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
       const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
         panel.type
@@ -57,7 +67,7 @@ export const lastSavedStateSessionStorage = {
       const { itemToSavedObject } =
         embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
       if (!itemToSavedObject) return panel;
-      const savedState = itemToSavedObject(panel.panelState.rawState);
+      const savedState = itemToSavedObject(rawState);
       return {
         ...panel,
         panelState: {

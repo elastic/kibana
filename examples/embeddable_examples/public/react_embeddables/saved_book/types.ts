@@ -32,7 +32,7 @@ export interface BookByValueSerializedState {
 }
 
 export interface BookByReferenceSerializedState {
-  savedBookId: string;
+  savedObjectId: string;
 }
 
 export interface HasSavedBookId {

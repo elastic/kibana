@@ -13,6 +13,7 @@ import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_TRIGGER, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import { CanGetEmbeddableContentManagementDefinition } from '@kbn/embeddable-plugin/common';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import {
   defaultBookAttributes,
@@ -23,7 +24,11 @@ import { ADD_SAVED_BOOK_ACTION_ID, SAVED_BOOK_ID } from './constants';
 import { openSavedBookEditor } from './saved_book_editor';
 import { BookRuntimeState } from './types';
 
-export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, core: CoreStart) => {
+export const registerCreateSavedBookAction = (
+  uiActions: UiActionsPublicStart,
+  core: CoreStart,
+  embeddableStart: CanGetEmbeddableContentManagementDefinition
+) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_SAVED_BOOK_ACTION_ID,
     getIconType: () => 'folderClosed',
@@ -35,16 +40,17 @@ export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, c
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
       const newPanelStateManager = stateManagerFromAttributes(defaultBookAttributes);
 
-      const { savedBookId } = await openSavedBookEditor({
+      const { savedObjectId } = await openSavedBookEditor({
         attributesManager: newPanelStateManager,
         parent: embeddable,
         isCreate: true,
         core,
+        embeddable: embeddableStart,
       });
 
       const bookAttributes = serializeBookAttributes(newPanelStateManager);
-      const initialState: BookRuntimeState = savedBookId
-        ? { savedBookId, ...bookAttributes }
+      const initialState: BookRuntimeState = savedObjectId
+        ? { savedObjectId, ...bookAttributes }
         : { ...bookAttributes };
 
       embeddable.addNewPanel<BookRuntimeState>({

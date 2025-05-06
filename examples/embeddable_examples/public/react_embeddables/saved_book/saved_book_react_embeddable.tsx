@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableFactory, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasParentApi,
@@ -46,10 +46,10 @@ import {
 const bookSerializedStateIsByReference = (
   state?: BookSerializedState
 ): state is BookByReferenceSerializedState => {
-  return Boolean(state && (state as BookByReferenceSerializedState).savedBookId);
+  return Boolean(state && (state as BookByReferenceSerializedState).savedObjectId);
 };
 
-export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
+export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: EmbeddableStart) => {
   const savedBookEmbeddableFactory: ReactEmbeddableFactory<
     BookSerializedState,
     BookRuntimeState,
@@ -64,12 +64,12 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         description: serializedState.rawState.description,
       };
 
-      const savedBookId = bookSerializedStateIsByReference(serializedState.rawState)
-        ? serializedState.rawState.savedBookId
+      const savedObjectId = bookSerializedStateIsByReference(serializedState.rawState)
+        ? serializedState.rawState.savedObjectId
         : undefined;
 
       const attributes: BookAttributes = bookSerializedStateIsByReference(serializedState.rawState)
-        ? await loadBookAttributes(serializedState.rawState.savedBookId)!
+        ? await loadBookAttributes(embeddable, serializedState.rawState.savedObjectId)!
         : serializedState.rawState.attributes;
 
       // Combine the serialized state from the parent with the state from the
@@ -77,19 +77,19 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
       return {
         ...titlesState,
         ...attributes,
-        savedBookId,
+        savedObjectId,
       };
     },
     buildEmbeddable: async (state, buildApi) => {
       const titleManager = initializeTitleManager(state);
       const bookAttributesManager = stateManagerFromAttributes(state);
-      const isByReference = Boolean(state.savedBookId);
+      const isByReference = Boolean(state.savedObjectId);
 
       const serializeBook = (byReference: boolean, newId?: string) => {
         if (byReference) {
           // if this book is currently by reference, we serialize the reference only.
           const bookByReferenceState: BookByReferenceSerializedState = {
-            savedBookId: newId ?? state.savedBookId!,
+            savedObjectId: newId ?? state.savedObjectId!,
             ...titleManager.serialize(),
           };
           return { rawState: bookByReferenceState };
@@ -112,8 +112,9 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
               isCreate: false,
               core,
               api,
+              embeddable,
             }).then((result) => {
-              const nextIsByReference = Boolean(result.savedBookId);
+              const nextIsByReference = Boolean(result.savedObjectId);
 
               // if the by reference state has changed during this edit, reinitialize the panel.
               if (
@@ -121,7 +122,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
                 apiIsPresentationContainer(api.parentApi)
               ) {
                 api.parentApi.replacePanel<BookSerializedState>(api.uuid, {
-                  serializedState: serializeBook(nextIsByReference, result.savedBookId),
+                  serializedState: serializeBook(nextIsByReference, result.savedObjectId),
                   panelType: api.type,
                 });
               }
@@ -135,10 +136,11 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           serializeState: () => serializeBook(isByReference),
 
           // library transforms
-          getSavedBookId: () => state.savedBookId,
+          getSavedBookId: () => state.savedObjectId,
           saveToLibrary: async (newTitle: string) => {
             bookAttributesManager.bookTitle.next(newTitle);
             const newId = await saveBookAttributes(
+              embeddable,
               undefined,
               serializeBookAttributes(bookAttributesManager)
             );
@@ -153,7 +155,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           canUnlinkFromLibrary: async () => isByReference,
         },
         {
-          savedBookId: getUnchangingComparator(), // saved book id will not change over the lifetime of the embeddable.
+          savedObjectId: getUnchangingComparator(), // saved book id will not change over the lifetime of the embeddable.
           ...bookAttributesManager.comparators,
           ...titleManager.comparators,
         }

@@ -81,8 +81,8 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
       const { getSavedBookEmbeddableFactory } = await import(
         './react_embeddables/saved_book/saved_book_react_embeddable'
       );
-      const [coreStart] = await startServicesPromise;
-      return getSavedBookEmbeddableFactory(coreStart);
+      const [coreStart, deps] = await startServicesPromise;
+      return getSavedBookEmbeddableFactory(coreStart, deps.embeddable);
     });
 
     registerSearchEmbeddable(
@@ -103,7 +103,7 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
 
     registerCreateDataTableAction(deps.uiActions);
 
-    registerCreateSavedBookAction(deps.uiActions, core);
+    registerCreateSavedBookAction(deps.uiActions, core, deps.embeddable);
   }
 
   public stop() {}

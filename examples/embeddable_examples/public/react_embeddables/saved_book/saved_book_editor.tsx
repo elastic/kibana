@@ -29,6 +29,7 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiHasUniqueId, useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useState } from 'react';
+import { CanGetEmbeddableContentManagementDefinition } from '@kbn/embeddable-plugin/common';
 import { serializeBookAttributes } from './book_state';
 import { BookApi, BookAttributesManager } from './types';
 import { saveBookAttributes } from './saved_book_library';
@@ -39,13 +40,15 @@ export const openSavedBookEditor = ({
   core,
   parent,
   api,
+  embeddable,
 }: {
   attributesManager: BookAttributesManager;
   isCreate: boolean;
   core: CoreStart;
   parent?: unknown;
   api?: BookApi;
-}): Promise<{ savedBookId?: string }> => {
+  embeddable: CanGetEmbeddableContentManagementDefinition;
+}): Promise<{ savedObjectId?: string }> => {
   return new Promise((resolve) => {
     const closeOverlay = (overlayRef: OverlayRef) => {
       if (tracksOverlays(parent)) parent.clearOverlays();
@@ -68,15 +71,16 @@ export const openSavedBookEditor = ({
             closeOverlay(overlay);
           }}
           onSubmit={async (addToLibrary: boolean) => {
-            const savedBookId = addToLibrary
+            const savedObjectId = addToLibrary
               ? await saveBookAttributes(
+                  embeddable,
                   api?.getSavedBookId(),
                   serializeBookAttributes(attributesManager)
                 )
               : undefined;
 
             closeOverlay(overlay);
-            resolve({ savedBookId });
+            resolve({ savedObjectId });
           }}
         />,
         core

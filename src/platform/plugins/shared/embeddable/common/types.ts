@@ -14,7 +14,6 @@ import type {
   PersistableStateDefinition,
 } from '@kbn/kibana-utils-plugin/common';
 import type { ObjectTransform } from '@kbn/object-versioning';
-import type { MaybePromise } from '@kbn/utility-types';
 import type { Type } from '@kbn/config-schema';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 
@@ -58,10 +57,10 @@ export type VersionableEmbeddableObject<
   itemSchema?: Type<ItemAttributes>;
   savedObjectToItem?: (
     savedObject: SavedObjectAttributesWithReferences<SOAttributes>
-  ) => MaybePromise<ItemAttributesWithReferences<ItemAttributes>>;
+  ) => ItemAttributesWithReferences<ItemAttributes>;
   itemToSavedObject?: (
     item: ItemAttributesWithReferences<ItemAttributes>
-  ) => MaybePromise<SavedObjectAttributesWithReferences<SOAttributes>>;
+  ) => SavedObjectAttributesWithReferences<SOAttributes>;
 };
 
 export type EmbeddableContentManagementDefinition = {
@@ -79,4 +78,10 @@ export interface CommonEmbeddableStartContract {
     embeddableFactoryId: string
   ) => PersistableState & { isContainerType: boolean };
   getEnhancement: (enhancementId: string) => PersistableState;
+}
+
+export interface CanGetEmbeddableContentManagementDefinition {
+  getEmbeddableContentManagementDefinition: (
+    id: string
+  ) => EmbeddableContentManagementDefinition | undefined;
 }
