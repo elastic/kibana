@@ -42,7 +42,6 @@ export type CopyToDashboardAPI = HasType &
       Pick<DashboardApi, 'getDashboardPanelFromId'>
   >;
 
-// SERIALIZED STATE ONLY TODO: Make Copy to Dashboard action get "panelLayout" type from Dashboard.
 const apiIsCompatible = (api: unknown): api is CopyToDashboardAPI => {
   return (
     apiHasUniqueId(api) &&
