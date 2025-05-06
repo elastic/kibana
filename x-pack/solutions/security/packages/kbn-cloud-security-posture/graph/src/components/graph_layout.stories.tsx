@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { ThemeProvider, css } from '@emotion/react';
 import type { StoryObj, Meta } from '@storybook/react';
@@ -20,15 +21,39 @@ import type {
 import { Graph } from '.';
 import { MinimapProps } from './types';
 
-// Define a type for our story args that includes structured minimap props
-interface GraphStoryProps extends Omit<GraphData, 'minimap'> {
-  minimap?: MinimapProps;
+// Define a type for our story args that includes custom fields for snapGrid controls
+interface GraphStoryProps extends Omit<GraphData, 'snapGrid'> {
+  snapGridX?: number;
+  snapGridY?: number;
 }
 
-// Create the meta object with a type assertion
-const meta: Meta<typeof Graph> = {
+// Define a type that extends StoryObj with our custom properties
+type CustomStory = StoryObj<typeof Graph> & {
+  args: {
+    snapGridX?: number;
+    snapGridY?: number;
+    [key: string]: any;
+  };
+};
+
+// Use a more flexible type assertion approach
+const meta = {
   component: Graph,
-  render: ({ nodes, edges, interactive, minimap, snapToGrid, snapGrid }: GraphData) => {
+  render: ({
+    nodes,
+    edges,
+    interactive,
+    minimap,
+    snapToGrid,
+    snapGridX,
+    snapGridY,
+  }: GraphStoryProps & Record<string, any>) => {
+    const defaultGridX = 1;
+    const defaultGridY = 1;
+
+    // Use the individual X and Y values and applay them to the snapGrid param
+    const snapGrid: [number, number] = [snapGridX ?? defaultGridX, snapGridY ?? defaultGridY];
+
     return (
       <ThemeProvider theme={{ darkMode: false }}>
         <Graph
@@ -50,7 +75,8 @@ const meta: Meta<typeof Graph> = {
   args: {
     interactive: true,
     snapToGrid: false,
-    snapGrid: 1,
+    snapGridX: 1,
+    snapGridY: 1,
   },
   argTypes: {
     interactive: { control: 'boolean', defaultValue: true },
@@ -59,28 +85,51 @@ const meta: Meta<typeof Graph> = {
       defaultValue: true,
       description: 'Controls whether nodes snap to grid when moving',
       table: {
+        category: 'Snap to grid',
         defaultValue: { summary: 'true' },
       },
     },
     snapGrid: {
-      control: { type: 'number', min: 1, max: 50, step: 1 },
-      defaultValue: 1,
-      description: 'Size of the grid in pixels that nodes will snap to',
+      control: false,
       table: {
+        disable: true,
+      },
+    },
+    snapGridX: {
+      control: { type: 'number', min: 1, max: 50, step: 1 },
+      name: 'Horizontal Grid Size',
+      description: 'Horizontal size of the grid in pixels',
+      table: {
+        category: 'Snap to grid',
         defaultValue: { summary: '1' },
       },
     },
-    // Make the minimap expandable in the controls panel
+    snapGridY: {
+      control: { type: 'number', min: 1, max: 50, step: 1 },
+      name: 'Vertical Grid Size',
+      description: 'Vertical size of the grid in pixels',
+      table: {
+        category: 'Snap to grid',
+        defaultValue: { summary: '1' },
+      },
+    },
     minimap: {
       control: 'object',
       expanded: true,
     },
   },
   decorators: [GlobalStylesStorybookDecorator],
-};
+} as Meta<typeof Graph>;
+/*
+ * Use type assertion rather than declaration - this allows for more flexibility
+ * in the types of the props passed to the component.
+ * This is especially useful for the `args` property, which can be a complex object.
+ * By using `as Meta<typeof Graph>`, we ensure that the component is correctly typed
+ * while still allowing for the flexibility needed in the story.
+ */
 
 export default meta;
-type Story = StoryObj<typeof Graph>;
+// type Story = StoryObj<typeof Graph>;
 
 interface GraphData {
   nodes: NodeViewModel[];
@@ -88,7 +137,7 @@ interface GraphData {
   interactive: boolean;
   minimap?: MinimapProps;
   snapToGrid?: boolean;
-  snapGrid?: number;
+  snapGrid?: [number, number];
 }
 
 type EnhancedNodeViewModel =
@@ -99,9 +148,6 @@ type EnhancedNodeViewModel =
 const extractEdges = (
   graphData: EnhancedNodeViewModel[]
 ): { nodes: NodeViewModel[]; edges: EdgeViewModel[] } => {
-  // Process nodes, transform nodes of id in the format of a(source)-b(target) to edges from a to label and from label to b
-  // If there are multiple edges from a to b, create a parent node and group the labels under it. The parent node will be a group node.
-  // Connect from a to the group node and from the group node to all the labels. and from the labels to the group again and from the group to b.
   const nodesMetadata: { [key: string]: { edgesIn: number; edgesOut: number } } = {};
   const edgesMetadata: {
     [key: string]: { source: string; target: string; edgesStacked: number; edges: string[] };
@@ -125,10 +171,9 @@ const extractEdges = (
 
       nodes[labelNode.id] = labelNode;
 
-      // Set metadata
       const edgeId = node.id;
-      nodesMetadata[source].edgesOut += 1; // TODO: Check if source exists
-      nodesMetadata[target].edgesIn += 1; // TODO: Check if target exists
+      nodesMetadata[source].edgesOut += 1;
+      nodesMetadata[target].edgesIn += 1;
 
       if (edgesMetadata[edgeId]) {
         edgesMetadata[edgeId].edgesStacked += 1;
@@ -215,11 +260,10 @@ const extractEdges = (
     }
   });
 
-  // Reversing order, groups like to be first in order :D
   return { nodes: Object.values(nodes).reverse(), edges };
 };
 
-export const SimpleAPIMock: Story = {
+export const SimpleAPIMock: CustomStory = {
   args: {
     interactive: true,
 
@@ -270,11 +314,12 @@ export const SimpleAPIMock: Story = {
     ],
 
     snapToGrid: false,
-    snapGrid: 10,
+    snapGridX: 1,
+    snapGridY: 1,
   },
 };
 
-export const GroupWithWarningAPIMock: Story = {
+export const GroupWithWarningAPIMock: CustomStory = {
   args: {
     ...meta.args,
     nodes: [
@@ -370,7 +415,8 @@ export const GroupWithWarningAPIMock: Story = {
       },
     ],
     snapToGrid: false,
-    snapGrid: 1,
+    snapGridX: 1,
+    snapGridY: 1,
   },
 };
 
@@ -497,16 +543,17 @@ const baseGraph: EnhancedNodeViewModel[] = [
   },
 ];
 
-export const LargeGraph: Story = {
+export const LargeGraph: CustomStory = {
   args: {
     ...meta.args,
     ...extractEdges(baseGraph),
     snapToGrid: false,
-    snapGrid: 1,
+    snapGridX: 1,
+    snapGridY: 1,
   },
 };
 
-export const GraphLabelOverlayCases: Story = {
+export const GraphLabelOverlayCases: CustomStory = {
   args: {
     ...meta.args,
     ...extractEdges([
@@ -536,11 +583,12 @@ export const GraphLabelOverlayCases: Story = {
       },
     ]),
     snapToGrid: false,
-    snapGrid: 1,
+    snapGridX: 1,
+    snapGridY: 1,
   },
 };
 
-export const GraphStackedEdgeCases: Story = {
+export const GraphStackedEdgeCases: CustomStory = {
   args: {
     ...meta.args,
     ...extractEdges([
@@ -563,11 +611,12 @@ export const GraphStackedEdgeCases: Story = {
       },
     ]),
     snapToGrid: false,
-    snapGrid: 1,
+    snapGridX: 1,
+    snapGridY: 1,
   },
 };
 
-export const GraphLargeStackedEdgeCases: Story = {
+export const GraphLargeStackedEdgeCases: CustomStory = {
   args: {
     ...meta.args,
     ...extractEdges([
@@ -594,11 +643,12 @@ export const GraphLargeStackedEdgeCases: Story = {
         })),
     ]),
     snapToGrid: false,
-    snapGrid: 1,
+    snapGridX: 1,
+    snapGridY: 1,
   },
 };
 
-export const GraphWithMinimap: Story = {
+export const GraphWithMinimap: CustomStory = {
   args: {
     ...meta.args,
     ...extractEdges(baseGraph),
@@ -621,7 +671,8 @@ export const GraphWithMinimap: Story = {
       ariaLabel: 'Graph overview minimap',
     },
     snapToGrid: false,
-    snapGrid: 1,
+    snapGridX: 1,
+    snapGridY: 1,
   },
   parameters: {
     docs: {
