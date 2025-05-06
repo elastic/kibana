@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep } from 'lodash';
 
 import { GridLayoutData, GridPanelData, GridSectionData, OrderedLayout } from '../types';
 import { getMainLayoutInOrder } from './resolve_grid_section';
@@ -21,7 +21,7 @@ export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
     })
     .forEach((section) => {
       const panels: { [key: string]: GridPanelData & { type?: 'panel' } } = cloneDeep(
-        (section as unknown as GridSectionData).panels
+        section.panels
       );
       if (section.isMainSection) {
         const panelValues = Object.values(panels);
@@ -36,9 +36,9 @@ export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
         gridLayout = { ...gridLayout, ...panels } as GridLayoutData;
         mainRow += maxRow;
       } else {
-        const typedSection = section as unknown as GridSectionData;
+        const { order, isMainSection, ...rest } = section;
         gridLayout[section.id] = {
-          ...omit(typedSection, 'order'),
+          ...rest,
           type: 'section',
           row: mainRow,
         };

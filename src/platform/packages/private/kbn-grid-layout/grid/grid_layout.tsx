@@ -118,8 +118,11 @@ export const GridLayout = ({
           }
 
           /** Panels */
-          if (section.isMainSection || !section.isCollapsed) {
-            let maxRow = -Infinity;
+          if (
+            Object.keys(section.panels).length &&
+            (section.isMainSection || !section.isCollapsed)
+          ) {
+            let maxRow = 0;
             getPanelKeysInOrder(section.panels).forEach((panelId) => {
               const panel = section.panels[panelId];
               maxRow = Math.max(maxRow, panel.row + panel.height);

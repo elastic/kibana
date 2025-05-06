@@ -22,7 +22,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
-  EuiPanel,
   EuiSpacer,
   UseEuiTheme,
   transparentize,
@@ -116,32 +115,22 @@ export const GridExample = ({
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
-      // const currentPanels = mockDashboardApi.panels$.getValue();
+      const currentPanels = mockDashboardApi.panels$.getValue();
 
       return (
-        <EuiPanel
-          hasBorder={true}
-          hasShadow={false}
-          css={css({
-            height: '100%',
-            backgroundColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-          })}
-        >
-          {id}
-        </EuiPanel>
-        // <ReactEmbeddableRenderer
-        //   key={id}
-        //   maybeId={id}
-        //   type={currentPanels[id].type}
-        //   getParentApi={() => mockDashboardApi}
-        //   panelProps={{
-        //     showBadges: true,
-        //     showBorder: true,
-        //     showNotifications: true,
-        //     showShadow: false,
-        //     setDragHandles,
-        //   }}
-        // />
+        <ReactEmbeddableRenderer
+          key={id}
+          maybeId={id}
+          type={currentPanels[id].type}
+          getParentApi={() => mockDashboardApi}
+          panelProps={{
+            showBadges: true,
+            showBorder: true,
+            showNotifications: true,
+            showShadow: false,
+            setDragHandles,
+          }}
+        />
       );
     },
     [mockDashboardApi]
@@ -162,9 +151,16 @@ export const GridExample = ({
   const addNewSection = useCallback(() => {
     const rows = cloneDeep(mockDashboardApi.rows$.getValue());
     const id = uuidv4();
+    const maxY = Math.max(
+      ...Object.values({
+        ...mockDashboardApi.rows$.getValue(),
+        ...mockDashboardApi.panels$.getValue(),
+      }).map((widget) => ('gridData' in widget ? widget.gridData.y + widget.gridData.h : widget.y))
+    );
+
     rows[id] = {
       id,
-      order: Object.keys(rows).length,
+      y: maxY + 1,
       title: i18n.translate('examples.gridExample.defaultSectionTitle', {
         defaultMessage: 'New collapsible section',
       }),
@@ -176,7 +172,7 @@ export const GridExample = ({
     layoutUpdated$.pipe(skip(1), take(1)).subscribe(() => {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
-  }, [mockDashboardApi.rows$, layoutUpdated$]);
+  }, [mockDashboardApi.rows$, mockDashboardApi.panels$, layoutUpdated$]);
 
   const resetUnsavedChanges = useCallback(() => {
     const { panels, rows } = savedState.current;
@@ -290,7 +286,7 @@ export const GridExample = ({
             renderPanelContents={renderPanelContents}
             onLayoutChange={onLayoutChange}
             css={layoutStyles}
-            useCustomDragHandle={false}
+            useCustomDragHandle={true}
           />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
