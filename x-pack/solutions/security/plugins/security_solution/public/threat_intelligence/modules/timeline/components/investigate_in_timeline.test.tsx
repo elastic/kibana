@@ -20,14 +20,14 @@ import {
 import { EMPTY_VALUE } from '../../../constants/common';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import type { SecuritySolutionPluginContext } from '../../../types';
-import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
+import { useInvestigateInTimeline } from '../../../hooks/use_investigate_in_timeline';
 
 const TEST_ID = 'test';
 
 jest.mock('../../../hooks/use_security_context', () => ({ useSecurityContext: jest.fn() }));
-jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
-);
+jest.mock('../../../hooks/use_investigate_in_timeline', () => ({
+  useInvestigateInTimeline: jest.fn(),
+}));
 
 describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon />', () => {
   beforeEach(() => {
@@ -35,17 +35,11 @@ describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon 
       hasAccessToTimeline: true,
     } as unknown as SecuritySolutionPluginContext);
 
-    jest.mocked(useInvestigateInTimeline).mockReturnValue({
-      investigateInTimelineActionItems: [
-        {
-          'data-test-subj': '',
-          disabled: false,
-          key: '',
-          name: '',
-          onClick: jest.fn(),
-        },
-      ],
-    } as unknown as ReturnType<typeof useInvestigateInTimeline>);
+    jest
+      .mocked(useInvestigateInTimeline)
+      .mockReturnValue({ investigateInTimelineFn: jest.fn() } as ReturnType<
+        typeof useInvestigateInTimeline
+      >);
   });
 
   it('should render EuiContextMenuItem when Indicator data is correct', () => {
