@@ -293,7 +293,7 @@ export const IntegrationActiveView: React.FC = () => {
                 }
                 body={i18n.translate('workchatApp.integrations.listView.noIntegrationBody', {
                   defaultMessage:
-                    'Your connected tools will appear here after setup. Until then, nothing for me to work with!',
+                    "Your connected tools will show up here once you've set up a tool. Until then, nothing for me to work with!",
                 })}
                 actions={
                   <EuiButton
