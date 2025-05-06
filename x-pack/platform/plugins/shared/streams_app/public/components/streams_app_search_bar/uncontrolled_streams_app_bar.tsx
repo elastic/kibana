@@ -20,6 +20,7 @@ export interface UncontrolledStreamsAppSearchBarProps {
   placeholder?: string;
   dataViews?: DataView[];
   showSubmitButton?: boolean;
+  showQueryInput?: boolean;
 }
 
 export function UncontrolledStreamsAppSearchBar({
@@ -32,6 +33,7 @@ export function UncontrolledStreamsAppSearchBar({
   placeholder,
   dataViews,
   showSubmitButton = true,
+  showQueryInput,
 }: UncontrolledStreamsAppSearchBarProps) {
   const {
     dependencies: {
@@ -39,9 +41,10 @@ export function UncontrolledStreamsAppSearchBar({
     },
   } = useKibana();
 
-  const queryObj = useMemo(() => (query ? { query, language: 'kuery' } : undefined), [query]);
-
-  const showQueryInput = query === undefined;
+  const queryObj = useMemo(
+    () => (showQueryInput ? { query: query ?? '', language: 'kuery' } : undefined),
+    [query, showQueryInput]
+  );
 
   return (
     <unifiedSearch.ui.SearchBar

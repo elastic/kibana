@@ -80,7 +80,13 @@ export {
 
 export { getConditionFields } from './src/helpers/get_condition_fields';
 
-export { type StreamQuery, upsertStreamQueryRequestSchema, streamQuerySchema } from './src/queries';
+export {
+  type StreamQuery,
+  type StreamQueryKql,
+  upsertStreamQueryRequestSchema,
+  streamQueryKqlSchema,
+  streamQuerySchema,
+} from './src/queries';
 
 export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
 
@@ -121,3 +127,9 @@ export {
 } from './src/conditions';
 
 export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';
+
+export type {
+  SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
+  SignificantEventsResponse,
+} from './src/api/significant_events/api';

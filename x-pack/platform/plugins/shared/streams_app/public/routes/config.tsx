@@ -44,11 +44,18 @@ const streamsAppRoutes = {
             <Outlet />
           </StreamDetailRoot>
         ),
-        params: t.type({
-          path: t.type({
-            key: t.string,
+        params: t.intersection([
+          t.type({
+            path: t.type({
+              key: t.string,
+            }),
           }),
-        }),
+          t.partial({
+            query: t.partial({
+              kql: t.string,
+            }),
+          }),
+        ]),
         children: {
           '/{key}': {
             element: <RedirectTo path="/{key}/{tab}" params={{ path: { tab: 'overview' } }} />,

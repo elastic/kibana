@@ -22,10 +22,16 @@ type ChangePointsType =
 type SignificantEventsResponse = StreamQueryKql & {
   occurrences: Array<{ date: string; count: number }>;
   change_points: {
-    type: Record<ChangePointsType, { p_value: number; change_point: number }>;
+    type: Partial<Record<ChangePointsType, { p_value: number; change_point: number }>>;
   };
 };
 
 type SignificantEventsGetResponse = SignificantEventsResponse[];
 
-export type { SignificantEventsResponse, SignificantEventsGetResponse };
+type SignificantEventsPreviewResponse = SignificantEventsResponse;
+
+export type {
+  SignificantEventsResponse,
+  SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
+};
