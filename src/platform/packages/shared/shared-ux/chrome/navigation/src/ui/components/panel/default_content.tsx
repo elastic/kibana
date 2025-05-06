@@ -11,10 +11,21 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } fr
 import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-chrome-browser';
 import React, { Fragment, type FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import { Theme, css } from '@emotion/react';
 
 import { PanelGroup } from './panel_group';
 import { PanelNavItem } from './panel_nav_item';
+
+const panelContentStyles = {
+  title: ({ euiTheme }: Theme) => css`
+    margin: calc(${euiTheme.size.xs} * 2);
+    padding-top: calc(${euiTheme.size.xxs} * 3);
+    padding-left: calc(${euiTheme.size.xxs} * 3);
+  `,
+  panelNavigation: () => css`
+    width: 100%;
+  `,
+};
 
 function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
   return children !== undefined;
@@ -109,7 +120,7 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
       {/* Panel title */}
       <EuiFlexItem>
         {typeof selectedNode.title === 'string' ? (
-          <EuiTitle size="xxs">
+          <EuiTitle size="xxs" css={panelContentStyles.title}>
             <h2>{selectedNode.title}</h2>
           </EuiTitle>
         ) : (
@@ -118,21 +129,14 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
       </EuiFlexItem>
 
       {/* Panel navigation */}
-      <EuiFlexItem css={{ width: '100%' }}>
+      <EuiFlexItem css={panelContentStyles.panelNavigation}>
         {serializedChildren?.map((child, i) => {
           const isGroup = !!child.children;
 
           return isGroup ? (
             <Fragment key={child.id}>
               <PanelGroup navNode={child} nodeIndex={i} />
-              {i < serializedChildren.length - 1 && (
-                <EuiHorizontalRule
-                  margin="xs"
-                  css={({ euiTheme }) => css`
-                    margin-bottom: calc(-${euiTheme.size.xs} * 1.5);
-                  `}
-                />
-              )}
+              {i < serializedChildren.length - 1 && <EuiHorizontalRule margin="xs" />}
             </Fragment>
           ) : (
             <PanelNavItem key={child.id} item={child} />

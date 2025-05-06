@@ -11,14 +11,12 @@ import React, { FC, useCallback } from 'react';
 import {
   EuiListGroup,
   EuiTitle,
-  useEuiTheme,
   euiFontSize,
-  type EuiThemeComputed,
   type UseEuiTheme,
   EuiSpacer,
   EuiAccordion,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { Theme, css } from '@emotion/react';
 
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { SubItemTitle } from '../subitem_title';
@@ -26,22 +24,35 @@ import { PanelNavItem } from './panel_nav_item';
 
 const accordionButtonClassName = 'sideNavPanelAccordion__button';
 
-const getClassnames = (euiTheme: EuiThemeComputed<{}>) => ({
-  title: css`
+const styles = {
+  title: ({ euiTheme }: Theme) => css`
     color: ${euiTheme.colors.textSubdued};
     padding-left: ${euiTheme.size.s};
-    padding-bottom: ${euiTheme.size.s};
+    padding-top: ${euiTheme.size.s};
     ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xs')}
     font-weight: ${euiTheme.font.weight.medium};
   `,
-  accordion: css`
+  panelGroup: ({ euiTheme }: Theme) => css`
+    padding: 0 calc(${euiTheme.size.xs} * 2);
+  `,
+  accordion: ({ euiTheme }: Theme) => css`
     margin-bottom: ${euiTheme.size.s};
     .${accordionButtonClassName} {
       font-weight: ${euiTheme.font.weight.bold};
       ${euiFontSize({ euiTheme } as UseEuiTheme<{}>, 'xs')}
     }
   `,
-});
+  listGroup: ({ euiTheme }: Theme) => css`
+    padding-left: 0;
+    padding-right: 0;
+    gap: 0;
+  `,
+  listGroupItemButton: ({ euiTheme }: Theme) => css`
+    .euiListGroupItem__button {
+      font-weight: ${euiTheme.font.weight.regular};
+    }
+  `,
+};
 
 const someChildIsVisible = (children: ChromeProjectNavigationNode[]) => {
   return children.some((child) => {
@@ -59,17 +70,13 @@ interface Props {
 }
 
 export const PanelGroup: FC<Props> = ({ navNode, nodeIndex }) => {
-  const { euiTheme } = useEuiTheme();
   const { id, title, spaceBefore: _spaceBefore, withBadge } = navNode;
   const filteredChildren = navNode.children?.filter((child) => child.sideNavStatus !== 'hidden');
-  const classNames = getClassnames(euiTheme);
   const hasTitle = !!title && title !== '';
 
   const isFirstInList = nodeIndex === 0;
 
   const removePaddingTop = !hasTitle && !isFirstInList;
-  const someChildIsGroup = filteredChildren?.some((child) => !!child.children);
-  const firstChildIsGroup = !!filteredChildren?.[0]?.children;
   const groupTestSubj = `panelGroup panelGroupId-${navNode.id}`;
 
   let spaceBefore = _spaceBefore;
@@ -100,12 +107,12 @@ export const PanelGroup: FC<Props> = ({ navNode, nodeIndex }) => {
   if (navNode.renderAs === 'accordion') {
     return (
       <>
-        {spaceBefore !== null && <EuiSpacer size={spaceBefore} />}
+        {spaceBefore != null && <EuiSpacer size={spaceBefore} />}
         <EuiAccordion
           id={id}
           buttonContent={withBadge ? <SubItemTitle item={navNode} /> : title}
           arrowDisplay="right"
-          className={classNames.accordion}
+          css={[styles.panelGroup, styles.listGroupItemButton, styles.accordion]}
           buttonClassName={accordionButtonClassName}
           data-test-subj={groupTestSubj}
           initialIsOpen={navNode.defaultIsCollapsed === false}
@@ -113,38 +120,25 @@ export const PanelGroup: FC<Props> = ({ navNode, nodeIndex }) => {
             'data-test-subj': `panelAccordionBtnId-${navNode.id}`,
           }}
         >
-          <>
-            {!firstChildIsGroup && <EuiSpacer size="s" />}
-            {renderChildren()}
-          </>
+          {renderChildren()}
         </EuiAccordion>
       </>
     );
   }
 
   return (
-    <div data-test-subj={groupTestSubj}>
-      {spaceBefore !== null && <EuiSpacer size={spaceBefore} />}
+    <div data-test-subj={groupTestSubj} css={styles.panelGroup}>
+      {spaceBefore != null && <EuiSpacer size={spaceBefore} />}
       {hasTitle && (
-        <EuiTitle
-          size="xs"
-          className={classNames.title}
-          data-test-subj={`panelGroupTitleId-${navNode.id}`}
-        >
+        <EuiTitle size="xs" css={styles.title} data-test-subj={`panelGroupTitleId-${navNode.id}`}>
           <h2>{title}</h2>
         </EuiTitle>
       )}
-      <EuiListGroup
-        css={{
-          paddingLeft: 0,
-          paddingRight: 0,
-          paddingTop: removePaddingTop ? 0 : undefined,
-          // Remove the gap between groups if some items are groups
-          gap: someChildIsGroup ? 0 : undefined,
-        }}
-      >
-        {renderChildren()}
-      </EuiListGroup>
+      <div style={{ paddingTop: removePaddingTop ? 0 : undefined }}>
+        <EuiListGroup css={[styles.listGroup, styles.listGroupItemButton]}>
+          {renderChildren()}
+        </EuiListGroup>
+      </div>
     </div>
   );
 };

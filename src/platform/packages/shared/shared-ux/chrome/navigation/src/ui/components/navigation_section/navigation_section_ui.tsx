@@ -44,7 +44,9 @@ const sectionStyles = {
   }),
   euiCollapsibleNavSection: ({ euiTheme }: Theme) => css`
     & > .euiCollapsibleNavLink {
-      font-weight: 600;
+      font-weight: ${euiTheme.font.weight.bold};
+      margin: ${euiTheme.size.s} 0;
+      margin-bottom: calc(${euiTheme.size.xs} * 1.5);
     }
 
     .euiCollapsibleNavAccordion.isSelected {
