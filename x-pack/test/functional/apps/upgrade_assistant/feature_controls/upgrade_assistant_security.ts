@@ -14,7 +14,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167073
   describe.skip('security', function () {
     this.tags('upgradeAssistant');
     before(async () => {

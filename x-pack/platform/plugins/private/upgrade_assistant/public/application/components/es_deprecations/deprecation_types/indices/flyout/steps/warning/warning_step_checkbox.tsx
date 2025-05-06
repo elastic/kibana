@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
-  EuiCheckbox,
   EuiCode,
   EuiLink,
   EuiSpacer,
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
+  EuiCheckableCard,
+  useEuiTheme,
+  EuiPopover,
+  EuiButtonIcon,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from '@kbn/core/public';
 import { IndexWarning, IndexWarningType } from '../../../../../../../../../common/types';
@@ -28,52 +32,6 @@ export const hasIndexWarning = (
   return Boolean(warnings.find((warning) => warning.warningType === warningType));
 };
 
-const WarningCheckbox: React.FunctionComponent<{
-  isChecked: boolean;
-  warningId: string;
-  label: React.ReactNode;
-  description: React.ReactNode;
-  documentationUrl?: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-}> = ({ isChecked, warningId, label, onChange, description, documentationUrl }) => (
-  <>
-    <EuiText>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiCheckbox
-            id={warningId}
-            label={<strong>{label}</strong>}
-            checked={isChecked}
-            onChange={onChange}
-          />
-        </EuiFlexItem>
-        {documentationUrl !== undefined && (
-          <EuiFlexItem grow={false}>
-            <EuiLink href={documentationUrl} target="_blank" external={false}>
-              <EuiIconTip
-                content={
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.documentationLinkLabel"
-                    defaultMessage="Documentation"
-                  />
-                }
-                position="right"
-                type="help"
-              />
-            </EuiLink>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-
-      <EuiSpacer size="xs" />
-
-      {description}
-    </EuiText>
-
-    <EuiSpacer />
-  </>
-);
-
 export interface WarningCheckboxProps {
   isChecked: boolean;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -81,6 +39,61 @@ export interface WarningCheckboxProps {
   id: string;
   meta?: IndexWarning['meta'];
 }
+
+// Base component for all warning checkboxes
+const BaseWarningCheckbox: React.FunctionComponent<{
+  id: string;
+  isChecked: boolean;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  children: ReactNode;
+}> = ({ id, isChecked, onChange, children }) => {
+  return (
+    <>
+      <EuiCheckableCard
+        id={id}
+        checkableType="checkbox"
+        checked={isChecked}
+        onChange={onChange}
+        label={children}
+      />
+      <EuiSpacer size="m" />
+    </>
+  );
+};
+
+// Reusable popover component with info button
+const InfoPopover: React.FunctionComponent<{
+  children: ReactNode;
+}> = ({ children }) => {
+  const { euiTheme } = useEuiTheme();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onTogglePopover = () => setIsPopoverOpen((isOpen) => !isOpen);
+
+  const popoverStyles = css`
+    margin-top: -${euiTheme.size.xs};
+  `;
+
+  return (
+    <EuiPopover
+      button={
+        <EuiButtonIcon
+          display="empty"
+          iconType="iInCircle"
+          onClick={onTogglePopover}
+          css={popoverStyles}
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      anchorPosition="leftCenter"
+    >
+      <EuiText size="s" css={{ width: 300 }}>
+        {children}
+      </EuiText>
+    </EuiPopover>
+  );
+};
 
 export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCheckboxProps> = ({
   isChecked,
@@ -90,70 +103,112 @@ export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCh
   meta,
 }) => {
   return (
-    <WarningCheckbox
-      isChecked={isChecked}
-      onChange={onChange}
-      warningId={id}
-      label={
+    <BaseWarningCheckbox id={id} isChecked={isChecked} onChange={onChange}>
+      <FormattedMessage
+        tagName="b"
+        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.deprecatedIndexSettingsWarningTitle"
+        defaultMessage="Remove deprecated index settings"
+      />
+      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <ul>
+          {(meta!.deprecatedSettings as string[]).map((setting, index) => {
+            return (
+              <li key={`${setting}-${index}`}>
+                <EuiCode>{setting}</EuiCode>
+              </li>
+            );
+          })}
+        </ul>
+      </EuiText>
+      <EuiSpacer size="m" />
+
+      <EuiLink href={docLinks.elasticsearch.indexModules} target="_blank" external>
         <FormattedMessage
-          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.deprecatedIndexSettingsWarningTitle"
-          defaultMessage="Remove deprecated index settings"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.documentationLinkLabel"
+          defaultMessage="Learn more"
         />
-      }
-      description={
-        <>
-          <FormattedMessage
-            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.deprecatedIndexSettingsWarningDetail"
-            defaultMessage="The following deprecated index settings were detected:"
-          />
-
-          <EuiSpacer size="xs" />
-
-          <ul>
-            {(meta!.deprecatedSettings as string[]).map((setting, index) => {
-              return (
-                <li key={`${setting}-${index}`}>
-                  <EuiCode>{setting}</EuiCode>
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      }
-      documentationUrl={docLinks.elasticsearch.indexModules}
-    />
+      </EuiLink>
+    </BaseWarningCheckbox>
   );
+};
+
+const i18nStrings = {
+  index: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.indexLabel',
+    {
+      defaultMessage: 'Index',
+    }
+  ),
+  newIndex: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.newIndexLabel',
+    {
+      defaultMessage: 'New index',
+    }
+  ),
+  alias: i18n.translate(
+    'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.aliasLabel',
+    {
+      defaultMessage: 'Alias',
+    }
+  ),
 };
 
 export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<
   WarningCheckboxProps
-> = ({ isChecked, onChange, docLinks, id, meta }) => {
+> = ({ isChecked, onChange, id, meta }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const textStyles = css`
+    p {
+      word-break: break-all;
+      margin-bottom: ${euiTheme.size.s};
+
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+    }
+  `;
+
   return (
-    <WarningCheckbox
-      isChecked={isChecked}
-      onChange={onChange}
-      warningId={id}
-      label={
-        <FormattedMessage
-          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.replaceIndexWithAliasWarningTitle"
-          defaultMessage="Replace {indexName} index with {reindexName} index and create {indexName} index alias"
-          values={{
-            indexName: <EuiCode>{meta?.indexName}</EuiCode>,
-            reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
-          }}
-        />
-      }
-      description={
-        <FormattedMessage
-          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.replaceIndexWithAliasWarningDetail"
-          defaultMessage="You can search {indexName} as before. To delete the data you'll have to delete {reindexName}"
-          values={{
-            indexName: <EuiCode>{meta?.indexName}</EuiCode>,
-            reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
-          }}
-        />
-      }
-    />
+    <BaseWarningCheckbox id={id} isChecked={isChecked} onChange={onChange}>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <FormattedMessage
+            tagName="b"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.replaceIndexWithAliasWarningTitle"
+            defaultMessage="Replace index and create alias"
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <InfoPopover>
+            <FormattedMessage
+              tagName="p"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.replaceIndexWithAliasWarningDetail"
+              defaultMessage="You can search {indexName} as before. To delete the data you'll have to delete {reindexName}"
+              values={{
+                indexName: <EuiCode>{meta?.indexName}</EuiCode>,
+                reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
+              }}
+            />
+          </InfoPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
+      <EuiText grow={false} size="s" css={textStyles}>
+        <p>
+          {i18nStrings.index}: <EuiCode>{meta?.indexName}</EuiCode>
+        </p>
+        <p>
+          {i18nStrings.newIndex}: <EuiCode>{meta?.reindexName}</EuiCode>
+        </p>
+        <p>
+          {i18nStrings.alias}: <EuiCode>{meta?.indexName}</EuiCode>
+        </p>
+      </EuiText>
+    </BaseWarningCheckbox>
   );
 };
 
@@ -164,28 +219,32 @@ export const MakeIndexReadonlyWarningCheckbox: React.FunctionComponent<WarningCh
   meta,
 }) => {
   return (
-    <WarningCheckbox
-      isChecked={isChecked}
-      onChange={onChange}
-      warningId={id}
-      label={
-        <FormattedMessage
-          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.makeIndexReadonlyWarningTitle"
-          defaultMessage="Flag {indexName} index as read-only"
-          values={{
-            indexName: <EuiCode>{meta?.indexName}</EuiCode>,
-          }}
-        />
-      }
-      description={
-        <FormattedMessage
-          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.makeIndexReadonlyWarningDetail"
-          defaultMessage="You can continue to search and retrieve documents from {indexName}. You will not be able to insert new documents or modify existing ones."
-          values={{
-            indexName: <EuiCode>{meta?.indexName}</EuiCode>,
-          }}
-        />
-      }
-    />
+    <BaseWarningCheckbox id={id} isChecked={isChecked} onChange={onChange}>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <FormattedMessage
+            tagName="b"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.makeIndexReadonlyWarningTitle"
+            defaultMessage="Flag {indexName} index as read-only"
+            values={{
+              indexName: <EuiCode>{meta?.indexName}</EuiCode>,
+            }}
+          />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <InfoPopover>
+            <FormattedMessage
+              tagName="p"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.makeIndexReadonlyWarningDetail"
+              defaultMessage="You can continue to search and retrieve documents from {indexName}. You will not be able to insert new documents or modify existing ones."
+              values={{
+                indexName: <EuiCode>{meta?.indexName}</EuiCode>,
+              }}
+            />
+          </InfoPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </BaseWarningCheckbox>
   );
 };

@@ -7,55 +7,148 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { getColorCategories } from './color_categories';
+import { DatatableRow } from '@kbn/expressions-plugin/common';
+import { getColorCategories, getLegacyColorCategories } from './color_categories';
+import { MultiFieldKey, RangeKey } from '@kbn/data-plugin/common';
 
-const getNextExtension = (() => {
-  let i = 0;
-  const extensions = ['gz', 'css', '', 'rpm', 'deb', 'zip', null];
-  return () => extensions[i++ % extensions.length];
-})();
+class FakeClass {}
 
-const basicDatatable = {
-  columns: ['count', 'extension'].map((id) => ({ id } as DatatableColumn)),
-  rows: Array.from({ length: 10 }).map((_, i) => ({
-    count: i,
-    extension: getNextExtension(),
-  })) as DatatableRow[],
-};
+const values = [
+  1,
+  false,
+  true,
+  0,
+  NaN,
+  null,
+  undefined,
+  '',
+  'test-string',
+  { test: 'obj' },
+  ['array'],
+];
+const mockRange = new RangeKey({ from: 0, to: 100 });
+const mockMultiField = new MultiFieldKey({ key: ['one', 'two'] });
+const fakeClass = new FakeClass();
+const complex = [mockRange, mockMultiField, fakeClass];
 
-describe('getColorCategories', () => {
-  it('should return no categories when accessor is undefined', () => {
-    expect(getColorCategories(basicDatatable.rows)).toEqual([]);
+const mockDatatableRows = Array.from({ length: 20 }).map<DatatableRow>((_, i) => ({
+  count: i,
+  value: values[i % values.length],
+  complex: complex[i % complex.length],
+}));
+
+describe('Color Categories', () => {
+  describe('getColorCategories', () => {
+    it('should return no categories when accessor is undefined', () => {
+      expect(getColorCategories(mockDatatableRows)).toEqual([]);
+    });
+
+    it('should return no categories when accessor is not found', () => {
+      expect(getColorCategories(mockDatatableRows, 'N/A')).toEqual([]);
+    });
+
+    it('should return no categories when no rows are defined', () => {
+      expect(getColorCategories(undefined, 'extension')).toEqual([]);
+    });
+
+    it('should return all categories from mixed value datatable', () => {
+      expect(getColorCategories(mockDatatableRows, 'value')).toEqual([
+        1,
+        false,
+        true,
+        0,
+        NaN,
+        null,
+        undefined,
+        '',
+        'test-string',
+        {
+          test: 'obj',
+        },
+        ['array'],
+      ]);
+    });
+
+    it('should exclude selected categories from datatable', () => {
+      expect(
+        getColorCategories(mockDatatableRows, 'value', [
+          1,
+          false,
+          true,
+          0,
+          NaN,
+          null,
+          undefined,
+          '',
+        ])
+      ).toEqual([
+        'test-string',
+        {
+          test: 'obj',
+        },
+        ['array'],
+      ]);
+    });
+
+    it('should return known serialized categories from datatable', () => {
+      expect(getColorCategories(mockDatatableRows, 'complex', [])).toEqual([
+        mockRange.serialize(),
+        mockMultiField.serialize(),
+        fakeClass,
+      ]);
+    });
   });
 
-  it('should return no categories when accessor is not found', () => {
-    expect(getColorCategories(basicDatatable.rows, 'N/A')).toEqual([]);
-  });
+  describe('getLegacyColorCategories', () => {
+    it('should return no categories when accessor is undefined', () => {
+      expect(getLegacyColorCategories(mockDatatableRows)).toEqual([]);
+    });
 
-  it('should return no categories when no rows are defined', () => {
-    expect(getColorCategories(undefined, 'extension')).toEqual([]);
-  });
+    it('should return no categories when accessor is not found', () => {
+      expect(getLegacyColorCategories(mockDatatableRows, 'N/A')).toEqual([]);
+    });
 
-  it('should return all categories from non-transpose datatable', () => {
-    expect(getColorCategories(basicDatatable.rows, 'extension')).toEqual([
-      'gz',
-      'css',
-      '',
-      'rpm',
-      'deb',
-      'zip',
-      'null',
-    ]);
-  });
+    it('should return no categories when no rows are defined', () => {
+      expect(getLegacyColorCategories(undefined, 'extension')).toEqual([]);
+    });
 
-  it('should exclude selected categories from non-transpose datatable', () => {
-    expect(getColorCategories(basicDatatable.rows, 'extension', ['', null])).toEqual([
-      'gz',
-      'css',
-      'rpm',
-      'deb',
-      'zip',
-    ]);
+    it('should return all categories from mixed value datatable', () => {
+      expect(getLegacyColorCategories(mockDatatableRows, 'value')).toEqual([
+        '1',
+        'false',
+        'true',
+        '0',
+        'NaN',
+        'null',
+        'undefined',
+        '',
+        'test-string',
+        '{"test":"obj"}',
+        'array',
+      ]);
+    });
+
+    it('should exclude selected categories from datatable', () => {
+      expect(
+        getLegacyColorCategories(mockDatatableRows, 'value', [
+          1,
+          false,
+          true,
+          0,
+          NaN,
+          null,
+          undefined,
+          '',
+        ])
+      ).toEqual(['test-string', '{"test":"obj"}', 'array']);
+    });
+
+    it('should return known serialized categories from datatable', () => {
+      expect(getLegacyColorCategories(mockDatatableRows, 'complex', [])).toEqual([
+        String(mockRange),
+        String(mockMultiField),
+        JSON.stringify(fakeClass),
+      ]);
+    });
   });
 });
