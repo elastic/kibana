@@ -19,15 +19,14 @@ export interface GridSectionProps {
 
 export const GridSectionFooter = React.memo(({ sectionId }: GridSectionProps) => {
   return (
-    <span
-      data-row-id={sectionId}
+    <div
       className={'kbnGridSectionFooter'}
       css={({ euiTheme }: UseEuiTheme) => {
         return css`
           grid-column-start: 1;
           grid-column-end: -1;
-          grid-row-end: end-${sectionId};
-          grid-row-start: span 1;
+          grid-row-end: span 1;
+          grid-row-start: end-${sectionId};
           height: ${euiTheme.size.s};
           display: block;
           border-top: ${euiTheme.border.thin};

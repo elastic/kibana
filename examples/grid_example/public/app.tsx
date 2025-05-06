@@ -169,7 +169,7 @@ export const GridExample = ({
     mockDashboardApi.rows$.next(rows);
 
     // scroll to bottom after row is added
-    layoutUpdated$.pipe(skip(1), take(1)).subscribe(() => {
+    layoutUpdated$.pipe(take(1)).subscribe(() => {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
   }, [mockDashboardApi.rows$, mockDashboardApi.panels$, layoutUpdated$]);

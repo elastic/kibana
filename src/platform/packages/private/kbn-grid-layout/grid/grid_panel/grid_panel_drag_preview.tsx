@@ -27,7 +27,7 @@ export const GridPanelDragPreview = () => {
           if (!dragPreviewRef.current) return;
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
           const sectionId = activePanel?.targetRow;
-          if (!activePanel || !sectionId || !gridLayout?.[sectionId].panels[activePanel.id]) {
+          if (!activePanel || !sectionId || !gridLayout[sectionId]?.panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
             const panel = gridLayout[sectionId].panels[activePanel.id];

@@ -291,13 +291,9 @@ const styles = {
     css({
       gridColumnStart: 1,
       gridColumnEnd: -1,
-      gridRowStart: `start-${sectionId}`,
-      gridRowEnd: `auto`,
+      gridRowStart: `span 1`,
+      gridRowEnd: `start-${sectionId}`,
       height: `${euiTheme.size.xl}`,
-      // border: '1px solid transparent', // prevents layout shift
-      '&.kbnGridSectionHeader--collapsed:not(.kbnGridSectionHeader--active)': {
-        // borderBottom: euiTheme.border.thin,
-      },
       '.kbnGridLayout--deleteRowIcon': {
         marginLeft: euiTheme.size.xs,
       },

@@ -109,15 +109,16 @@ export const GridLayout = ({
         })
         .forEach((section) => {
           const { id } = section;
-          gridTemplateString += `[start-${id}] `;
           const isMainSection = 'isMainSection' in section && section.isMainSection;
+
+          /** Header */
           if (!isMainSection) {
-            /** Header */
             currentElementsInOrder.push({ type: 'header', id });
             gridTemplateString += `auto `;
           }
 
           /** Panels */
+          gridTemplateString += `[start-${id}] `;
           if (
             Object.keys(section.panels).length &&
             (section.isMainSection || !section.isCollapsed)
@@ -137,13 +138,13 @@ export const GridLayout = ({
               id,
             });
           }
+          gridTemplateString += `[end-${section.id}] `;
 
+          /** Footer */
           if (!isMainSection) {
-            /** Footer */
             currentElementsInOrder.push({ type: 'footer', id });
             gridTemplateString += `auto `;
           }
-          gridTemplateString += `[end-${section.id}] `;
         });
 
       setElementsInOrder(currentElementsInOrder);

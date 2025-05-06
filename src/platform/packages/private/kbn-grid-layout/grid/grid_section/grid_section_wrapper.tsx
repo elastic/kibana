@@ -23,7 +23,7 @@ export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) =
   const styles = useMemo(() => {
     return css({
       gridColumn: `1 / -1`,
-      gridRowStart: `gridRow-${sectionId}`,
+      gridRowStart: `start-${sectionId}`,
       gridRowEnd: `end-${sectionId}`,
     });
   }, [sectionId]);
