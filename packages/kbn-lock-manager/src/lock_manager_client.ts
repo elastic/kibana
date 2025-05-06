@@ -269,6 +269,10 @@ export async function getLock({
   return lockManager.get();
 }
 
+export function isLockAcquisitionError(error: unknown): error is LockAcquisitionError {
+  return error instanceof LockAcquisitionError;
+}
+
 export async function withLock<T>(
   {
     esClient,
