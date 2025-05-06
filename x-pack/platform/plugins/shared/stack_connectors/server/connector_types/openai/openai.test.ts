@@ -77,7 +77,7 @@ class TestOpenAIConnector extends OpenAIConnector {
   public setPKIConfig(config: Partial<Config>) {
     (this as any).configAny = {
       ...(this as any).configAny,
-      ...config
+      ...config,
     };
   }
 }
@@ -659,7 +659,9 @@ describe('OpenAIConnector', () => {
       });
 
       it('returns the error.message', () => {
-        const error = { message: 'a message' } as unknown as AxiosError<{ error?: { message?: string } }>;
+        const error = { message: 'a message' } as unknown as AxiosError<{
+          error?: { message?: string };
+        }>;
         expect(connector.getResponseErrorMessage(error)).toEqual(
           `Unexpected API Error:  - a message`
         );
@@ -678,7 +680,9 @@ describe('OpenAIConnector', () => {
             },
           },
         } as unknown as AxiosError<{ error?: { message?: string } }>;
-        expect(connector.getResponseErrorMessage(err)).toEqual(`API Error: Resource Not Found - Resource not found`);
+        expect(connector.getResponseErrorMessage(err)).toEqual(
+          `API Error: Resource Not Found - Resource not found`
+        );
       });
 
       it('returns the error.response.data.error', () => {
@@ -692,7 +696,9 @@ describe('OpenAIConnector', () => {
             },
           },
         } as unknown as AxiosError<{ error?: { message?: string } }>;
-        expect(connector.getResponseErrorMessage(err)).toEqual(`API Error: Resource Not Found - Resource not found`);
+        expect(connector.getResponseErrorMessage(err)).toEqual(
+          `API Error: Resource Not Found - Resource not found`
+        );
       });
 
       it('returns authorization error', () => {
@@ -1283,7 +1289,7 @@ describe('OpenAIConnector', () => {
         connector.request = mockError;
         connector.setPKIConfig({
           certificateFile: undefined,
-          certificateData: undefined
+          certificateData: undefined,
         });
 
         await expect(
@@ -1295,7 +1301,7 @@ describe('OpenAIConnector', () => {
         connector.request = mockError;
         connector.setPKIConfig({
           privateKeyFile: undefined,
-          privateKeyData: undefined
+          privateKeyData: undefined,
         });
 
         await expect(
@@ -1306,7 +1312,7 @@ describe('OpenAIConnector', () => {
       it('handles invalid certificate format', async () => {
         connector.request = mockError;
         connector.setPKIConfig({
-          certificateData: 'invalid-certificate-data'
+          certificateData: 'invalid-certificate-data',
         });
 
         await expect(
@@ -1317,7 +1323,7 @@ describe('OpenAIConnector', () => {
       it('handles invalid private key format', async () => {
         connector.request = mockError;
         connector.setPKIConfig({
-          privateKeyData: 'invalid-key-data'
+          privateKeyData: 'invalid-key-data',
         });
 
         await expect(
