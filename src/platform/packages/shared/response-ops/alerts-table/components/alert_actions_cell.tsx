@@ -19,6 +19,7 @@ import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DefaultAlertActions } from './default_alert_actions';
 import type { GetAlertsTableProp } from '../types';
+import { STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX } from '../constants';
 
 const actionsToolTip = i18n.translate('xpack.triggersActionsUI.alertsTable.moreActionsTextLabel', {
   defaultMessage: 'More actions',
@@ -45,9 +46,7 @@ export const AlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (props)
         onActionExecuted={closeActionsPopover}
         isAlertDetailsEnabled={false}
         resolveRulePagePath={(alertRuleId) =>
-          alertRuleId
-            ? `/app/management/insightsAndAlerting/triggersActions/rule/${alertRuleId}`
-            : null
+          alertRuleId ? `${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${alertRuleId}` : null
         }
         {...props}
       />

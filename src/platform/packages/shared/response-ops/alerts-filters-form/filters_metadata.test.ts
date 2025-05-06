@@ -8,24 +8,15 @@
  */
 
 import { getFilterMetadata } from './filters_metadata';
-import type { AlertsFilter } from './types';
 
 describe('getFilterMetadata', () => {
-  it('should throw an error if filter type is missing', () => {
-    expect(() => getFilterMetadata({} as AlertsFilter)).toThrow(
-      'Cannot get metadata for filter without type'
-    );
-  });
-
   it('should throw an error if filter type is not found in metadata', () => {
     // @ts-expect-error: Testing unknown type
-    expect(() => getFilterMetadata({ type: 'unknown' })).toThrow(
-      'Alerts filter of type unknown not found'
-    );
+    expect(() => getFilterMetadata('unknown')).toThrow('Alerts filter of type unknown not found');
   });
 
   it('should return metadata for a valid filter type', () => {
-    const metadata = getFilterMetadata({ type: 'ruleTags' });
+    const metadata = getFilterMetadata('ruleTags');
     expect(metadata).toHaveProperty('id', 'ruleTags');
     expect(metadata).toHaveProperty('displayName');
     expect(metadata).toHaveProperty('component');

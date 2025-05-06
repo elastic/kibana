@@ -10,7 +10,6 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ComponentType } from 'react';
-import type { alertsFiltersMetadata } from './filters_metadata';
 
 export type AlertsFilterComponentType<T> = ComponentType<{
   value?: T;
@@ -25,13 +24,11 @@ export interface AlertsFilter<T = unknown> {
 }
 
 export interface AlertsFilterMetadata<T> {
-  id: string;
+  id: AlertsFiltersType;
   displayName: string;
   component: AlertsFilterComponentType<T>;
   isEmpty: (value?: T) => boolean;
   toKql: (value?: T) => string | null;
-  /** @internal */
-  __valueType?: T;
 }
 
 export interface AlertsFiltersFormContextValue {
@@ -46,7 +43,7 @@ export interface AlertsFiltersFormContextValue {
   };
 }
 
-export type AlertsFiltersType = keyof typeof alertsFiltersMetadata;
+export type AlertsFiltersType = 'ruleTags' | 'ruleTypes';
 
 export type AlertsFiltersExpressionOperator = 'and' | 'or';
 
@@ -59,3 +56,5 @@ export type AlertsFiltersExpressionItem =
     };
 
 export type AlertsFiltersExpression = AlertsFiltersExpressionItem[];
+
+export type AlertsFiltersExpressionErrors = Array<{ type?: string; value?: string } | undefined>;

@@ -27,7 +27,7 @@ import {
 export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
   value,
   onChange,
-  isDisabled = false,
+  isDisabled: isDisabledProp = false,
   error,
 }) => {
   const {
@@ -67,11 +67,12 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
   );
 
   const isInvalid = Boolean(error) || cannotLoadRuleTypes;
+  const isDisabled = isDisabledProp || cannotLoadRuleTypes || !options.length;
 
   return (
     <EuiFormRow
       label={RULE_TYPES_FILTER_LABEL}
-      isDisabled={isDisabled || cannotLoadRuleTypes}
+      isDisabled={isDisabled}
       isInvalid={isInvalid}
       error={error ?? RULE_TYPES_LOAD_ERROR_MESSAGE}
       fullWidth
@@ -79,7 +80,7 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
       <EuiComboBox
         isClearable
         isLoading={isLoading}
-        isDisabled={isDisabled || cannotLoadRuleTypes || !options.length}
+        isDisabled={isDisabled}
         isInvalid={isInvalid}
         options={options}
         selectedOptions={selectedOptions}
@@ -109,7 +110,7 @@ export const filterMetadata: AlertsFilterMetadata<string[]> = {
     return toKqlExpression(
       value.length === 1
         ? nodeBuilder.is(ALERT_RULE_TYPE_ID, value[0])
-        : nodeBuilder.or(value.map((tag) => nodeBuilder.is(ALERT_RULE_TYPE_ID, tag)))
+        : nodeBuilder.or(value.map((ruleTypeId) => nodeBuilder.is(ALERT_RULE_TYPE_ID, ruleTypeId)))
     );
   },
 };

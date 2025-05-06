@@ -9,39 +9,50 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import { toElasticsearchQuery } from '@kbn/es-query/src/kuery/ast';
-import type { AlertsFilter, AlertsFiltersExpression, AlertsFiltersExpressionItem } from '../types';
-import { alertsFiltersMetadata, getFilterMetadata } from '../filters_metadata';
+import type {
+  AlertsFilter,
+  AlertsFiltersExpression,
+  AlertsFiltersExpressionItem,
+  AlertsFiltersExpressionOperator,
+} from '../types';
+import { getFilterMetadata } from '../filters_metadata';
 
 export const isFilter = (item?: AlertsFiltersExpressionItem): item is { filter: AlertsFilter } =>
   item != null && 'filter' in item;
 
+export const isOperator = (
+  item?: AlertsFiltersExpressionItem
+): item is { operator: AlertsFiltersExpressionOperator } => item != null && 'operator' in item;
+
 export const isEmptyExpression = (expression: AlertsFiltersExpression) => {
+  // An expression is empty if it does not have any elements
   if (!Boolean(expression?.length)) {
     return true;
   }
+  // Or one empty filter
   const item = expression[0];
   if (isFilter(item)) {
     if (!item.filter.type) {
       return true;
     }
-    const { isEmpty } = getFilterMetadata(item.filter);
-    return isEmpty();
+    const { isEmpty } = getFilterMetadata(item.filter.type);
+    return isEmpty(item.filter.value);
   }
   return false;
 };
 
 export const alertsFiltersToEsQuery = (expression: AlertsFiltersExpression) => {
   const kuery = expression.reduce((kqlExpression, item, index) => {
-    if (isFilter(item)) {
+    if (isFilter(item) && item.filter.type) {
       const { type, value } = item.filter;
-      if (type) {
-        const { toKql } = alertsFiltersMetadata[type];
-        const filterKqlExpression = toKql(value as Parameters<typeof toKql>[0]);
-        if (filterKqlExpression) {
-          kqlExpression += ` ${filterKqlExpression} `;
-        }
+      const { toKql } = getFilterMetadata(type);
+      const filterKqlExpression = toKql(value);
+      if (filterKqlExpression) {
+        kqlExpression += ` ${filterKqlExpression} `;
       }
-    } else {
+    }
+
+    if (isOperator(item) && index > 0) {
       const { operator } = item;
       if (index > 0) {
         kqlExpression += ` ${operator} `;

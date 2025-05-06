@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
@@ -35,6 +37,11 @@ const queryClient = new QueryClient({
     queries: {
       retry: false,
     },
+  },
+  logger: {
+    log: console.log,
+    warn: console.warn,
+    error: () => {},
   },
 });
 
@@ -102,7 +109,6 @@ describe('ConfigEditorFlyout', () => {
     expect(await screen.findByTestId(FILTERS_FORM_SUBJ)).toBeInTheDocument();
     await userEvent.click(within(screen.getByTestId(SOLUTION_SELECTOR_SUBJ)).getByRole('button'));
     await userEvent.click(screen.getByRole('option', { name: 'Security' }));
-    screen.debug(undefined, Infinity);
     expect(screen.getAllByTestId(FILTERS_FORM_ITEM_SUBJ)).toHaveLength(1);
   });
 

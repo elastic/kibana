@@ -21,7 +21,9 @@ import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { GENERAL_CASES_OWNER } from '@kbn/cases-plugin/common';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
+import type { JsonObject } from '@kbn/utility-types';
 import {
+  CONFIG_EDITOR_KQL_ERROR_TOAST_TITLE,
   getSolutionRuleTypesAuthPromptBody,
   NO_AUTHORIZED_RULE_TYPE_PROMPT_TITLE,
   RULE_TYPES_LOAD_ERROR_DESCRIPTION,
@@ -82,7 +84,17 @@ export const EmbeddableAlertsTable = ({
         },
       }
     : null;
-  const filtersQuery = query?.filters ? alertsFiltersToEsQuery(query?.filters) : null;
+  const filtersQuery = useMemo(() => {
+    let filters: JsonObject | null = null;
+    try {
+      if (query?.filters) {
+        filters = alertsFiltersToEsQuery(query.filters);
+      }
+    } catch (e) {
+      services.notifications.toasts.addError(e, { title: CONFIG_EDITOR_KQL_ERROR_TOAST_TITLE });
+    }
+    return filters;
+  }, [query?.filters, services.notifications.toasts]);
   const finalQuery = {
     bool: {
       must: [timeRangeQuery, filtersQuery].filter(Boolean) as QueryDslQueryContainer[],

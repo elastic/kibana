@@ -54,7 +54,7 @@ export const AlertsFlyout = <AC extends AdditionalContext>({
     renderFlyoutHeader: Header = DefaultAlertsFlyoutHeader,
     renderFlyoutBody: Body = DefaultAlertsFlyoutBody,
     renderFlyoutFooter,
-    flyoutOwnsFocus,
+    flyoutOwnsFocus = false,
   } = renderContext;
   const Footer: FlyoutSectionRenderer<AC> | undefined = renderFlyoutFooter;
   const prevAlert = usePrevious(alert);

@@ -22,20 +22,28 @@ import {
   logicalCSS,
   useEuiTheme,
 } from '@elastic/eui';
-import type { AlertsFiltersFormHandle } from '@kbn/response-ops-alerts-filters-form/components/alerts_filters_form';
+import type { AlertsFiltersFormProps } from '@kbn/response-ops-alerts-filters-form/components/alerts_filters_form';
 import { AlertsFiltersForm } from '@kbn/response-ops-alerts-filters-form/components/alerts_filters_form';
 import { AlertsSolutionSelector } from '@kbn/response-ops-alerts-filters-form/components/alerts_solution_selector';
-import { isEmptyExpression } from '@kbn/response-ops-alerts-filters-form/utils/filters';
+import { isEmptyExpression, isFilter } from '@kbn/response-ops-alerts-filters-form/utils/filters';
 import {
   getAvailableSolutions,
   getRuleTypeIdsForSolution,
 } from '@kbn/response-ops-alerts-filters-form/utils/solutions';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
-import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
+import type {
+  AlertsFiltersExpression,
+  AlertsFiltersExpressionErrors,
+} from '@kbn/response-ops-alerts-filters-form/types';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { EuiSuperSelect } from '@elastic/eui/src/components/form/super_select/super_select';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { css } from '@emotion/react';
+import {
+  FILTER_TYPE_REQUIRED_ERROR_MESSAGE,
+  FILTER_VALUE_REQUIRED_ERROR_MESSAGE,
+} from '@kbn/response-ops-alerts-filters-form/translations';
+import { getFilterMetadata } from '@kbn/response-ops-alerts-filters-form/filters_metadata';
 import { SAVE_CONFIG_BUTTON_SUBJ } from '../constants';
 import type { EmbeddableAlertsTableConfig } from '../types';
 import {
@@ -67,6 +75,28 @@ export interface ConfigEditorFlyoutProps {
 
 const EMPTY_FILTERS: AlertsFiltersExpression = [{ filter: {} }];
 
+const computeFiltersErrors = (
+  expression: AlertsFiltersExpression
+): AlertsFiltersExpressionErrors => {
+  return expression?.map((item) => {
+    if (!isFilter(item)) {
+      return undefined;
+    }
+
+    if (!item.filter.type && expression.length > 1) {
+      // The user can leave the default filter empty if it's the only one
+      return { type: FILTER_TYPE_REQUIRED_ERROR_MESSAGE };
+    }
+
+    if (item.filter.type) {
+      const { isEmpty } = getFilterMetadata(item.filter.type);
+      if (isEmpty(item.filter.value)) {
+        return { value: FILTER_VALUE_REQUIRED_ERROR_MESSAGE };
+      }
+    }
+  });
+};
+
 export const ConfigEditorFlyout = ({
   initialConfig,
   onSave,
@@ -80,7 +110,6 @@ export const ConfigEditorFlyout = ({
   const [filters, setFilters] = useState<
     EmbeddableAlertsTableConfig['query']['filters'] | undefined
   >(initialConfig?.query?.filters ?? EMPTY_FILTERS);
-  const formRef = useRef<AlertsFiltersFormHandle>(null);
   const {
     data: ruleTypes,
     isLoading: isLoadingRuleTypes,
@@ -98,6 +127,18 @@ export const ConfigEditorFlyout = ({
     () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
     [ruleTypes, solution]
   );
+  const [filtersErrors, setFiltersErrors] = useState<AlertsFiltersExpressionErrors>([]);
+
+  const validateFilters = useCallback(() => {
+    const errors = filters ? computeFiltersErrors(filters) : [];
+    setFiltersErrors(errors);
+    return !Boolean(errors?.some((error) => error));
+  }, [filters]);
+
+  const handleFiltersChange: AlertsFiltersFormProps['onChange'] = (newFilters) => {
+    setFiltersErrors([]);
+    setFilters(newFilters);
+  };
 
   const resetFilters = useCallback(() => {
     setFilters(EMPTY_FILTERS);
@@ -212,10 +253,10 @@ export const ConfigEditorFlyout = ({
                     </EuiCallOut>
                   ) : (
                     <AlertsFiltersForm
-                      ref={formRef}
                       ruleTypeIds={ruleTypeIds}
                       value={filters}
-                      onChange={setFilters}
+                      errors={filtersErrors}
+                      onChange={handleFiltersChange}
                       services={services}
                     />
                   )}
@@ -237,7 +278,7 @@ export const ConfigEditorFlyout = ({
             <EuiButton
               isDisabled={!solution || cannotLoadRuleTypes}
               onClick={() => {
-                if (formRef.current?.validate()) {
+                if (validateFilters()) {
                   onSave({
                     solution: solution!,
                     query: { type: 'alertsFilters', filters: filters! },

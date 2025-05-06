@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable no-console */
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -20,6 +22,11 @@ const queryClient = new QueryClient({
     queries: {
       retry: false,
     },
+  },
+  logger: {
+    log: console.log,
+    warn: console.warn,
+    error: () => {},
   },
 });
 

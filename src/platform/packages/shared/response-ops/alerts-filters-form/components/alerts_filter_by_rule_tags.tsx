@@ -26,7 +26,7 @@ import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
   value,
   onChange,
-  isDisabled = false,
+  isDisabled: isDisabledProp = false,
   error,
 }) => {
   const {
@@ -40,7 +40,7 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
   const {
     tags,
     isLoading,
-    isError: cannotLoadRuleTags,
+    isError: isErrorLoadingRuleTags,
   } = useGetRuleTagsQuery({
     enabled: true,
     perPage: 10000,
@@ -70,12 +70,13 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
     [onChange]
   );
 
-  const isInvalid = Boolean(error) || cannotLoadRuleTags;
+  const isInvalid = Boolean(error) || isErrorLoadingRuleTags;
+  const isDisabled = isDisabledProp || isErrorLoadingRuleTags || !options.length;
 
   return (
     <EuiFormRow
       label={RULE_TAGS_FILTER_LABEL}
-      isDisabled={isDisabled || cannotLoadRuleTags}
+      isDisabled={isDisabled}
       isInvalid={isInvalid}
       error={error ?? RULE_TAGS_LOAD_ERROR_MESSAGE}
       fullWidth
@@ -83,7 +84,7 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
       <EuiComboBox
         isClearable
         isLoading={isLoading}
-        isDisabled={isDisabled || cannotLoadRuleTags || !options.length}
+        isDisabled={isDisabled}
         isInvalid={isInvalid}
         options={options}
         selectedOptions={selectedOptions}

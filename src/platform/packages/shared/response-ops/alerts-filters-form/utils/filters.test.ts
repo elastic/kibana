@@ -8,6 +8,7 @@
  */
 
 import { alertsFiltersToEsQuery, isEmptyExpression, isFilter } from './filters';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 describe('isFilter', () => {
   it('should return true for items with filter property', () => {
@@ -19,6 +20,8 @@ describe('isFilter', () => {
     expect(isFilter(filter)).toBeFalsy();
   });
 });
+
+const kqlToEs = (kql: string) => toElasticsearchQuery(fromKueryExpression(kql));
 
 describe('isEmptyExpression', () => {
   it('should return true for empty expressions', () => {
@@ -44,89 +47,31 @@ describe('alertsFiltersToEsQuery', () => {
   });
 
   it('should handle and expressions', () => {
+    const expectedKql = `kibana.alert.rule.tags: tag1 and kibana.alert.rule.rule_type_id: type1`;
     expect(
       alertsFiltersToEsQuery([
         { filter: { type: 'ruleTags', value: ['tag1'] } },
         { operator: 'and' },
         { filter: { type: 'ruleTypes', value: ['type1'] } },
       ])
-    ).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "filter": Array [
-            Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
-                  Object {
-                    "match": Object {
-                      "kibana.alert.rule.tags": "tag1",
-                    },
-                  },
-                ],
-              },
-            },
-            Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
-                  Object {
-                    "match": Object {
-                      "kibana.alert.rule.rule_type_id": "type1",
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      }
-    `);
+    ).toEqual(kqlToEs(expectedKql));
   });
 
   it('should handle or expressions', () => {
+    const expectedKql = `kibana.alert.rule.tags: tag1 or kibana.alert.rule.rule_type_id: type1`;
     expect(
       alertsFiltersToEsQuery([
         { filter: { type: 'ruleTags', value: ['tag1'] } },
         { operator: 'or' },
         { filter: { type: 'ruleTypes', value: ['type1'] } },
       ])
-    ).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "minimum_should_match": 1,
-          "should": Array [
-            Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
-                  Object {
-                    "match": Object {
-                      "kibana.alert.rule.tags": "tag1",
-                    },
-                  },
-                ],
-              },
-            },
-            Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
-                  Object {
-                    "match": Object {
-                      "kibana.alert.rule.rule_type_id": "type1",
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      }
-    `);
+    ).toEqual(kqlToEs(expectedKql));
   });
 
   it('should handle complex expressions', () => {
+    const expectedKql = `
+    kibana.alert.rule.tags: (tag1 or tag2) or kibana.alert.rule.rule_type_id: type1 and kibana.alert.rule.tags: tag3 or kibana.alert.rule.rule_type_id: (type2 or type3)
+    `;
     expect(
       alertsFiltersToEsQuery([
         { filter: { type: 'ruleTags', value: ['tag1', 'tag2'] } },
@@ -137,106 +82,6 @@ describe('alertsFiltersToEsQuery', () => {
         { operator: 'or' },
         { filter: { type: 'ruleTypes', value: ['type2', 'type3'] } },
       ])
-    ).toMatchInlineSnapshot(`
-      Object {
-        "bool": Object {
-          "minimum_should_match": 1,
-          "should": Array [
-            Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "kibana.alert.rule.tags": "tag1",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "kibana.alert.rule.tags": "tag2",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-            Object {
-              "bool": Object {
-                "filter": Array [
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "kibana.alert.rule.rule_type_id": "type1",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "kibana.alert.rule.tags": "tag3",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-            Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "kibana.alert.rule.rule_type_id": "type2",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
-                        Object {
-                          "match": Object {
-                            "kibana.alert.rule.rule_type_id": "type3",
-                          },
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      }
-    `);
+    ).toEqual(kqlToEs(expectedKql));
   });
 });

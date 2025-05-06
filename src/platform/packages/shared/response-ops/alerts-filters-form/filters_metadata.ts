@@ -9,25 +9,21 @@
 
 import { filterMetadata as ruleTagsFilterMetadata } from './components/alerts_filter_by_rule_tags';
 import { filterMetadata as ruleTypesFilterMetadata } from './components/alerts_filter_by_rule_types';
-import type { AlertsFilter, AlertsFilterMetadata } from './types';
+import type { AlertsFilterMetadata, AlertsFiltersType } from './types';
 
-export const alertsFiltersMetadata = {
+export const alertsFiltersMetadata: Record<AlertsFiltersType, AlertsFilterMetadata<any>> = {
   ruleTags: ruleTagsFilterMetadata,
   ruleTypes: ruleTypesFilterMetadata,
-} as const satisfies Record<string, AlertsFilterMetadata<any>>;
+};
 
-export const getFilterMetadata = (filter: AlertsFilter) => {
-  if (!filter?.type) {
-    throw new Error(`Cannot get metadata for filter without type`);
-  }
-  const filterMetadata = alertsFiltersMetadata[filter.type];
+export const getFilterMetadata = <T>(
+  type: AlertsFilterMetadata<T>['id']
+): AlertsFilterMetadata<T> => {
+  const filterMetadata = alertsFiltersMetadata[type];
+
   if (!filterMetadata) {
-    throw new Error(`Alerts filter of type ${filter.type} not found`);
+    throw new Error(`Alerts filter of type ${type} not found`);
   }
-  const value = filter.value as typeof filterMetadata.__valueType;
-  return {
-    ...filterMetadata,
-    isEmpty: () => filterMetadata.isEmpty(value),
-    toKql: () => filterMetadata.toKql(value),
-  };
+
+  return filterMetadata;
 };

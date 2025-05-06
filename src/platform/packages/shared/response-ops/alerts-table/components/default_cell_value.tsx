@@ -22,7 +22,11 @@ import {
 import { EuiBadge, EuiLink } from '@elastic/eui';
 import { JsonValue } from '@kbn/utility-types';
 import { AlertsTableSupportedConsumers, GetAlertsTableProp } from '../types';
-import { alertProducersData, observabilityFeatureIds } from '../constants';
+import {
+  alertProducersData,
+  observabilityFeatureIds,
+  STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX,
+} from '../constants';
 import { useFieldFormatter } from '../hooks/use_field_formatter';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
@@ -57,9 +61,7 @@ export const DefaultCellValue = ({
       }
       return (
         <EuiLink
-          href={http.basePath.prepend(
-            `/app/management/insightsAndAlerting/triggersActions/rule/${ruleUuid}`
-          )}
+          href={http.basePath.prepend(`${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${ruleUuid}`)}
           target={openLinksInNewTab ? '_blank' : undefined}
         >
           {ruleName}
