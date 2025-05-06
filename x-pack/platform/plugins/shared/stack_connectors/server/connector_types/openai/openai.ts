@@ -120,18 +120,18 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     try {
       if (
         this.provider === OpenAiProviderType.Other &&
-        (this.config.certificateFile ||
-          this.config.certificateData ||
-          this.config.privateKeyFile ||
-          this.config.privateKeyData)
+        (this.configAny.certificateFile ||
+          this.configAny.certificateData ||
+          this.configAny.privateKeyFile ||
+          this.configAny.privateKeyData)
       ) {
         // Validate PKI configuration
         if (
           !validatePKICertificates(
-            this.config.certificateFile,
-            this.config.certificateData,
-            this.config.privateKeyFile,
-            this.config.privateKeyData
+            this.configAny.certificateFile,
+            this.configAny.certificateData,
+            this.configAny.privateKeyFile,
+            this.configAny.privateKeyData
           )
         ) {
           throw new Error('Invalid or inaccessible PKI certificates');
@@ -140,28 +140,28 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         let cert: string;
         let key: string;
 
-        if (this.config.certificateFile) {
+        if (this.configAny.certificateFile) {
           cert = fs.readFileSync(
-            Array.isArray(this.config.certificateFile)
-              ? this.config.certificateFile[0]
-              : this.config.certificateFile,
+            Array.isArray(this.configAny.certificateFile)
+              ? this.configAny.certificateFile[0]
+              : this.configAny.certificateFile,
             'utf8'
           );
-        } else if (this.config.certificateData) {
-          cert = formatPEMContent(this.config.certificateData, 'CERTIFICATE');
+        } else if (this.configAny.certificateData) {
+          cert = formatPEMContent(this.configAny.certificateData, 'CERTIFICATE', this.logger);
         } else {
           throw new Error('No certificate file or data provided');
         }
 
-        if (this.config.privateKeyFile) {
+        if (this.configAny.privateKeyFile) {
           key = fs.readFileSync(
-            Array.isArray(this.config.privateKeyFile)
-              ? this.config.privateKeyFile[0]
-              : this.config.privateKeyFile,
+            Array.isArray(this.configAny.privateKeyFile)
+              ? this.configAny.privateKeyFile[0]
+              : this.configAny.privateKeyFile,
             'utf8'
           );
-        } else if (this.config.privateKeyData) {
-          key = formatPEMContent(this.config.privateKeyData, 'PRIVATE KEY');
+        } else if (this.configAny.privateKeyData) {
+          key = formatPEMContent(this.configAny.privateKeyData, 'PRIVATE KEY', this.logger);
         } else {
           throw new Error('No private key file or data provided');
         }
@@ -169,9 +169,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         const httpsAgent = new https.Agent({
           cert,
           key,
-          rejectUnauthorized: this.config.verificationMode === 'none',
+          rejectUnauthorized: this.configAny.verificationMode === 'none',
           checkServerIdentity:
-            this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
+            this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
               ? () => undefined
               : undefined,
         });
@@ -181,8 +181,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.logger.debug(JSON.stringify({
           cert: cert.slice(0, 100) + '...',
           key: key.slice(0, 100) + '...',
-          rejectUnauthorized: this.config.verificationMode === 'none',
-          checkServerIdentity: this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
+          rejectUnauthorized: this.configAny.verificationMode === 'none',
+          checkServerIdentity: this.configAny.verificationMode === 'certificate' || this.configAny.verificationMode === 'none'
         }, null, 2));
 
         try {
