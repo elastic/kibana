@@ -81,6 +81,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should list users', async () => {
         log.info(`listing users`);
+
+        await api.createPrivMonUser({
+          body: { user: { name: 'list_test_user' } },
+        });
         const res = await api.listPrivMonUsers({ query: {} });
 
         if (res.status !== 200) {
