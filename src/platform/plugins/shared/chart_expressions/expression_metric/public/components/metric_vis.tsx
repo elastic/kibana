@@ -36,7 +36,7 @@ import {
   FieldFormatConvertFunction,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { CUSTOM_PALETTE, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
@@ -46,6 +46,7 @@ import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import { getPaletteService, getThemeService, getFormatService } from '../services';
 import { getDataBoundsForPalette } from '../utils';
+import useAsync from 'react-use/lib/useAsync';
 
 export const defaultColor = euiThemeVars.euiColorEmptyShade;
 
@@ -105,11 +106,12 @@ const getColor = (
   palette: PaletteOutput<CustomPaletteState>,
   accessors: { metric: string; max?: string; breakdownBy?: string },
   data: Datatable,
-  rowNumber: number
+  rowNumber: number,
+  paletteService?: PaletteRegistry
 ) => {
   const { min, max } = getDataBoundsForPalette(accessors, data, rowNumber);
 
-  return getPaletteService().get(CUSTOM_PALETTE)?.getColorForValue?.(value, palette.params, {
+  return paletteService?.get(CUSTOM_PALETTE)?.getColorForValue?.(value, palette.params, {
     min,
     max,
   });
@@ -207,6 +209,10 @@ export const MetricVis = ({
     data.rows.length ? data.rows : [{ [primaryMetricColumn.id]: null }]
   ).slice(0, 1);
 
+  const { value: paletteService } = useAsync(async () => {
+    return await getPaletteService();
+  }, []);
+
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : firstRowForNonBreakdown
   ).map((row, rowIdx) => {
@@ -248,7 +254,8 @@ export const MetricVis = ({
                 breakdownBy: breakdownByColumn?.id,
               },
               data,
-              rowIdx
+              rowIdx,
+              paletteService
             ) ?? defaultColor
           : config.metric.color ?? defaultColor,
     };

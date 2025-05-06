@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { metricVisFunction } from '../common';
-import { setFormatService, setPaletteService } from './services';
+import { setChartsService, setFormatService } from './services';
 import { getMetricVisRenderer } from './expression_renderers';
 import { setThemeService } from './services/theme_service';
 import { setUiSettingsService } from './services/ui_settings';
@@ -30,6 +30,7 @@ export interface ExpressionMetricPluginSetup {
 export interface ExpressionMetricPluginStart {
   fieldFormats: FieldFormatsStart;
   usageCollection?: UsageCollectionStart;
+  charts: ChartsPluginStart;
 }
 
 /** @internal */
@@ -42,10 +43,6 @@ export class ExpressionMetricPlugin implements Plugin {
       core.getStartServices
     );
 
-    charts.palettes.getPalettes().then((palettes) => {
-      setPaletteService(palettes);
-    });
-
     expressions.registerFunction(metricVisFunction);
     expressions.registerFunction(metricTrendlineFunction);
     expressions.registerRenderer(getMetricVisRenderer({ getStartDeps }));
@@ -54,7 +51,8 @@ export class ExpressionMetricPlugin implements Plugin {
     setThemeService(charts.theme);
   }
 
-  public start(core: CoreStart, { fieldFormats }: ExpressionMetricPluginStart) {
+  public start(core: CoreStart, { charts, fieldFormats }: ExpressionMetricPluginStart) {
+    setChartsService(charts);
     setFormatService(fieldFormats);
   }
 }

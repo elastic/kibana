@@ -7,8 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PaletteRegistry } from '@kbn/coloring';
-import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { PaletteRegistry } from '@kbn/coloring';
 
-export const [getPaletteService, setPaletteService] =
-  createGetterSetter<PaletteRegistry>('palette');
+let chartService: ChartsPluginStart | undefined;
+
+export function setChartsService(_chartService: ChartsPluginStart) {
+  chartService = _chartService;
+}
+
+let paletteServicePromise: Promise<PaletteRegistry> | null = null;
+export function getPaletteService() {
+  if (paletteServicePromise) {
+    return paletteServicePromise;
+  }
+
+  paletteServicePromise = new Promise(async (resolve, reject) => {
+    if (!chartService) {
+      reject();
+      return;
+    }
+    const paletteService = await chartService.palettes.getPalettes();
+    resolve(paletteService);
+  });
+  return paletteServicePromise;
+}

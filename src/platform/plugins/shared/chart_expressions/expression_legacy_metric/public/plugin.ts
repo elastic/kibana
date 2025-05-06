@@ -39,9 +39,9 @@ export class ExpressionLegacyMetricPlugin implements Plugin {
       core.getStartServices
     );
 
-    charts.palettes.getPalettes().then((palettes) => {
+    /*charts.palettes.getPalettes().then((palettes) => {
       setPaletteService(palettes);
-    });
+    });*/
 
     expressions.registerFunction(metricVisFunction);
     expressions.registerRenderer(getMetricVisRenderer({ getStartDeps }));
