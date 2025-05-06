@@ -120,6 +120,7 @@ export interface ReindexService {
     aliases: Record<string, IndicesAlias>;
     settings?: IndicesIndexSettings;
     isInDataStream: boolean;
+    isFollowerIndex: boolean;
   }>;
 }
 
@@ -364,7 +365,19 @@ export const reindexServiceFactory = (
     const aliases = response[indexName]?.aliases ?? {};
     const settings = response[indexName]?.settings?.index ?? {};
     const isInDataStream = Boolean(response[indexName]?.data_stream);
-    return { aliases, settings, isInDataStream };
+
+    // Check if the index is a follower index
+    let isFollowerIndex = false;
+    try {
+      const ccrResponse = await esClient.ccr.followInfo({ index: indexName });
+      isFollowerIndex = ccrResponse.follower_indices?.length > 0;
+    } catch (err) {
+      // If the API returns a 404, it means the index is not a follower index
+      // Any other error should be ignored and we'll default to false
+      isFollowerIndex = false;
+    }
+
+    return { aliases, settings, isInDataStream, isFollowerIndex };
   };
 
   const isIndexHidden = async (indexName: string) => {
@@ -375,19 +388,49 @@ export const reindexServiceFactory = (
 
   /**
    * Restores the original index settings in the new index that had other defaults for reindexing performance reasons
+   * Also removes any deprecated index settings found in warnings
    * @param reindexOp
    */
   const restoreIndexSettings = async (reindexOp: ReindexSavedObject) => {
-    const { newIndexName, backupSettings } = reindexOp.attributes;
+    const { newIndexName, backupSettings, indexName } = reindexOp.attributes;
+
+    // Build settings to restore or remove
+    const settingsToApply: Record<string, any> = {
+      // Defaulting to null in case the original setting was empty to remove the setting.
+      'index.number_of_replicas': null,
+      'index.refresh_interval': null,
+      ...backupSettings,
+    };
+
+    // Get the warnings for this index to check for deprecated settings
+    const flatSettings = await actions.getFlatSettings(indexName);
+    const warnings = flatSettings ? getReindexWarnings(flatSettings) : undefined;
+    const indexSettingsWarning = warnings?.find(
+      (warning) =>
+        warning.warningType === 'indexSetting' &&
+        (warning.flow === 'reindex' || warning.flow === 'all')
+    );
+
+    // If there are deprecated settings, set them to null to remove them
+    if (indexSettingsWarning?.meta?.deprecatedSettings) {
+      const deprecatedSettings = indexSettingsWarning.meta.deprecatedSettings as string[];
+      for (const setting of deprecatedSettings) {
+        settingsToApply[setting] = null;
+      }
+      log.info(
+        `Removing deprecated settings ${deprecatedSettings.join(
+          ', '
+        )} from reindexed index ${newIndexName}`
+      );
+    }
 
     const settingsResponse = await esClient.indices.putSettings({
       index: newIndexName,
-      settings: {
-        // Defaulting to null in case the original setting was empty to remove the setting.
-        'index.number_of_replicas': null,
-        'index.refresh_interval': null,
-        ...backupSettings,
-      },
+      settings: settingsToApply,
+      // Any static settings that would ordinarily only be updated on closed indices
+      // will be updated by automatically closing and reopening the affected indices.
+      // @ts-ignore - This is not in the ES types, but it is a valid option
+      reopen: true,
     });
 
     if (!settingsResponse.acknowledged) {

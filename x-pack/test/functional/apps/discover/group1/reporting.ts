@@ -121,7 +121,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return decodeURIComponent((await copyButton.getAttribute('data-share-url')) ?? '');
   };
 
-  describe('Discover CSV Export', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/219807
+  describe.skip('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
