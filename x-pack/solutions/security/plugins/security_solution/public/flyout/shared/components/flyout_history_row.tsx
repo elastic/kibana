@@ -99,17 +99,12 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
         />
       );
     case MisconfigurationFindingsPanelKey:
-      return (
-        <GenericHistoryRow
-          item={item}
-          index={index}
-          title={String(item?.panel?.params?.resourceId)}
-          icon={'document'}
-          name={'Resource Id'}
-          dataTestSubj={MISCONFIGURATION_HISTORY_ROW_TEST_ID}
-        />
-      );
     case VulnerabilityFindingsPanelKey:
+      const TEST_ID =
+        item.panel.id === MisconfigurationFindingsPanelKey
+          ? MISCONFIGURATION_HISTORY_ROW_TEST_ID
+          : VULNERABILITY_HISTORY_ROW_TEST_ID;
+
       return (
         <GenericHistoryRow
           item={item}
@@ -117,7 +112,7 @@ export const FlyoutHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item, index }
           title={String(item?.panel?.params?.resourceId)}
           icon={'document'}
           name={'Resource Id'}
-          dataTestSubj={VULNERABILITY_HISTORY_ROW_TEST_ID}
+          dataTestSubj={TEST_ID}
         />
       );
     default:
