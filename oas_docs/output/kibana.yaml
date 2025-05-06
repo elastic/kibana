@@ -1347,6 +1347,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -2179,7 +2188,17 @@ paths:
                             type: string
                         required:
                           - id
+                      maxItems: 10
                       type: array
+                    investigation_guide:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        blob:
+                          maxLength: 1000
+                          type: string
+                      required:
+                        - blob
                 consumer:
                   description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                   type: string
@@ -2724,6 +2743,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -3432,7 +3460,17 @@ paths:
                             type: string
                         required:
                           - id
+                      maxItems: 10
                       type: array
+                    investigation_guide:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        blob:
+                          maxLength: 1000
+                          type: string
+                      required:
+                        - blob
                 flapping:
                   additionalProperties: false
                   description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
@@ -3738,6 +3776,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -5141,6 +5188,15 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          blob:
+                            description: User-created content that describes alert causes and remdiation.
+                            type: string
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -22798,6 +22854,68 @@ paths:
                   - message
                   - attributes
       summary: Update an agent policy
+      tags:
+        - Elastic Agent policies
+  /api/fleet/agent_policies/{agentPolicyId}/auto_upgrade_agents_status:
+    get:
+      description: 'Get auto upgrade agent status<br/><br/>[Required authorization] Route required privileges: fleet-agents-read.'
+      operationId: get-fleet-agent-policies-agentpolicyid-auto-upgrade-agents-status
+      parameters:
+        - in: path
+          name: agentPolicyId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  currentVersions:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        agents:
+                          type: number
+                        failedUpgradeAgents:
+                          type: number
+                        version:
+                          type: string
+                      required:
+                        - version
+                        - agents
+                        - failedUpgradeAgents
+                    type: array
+                  totalAgents:
+                    type: number
+                required:
+                  - currentVersions
+                  - totalAgents
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Get auto upgrade agent status
       tags:
         - Elastic Agent policies
   /api/fleet/agent_policies/{agentPolicyId}/copy:
