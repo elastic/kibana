@@ -8,9 +8,14 @@
 import type { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import type { InfraCustomDashboard } from '../../../common/custom_dashboards';
-
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 export const INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE = 'infra-custom-dashboards';
+
+interface InfraCustomDashboard {
+  dashboardSavedObjectId: string;
+  assetType: InventoryItemType;
+  dashboardFilterAssetIdEnabled: boolean;
+}
 
 const properties: Record<keyof InfraCustomDashboard, SavedObjectsFieldMapping> = {
   assetType: {
