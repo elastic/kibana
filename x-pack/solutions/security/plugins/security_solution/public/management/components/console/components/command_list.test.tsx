@@ -36,9 +36,8 @@ describe('When rendering the command list (help output)', () => {
       renderAndOpenHelpPanel = (props) => {
         render(props);
         helpPanelSelectors = getHelpSidePanelSelectorsAndActionsMock(renderResult);
-        act(() => {
-          consoleSelectors.openHelpPanel();
-        });
+
+        consoleSelectors.openHelpPanel();
 
         return renderResult;
       };
@@ -61,9 +60,7 @@ describe('When rendering the command list (help output)', () => {
 
     it('should close the side panel when close button is clicked', () => {
       renderAndOpenHelpPanel();
-      act(() => {
-        consoleSelectors.closeHelpPanel();
-      });
+      consoleSelectors.closeHelpPanel();
 
       expect(renderResult.queryByTestId('test-sidePanel')).toBeNull();
     });

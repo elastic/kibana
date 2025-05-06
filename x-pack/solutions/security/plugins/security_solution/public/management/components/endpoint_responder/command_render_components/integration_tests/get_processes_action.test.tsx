@@ -15,7 +15,7 @@ import React from 'react';
 import { getEndpointConsoleCommands } from '../../lib/console_commands_definition';
 import { responseActionsHttpMocks } from '../../../../mocks/response_actions_http_mocks';
 import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
 import type {
@@ -304,9 +304,7 @@ describe('When using processes action from response actions console', () => {
 
     it('should display correct entry in help panel', async () => {
       await render();
-      act(() => {
-        consoleSelectors.openHelpPanel();
-      });
+      consoleSelectors.openHelpPanel();
 
       expect(
         renderResult.getByTestId('test-commandList-Responseactions-processes')
@@ -346,9 +344,7 @@ describe('When using processes action from response actions console', () => {
 
       it('should not display `processes` command in console help', async () => {
         await render();
-        act(() => {
-          consoleSelectors.openHelpPanel();
-        });
+        consoleSelectors.openHelpPanel();
 
         expect(renderResult.queryByTestId('test-commandList-Responseactions-processes')).toBeNull();
       });
