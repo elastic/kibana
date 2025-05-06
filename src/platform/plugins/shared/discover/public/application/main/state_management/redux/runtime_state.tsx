@@ -65,7 +65,7 @@ export const selectTabRuntimeAppState = (
   tabId: string
 ) => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-  return tabRuntimeState.stateContainer$.getValue()?.appState?.getState();
+  return tabRuntimeState?.stateContainer$.getValue()?.appState?.getState();
 };
 
 export const selectTabRuntimeGlobalState = (
@@ -73,7 +73,7 @@ export const selectTabRuntimeGlobalState = (
   tabId: string
 ): TabState['lastPersistedGlobalState'] | undefined => {
   const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-  const globalState = tabRuntimeState.stateContainer$.getValue()?.globalState?.get();
+  const globalState = tabRuntimeState?.stateContainer$.getValue()?.globalState?.get();
 
   if (!globalState) {
     return undefined;
