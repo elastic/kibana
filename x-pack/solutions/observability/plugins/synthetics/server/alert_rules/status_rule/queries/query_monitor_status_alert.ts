@@ -82,32 +82,38 @@ const getPendingConfigs = async ({
     }
   }
 
-  // Get the last ping for the pending configs in the last month
-  const params = getSearchPingsParams({
-    idSize: Array.from(idsToQuery).length,
-    idsToQuery: Array.from(idsToQuery),
-    monitorLocationIds: Array.from(locationsToQuery),
-    numberOfChecks: 1,
-    includeRetests,
-    range: { from: moment().subtract(1, 'M').toISOString(), to: 'now' },
-  });
+  const newIdsToQuery = Array.from(idsToQuery);
 
-  const {
-    body: { aggregations },
-  } = await esClient.search<OverviewPing, typeof params>(params);
-
-  aggregations?.id.buckets.forEach(({ location, key: monitorQueryId }) => {
-    location.buckets.forEach(({ key: locationId, totalChecks }) => {
-      const latestPing = totalChecks.hits.hits[0]._source;
-      const configWithLocationId = `${monitorQueryId}-${locationId}`;
-
-      pendingConfigs[configWithLocationId] = {
-        ...pendingConfigs[configWithLocationId],
-        ping: latestPing,
-        timestamp: latestPing['@timestamp'],
-      };
+  if (newIdsToQuery.length) {
+    // Get the last ping for the pending configs in the last month
+    const params = getSearchPingsParams({
+      idSize: newIdsToQuery.length,
+      idsToQuery: newIdsToQuery,
+      monitorLocationIds: Array.from(locationsToQuery),
+      numberOfChecks: 1,
+      includeRetests,
+      range: { from: moment().subtract(1, 'M').toISOString(), to: 'now' },
     });
-  });
+
+    const {
+      body: { aggregations },
+    } = await esClient.search<OverviewPing, typeof params>(params);
+
+    aggregations?.id.buckets.forEach(({ location, key: monitorQueryId }) => {
+      location.buckets.forEach(({ key: locationId, totalChecks }) => {
+        const latestPing = totalChecks.hits.hits[0]._source;
+        const configWithLocationId = `${monitorQueryId}-${locationId}`;
+
+        if (pendingConfigs[configWithLocationId]) {
+          pendingConfigs[configWithLocationId] = {
+            ...pendingConfigs[configWithLocationId],
+            ping: latestPing,
+            timestamp: latestPing['@timestamp'],
+          };
+        }
+      });
+    });
+  }
 
   return pendingConfigs;
 };
