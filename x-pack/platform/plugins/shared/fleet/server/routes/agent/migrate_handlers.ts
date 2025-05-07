@@ -15,7 +15,7 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof MigrateSingleAgentRequestSchema.body>
 > = async (context, request, response) => {
-  const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+  const [coreContext] = await Promise.all([context.core, context.fleet]);
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   const options = request.body;
@@ -34,7 +34,10 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
       throw new Error(`Agent is protected and cannot be migrated`);
     }
 
-    const body = await AgentService.migrateSingleAgent(esClient, request.params.agentId, options);
+    const body = await AgentService.migrateSingleAgent(esClient, request.params.agentId, {
+      ...options,
+      policyId: agentPolicy?.id,
+    });
     return response.ok({ body });
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {

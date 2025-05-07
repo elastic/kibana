@@ -61,6 +61,7 @@ export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTup
 export interface NewAgentAction {
   type: AgentActionType;
   data?: any;
+  additionalProperties?: any;
   ack_data?: any;
   sent_at?: string;
   agents: string[];

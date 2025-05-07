@@ -69,6 +69,14 @@ export async function createAgentAction(
     traceparent: apm.currentTraceparent,
     is_automatic: newAgentAction.is_automatic,
     policyId: newAgentAction.policyId,
+    properties: {
+      id: actionId,
+      type: newAgentAction.type,
+      policy_id: newAgentAction.additionalProperties.policyId,
+      target_uri: newAgentAction.additionalProperties.uri,
+      enrollment_token: newAgentAction.additionalProperties.enrollment_token,
+      settings: { description: newAgentAction.additionalProperties?.settings || {} },
+    },
   };
 
   const messageSigningService = appContextService.getMessageSigningService();
@@ -79,7 +87,7 @@ export async function createAgentAction(
       signature: signedBody.signature,
     };
   }
-
+  console.log('the new agent action is', body);
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
     id: uuidv4(),

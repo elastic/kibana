@@ -547,6 +547,9 @@ export const MigrateSingleAgentRequestSchema = {
     settings: schema.maybe(schema.object(MigrateOptionsSchema)),
   }),
 };
+export const MigrateSingleAgentResponseSchema = schema.object({
+  actionId: schema.string(),
+});
 
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({

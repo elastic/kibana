@@ -35,6 +35,7 @@ import {
   PostRetrieveAgentsByActionsRequestSchema,
   DeleteAgentUploadFileRequestSchema,
   GetTagsResponseSchema,
+  MigrateSingleAgentResponseSchema,
 } from '../../types';
 import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
@@ -145,7 +146,14 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         version: API_VERSIONS.public.v1,
         validate: {
           request: MigrateSingleAgentRequestSchema,
-          response: {},
+          response: {
+            200: {
+              body: () => MigrateSingleAgentResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
         },
       },
       migrateSingleAgentHandler
