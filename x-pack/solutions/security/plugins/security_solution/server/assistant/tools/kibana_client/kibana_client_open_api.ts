@@ -28,13 +28,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 export const kibanaServerlessOpenApiSpec = path.resolve(
   REPO_ROOT,
-  __dirname,
-  '../../../../../../../../../oas_docs/output/kibana.serverless.yaml'
+  './oas_docs/output/kibana.serverless.yaml'
 );
 export const kibanaOpenApiSpec = path.resolve(
   REPO_ROOT,
-  __dirname,
-  '../../../../../../../../../oas_docs/output/kibana.yaml'
+  './oas_docs/output/kibana.yaml'
 );
 
 const defaultOptions: Options = {

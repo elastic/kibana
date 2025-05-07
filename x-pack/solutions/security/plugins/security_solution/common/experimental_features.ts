@@ -111,7 +111,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables Kibana client tools
    */
-  kibanaClientToolEnabled: false,
+  kibanaClientToolEnabled: true,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
