@@ -27,14 +27,17 @@ export enum WarningLevels {
   WARNING = 'warning',
   CRITICAL = 'critical',
   FETCH_ERROR = 'fetch_error',
-};
+}
 
 export interface DeprecationBadgeProps {
   level: WarningLevels;
   isResolved?: boolean;
 }
 
-export const DeprecationBadge: FunctionComponent<DeprecationBadgeProps> = ({ level, isResolved }) => {
+export const DeprecationBadge: FunctionComponent<DeprecationBadgeProps> = ({
+  level,
+  isResolved,
+}) => {
   if (isResolved) {
     return (
       <EuiBadge color="success" data-test-subj="resolvedDeprecationBadge">
