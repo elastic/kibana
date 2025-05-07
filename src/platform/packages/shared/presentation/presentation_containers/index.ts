@@ -8,18 +8,9 @@
  */
 
 export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/can_add_new_panel';
-export {
-  apiHasRuntimeChildState,
-  apiHasSerializedChildState,
-  type HasRuntimeChildState,
-  type HasSerializedChildState,
-} from './interfaces/child_state';
+export { apiHasSerializedChildState, type HasSerializedChildState } from './interfaces/child_state';
 export { childrenUnsavedChanges$ } from './interfaces/unsaved_changes/children_unsaved_changes';
 export { initializeUnsavedChanges } from './interfaces/unsaved_changes/initialize_unsaved_changes';
-export {
-  apiHasSaveNotification,
-  type HasSaveNotification,
-} from './interfaces/has_save_notification';
 export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
@@ -30,6 +21,10 @@ export {
   canTrackContentfulRender,
   type TrackContentfulRender,
 } from './interfaces/performance_trackers';
+export {
+  type HasLastSavedChildState,
+  apiHasLastSavedChildState,
+} from './interfaces/last_saved_child_state';
 export {
   apiIsPresentationContainer,
   combineCompatibleChildrenApis,

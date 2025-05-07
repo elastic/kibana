@@ -11244,18 +11244,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:apmEnableServiceMetrics": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:apmEnableContinuousRollups": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "observability:apmEnableTableSearchBar": {
           "type": "boolean",
           "_meta": {
@@ -11421,12 +11409,6 @@
             "description": "Non-default value of setting."
           }
         },
-        "observability:enableAwsLambdaMetrics": {
-          "type": "boolean",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
         "observability:apmProgressiveLoading": {
           "type": "keyword",
           "_meta": {
@@ -11435,12 +11417,6 @@
         },
         "observability:apmServiceGroupMaxNumberOfServices": {
           "type": "long",
-          "_meta": {
-            "description": "Non-default value of setting."
-          }
-        },
-        "observability:apmTraceExplorerTab": {
-          "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
           }

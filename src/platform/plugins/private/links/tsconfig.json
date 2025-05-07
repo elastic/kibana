@@ -40,7 +40,6 @@
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/presentation-panel-plugin",
-    "@kbn/embeddable-enhanced-plugin",
     "@kbn/share-plugin",
     "@kbn/es-query"
   ],
