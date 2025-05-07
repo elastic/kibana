@@ -1911,6 +1911,8 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test_serverless/**/test_suites/common/saved_objects_management/ @elastic/kibana-core
 /x-pack/test_serverless/api_integration/test_suites/common/core/ @elastic/kibana-core
 /x-pack/test_serverless/api_integration/test_suites/**/telemetry/ @elastic/kibana-core
+/src/cli/serve/config_snapshots.test.js
+/src/cli/serve/__snapshots__/config_snapshots.test.js.snap
 /x-pack/test/functional/es_archives/cases/migrations/8.8.0 @elastic/response-ops
 
 #CC# /src/core/server/csp/ @elastic/kibana-core
