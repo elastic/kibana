@@ -68,27 +68,31 @@ Object {
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="Time"
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
                   >
-                    Time
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="Time"
+                    >
+                      Time
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
             <th
               aria-sort="descending"
@@ -97,26 +101,30 @@ Object {
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="CPU"
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                   >
-                    CPU
-                  </span>
-                  <span
-                    class="euiTableSortIcon"
-                    data-euiicon-type="sortDown"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="CPU"
+                    >
+                      CPU
+                    </span>
+                    <span
+                      class="euiTableSortIcon"
+                      data-euiicon-type="sortDown"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
             <th
               aria-sort="none"
@@ -125,27 +133,31 @@ Object {
               role="columnheader"
               scope="col"
             >
-              <button
-                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                data-test-subj="tableHeaderSortButton"
-                type="button"
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
               >
-                <div
-                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                <button
+                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
                 >
-                  <span
-                    class="eui-textTruncate"
-                    title="Mem."
+                  <div
+                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                   >
-                    Mem.
-                  </span>
-                  <span
-                    class="euiTableSortIcon euiTableSortIcon--sortable"
-                    color="subdued"
-                    data-euiicon-type="sortable"
-                  />
-                </div>
-              </button>
+                    <span
+                      class="eui-textTruncate"
+                      title="Mem."
+                    >
+                      Mem.
+                    </span>
+                    <span
+                      class="euiTableSortIcon euiTableSortIcon--sortable"
+                      color="subdued"
+                      data-euiicon-type="sortable"
+                    />
+                  </div>
+                </button>
+              </span>
             </th>
           </tr>
         </thead>
@@ -163,6 +175,7 @@ Object {
               >
                 <button
                   aria-expanded="false"
+                  aria-label="Expand process details"
                   class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
                   data-test-subj="infraProcessRowButton"
                   type="button"
@@ -333,27 +346,31 @@ Object {
             role="columnheader"
             scope="col"
           >
-            <button
-              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-              data-test-subj="tableHeaderSortButton"
-              type="button"
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
             >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
               >
-                <span
-                  class="eui-textTruncate"
-                  title="Time"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-right-euiTableHeaderCell__content"
                 >
-                  Time
-                </span>
-                <span
-                  class="euiTableSortIcon euiTableSortIcon--sortable"
-                  color="subdued"
-                  data-euiicon-type="sortable"
-                />
-              </div>
-            </button>
+                  <span
+                    class="eui-textTruncate"
+                    title="Time"
+                  >
+                    Time
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </span>
           </th>
           <th
             aria-sort="descending"
@@ -362,26 +379,30 @@ Object {
             role="columnheader"
             scope="col"
           >
-            <button
-              class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-              data-test-subj="tableHeaderSortButton"
-              type="button"
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
             >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              <button
+                class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
               >
-                <span
-                  class="eui-textTruncate"
-                  title="CPU"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                 >
-                  CPU
-                </span>
-                <span
-                  class="euiTableSortIcon"
-                  data-euiicon-type="sortDown"
-                />
-              </div>
-            </button>
+                  <span
+                    class="eui-textTruncate"
+                    title="CPU"
+                  >
+                    CPU
+                  </span>
+                  <span
+                    class="euiTableSortIcon"
+                    data-euiicon-type="sortDown"
+                  />
+                </div>
+              </button>
+            </span>
           </th>
           <th
             aria-sort="none"
@@ -390,27 +411,31 @@ Object {
             role="columnheader"
             scope="col"
           >
-            <button
-              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-              data-test-subj="tableHeaderSortButton"
-              type="button"
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
             >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
               >
-                <span
-                  class="eui-textTruncate"
-                  title="Mem."
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                 >
-                  Mem.
-                </span>
-                <span
-                  class="euiTableSortIcon euiTableSortIcon--sortable"
-                  color="subdued"
-                  data-euiicon-type="sortable"
-                />
-              </div>
-            </button>
+                  <span
+                    class="eui-textTruncate"
+                    title="Mem."
+                  >
+                    Mem.
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </span>
           </th>
         </tr>
       </thead>
@@ -428,6 +453,7 @@ Object {
             >
               <button
                 aria-expanded="false"
+                aria-label="Expand process details"
                 class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary"
                 data-test-subj="infraProcessRowButton"
                 type="button"

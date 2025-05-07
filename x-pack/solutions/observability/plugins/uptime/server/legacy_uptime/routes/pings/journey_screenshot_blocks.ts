@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { IKibanaResponse } from '@kbn/core/server';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import { schema } from '@kbn/config-schema';
 import { getJourneyScreenshotBlocks } from '../../lib/requests/get_journey_screenshot_blocks';
 import { UMServerLibs } from '../../lib/lib';

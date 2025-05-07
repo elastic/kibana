@@ -15,7 +15,7 @@ export const agentSoType: SavedObjectsType<AgentAttributes> = {
   hidden: true,
   namespaceType: 'agnostic',
   mappings: {
-    dynamic: 'strict',
+    dynamic: false,
     properties: {
       agent_id: { type: 'keyword' },
       agent_name: { type: 'text' },
@@ -43,5 +43,9 @@ export interface AgentAttributes {
   user_name: string;
   access_control: {
     public: boolean;
+  };
+  avatar: {
+    color?: string;
+    text?: string;
   };
 }

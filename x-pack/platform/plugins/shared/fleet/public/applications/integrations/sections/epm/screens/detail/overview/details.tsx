@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
@@ -17,6 +17,7 @@ import {
   EuiLink,
   EuiPortal,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
@@ -32,10 +33,11 @@ import type {
   RegistryPolicyIntegrationTemplate,
 } from '../../../../../types';
 import { entries } from '../../../../../types';
-import { useGetCategoriesQuery } from '../../../../../hooks';
+import { useGetCategoriesQuery, useStartServices } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssetsFromPackageInfo, ServiceTitleMap } from '../../../constants';
 
 import { ChangelogModal } from '../settings/changelog_modal';
+import { useChangelog } from '../hooks';
 
 import { NoticeModal } from './notice_modal';
 import { LicenseModal } from './license_modal';
@@ -65,7 +67,13 @@ const Replacements = euiStyled(EuiFlexItem)`
 `;
 
 export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) => {
+  const { notifications } = useStartServices();
   const { data: categoriesData, isLoading: isLoadingCategories } = useGetCategoriesQuery();
+  const {
+    changelog,
+    isLoading: isChangelogLoading,
+    error: changelogError,
+  } = useChangelog(packageInfo.name, packageInfo.version);
 
   const mergedCategories: Array<string | undefined> = useMemo(() => {
     let allCategories: Array<string | undefined> = [];
@@ -276,7 +284,11 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
       description: (
         <>
           <p>
-            <EuiLink onClick={toggleChangelogModal}>View Changelog</EuiLink>
+            {changelog.length > 0 ? (
+              <EuiLink onClick={toggleChangelogModal}>View Changelog</EuiLink>
+            ) : (
+              '-'
+            )}
           </p>
         </>
       ),
@@ -284,6 +296,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
 
     return items;
   }, [
+    changelog,
     packageCategories,
     packageInfo.assets,
     packageInfo.conditions?.elastic?.subscription,
@@ -298,6 +311,16 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     toggleNoticeModal,
     toggleChangelogModal,
   ]);
+
+  useEffect(() => {
+    if (changelogError) {
+      notifications.toasts.addError(changelogError, {
+        title: i18n.translate('xpack.fleet.epm.errorLoadingChangelog', {
+          defaultMessage: 'Error loading changelog information',
+        }),
+      });
+    }
+  }, [changelogError, notifications.toasts]);
 
   return (
     <>
@@ -318,8 +341,8 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
       <EuiPortal>
         {isChangelogModalOpen && (
           <ChangelogModal
-            latestVersion={packageInfo.version}
-            packageName={packageInfo.name}
+            changelog={changelog}
+            isLoading={isChangelogLoading}
             onClose={toggleChangelogModal}
           />
         )}

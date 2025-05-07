@@ -77,10 +77,12 @@ export default function (providerContext: FtrProviderContext) {
     orchestrator: {
       cluster: { id: 'Upper case cluster id' },
     },
+    data_stream: {
+      dataset: 'cloud_security_posture.findings',
+    },
   });
 
-  // Failing: See https://github.com/elastic/kibana/issues/217399
-  describe.skip('GET /internal/cloud_security_posture/benchmarks', () => {
+  describe('GET /internal/cloud_security_posture/benchmarks', () => {
     describe('Get Benchmark API', async () => {
       beforeEach(async () => {
         await findingsIndex.deleteAll();

@@ -9,18 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiIcon, EuiInMemoryTable } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import {
-  isRootStreamDefinition,
-  isUnwiredStreamDefinition,
-  getSegments,
-  isDescendantOf,
-} from '@kbn/streams-schema';
+import { isRootStreamDefinition, getSegments, isDescendantOf, Streams } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { RetentionColumn } from './retention_column';
-import { useTimeFilter } from '../../hooks/use_timefilter';
 
 export function StreamsTreeTable({
   loading,
@@ -31,7 +25,6 @@ export function StreamsTreeTable({
 }) {
   const router = useStreamsAppRouter();
   const items = React.useMemo(() => flattenTrees(asTrees(streams ?? [])), [streams]);
-  const { timeRange, setTimeRange, refreshAbsoluteTimeRange } = useTimeFilter();
 
   return (
     <EuiInMemoryTable
@@ -100,21 +93,7 @@ export function StreamsTreeTable({
         box: {
           incremental: true,
         },
-        toolsRight: (
-          <StreamsAppSearchBar
-            onQuerySubmit={({ dateRange }, isUpdate) => {
-              if (dateRange) {
-                setTimeRange(dateRange);
-                if (!isUpdate) {
-                  refreshAbsoluteTimeRange();
-                }
-              }
-            }}
-            onRefresh={refreshAbsoluteTimeRange}
-            dateRangeFrom={timeRange.from}
-            dateRangeTo={timeRange.to}
-          />
-        ),
+        toolsRight: <StreamsAppSearchBar showDatePicker />,
       }}
     />
   );
@@ -150,7 +129,7 @@ export function asTrees(streams: ListStreamDetail[]) {
         ...streamDetail,
         name: streamDetail.stream.name,
         children: [],
-        type: isUnwiredStreamDefinition(streamDetail.stream)
+        type: Streams.UnwiredStream.Definition.is(streamDetail.stream)
           ? 'classic'
           : isRootStreamDefinition(streamDetail.stream)
           ? 'root'

@@ -14,10 +14,11 @@ import type { FleetSetup } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
+  FindingMisconfigurationFlyoutContentProps,
   FindingMisconfigurationFlyoutFooterProps,
-  FindingMisconfigurationFlyoutProps,
   FindingsMisconfigurationFlyoutContentProps,
   FindingsMisconfigurationFlyoutHeaderProps,
+  FindingsMisconfigurationPanelExpandableFlyoutProps,
 } from '@kbn/cloud-security-posture';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
@@ -43,7 +44,11 @@ export interface CspClientPluginStart {
   getCloudSecurityPostureRouter(): ComponentType<CspRouterProps>;
   // getCloudSecurityPostureMisconfigurationFlyout: () => React.JSX.Element;
   getCloudSecurityPostureMisconfigurationFlyout: () => {
-    Component: React.FC<FindingMisconfigurationFlyoutProps>;
+    Component: React.FC<
+      FindingsMisconfigurationPanelExpandableFlyoutProps['params'] & {
+        children?: (props: FindingMisconfigurationFlyoutContentProps) => ReactNode;
+      }
+    >;
     Header: React.FC<FindingsMisconfigurationFlyoutHeaderProps>;
     Body: React.FC<FindingsMisconfigurationFlyoutContentProps>;
     Footer: React.FC<FindingMisconfigurationFlyoutFooterProps>;

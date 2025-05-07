@@ -8,7 +8,7 @@
  */
 
 import { ESQLAstTimeseriesCommand, ESQLMessage } from '@kbn/esql-ast';
-import { ESQLFunction, ESQLSource } from '@kbn/esql-ast/src/types';
+import { ESQLFunction } from '@kbn/esql-ast/src/types';
 import {
   isAggFunction,
   isFunctionOperatorParam,
@@ -16,7 +16,7 @@ import {
 } from '../../../shared/helpers';
 import { ReferenceMaps } from '../../types';
 import { isFunctionItem, isLiteralItem } from '../../../..';
-import { validateSource } from '../../validation';
+import { validateSources } from '../../validation';
 
 /**
  * Validates the TIMESERIES source command:
@@ -57,16 +57,6 @@ const findNestedAggFunctionInAggFunction = (agg: ESQLFunction): ESQLFunction | u
     }
   }
 };
-
-function validateSources(sources: ESQLSource[], references: ReferenceMaps): ESQLMessage[] {
-  const messages: ESQLMessage[] = [];
-
-  for (const source of sources) {
-    messages.push(...validateSource(source, references));
-  }
-
-  return messages;
-}
 
 /**
  * Looks for first nested aggregate function in another aggregate a function,

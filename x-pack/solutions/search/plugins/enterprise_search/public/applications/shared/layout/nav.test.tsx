@@ -29,8 +29,8 @@ const baseNavItems = [
     items: undefined,
   }),
   {
-    'data-test-subj': 'searchSideNav-Content',
-    id: 'content',
+    'data-test-subj': 'searchSideNav-Data',
+    id: 'data',
     items: [
       {
         'data-test-subj': 'searchSideNav-Indices',
@@ -54,7 +54,7 @@ const baseNavItems = [
         name: 'Web Crawlers',
       },
     ],
-    name: 'Content',
+    name: 'Data',
   },
   {
     'data-test-subj': 'searchSideNav-Build',

@@ -26,6 +26,7 @@
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-user-profile-browser",
+    "@kbn/datemath",
   ],
   "exclude": [
     "target/**/*",

@@ -22,13 +22,13 @@ import {
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
-import {
-  addSampleDocsToInternalKb,
-  clearKnowledgeBase,
-  deleteKnowledgeBaseModel,
-  setupKnowledgeBase,
-} from '../../utils/knowledge_base';
+import { addSampleDocsToInternalKb, clearKnowledgeBase } from '../../utils/knowledge_base';
 import { chatComplete } from '../../utils/conversation';
+import {
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../../utils/model_and_inference';
+import { restoreIndexAssets } from '../../utils/index_assets';
 
 const screenContexts = [
   {
@@ -84,12 +84,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: llmProxy.getPort(),
       });
-      await setupKnowledgeBase(getService);
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      await deployTinyElserAndSetupKb(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
 
       ({ getDocuments } = llmProxy.interceptScoreToolChoice(log));
 
-      void llmProxy.interceptConversation('Your favourite color is blue.');
+      void llmProxy.interceptWithResponse('Your favourite color is blue.');
 
       ({ messageAddedEvents } = await chatComplete({
         userPrompt,
@@ -107,7 +108,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         actionId: connectorId,
       });
 
-      await deleteKnowledgeBaseModel(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
     });
 
@@ -158,7 +159,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const extractedDocs = await getDocuments();
           const expectedTexts = sampleDocsForInternalKb.map((doc) => doc.text).sort();
           const actualTexts = extractedDocs.map((doc) => doc.text).sort();
-
           expect(actualTexts).to.eql(expectedTexts);
         });
       });

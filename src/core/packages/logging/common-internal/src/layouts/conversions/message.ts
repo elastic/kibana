@@ -8,6 +8,7 @@
  */
 
 import { LogRecord } from '@kbn/logging';
+import { takeWhile } from 'lodash';
 import { Conversion } from './types';
 
 // From https://www.ascii-code.com/characters/control-characters,
@@ -18,7 +19,10 @@ export const MessageConversion: Conversion = {
   pattern: /%message/g,
   convert(record: LogRecord) {
     // Error stack is much more useful than just the message.
-    let str = record.error?.stack || record.message;
+    let str = record.message;
+    if (record.error) {
+      str = getErrorMessage(record.error);
+    }
     // typings may be wrong, there's scenarios where the message is not a plain string (e.g error stacks from the ES client)
     if (typeof str !== 'string') {
       str = String(str);
@@ -34,3 +38,31 @@ export const MessageConversion: Conversion = {
     );
   },
 };
+
+function getErrorMessage(error: Error): string {
+  if (error instanceof AggregateError) {
+    return getAggregateErrorMessage(error);
+  }
+  return error.stack ?? error.message;
+}
+
+// Aggregate errors by default will only produce the
+// aggregate error's stack. `getAggregateErrorMessage`
+// also outputs the part of the _aggregated_ errors
+// stack traces that is not shared with the aggregate
+// error's stack trace.
+function getAggregateErrorMessage(error: AggregateError): string {
+  const [head, ...tail] = error.stack?.split('\n') ?? [];
+
+  const trimmedLines = tail.map((line) => line.trim());
+
+  return [
+    `${head}. Caused by:`,
+    ...error.errors.map((cause) =>
+      takeWhile(getErrorMessage(cause).split('\n'), (line) => !trimmedLines.includes(line.trim()))
+        .map((line) => `    > ${line.replace(/^\s*/, '')}`)
+        .join('\n')
+    ),
+    ...tail,
+  ].join('\n');
+}

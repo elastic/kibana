@@ -140,6 +140,18 @@ export interface LogsEndpointAction<
   '@timestamp': string;
   agent: {
     id: string | string[];
+    /**
+     * Policy information for each of the agents that the response action was sent to.
+     * Added in support of space awareness.
+     */
+    policy: Array<{
+      /** The agent id running on the host */
+      agentId: string;
+      /** The elastic agent id that ingested the data. This will be different from `agentId` for 3rd party EDRs */
+      elasticAgentId: string;
+      integrationPolicyId: string;
+      agentPolicyId: string;
+    }>;
   };
   EndpointActions: EndpointActionFields<TParameters, TOutputContent> & ActionRequestFields;
   error?: EcsError;
