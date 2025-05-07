@@ -49,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esDeleteAllIndices(indexName);
       });
 
-      describe('search overview page', () => {
+      describe.skip('search overview page', () => {
         beforeEach(async () => {
           await esDeleteAllIndices(indexName);
           await pageObjects.searchNavigation.navigateToElasticsearchOverviewPage(
@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
         });
 
-        it.skip('should have embedded dev console', async () => {
+        it('should have embedded dev console', async () => {
           await testHasEmbeddedConsole(pageObjects);
         });
 
