@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyString, NonEmptyTimestamp, User } from '../common_attributes.gen';
 
 /**
  * Reason why a prompt was skipped during the bulk action.
@@ -83,7 +83,7 @@ export const NormalizedPromptError = z.object({
 export type PromptResponse = z.infer<typeof PromptResponse>;
 export const PromptResponse = z.object({
   id: NonEmptyString,
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyTimestamp.optional(),
   /**
    * The name of the prompt.
    */

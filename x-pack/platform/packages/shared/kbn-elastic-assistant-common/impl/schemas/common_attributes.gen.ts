@@ -24,6 +24,12 @@ export type NonEmptyString = z.infer<typeof NonEmptyString>;
 export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
+ * A string that represents a timestamp in ISO 8601 format and does not contain only whitespace characters.
+ */
+export type NonEmptyTimestamp = z.infer<typeof NonEmptyTimestamp>;
+export const NonEmptyTimestamp = z.string().min(1).superRefine(isNonEmptyString);
+
+/**
  * A universally unique identifier.
  */
 export type UUID = z.infer<typeof UUID>;

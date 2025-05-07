@@ -178,7 +178,7 @@ components:
         id:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         timestamp:
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
         name:
           type: string
           description: The name of the prompt.

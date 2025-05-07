@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyTimestamp, NonEmptyString, User } from '../common_attributes.gen';
 
 /**
  * Trace Data
@@ -239,7 +239,7 @@ export const Message = z.object({
   /**
    * The timestamp message was sent or received.
    */
-  timestamp: NonEmptyString,
+  timestamp: NonEmptyTimestamp,
   /**
    * Is error message.
    */
@@ -287,7 +287,7 @@ export const ConversationSummary = z.object({
   /**
    * The timestamp summary was updated.
    */
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyTimestamp.optional(),
   /**
    * Define if summary is marked as publicly available.
    */
@@ -321,7 +321,7 @@ export const ConversationResponse = z.object({
    */
   category: ConversationCategory,
   summary: ConversationSummary.optional(),
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyTimestamp.optional(),
   /**
    * The last time conversation was updated.
    */

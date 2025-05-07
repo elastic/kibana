@@ -13,6 +13,14 @@ components:
       description: A string that does not contain only whitespace characters.
       example: "I am a string"
 
+
+    NonEmptyTimestamp:
+      type: string
+      format: nonempty
+      minLength: 1
+      description: A string that represents a timestamp in ISO 8601 format and does not contain only whitespace characters.
+      example: "2023-10-31T12:00:00Z"
+
     UUID:
       type: string
       format: uuid

@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString } from '../common_attributes.gen';
+import { NonEmptyString, NonEmptyTimestamp } from '../common_attributes.gen';
 
 /**
  * Reason why the anonymization field was not modified
@@ -87,7 +87,7 @@ export const AnonymizationFieldResponse = z.object({
   /**
    * Timestamp of the field creation
    */
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyTimestamp.optional(),
   /**
    * Field name
    */

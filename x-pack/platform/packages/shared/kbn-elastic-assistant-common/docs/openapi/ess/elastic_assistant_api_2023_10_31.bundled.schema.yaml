@@ -1519,7 +1519,7 @@ components:
           description: Kibana space
           type: string
         timestamp:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '#/components/schemas/NonEmptyTimestamp'
           description: Timestamp of the field creation
         updatedAt:
           description: Timestamp of the last update
@@ -1863,7 +1863,7 @@ components:
         summary:
           $ref: '#/components/schemas/ConversationSummary'
         timestamp:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '#/components/schemas/NonEmptyTimestamp'
         title:
           description: The conversation title.
           example: Security AI Assistant Setup
@@ -1903,7 +1903,7 @@ components:
           example: true
           type: boolean
         timestamp:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '#/components/schemas/NonEmptyTimestamp'
           description: The timestamp summary was updated.
           example: '2025-04-30T16:00:00Z'
     ConversationUpdateProps:
@@ -2558,7 +2558,7 @@ components:
           description: Message role.
           example: assistant
         timestamp:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '#/components/schemas/NonEmptyTimestamp'
           description: The timestamp message was sent or received.
           example: '2025-04-30T15:30:00Z'
         traceData:
@@ -2593,6 +2593,14 @@ components:
     NonEmptyString:
       description: A string that does not contain only whitespace characters.
       example: I am a string
+      format: nonempty
+      minLength: 1
+      type: string
+    NonEmptyTimestamp:
+      description: >-
+        A string that represents a timestamp in ISO 8601 format and does not
+        contain only whitespace characters.
+      example: '2023-10-31T12:00:00Z'
       format: nonempty
       minLength: 1
       type: string
@@ -2780,7 +2788,7 @@ components:
           $ref: '#/components/schemas/PromptType'
           description: The type of the prompt.
         timestamp:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '#/components/schemas/NonEmptyTimestamp'
         updatedAt:
           description: The timestamp of when the prompt was last updated.
           type: string

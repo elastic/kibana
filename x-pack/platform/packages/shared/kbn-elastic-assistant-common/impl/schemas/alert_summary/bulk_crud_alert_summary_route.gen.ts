@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyString, NonEmptyTimestamp, User } from '../common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
 
 export type AlertSummaryBulkActionSkipReason = z.infer<typeof AlertSummaryBulkActionSkipReason>;
@@ -47,7 +47,7 @@ export type AlertSummaryResponse = z.infer<typeof AlertSummaryResponse>;
 export const AlertSummaryResponse = z.object({
   id: NonEmptyString,
   alertId: NonEmptyString,
-  timestamp: NonEmptyString.optional(),
+  timestamp: NonEmptyTimestamp.optional(),
   summary: z.string(),
   recommendedActions: z.string().optional(),
   replacements: Replacements,

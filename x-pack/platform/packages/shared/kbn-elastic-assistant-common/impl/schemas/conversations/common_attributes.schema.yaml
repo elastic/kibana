@@ -244,7 +244,7 @@ components:
           description: Message role.
           example: 'assistant'
         timestamp:
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
           description: The timestamp message was sent or received.
           example: '2025-04-30T15:30:00Z'
         isError:
@@ -293,7 +293,7 @@ components:
           description: Summary text of the conversation over time.
           example: 'This conversation covered how to configure the Security AI Assistant.'
         timestamp:
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
           description: The timestamp summary was updated.
           example: '2025-04-30T16:00:00Z'
         public:
@@ -350,7 +350,7 @@ components:
         summary:
           $ref: '#/components/schemas/ConversationSummary'
         timestamp:
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
         updatedAt:
           description: The last time conversation was updated.
           type: string

@@ -187,7 +187,7 @@ components:
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
           description: The id of the anonymization field
         timestamp:
-          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyTimestamp'
           description: Timestamp of the field creation
         field:
           type: string
