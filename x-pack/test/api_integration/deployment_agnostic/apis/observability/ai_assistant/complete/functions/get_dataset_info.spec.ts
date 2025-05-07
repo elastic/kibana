@@ -44,6 +44,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
+    afterEach(async () => {
+      llmProxy.clear();
+    });
+
     // Calling `get_dataset_info` via the chat/complete endpoint
     describe('POST /internal/observability_ai_assistant/chat/complete', function () {
       let messageAddedEvents: MessageAddEvent[];
@@ -62,12 +66,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'get_dataset_info',
           arguments: () => JSON.stringify({ index: 'logs*' }),
-          when: () => true,
         });
 
         ({ getRelevantFields } = llmProxy.interceptSelectRelevantFieldsToolChoice());
 
-        void llmProxy.interceptConversation(`Yes, you do have logs. Congratulations! 🎈️🎈️🎈️`);
+        void llmProxy.interceptWithResponse(`Yes, you do have logs. Congratulations! 🎈️🎈️🎈️`);
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: USER_MESSAGE,
@@ -84,6 +87,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => {
         await logsSynthtraceEsClient.clean();
+      });
+
+      afterEach(async () => {
+        llmProxy.clear();
       });
 
       it('makes 3 requests to the LLM', () => {

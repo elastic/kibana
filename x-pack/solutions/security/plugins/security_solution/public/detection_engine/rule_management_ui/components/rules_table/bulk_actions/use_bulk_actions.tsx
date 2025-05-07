@@ -219,7 +219,10 @@ export const useBulkActions = ({
           ...(isAllSelected
             ? { query: convertRulesFilterToKQL(filterOptions) }
             : { ids: selectedRuleIds }),
-          runPayload: { start_date: new Date().toISOString() },
+          runPayload: {
+            start_date: new Date(Date.now() - 1000).toISOString(),
+            end_date: new Date().toISOString(),
+          },
         });
 
         setIsPreflightInProgress(false);

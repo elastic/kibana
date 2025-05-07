@@ -856,7 +856,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       });
     });
     describe('artifacts', () => {
-      describe('create rule with dashboards artifacts correctly', () => {
+      describe('create rule with dashboards artifacts correctly', function () {
+        this.tags('skipFIPS');
+
         it('should not return dashboards artifacts in the rule response', async () => {
           const response = await supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

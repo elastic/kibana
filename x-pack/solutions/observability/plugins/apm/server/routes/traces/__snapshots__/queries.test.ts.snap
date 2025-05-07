@@ -27,6 +27,7 @@ Object {
       "parent.id",
       "transaction.id",
       "span.id",
+      "span.destination.service.resource",
       "error.culprit",
       "error.log.message",
       "error.exception.message",

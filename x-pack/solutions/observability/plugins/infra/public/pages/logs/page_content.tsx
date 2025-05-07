@@ -83,7 +83,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
                 </EuiHeaderLink>
                 <LazyAlertDropdownWrapper />
                 <EuiHeaderLink
-                  href={onboardingLocator?.useUrl({ category: 'logs' })}
+                  href={onboardingLocator?.useUrl({ category: 'host' })}
                   color="primary"
                   iconType="indexOpen"
                 >

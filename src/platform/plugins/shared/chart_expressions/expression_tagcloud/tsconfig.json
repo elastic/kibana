@@ -29,6 +29,7 @@
     "@kbn/data-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/charts-theme",
+    "@kbn/ebt-tools",
   ],
   "exclude": [
     "target/**/*",
