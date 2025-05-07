@@ -25,6 +25,7 @@ export interface NameOverrides {
 
 export const getModelStateColor = (
   state: ModelState | undefined,
+  canStartStopTrainedModels: boolean,
   nameOverrides?: NameOverrides
 ): { color: EuiHealthProps['color']; name: string; component?: React.ReactNode } | null => {
   switch (state) {
@@ -108,19 +109,28 @@ export const getModelStateColor = (
           }
         ),
         get component() {
+          const message = canStartStopTrainedModels
+            ? i18n.translate(
+                'xpack.ml.trainedModels.modelsList.modelState.downloadedInDifferentSpaceTooltip.canDeploy',
+                {
+                  defaultMessage:
+                    'The model is downloaded in a different space. Assign it to the current space to deploy it.',
+                }
+              )
+            : i18n.translate(
+                'xpack.ml.trainedModels.modelsList.modelState.downloadedInDifferentSpaceTooltip.cannotDeploy',
+                {
+                  defaultMessage:
+                    'The model is downloaded in a different space. Assign it to the current space see more details.',
+                }
+              );
           return (
             <EuiIconTip
               aria-label="Warning"
               size="m"
               type="warning"
               color="warning"
-              content={i18n.translate(
-                'xpack.ml.trainedModels.modelsList.modelState.downloadedInDifferentSpaceTooltip',
-                {
-                  defaultMessage:
-                    'The model is downloaded in a different space. Assign it to the current space to deploy it.',
-                }
-              )}
+              content={message}
             />
           );
         },
