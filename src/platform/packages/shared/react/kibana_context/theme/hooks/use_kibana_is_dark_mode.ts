@@ -9,6 +9,12 @@
 
 import { useEuiTheme, COLOR_MODES_STANDARD } from '@elastic/eui';
 
+/**
+ * A **temporary** hook to simplify getting `isDarkMode` from eui context
+ *
+ * TODO: Replace with hook directly from eui
+ * See https://github.com/elastic/eui/issues/8693
+ */
 export const useKibanaIsDarkMode = (): boolean => {
   const { colorMode } = useEuiTheme();
 
