@@ -93,11 +93,16 @@ export const getModelOptionsForInferenceEndpoints = ({
   endpoints: InferenceAPIConfigResponse[];
 }): ModelOptionsData[] => {
   const hasElserEIS = endpoints.some((ep) => ep.inference_id === ELSER_IN_EIS_INFERENCE_ID);
+  const hasE5EIS = endpoints.some((ep) => ep.inference_id === E5_LARGE_IN_EIS_INFERENCE_ID);
 
   return endpoints
     .filter((endpoint) => {
       // if ELSER exists in EIS, skip the other ELSER model
-      if (endpoint.inference_id === '.elser-2-elasticsearch' && hasElserEIS) {
+      if (endpoint.inference_id === DEFAULT_ELSER_INFERENCE_ID && hasElserEIS) {
+        return false;
+      }
+
+      if (endpoint.inference_id === E5_SMALL_INFERENCE_ID && hasE5EIS) {
         return false;
       }
 
