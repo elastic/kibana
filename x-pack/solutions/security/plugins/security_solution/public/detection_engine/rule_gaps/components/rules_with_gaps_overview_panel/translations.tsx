@@ -54,23 +54,20 @@ export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_STATUS_LABEL = i18n.translate(
   }
 );
 
-export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_SUCCESS_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.lastExecutionSuccessLabel',
-  {
-    defaultMessage: 'Succeeded:',
-  }
-);
+export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_SUCCESS_LABEL = (count: number) =>
+  i18n.translate('xpack.securitySolution.ruleGapsOverviewPanel.lastExecutionSuccessLabel', {
+    values: { count },
+    defaultMessage: 'Succeeded: {count}',
+  });
 
-export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_FAILURE_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.lastExecutionFailureLabel',
-  {
-    defaultMessage: 'Failed:',
-  }
-);
+export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_FAILURE_LABEL = (count: number) =>
+  i18n.translate('xpack.securitySolution.ruleGapsOverviewPanel.lastExecutionFailureLabel', {
+    values: { count },
+    defaultMessage: 'Failed: {count}',
+  });
 
-export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_WARNING_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.lastExecutionWarningLabel',
-  {
-    defaultMessage: 'Warning:',
-  }
-);
+export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_WARNING_LABEL = (count: number) =>
+  i18n.translate('xpack.securitySolution.ruleGapsOverviewPanel.lastExecutionWarningLabel', {
+    values: { count },
+    defaultMessage: 'Warning: {count}',
+  });

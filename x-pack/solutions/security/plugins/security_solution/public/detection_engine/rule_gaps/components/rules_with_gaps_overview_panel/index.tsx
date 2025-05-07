@@ -241,8 +241,9 @@ export const RulesWithGapsOverviewPanel = () => {
                 textSize="xs"
                 data-test-subj="last-rule-execution-success-count-label"
               >
-                {i18n.RULE_GAPS_OVERVIEW_LAST_EXECUTION_SUCCESS_LABEL}{' '}
-                {executionSummaryData?.latestExecutionSummary.success}
+                {i18n.RULE_GAPS_OVERVIEW_LAST_EXECUTION_SUCCESS_LABEL(
+                  executionSummaryData?.latestExecutionSummary.success ?? 0
+                )}
               </EuiHealth>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -251,8 +252,9 @@ export const RulesWithGapsOverviewPanel = () => {
                 textSize="xs"
                 data-test-subj="last-rule-execution-failure-count-label"
               >
-                {i18n.RULE_GAPS_OVERVIEW_LAST_EXECUTION_FAILURE_LABEL}{' '}
-                {executionSummaryData?.latestExecutionSummary.failure}
+                {i18n.RULE_GAPS_OVERVIEW_LAST_EXECUTION_FAILURE_LABEL(
+                  executionSummaryData?.latestExecutionSummary.failure ?? 0
+                )}
               </EuiHealth>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -261,8 +263,9 @@ export const RulesWithGapsOverviewPanel = () => {
                 textSize="xs"
                 data-test-subj="last-rule-execution-warning-count-label"
               >
-                {i18n.RULE_GAPS_OVERVIEW_LAST_EXECUTION_WARNING_LABEL}{' '}
-                {executionSummaryData?.latestExecutionSummary.warning}
+                {i18n.RULE_GAPS_OVERVIEW_LAST_EXECUTION_WARNING_LABEL(
+                  executionSummaryData?.latestExecutionSummary.warning ?? 0
+                )}
               </EuiHealth>
             </EuiFlexItem>
           </EuiFlexGroup>
