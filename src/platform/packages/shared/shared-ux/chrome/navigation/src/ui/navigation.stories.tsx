@@ -87,7 +87,15 @@ const NavigationWrapper: FC<Props & Omit<Partial<EuiCollapsibleNavBetaProps>, 'c
               {props.clickActionText ?? 'Click me'}
             </EuiButton>
           ) : (
-            <p>Hello world</p>
+            <>
+              <h1>Solution side nav</h1>
+              <br />
+              <p>There should be multiple &quot;selected&quot; nodes in the side nav:</p>
+              <ul>
+                <li>* Item 03 &raquo; Item 22</li>
+                <li>* Footer parent 1 &raquo; Item 35</li>
+              </ul>
+            </>
           )}
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
@@ -456,8 +464,48 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
       path: '',
       children: [
         {
+          id: 'footer-section6',
+          title: 'Footer parent 1',
+          path: '',
+          renderAs: 'accordion',
+          spaceBefore: null,
+          icon: 'iInCircle',
+          defaultIsCollapsed: false,
+          children: [
+            {
+              id: 'item33',
+              path: '',
+              title: 'Item 33',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item34',
+              path: '',
+              title: 'Item 34',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item35',
+              path: '',
+              title: 'Item 35',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+              openInNewTab: true,
+            },
+          ],
+        },
+        {
+          id: 'item10',
+          path: '',
+          title: 'Item 10',
+          icon: 'iInCircle',
+          href: '/app/kibana',
+        },
+        {
           id: 'footer-section5',
-          title: 'Parent item, closed',
+          title: 'Footer parent 2',
           path: '',
           renderAs: 'accordion',
           spaceBefore: null,
@@ -502,46 +550,6 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
             },
           ],
         },
-        {
-          id: 'item10',
-          path: '',
-          title: 'Item 10',
-          icon: 'iInCircle',
-          href: '/app/kibana',
-        },
-        {
-          id: 'footer-section6',
-          title: 'Parent item, opened',
-          path: '',
-          renderAs: 'accordion',
-          spaceBefore: null,
-          icon: 'iInCircle',
-          defaultIsCollapsed: false,
-          children: [
-            {
-              id: 'item33',
-              path: '',
-              title: 'Item 33',
-              href: '/app/kibana',
-              icon: 'iInCircle',
-            },
-            {
-              id: 'item34',
-              path: '',
-              title: 'Item 34',
-              href: '/app/kibana',
-              icon: 'iInCircle',
-            },
-            {
-              id: 'item35',
-              path: '',
-              title: 'Item 35',
-              href: '/app/kibana',
-              icon: 'iInCircle',
-              openInNewTab: true,
-            },
-          ],
-        },
       ],
     },
   ],
@@ -577,6 +585,20 @@ generalLayoutNavTree.footer = correctPaths(
 
 export const GeneralLayoutStructure = (args: NavigationServices) => {
   const services = storybookMock.getServices(args);
+  services.activeNodes$ = of([
+    [
+      { id: '', path: 'example_project' },
+      { id: '', path: 'example_project.root-section1' },
+      { id: '', path: 'example_project.root-section1.item03' },
+      { id: '', path: 'example_project.root-section1.item03.child-section4' },
+      { id: '', path: 'example_project.root-section1.item03.child-section4.sub3' },
+    ],
+    [
+      { id: '', path: 'example_project_footer' },
+      { id: '', path: 'example_project_footer.footer-section6' },
+      { id: '', path: 'example_project_footer.footer-section6.item35' },
+    ],
+  ]);
 
   return (
     <NavigationWrapper>

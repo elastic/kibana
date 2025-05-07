@@ -7,7 +7,6 @@
 
 import { render, renderHook } from '@testing-library/react';
 import React from 'react';
-import { matchers } from '@emotion/jest';
 
 import { TestProviders } from '../../../../common/mock';
 
@@ -17,8 +16,6 @@ import { EuiHealth, useEuiTheme } from '@elastic/eui';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '.';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
-
-expect.extend(matchers);
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
