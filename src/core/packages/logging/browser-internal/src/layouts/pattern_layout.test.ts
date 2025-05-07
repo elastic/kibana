@@ -31,6 +31,9 @@ const records: LogRecord[] = [
       name: 'Some error name',
       stack: 'Some error stack',
     },
+    meta: {
+      error: new Error('Some error'),
+    },
     level: LogLevel.Fatal,
     message: 'message-1',
     timestamp,
