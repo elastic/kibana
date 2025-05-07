@@ -132,8 +132,6 @@
     "@kbn/stack-alerts-plugin",
     "@kbn/apm-data-access-plugin",
     "@kbn/coloring",
-    "@kbn/profiling-utils",
-    "@kbn/profiling-data-access-plugin",
     "@kbn/coloring",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
@@ -194,6 +192,7 @@
     "@kbn/content-packs-schema",
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
-    "@kbn/test-suites-xpack-observability"
+    "@kbn/test-suites-xpack-observability",
+    "@kbn/management-settings-ids"
   ]
 }

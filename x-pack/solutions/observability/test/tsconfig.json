@@ -33,7 +33,6 @@
     "@kbn/synthetics-plugin",
     "@kbn/uptime-plugin",
     "@kbn/apm-plugin",
-    "@kbn/apm-sources-access-plugin",
     "@kbn/server-route-repository",
     "@kbn/apm-synthtrace",
     "@kbn/test-suites-xpack-platform",
@@ -49,5 +48,6 @@
     "@kbn/profiling-plugin",
     "@kbn/profiling-utils",
     "@kbn/profiling-data-access-plugin",
+    "@kbn/apm-data-access-plugin",
   ]
 }
