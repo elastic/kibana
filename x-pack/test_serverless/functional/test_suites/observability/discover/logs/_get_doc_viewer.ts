@@ -22,7 +22,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const start = moment().subtract(30, 'minutes').valueOf();
   const end = moment().valueOf();
 
-  describe('observability logs getDocViewer ', () => {
+  describe('observability logs getDocViewer ', function () {
+    // see details: https://github.com/elastic/kibana/issues/220399
+    this.tags(['failsOnMKI']);
     before(async () => {
       await synthtrace.index([
         timerange(start, end)
