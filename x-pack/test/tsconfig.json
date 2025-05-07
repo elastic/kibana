@@ -121,15 +121,12 @@
     "@kbn/core-http-common",
     "@kbn/lens-plugin",
     "@kbn/logs-shared-plugin",
-    "@kbn/profiling-plugin",
     "@kbn/observability-onboarding-plugin",
     "@kbn/uptime-plugin",
     "@kbn/ml-category-validator",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/stack-connectors-plugin",
     "@kbn/stack-alerts-plugin",
-    "@kbn/profiling-utils",
-    "@kbn/profiling-data-access-plugin",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
     "@kbn/dataset-quality-plugin",
@@ -165,7 +162,6 @@
     "@kbn/actions-simulators-plugin",
     "@kbn/cases-api-integration-test-plugin",
     "@kbn/security-solution-plugin/public/management/cypress",
-    "@kbn/management-settings-ids",
     "@kbn/mock-idp-utils",
     "@kbn/cloud-security-posture-common",
     "@kbn/saved-objects-management-plugin",
@@ -189,5 +185,7 @@
     "@kbn/es-errors",
     "@kbn/content-packs-schema",
     "@kbn/lock-manager",
+    "@kbn/alerts-ui-shared",
+    "@kbn/test-suites-xpack-observability"
   ]
 }

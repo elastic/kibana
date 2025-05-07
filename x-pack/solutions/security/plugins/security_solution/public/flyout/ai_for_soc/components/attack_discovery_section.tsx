@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AttackDiscoveryWidget } from './attack_discovery';
+import { AttackDiscoveryWidget } from './attack_discovery_widget';
 import { ATTACK_DISCOVERY_SECTION_TEST_ID } from '..';
 import { useAIForSOCDetailsContext } from '../context';
 
@@ -31,7 +31,7 @@ export const AttackDiscoverySection = memo(() => {
         <h2>{ATTACK_DISCOVERY}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <AttackDiscoveryWidget id={eventId} />
+      <AttackDiscoveryWidget alertId={eventId} />
     </div>
   );
 });
