@@ -96,7 +96,6 @@ webpack_cli(
   env = select({
     "//:dist": {
       "NODE_ENV": "production",
-      "EUI_AMSTERDAM": "$(EUI_AMSTERDAM)",
     },
     "//conditions:default": {
       "NODE_ENV": "development",
