@@ -159,7 +159,7 @@ export const getAxiosOptions = (
         const httpsAgent = new https.Agent({
           cert,
           key,
-          rejectUnauthorized: configAny.verificationMode === 'none',
+          rejectUnauthorized: configAny.verificationMode !== 'none',
           checkServerIdentity:
             configAny.verificationMode === 'certificate' || configAny.verificationMode === 'none'
               ? () => undefined
