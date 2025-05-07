@@ -1285,6 +1285,16 @@ describe('ConfigureCases', () => {
       expect(await screen.findByTestId('add-observable-type')).toBeInTheDocument();
     });
 
+    it('should not render observable types section if observable feature is not enabled', async () => {
+      const newWrapper = mount(<ConfigureCases />, {
+        wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
+        wrappingComponentProps: { features: { observables: { enabled: true } } },
+      });
+
+      expect(screen.queryByTestId('observable-types-form-group')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('add-observable-type')).not.toBeInTheDocument();
+    });
+
     it('opens fly out for when click on add observable type', async () => {
       renderWithTestingProviders(<ConfigureCases />);
 
