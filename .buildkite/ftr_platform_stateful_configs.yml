@@ -155,7 +155,6 @@ enabled:
   - x-pack/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
   - x-pack/test/api_integration/apis/ml/config.ts
   - x-pack/test/api_integration/apis/monitoring/config.ts
-  - x-pack/test/api_integration/apis/search_playground/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/banners_functional/config.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_basic.ts
@@ -270,7 +269,6 @@ enabled:
   - x-pack/test/functional_cloud/config.ts
   - x-pack/test/functional_cloud/saml.config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
-  - x-pack/test/functional_search/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
   - x-pack/test/monitoring_api_integration/config.ts
