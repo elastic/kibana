@@ -62,14 +62,14 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           key: '1,322 - 1,717.5',
           name: '1,322 - 1,717.5',
         },
-        { color: '#86CB66', key: '1,717.5 - 2,113', name: '1,717.5 - 2,113' },
+        { color: '#86cb66', key: '1,717.5 - 2,113', name: '1,717.5 - 2,113' },
         {
-          color: '#FEFEBD',
+          color: '#fefebd',
           key: '2,113 - 2,508.5',
           name: '2,113 - 2,508.5',
         },
         {
-          color: '#F88D52',
+          color: '#f88d52',
           key: '2,508.5 - 2,904',
           name: '2,508.5 - 2,904',
         },
@@ -110,7 +110,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         { key: '1,322 - 1,585.667', name: '1,322 - 1,585.667', color: '#006837' },
         { key: '1,585.667 - 1,849.333', name: '1,585.667 - 1,849.333', color: '#4CB15D' },
         { key: '1,849.333 - 2,113', name: '1,849.333 - 2,113', color: '#B7E075' },
-        { key: '2,113 - 2,376.667', name: '2,113 - 2,376.667', color: '#FEFEBD' },
+        { key: '2,113 - 2,376.667', name: '2,113 - 2,376.667', color: '#fefebd' },
         { key: '2,376.667 - 2,640.333', name: '2,376.667 - 2,640.333', color: '#FDBF6F' },
         { key: '2,640.333 - 2,904', name: '2,640.333 - 2,904', color: '#EA5839' },
       ]);
