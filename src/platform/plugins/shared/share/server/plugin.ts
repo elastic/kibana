@@ -143,7 +143,7 @@ export class SharePlugin
 
     if (this.config.url_expiration.enabled && taskManager) {
       const taskInstance = getDeleteUnusedUrlTaskInstance(
-        this.config.url_expiration.check_interval_in_seconds
+        this.config.url_expiration.check_interval
       );
       taskManager.ensureScheduled(taskInstance);
     }

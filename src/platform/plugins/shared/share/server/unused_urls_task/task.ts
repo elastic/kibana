@@ -12,15 +12,18 @@ import { CoreSetup, ISavedObjectsRepository, SavedObjectsBulkDeleteObject } from
 import { Logger } from '@kbn/logging';
 import { TaskInstanceWithId } from '@kbn/task-manager-plugin/server/task';
 import { groupBy } from 'lodash';
+import { Duration } from 'moment';
 import { MAX_PAGE_SIZE, SAVED_OBJECT_TYPE, TASK_ID } from './constants';
 
-export const getDeleteUnusedUrlTaskInstance = (interval: string): TaskInstanceWithId => ({
+export const durationToSeconds = (duration: Duration) => `${duration.asSeconds()}s`;
+
+export const getDeleteUnusedUrlTaskInstance = (interval: Duration): TaskInstanceWithId => ({
   id: TASK_ID,
   taskType: TASK_ID,
   params: {},
   state: {},
   schedule: {
-    interval,
+    interval: durationToSeconds(interval),
   },
 });
 
@@ -116,9 +119,9 @@ export const runDeleteUnusedUrlsTask = async ({
   pitKeepAlive,
 }: {
   core: CoreSetup;
-  urlExpirationDuration: string;
+  urlExpirationDuration: Duration;
   logger: Logger;
-  pitKeepAlive: string;
+  pitKeepAlive: Duration;
 }) => {
   try {
     logger.info('Unused URLs cleanup started');
@@ -126,13 +129,13 @@ export const runDeleteUnusedUrlsTask = async ({
 
     const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
 
-    const filter = `url.attributes.accessDate <= now-${urlExpirationDuration}`;
+    const filter = `url.attributes.accessDate <= now-${durationToSeconds(urlExpirationDuration)}`;
 
     const unusedUrlsGroupedByNamespace = await fetchAllUnusedUrls({
       savedObjectsRepository,
       filter,
       logger,
-      pitKeepAlive,
+      pitKeepAlive: durationToSeconds(pitKeepAlive),
     });
 
     if (Object.keys(unusedUrlsGroupedByNamespace).length) {
