@@ -53,7 +53,7 @@ describe(
       createRule(getNewRule());
     });
 
-    it('attampts to fetch the summary for the selected interval ranges', function () {
+    it('attempts to fetch the summary for the selected interval ranges', function () {
       // Intercept API calls with data
       interceptGetGlobalRuleExecutionSummary({
         body: executionSummaryResult,
