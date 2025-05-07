@@ -243,10 +243,6 @@ For more information, refer to https://github.com/elastic/kibana/issues/209996[#
 Clusters with saved objects of the type inventory-view may fail to upgrade to 8.17.3, resulting in downtime until the failed upgrade is rolled back.
 ====
 
-[float]
-[[known-issues-8.17.3]]
-=== Known issues
-
 include::CHANGELOG.asciidoc[tag=known-issue-220339]
 
 [float]
