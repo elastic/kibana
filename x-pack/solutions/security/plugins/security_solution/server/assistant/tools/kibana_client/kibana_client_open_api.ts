@@ -24,12 +24,15 @@ import type { JsonSchema, JsonSchemaObject, Refs } from '@n8n/json-schema-to-zod
 import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import { formatToolName, type Operation } from '../../../utils/open_api_tool/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-export const kibanaServerlessOpenApiSpec = path.join(
+export const kibanaServerlessOpenApiSpec = path.resolve(
+  REPO_ROOT,
   __dirname,
   '../../../../../../../../../oas_docs/output/kibana.serverless.yaml'
 );
-export const kibanaOpenApiSpec = path.join(
+export const kibanaOpenApiSpec = path.resolve(
+  REPO_ROOT,
   __dirname,
   '../../../../../../../../../oas_docs/output/kibana.yaml'
 );
