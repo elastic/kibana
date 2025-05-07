@@ -407,15 +407,18 @@ export class VisualizationsPlugin
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
-        container.addNewPanel<VisualizeSavedObjectInputState>({
-          panelType: VISUALIZE_EMBEDDABLE_TYPE,
-          serializedState: {
-            rawState: {
-              savedObjectId: savedObject.id,
+        container.addNewPanel<VisualizeSavedObjectInputState>(
+          {
+            panelType: VISUALIZE_EMBEDDABLE_TYPE,
+            serializedState: {
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+              references: savedObject.references,
             },
-            references: savedObject.references,
           },
-        }, true);
+          true
+        );
       },
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {

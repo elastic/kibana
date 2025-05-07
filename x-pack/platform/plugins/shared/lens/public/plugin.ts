@@ -407,9 +407,10 @@ export class LensPlugin {
                   savedObjectId: savedObject.id,
                 },
                 references: savedObject.references,
+              },
             },
-           },
-            true);
+            true
+          );
         },
         savedObjectType: LENS_EMBEDDABLE_TYPE,
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {

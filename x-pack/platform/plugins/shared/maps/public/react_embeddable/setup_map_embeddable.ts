@@ -25,14 +25,17 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
 
   embeddableSetup.registerAddFromLibraryType<MapAttributes>({
     onAdd: (container, savedObject) => {
-      container.addNewPanel<MapSerializedState>({
-        panelType: MAP_SAVED_OBJECT_TYPE,
-        serializedState: {
-          rawState: {
-            savedObjectId: savedObject.id,
+      container.addNewPanel<MapSerializedState>(
+        {
+          panelType: MAP_SAVED_OBJECT_TYPE,
+          serializedState: {
+            rawState: {
+              savedObjectId: savedObject.id,
+            },
           },
         },
-      }, true);
+        true
+      );
     },
     savedObjectType: MAP_SAVED_OBJECT_TYPE,
     savedObjectName: i18n.translate('xpack.maps.mapSavedObjectLabel', {
