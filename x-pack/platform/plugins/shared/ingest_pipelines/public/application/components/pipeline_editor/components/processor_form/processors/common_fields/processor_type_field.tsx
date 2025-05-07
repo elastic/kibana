@@ -24,7 +24,6 @@ import {
   fieldValidators,
   useKibana,
 } from '../../../../../../../shared_imports';
-import type { DocumentationService } from '../../../../../../services';
 
 import { getProcessorDescriptor, mapProcessorTypeToDescriptor } from '../../../shared';
 
