@@ -7,7 +7,6 @@
 
 import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 import { AI_FOR_SOC_INTEGRATIONS } from '../../../../../../common/constants';
-import { DEFAULT_CHECK_COMPLETE_METADATA } from '../../../../../common/lib/integrations/components/integration_card_grid_tabs';
 import type { StartServices } from '../../../../../types';
 import type { OnboardingCardCheckComplete } from '../../../../types';
 import {
@@ -32,7 +31,9 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   if (!isComplete) {
     return {
       isComplete,
-      metadata: DEFAULT_CHECK_COMPLETE_METADATA,
+      metadata: {
+        activeIntegrations,
+      },
     };
   }
 

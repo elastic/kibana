@@ -48,18 +48,19 @@ export const getActiveIntegrationList = async (
       return { items: emptyItems };
     });
 
-  const activePackages = activePackageData?.items?.filter((installedPkg) => {
-    const isInstalled =
-      (installedPkg.status === installationStatuses.Installed ||
-        installedPkg.status === installationStatuses.InstallFailed) &&
-      installedPkg.dataStreams.length > 0;
-    return availableIntegrationNames
-      ? isInstalled &&
-          availableIntegrationNames.some(
-            (availableIntegration) => availableIntegration === installedPkg.name
-          )
-      : isInstalled;
-  });
+  const activePackages =
+    activePackageData?.items?.filter((installedPkg) => {
+      const isInstalled =
+        (installedPkg.status === installationStatuses.Installed ||
+          installedPkg.status === installationStatuses.InstallFailed) &&
+        installedPkg.dataStreams.length > 0;
+      return availableIntegrationNames
+        ? isInstalled &&
+            availableIntegrationNames.some(
+              (availableIntegration) => availableIntegration === installedPkg.name
+            )
+        : isInstalled;
+    }) ?? [];
   const isComplete = activePackages && activePackages.length > 0;
 
   return { isComplete, activePackages };
