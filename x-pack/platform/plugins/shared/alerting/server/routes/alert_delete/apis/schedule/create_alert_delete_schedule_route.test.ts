@@ -11,6 +11,9 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { alertDeletionClientMock } from '../../../../alert_deletion/alert_deletion_client.mock';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { API_PRIVILEGES } from '../../../../../common';
+import type { CoreSetup } from '@kbn/core/server';
+import type { AlertingPluginsStart } from '../../../../plugin';
+import { hasRequiredPrivilegeGrantedInAllSpaces } from '../../../../lib/has_required_privilege_granted_in_all_spaces';
 
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
@@ -20,20 +23,39 @@ jest.mock('../../../lib/track_legacy_terminology', () => ({
   trackLegacyTerminology: jest.fn(),
 }));
 
-beforeEach(() => {
-  jest.resetAllMocks();
-});
+jest.mock('../../../../lib/has_required_privilege_granted_in_all_spaces', () => ({
+  hasRequiredPrivilegeGrantedInAllSpaces: jest.fn(),
+}));
 
 describe('alertDeleteScheduleRoute', () => {
   const alertDeletionClient = alertDeletionClientMock.create();
   const rulesClient = rulesClientMock.create();
-  const hasRequiredPrivilegeGrantedInAllSpacesMock = jest.fn();
+  const hasRequiredPrivilegeGrantedInAllSpacesMock =
+    hasRequiredPrivilegeGrantedInAllSpaces as jest.Mock;
+  const coreMock = {
+    getStartServices: async () => [
+      {} as unknown,
+      {
+        security: {
+          authz: {},
+        },
+      },
+    ],
+  } as unknown as CoreSetup<AlertingPluginsStart, unknown>;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
 
   it('registers the route without public access', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    alertDeleteScheduleRoute(router, licenseState);
+    alertDeleteScheduleRoute(
+      router,
+      licenseState,
+      {} as unknown as CoreSetup<AlertingPluginsStart, unknown>
+    );
     expect(router.post).toHaveBeenCalledWith(
       expect.not.objectContaining({
         options: expect.objectContaining({ access: 'public' }),
@@ -52,7 +74,7 @@ describe('alertDeleteScheduleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    alertDeleteScheduleRoute(router, licenseState);
+    alertDeleteScheduleRoute(router, licenseState, coreMock);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -86,7 +108,7 @@ describe('alertDeleteScheduleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    alertDeleteScheduleRoute(router, licenseState);
+    alertDeleteScheduleRoute(router, licenseState, coreMock);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -118,7 +140,7 @@ describe('alertDeleteScheduleRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    alertDeleteScheduleRoute(router, licenseState);
+    alertDeleteScheduleRoute(router, licenseState, coreMock);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -144,18 +166,20 @@ describe('alertDeleteScheduleRoute', () => {
       `"Insufficient privileges to delete alerts in the specified spaces"`
     );
 
-    expect(hasRequiredPrivilegeGrantedInAllSpacesMock).toHaveBeenCalledWith({
-      request: req,
-      spaceIds: ['space1', 'space2'],
-      requiredPrivilege: API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS,
-    });
+    expect(hasRequiredPrivilegeGrantedInAllSpacesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        request: req,
+        spaceIds: ['space1', 'space2'],
+        requiredPrivilege: API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS,
+      })
+    );
   });
 
   it('does not throw error if required privileges are granted in all spaces', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    alertDeleteScheduleRoute(router, licenseState);
+    alertDeleteScheduleRoute(router, licenseState, coreMock);
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -181,11 +205,13 @@ describe('alertDeleteScheduleRoute', () => {
 
     await handler(context, req, res);
 
-    expect(hasRequiredPrivilegeGrantedInAllSpacesMock).toHaveBeenCalledWith({
-      request: req,
-      spaceIds: ['space1', 'space2'],
-      requiredPrivilege: API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS,
-    });
+    expect(hasRequiredPrivilegeGrantedInAllSpacesMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        request: req,
+        spaceIds: ['space1', 'space2'],
+        requiredPrivilege: API_PRIVILEGES.WRITE_ALERT_DELETE_SETTINGS,
+      })
+    );
 
     expect(alertDeletionClient.scheduleTask).toHaveBeenCalledWith(
       req,
