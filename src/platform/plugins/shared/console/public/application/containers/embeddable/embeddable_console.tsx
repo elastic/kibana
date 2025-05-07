@@ -67,6 +67,7 @@ const getInitialConsoleHeight = (
 
 export const EmbeddableConsole = ({
   core,
+  dataViews,
   usageCollection,
   setDispatch,
   alternateView,
@@ -196,6 +197,7 @@ export const EmbeddableConsole = ({
             <ConsoleWrapper
               isOpen={showConsole}
               core={core}
+              dataViews={dataViews}
               usageCollection={usageCollection}
               onKeyDown={onKeyDown}
               isDevMode={isDevMode}

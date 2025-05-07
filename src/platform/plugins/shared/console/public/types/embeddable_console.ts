@@ -11,9 +11,11 @@ import type { ComponentType, MouseEventHandler } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Dispatch } from 'react';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export interface EmbeddableConsoleDependencies {
   core: CoreStart;
+  dataViews: DataViewsPublicPluginStart;
   usageCollection?: UsageCollectionStart;
   setDispatch: (dispatch: Dispatch<EmbeddedConsoleAction> | null) => void;
   alternateView?: EmbeddedConsoleView;

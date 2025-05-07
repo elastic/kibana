@@ -32,7 +32,7 @@ export const getSuggestionProvider = (
       const cursorOffset = model.getOffsetAt(position);
       const textBeforeCursor = fullText.slice(0, cursorOffset);
       const { insideQuery } = isInsideTripleQuotes(textBeforeCursor);
-      const lastChar = fullText.at(cursorOffset - 1);
+      const lastChar = fullText.at(cursorOffset - 1) ?? '';
       if (esqlCallbacks && insideQuery && ESQL_TRIGGER_CHARS.includes(lastChar)) {
         const queryStartOffset = textBeforeCursor.lastIndexOf('"""') + 3;
         const esqlSuggestions = await suggest(
@@ -42,7 +42,6 @@ export const getSuggestionProvider = (
           esqlCallbacks
         );
         return {
-          // @ts-expect-error because of range typing: https://github.com/microsoft/monaco-editor/issues/4638
           suggestions: getEsqlCompletionItems(model, position, esqlSuggestions),
         };
       } else if (actionsProvider.current) {

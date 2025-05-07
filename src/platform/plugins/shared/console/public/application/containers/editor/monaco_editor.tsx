@@ -14,9 +14,6 @@ import { CodeEditor } from '@kbn/code-editor';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ESQLCallbacks, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { getESQLSources } from '@kbn/esql-editor/src/helpers';
-import memoize from 'lodash/memoize';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';
@@ -138,37 +135,19 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     unregisterKeyboardCommands();
   }, [destroyResizeChecker, unregisterKeyboardCommands]);
 
-  const memoizedSources = useMemo(() => {
-    const fn = memoize(
-      (
-        ...args: [DataViewsPublicPluginStart, Pick<CoreStart, 'application' | 'http'>, boolean]
-      ) => ({
-        timestamp: Date.now(),
-        result: getESQLSources(...args),
-      })
-    );
-
-    return fn;
-  }, []);
-
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        // TODO: Add logic for correct check
+        // TODO: Add logic for correct check for remote indices
         const areRemoteIndicesAvailable = false;
-        const sources = await memoizedSources(
-          dataViews,
-          { application, http },
-          areRemoteIndicesAvailable
-        ).result;
-        return getESQLSources(dataViews, { application, http }, areRemoteIndicesAvailable);
+        return await getESQLSources(dataViews, { application, http }, areRemoteIndicesAvailable);
       },
       getPolicies: () => {
         return [];
       },
     };
     return callbacks;
-  }, [application, http, memoizedSources, dataViews]);
+  }, [application, http, dataViews]);
 
   const suggestionProvider = useMemo(() => {
     return getSuggestionProvider(actionsProvider, esqlCallbacks);

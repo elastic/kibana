@@ -20,7 +20,7 @@ import {
   ConsolePluginStart,
   ConsoleUILocatorParams,
   EmbeddedConsoleView,
-  PluginStartDependencies,
+  AppPluginSetupDependencies,
 } from './types';
 import {
   AutocompleteInfo,
@@ -37,7 +37,7 @@ export class ConsoleUIPlugin
       ConsolePluginSetup,
       ConsolePluginStart,
       AppSetupUIPluginDependencies,
-      PluginStartDependencies
+      AppPluginSetupDependencies
     >
 {
   private readonly autocompleteInfo = new AutocompleteInfo();
@@ -53,7 +53,7 @@ export class ConsoleUIPlugin
   }
 
   public setup(
-    { notifications, getStartServices, http }: CoreSetup<PluginStartDependencies>,
+    { notifications, getStartServices, http }: CoreSetup<AppPluginSetupDependencies>,
     { devTools, home, share, usageCollection }: AppSetupUIPluginDependencies
   ): ConsolePluginSetup {
     const {
@@ -154,6 +154,7 @@ export class ConsoleUIPlugin
       consoleStart.EmbeddableConsole = (_props: {}) => {
         return EmbeddableConsole({
           core,
+          dataViews: deps.dataViews,
           usageCollection: deps.usageCollection,
           setDispatch: (d) => {
             this._embeddableConsole.setDispatch(d);

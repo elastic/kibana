@@ -37,7 +37,7 @@ export interface AppSetupUIPluginDependencies {
   usageCollection?: UsageCollectionSetup;
 }
 
-export interface PluginStartDependencies {
+export interface AppPluginSetupDependencies {
   dataViews: DataViewsPublicPluginStart;
 }
 
@@ -45,6 +45,7 @@ export interface AppStartUIPluginDependencies {
   home?: HomePublicPluginStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
+  dataViews: DataViewsPublicPluginStart;
 }
 
 /**
