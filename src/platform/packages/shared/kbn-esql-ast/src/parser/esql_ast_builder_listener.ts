@@ -45,6 +45,7 @@ import {
 } from './factories';
 import { createChangePointCommand } from './factories/change_point';
 import { createDissectCommand } from './factories/dissect';
+import { createEvalCommand } from './factories/eval';
 import { createForkCommand } from './factories/fork';
 import { createFromCommand } from './factories/from';
 import { createGrokCommand } from './factories/grok';
@@ -58,7 +59,6 @@ import { getPosition } from './helpers';
 import {
   collectAllAggFields,
   collectAllColumnIdentifiers,
-  collectAllFields,
   getEnrichClauses,
   getMatchField,
   getPolicyName,
@@ -158,9 +158,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitEvalCommand(ctx: EvalCommandContext) {
-    const commandAst = createCommand('eval', ctx);
-    this.ast.push(commandAst);
-    commandAst.args.push(...collectAllFields(ctx.fields()));
+    if (this.inFork) {
+      return;
+    }
+    this.ast.push(createEvalCommand(ctx));
   }
 
   /**
@@ -168,7 +169,11 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitStatsCommand(ctx: StatsCommandContext) {
-    const command = createStatsCommand(ctx, this.src);
+    if (this.inFork) {
+      return;
+    }
+
+    const command = createStatsCommand(ctx);
 
     this.ast.push(command);
   }
@@ -253,9 +258,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitDissectCommand(ctx: DissectCommandContext) {
-    const command = createDissectCommand(ctx);
-
-    this.ast.push(command);
+    if (this.inFork) {
+      return;
+    }
+    this.ast.push(createDissectCommand(ctx));
   }
 
   /**
