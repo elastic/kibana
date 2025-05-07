@@ -27,7 +27,6 @@ export {
   defaultApmServiceEnvironment,
   apmProgressiveLoading,
   apmServiceGroupMaxNumberOfServices,
-  apmTraceExplorerTab,
   apmLabsButton,
   enableInfrastructureProfilingIntegration,
   apmEnableTableSearchBar,
