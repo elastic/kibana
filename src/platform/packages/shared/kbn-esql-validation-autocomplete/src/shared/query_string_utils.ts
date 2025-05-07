@@ -8,7 +8,7 @@
  */
 export function removeComments(text: string): string {
   // Remove single-line comments
-  const withoutSingleLineComments = text.replace(/\/\/.*$/gm, '');
+  const withoutSingleLineComments = text.replace(/\/\/.*?(?:\r\n|\r|\n|$)/gm, '');
   // Remove multi-line comments
   const withoutMultiLineComments = withoutSingleLineComments.replace(/\/\*[\s\S]*?\*\//g, '');
   return withoutMultiLineComments.trim();
