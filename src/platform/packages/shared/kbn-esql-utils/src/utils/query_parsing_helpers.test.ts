@@ -81,6 +81,9 @@ describe('esql query helpers', () => {
 
       const idxPattern18 = getIndexPatternFromESQLQuery('FROM """foo-{{mm-dd_yy}}"""');
       expect(idxPattern18).toBe('foo-{{mm-dd_yy}}');
+
+      const idxPattern19 = getIndexPatternFromESQLQuery('FROM foo-1::data');
+      expect(idxPattern19).toBe('foo-1::data');
     });
   });
 
@@ -596,6 +599,34 @@ describe('esql query helpers', () => {
       const values = getValuesFromQueryField(queryString, {
         lineNumber: 1,
         column: 31,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+
+    it('should return undefined if the query has a questionmark at the last position', () => {
+      const queryString = 'FROM my_index | STATS COUNT() BY ?';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 34,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+
+    it('should return undefined if the query has a questionmark at the second last position', () => {
+      const queryString = 'FROM my_index | STATS PERCENTILE(bytes, ?)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 42,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+
+    it('should return undefined if the query has a questionmark at the last cursor position', () => {
+      const queryString =
+        'FROM my_index | STATS COUNT() BY BUCKET(@timestamp, ?, ?_tstart, ?_tend)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 52,
       } as monaco.Position);
       expect(values).toEqual(undefined);
     });

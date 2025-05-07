@@ -63,6 +63,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
   dataPlugin.query.timefilter.timefilter.getTime = jest.fn(() => {
     return { from: 'now-15m', to: 'now' };
   });
+  dataPlugin.query.timefilter.timefilter.getTimeDefaults = jest.fn(() => {
+    return { from: 'now-15m', to: 'now' };
+  });
   dataPlugin.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
     return { pause: true, value: 1000 };
   });

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 
-import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
+import { renderWithI18n as render } from '@kbn/test-jest-helpers';
 
 import { PanelHeader } from './header';
 import { allThreeTabs } from './hooks/use_tabs';
@@ -20,15 +20,15 @@ jest.mock('../shared/hooks/use_basic_data_from_details_data', () => ({
   useBasicDataFromDetailsData: jest.fn(),
 }));
 jest.mock('../../../common/components/guided_onboarding_tour/tour_step', () => ({
-  GuidedOnboardingTourStep: jest.fn().mockReturnValue(<div />),
+  GuidedOnboardingTourStep: jest.fn(() => <div />),
 }));
 
 jest.mock('./components/alert_header_title', () => ({
-  AlertHeaderTitle: jest.fn().mockReturnValue(<div data-test-subj="alert-header" />),
+  AlertHeaderTitle: jest.fn(() => <div data-test-subj="alert-header" />),
 }));
 
 jest.mock('./components/event_header_title', () => ({
-  EventHeaderTitle: jest.fn().mockReturnValue(<div data-test-subj="event-header" />),
+  EventHeaderTitle: jest.fn(() => <div data-test-subj="event-header" />),
 }));
 
 const mockUseBasicDataFromDetailsData = useBasicDataFromDetailsData as jest.Mock;

@@ -690,6 +690,55 @@
       },
       {
         "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.Artifacts",
+        "type": "Interface",
+        "tags": [],
+        "label": "Artifacts",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.Artifacts.dashboards",
+            "type": "Array",
+            "tags": [],
+            "label": "dashboards",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Dashboard",
+                "text": "Dashboard"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.Artifacts.investigation_guide",
+            "type": "Object",
+            "tags": [],
+            "label": "investigation_guide",
+            "description": [],
+            "signature": [
+              "{ blob: string; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
         "id": "def-common.BrowserField",
         "type": "Interface",
         "tags": [],
@@ -897,6 +946,31 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alert_fields_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.Dashboard",
+        "type": "Interface",
+        "tags": [],
+        "label": "Dashboard",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.Dashboard.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1138,6 +1212,20 @@
             "tags": [],
             "label": "_index",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.MetaAlertFields._score",
+            "type": "number",
+            "tags": [],
+            "label": "_score",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1696,6 +1784,27 @@
                 "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.Flapping",
                 "text": "Flapping"
+              },
+              " | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.Rule.artifacts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "artifacts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Artifacts",
+                "text": "Artifacts"
               },
               " | null | undefined"
             ],
@@ -4504,7 +4613,7 @@
           },
           " | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
-          " | undefined; }"
+          " | undefined; minScore?: number | undefined; trackScores?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
         "deprecated": false,
@@ -4731,7 +4840,7 @@
         "label": "UnknownAlertFields",
         "description": [],
         "signature": [
-          "{ [x: string]: string | ",
+          "{ [x: string]: string | number | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",

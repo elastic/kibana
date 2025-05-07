@@ -10,7 +10,6 @@
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
-  assets = 'assets',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
@@ -46,10 +45,8 @@ export enum SecurityPageName {
   hostsEvents = 'hosts-events',
   hostsSessions = 'hosts-sessions',
   hostsUncommonProcesses = 'hosts-uncommon_processes',
-  investigations = 'investigations',
   kubernetes = 'kubernetes',
   landing = 'get_started',
-  mlLanding = 'machine_learning-landing', // serverless only
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
@@ -65,6 +62,7 @@ export enum SecurityPageName {
   rulesAdd = 'rules-add',
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
+  rulesManagement = 'rules-management',
   siemMigrationsRules = 'siem_migrations-rules',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
@@ -80,9 +78,10 @@ export enum SecurityPageName {
   usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
   usersRisk = 'users-risk',
-  entityAnalytics = 'entity_analytics',
+  entityAnalytics = 'entity_analytics', // This is the first Entity Analytics page, that is why the name is too generic.
   entityAnalyticsManagement = 'entity_analytics-management',
-  entityAnalyticsAssetClassification = 'entity_analytics-asset-classification',
+  entityAnalyticsLanding = 'entity_analytics-landing',
+  entityAnalyticsPrivilegedUserMonitoring = 'entity_analytics-privileged_user_monitoring',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
   coverageOverview = 'coverage-overview',
   notes = 'notes',

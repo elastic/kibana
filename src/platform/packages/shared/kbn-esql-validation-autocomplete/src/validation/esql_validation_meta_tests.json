@@ -2271,28 +2271,28 @@
     {
       "query": "from index | project ",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | PROJECT textField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
     {
       "query": "from index | project missingField, doubleField, dateField",
       "error": [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}"
       ],
       "warning": []
     },
@@ -2635,22 +2635,17 @@
     {
       "query": "from a_index | rename key* as keywords",
       "error": [
-        "Using wildcards (*) in RENAME is not allowed [key*]",
         "Unknown column [keywords]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | rename s* as strings",
-      "error": [
-        "Using wildcards (*) in RENAME is not allowed [s*]",
-        "Unknown column [s*]",
-        "Unknown column [strings]"
-      ],
+      "query": "row a = 10 | rename a as `this``is fine`",
+      "error": [],
       "warning": []
     },
     {
-      "query": "row a = 10 | rename a as `this``is fine`",
+      "query": "ROW `C*OUNT` = 5 | RENAME `C*OUNT` AS meow",
       "error": [],
       "warning": []
     },
@@ -2792,19 +2787,19 @@
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\"",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | grok doubleField \"%{firstWord}\"",
+      "query": "from a_index | grok doubleField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\"",
       "error": [
         "GROK only supports values of type [keyword, text]. Found [doubleField] of type [double]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | grok textField \"%{firstWord}\" | keep firstWord",
+      "query": "from a_index | grok textField \"\"\"%{WORD:textPrts} %{WORD:textPrts}\"\"\" | keep textPrts",
       "error": [],
       "warning": []
     },
@@ -5470,7 +5465,7 @@
       ]
     },
     {
-      "query": "from a_index | eval var0 = log(-1, -20)",
+      "query": "from a_index | eval col0 = log(-1, -20)",
       "error": [],
       "warning": [
         "Log of a negative number results in null: -1",
@@ -6825,7 +6820,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval result = case(false, 0, 1) | stats var0 = sum(result)",
+      "query": "from a_index | eval result = case(false, 0, 1) | stats col0 = sum(result)",
       "error": [],
       "warning": []
     },
@@ -9211,69 +9206,69 @@
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 ",
+      "query": "from a_index | enrich policy on textField with col0 ",
       "error": [
-        "Unknown column [var0]"
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = ",
+      "query": "from a_index |enrich policy on doubleField with col0 = ",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [var0]"
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = c ",
+      "query": "from a_index | enrich policy on textField with col0 = c ",
       "error": [
-        "Unknown column [var0]",
+        "Unknown column [col0]",
         "Unknown column [c]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = , ",
+      "query": "from a_index |enrich policy on doubleField with col0 = , ",
       "error": [
         "SyntaxError: mismatched input ',' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [var0]"
+        "Unknown column [col0]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, var1 ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, col1 ",
       "error": [
-        "Unknown column [var1]"
+        "Unknown column [col1]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField ",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, yetAnotherField ",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, yetAnotherField ",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index |enrich policy on doubleField with var0 = otherField, var1 = ",
+      "query": "from a_index |enrich policy on doubleField with col0 = otherField, col1 = ",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
-        "Unknown column [var1]"
+        "Unknown column [col1]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, var1 = yetAnotherField",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, col1 = yetAnotherField",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy on textField with var0 = otherField, `this``is fine` = yetAnotherField",
+      "query": "from a_index | enrich policy on textField with col0 = otherField, `this``is fine` = yetAnotherField",
       "error": [],
       "warning": []
     },
@@ -9295,7 +9290,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | enrich policy with var0 = otherField | eval var0",
+      "query": "from a_index | enrich policy with col0 = otherField | eval col0",
       "error": [],
       "warning": []
     },
@@ -9663,6 +9658,31 @@
       "warning": []
     },
     {
+      "query": "FROM index, missingIndex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index*, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, missingIndex2*, index",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from index,",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
@@ -9738,6 +9758,42 @@
       "query": "FROM policy",
       "error": [
         "Unknown index [policy]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex, index",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missingIndex2, index",
+      "error": [
+        "Unknown index [missingIndex2]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*",
+      "error": [
+        "Unknown index [missingIndex*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missing*Index2",
+      "error": [
+        "Unknown index [*missingIndex]",
+        "Unknown index [missing*Index2]"
       ],
       "warning": []
     },

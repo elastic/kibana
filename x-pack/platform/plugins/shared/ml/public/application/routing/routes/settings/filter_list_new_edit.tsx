@@ -13,11 +13,14 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
-import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import {
+  type NavigateToApp,
+  getMlManagementBreadcrumb,
+  getADSettingsBreadcrumbs,
+} from '../../breadcrumbs';
 
 enum MODE {
   NEW,
@@ -32,20 +35,15 @@ const EditFilterList = dynamic(async () => ({
   default: (await import('../../../settings/filter_lists')).EditFilterList,
 }));
 
-export const newFilterListRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const newFilterListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.FILTER_LISTS_NEW),
   title: i18n.translate('xpack.ml.settings.createFilter.docTitle', {
     defaultMessage: 'Create Filter',
   }),
   render: (props, deps) => <PageWrapper {...props} mode={MODE.NEW} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('FILTER_LISTS_BREADCRUMB', navigateToPath, basePath),
+    ...getADSettingsBreadcrumbs(navigateToApp),
+    getMlManagementBreadcrumb('FILTER_LISTS_MANAGEMENT_BREADCRUMB', navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.createLabel', {
         defaultMessage: 'Create',
@@ -54,19 +52,14 @@ export const newFilterListRouteFactory = (
   ],
 });
 
-export const editFilterListRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const editFilterListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.FILTER_LISTS_EDIT, '/:filterId'),
   title: i18n.translate('xpack.ml.settings.editFilter.docTitle', {
     defaultMessage: 'Edit Filter',
   }),
   render: (props, deps) => <PageWrapper {...props} mode={MODE.EDIT} deps={deps} />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('SETTINGS_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('FILTER_LISTS_BREADCRUMB', navigateToPath, basePath),
+    ...getADSettingsBreadcrumbs(navigateToApp),
     {
       text: i18n.translate('xpack.ml.settings.breadcrumbs.filterLists.editLabel', {
         defaultMessage: 'Edit',

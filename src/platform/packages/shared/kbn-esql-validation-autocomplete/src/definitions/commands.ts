@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import {
   ESQLCommandMode,
   ESQLCommandOption,
@@ -16,10 +15,8 @@ import {
   type ESQLCommand,
   type ESQLFunction,
   type ESQLMessage,
-  Walker,
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
-import { ESQLAstRenameExpression } from '@kbn/esql-ast/src/types';
 import {
   hasWildcard,
   isAssignment,
@@ -41,23 +38,48 @@ import {
 } from './commands_helpers';
 import { type CommandDefinition } from './types';
 
-import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
-import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
+import {
+  suggest as suggestForDissect,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterDissect,
+} from '../autocomplete/commands/dissect';
+import {
+  suggest as suggestForDrop,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterDrop,
+} from '../autocomplete/commands/drop';
 import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
 import { suggest as suggestForEval } from '../autocomplete/commands/eval';
+import {
+  suggest as suggestForFork,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterFork,
+} from '../autocomplete/commands/fork';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
-import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
+import {
+  suggest as suggestForGrok,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterGrok,
+} from '../autocomplete/commands/grok';
 import { suggest as suggestForJoin } from '../autocomplete/commands/join';
-import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
+import {
+  suggest as suggestForKeep,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterKeep,
+} from '../autocomplete/commands/keep';
 import { suggest as suggestForLimit } from '../autocomplete/commands/limit';
 import { suggest as suggestForMvExpand } from '../autocomplete/commands/mv_expand';
-import { suggest as suggestForRename } from '../autocomplete/commands/rename';
+import {
+  suggest as suggestForRename,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterRename,
+} from '../autocomplete/commands/rename';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
-import { suggest as suggestForStats } from '../autocomplete/commands/stats';
+import {
+  suggest as suggestForStats,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterStats,
+} from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
-import { suggest as suggestForChangePoint } from '../autocomplete/commands/change_point';
+import {
+  suggest as suggestForChangePoint,
+  fieldsSuggestionsAfter as fieldsSuggestionsAfterChangePoint,
+} from '../autocomplete/commands/change_point';
 
 import { METADATA_FIELDS } from '../shared/constants';
 import { getMessageFromId } from '../validation/errors';
@@ -235,6 +257,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['… | stats avg = avg(a)', '… | stats sum(b) by b', '… | stats sum(b) by b % 2'],
     validate: statsValidator,
     suggest: suggestForStats,
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterStats,
   },
   {
     name: 'inlinestats',
@@ -276,35 +299,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: 'RENAME old_name1 AS new_name1[, ..., old_nameN AS new_nameN]',
     examples: ['… | RENAME old AS new', '… | RENAME old AS new, a AS b'],
     suggest: suggestForRename,
-    validate: (command: ESQLCommand<'rename'>) => {
-      const messages: ESQLMessage[] = [];
-
-      const renameExpressions = Walker.findAll(command, (node) => {
-        return node.type === 'option' && node.name === 'as';
-      }) as ESQLAstRenameExpression[];
-
-      for (const expression of renameExpressions) {
-        const [column] = expression.args;
-        if (!isColumnItem(column)) {
-          continue;
-        }
-
-        if (hasWildcard(column.name)) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'wildcardNotSupportedForCommand',
-              values: {
-                command: 'RENAME',
-                value: column.name,
-              },
-              locations: column.location,
-            })
-          );
-        }
-      }
-
-      return messages;
-    },
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterRename,
   },
   {
     name: 'limit',
@@ -325,6 +320,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: 'KEEP column1[, ..., columnN]',
     examples: ['… | KEEP a', '… | KEEP a, b'],
     suggest: suggestForKeep,
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterKeep,
   },
   {
     name: 'drop',
@@ -371,6 +367,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       }
       return messages;
     },
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterDrop,
   },
   {
     name: 'sort',
@@ -446,6 +443,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       }
       return messages;
     },
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterDissect,
   },
   {
     name: 'grok',
@@ -457,6 +455,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
     suggest: suggestForGrok,
     validate: validateColumnForGrokDissect,
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterGrok,
   },
   {
     name: 'mv_expand',
@@ -589,7 +588,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     suggest: suggestForJoin,
   },
   {
-    hidden: true,
     name: 'change_point',
     preview: true,
     description: i18n.translate(
@@ -611,11 +609,11 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       const valueArg = command.args[0];
       if (isColumnItem(valueArg)) {
         const columnName = valueArg.name;
-        // look up for columns in variables and existing fields
+        // look up for columns in userDefinedColumns and existing fields
         let valueColumnType: string | undefined;
-        const variableRef = references.variables.get(columnName);
-        if (variableRef) {
-          valueColumnType = variableRef.find((v) => v.name === columnName)?.type;
+        const userDefinedColumnRef = references.userDefinedColumns.get(columnName);
+        if (userDefinedColumnRef) {
+          valueColumnType = userDefinedColumnRef.find((v) => v.name === columnName)?.type;
         } else {
           const fieldRef = references.fields.get(columnName);
           valueColumnType = fieldRef?.type;
@@ -660,10 +658,10 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // validate AS
       const asArg = command.args.find((arg) => isOptionItem(arg) && arg.name === 'as');
       if (asArg && isOptionItem(asArg)) {
-        // populate variable references to prevent the common check from failing with unknown column
+        // populate userDefinedColumns references to prevent the common check from failing with unknown column
         asArg.args.forEach((arg, index) => {
           if (isColumnItem(arg)) {
-            references.variables.set(arg.name, [
+            references.userDefinedColumns.set(arg.name, [
               { name: arg.name, location: arg.location, type: index === 0 ? 'keyword' : 'long' },
             ]);
           }
@@ -673,5 +671,38 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       return messages;
     },
     suggest: suggestForChangePoint,
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterChangePoint,
+  },
+  {
+    hidden: true,
+    name: 'fork',
+    preview: true,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.forkDoc', {
+      defaultMessage: 'Forks the stream.',
+    }),
+    declaration: `TODO`,
+    examples: [],
+    suggest: suggestForFork,
+    validate: (command) => {
+      const messages: ESQLMessage[] = [];
+
+      if (command.args.length < 2) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.validation.forkTooFewBranches',
+            {
+              defaultMessage: '[FORK] Must include at least two branches.',
+            }
+          ),
+          type: 'error',
+          code: 'forkTooFewBranches',
+        });
+      }
+
+      return messages;
+    },
+
+    fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
   },
 ];

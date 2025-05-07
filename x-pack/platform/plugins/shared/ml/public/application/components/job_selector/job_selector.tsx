@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,6 +24,8 @@ import type {
 import { FeedBackButton } from '../feedback_button';
 import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
 import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana/use_create_url';
 import { useJobSelectionFlyout } from '../../contexts/ml/use_job_selection_flyout';
 
 export interface GroupObj {
@@ -142,6 +145,11 @@ export function JobSelector({
     setSelectedIds(newSelection);
     onSelectionChange?.({ jobIds: newSelection, time: undefined });
   };
+
+  const [canGetJobs, canCreateJob] = usePermissionCheck(['canGetJobs', 'canCreateJob']);
+
+  const redirectToADJobManagement = useCreateAndNavigateToManagementMlLink('', 'anomaly_detection');
+
   function renderJobSelectionBar() {
     return (
       <>
@@ -193,6 +201,30 @@ export function JobSelector({
           <EuiFlexItem grow={false}>
             <FeedBackButton jobIds={selectedIds} page={page} />
           </EuiFlexItem>
+
+          {canGetJobs ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                color="primary"
+                onClick={redirectToADJobManagement}
+                disabled={!canGetJobs}
+                data-test-subj="mlJobSelectorManageJobsButton"
+              >
+                {canCreateJob ? (
+                  <FormattedMessage
+                    id="xpack.ml.jobSelector.manageJobsLinkLabel"
+                    defaultMessage="Manage jobs"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ml.jobSelector.viewJobsLinkLabel"
+                    defaultMessage="View jobs"
+                  />
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="s" />
       </>

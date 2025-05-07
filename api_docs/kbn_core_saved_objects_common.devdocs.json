@@ -997,66 +997,6 @@
           },
           {
             "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
-          },
-          {
-            "plugin": "@kbn/core",
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts"
           },
           {
@@ -1070,6 +1010,66 @@
           {
             "plugin": "@kbn/core",
             "path": "src/core/packages/saved-objects/api-server/src/saved_objects_repository.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/api-browser/src/simple_saved_object.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1217,27 +1217,83 @@
           },
           {
             "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/regenerate_ids.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/regenerate_ids.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core",
+            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
+          },
+          {
+            "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
           },
           {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/types.ts"
           },
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/types.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
           },
           {
             "plugin": "upgradeAssistant",
@@ -1310,62 +1366,6 @@
           {
             "plugin": "savedObjectsManagement",
             "path": "src/platform/plugins/shared/saved_objects_management/server/lib/find_relationships.test.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/errors.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/regenerate_ids.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/regenerate_ids.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
-          },
-          {
-            "plugin": "@kbn/core",
-            "path": "src/core/packages/saved-objects/import-export-server-internal/src/export/apply_export_transforms.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1776,18 +1776,6 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/persistence/saved_object_store.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/persistence/saved_object_store.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/persistence/saved_object_store.ts"
-          },
-          {
-            "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/editor_frame_service/editor_frame/state_helpers.ts"
           },
           {
@@ -1892,19 +1880,19 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/text_based/text_based_languages.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/text_based/text_based_languages.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/text_based/text_based_languages.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/text_based/text_based_languages.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
           },
           {
             "plugin": "lens",
@@ -2241,18 +2229,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
           },
           {
             "plugin": "maps",

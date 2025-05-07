@@ -1271,7 +1271,7 @@
         "label": "useConfirmModal",
         "description": [],
         "signature": [
-          "({\n  title,\n  children,\n  confirmButtonText,\n}: { title: React.ReactNode; children: React.ReactNode; confirmButtonText: React.ReactNode; }) => { element: React.ReactNode; confirm: (checkBoxLabel: string) => Promise<boolean>; }"
+          "({\n  title,\n  children,\n  confirmButtonText,\n}: { title: React.ReactNode; children: React.ReactNode; confirmButtonText: React.ReactNode; }) => { element: React.ReactNode; confirm: () => Promise<boolean>; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
         "deprecated": false,
@@ -1737,6 +1737,61 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseConversationContextMenuResult.archiveConversation",
+            "type": "Function",
+            "tags": [],
+            "label": "archiveConversation",
+            "description": [],
+            "signature": [
+              "(id: string, isArchived: boolean) => Promise<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Conversation",
+                "text": "Conversation"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseConversationContextMenuResult.archiveConversation.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseConversationContextMenuResult.archiveConversation.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isArchived",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1760,13 +1815,19 @@
             "label": "status",
             "description": [],
             "signature": [
-              "State<{ errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
+              "State<{ errorMessage?: string | undefined; enabled: boolean; endpoint?: Partial<",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; model_stats?: { deployment_state?: ",
-              "MlDeploymentAssignmentState",
-              " | undefined; allocation_state?: ",
-              "MlDeploymentAllocationState",
-              " | undefined; allocation_count?: number | undefined; } | undefined; }> & { refresh: () => void; }"
+              "> | undefined; modelStats?: Partial<",
+              "MlTrainedModelStats",
+              "> | undefined; kbState: ",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.KnowledgeBaseState",
+                "text": "KnowledgeBaseState"
+              },
+              "; currentInferenceId: string | undefined; concreteWriteIndex: string | undefined; isReIndexing: boolean; }> & { refresh: () => void; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
@@ -1785,14 +1846,11 @@
           },
           {
             "parentPluginId": "@kbn/ai-assistant",
-            "id": "def-public.UseKnowledgeBaseResult.installError",
-            "type": "Object",
+            "id": "def-public.UseKnowledgeBaseResult.isPolling",
+            "type": "boolean",
             "tags": [],
-            "label": "installError",
+            "label": "isPolling",
             "description": [],
-            "signature": [
-              "Error | undefined"
-            ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1805,13 +1863,72 @@
             "label": "install",
             "description": [],
             "signature": [
-              "() => Promise<void>"
+              "(inferenceId: string) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseKnowledgeBaseResult.install.$1",
+                "type": "string",
+                "tags": [],
+                "label": "inferenceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.warmupModel",
+            "type": "Function",
+            "tags": [],
+            "label": "warmupModel",
+            "description": [],
+            "signature": [
+              "(inferenceId: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseKnowledgeBaseResult.warmupModel.$1",
+                "type": "string",
+                "tags": [],
+                "label": "inferenceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseKnowledgeBaseResult.isWarmingUpModel",
+            "type": "boolean",
+            "tags": [],
+            "label": "isWarmingUpModel",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

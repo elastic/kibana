@@ -33,7 +33,6 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { act } from 'react-dom/test-utils';
@@ -41,10 +40,11 @@ import { ErrorCallout } from '../../../../components/common/error_callout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import {
-  CurrentTabProvider,
+  InternalStateProvider,
   RuntimeStateProvider,
   internalStateActions,
 } from '../../state_management/redux';
+import { ChartPortalsRenderer } from '../chart';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -114,7 +114,11 @@ async function mountComponent(
   );
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
-      dataRequestParams: { timeRangeAbsolute: time, timeRangeRelative: time },
+      dataRequestParams: {
+        timeRangeAbsolute: time,
+        timeRangeRelative: time,
+        searchSessionId: '123',
+      },
     })
   );
 
@@ -131,19 +135,20 @@ async function mountComponent(
     setExpandedDoc: jest.fn(),
     updateDataViewList: jest.fn(),
   };
-  stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
-      <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
-        <DiscoverMainProvider value={stateContainer}>
-          <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
-            <EuiProvider highContrastMode={false}>
-              <DiscoverLayout {...props} />
-            </EuiProvider>
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
-      </CurrentTabProvider>
+      <InternalStateProvider store={stateContainer.internalState}>
+        <ChartPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
+          <DiscoverMainProvider value={stateContainer}>
+            <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
+              <EuiProvider highContrastMode={false}>
+                <DiscoverLayout {...props} />
+              </EuiProvider>
+            </RuntimeStateProvider>
+          </DiscoverMainProvider>
+        </ChartPortalsRenderer>
+      </InternalStateProvider>
     </KibanaContextProvider>,
     mountOptions
   );

@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createSelector } from '@reduxjs/toolkit';
 import type { DiscoverInternalState } from './types';
 
-export const selectAllTabs = (state: DiscoverInternalState) =>
-  state.tabs.allIds.map((id) => state.tabs.byId[id]);
-
 export const selectTab = (state: DiscoverInternalState, tabId: string) => state.tabs.byId[tabId];
+
+export const selectAllTabs = createSelector(
+  [
+    (state: DiscoverInternalState) => state.tabs.allIds,
+    (state: DiscoverInternalState) => state.tabs.byId,
+  ],
+  (allIds, byId) => allIds.map((id) => byId[id])
+);

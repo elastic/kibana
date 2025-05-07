@@ -4,87 +4,111 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import { Outlet } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { useKibana } from '../../hooks/use_kibana';
-import { StreamDetailContextProvider, useStreamDetail } from '../../hooks/use_stream_detail';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiBadgeGroup, EuiButton } from '@elastic/eui';
+import { Streams } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { StreamDetailManagement } from '../data_management/stream_detail_management';
-import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
-import { RedirectTo } from '../redirect_to';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
+import { useStreamDetail } from '../../hooks/use_stream_detail';
+import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
+import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { StatefulStreamsAppRouter, useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { RedirectTo } from '../redirect_to';
 
-export function StreamDetailView() {
-  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
-
-  const {
-    path: { key: name },
-  } = useStreamsAppParams('/{key}/{tab}', true);
-
-  return (
-    <StreamDetailContextProvider name={name} streamsRepositoryClient={streamsRepositoryClient}>
-      <Outlet />
-    </StreamDetailContextProvider>
-  );
-}
-
-export function StreamDetailViewContent() {
-  const params1 = useStreamsAppParams('/{key}/{tab}', true);
-  const params2 = useStreamsAppParams('/{key}/{tab}/{subtab}', true);
-
-  const name = params1?.path?.key || params2.path.key;
-  const tab = params1?.path?.tab || 'management';
-  const { definition, refresh } = useStreamDetail();
-
-  const entity = {
-    id: name,
-    displayName: name,
-  };
-
-  if (params2?.path?.subtab && tab !== 'management') {
-    // only management tab has subtabs
-    return <RedirectTo path="/{key}/{tab}" params={{ path: { tab } }} />;
-  }
-  if (!params2?.path?.subtab && tab === 'management') {
-    // management tab requires a subtab
-    return <RedirectTo path="/{key}/{tab}/{subtab}" params={{ path: { tab, subtab: 'route' } }} />;
-  }
-
-  const tabs: EntityViewTab[] = [
-    {
-      name: 'overview',
+const getStreamDetailTabs = ({
+  definition,
+  router,
+}: {
+  definition: Streams.ingest.all.GetResponse;
+  router: StatefulStreamsAppRouter;
+}) =>
+  ({
+    overview: {
+      href: router.link('/{key}/{tab}', {
+        path: { key: definition.stream.name, tab: 'overview' },
+      }),
+      background: false,
       content: <StreamDetailOverview definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
         defaultMessage: 'Overview',
       }),
-      background: false,
     },
-    {
-      name: 'dashboards',
+    dashboards: {
+      href: router.link('/{key}/{tab}', {
+        path: { key: definition.stream.name, tab: 'dashboards' },
+      }),
+      background: true,
       content: <StreamDetailDashboardsView definition={definition} />,
       label: i18n.translate('xpack.streams.streamDetailView.dashboardsTab', {
         defaultMessage: 'Dashboards',
       }),
-      background: true,
     },
-    {
-      name: 'management',
-      content: <StreamDetailManagement definition={definition} refreshDefinition={refresh} />,
-      label: i18n.translate('xpack.streams.streamDetailView.managementTab', {
-        defaultMessage: 'Management',
-      }),
-      background: true,
-    },
-  ];
+  } as const);
+
+export type StreamDetailTabs = ReturnType<typeof getStreamDetailTabs>;
+export type StreamDetailTabName = keyof StreamDetailTabs;
+
+function isValidStreamDetailTab(value: string): value is StreamDetailTabName {
+  return ['overview', 'dashboards'].includes(value as StreamDetailTabName);
+}
+
+export function StreamDetailView() {
+  const router = useStreamsAppRouter();
+  const { path } = useStreamsAppParams('/{key}/{tab}', true);
+  const { key, tab } = path;
+
+  const { definition } = useStreamDetail();
+
+  if (tab === 'management') {
+    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'route' } }} />;
+  }
+
+  if (!isValidStreamDetailTab(tab)) {
+    return <RedirectTo path="/{key}/{tab}" params={{ path: { key, tab: 'overview' } }} />;
+  }
+
+  const tabs = getStreamDetailTabs({ definition, router });
+
+  const selectedTabObject = tabs[tab as StreamDetailTabName];
 
   return (
-    <EntityDetailViewWithoutParams
-      tabs={tabs}
-      entity={entity}
-      definition={definition}
-      selectedTab={tab}
-    />
+    <>
+      <StreamsAppPageTemplate.Header
+        bottomBorder="extended"
+        pageTitle={
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            {key}
+            <EuiBadgeGroup gutterSize="s">
+              {Streams.UnwiredStream.GetResponse.is(definition) && <ClassicStreamBadge />}
+              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+            </EuiBadgeGroup>
+          </EuiFlexGroup>
+        }
+        tabs={Object.entries(tabs).map(([tabName, { label, href }]) => {
+          return {
+            label,
+            href,
+            isSelected: tab === tabName,
+          };
+        })}
+        rightSideItems={[
+          <EuiButton
+            iconType="gear"
+            href={router.link('/{key}/management/{tab}', {
+              path: { key, tab: 'route' },
+            })}
+          >
+            {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamLabel', {
+              defaultMessage: 'Manage stream',
+            })}
+          </EuiButton>,
+        ]}
+      />
+      <StreamsAppPageTemplate.Body color={selectedTabObject.background ? 'plain' : 'subdued'}>
+        {selectedTabObject.content}
+      </StreamsAppPageTemplate.Body>
+    </>
   );
 }

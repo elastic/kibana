@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { GroupDefinition } from '@kbn/core-chrome-browser';
+import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
-export const createStackManagementNavigationTree = (): GroupDefinition => ({
-  type: 'navGroup',
+export const createStackManagementNavigationTree = (): NodeDefinition => ({
   id: 'category-management',
   title: i18nStrings.projectSettings.title,
   icon: 'gear',
   breadcrumbStatus: 'hidden',
+  renderAs: 'accordion',
+  spaceBefore: null,
   children: [
     {
-      id: 'stack_management',
+      id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
       title: i18nStrings.stackManagement.title,
       renderAs: 'panelOpener',
       spaceBefore: null,
@@ -58,6 +59,10 @@ export const createStackManagementNavigationTree = (): GroupDefinition => ({
               link: 'management:data_usage',
               breadcrumbStatus: 'hidden',
             },
+            {
+              link: 'management:content_connectors',
+              breadcrumbStatus: 'hidden',
+            },
           ],
         },
         {
@@ -95,13 +100,23 @@ export const createStackManagementNavigationTree = (): GroupDefinition => ({
               breadcrumbStatus: 'hidden',
             },
             {
+              id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
-              breadcrumbStatus: 'hidden',
             },
             {
+              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
               link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-              breadcrumbStatus: 'hidden',
             },
+          ],
+        },
+        {
+          title: i18nStrings.ml.title,
+          children: [
+            { link: 'management:overview' },
+            { link: 'management:anomaly_detection' },
+            { link: 'management:analytics' },
+            { link: 'management:trained_models' },
+            { link: 'management:supplied_configurations' },
           ],
         },
         {

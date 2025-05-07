@@ -706,9 +706,6 @@ class OutputService {
         if (!output.service_token && output.secrets?.service_token) {
           data.service_token = output.secrets?.service_token as string;
         }
-        if (!output.kibana_api_key && output.secrets?.kibana_api_key) {
-          data.kibana_api_key = output.secrets?.kibana_api_key as string;
-        }
       }
     }
 
@@ -1132,9 +1129,6 @@ class OutputService {
       ) {
         if (!data.service_token && data.secrets?.service_token) {
           updateData.service_token = data.secrets?.service_token as string;
-        }
-        if (!data.kibana_api_key && data.secrets?.kibana_api_key) {
-          updateData.kibana_api_key = data.secrets?.kibana_api_key as string;
         }
       }
     }

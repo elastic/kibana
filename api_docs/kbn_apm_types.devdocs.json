@@ -1430,6 +1430,48 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OtelSpanLink",
+        "type": "Interface",
+        "tags": [],
+        "label": "OtelSpanLink",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.OtelSpanLink.span_id",
+            "type": "Array",
+            "tags": [],
+            "label": "span_id",
+            "description": [],
+            "signature": [
+              "(string | undefined)[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-types",
+            "id": "def-common.OtelSpanLink.trace_id",
+            "type": "Array",
+            "tags": [],
+            "label": "trace_id",
+            "description": [],
+            "signature": [
+              "(string | undefined)[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_schemas/raw/fields/span_links.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.Page",
         "type": "Interface",
         "tags": [],
@@ -3156,6 +3198,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ELASTIC_PROFILER_STACK_TRACE_IDS",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_PROFILER_STACK_TRACE_IDS",
+        "description": [],
+        "signature": [
+          "\"elastic.profiler_stack_trace_ids\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.ElasticAgentName",
         "type": "Type",
         "tags": [],
@@ -3878,36 +3935,6 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
-        "id": "def-common.LINKS_SPAN_ID",
-        "type": "string",
-        "tags": [],
-        "label": "LINKS_SPAN_ID",
-        "description": [],
-        "signature": [
-          "\"links.span_id\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/apm-types",
-        "id": "def-common.LINKS_TRACE_ID",
-        "type": "string",
-        "tags": [],
-        "label": "LINKS_TRACE_ID",
-        "description": [],
-        "signature": [
-          "\"links.trace_id\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.LOG_LEVEL",
         "type": "string",
         "tags": [],
@@ -4443,6 +4470,51 @@
           "\"opentelemetry\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}`"
         ],
         "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OTEL_SPAN_LINKS",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_SPAN_LINKS",
+        "description": [],
+        "signature": [
+          "\"links\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OTEL_SPAN_LINKS_SPAN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_SPAN_LINKS_SPAN_ID",
+        "description": [],
+        "signature": [
+          "\"links.span_id\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.OTEL_SPAN_LINKS_TRACE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OTEL_SPAN_LINKS_TRACE_ID",
+        "description": [],
+        "signature": [
+          "\"links.trace_id\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

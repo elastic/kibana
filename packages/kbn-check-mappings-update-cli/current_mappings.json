@@ -71,6 +71,17 @@
       "alertTypeId": {
         "type": "keyword"
       },
+      "artifacts": {
+        "properties": {
+          "investigation_guide": {
+            "properties": {
+              "blob": {
+                "type": "text"
+              }
+            }
+          }
+        }
+      },
       "consumer": {
         "type": "keyword"
       },
@@ -1101,6 +1112,7 @@
     }
   },
   "epm-packages": {
+    "dynamic": false,
     "properties": {
       "additional_spaces_installed_kibana": {
         "index": false,
@@ -2748,6 +2760,27 @@
       }
     }
   },
+  "onechat_workflow": {
+    "dynamic": false,
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "categories": {
+        "type": "keyword"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "workflow_id": {
+        "type": "keyword"
+      }
+    }
+  },
   "osquery-manager-usage-metric": {
     "properties": {
       "count": {
@@ -2912,6 +2945,14 @@
       }
     }
   },
+  "privilege-monitoring-status": {
+    "dynamic": false,
+    "properties": {
+      "status": {
+        "type": "keyword"
+      }
+    }
+  },
   "product-doc-install-status": {
     "dynamic": false,
     "properties": {
@@ -3038,6 +3079,19 @@
   "search-telemetry": {
     "dynamic": false,
     "properties": {}
+  },
+  "search_playground": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      }
+    }
   },
   "security-ai-prompt": {
     "dynamic": false,
@@ -3864,7 +3918,7 @@
     }
   },
   "workchat_agent": {
-    "dynamic": "strict",
+    "dynamic": false,
     "properties": {
       "access_control": {
         "properties": {

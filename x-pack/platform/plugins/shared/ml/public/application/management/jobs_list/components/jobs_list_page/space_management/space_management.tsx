@@ -261,7 +261,7 @@ export const RefreshButton: FC<{ onRefreshClick: () => void; isRefreshing: boole
   isRefreshing,
 }) => (
   <EuiButtonEmpty
-    data-test-subj={`mlRefreshJobListButton${isRefreshing ? ' loading' : ' loaded'}`}
+    data-test-subj={`mlDatePickerRefreshPageButton${isRefreshing ? ' loading' : ' loaded'}`}
     onClick={onRefreshClick}
     isLoading={isRefreshing}
     iconType={'refresh'}

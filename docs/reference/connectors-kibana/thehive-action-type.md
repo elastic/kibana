@@ -2,29 +2,29 @@
 navigation_title: "{{hive}}"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/thehive-action-type.html
+applies_to:
+  stack: all
+  serverless:
+    observability: ga
+    security: ga
 ---
 
 # {{hive}} connector and action [thehive-action-type]
-
 
 {{hive}} connector uses the [{{hive}} (v1) REST API](https://docs.strangebee.com/thehive/api-docs/) to create cases and alerts. [8.16.0]
 
 ::::{note}
 If you use this connector with [cases](docs-content://explore-analyze/alerts-cases/cases.md), the status values differ in {{kib}} and {{hive}}. The status values are not synchronized when you update a case.
-
 ::::
-
-
 
 ## Create connectors in {{kib}} [define-thehive-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you're creating a rule. For example:
 
 :::{image} ../images/thehive-connector.png
 :alt: {{hive}} connector
-:class: screenshot
+:screenshot:
 :::
-
 
 ### Connector configuration [thehive-connector-configuration]
 
@@ -42,19 +42,18 @@ URL
 API key
 :   The API key for authentication in {{hive}}.
 
-
 ## Test connectors [thehive-action-configuration]
 
-You can test connectors for creating a case or an alert with the [run connector API](https://www.elastic.co/docs/api/doc/kibana/v8/group/endpoint-connectors) or as you’re creating or editing the connector in {{kib}}. For example:
+You can test connectors for creating a case or an alert with the [run connector API](https://www.elastic.co/docs/api/doc/kibana/v8/group/endpoint-connectors) or as you're creating or editing the connector in {{kib}}. For example:
 
 :::{image} ../images/thehive-params-case-test.png
 :alt: {{hive}} case params test
-:class: screenshot
+:screenshot:
 :::
 
 :::{image} ../images/thehive-params-alert-test.png
 :alt: {{hive}} alert params test
-:class: screenshot
+:screenshot:
 :::
 
 {{hive}} actions have the following configuration properties.
@@ -89,11 +88,9 @@ Source
 Source reference
 :   A source reference for the alert.
 
-
 ## Connector networking configuration [thehive-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
 
 ## Configure {{hive}} [configure-thehive]
 
@@ -104,4 +101,3 @@ To generate an API key in {{hive}}:
 3. Go to **API Key**.
 4. Click **Create** if no API key has been created previously; otherwise, you can view the API key by clicking on **Reveal**.
 5. Copy the **API key** value to configure the connector in {{kib}}.
-

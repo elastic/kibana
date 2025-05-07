@@ -23,7 +23,7 @@ export const CSP_BENCHMARKS_URL = '/app/security/cloud_security_posture/benchmar
 export const CSP_DASHBOARD_URL = '/app/security/cloud_security_posture/dashboard';
 export const CSP_FINDINGS_URL = '/app/security/cloud_security_posture/findings/configurations';
 
-export const RULES_LANDING_URL = '/app/security/rules/landing';
+export const RULES_URL = '/app/security/rules';
 export const RULES_COVERAGE_URL = '/app/security/rules_coverage_overview';
 
 export const HOSTS_URL = '/app/security/hosts/events';
@@ -65,6 +65,7 @@ export const MACHINE_LEARNING_LANDING_URL = '/app/security/ml';
 // Detection and Response
 export const DETECTION_AND_RESPONSE_URL = '/app/security/detection_response';
 export const ALERTS_URL = '/app/security/alerts';
+export const ALERT_SUMMARY_URL = '/app/security/alert_summary';
 export const EXCEPTIONS_URL = '/app/security/exceptions';
 export const CREATE_RULE_URL = '/app/security/rules/create';
 export const ENTITY_ANALYTICS_MANAGEMENT_URL = '/app/security/entity_analytics_management';
@@ -87,3 +88,7 @@ export const ASSET_INVENTORY_URL = '/app/security/asset_inventory';
 
 // Custom Role Creation
 export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
+
+// Alerting
+export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
+export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';

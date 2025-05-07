@@ -92,11 +92,11 @@ describe('CompareDocuments', () => {
     renderCompareDocuments();
     expect(mockDataGridProps).toBeDefined();
     expect(mockDataGridProps?.columns).toBeDefined();
-    expect(mockDataGridProps?.css).toBeDefined();
-    expect(omit(mockDataGridProps, 'columns', 'css')).toMatchInlineSnapshot(`
+    expect(omit(mockDataGridProps, 'columns')).toMatchInlineSnapshot(`
       Object {
         "aria-describedby": "test",
         "aria-labelledby": "test",
+        "className": "css-h7dgtn-useComparisonCss-useComparisonCss",
         "columnVisibility": Object {
           "setVisibleColumns": [Function],
           "visibleColumns": Array [

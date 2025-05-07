@@ -12,6 +12,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useEffect, useState } from 'react';
 import React from 'react';
+import useUnmount from 'react-use/lib/useUnmount';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -20,7 +21,6 @@ import {
   createInternalStateStore,
   createRuntimeStateManager,
   internalStateActions,
-  CurrentTabProvider,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -33,9 +33,8 @@ import {
 } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-
-// TEMPORARY: This is a temporary flag to enable/disable tabs in Discover until the feature is fully implemented.
-const TABS_ENABLED = false;
+import { TABS_ENABLED } from '../../constants';
+import { ChartPortalsRenderer } from './components/chart';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -76,7 +75,6 @@ export const DiscoverMainRoute = ({
       urlStateStorage,
     })
   );
-  const [initialTabId] = useState(() => internalState.getState().tabs.allIds[0]);
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {
@@ -104,6 +102,12 @@ export const DiscoverMainRoute = ({
       initializeMainRoute(rootProfileState);
     }
   }, [initializeMainRoute, rootProfileState]);
+
+  useUnmount(() => {
+    for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
+      internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
+    }
+  });
 
   if (rootProfileState.rootProfileLoading || mainRouteInitializationState.loading) {
     return <BrandedLoadingIndicator />;
@@ -138,13 +142,13 @@ export const DiscoverMainRoute = ({
   return (
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
-        {TABS_ENABLED ? (
-          <TabsView initialTabId={initialTabId} sessionViewProps={sessionViewProps} />
-        ) : (
-          <CurrentTabProvider currentTabId={initialTabId}>
+        <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
+          {TABS_ENABLED ? (
+            <TabsView {...sessionViewProps} />
+          ) : (
             <DiscoverSessionView {...sessionViewProps} />
-          </CurrentTabProvider>
-        )}
+          )}
+        </ChartPortalsRenderer>
       </rootProfileState.AppWrapper>
     </InternalStateProvider>
   );
