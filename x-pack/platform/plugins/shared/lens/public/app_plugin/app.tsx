@@ -137,7 +137,7 @@ export function App({
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const [lastKnownDoc, setLastKnownDoc] = useState<LensDocument | undefined>(undefined);
+  const lastKnownDoc = useMemo(() => currentDoc, [currentDoc]);
   const [initialDocFromContext, setInitialDocFromContext] = useState<LensDocument | undefined>(
     undefined
   );
@@ -154,12 +154,6 @@ export function App({
       ? initialContext.vizEditorOriginatingAppUrl
       : undefined;
   const initialContextIsEmbedded = Boolean(legacyEditorAppName);
-
-  useEffect(() => {
-    if (currentDoc) {
-      setLastKnownDoc(currentDoc);
-    }
-  }, [currentDoc]);
 
   const showNoDataPopover = useCallback(() => {
     setIndicateNoData(true);

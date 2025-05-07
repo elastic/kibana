@@ -345,7 +345,10 @@ export const LensTopNavMenu = ({
   );
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
-  const [isOnTextBasedMode, setIsOnTextBasedMode] = useState(false);
+  const isOnTextBasedMode = useMemo(
+    () => query != null && typeof query === 'object' && isOfAggregateQueryType(query),
+    [query]
+  );
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const dispatchChangeIndexPattern = React.useCallback(
@@ -415,9 +418,10 @@ export const LensTopNavMenu = ({
       indexPatterns.length + rejectedIndexPatterns.length !== indexPatternIds.size ||
       [...indexPatternIds].some(
         (id) =>
-          ![...indexPatterns.map((ip) => ip.id), ...rejectedIndexPatterns].find(
-            (loadedId) => loadedId === id
-          )
+          !indexPatterns
+            .map((ip) => ip.id)
+            .concat(rejectedIndexPatterns)
+            .some((loadedId) => loadedId === id)
       );
 
     // Update the cached index patterns if the user made a change to any of them
@@ -461,12 +465,6 @@ export const LensTopNavMenu = ({
     data.dataViews,
     isOnTextBasedMode,
   ]);
-
-  useEffect(() => {
-    if (typeof query === 'object' && query !== null && isOfAggregateQueryType(query)) {
-      setIsOnTextBasedMode(true);
-    }
-  }, [query]);
 
   useEffect(() => {
     return () => {
@@ -885,7 +883,6 @@ export const LensTopNavMenu = ({
           dispatchSetState({ query: newQuery as Query });
           // check if query is text-based (esql etc) and switchAndCleanDatasource
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
-            setIsOnTextBasedMode(true);
             dispatch(
               switchAndCleanDatasource({
                 newDatasourceId: 'textBased',
@@ -1085,7 +1082,6 @@ export const LensTopNavMenu = ({
             currentIndexPatternId: newIndexPatternId,
           })
         );
-        setIsOnTextBasedMode(false);
       }
     },
     onEditDataView: async (updatedDataViewStub) => {
