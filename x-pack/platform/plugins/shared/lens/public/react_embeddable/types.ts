@@ -64,6 +64,7 @@ import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-pl
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { CanAddNewPanel } from '@kbn/presentation-containers';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -374,7 +375,7 @@ export interface LensInspectorAdapters {
 }
 
 export type LensApi = Simplify<
-  DefaultEmbeddableApi<LensSerializedState, LensRuntimeState> &
+  DefaultEmbeddableApi<LensSerializedState> &
     // This is used by actions to operate the edit action
     HasEditCapabilities &
     // for blocking errors leverage the embeddable panel UI
@@ -432,6 +433,7 @@ export type LensInternalApi = Simplify<
       updateAbortController: (newAbortController: AbortController | undefined) => void;
       renderCount$: PublishingSubject<number>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
+      updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) => void;
       messages$: PublishingSubject<UserMessage[]>;
       updateMessages: (newMessages: UserMessage[]) => void;
       validationMessages$: PublishingSubject<UserMessage[]>;
@@ -474,18 +476,20 @@ export interface ExpressionWrapperProps {
 
 export type GetStateType = () => LensRuntimeState;
 
-/**
- * Custom Lens component exported by the plugin
- * For better DX of Lens component consumers, expose a typed version of the serialized state
- */
+export interface StructuredDatasourceStates {
+  formBased?: FormBasedPersistedState;
+  textBased?: TextBasedPersistedState;
+}
 
-/** Utility function to build typed version for each chart */
+/** Utility type to build typed version for each chart */
 type TypedLensAttributes<TVisType, TVisState> = Simplify<
   Omit<LensDocument, 'savedObjectId' | 'type' | 'state' | 'visualizationType'> & {
     visualizationType: TVisType;
     state: Simplify<
       Omit<LensDocument['state'], 'datasourceStates' | 'visualization'> & {
         datasourceStates: {
+          // This is of type StructuredDatasourceStates but does not conform to Record<string, unknown>
+          // so I am leaving this alone until we improve this datasource typing structure.
           formBased?: FormBasedPersistedState;
           textBased?: TextBasedPersistedState;
         };
@@ -522,13 +526,9 @@ export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 export type LensEmbeddableOutput = LensApi;
 
-export interface ControlGroupApi {
-  addNewPanel: (panelState: Record<string, unknown>) => void;
-}
-
 interface ESQLVariablesCompatibleDashboardApi {
   esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
-  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  controlGroupApi$: PublishingSubject<Partial<CanAddNewPanel> | undefined>;
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }
 
