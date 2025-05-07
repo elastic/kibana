@@ -6,8 +6,13 @@
  */
 import { BehaviorSubject } from 'rxjs';
 import { defaultDoc } from '../mocks/services_mock';
-import { deserializeState } from './helper';
+import { deserializeState, getStructuredDatasourceStates } from './helper';
 import { makeEmbeddableServices } from './mocks';
+import { FormBasedPersistedState } from '../datasources/form_based/types';
+import { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
+import expect from 'expect';
+import { DatasourceState } from '../state_management';
+import { StructuredDatasourceStates } from './types';
 
 describe('Embeddable helpers', () => {
   describe('deserializeState', () => {
@@ -112,6 +117,53 @@ describe('Embeddable helpers', () => {
         // note: in this case the references are swapped
         expect(runtimeState.attributes.references).toEqual(mockedReferences);
       });
+    });
+  });
+
+  describe('getStructuredDatasourceStates', () => {
+    const formBasedDSStateMock: FormBasedPersistedState = {
+      layers: {},
+    };
+    const textBasedDSStateMock: TextBasedPersistedState = {
+      layers: {},
+    };
+
+    it('should return structured datasourceStates from unknown datasourceStates', () => {
+      const mockDatasourceStates: Record<string, unknown> = {
+        formBased: formBasedDSStateMock,
+        textBased: textBasedDSStateMock,
+        other: textBasedDSStateMock,
+      };
+      const result = getStructuredDatasourceStates(mockDatasourceStates);
+
+      expect(result.formBased).toEqual(formBasedDSStateMock);
+      expect(result.textBased).toEqual(textBasedDSStateMock);
+      expect('other' in result).toBe(false);
+    });
+
+    it('should return structured datasourceStates from nested unknown datasourceStates', () => {
+      const wrap = (ds: unknown) => ({ state: ds, isLoading: false } satisfies DatasourceState);
+      const mockDatasourceStates: Record<string, unknown> = {
+        formBased: wrap(formBasedDSStateMock),
+        textBased: wrap(textBasedDSStateMock),
+        other: wrap(textBasedDSStateMock),
+      };
+      const result = getStructuredDatasourceStates(mockDatasourceStates);
+
+      expect(result.formBased).toEqual(formBasedDSStateMock);
+      expect(result.textBased).toEqual(textBasedDSStateMock);
+      expect('other' in result).toBe(false);
+    });
+
+    it('should return structured datasourceStates from structured datasourceStates', () => {
+      const mockDatasourceStates: StructuredDatasourceStates = {
+        formBased: formBasedDSStateMock,
+        textBased: textBasedDSStateMock,
+      };
+      const result = getStructuredDatasourceStates(mockDatasourceStates);
+
+      expect(result.formBased).toEqual(formBasedDSStateMock);
+      expect(result.textBased).toEqual(textBasedDSStateMock);
     });
   });
 });
