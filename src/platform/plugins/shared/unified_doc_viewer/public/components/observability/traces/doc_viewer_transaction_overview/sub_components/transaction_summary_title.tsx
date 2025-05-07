@@ -32,19 +32,19 @@ export const TransactionSummaryTitle = ({
       <EuiTitle size="xs">
         <h2>
           {transactionName ? (
-            <TransactionNameLink
-              serviceName={serviceName}
-              transactionName={transactionName}
-              renderContent={() => {
-                return formattedTransactionName ? (
-                  // Value returned from formatFieldValue is always sanitized
-                  // eslint-disable-next-line react/no-danger
-                  <strong dangerouslySetInnerHTML={{ __html: formattedTransactionName }} />
-                ) : (
-                  <strong>{transactionName}</strong>
-                );
-              }}
-            />
+            <HighlightField
+              value={transactionName}
+              formattedValue={formattedTransactionName}
+              as="strong"
+            >
+              {({ content }) => (
+                <TransactionNameLink
+                  serviceName={serviceName}
+                  transactionName={transactionName}
+                  renderContent={() => content}
+                />
+              )}
+            </HighlightField>
           ) : (
             serviceName
           )}

@@ -15,15 +15,16 @@ export function getTraceDocumentOverview(
   doc: DataTableRecord,
   { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
 ): TraceDocumentOverview {
-  const formatField = <T extends keyof TraceDocumentOverview>(field: T) => {
-    return formatFieldValue(
-      doc.flattened[field],
-      doc.raw,
-      fieldFormats,
-      dataView,
-      dataView.fields.getByName(field)
-    );
-  };
+  const formatField = <T extends keyof TraceDocumentOverview>(field: T) =>
+    doc.flattened[field] !== undefined && doc.flattened[field] !== null
+      ? formatFieldValue(
+          doc.flattened[field],
+          doc.raw,
+          fieldFormats,
+          dataView,
+          dataView.fields.getByName(field)
+        )
+      : undefined;
 
   const fields: Array<keyof TraceDocumentOverview> = [
     fieldConstants.TIMESTAMP_FIELD,

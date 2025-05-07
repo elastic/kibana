@@ -10,7 +10,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { HighlightField } from '.';
-import { EuiTextProps } from '@elastic/eui';
 
 describe('HighlightField', () => {
   it('renders the value when formattedValue is not provided', () => {
@@ -33,22 +32,21 @@ describe('HighlightField', () => {
     expect(getByText('Formatted Value')).toBeInTheDocument();
   });
 
-  it('applies the default textSize when not provided', () => {
-    const { container } = render(<HighlightField value="Test Value" />);
-    const textElement = container.querySelector('.euiText');
-    expect(textElement).toHaveClass('eui-textTruncate');
-    expect(textElement).toHaveAttribute('size', 'xs');
-  });
-
-  it('applies the specified textSize when provided', () => {
-    const textSize: EuiTextProps['size'] = 'm';
-    const { container } = render(<HighlightField value="Test Value" textSize={textSize} />);
-    const textElement = container.querySelector('.euiText');
-    expect(textElement).toHaveAttribute('size', textSize);
-  });
-
   it('renders nothing when neither value nor formattedValue is provided', () => {
     const { container } = render(<HighlightField />);
     expect(container.firstChild).toBeNull();
+  });
+
+  it('renders the formattedValue with a custom HTML element when "as" prop is provided', () => {
+    const { container } = render(
+      <HighlightField formattedValue="<b>Formatted Value</b>" as="span" />
+    );
+    const spanElement = container.querySelector('span');
+    expect(spanElement).toHaveTextContent('Formatted Value');
+  });
+
+  it('renders valueContent when formattedValue is not provided', () => {
+    const { getByText } = render(<HighlightField value="Fallback Value" />);
+    expect(getByText('Fallback Value')).toBeInTheDocument();
   });
 });

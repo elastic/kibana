@@ -26,6 +26,8 @@ import { SpanSummaryField } from './sub_components/span_summary_field';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
 import { Trace } from '../components/trace';
 import { SpanSummaryTitle } from './sub_components/span_summary_title';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { getTraceDocValue } from '../resources/get_field_value';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;
@@ -38,11 +40,19 @@ export function SpanOverview({
   onAddColumn,
   onRemoveColumn,
   transactionIndexPattern,
+  dataView,
 }: SpanOverviewProps) {
-  const parsedDoc = useMemo(() => getTraceDocumentOverview(hit), [hit]);
-  const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
-  const transactionId = parsedDoc[TRANSACTION_ID_FIELD];
-  const fieldConfigurations = useMemo(() => getSpanFieldConfiguration(parsedDoc), [parsedDoc]);
+  const { fieldFormats } = getUnifiedDocViewerServices();
+  const parsedDoc = useMemo(
+    () => getTraceDocumentOverview(hit, { dataView, fieldFormats }),
+    [dataView, fieldFormats, hit]
+  );
+  const spanDuration = getTraceDocValue(SPAN_DURATION_FIELD, hit.flattened);
+  const transactionId = getTraceDocValue(TRANSACTION_ID_FIELD, hit.flattened);
+  const fieldConfigurations = useMemo(
+    () => getSpanFieldConfiguration({ attributes: parsedDoc, flattenedDoc: hit.flattened }),
+    [hit.flattened, parsedDoc]
+  );
 
   return (
     <TransactionProvider transactionId={transactionId} indexPattern={transactionIndexPattern}>
@@ -54,7 +64,12 @@ export function SpanOverview({
       >
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
-          <SpanSummaryTitle name={parsedDoc[SPAN_NAME_FIELD]} id={parsedDoc[SPAN_ID_FIELD]} />
+          <SpanSummaryTitle
+            spanName={getTraceDocValue(SPAN_NAME_FIELD, hit.flattened)}
+            formattedSpanName={parsedDoc[SPAN_NAME_FIELD]}
+            id={getTraceDocValue(SPAN_ID_FIELD, hit.flattened)}
+            formattedId={parsedDoc[SPAN_ID_FIELD]}
+          />
           <EuiSpacer size="m" />
           {spanFields.map((fieldId) => (
             <SpanSummaryField
@@ -73,8 +88,8 @@ export function SpanOverview({
           <EuiSpacer size="m" />
           <Trace
             fields={fieldConfigurations}
-            traceId={parsedDoc[TRACE_ID_FIELD]}
-            docId={parsedDoc[SPAN_ID_FIELD]}
+            traceId={getTraceDocValue(TRACE_ID_FIELD, hit.flattened)}
+            docId={getTraceDocValue(SPAN_ID_FIELD, hit.flattened)}
             displayType="span"
           />
         </EuiPanel>

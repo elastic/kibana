@@ -9,25 +9,39 @@
 
 import { EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { HighlightField } from '../../components/highlight_field.tsx';
 
 export interface SpanSummaryTitleProps {
-  name?: string;
+  spanName?: string;
+  formattedSpanName?: string;
   id: string;
+  formattedId: string;
 }
 
-export const SpanSummaryTitle = ({ name, id }: SpanSummaryTitleProps) => {
-  return name ? (
+export const SpanSummaryTitle = ({
+  spanName,
+  id,
+  formattedId,
+  formattedSpanName,
+}: SpanSummaryTitleProps) => {
+  const idContent = <HighlightField value={id} formattedValue={formattedId} />;
+  return spanName ? (
     <>
       <EuiTitle size="xs">
-        <h2>{name}</h2>
+        <h2>
+          <HighlightField
+            textSize="m"
+            value={spanName}
+            formattedValue={formattedSpanName}
+            as="strong"
+          />
+        </h2>
       </EuiTitle>
-      <EuiText size="xs" color="subdued">
-        {id}
-      </EuiText>
+      {idContent}
     </>
   ) : (
     <EuiTitle size="xs">
-      <h2>{id}</h2>
+      <h2>{idContent}</h2>
     </EuiTitle>
   );
 };

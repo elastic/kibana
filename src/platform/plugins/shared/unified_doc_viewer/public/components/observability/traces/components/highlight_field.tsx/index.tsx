@@ -16,28 +16,48 @@ interface Props {
   formattedValue?: string;
   children?: (props: { content: React.ReactNode }) => React.ReactNode | React.ReactNode;
   textSize?: EuiTextProps['size'];
+
+  as?: keyof JSX.IntrinsicElements;
 }
 
-export function HighlightField({ value, formattedValue, children, textSize = 'xs' }: Props) {
+export function HighlightField({ value, formattedValue, children, textSize = 'xs', as }: Props) {
   const formattedContent = formattedValue ? (
-    typeof children === 'function' ? (
-      children({ content: <FormattedValue value={formattedValue} textSize={textSize} /> })
-    ) : (
-      <FormattedValue value={formattedValue} textSize={textSize} />
-    )
-  ) : undefined;
-  return (
-    <div className="eui-textTruncate">
-      {formattedContent ? formattedContent : <EuiText size={textSize}>{value}</EuiText>}
-    </div>
-  );
+    <FormattedValue value={formattedValue} textSize={textSize} as={as} />
+  ) : null;
+  const valueContent = value ? <EuiText size={textSize}>{value}</EuiText> : null;
+  const content = formattedContent ?? valueContent;
+
+  if (typeof children === 'function') {
+    return children({ content });
+  }
+
+  return <>{content}</>;
 }
 
-const FormattedValue = ({ value, textSize }: { value: string; textSize: EuiTextProps['size'] }) => (
-  <EuiText
-    className="eui-textTruncate"
-    size={textSize}
-    // Value returned from formatFieldValue is always sanitized
-    dangerouslySetInnerHTML={{ __html: value }}
-  />
-);
+const FormattedValue = ({
+  value,
+  textSize,
+  as,
+}: {
+  value: string;
+  textSize: EuiTextProps['size'];
+  as?: keyof JSX.IntrinsicElements;
+}) => {
+  if (as) {
+    const As = as;
+    return (
+      <As
+        // Value returned from formatFieldValue is always sanitized
+        dangerouslySetInnerHTML={{ __html: value }}
+      />
+    );
+  }
+  return (
+    <EuiText
+      className="eui-textTruncate"
+      size={textSize}
+      // Value returned from formatFieldValue is always sanitized
+      dangerouslySetInnerHTML={{ __html: value }}
+    />
+  );
+};

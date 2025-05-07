@@ -54,7 +54,7 @@ export const getCommonFieldConfiguration = ({
         <HighlightField value={value} formattedValue={formattedValue}>
           {({ content }) => (
             <TransactionNameLink
-              serviceName={attributes[SERVICE_NAME_FIELD]}
+              serviceName={getTraceDocValue(SERVICE_NAME_FIELD, flattenedDoc)}
               transactionName={value as string}
               renderContent={() => content}
             />
