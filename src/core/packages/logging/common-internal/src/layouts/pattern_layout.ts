@@ -69,6 +69,6 @@ export class PatternLayout implements Layout {
       );
     }
 
-    return recordString;
+    return recordString.trim();
   }
 }
