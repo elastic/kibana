@@ -34,6 +34,7 @@ import { defaultRangeValue, GapRangeValue } from '../../constants';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry/events/manual_rule_run/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useGetGlobalRuleExecutionSummary } from '../../api/hooks/use_get_global_rule_execution_summary';
+import { getExecutionSuccessRate } from './utils';
 
 const DoubleDivider = styled.div`
   border-right: ${(props) => props.theme.euiTheme.border.thin};
@@ -118,12 +119,7 @@ export const RulesWithGapsOverviewPanel = () => {
     });
   };
 
-  const executionSuccessRate =
-    typeof executionSummaryData?.executions.total !== 'number'
-      ? 0
-      : Math.round(
-          (100 * executionSummaryData.executions.success) / executionSummaryData.executions.total
-        );
+  const executionSuccessRate = getExecutionSuccessRate(executionSummaryData?.executions);
 
   const gapsCounterBadgeColor = isLoadingGapsData
     ? 'hollow'
@@ -196,8 +192,7 @@ export const RulesWithGapsOverviewPanel = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" data-test-subj="rule-execution-success-rate-label">
-                {executionSuccessRate}
-                {'%'}
+                {i18n.RULE_GAPS_OVERVIEW_EXECUTION_SUCCESS_RATE_VALUE(executionSuccessRate)}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

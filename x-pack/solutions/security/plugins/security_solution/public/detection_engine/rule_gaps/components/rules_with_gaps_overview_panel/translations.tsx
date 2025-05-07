@@ -48,6 +48,12 @@ export const RULE_GAPS_OVERVIEW_EXECUTION_SUCCESS_RATE_LABEL = i18n.translate(
   }
 );
 
+export const RULE_GAPS_OVERVIEW_EXECUTION_SUCCESS_RATE_VALUE = (rate: number): string =>
+  i18n.translate('xpack.securitySolution.ruleGapsOverviewPanel.executionSuccessRateValue', {
+    values: { rate },
+    defaultMessage: '{rate}%',
+  });
+
 export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_STATUS_LABEL = i18n.translate(
   'xpack.securitySolution.ruleGapsOverviewPanel.lastExecutionStatusLabel',
   {
