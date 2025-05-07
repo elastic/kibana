@@ -21,7 +21,7 @@ const i18nTexts = {
   }),
 };
 
-export enum DeprecationLevels {
+export enum WarningLevels {
   NONE = 'none',
   INFO = 'info',
   WARNING = 'warning',
@@ -30,7 +30,7 @@ export enum DeprecationLevels {
 };
 
 export interface DeprecationBadgeProps {
-  level: DeprecationLevels;
+  level: WarningLevels;
   isResolved?: boolean;
 }
 

@@ -13,7 +13,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 
 import type { IndexStateContext } from '../context';
-import { DeprecationBadge } from '../../../../shared';
+import { DeprecationBadge, WarningLevels } from '../../../../shared';
 import {
   UIM_REINDEX_READONLY_CLICK,
   UIM_REINDEX_READONLY_RETRY_CLICK,
@@ -234,7 +234,7 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <DeprecationBadge
-          level={deprecation.level}
+          level={deprecation.level as WarningLevels}
           isResolved={reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete'}
         />
         <EuiSpacer size="s" />

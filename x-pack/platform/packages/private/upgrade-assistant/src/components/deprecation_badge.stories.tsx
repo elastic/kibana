@@ -7,7 +7,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { DeprecationBadge, DeprecationLevels } from './deprecation_badge';
+import { DeprecationBadge, WarningLevels } from './deprecation_badge';
 
 const meta: Meta<typeof DeprecationBadge> = {
   component: DeprecationBadge,
@@ -15,7 +15,7 @@ const meta: Meta<typeof DeprecationBadge> = {
   argTypes: {
     level: {
       name: 'Deprecation level',
-      options: Object.values(DeprecationLevels),
+      options: Object.values(WarningLevels),
       control: { type: 'select' },
     },
     isResolved: {
@@ -33,7 +33,7 @@ export const Basic: Story = {};
 
 export const Primary: Story = {
   args: {
-    level: DeprecationLevels.NONE,
+    level: WarningLevels.NONE,
     isResolved: false,
   },
 };

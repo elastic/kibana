@@ -11,7 +11,7 @@ import { EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { EnrichedDeprecationInfo } from '../../../../common/types';
 import { DEPRECATION_TYPE_MAP } from '../constants';
 import { DeprecationTableColumns } from '../types';
-import { DeprecationBadge } from '../shared';
+import { DeprecationBadge, WarningLevels } from '../shared';
 
 interface Props {
   resolutionTableCell?: React.ReactNode;
@@ -41,7 +41,7 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
 }) => {
   // "Status column"
   if (fieldName === 'level') {
-    return <DeprecationBadge level={deprecation.level} />;
+    return <DeprecationBadge level={deprecation.level as WarningLevels} />;
   }
 
   // "Issue" column

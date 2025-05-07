@@ -31,7 +31,7 @@ import {
 } from '../../../../../../common/types';
 import { uiMetricService, UIM_INDEX_SETTINGS_DELETE_CLICK } from '../../../../lib/ui_metric';
 import type { Status } from '../../../types';
-import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge, WarningLevels } from '../../../shared';
 
 export interface RemoveIndexSettingsFlyoutProps {
   deprecation: EnrichedDeprecationInfo;
@@ -114,7 +114,7 @@ export const RemoveIndexSettingsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge level={deprecation.level} isResolved={statusType === 'complete'} />
+        <DeprecationBadge level={deprecation.level as WarningLevels} isResolved={statusType === 'complete'} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="indexSettingsDetailsFlyoutTitle">{message}</h2>

@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 
 import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
-import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../shared';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge, WarningLevels } from '../shared';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
 
 export interface DeprecationDetailsFlyoutProps {
@@ -173,7 +173,7 @@ export const DeprecationDetailsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge level={deprecation.level} isResolved={isResolved} />
+        <DeprecationBadge level={deprecation.level as WarningLevels} isResolved={isResolved} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="kibanaDeprecationDetailsFlyoutTitle" className="eui-textBreakWord">

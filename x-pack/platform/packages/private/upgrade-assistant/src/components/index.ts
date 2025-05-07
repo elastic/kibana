@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DeprecationBadge } from './deprecation_badge';
+export { DeprecationBadge, WarningLevels } from './deprecation_badge';
