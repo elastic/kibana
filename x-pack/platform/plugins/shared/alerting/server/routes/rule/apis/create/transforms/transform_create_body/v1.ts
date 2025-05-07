@@ -86,21 +86,23 @@ export const transformCreateBody = <Params extends RuleParams = never>({
   createBody: CreateRuleRequestBodyV1<Params>;
   actions: CreateRuleRequestBodyV1<Params>['actions'];
   systemActions: CreateRuleRequestBodyV1<Params>['actions'];
-}): CreateRuleData<Params> => ({
-  name: createBody.name,
-  alertTypeId: createBody.rule_type_id,
-  enabled: createBody.enabled,
-  consumer: createBody.consumer,
-  tags: createBody.tags,
-  ...(createBody.throttle ? { throttle: createBody.throttle } : {}),
-  params: createBody.params,
-  schedule: createBody.schedule,
-  actions: transformCreateBodyActions(actions),
-  systemActions: transformCreateBodySystemActions(systemActions),
-  ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
-  ...(createBody.alert_delay ? { alertDelay: createBody.alert_delay } : {}),
-  ...(createBody.flapping !== undefined
-    ? { flapping: transformCreateBodyFlapping(createBody.flapping) }
-    : {}),
-  ...(createBody.artifacts ? { artifacts: createBody.artifacts } : {}),
-});
+}): CreateRuleData<Params> => {
+  return {
+    name: createBody.name,
+    alertTypeId: createBody.rule_type_id,
+    enabled: createBody.enabled,
+    consumer: createBody.consumer,
+    tags: createBody.tags,
+    ...(createBody.throttle ? { throttle: createBody.throttle } : {}),
+    params: createBody.params,
+    schedule: createBody.schedule,
+    actions: transformCreateBodyActions(actions),
+    systemActions: transformCreateBodySystemActions(systemActions),
+    ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
+    ...(createBody.alert_delay ? { alertDelay: createBody.alert_delay } : {}),
+    ...(createBody.flapping !== undefined
+      ? { flapping: transformCreateBodyFlapping(createBody.flapping) }
+      : {}),
+    ...(createBody.artifacts ? { artifacts: createBody.artifacts } : {}),
+  };
+};
