@@ -60,7 +60,7 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
-import type { DataViewsState } from './state_management/types';
+import type { DataViewsState, GeneralDatasourceStates } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { LensDocument } from './persistence/saved_object_store';
 import { TableInspectorAdapter } from './editor_frame_service/types';
@@ -1073,16 +1073,20 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     (
       addNewLayer: () => string,
       nonPersistedState?: T,
-      mainPalette?: SuggestionRequest['mainPalette']
+      mainPalette?: SuggestionRequest['mainPalette'],
+      datasourceStates?: GeneralDatasourceStates
     ): T;
     (
       addNewLayer: () => string,
       persistedState: P,
       mainPalette?: SuggestionRequest['mainPalette'],
+      datasourceStates?: GeneralDatasourceStates,
       annotationGroups?: AnnotationGroups,
       references?: SavedObjectReference[]
     ): T;
   };
+
+  convertToRuntimeState?: (state: T, datasourceStates?: Record<string, unknown>) => T;
 
   getUsedDataView?: (state: T, layerId: string) => string | undefined;
   /**
@@ -1115,7 +1119,11 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   /** Description is displayed as the clickable text in the chart switcher */
   getDescription: (state: T, layerId?: string) => { icon?: IconType; label: string };
   /** Visualizations can have references as well */
-  getPersistableState?: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
+  getPersistableState?: (
+    state: T,
+    datasource?: Datasource,
+    datasourceState?: { state: unknown }
+  ) => { state: P; savedObjectReferences: SavedObjectReference[] };
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */
