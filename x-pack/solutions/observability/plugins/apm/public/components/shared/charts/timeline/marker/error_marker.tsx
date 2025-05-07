@@ -56,6 +56,9 @@ export function ErrorMarker({ mark }: Props) {
     '/services/{serviceName}/overview',
     '/services/{serviceName}/errors',
     '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/overview',
+    '/mobile-services/{serviceName}/errors',
+    '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer/waterfall'
   );
 
