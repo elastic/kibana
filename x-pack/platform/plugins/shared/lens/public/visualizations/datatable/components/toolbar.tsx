@@ -9,6 +9,7 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonGroup,
+  type EuiButtonGroupOptionProps,
   EuiFlexGroup,
   EuiFormRow,
   EuiI18n,
@@ -179,55 +180,68 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
   );
 }
 
-const DensitySettings = ({
-  dataGridDensity,
-  onChange,
-}: {
+interface DensitySettingsProps {
   dataGridDensity: DataGridDensity;
   onChange: (density: DataGridDensity) => void;
-}) => {
-  const tokens = [
-    'euiDisplaySelector.densityLabel',
-    'euiDisplaySelector.labelCompact',
-    'euiDisplaySelector.labelNormal',
-    'euiDisplaySelector.labelExpanded',
-  ];
+}
+
+const DENSITY_TOKENS = [
+  'euiDisplaySelector.densityLabel',
+  'euiDisplaySelector.labelCompact',
+  'euiDisplaySelector.labelNormal',
+  'euiDisplaySelector.labelExpanded',
+];
+
+const DENSITY_DEFAULTS = ['Density', 'Compact', 'Normal', 'Expanded'];
+
+const getDensityOptions = ({
+  labelCompact,
+  labelNormal,
+  labelExpanded,
+}: {
+  labelCompact: string;
+  labelNormal: string;
+  labelExpanded: string;
+}): EuiButtonGroupOptionProps[] => [
+  { id: DataGridDensity.COMPACT, label: labelCompact },
+  { id: DataGridDensity.NORMAL, label: labelNormal },
+  { id: DataGridDensity.EXPANDED, label: labelExpanded },
+];
+
+const DensitySettings: React.FC<DensitySettingsProps> = ({ dataGridDensity, onChange }) => {
+  const isValidDensity = (value: string): value is DataGridDensity => {
+    return Object.values(DataGridDensity).includes(value as DataGridDensity);
+  };
 
   const setDensity = useCallback(
     (density: string) => {
-      onChange(density as DataGridDensity);
+      const _density = isValidDensity(density) ? density : DataGridDensity.NORMAL;
+      onChange(_density);
     },
     [onChange]
   );
 
   return (
-    <EuiI18n tokens={tokens} defaults={['Density', 'Compact', 'Normal', 'Expanded']}>
-      {([densityLabel, labelCompact, labelNormal, labelExpanded]: string[]) => (
-        <EuiFormRow label={densityLabel} display="columnCompressed">
-          <EuiButtonGroup
-            legend={densityLabel}
-            buttonSize="compressed"
-            isFullWidth
-            options={[
-              {
-                id: `${DataGridDensity.COMPACT}`,
-                label: labelCompact,
-              },
-              {
-                id: `${DataGridDensity.NORMAL}`,
-                label: labelNormal,
-              },
-              {
-                id: `${DataGridDensity.EXPANDED}`,
-                label: labelExpanded,
-              },
-            ]}
-            onChange={setDensity}
-            idSelected={dataGridDensity}
-            data-test-subj="lnsDensityButtonGroup"
-          />
-        </EuiFormRow>
-      )}
+    <EuiI18n tokens={DENSITY_TOKENS} defaults={DENSITY_DEFAULTS}>
+      {([densityLabel, labelCompact, labelNormal, labelExpanded]: string[]) => {
+        const densityOptions = getDensityOptions({ labelCompact, labelNormal, labelExpanded });
+        return (
+          <EuiFormRow
+            label={densityLabel}
+            display="columnCompressed"
+            data-test-subj="lnsDensitySettings"
+          >
+            <EuiButtonGroup
+              legend={densityLabel}
+              buttonSize="compressed"
+              isFullWidth
+              options={densityOptions}
+              onChange={setDensity}
+              idSelected={dataGridDensity}
+            />
+          </EuiFormRow>
+        );
+      }}
     </EuiI18n>
   );
 };
