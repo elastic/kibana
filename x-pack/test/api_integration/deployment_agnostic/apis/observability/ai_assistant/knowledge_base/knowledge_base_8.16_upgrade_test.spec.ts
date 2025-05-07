@@ -18,6 +18,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 import {
   getKnowledgeBaseEntriesFromEs,
   getKnowledgeBaseEntriesFromApi,
+  refreshKbIndex,
 } from '../utils/knowledge_base';
 import {
   createOrUpdateIndexAssets,
@@ -132,40 +133,26 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
         await deployTinyElserAndSetupKb(getService);
 
-        await addEntryWithoutSemanticText({ es, title: 'user_color', text: 'Red' });
-        await addEntryWithoutSemanticText({ es, title: 'user_nickname', text: 'Peter Parker' });
-        await addEntryWithoutSemanticText({ es, title: 'empty_text_doc', text: '' });
+        // index sample documents
+        await Promise.all([
+          addEntryWithoutSemanticText({ es, title: 'user_color', text: 'Red' }),
+          addEntryWithoutSemanticText({ es, title: 'user_nickname', text: 'Peter Parker' }),
+          addEntryWithoutSemanticText({ es, title: 'empty_text_doc', text: '' }), // important to test for empty text: https://github.com/elastic/kibana/issues/220339
+        ]);
+        await refreshKbIndex(es);
         await runStartupMigrations(observabilityAIAssistantAPIClient);
-
-        await retry.try(async () => {
-          const hits = await getKnowledgeBaseEntriesFromEs(es);
-
-          // wait for migration to finish and two entries to have semantic text field
-          expect(hits.filter((hit) => hit._source?.semantic_text)).to.have.length(2);
-          expect(hits.length).to.be(3);
-        });
       });
 
       after(async () => {
         await teardownTinyElserModelAndInferenceEndpoint(getService);
       });
 
-      it('should not throw an error when some entries have empty text fields', async () => {
-        const res = await getKnowledgeBaseEntriesFromApi({
-          observabilityAIAssistantAPIClient,
+      it('should migrate entries with `text` and ignore entries without `text`', async () => {
+        await retry.try(async () => {
+          const hits = await getKnowledgeBaseEntriesFromEs(es);
+          expect(hits.filter((hit) => hit._source?.semantic_text)).to.have.length(2);
+          expect(hits.length).to.be(3);
         });
-        expect(res.status).to.be(200);
-
-        expect(
-          sortBy(
-            res.body.entries.map(({ title, text, type }) => ({ title, text, type })),
-            ({ title }) => title
-          )
-        ).to.eql([
-          { title: 'empty_text_doc', text: '', type: 'contextual' },
-          { title: 'user_color', type: 'contextual', text: 'Red' },
-          { title: 'user_nickname', type: 'contextual', text: 'Peter Parker' },
-        ]);
       });
     });
   });

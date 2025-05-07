@@ -87,8 +87,12 @@ export async function addSampleDocsToInternalKb(
     },
   });
 
-  // refresh the index to make sure the documents are searchable
-  await es.indices.refresh({ index: resourceNames.indexPatterns.kb });
+  await refreshKbIndex(es);
+}
+
+// refresh the index to make sure the documents are searchable
+export function refreshKbIndex(es: Client) {
+  return es.indices.refresh({ index: resourceNames.indexPatterns.kb });
 }
 
 export async function addSampleDocsToCustomIndex(
