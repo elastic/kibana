@@ -62,6 +62,7 @@ export function prepareOnRender(
 ) {
   return function onRender$(count: number) {
     addLog(`onRender$ ${count}`);
+    console.log(`EVENT: chart drawn (took ${performance.now() - window.DATA_RECEIVED_TIME}ms)`);
     // for some reason onRender$ is emitting multiple times with the same render count
     // so avoid to repeat the same logic on duplicate calls
     if (count === internalApi.renderCount$.getValue()) {
