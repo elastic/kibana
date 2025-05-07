@@ -1659,6 +1659,9 @@ describe('The custom threshold alert type', () => {
         expect(getViewInAppUrl).toBeCalledTimes(1);
         expect(getViewInAppUrl).toBeCalledWith({
           dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
+          dataViewSpec: {
+            id: 'valid-index-name',
+          },
           groups: [
             {
               field: 'host.name',
