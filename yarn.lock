@@ -13407,7 +13407,7 @@ anymatch@^3.0.0, anymatch@^3.0.3, anymatch@^3.1.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-apache-arrow@^18.0.0:
+"apache-arrow@18.x - 19.x", apache-arrow@^18.0.0:
   version "18.0.0"
   resolved "https://registry.yarnpkg.com/apache-arrow/-/apache-arrow-18.0.0.tgz#a187bd55318a7a68b6ff09835d05e89e019eba2e"
   integrity sha512-gFlPaqN9osetbB83zC29AbbZqGiCuFH1vyyPseJ+B7SIbfBtESV62mMT/CkiIt77W6ykC/nTWFzTXFs0Uldg4g==
@@ -17490,13 +17490,13 @@ elastic-apm-node@^4.10.0, elastic-apm-node@^4.12.0:
     stream-chopper "^3.0.1"
     unicode-byte-truncate "^1.0.0"
 
-"elasticsearch-8.x@npm:@elastic/elasticsearch@8.18.1":
-  version "8.18.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.18.1.tgz#1bdd385d7f0759fec40128f2d49fed021a374a63"
-  integrity sha512-OdR2VqrpVSMzP97jMFKVilJ/e1rQzq5aaQX6gJcNPktrjDUSp+9ESls8twFgyalS0DWtqnZrWqhneRCBWT2vuA==
+"elasticsearch-8.x@npm:@elastic/elasticsearch@8.18.2":
+  version "8.18.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.18.2.tgz#0916b6e3b5bde29ad12c2f2a241b14bf7429e4a7"
+  integrity sha512-2pOc/hGdxkbaDavfAlnUfjJdVsFRCGqg7fpsWJfJ2UzpgViIyojdViHg8zOCT1J14lAwvDgb9CNETWa3SBZRfw==
   dependencies:
     "@elastic/transport" "^8.9.6"
-    apache-arrow "^18.0.0"
+    apache-arrow "18.x - 19.x"
     tslib "^2.4.0"
 
 elasticsearch@^16.4.0:
