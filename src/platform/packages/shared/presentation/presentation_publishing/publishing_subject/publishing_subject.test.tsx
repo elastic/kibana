@@ -244,10 +244,7 @@ describe('publishing subject', () => {
           </>
         );
       }
-      render(<Component />, {
-        // TODO: fails with concurrent mode
-        legacyRoot: true,
-      });
+      render(<Component />);
       await waitFor(() => {
         expect(
           screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')
@@ -259,7 +256,7 @@ describe('publishing subject', () => {
           screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
         ).toBeInTheDocument();
       });
-      expect(renderCount).toBe(7);
+      expect(renderCount).toBe(2);
     });
   });
 
