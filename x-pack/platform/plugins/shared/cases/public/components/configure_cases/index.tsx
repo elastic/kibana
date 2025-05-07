@@ -113,12 +113,13 @@ const addNewCustomFieldToTemplates = ({
 };
 
 export const ConfigureCases: React.FC = React.memo(() => {
-  const { permissions } = useCasesContext();
+  const { permissions, features } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
+  const canShowObservableTypes = features.observables.enabled;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] = useState<Flyout | null>(null);
@@ -712,7 +713,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
             </EuiFlexItem>
           </div>
 
-          {hasMinimumLicensePermissionsForObservables && (
+          {hasMinimumLicensePermissionsForObservables && canShowObservableTypes && (
             <>
               <EuiSpacer size="xl" />
 
