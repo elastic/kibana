@@ -991,6 +991,7 @@ src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @
 x-pack/test_serverless
 src/platform/test
 x-pack/test
+x-pack/solutions/observability/test
 x-pack/performance @elastic/appex-qa
 x-pack/platform/test
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
@@ -1047,7 +1048,6 @@ src/platform/packages/shared/kbn-utility-types @elastic/kibana-core
 src/platform/packages/shared/kbn-utility-types-jest @elastic/kibana-operations
 src/platform/packages/shared/kbn-utils @elastic/kibana-operations
 x-pack/solutions/observability/plugins/ux @elastic/obs-ux-management-team
-x-pack/solutions/observability/test
 examples/v8_profiler_examples @elastic/response-ops
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 src/platform/plugins/private/vis_default_editor @elastic/kibana-visualizations
