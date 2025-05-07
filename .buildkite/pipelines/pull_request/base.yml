@@ -27,7 +27,7 @@ steps:
     agents:
       machineType: n2-highcpu-8
       preemptible: true
-      diskSizeGb: 75
+      diskSizeGb: 80
     key: quick_checks
     timeout_in_minutes: 60
     retry:
@@ -53,7 +53,7 @@ steps:
     agents:
       machineType: n2-standard-16
       preemptible: true
-      diskSizeGb: 75
+      diskSizeGb: 80
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -66,7 +66,7 @@ steps:
     agents:
       machineType: n2-standard-32
       preemptible: true
-      diskSizeGb: 75
+      diskSizeGb: 80
     key: linting_with_types
     timeout_in_minutes: 60
     retry:
@@ -138,7 +138,7 @@ steps:
     agents:
       machineType: n2-highmem-4
       preemptible: true
-      diskSizeGb: 75
+      diskSizeGb: 80
     key: build_api_docs
     timeout_in_minutes: 90
     retry:

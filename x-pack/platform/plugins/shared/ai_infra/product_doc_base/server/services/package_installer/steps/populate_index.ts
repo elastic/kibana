@@ -36,7 +36,12 @@ export const populateIndex = async ({
     const entryPath = contentEntries[i];
     log.debug(`Indexing content for entry ${entryPath}`);
     const contentBuffer = await archive.getEntryContent(entryPath);
-    await indexContentFile({ indexName, esClient, contentBuffer, legacySemanticText });
+    await indexContentFile({
+      indexName,
+      esClient,
+      contentBuffer,
+      legacySemanticText,
+    });
   }
 
   log.debug(`Done populating index ${indexName}`);

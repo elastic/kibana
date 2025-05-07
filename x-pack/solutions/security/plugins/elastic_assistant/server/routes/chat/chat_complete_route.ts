@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { Logger } from '@kbn/core/server';
+import { IKibanaResponse, Logger } from '@kbn/core/server';
 import {
   ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
   ChatCompleteProps,
@@ -22,7 +22,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
-import { ElasticAssistantPluginRouter, GetElser } from '../../types';
+import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
@@ -34,6 +34,7 @@ import {
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
 import { isOpenSourceModel } from '../utils';
+import { ConfigSchema } from '../../config_schema';
 
 export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
   return `CONTEXT:\n"""\n${context}\n"""`;
@@ -41,8 +42,10 @@ export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
 
 export const chatCompleteRoute = (
   router: ElasticAssistantPluginRouter,
-  getElser: GetElser
+  config?: ConfigSchema
 ): void => {
+  const RESPONSE_TIMEOUT = config?.responseTimeout as number;
+
   router.versioned
     .post({
       access: 'public',
@@ -51,6 +54,12 @@ export const chatCompleteRoute = (
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
+        },
+      },
+      options: {
+        timeout: {
+          // Add extra time to the timeout to account for the time it takes to process the request
+          idleSocket: RESPONSE_TIMEOUT + 30 * 1000,
         },
       },
     })
@@ -177,6 +186,14 @@ export const chatCompleteRoute = (
             }));
           }
 
+          const timeout = new Promise((_, reject) => {
+            setTimeout(() => {
+              reject(
+                new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
+              );
+            }, config?.responseTimeout as number);
+          }) as unknown as IKibanaResponse;
+
           // Do not persist conversation messages if `persist = false`
           const conversationId = request.body.persist
             ? existingConversationId ?? newConversation?.id
@@ -204,39 +221,41 @@ export const chatCompleteRoute = (
             }
           };
 
-          return await langChainExecute({
-            abortSignal,
-            isStream: request.body.isStream ?? false,
-            actionsClient,
-            actionTypeId,
-            connectorId,
-            isOssModel,
-            conversationId,
-            context: ctx,
-            getElser,
-            logger,
-            inference,
-            messages: messages ?? [],
-            onLlmResponse,
-            onNewReplacements,
-            replacements: latestReplacements,
-            contentReferencesStore,
-            request: {
-              ...request,
-              // TODO: clean up after empty tools will be available to use
-              body: {
-                ...request.body,
-                replacements: {},
-                size: 10,
-                alertsIndexPattern: '.alerts-security.alerts-default',
+          return await Promise.race([
+            langChainExecute({
+              abortSignal,
+              isStream: request.body.isStream ?? false,
+              actionsClient,
+              actionTypeId,
+              connectorId,
+              isOssModel,
+              conversationId,
+              context: ctx,
+              logger,
+              inference,
+              messages: messages ?? [],
+              onLlmResponse,
+              onNewReplacements,
+              replacements: latestReplacements,
+              contentReferencesStore,
+              request: {
+                ...request,
+                // TODO: clean up after empty tools will be available to use
+                body: {
+                  ...request.body,
+                  replacements: {},
+                  size: 10,
+                  alertsIndexPattern: '.alerts-security.alerts-default',
+                },
               },
-            },
-            response,
-            telemetry,
-            responseLanguage: request.body.responseLanguage,
-            savedObjectsClient,
-            ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
-          });
+              response,
+              telemetry,
+              responseLanguage: request.body.responseLanguage,
+              savedObjectsClient,
+              ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+            }),
+            timeout,
+          ]);
         } catch (err) {
           const error = transformError(err as Error);
           const kbDataClient =

@@ -5,36 +5,50 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { screen, render } from '@testing-library/react';
 
-import { TestProviders } from '../../mock';
 import { Title } from './title';
-import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/kibana');
 
 describe('Title', () => {
-  const mount = useMountAppended();
+  test('it renders title', () => {
+    const { container } = render(<Title title="Test title" />);
 
-  test('it renders', () => {
-    const wrapper = shallow(
-      <Title
-        badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
-        title="Test title"
-      />
-    );
-
-    expect(wrapper).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
-  test('it renders the title', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Title title="Test title" />
-      </TestProviders>
-    );
+  describe('given badgeOptions', () => {
+    test('it renders beta badge', () => {
+      render(
+        <Title
+          title="Test title"
+          badgeOptions={{
+            beta: true,
+            text: 'Beta',
+            tooltip: 'Beta tooltip',
+            size: 's',
+          }}
+        />
+      );
 
-    expect(wrapper.find('[data-test-subj="header-page-title"]').first().exists()).toBe(true);
+      expect(screen.getByTestId('header-page-title-beta-badge')).toBeInTheDocument();
+    });
+
+    test('it renders badge', () => {
+      render(
+        <Title
+          title="Test title"
+          badgeOptions={{
+            text: 'Badge',
+            tooltip: 'Badge tooltip',
+            color: 'hollow',
+          }}
+        />
+      );
+
+      expect(screen.getByTestId('header-page-title-badge')).toBeInTheDocument();
+    });
   });
 });

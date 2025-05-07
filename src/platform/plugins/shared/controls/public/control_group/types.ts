@@ -65,7 +65,7 @@ export type ControlGroupApi = PresentationContainer &
     labelPosition: PublishingSubject<ControlLabelPosition>;
 
     asyncResetUnsavedChanges: () => Promise<void>;
-    controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
+    controlFetch$: (controlUuid: string, onReload?: () => void) => Observable<ControlFetchContext>;
     openAddDataControlFlyout: (options?: {
       controlStateTransform?: ControlStateTransform;
       onSave?: () => void;
