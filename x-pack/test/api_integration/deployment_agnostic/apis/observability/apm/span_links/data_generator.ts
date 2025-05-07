@@ -7,14 +7,16 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { SpanLink } from '@kbn/apm-plugin/typings/es_schemas/raw/fields/span_links';
 import { v4 as uuidv4 } from 'uuid';
+import { Moment } from 'moment';
+import moment from 'moment';
 
-function getProducerInternalOnly() {
+function getProducerInternalOnly({ start }: { start: Moment }) {
   const producerInternalOnlyInstance = apm
     .service({ name: 'producer-internal-only', environment: 'production', agentName: 'go' })
     .instance('instance a');
 
   const events = Array.from(
-    timerange(new Date('2022-01-01T00:00:00.000Z'), new Date('2022-01-01T00:01:00.000Z'))
+    timerange(moment(start).toISOString(), moment(start).add('1', 'minute').toISOString())
       .interval('1m')
       .rate(1)
       .generator((timestamp) => {
@@ -54,13 +56,16 @@ function getProducerInternalOnly() {
   };
 }
 
-function getProducerExternalOnly() {
+function getProducerExternalOnly({ start }: { start: Moment }) {
   const producerExternalOnlyInstance = apm
     .service({ name: 'producer-external-only', environment: 'production', agentName: 'java' })
     .instance('instance b');
 
   const events = Array.from(
-    timerange(new Date('2022-01-01T00:02:00.000Z'), new Date('2022-01-01T00:03:00.000Z'))
+    timerange(
+      moment(start).add(2, 'minutes').toISOString(),
+      moment(start).add(3, 'minutes').toISOString()
+    )
       .interval('1m')
       .rate(1)
       .generator((timestamp) => {
@@ -120,10 +125,12 @@ function getProducerConsumer({
   producerInternalOnlySpanASpanLink,
   producerExternalOnlySpanBLink,
   producerExternalOnlyTransactionBLink,
+  start,
 }: {
   producerInternalOnlySpanASpanLink: SpanLink;
   producerExternalOnlySpanBLink: SpanLink;
   producerExternalOnlyTransactionBLink: SpanLink;
+  start: Moment;
 }) {
   const externalTraceId = uuidv4();
 
@@ -132,7 +139,10 @@ function getProducerConsumer({
     .instance('instance c');
 
   const events = Array.from(
-    timerange(new Date('2022-01-01T00:04:00.000Z'), new Date('2022-01-01T00:05:00.000Z'))
+    timerange(
+      moment(start).add(4, 'minutes').toISOString(),
+      moment(start).add(5, 'minutes').toISOString()
+    )
       .interval('1m')
       .rate(1)
       .generator((timestamp) => {
@@ -193,18 +203,23 @@ function getConsumerMultiple({
   producerExternalOnlySpanBLink,
   producerConsumerSpanCLink,
   producerConsumerTransactionCLink,
+  start,
 }: {
   producerInternalOnlySpanALink: SpanLink;
   producerExternalOnlySpanBLink: SpanLink;
   producerConsumerSpanCLink: SpanLink;
   producerConsumerTransactionCLink: SpanLink;
+  start: Moment;
 }) {
   const consumerMultipleInstance = apm
     .service({ name: 'consumer-multiple', environment: 'production', agentName: 'nodejs' })
     .instance('instance d');
 
   const events = Array.from(
-    timerange(new Date('2022-01-01T00:06:00.000Z'), new Date('2022-01-01T00:07:00.000Z'))
+    timerange(
+      moment(start).add(6, 'minutes').toISOString(),
+      moment(start).add(7, 'minutes').toISOString()
+    )
       .interval('1m')
       .rate(1)
       .generator((timestamp) => {
@@ -268,19 +283,21 @@ function getConsumerMultiple({
  * ----Span E
  * ------span.links= Service B / Span B | Service C / Transaction C
  */
-export function generateSpanLinksData() {
-  const producerInternalOnly = getProducerInternalOnly();
-  const producerExternalOnly = getProducerExternalOnly();
+export function generateSpanLinksData({ start }: { start: Moment }) {
+  const producerInternalOnly = getProducerInternalOnly({ start });
+  const producerExternalOnly = getProducerExternalOnly({ start });
   const producerConsumer = getProducerConsumer({
     producerInternalOnlySpanASpanLink: producerInternalOnly.spanASpanLink,
     producerExternalOnlySpanBLink: producerExternalOnly.spanBSpanLink,
     producerExternalOnlyTransactionBLink: producerExternalOnly.transactionBSpanLink,
+    start,
   });
   const producerMultiple = getConsumerMultiple({
     producerInternalOnlySpanALink: producerInternalOnly.spanASpanLink,
     producerExternalOnlySpanBLink: producerExternalOnly.spanBSpanLink,
     producerConsumerSpanCLink: producerConsumer.spanCSpanLink,
     producerConsumerTransactionCLink: producerConsumer.transactionCSpanLink,
+    start,
   });
   return {
     events: {
