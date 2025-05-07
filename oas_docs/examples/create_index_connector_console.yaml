@@ -1,0 +1,11 @@
+lang: Console
+# label:
+source: |
+  POST api/actions/connector
+  {
+    "name": "my-connector",
+    "connector_type_id": ".index",
+    "config": {
+      "index": "test-index"
+    }
+  }

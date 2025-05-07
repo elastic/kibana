@@ -478,6 +478,28 @@ paths:
       summary: Create a connector
       tags:
         - connectors
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -X POST "localhost:5601/api/actions/connector" -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'
+            {
+              "name": "my-connector",
+              "connector_type_id": ".index",
+              "config": {
+                "index": "test-index"
+              }
+            }
+            '
+        - lang: Console
+          source: |
+            POST api/actions/connector
+            {
+              "name": "my-connector",
+              "connector_type_id": ".index",
+              "config": {
+                "index": "test-index"
+              }
+            }
     put:
       operationId: put-actions-connector-id
       parameters:
