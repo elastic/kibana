@@ -34,6 +34,11 @@ const getGlobalRuleExecutionSummaryMock = getGlobalRuleExecutionSummary as jest.
 >;
 const getGapRangeMock = getGapRange as jest.MockedFunction<typeof getGapRange>;
 
+const dateRange = {
+  start: '2025-03-25T00:00:00.000Z',
+  end: '2025-03-26T00:00:00.000Z',
+};
+
 describe('useGetGlobalRuleExecutionSummary', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -47,24 +52,27 @@ describe('useGetGlobalRuleExecutionSummary', () => {
       GapRangeValue.LAST_24_H,
     ]);
     expect(useQueryMock.mock.calls[0][1]).toBeInstanceOf(Function);
-    expect(useQueryMock.mock.calls[0][2]).toMatchSnapshot();
+    expect(useQueryMock.mock.calls[0][2]).toEqual({
+      keepPreviousData: true,
+      retry: 0,
+    });
   });
 
   it('should pass a function that calls getGlobalRuleExecutionSummary and return its value', async () => {
     const callFn = useQueryMock.mock.calls[0][1];
     const fetchedSummary = {} as GetGlobalExecutionSummaryResponseBodyV1;
     getGlobalRuleExecutionSummaryMock.mockResolvedValue(fetchedSummary);
-    getGapRangeMock.mockReturnValue({
-      start: '2025-03-25T00:00:00.000Z',
-      end: '2025-03-26T00:00:00.000Z',
-    });
+    getGapRangeMock.mockReturnValue(dateRange);
 
     const signal = {} as AbortSignal;
 
     const result = await callFn({ signal } as QueryFunctionContext);
 
     expect(getGapRangeMock).toHaveBeenCalledWith(GapRangeValue.LAST_24_H);
-    expect(getGlobalRuleExecutionSummaryMock.mock.calls).toMatchSnapshot();
+    expect(getGlobalRuleExecutionSummaryMock).toHaveBeenNthCalledWith(1, {
+      signal: {},
+      ...dateRange,
+    });
     expect(result).toBe(fetchedSummary);
   });
 });
