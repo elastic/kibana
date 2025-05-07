@@ -4,7 +4,6 @@
     "outDir": "target/types",
   },
   "exclude": [
-    "public/applications/**/cypress/**/*",
     "target/**/*",
   ],
   "include": [
