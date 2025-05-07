@@ -44,7 +44,7 @@ export const serviceContextMock = {
         settings: new SettingsMock(storage),
         routeHistory: createMemoryHistory(),
         history: new HistoryMock(storage),
-        notifications: notificationServiceMock.createSetupContract(),
+        notifications: notificationServiceMock.createStartContract(),
         objectStorageClient: {} as unknown as ObjectStorageClient,
         http,
         autocompleteInfo: new AutocompleteInfoMock(),

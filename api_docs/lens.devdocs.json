@@ -75,31 +75,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: (",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.PresentationContainer",
-            "text": "PresentationContainer"
-          },
-          " & Partial<Pick<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesTitle",
-            "text": "PublishesTitle"
-          },
-          ", \"hideTitle$\"> & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          ">) | undefined; hasLockedHoverActions$?: ",
+          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: unknown; hasLockedHoverActions$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -9285,7 +9261,7 @@
           {
             "parentPluginId": "lens",
             "id": "def-public.SharedPieLayerState.colorMapping",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "colorMapping",
             "description": [],
@@ -9969,7 +9945,7 @@
           {
             "parentPluginId": "lens",
             "id": "def-public.TagcloudState.colorMapping",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "colorMapping",
             "description": [],
@@ -10224,7 +10200,9 @@
               },
               "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
               "Config",
-              "; } | undefined): T; (addNewLayer: () => string, persistedState: P, mainPalette?: { type: \"legacyPalette\"; value: ",
+              "; } | undefined, datasourceStates?: ",
+              "GeneralDatasourceStates",
+              " | undefined): T; (addNewLayer: () => string, persistedState: P, mainPalette?: { type: \"legacyPalette\"; value: ",
               {
                 "pluginId": "@kbn/coloring",
                 "scope": "common",
@@ -10234,7 +10212,9 @@
               },
               "<{ [key: string]: unknown; }>; } | { type: \"colorMapping\"; value: ",
               "Config",
-              "; } | undefined, annotationGroups?: ",
+              "; } | undefined, datasourceStates?: ",
+              "GeneralDatasourceStates",
+              " | undefined, annotationGroups?: ",
               "AnnotationGroups",
               " | undefined, references?: ",
               "SavedObjectReference",
@@ -10243,6 +10223,53 @@
             "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.Visualization.convertToRuntimeState",
+            "type": "Function",
+            "tags": [],
+            "label": "convertToRuntimeState",
+            "description": [],
+            "signature": [
+              "((state: T, datasourceStates?: Record<string, unknown> | undefined) => T) | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.convertToRuntimeState.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.convertToRuntimeState.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "datasourceStates",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown> | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "lens",
@@ -14067,7 +14094,7 @@
           {
             "parentPluginId": "lens",
             "id": "def-public.XYDataLayerConfig.colorMapping",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "colorMapping",
             "description": [],
@@ -16629,31 +16656,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: (",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.PresentationContainer",
-            "text": "PresentationContainer"
-          },
-          " & Partial<Pick<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesTitle",
-            "text": "PublishesTitle"
-          },
-          ", \"hideTitle$\"> & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          ">) | undefined; hasLockedHoverActions$?: ",
+          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: unknown; hasLockedHoverActions$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18975,31 +18978,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: (",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.PresentationContainer",
-            "text": "PresentationContainer"
-          },
-          " & Partial<Pick<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesTitle",
-            "text": "PublishesTitle"
-          },
-          ", \"hideTitle$\"> & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          ">) | undefined; hasLockedHoverActions$?: ",
+          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: unknown; hasLockedHoverActions$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",

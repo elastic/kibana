@@ -8,7 +8,7 @@
 import { BaseMessage } from '@langchain/core/messages';
 import { AgentAction, AgentFinish, AgentStep } from '@langchain/core/agents';
 import type { Logger } from '@kbn/logging';
-import { ConversationResponse } from '@kbn/elastic-assistant-common';
+import { ContentReferencesStore, ConversationResponse } from '@kbn/elastic-assistant-common';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
@@ -50,4 +50,5 @@ export interface NodeParamsBase {
   actionsClient: PublicMethodsOf<ActionsClient>;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
+  contentReferencesStore: ContentReferencesStore;
 }

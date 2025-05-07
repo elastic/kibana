@@ -8,12 +8,27 @@
  */
 
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 
 import { OptionsListControlState } from '../../../../common/options_list';
 import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
+
+function selectedOptionsComparatorFunction(
+  a: OptionsListSelection[] | undefined,
+  b: OptionsListSelection[] | undefined
+) {
+  return deepEqual(a ?? [], b ?? []);
+}
+
+export const selectionComparators: StateComparators<
+  Pick<OptionsListControlState, 'exclude' | 'existsSelected' | 'selectedOptions'>
+> = {
+  exclude: 'referenceEquality',
+  existsSelected: 'referenceEquality',
+  selectedOptions: selectedOptionsComparatorFunction,
+};
 
 export function initializeOptionsListSelections(
   initialState: OptionsListControlState,
@@ -22,10 +37,7 @@ export function initializeOptionsListSelections(
   const selectedOptions$ = new BehaviorSubject<OptionsListSelection[] | undefined>(
     initialState.selectedOptions ?? []
   );
-  const selectedOptionsComparatorFunction = (
-    a: OptionsListSelection[] | undefined,
-    b: OptionsListSelection[] | undefined
-  ) => deepEqual(a ?? [], b ?? []);
+
   function setSelectedOptions(next: OptionsListSelection[] | undefined) {
     if (!selectedOptionsComparatorFunction(selectedOptions$.value, next)) {
       selectedOptions$.next(next);
@@ -50,19 +62,29 @@ export function initializeOptionsListSelections(
   }
 
   return {
-    comparators: {
-      exclude: [exclude$, setExclude],
-      existsSelected: [existsSelected$, setExistsSelected],
-      selectedOptions: [selectedOptions$, setSelectedOptions, selectedOptionsComparatorFunction],
-    } as StateComparators<
-      Pick<OptionsListControlState, 'exclude' | 'existsSelected' | 'selectedOptions'>
-    >,
-    hasInitialSelections: initialState.selectedOptions?.length || initialState.existsSelected,
-    selectedOptions$: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
-    setSelectedOptions,
-    existsSelected$: existsSelected$ as PublishingSubject<boolean | undefined>,
-    setExistsSelected,
-    exclude$: exclude$ as PublishingSubject<boolean | undefined>,
-    setExclude,
+    anyStateChange$: merge(exclude$, existsSelected$, selectedOptions$).pipe(map(() => undefined)),
+    getLatestState: () => {
+      return {
+        selectedOptions: selectedOptions$.getValue(),
+        existsSelected: existsSelected$.getValue(),
+        exclude: exclude$.getValue(),
+      };
+    },
+    reinitializeState: (lastSaved?: OptionsListControlState) => {
+      setExclude(lastSaved?.exclude);
+      setExistsSelected(lastSaved?.existsSelected);
+      setSelectedOptions(lastSaved?.selectedOptions ?? []);
+    },
+    stateManager: {
+      selectedOptions: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
+      existsSelected: existsSelected$ as PublishingSubject<boolean | undefined>,
+      exclude: exclude$ as PublishingSubject<boolean | undefined>,
+    },
+    internalApi: {
+      hasInitialSelections: initialState.selectedOptions?.length || initialState.existsSelected,
+      setSelectedOptions,
+      setExistsSelected,
+      setExclude,
+    },
   };
 }

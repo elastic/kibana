@@ -41,6 +41,24 @@ export interface IlmStats {
   policy_name?: string;
 }
 
+export interface IndexTemplatesStats {
+  items: IndexTemplateInfo[];
+}
+
+export interface IndexTemplateInfo {
+  template_name: string;
+  index_mode: Nullable<string>;
+  datastream: boolean;
+  package_name: Nullable<string>;
+  managed_by: Nullable<string>;
+  beat: Nullable<string>;
+  is_managed: Nullable<boolean>;
+  composed_of: string[];
+  source_enabled: Nullable<boolean>;
+  source_includes: string[];
+  source_excludes: string[];
+}
+
 export interface IndicesStats {
   items: IndexStats[];
 }
@@ -71,8 +89,10 @@ export interface IndicesSettings {
 
 export interface IndexSettings {
   index_name: string;
+  index_mode?: string;
   default_pipeline?: string;
   final_pipeline?: string;
+  source_mode?: string;
 }
 
 export interface Index {

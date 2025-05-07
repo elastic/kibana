@@ -291,6 +291,10 @@ export class ConsolePageObject extends FtrService {
     return classAttribute?.includes('euiPopover-isOpen');
   }
 
+  public async isTourPopoverOpen() {
+    return this.testSubjects.isDisplayed('consoleSkipTourButton');
+  }
+
   public async clickSkipTour() {
     await this.testSubjects.click('consoleSkipTourButton');
   }

@@ -60,7 +60,7 @@ import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart, ExportShare } from '@kbn/share-plugin/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -133,7 +133,7 @@ import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
+import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import { LensDocument } from './persistence/saved_object_store';
 import {
   CONTENT_ID,
@@ -399,21 +399,14 @@ export class LensPlugin {
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
-          const [services, { deserializeState }] = await Promise.all([
-            getStartServicesForEmbeddable(),
-            import('./async_services'),
-          ]);
-          // deserialize the saved object from visualize library
-          // this make sure to fit into the new embeddable model, where the following build()
-          // function expects a fully loaded runtime state
-          const state = await deserializeState(
-            services,
-            { savedObjectId: savedObject.id },
-            savedObject.references
-          );
           container.addNewPanel({
             panelType: LENS_EMBEDDABLE_TYPE,
-            initialState: state,
+            serializedState: {
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+              references: savedObject.references,
+            },
           });
         },
         savedObjectType: LENS_EMBEDDABLE_TYPE,
@@ -427,8 +420,9 @@ export class LensPlugin {
     if (share) {
       this.locator = share.url.locators.create(new LensAppLocatorDefinition());
 
-      share.register(
-        downloadCsvShareProvider({
+      share.registerShareIntegration<ExportShare>(
+        'lens',
+        downloadCsvLensShareProvider({
           uiSettings: core.uiSettings,
           formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
           atLeastGold: () => {

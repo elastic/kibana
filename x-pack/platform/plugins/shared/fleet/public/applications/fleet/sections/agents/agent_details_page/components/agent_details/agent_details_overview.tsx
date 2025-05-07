@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/css';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 import { useAgentVersion, useGetInfoOutputsForPolicy } from '../../../../../hooks';
@@ -172,7 +173,13 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               }),
               description:
                 typeof agent.local_metadata?.elastic?.agent?.version === 'string' ? (
-                  <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    css={css`
+                      min-width: 0;
+                    `}
+                  >
                     <EuiFlexItem grow={false} className="eui-textNoWrap">
                       {agent.local_metadata.elastic.agent.version}
                     </EuiFlexItem>

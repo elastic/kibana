@@ -113,16 +113,27 @@ export interface LogCloudFields {
   'cloud.instance.id'?: string;
 }
 
-export interface TraceDocumentOverview
-  extends ServiceFields,
-    TransactionTraceFields,
-    SpanTraceFields,
-    UserAgentTraceFields {
+export interface TransactionDocumentOverview
+  extends TraceFields,
+    ServiceFields,
+    TransactionFields,
+    UserAgentFields {}
+
+export interface SpanDocumentOverview
+  extends TraceFields,
+    ServiceFields,
+    SpanFields,
+    UserAgentFields {
+  'transaction.id'?: string;
+  'transaction.name'?: string;
+}
+
+export interface TraceFields {
   '@timestamp': number;
   'trace.id': string;
+  'processor.event'?: 'span' | 'transaction';
   'parent.id'?: string;
   'http.response.status_code'?: number;
-  'processor.event'?: 'span' | 'transaction';
 }
 
 export interface ServiceFields {
@@ -131,22 +142,24 @@ export interface ServiceFields {
   'agent.name': string;
 }
 
-export interface TransactionTraceFields {
-  'transaction.id'?: string;
-  'transaction.name'?: string;
+export interface TransactionFields {
+  'transaction.id': string;
+  'transaction.type': string;
+  'transaction.name': string;
   'transaction.duration.us'?: number;
 }
 
-export interface SpanTraceFields {
-  'span.name'?: string;
-  'span.action'?: string;
-  'span.duration.us'?: number;
-  'span.type'?: string;
-  'span.subtype'?: string;
-  'span.destination.service.resource'?: string;
+export interface SpanFields {
+  'span.id': string;
+  'span.name': string;
+  'span.action': string;
+  'span.duration.us': number;
+  'span.type': string;
+  'span.subtype': string;
+  'span.destination.service.resource': string;
 }
 
-export interface UserAgentTraceFields {
-  'user_agent.name'?: string;
-  'user_agent.version'?: string;
+export interface UserAgentFields {
+  'user_agent.name': string;
+  'user_agent.version': string;
 }
