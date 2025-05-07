@@ -21,19 +21,16 @@ import axios from 'axios';
 import type { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
 import { Command, END } from '@langchain/langgraph';
 import type { JsonSchema, JsonSchemaObject, Refs } from '@n8n/json-schema-to-zod';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import { formatToolName, type Operation } from '../../../utils/open_api_tool/utils';
-import { REPO_ROOT } from '@kbn/repo-info';
 
 export const kibanaServerlessOpenApiSpec = path.resolve(
   REPO_ROOT,
   './oas_docs/output/kibana.serverless.yaml'
 );
-export const kibanaOpenApiSpec = path.resolve(
-  REPO_ROOT,
-  './oas_docs/output/kibana.yaml'
-);
+export const kibanaOpenApiSpec = path.resolve(REPO_ROOT, './oas_docs/output/kibana.yaml');
 
 const defaultOptions: Options = {
   apiSpecPath: kibanaOpenApiSpec,
