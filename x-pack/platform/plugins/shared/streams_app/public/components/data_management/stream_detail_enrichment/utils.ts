@@ -36,9 +36,9 @@ import {
  */
 export const SPECIALISED_TYPES = ['date', 'dissect', 'grok'];
 
-const defaultDateProcessorFormState: () => DateFormState = () => ({
+const defaultDateProcessorFormState = (sampleDocs: FlattenRecord[]): DateFormState => ({
   type: 'date',
-  field: '',
+  field: getDefaultTextField(sampleDocs),
   formats: [],
   locale: '',
   target_field: '',
@@ -86,9 +86,7 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[]) => {
   return mostCommonField ? mostCommonField[0] : '';
 };
 
-const defaultDissectProcessorFormState: (sampleDocs: FlattenRecord[]) => DissectFormState = (
-  sampleDocs: FlattenRecord[]
-) => ({
+const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectFormState => ({
   type: 'dissect',
   field: getDefaultTextField(sampleDocs),
   pattern: '',
@@ -97,9 +95,7 @@ const defaultDissectProcessorFormState: (sampleDocs: FlattenRecord[]) => Dissect
   if: ALWAYS_CONDITION,
 });
 
-const defaultGrokProcessorFormState: (sampleDocs: FlattenRecord[]) => GrokFormState = (
-  sampleDocs: FlattenRecord[]
-) => ({
+const defaultGrokProcessorFormState = (sampleDocs: FlattenRecord[]): GrokFormState => ({
   type: 'grok',
   field: getDefaultTextField(sampleDocs),
   patterns: [{ value: '' }],
