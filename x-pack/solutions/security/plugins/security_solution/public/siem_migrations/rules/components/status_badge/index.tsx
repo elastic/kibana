@@ -39,7 +39,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
             <EuiFlexItem grow={false}>
               <EuiIcon type="check" color={colors[RuleTranslationResult.FULL]} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{i18n.RULE_STATUS_INSTALLED}</EuiFlexItem>
+            <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
+              {i18n.RULE_STATUS_INSTALLED}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>
       );
@@ -56,7 +58,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
             <EuiFlexItem grow={false}>
               <EuiIcon type="warningFilled" color="danger" />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{i18n.RULE_STATUS_FAILED}</EuiFlexItem>
+            <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
+              {i18n.RULE_STATUS_FAILED}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>
       );

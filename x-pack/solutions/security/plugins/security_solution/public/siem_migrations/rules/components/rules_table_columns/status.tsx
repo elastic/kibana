@@ -56,7 +56,12 @@ export const createStatusColumn = (): TableColumn => {
         }
       />
     ),
-    render: (_, rule: RuleMigrationRule) => <StatusBadge migrationRule={rule} />,
+    render: (_, rule: RuleMigrationRule) => (
+      <StatusBadge
+        data-test-subj={`translationStatus-${rule.translation_result ?? rule.status}`}
+        migrationRule={rule}
+      />
+    ),
     sortable: true,
     truncateText: true,
     width: '15%',

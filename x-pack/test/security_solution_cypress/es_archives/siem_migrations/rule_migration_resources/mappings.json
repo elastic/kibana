@@ -1,0 +1,67 @@
+{
+  "type": "index",
+  "value": {
+    "_index": ".kibana-siem-rule-migrations-resources-default",
+    "aliases": {},
+    "mappings": {
+      "dynamic": "false",
+      "_meta": {
+        "namespace": "default",
+        "kibana": {
+          "version": "9.1.0"
+        },
+        "managed": true
+      },
+      "properties": {
+        "content": {
+          "type": "text"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "migration_id": {
+          "type": "keyword"
+        },
+        "name": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "updated_by": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "routing": {
+          "allocation": {
+            "include": {
+              "_tier_preference": "data_content"
+            }
+          }
+        },
+        "mapping": {
+          "total_fields": {
+            "limit": "2500"
+          },
+          "ignore_malformed": "true"
+        },
+        "hidden": "true",
+        "number_of_shards": "1",
+        "auto_expand_replicas": "0-1",
+        "provided_name": ".kibana-siem-rule-migrations-resources-default",
+        "creation_date": "1746515615941",
+        "number_of_replicas": "0",
+        "uuid": "Ca8vNDN9QUGZzsJDDwSUkg",
+        "version": {
+          "created": "9025000"
+        }
+      }
+    }
+  }
+}

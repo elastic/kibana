@@ -74,6 +74,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiBadge
+                      data-test-subj="translationResultBadge"
                       color={convertTranslationResultIntoColor(ruleMigration.translation_result)}
                     >
                       {isInstalled
