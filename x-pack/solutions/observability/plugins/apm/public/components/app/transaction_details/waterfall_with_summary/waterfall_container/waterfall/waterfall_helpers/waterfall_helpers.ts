@@ -6,17 +6,18 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import type { Dictionary } from 'lodash';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { isOpenTelemetryAgentName } from '../../../../../../../../common/agent_name';
 import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
-import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
-import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import type {
   WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 
@@ -45,6 +46,7 @@ export interface IWaterfall {
   childrenByParentId: Record<string | number, IWaterfallSpanOrTransaction[]>;
   getErrorCount: (parentId: string) => number;
   legends: IWaterfallLegend[];
+  colorBy: WaterfallLegendType;
   errorItems: IWaterfallError[];
   exceedsMax: boolean;
   totalErrorsCount: number;
@@ -75,6 +77,7 @@ interface IWaterfallItemBase<TDocument, TDoctype> {
   legendValues: Record<WaterfallLegendType, string>;
   spanLinksCount: SpanLinksCount;
   isOrphan?: boolean;
+  missingDestination?: boolean;
 }
 
 export type IWaterfallError = Omit<
@@ -262,7 +265,7 @@ function getRootWaterfallTransaction(
   }
 }
 
-function getLegends(waterfallItems: IWaterfallItem[]) {
+export function getLegendsAndColorBy(waterfallItems: IWaterfallItem[]) {
   const onlyBaseSpanItems = waterfallItems.filter(
     (item) => item.docType === 'span' || item.docType === 'transaction'
   ) as IWaterfallSpanOrTransaction[];
@@ -283,7 +286,39 @@ function getLegends(waterfallItems: IWaterfallItem[]) {
     }
   );
 
-  return legends;
+  const serviceLegends = legends.filter(({ type }) => type === WaterfallLegendType.ServiceName);
+  // only color by span type if there are only events for one service
+  const colorBy =
+    serviceLegends.length > 1 ? WaterfallLegendType.ServiceName : WaterfallLegendType.SpanType;
+
+  const serviceColorsMap = serviceLegends.reduce((colorMap, legend) => {
+    colorMap[legend.value] = legend.color;
+    return colorMap;
+  }, {} as Record<string, string>);
+
+  const legendsByValue = legends.reduce<Record<string, IWaterfallLegend>>((acc, curr) => {
+    if (curr.type === colorBy) {
+      acc[curr.value] = curr;
+    }
+    return acc;
+  }, {});
+
+  // mutate items rather than rebuilding both items and childrenByParentId
+  waterfallItems.forEach((item) => {
+    let color = '';
+    if ('legendValues' in item) {
+      color = legendsByValue[item.legendValues[colorBy]].color;
+    }
+
+    if (!color) {
+      // fall back to service color if there's no span.type, e.g. for transactions
+      color = serviceColorsMap[item.doc.service.name];
+    }
+
+    item.color = color;
+  });
+
+  return { legends, colorBy };
 }
 
 const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
@@ -474,6 +509,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
       duration: 0,
       items: [],
       legends: [],
+      colorBy: WaterfallLegendType.ServiceName,
       errorItems: [],
       childrenByParentId: {},
       getErrorCount: () => 0,
@@ -508,7 +544,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   const rootWaterfallTransaction = getRootWaterfallTransaction(childrenByParentId);
 
   const duration = getWaterfallDuration(items);
-  const legends = getLegends(items);
+  const { legends, colorBy } = getLegendsAndColorBy(items);
 
   return {
     entryWaterfallTransaction,
@@ -517,6 +553,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     duration,
     items,
     legends,
+    colorBy,
     errorItems,
     childrenByParentId: getChildrenGroupedByParentId(items),
     getErrorCount: (parentId: string) => errorCountByParentId[parentId] ?? 0,
@@ -593,6 +630,18 @@ function buildTree({
           childrenToLoad: 0,
           hasInitializedChildren: false,
         };
+
+        // It is missing a destination when a child (currentNode) is a transaction
+        // and its parent (node) is a span without destination for Otel agents.
+
+        if (
+          currentNode.item.docType === 'transaction' &&
+          node.item.docType === 'span' &&
+          !node.item.doc.span?.destination?.service?.resource &&
+          isOpenTelemetryAgentName(node.item.doc.agent.name)
+        ) {
+          node.item.missingDestination = true;
+        }
 
         node.children.push(currentNode);
         queue.push(currentNode);

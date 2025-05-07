@@ -44,6 +44,21 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
+    async createWithSpace(
+      slo: CreateSLOInput & { id?: string },
+      spaceId: string,
+      roleAuthc: RoleCredentials,
+      expectedStatus: 200 | 409
+    ) {
+      const { body } = await supertestWithoutAuth
+        .post(`/s/${spaceId}/api/observability/slos`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(slo)
+        .expect(expectedStatus);
+      return body;
+    },
+
     async reset(id: string, roleAuthc: RoleCredentials) {
       const { body } = await supertestWithoutAuth
         .post(`/api/observability/slos/${id}/_reset`)

@@ -42,6 +42,7 @@ export {
   enableInfrastructureContainerAssetView,
   enableAgentExplorerView,
   apmEnableTableSearchBar,
+  apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';
 export {
   alertsLocatorID,
@@ -99,7 +100,6 @@ export { useTimeBuckets } from './hooks/use_time_buckets';
 export { createUseRulesLink } from './hooks/create_use_rules_link';
 export { useSummaryTimeRange } from './hooks/use_summary_time_range';
 
-export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { buildEsQuery } from './utils/build_es_query';
 
 export type {
