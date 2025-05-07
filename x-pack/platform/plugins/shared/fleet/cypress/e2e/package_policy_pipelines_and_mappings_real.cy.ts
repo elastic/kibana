@@ -109,6 +109,82 @@ describe('Input package create and edit package policy', () => {
   });
 });
 
+describe('Input package with custom data stream type', () => {
+  beforeEach(() => {
+    login();
+  });
+
+  const agentPolicyId = 'test-input-package-policy';
+  const agentPolicyName = 'Test input package policy';
+  const packagePolicyName = 'input-package-policy';
+
+  before(() => {
+    cy.task('installTestPackage', INPUT_TEST_PACKAGE);
+
+    request({
+      method: 'POST',
+      url: `/api/fleet/agent_policies`,
+      body: {
+        id: agentPolicyId,
+        name: agentPolicyName,
+        description: 'desc',
+        namespace: 'default',
+        monitoring_enabled: [],
+      },
+      headers: { 'kbn-xsrf': 'cypress', 'Elastic-Api-Version': `${API_VERSIONS.public.v1}` },
+    });
+  });
+
+  after(() => {
+    cleanupAgentPolicies();
+    cy.task('uninstallTestPackage', INPUT_TEST_PACKAGE);
+  });
+
+  it('should successfully create a package policy', () => {
+    cy.visit(`/app/integrations/detail/${INPUT_TEST_PACKAGE}/overview`);
+    cy.getBySel(ADD_INTEGRATION_POLICY_BTN).click();
+
+    cy.getBySel(POLICY_EDITOR.POLICY_NAME_INPUT).click().clear().type(packagePolicyName);
+    cy.getBySel('multiTextInput-paths')
+      .find('[data-test-subj="multiTextInputRow-0"]')
+      .click()
+      .type('/var/log/test.log');
+
+    // Select metrics data stream type.
+    cy.get('[data-test-subj^="advancedStreamOptionsToggle"]')
+      .click();
+    cy.get('[data-test-subj="packagePolicyDataStreamType"')
+      .find('label[for="metrics"]')
+      .click();
+
+    cy.getBySel(EXISTING_HOSTS_TAB).click();
+
+    cy.getBySel(POLICY_EDITOR.AGENT_POLICY_SELECT).click();
+    cy.getBySel('agentPolicyMultiItem').each(($el) => {
+      if ($el.text() === agentPolicyName) {
+        $el.trigger('click');
+      }
+    });
+    cy.wait(1000); // wait for policy id to be set
+    cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
+
+    cy.getBySel(CONFIRM_MODAL.CANCEL_BUTTON).click();
+  });
+
+  it('should not allow to edit data stream type', () => {
+    cy.visit(`/app/integrations/detail/${INPUT_TEST_PACKAGE}/policies`);
+
+    cy.getBySel(INTEGRATION_NAME_LINK).contains(packagePolicyName).click();
+
+    cy.get('button').contains('Change defaults').click();
+    cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
+    cy.get('[data-test-subj="packagePolicyDataStreamType"')
+      .find('label')
+      .should('have.length', 3)
+      .each(($el) => cy.wrap($el).should('be.disabled'));
+  });
+});
+
 describe('Integration package with custom dataset create and edit package policy', () => {
   beforeEach(() => {
     login();
