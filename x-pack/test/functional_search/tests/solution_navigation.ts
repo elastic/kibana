@@ -65,7 +65,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'enterpriseSearch',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
@@ -121,7 +120,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'elasticsearchIndexManagement',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
