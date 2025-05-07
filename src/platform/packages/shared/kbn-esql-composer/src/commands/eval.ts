@@ -10,6 +10,9 @@
 import { NamedParameterWithIdentifier } from '../types';
 import { append } from './append';
 
-export function stats(body: string, params?: NamedParameterWithIdentifier) {
-  return append({ command: `STATS ${body}`, params });
+export function evaluate<
+  TQuery extends string,
+  TParams extends NamedParameterWithIdentifier<TQuery>
+>(body: TQuery, params?: TParams) {
+  return append({ command: `EVAL ${body}`, params });
 }

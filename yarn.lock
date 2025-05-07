@@ -5583,7 +5583,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-composer@link:packages/kbn-esql-composer":
+"@kbn/esql-composer@link:src/platform/packages/shared/kbn-esql-composer":
   version "0.0.0"
   uid ""
 

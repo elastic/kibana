@@ -8,8 +8,21 @@
  */
 
 import { isObject } from 'lodash';
-import { Query, QueryPipeline, QueryRequest, NamedParameter, Params } from './types';
+import {
+  Query,
+  QueryPipeline,
+  QueryRequest,
+  NamedParameterValue,
+  Params,
+  NamedParameterIndentifier,
+} from './types';
 import { escapeIdentifier, formatValue } from './utils/formatters';
+
+function isNamedParameterWithIdentifier(
+  value: NamedParameterValue
+): value is NamedParameterIndentifier {
+  return isObject(value) && 'identifier' in value;
+}
 
 export function createPipeline(source: Query): QueryPipeline {
   const asRequest = (): QueryRequest => {
@@ -17,9 +30,7 @@ export function createPipeline(source: Query): QueryPipeline {
       if (isObject(param)) {
         return Object.entries(param).map(([key, value]) => ({ [key]: value }));
       }
-      if (Array.isArray(param)) {
-        return param.map((p) => p);
-      }
+
       return param;
     });
 
@@ -33,14 +44,14 @@ export function createPipeline(source: Query): QueryPipeline {
     const { query, params } = asRequest();
 
     let index = 0;
-    return query.replace(/\?([a-zA-Z0-9_]+)?/g, (match, namedParam) => {
+    return query.replace(/\?([a-zA-Z0-9_]+)?/g, (match, namedParam: string) => {
       if (index < params.length) {
         const value = params[index++];
 
         if (namedParam) {
           if (isObject(value)) {
-            const paramValue = (value as NamedParameter)[namedParam];
-            return isObject(paramValue) && 'identifier' in paramValue
+            const paramValue = (value as any)[namedParam];
+            return isNamedParameterWithIdentifier(paramValue)
               ? escapeIdentifier(paramValue.identifier)
               : formatValue(paramValue);
           }

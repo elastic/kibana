@@ -21,7 +21,10 @@ type Sort = Record<string, SortOrder>;
 type SortArgs = Sort | string | Array<Sort | string>;
 
 // TODO: a better name?
-export function sortRaw(body: string, params?: NamedParameterWithIdentifier): QueryOperator {
+export function sortRaw<
+  TQuery extends string,
+  TParams extends NamedParameterWithIdentifier<TQuery>
+>(body: TQuery, params?: TParams): QueryOperator {
   return append({ command: `SORT ${body}`, params });
 }
 

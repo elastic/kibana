@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Params } from '../types';
+import { NamedParameterWithIdentifier } from '../types';
 import { append } from './append';
 
-export function evaluate(body: string, params?: Params) {
-  return append({ command: `EVAL ${body}`, params });
+export function stats<TQuery extends string, TParams extends NamedParameterWithIdentifier<TQuery>>(
+  body: TQuery,
+  params?: TParams
+) {
+  return append({ command: `STATS ${body}`, params });
 }

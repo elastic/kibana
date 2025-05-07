@@ -48,7 +48,7 @@ describe('where', () => {
   });
 
   it('handles WHERE clause with IN operator and positional parameters', () => {
-    const hosts = ['host1', 'host2', 'host3'];
+    const hosts = ['host1', 'host2', 'host3'] as const;
     const pipeline = source.pipe(where(`host.name IN (${hosts.map(() => '?').join(',')})`, hosts));
     const queryRequest = pipeline.asRequest();
 

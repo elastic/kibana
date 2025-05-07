@@ -10,6 +10,9 @@
 import { Params } from '../types';
 import { append } from './append';
 
-export function where(body: string, params?: Params) {
+export function where<TQuery extends string, TParams extends Params<TQuery>>(
+  body: TQuery,
+  params?: TParams
+) {
   return append({ command: `WHERE ${body}`, params });
 }
