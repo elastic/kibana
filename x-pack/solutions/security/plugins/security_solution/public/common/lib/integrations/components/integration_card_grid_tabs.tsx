@@ -11,6 +11,7 @@ import { IntegrationsCardGridTabsComponent } from './integration_card_grid_tabs_
 
 export const DEFAULT_CHECK_COMPLETE_METADATA: IntegrationCardMetadata = {
   activeIntegrations: [],
+  isAgentRequired: false,
 };
 
 export const IntegrationsCardGridTabs: RenderChildrenType = ({

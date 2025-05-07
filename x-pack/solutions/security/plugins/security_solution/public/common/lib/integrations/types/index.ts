@@ -9,7 +9,7 @@ import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/type
 import type { UseSelectedTabReturn } from '../hooks/use_selected_tab';
 
 export interface IntegrationCardMetadata {
-  isAgentRequired?: boolean;
+  isAgentRequired: boolean;
   activeIntegrations: GetInstalledPackagesResponse['items'];
 }
 

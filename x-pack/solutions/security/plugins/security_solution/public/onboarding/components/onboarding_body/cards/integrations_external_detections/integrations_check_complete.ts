@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 import { AI_FOR_SOC_INTEGRATIONS } from '../../../../../../common/constants';
 import { DEFAULT_CHECK_COMPLETE_METADATA } from '../../../../../common/lib/integrations/components/integration_card_grid_tabs';
-import type { IntegrationCardMetadata } from '../../../../../common/lib/integrations/types';
 import type { StartServices } from '../../../../../types';
 import type { OnboardingCardCheckComplete } from '../../../../types';
 import {
@@ -15,8 +15,12 @@ import {
   getCompleteBadgeText,
 } from '../common/integrations/integrations_check_complete_helpers';
 
+export interface ExternalIntegrationCardMetadata {
+  activeIntegrations: GetInstalledPackagesResponse['items'];
+}
+
 export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
-  IntegrationCardMetadata
+  ExternalIntegrationCardMetadata
 > = async (services: StartServices) => {
   const { isComplete, activePackages: activeIntegrations } = await getActiveIntegrationList(
     services,
