@@ -83,7 +83,7 @@ export const QueryRulesetDetail: React.FC = () => {
           ]}
         />
       )}
-      {!isError && <QueryRuleDetailPanel rules={rules} setRules={setRules} />}
+      {!isError && <QueryRuleDetailPanel rules={rules} setRules={setRules} rulesetId={rulesetId} />}
       {isError && (
         <ErrorPrompt
           errorType={

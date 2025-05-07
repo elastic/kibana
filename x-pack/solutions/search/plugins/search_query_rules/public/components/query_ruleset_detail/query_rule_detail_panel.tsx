@@ -9,16 +9,30 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiText } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
+import { QueryRulesQueryRule, QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { QueryRuleDraggableList } from './query_rule_draggable_list/query_rule_draggable_list';
+import { QueryRuleFlyout } from './query_rule_flyout/query_rule_flyout';
 
 interface QueryRuleDetailPanelProps {
   rules: QueryRulesQueryRule[];
+  rulesetId: QueryRulesQueryRuleset['ruleset_id'];
   setRules: (rules: QueryRulesQueryRule[]) => void;
 }
-export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({ rules, setRules }) => {
+export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
+  rulesetId,
+  rules,
+  setRules,
+}) => {
+  const [ruleIdToEdit, setRuleIdToEdit] = React.useState<string | null>(null);
   return (
     <KibanaPageTemplate.Section restrictWidth>
+      {ruleIdToEdit !== null && (
+        <QueryRuleFlyout
+          rulesetId={rulesetId}
+          ruleId={ruleIdToEdit}
+          onClose={() => setRuleIdToEdit(null)}
+        />
+      )}
       <EuiFlexGroup justifyContent="spaceBetween" direction="column">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -54,7 +68,11 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({ rule
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <QueryRuleDraggableList rules={rules} onReorder={setRules} />
+          <QueryRuleDraggableList
+            rules={rules}
+            onReorder={setRules}
+            onEditRuleFlyoutOpen={(ruleId: string) => setRuleIdToEdit(ruleId)}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </KibanaPageTemplate.Section>
