@@ -130,11 +130,10 @@ export const reportingPDFExportProvider = ({
       disabled: sharingData.reportingDisabled,
       label: 'PDF' as const,
       generateAssetExport: generateReportPDF,
-      generateAssetURIValue: generateExportUrlPDF,
       exportType: 'printablePdfV2',
       requiresSavedState,
       renderLayoutOptionSwitch: objectType === 'dashboard',
-      copyURIConfig: {
+      copyAssetURIConfig: {
         headingText: i18n.translate(
           'reporting.shareContextMenu.copyUriModal.pdfExportCopyUriHeading',
           {
@@ -149,6 +148,7 @@ export const reportingPDFExportProvider = ({
           }
         ),
         contentType: 'text',
+        generateAssetURIValue: generateExportUrlPDF,
       },
     };
   };
@@ -289,10 +289,9 @@ export const reportingPNGExportProvider = ({
       disabled: sharingData.reportingDisabled,
       label: 'PNG' as const,
       generateAssetExport: generateReportPNG,
-      generateAssetURIValue: generateExportUrlPNG,
       exportType: 'pngV2',
       requiresSavedState,
-      copyURIConfig: {
+      copyAssetURIConfig: {
         headingText: i18n.translate(
           'reporting.shareContextMenu.copyUriModal.pngExportCopyUriHeading',
           {
@@ -307,6 +306,7 @@ export const reportingPNGExportProvider = ({
           }
         ),
         contentType: 'text',
+        generateAssetURIValue: generateExportUrlPNG,
       },
     };
   };

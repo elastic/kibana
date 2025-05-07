@@ -16,7 +16,7 @@ import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 import { ExportMenu } from './export_popover';
-import type { IShareContext } from './context';
+import type { IShareContext } from '../context';
 
 const mockShareContext: IShareContext = {
   shareMenuItems: [

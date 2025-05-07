@@ -121,41 +121,45 @@ export interface ShareLegacy {
  * @description Share integration implementation definition for performing exports within kibana
  */
 export interface ExportShare
-  extends ShareIntegration<{
-    /**
-     * @deprecated only kept around for legacy reasons
-     */
-    name?: string;
-    icon?: EuiIconProps['type'];
-    /**
-     * @deprecated only kept around for legacy reasons
-     */
-    sortOrder?: number;
-    /**
-     * @deprecated only kept around for legacy reasons
-     */
-    toolTipContent?: string;
-    label: string;
-    exportType: string;
-    /**
-     * allows disabling the export action, for instance the current app has no data to export
-     */
-    disabled?: boolean;
-    helpText?: ReactNode;
-    generateExportButton?: ReactNode;
-    generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
-    generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
-    renderCopyURIButton?: boolean;
-    copyURIConfig?: {
-      headingText: string;
-      helpText: string;
-      contentType: EuiCodeProps['language'];
-    };
-    warnings?: Array<{ title: string; message: string }>;
-    requiresSavedState?: boolean;
-    supportedLayoutOptions?: Array<'print'>;
-    renderLayoutOptionSwitch?: boolean;
-  }> {
+  extends ShareIntegration<
+    {
+      /**
+       * @deprecated only kept around for legacy reasons
+       */
+      name?: string;
+      icon?: EuiIconProps['type'];
+      sortOrder?: number;
+      /**
+       * @deprecated only kept around for legacy reasons
+       */
+      toolTipContent?: string;
+      label: string;
+      exportType: string;
+      /**
+       * allows disabling the export action, for instance the current app has no data to export
+       */
+      disabled?: boolean;
+      helpText?: ReactNode;
+      generateExportButton?: ReactNode;
+      generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
+      renderCopyURIButton?: boolean;
+      warnings?: Array<{ title: string; message: string }>;
+      requiresSavedState?: boolean;
+      supportedLayoutOptions?: Array<'print'>;
+      renderLayoutOptionSwitch?: boolean;
+    } & (
+      | {
+          generateAssetComponent?: never;
+          copyAssetURIConfig: {
+            headingText: string;
+            helpText?: string;
+            contentType: EuiCodeProps['language'];
+            generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
+          };
+        }
+      | { generateAssetComponent: ReactNode; copyAssetURIConfig?: never }
+    )
+  > {
   groupId: 'export';
 }
 

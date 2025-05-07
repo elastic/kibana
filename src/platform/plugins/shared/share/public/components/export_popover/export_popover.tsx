@@ -31,8 +31,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import { ShareMenuProvider, type IShareContext, useShareTabsContext } from './context';
-import { ExportShareConfig } from '../types';
+import { ShareMenuProvider, type IShareContext, useShareTabsContext } from '../context';
+import { ExportShareConfig } from '../../types';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (
@@ -207,12 +207,12 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                 )}
               </Fragment>
               <Fragment>
-                {selectedMenuItem?.config.copyURIConfig && publicAPIEnabled && (
+                {selectedMenuItem?.config.copyAssetURIConfig && publicAPIEnabled && (
                   <EuiFlexItem>
                     <EuiFormRow
                       label={
                         <EuiText size="s">
-                          <h4>{selectedMenuItem?.config.copyURIConfig.headingText}</h4>
+                          <h4>{selectedMenuItem?.config.copyAssetURIConfig.headingText}</h4>
                         </EuiText>
                       }
                       fullWidth
@@ -220,20 +220,20 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                       <EuiFlexGroup direction="column">
                         <EuiFlexItem>
                           <EuiText size="s" color="subdued">
-                            {selectedMenuItem?.config.copyURIConfig.helpText}
+                            {selectedMenuItem?.config.copyAssetURIConfig.helpText}
                           </EuiText>
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiCodeBlock
                             data-test-subj="exportAssetValue"
                             css={{ overflowWrap: 'break-word' }}
-                            language={selectedMenuItem?.config.copyURIConfig.contentType}
+                            language={selectedMenuItem?.config.copyAssetURIConfig.contentType}
                             isCopyable
                             copyAriaLabel={i18n.translate('share.export.copyPostURLAriaLabel', {
                               defaultMessage: 'Copy export asset value',
                             })}
                           >
-                            {selectedMenuItem?.config.generateAssetURIValue({
+                            {selectedMenuItem?.config.copyAssetURIConfig.generateAssetURIValue({
                               intl,
                               optimizedForPrinting: usePrintLayout,
                             })}
@@ -244,6 +244,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                   </EuiFlexItem>
                 )}
               </Fragment>
+              <Fragment>{selectedMenuItem?.config.generateAssetComponent}</Fragment>
               <Fragment>
                 {publicAPIEnabled && isDirty && (
                   <EuiFlexItem>
@@ -281,20 +282,22 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  onClick={getReport}
-                  data-test-subj="generateReportButton"
-                  isLoading={isCreatingExport}
-                >
+                <Fragment>
                   {selectedMenuItem?.config.generateExportButton ?? (
-                    <FormattedMessage
-                      id="share.export.generateButtonLabel"
-                      defaultMessage="Export {type}"
-                      values={{ type: selectedMenuItem?.config.label }}
-                    />
+                    <EuiButton
+                      fill
+                      onClick={getReport}
+                      data-test-subj="generateReportButton"
+                      isLoading={isCreatingExport}
+                    >
+                      <FormattedMessage
+                        id="share.export.generateButtonLabel"
+                        defaultMessage="Export {type}"
+                        values={{ type: selectedMenuItem?.config.label }}
+                      />
+                    </EuiButton>
                   )}
-                </EuiButton>
+                </Fragment>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>
