@@ -151,11 +151,8 @@ describe('Input package with custom data stream type', () => {
       .type('/var/log/test.log');
 
     // Select metrics data stream type.
-    cy.get('[data-test-subj^="advancedStreamOptionsToggle"]')
-      .click();
-    cy.get('[data-test-subj="packagePolicyDataStreamType"')
-      .find('label[for="metrics"]')
-      .click();
+    cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
+    cy.get('[data-test-subj="packagePolicyDataStreamType"').find('label[for="metrics"]').click();
 
     cy.getBySel(EXISTING_HOSTS_TAB).click();
 
