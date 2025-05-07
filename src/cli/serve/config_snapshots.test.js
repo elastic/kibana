@@ -51,7 +51,7 @@ describe('Serverless configuration snapshots', () => {
     const configService = new RawConfigService(configStack);
     try {
       configService.loadConfig();
-      const snapshot = await firstValueFrom(configService.config$);
+      const snapshot = await firstValueFrom(configService.getConfig$());
       expect(snapshot).toMatchSnapshot();
     } finally {
       configService.stop();
