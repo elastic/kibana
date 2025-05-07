@@ -279,7 +279,7 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
       body: StartRuleMigrationResponse;
     }> => {
       const response = await supertest
-        .put(
+        .post(
           replaceParams(SIEM_RULE_MIGRATION_START_PATH, {
             migration_id: migrationId,
           })
@@ -301,7 +301,7 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
       body: StopRuleMigrationResponse;
     }> => {
       const response = await supertest
-        .put(
+        .post(
           replaceParams(SIEM_RULE_MIGRATION_STOP_PATH, {
             migration_id: migrationId,
           })

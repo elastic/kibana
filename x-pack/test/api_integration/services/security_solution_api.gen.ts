@@ -1628,7 +1628,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     startRuleMigration(props: StartRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(
+        .post(
           routeWithNamespace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/start', props.params),
             kibanaSpace
@@ -1656,7 +1656,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
      */
     stopRuleMigration(props: StopRuleMigrationProps, kibanaSpace: string = 'default') {
       return supertest
-        .put(
+        .post(
           routeWithNamespace(
             replaceParams('/internal/siem_migrations/rules/{migration_id}/stop', props.params),
             kibanaSpace

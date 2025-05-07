@@ -348,7 +348,7 @@ paths:
                     description: Indicates the number of successfully installed migration rules.
 
   /internal/siem_migrations/rules/{migration_id}/start:
-    put:
+    post:
       summary: Starts a rule migration
       operationId: StartRuleMigration
       x-codegen-enabled: true
@@ -447,7 +447,7 @@ paths:
           description: Indicates the migration id was not found.
 
   /internal/siem_migrations/rules/{migration_id}/stop:
-    put:
+    post:
       summary: Stops an existing rule migration
       operationId: StopRuleMigration
       x-codegen-enabled: true

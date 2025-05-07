@@ -26,7 +26,7 @@ export const registerSiemRuleMigrationsStartRoute = (
   logger: Logger
 ) => {
   router.versioned
-    .put({
+    .post({
       path: SIEM_RULE_MIGRATION_START_PATH,
       access: 'internal',
       security: { authz },

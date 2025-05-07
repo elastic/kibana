@@ -174,7 +174,7 @@ export const startRuleMigration = async ({
     retry,
     langsmith_options: langSmithOptions,
   };
-  return KibanaServices.get().http.put<StartRuleMigrationResponse>(
+  return KibanaServices.get().http.post<StartRuleMigrationResponse>(
     replaceParams(SIEM_RULE_MIGRATION_START_PATH, { migration_id: migrationId }),
     { body: JSON.stringify(body), version: '1', signal }
   );
