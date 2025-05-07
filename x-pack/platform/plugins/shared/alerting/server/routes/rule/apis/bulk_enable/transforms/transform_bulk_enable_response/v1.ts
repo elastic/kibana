@@ -15,7 +15,7 @@ export const transformBulkEnableResponse = <Params extends RuleParams = never>(
   response: BulkEnableRulesResult<Params>
 ): BulkEnableRulesResponseV1<RuleParamsV1>['body'] => {
   return {
-    rules: response.rules.map((rule) => transformRuleToRuleResponseV1<Params>(rule as Rule)),
+    rules: response.rules.map((rule) => transformRuleToRuleResponseV1<Params>(rule as Rule, true)),
     errors: response.errors,
     total: response.total,
     task_ids_failed_to_be_enabled: response.taskIdsFailedToBeEnabled,
