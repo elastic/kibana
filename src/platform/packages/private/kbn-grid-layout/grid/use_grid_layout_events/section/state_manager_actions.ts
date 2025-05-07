@@ -15,6 +15,7 @@ import { getPanelKeysInOrder } from '../../utils/resolve_grid_section';
 import { resolveSections } from '../../utils/section_management';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
+import { isOrderedLayoutEqual } from '../../utils/equality_checks';
 
 let startingLayout: OrderedLayout | undefined;
 
@@ -39,9 +40,20 @@ export const startAction = (
   });
 };
 
-export const commitAction = ({ activeRowEvent$, headerRefs }: GridLayoutStateManager) => {
+export const commitAction = ({
+  activeRowEvent$,
+  headerRefs,
+  gridLayout$,
+  layoutUpdated$,
+}: GridLayoutStateManager) => {
   const event = activeRowEvent$.getValue();
   activeRowEvent$.next(undefined);
+
+  const proposedLayout = gridLayout$.getValue();
+  if (!startingLayout || !isOrderedLayoutEqual(startingLayout, proposedLayout)) {
+    layoutUpdated$.next(proposedLayout);
+  }
+
   startingLayout = undefined;
 
   if (!event) return;
@@ -123,6 +135,7 @@ export const moveAction = (
         };
       });
       gridLayoutStateManager.gridLayout$.next(orderedLayout);
+      gridLayoutStateManager.rerender$.next();
     }
   } else {
     // when a main section is being targetted, allow the header to be dropped between panels
@@ -199,8 +212,10 @@ export const moveAction = (
       });
 
     const finalLayout = resolveSections(anotherLayout);
-    if (!deepEqual(currentLayout, finalLayout))
+    if (!deepEqual(currentLayout, finalLayout)) {
       gridLayoutStateManager.gridLayout$.next(finalLayout);
+      gridLayoutStateManager.rerender$.next();
+    }
   }
   // update the dragged element
   gridLayoutStateManager.activeRowEvent$.next({

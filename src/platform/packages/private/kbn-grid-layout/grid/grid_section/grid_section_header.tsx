@@ -172,6 +172,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
 
     section.isCollapsed = !section.isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
+    gridLayoutStateManager.rerender$.next();
   }, [gridLayoutStateManager, sectionId]);
 
   const setRef = useCallback(

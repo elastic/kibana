@@ -134,8 +134,10 @@ export const moveAction = (
       maxColumn
     );
   })();
+
+  const sectionExists = Boolean(currentLayout[targetSectionId]);
   const targetRow = (() => {
-    if (currentLayout[targetSectionId]) {
+    if (sectionExists) {
       // this section already exists, so use the wrapper element to figure out target row
       const targetedGridSection = gridSectionElements[targetSectionId];
       const targetedGridSectionRect = targetedGridSection?.getBoundingClientRect();
@@ -220,6 +222,11 @@ export const moveAction = (
     }
     if (currentLayout && !isOrderedLayoutEqual(currentLayout, nextLayout)) {
       gridLayout$.next(nextLayout);
+      if (!sectionExists) {
+        // had to create a new section, so force a rerender
+        console.log('FORCE RERENDER');
+        gridLayoutStateManager.rerender$.next();
+      }
     }
   }
 
@@ -235,9 +242,16 @@ export const moveAction = (
 export const commitAction = ({
   activePanelEvent$: activePanelEvent$,
   panelRefs,
+  gridLayout$,
+  layoutUpdated$,
 }: GridLayoutStateManager) => {
   const event = activePanelEvent$.getValue();
   activePanelEvent$.next(undefined);
+
+  const proposedLayout = gridLayout$.getValue();
+  if (!startingLayout || !isOrderedLayoutEqual(startingLayout, proposedLayout)) {
+    layoutUpdated$.next(proposedLayout);
+  }
   startingLayout = undefined;
 
   if (!event) return;
