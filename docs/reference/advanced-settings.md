@@ -303,35 +303,20 @@ $$$notifications-lifetime-warning$$$`notifications:lifetime:warning`
 $$$apm-enable-service-overview$$$`apm:enableServiceOverview`
 :   When enabled, displays the **Overview** tab for services in **APM**.
 
-$$$apm-agent-explorer$$$`observability:apmAgentExplorerView`
-:   [beta] Enables the Agent explorer view.
-
 $$$apm-aws-price$$$`observability:apmAWSLambdaPriceFactor`
 :   Set the price per Gb-second for your AWS Lambda functions.
 
 $$$apm-aws-request$$$`observability:apmAWSLambdaRequestCostPerMillion`
 :   Set the AWS Lambda cost per million requests.
 
-$$$apm-continuous-rollups$$$`observability:apmEnableContinuousRollups`
-:   [beta] When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.
-
-$$$apm-enable-service-metrics$$$`observability:apmEnableServiceMetrics`
-:   [beta] Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.
-
 $$$observability-apm-labs$$$`observability:apmLabsButton`
 :   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
 
-$$$observability-apm-critical-path$$$`observability:apmEnableCriticalPath`
-:   When enabled, displays the critical path of a trace.
-
 $$$observability-enable-progressive-loading$$$`observability:apmProgressiveLoading`
-:   When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
+:   [preview] When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
 
 $$$observability-apm-max-groups$$$`observability:apmServiceGroupMaxNumberOfServices`
 :   Limit the number of services in a given service group.
-
-$$$observability-apm-optimized-sort$$$`observability:apmServiceInventoryOptimizedSorting`
-:   [preview] Sorts services without anomaly detection rules on the APM Service inventory page by service name.
 
 $$$observability-default-service-env$$$`observability:apmDefaultServiceEnvironment`
 :   Set the default environment for the APM app. When left empty, data from all environments will be displayed by default.
@@ -341,9 +326,6 @@ $$$observability-profiling-show-error-frames$$$`observability:profilingShowError
 
 $$$observability-apm-enable-table-search-bar$$$`observability:apmEnableTableSearchBar`
 :   [beta] Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions, and Errors.
-
-$$$observability-enable-aws-lambda-metrics$$$`observability:enableAwsLambdaMetrics`
-:   [preview] Display Amazon Lambda metrics in the service metrics tab.
 
 $$$observability-enable-legacy-uptime-app$$$`observability:enableLegacyUptimeApp`
 :   Shows the Uptime app even if there is no recent Heartbeat data.
@@ -362,12 +344,6 @@ $$$observability-enable-inspect-es-queries$$$`observability:enableInspectEsQueri
 
 $$$observability-apm-enable-service-groups$$$`observability:enableServiceGroups`
 :   [preview] When enabled, allows users to create Service Groups from the APM Service Inventory page.
-
-$$$observability-apm-trace-explorer-tab$$$`observability:apmTraceExplorerTab`
-:   [preview] Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL.
-
-$$$observability-infrastructure-asset-custom-dashboard$$$`observability:enableInfrastructureAssetCustomDashboards`
-:   [preview] Enables option to link custom dashboards in the Asset Details view.
 
 $$$observability-profiling-per-vcpu-watt-x86$$$`observability:profilingPervCPUWattX86`
 :   The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.
