@@ -42,7 +42,7 @@ describe('validate bundled packages', () => {
     // We bundle APM from snapshot, but that bundled version isn't available in the docker
     // image that's running EPR during FTR runs, so to avoid nasty test failures we don't
     // verify APM here.
-    const EXCLUDED_PACKAGES = ['apm', 'security_ai_prompts'];
+    const EXCLUDED_PACKAGES = ['apm'];
 
     const bundledPackages = await getBundledPackageEntries();
 
