@@ -30,11 +30,11 @@ import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public'
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { getOriginalId } from '@kbn/transpose-utils';
-import { getKbnPalettes } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getColorCategories, getLegacyColorCategories } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
-import { useKibanaCoreTheme } from '@kbn/react-kibana-context-theme/hooks';
+import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme/hooks';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import { RowHeightMode } from '../../../../common/types';
 import { LensGridDirection } from '../../../../common/expressions';
@@ -81,8 +81,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
-  const theme = useKibanaCoreTheme();
-  const palettes = getKbnPalettes(theme);
+  const isDarkMode = useKibanaDarkMode();
+  const palettes = useKbnPalettes();
 
   const [columnConfig, setColumnConfig] = useState({
     columns: props.args.columns,
@@ -419,7 +419,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         palettes,
         data,
         colorByTerms,
-        theme.darkMode,
+        isDarkMode,
         syncColors,
         palette,
         colorMapping
@@ -433,14 +433,14 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       formatters,
       columnConfig,
       DataContext,
-      theme.darkMode,
+      isDarkMode,
       getCellColor,
       props.args.fitRowToContent
     );
   }, [
     formatters,
     columnConfig,
-    theme.darkMode,
+    isDarkMode,
     props.args.fitRowToContent,
     props.paletteService,
     palettes,

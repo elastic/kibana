@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useKibanaCoreTheme } from './use_kibana_core_theme';
 export { useKibanaDarkMode } from './use_kibana_dark_mode';
