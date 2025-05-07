@@ -221,7 +221,7 @@ export function HeaderActions({
           <EuiButtonIcon
             className="snoozeButton"
             data-test-subj="snoozeRuleButton"
-            iconType={!getRuleHelpers(rule).isRuleSnoozed ? 'bellSlash' : 'bell'}
+            iconType={getRuleHelpers(rule).isRuleSnoozed ? 'bellSlash' : 'bell'}
             onClick={() => {
               setSnoozeModalOpen(true);
             }}
