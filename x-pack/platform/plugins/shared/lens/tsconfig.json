@@ -124,7 +124,8 @@
     "@kbn/response-ops-rule-form",
     "@kbn/alerts-ui-shared",
     "@kbn/rule-data-utils",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
+    "@kbn/esql-ast"
   ],
   "exclude": ["target/**/*"]
 }
