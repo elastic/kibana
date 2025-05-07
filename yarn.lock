@@ -2225,6 +2225,11 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
+"@elastic/monaco-esql@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.1.tgz#f0261b9cbf516f9294a1ebf3f84d2ef3804db729"
+  integrity sha512-z4MuolpYHhdIViT78l55a072oAwy9u2uGFekTMvUuV5Ewlot1x5P71Kn8iEAhOPv+dHqwUvY/KCWcwMFmhRnZQ==
+
 "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.2.3.tgz#7ebd71964ea09cf085c713c1a6edfc2dfac08b29"

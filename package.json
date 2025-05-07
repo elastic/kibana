@@ -125,6 +125,7 @@
     "@elastic/ems-client": "8.6.3",
     "@elastic/eui": "102.1.0-amsterdam.0",
     "@elastic/filesaver": "1.1.2",
+    "@elastic/monaco-esql": "^3.1.1",
     "@elastic/node-crypto": "^1.2.3",
     "@elastic/numeral": "^2.5.1",
     "@elastic/react-search-ui": "^1.20.2",
