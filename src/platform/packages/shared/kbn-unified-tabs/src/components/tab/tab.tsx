@@ -328,8 +328,6 @@ function getTabContentCss(euiTheme: EuiThemeComputed) {
 
 function getTabLabelContainerCss(euiTheme: EuiThemeComputed) {
   return css`
-    display: flex;
-    align-items: center;
     width: 100%;
     height: ${euiTheme.size.l};
     padding-top: ${euiTheme.size.xxs};
