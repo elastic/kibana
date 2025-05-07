@@ -10,6 +10,7 @@ import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { FindDashboardsByIdResponse } from '@kbn/dashboard-plugin/public';
 import {
   EuiEmptyPrompt,
   EuiPanel,
@@ -99,6 +100,7 @@ export function AlertDetails() {
     observabilityAIAssistant,
     uiSettings,
     serverless,
+    dashboard: dashboardService,
   } = useKibana().services;
   const { onPageReady } = usePerformanceContext();
 
@@ -125,6 +127,8 @@ export function AlertDetails() {
       ? (urlTabId as TabId)
       : OVERVIEW_TAB_ID;
   });
+  const [validDashboards, setValidDashboards] = useState<FindDashboardsByIdResponse[]>([]);
+  const linkedDashboards = React.useMemo(() => rule?.artifacts?.dashboards ?? [], [rule]);
   const handleSetTabId = async (tabId: TabId) => {
     setActiveTabId(tabId);
 
@@ -192,6 +196,20 @@ export function AlertDetails() {
     }
   }, [onPageReady, alertDetail, isLoading, activeTabId]);
 
+  useEffect(() => {
+    const fetchValidDashboards = async () => {
+      const dashboardIds = linkedDashboards.map((dashboard: { id: string }) => dashboard.id);
+
+      const findDashboardsService = await dashboardService.findDashboardsService();
+      const responses = await findDashboardsService.findByIds(dashboardIds);
+      const existingDashboards = responses.filter(({ status }) => status === 'success');
+
+      setValidDashboards(existingDashboards.length ? existingDashboards : []);
+    };
+
+    fetchValidDashboards();
+  }, [rule, dashboardService, linkedDashboards]);
+
   if (isLoading) {
     return <CenterJustifiedSpinner />;
   }
@@ -221,8 +239,6 @@ export function AlertDetails() {
     );
   const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
   const timeZone = getTimeZone(uiSettings);
-
-  const linkedDashboards: any = rule?.artifacts?.dashboards ?? [];
 
   const overviewTab = alertDetail ? (
     AlertDetailsAppSection &&
@@ -318,7 +334,7 @@ export function AlertDetails() {
       'data-test-subj': 'relatedAlertsTab',
       content: <RelatedAlerts alertData={alertDetail} />,
     },
-    ...(linkedDashboards?.length
+    ...(validDashboards?.length
       ? [
           {
             id: RELATED_DASHBOARDS_TAB_ID,
@@ -329,7 +345,7 @@ export function AlertDetails() {
                   defaultMessage="Related dashboards"
                 />{' '}
                 <EuiNotificationBadge color="success">
-                  {linkedDashboards?.length}
+                  {validDashboards?.length}
                 </EuiNotificationBadge>
               </>
             ),

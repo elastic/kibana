@@ -47,21 +47,49 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
   >();
 
   useEffect(() => {
-    if ((dashboardsFormData ?? []).length > 0 && dashboardService) {
-      const fetchDashboardTitles = async () => {
-        const dashboardsWithTitles = await Promise.all(
-          (dashboardsFormData ?? []).map(async (dashboard) => ({
-            label: (
-              await dashboardServiceProvider(dashboardService).fetchDashboard(dashboard.id)
-            )?.attributes.title,
-            value: dashboard.id,
-          }))
-        );
-        setSelectedDashboards(dashboardsWithTitles);
-      };
-
-      fetchDashboardTitles();
+    if (!dashboardsFormData?.length || !dashboardService) {
+      return;
     }
+
+    const fetchDashboardTitles = async () => {
+      try {
+        const dashboardPromises = dashboardsFormData.map(async (dashboard) => {
+          try {
+            const fetchedDashboard = await dashboardServiceProvider(
+              dashboardService
+            ).fetchDashboard(dashboard.id);
+
+            // Only return the dashboard if it exists and has a title
+            if (fetchedDashboard?.attributes?.title) {
+              return {
+                label: fetchedDashboard.attributes.title,
+                value: dashboard.id,
+              };
+            }
+            // Return null if dashboard doesn't have required data
+            return null;
+          } catch (dashboardError) {
+            /**
+             * Swallow the error that is thrown, since this just means the selected dashboard was deleted
+             * Return null when dashboard fetch fails
+             */
+            return null;
+          }
+        });
+
+        const results = await Promise.all(dashboardPromises);
+
+        // Filter out null results and cast to the expected type
+        const validDashboards = results.filter(Boolean) as Array<EuiComboBoxOptionOption<string>>;
+
+        setSelectedDashboards(validDashboards);
+      } catch (error) {
+        // Set empty array or handle the error appropriately
+        setSelectedDashboards([]);
+      }
+    };
+
+    fetchDashboardTitles();
   }, [dashboardsFormData, dashboardService]);
 
   const onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {

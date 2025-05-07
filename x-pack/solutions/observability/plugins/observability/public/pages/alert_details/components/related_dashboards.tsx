@@ -22,7 +22,7 @@ import { TopAlert } from '../../..';
 
 interface RelatedDashboardsProps {
   alert: TopAlert;
-  relatedDashboards: Array<{ id: string; title: string }>;
+  relatedDashboards: Array<{ id: string }>;
 }
 
 export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboardsProps) {
@@ -40,26 +40,43 @@ export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboard
   const dashboardLocator = urlService.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
 
   useEffect(() => {
-    if ((relatedDashboards ?? []).length > 0 && dashboardService) {
-      const fetchDashboards = async () => {
-        const dashboards = await Promise.all(
-          (relatedDashboards ?? []).map(async (dashboard) => {
-            const findDashboardsService = await dashboardService.findDashboardsService();
-            const response = await findDashboardsService.findById(dashboard.id);
-            if (response.status === 'error') {
-              throw new Error(response.error.message);
-            }
-            return {
-              id: dashboard.id,
-              title: response.attributes.title,
-              description: response.attributes.description,
-            };
-          })
-        );
-        setDashboardsMeta(dashboards);
-      };
-      fetchDashboards();
+    if (!relatedDashboards?.length || !dashboardService) {
+      return;
     }
+
+    const fetchDashboards = async () => {
+      const dashboardPromises = relatedDashboards.map(async (dashboard) => {
+        try {
+          const findDashboardsService = await dashboardService.findDashboardsService();
+          const response = await findDashboardsService.findById(dashboard.id);
+
+          if (response.status === 'error') {
+            return null;
+          }
+
+          return {
+            id: dashboard.id,
+            title: response.attributes.title,
+            description: response.attributes.description,
+          };
+        } catch (dashboardError) {
+          return null;
+        }
+      });
+
+      const results = await Promise.all(dashboardPromises);
+
+      // Filter out null results (failed dashboard fetches)
+      const validDashboards = results.filter(Boolean) as Array<{
+        id: string;
+        title: string;
+        description: string;
+      }>;
+
+      setDashboardsMeta(validDashboards);
+    };
+
+    fetchDashboards();
   }, [relatedDashboards, dashboardService, setDashboardsMeta]);
 
   return (
