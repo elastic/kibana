@@ -100,7 +100,7 @@ export const transformFlapping = (flapping: Rule['flapping']) => {
 };
 
 export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
-  rule: Rule<Params>,
+  rule: Rule<Params>
 ): RuleResponseV1<RuleParamsV1> => ({
   id: rule.id,
   enabled: rule.enabled,
