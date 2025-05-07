@@ -18,7 +18,7 @@ export const existingDashboardFileNames = new Set([
   'classic_apm-edot-dotnet',
   'otel_native-edot-python',
   'otel_native-edot-nodejs',
-  'otel_native-edot-golang',
+  'classic_apm-otel_other-go',
 ]);
 
 // The new dashboard files should be mapped here
@@ -93,10 +93,10 @@ export async function loadDashboardFile(filename: string) {
         './otel_native-edot-nodejs.json'
       );
     }
-    case 'otel_native-edot-golang': {
+    case 'classic_apm-otel_other-go': {
       return import(
-        /* webpackChunkName: "lazyGolangOtelNativeDashboard" */
-        './otel_native-edot-golang.json'
+        /* webpackChunkName: "lazyGoOtelNativeDashboard" */
+        './otel_native-otel_other-go.json'
       );
     }
     default: {
