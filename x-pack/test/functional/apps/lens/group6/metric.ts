@@ -373,7 +373,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(decimals).have.length(3);
     });
 
-    it('should show a badge for the secondary metric -- nick', async () => {
+    it('should show a badge for the secondary metric', async () => {
       const BADGE_SELECTOR = `[data-test-subj^="expressionMetricVis-secondaryMetric-badge-"]`;
       const CUSTOM_STATIC_COLOR_HEX = '#EE72A6';
 
