@@ -39,7 +39,7 @@ export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) =
   useEffect(
     () => {
       /** Update the styles of the grid row via a subscription to prevent re-renders */
-      const interactionStyleSubscription = gridLayoutStateManager.activePanel$.subscribe(
+      const interactionStyleSubscription = gridLayoutStateManager.activePanelEvent$.subscribe(
         (activePanel) => {
           const rowRef = gridLayoutStateManager.sectionRefs.current[sectionId];
           if (!rowRef) return;

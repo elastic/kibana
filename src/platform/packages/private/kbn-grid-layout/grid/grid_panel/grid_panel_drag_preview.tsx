@@ -21,7 +21,7 @@ export const GridPanelDragPreview = () => {
   useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
-      const styleSubscription = gridLayoutStateManager.activePanel$
+      const styleSubscription = gridLayoutStateManager.activePanelEvent$
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
         .subscribe((activePanel) => {
           if (!dragPreviewRef.current) return;

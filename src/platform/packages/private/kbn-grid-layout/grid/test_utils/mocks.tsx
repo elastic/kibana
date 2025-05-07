@@ -16,7 +16,6 @@ import {
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
-  PanelInteractionEvent,
   RuntimeGridSettings,
 } from '../types';
 import { getSampleLayout } from './sample_layout';
@@ -50,7 +49,7 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
     sectionRefs: { current: {} },
     headerRefs: { current: {} },
     accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
-    activePanel$: new BehaviorSubject<ActivePanelEvent | undefined>(undefined),
+    activePanelEvent$: new BehaviorSubject<ActivePanelEvent | undefined>(undefined),
     activeRowEvent$: new BehaviorSubject<ActiveRowEvent | undefined>(undefined),
     gridDimensions$: new BehaviorSubject<ObservedSize>({ width: 600, height: 900 }),
     ...overrides,

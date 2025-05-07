@@ -73,7 +73,7 @@ export const getNextKeyboardPositionForPanel = (
   handlePosition: { clientX: number; clientY: number }
 ) => {
   const {
-    activePanel$: { value: activePanel },
+    activePanelEvent$: { value: activePanel },
     runtimeSettings$: {
       value: { columnPixelWidth, rowHeight, gutterSize, keyboardDragTopLimit },
     },

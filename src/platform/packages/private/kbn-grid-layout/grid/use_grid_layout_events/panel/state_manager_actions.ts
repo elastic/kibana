@@ -32,7 +32,7 @@ export const startAction = (
 
   startingLayout = gridLayoutStateManager.gridLayout$.getValue();
   const panelRect = panelRef.getBoundingClientRect();
-  gridLayoutStateManager.activePanel$.next({
+  gridLayoutStateManager.activePanelEvent$.next({
     type,
     id: panelId,
     panelDiv: panelRef,
@@ -51,13 +51,13 @@ export const moveAction = (
 ) => {
   const {
     runtimeSettings$: { value: runtimeSettings },
-    activePanel$,
+    activePanelEvent$,
     gridLayout$,
     layoutRef: { current: gridLayoutElement },
     headerRefs: { current: gridHeaderElements },
     sectionRefs: { current: gridSectionElements },
   } = gridLayoutStateManager;
-  const activePanel = activePanel$.value;
+  const activePanel = activePanelEvent$.value;
   const currentLayout = gridLayout$.value;
   if (!activePanel || !runtimeSettings || !gridSectionElements || !currentLayout) {
     // if no interaction event return early
@@ -224,7 +224,7 @@ export const moveAction = (
   }
 
   // re-render the active panel
-  activePanel$.next({
+  activePanelEvent$.next({
     ...activePanel,
     id: activePanel.id,
     position: previewRect,
@@ -232,9 +232,12 @@ export const moveAction = (
   });
 };
 
-export const commitAction = ({ activePanel$, panelRefs }: GridLayoutStateManager) => {
-  const event = activePanel$.getValue();
-  activePanel$.next(undefined);
+export const commitAction = ({
+  activePanelEvent$: activePanelEvent$,
+  panelRefs,
+}: GridLayoutStateManager) => {
+  const event = activePanelEvent$.getValue();
+  activePanelEvent$.next(undefined);
   startingLayout = undefined;
 
   if (!event) return;
@@ -244,9 +247,13 @@ export const commitAction = ({ activePanel$, panelRefs }: GridLayoutStateManager
   });
 };
 
-export const cancelAction = ({ activePanel$, gridLayout$, panelRefs }: GridLayoutStateManager) => {
-  const event = activePanel$.getValue();
-  activePanel$.next(undefined);
+export const cancelAction = ({
+  activePanelEvent$: activePanelEvent$,
+  gridLayout$,
+  panelRefs,
+}: GridLayoutStateManager) => {
+  const event = activePanelEvent$.getValue();
+  activePanelEvent$.next(undefined);
   if (startingLayout) {
     gridLayout$.next(startingLayout);
     startingLayout = undefined;

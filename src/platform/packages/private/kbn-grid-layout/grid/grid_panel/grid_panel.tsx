@@ -64,7 +64,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
   useEffect(() => {
     /** Update the styles of the panel via a subscription to prevent re-renders */
     const activePanelStyleSubscription = combineLatest([
-      gridLayoutStateManager.activePanel$,
+      gridLayoutStateManager.activePanelEvent$,
       panel$,
     ])
       .pipe(skip(1))

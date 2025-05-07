@@ -27,7 +27,7 @@ export const GridHeightSmoother = React.memo(
        */
       const interactionStyleSubscription = combineLatest([
         gridLayoutStateManager.gridDimensions$,
-        gridLayoutStateManager.activePanel$,
+        gridLayoutStateManager.activePanelEvent$,
       ]).subscribe(([dimensions, activePanel]) => {
         if (!smoothHeightRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
 

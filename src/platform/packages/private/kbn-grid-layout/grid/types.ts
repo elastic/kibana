@@ -142,7 +142,7 @@ export interface GridLayoutStateManager {
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
 
-  activePanel$: BehaviorSubject<ActivePanelEvent | undefined>;
+  activePanelEvent$: BehaviorSubject<ActivePanelEvent | undefined>;
   activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
   layoutUpdated$: Observable<GridLayoutData>;
 

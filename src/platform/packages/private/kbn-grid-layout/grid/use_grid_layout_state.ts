@@ -107,10 +107,10 @@ export const useGridLayoutState = ({
 
     const gridLayout$ = new BehaviorSubject<OrderedLayout>(getOrderedLayout(resolvedLayout));
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
-    const activePanel$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
+    const activePanelEvent$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);
 
-    const panelDropped$ = merge(activePanel$, activeRowEvent$).pipe(
+    const panelDropped$ = merge(activePanelEvent$, activeRowEvent$).pipe(
       pairwise(),
       map(([hasEventBefore, hasEventAfter]) => {
         return Boolean(hasEventBefore) && !Boolean(hasEventAfter);
@@ -133,7 +133,7 @@ export const useGridLayoutState = ({
       footerRefs,
       panelRefs,
       gridLayout$,
-      activePanel$,
+      activePanelEvent$,
       activeRowEvent$,
       accessMode$,
       gridDimensions$,
