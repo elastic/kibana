@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: Privileged User Monitoring API
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/monitoring/users/{id}:
+    put:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: UpdatePrivMonUser
+      summary: Update a monitored user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./common.schema.yaml#/components/schemas/MonitoredUserDoc"
+
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "./common.schema.yaml#/components/schemas/MonitoredUserDoc"

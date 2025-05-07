@@ -7,8 +7,9 @@
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Readable } from 'stream';
-import type { ApmSynthtraceEsClient, ApmSynthtracePipelines } from '@kbn/apm-synthtrace';
+import { type ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import moment from 'moment';
+import { ApmSynthtracePipelineSchema, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateSpanLinksData } from './data_generator';
 
@@ -20,17 +21,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = moment(baseTime).subtract(15, 'minutes');
   const end = moment(baseTime);
 
-  const scenarios: ApmSynthtracePipelines[] = ['default', 'apmToOtel'];
-
-  // skips all tests that validate the `transaction.id` in `span` docs for Otel
-  // TODO: remove this once a solution for that has been found
-  const maybeIt = (pipeline: ApmSynthtracePipelines) => (pipeline === 'apmToOtel' ? it.skip : it);
+  const scenarios: ApmSynthtracePipelines[] = [
+    ApmSynthtracePipelineSchema.Default,
+    ApmSynthtracePipelineSchema.ApmToOtel,
+  ];
 
   describe('Span Links', () => {
     scenarios.forEach((pipeline) => {
-      describe(`contains linked children - ${
-        pipeline === 'default' ? 'elastic APM' : 'Otel'
-      }`, () => {
+      const isDefaultPipeline = pipeline === ApmSynthtracePipelineSchema.Default;
+
+      describe(`contains linked children - ${isDefaultPipeline ? 'elastic APM' : 'Otel'}`, () => {
         let ids: ReturnType<typeof generateSpanLinksData>['ids'];
         let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
@@ -234,7 +234,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               expect(spanALinksDetails.parentsLinks.spanLinksDetails).to.eql([]);
             });
 
-            maybeIt(pipeline)('returns two children on Span A', () => {
+            it('returns two children on Span A', () => {
               expect(spanALinksDetails.childrenLinks.spanLinksDetails.length).to.eql(2);
               const serviceCDetails = spanALinksDetails.childrenLinks.spanLinksDetails.find(
                 (childDetails) => {
@@ -312,7 +312,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               ]);
             });
 
-            maybeIt(pipeline)('returns consumer-multiple as child on Span B', () => {
+            it('returns consumer-multiple as child on Span B', () => {
               expect(spanBLinksDetails.childrenLinks.spanLinksDetails.length).to.be(1);
               expect(spanBLinksDetails.childrenLinks.spanLinksDetails).to.eql([
                 {
@@ -321,12 +321,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                   details: {
                     serviceName: 'consumer-multiple',
                     agentName: 'nodejs',
-                    transactionId: ids.producerMultiple.transactionDId,
                     spanName: 'Span E',
                     duration: 100000,
                     spanSubtype: 'http',
                     spanType: 'external',
                     environment: 'production',
+                    ...(isDefaultPipeline && {
+                      transactionId: ids.producerMultiple.transactionDId,
+                    }),
                   },
                 },
               ]);
@@ -358,46 +360,45 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               spanCLinksDetails = spanALinksDetailsResponse;
             });
 
-            maybeIt(pipeline)(
-              'returns producer-internal-only Span A, producer-external-only Transaction B, and External link as parents of Transaction C',
-              () => {
-                expect(transactionCLinksDetails.parentsLinks.spanLinksDetails.length).to.be(3);
-                expect(transactionCLinksDetails.parentsLinks.spanLinksDetails).to.eql([
-                  {
-                    traceId: ids.producerInternalOnly.traceId,
-                    spanId: ids.producerInternalOnly.spanAId,
-                    details: {
-                      serviceName: 'producer-internal-only',
-                      agentName: 'go',
+            it('returns producer-internal-only Span A, producer-external-only Transaction B, and External link as parents of Transaction C', () => {
+              expect(transactionCLinksDetails.parentsLinks.spanLinksDetails.length).to.be(3);
+              expect(transactionCLinksDetails.parentsLinks.spanLinksDetails).to.eql([
+                {
+                  traceId: ids.producerInternalOnly.traceId,
+                  spanId: ids.producerInternalOnly.spanAId,
+                  details: {
+                    serviceName: 'producer-internal-only',
+                    agentName: 'go',
+                    spanName: 'Span A',
+                    duration: 100000,
+                    spanSubtype: 'http',
+                    spanType: 'external',
+                    environment: 'production',
+                    ...(isDefaultPipeline && {
                       transactionId: ids.producerInternalOnly.transactionAId,
-                      spanName: 'Span A',
-                      duration: 100000,
-                      spanSubtype: 'http',
-                      spanType: 'external',
-                      environment: 'production',
-                    },
+                    }),
                   },
-                  {
-                    traceId: ids.producerExternalOnly.traceId,
-                    spanId: ids.producerExternalOnly.transactionBId,
-                    details: {
-                      serviceName: 'producer-external-only',
-                      agentName: 'java',
-                      transactionId: ids.producerExternalOnly.transactionBId,
-                      duration: 1000000,
-                      spanName: 'Transaction B',
-                      environment: 'production',
-                    },
+                },
+                {
+                  traceId: ids.producerExternalOnly.traceId,
+                  spanId: ids.producerExternalOnly.transactionBId,
+                  details: {
+                    serviceName: 'producer-external-only',
+                    agentName: 'java',
+                    transactionId: ids.producerExternalOnly.transactionBId,
+                    duration: 1000000,
+                    spanName: 'Transaction B',
+                    environment: 'production',
                   },
-                  {
-                    traceId: ids.producerConsumer.externalTraceId,
-                    spanId: ids.producerExternalOnly.spanBId,
-                  },
-                ]);
-              }
-            );
+                },
+                {
+                  traceId: ids.producerConsumer.externalTraceId,
+                  spanId: ids.producerExternalOnly.spanBId,
+                },
+              ]);
+            });
 
-            maybeIt(pipeline)('returns consumer-multiple Span E as child of Transaction C', () => {
+            it('returns consumer-multiple Span E as child of Transaction C', () => {
               expect(transactionCLinksDetails.childrenLinks.spanLinksDetails.length).to.be(1);
               expect(transactionCLinksDetails.childrenLinks.spanLinksDetails).to.eql([
                 {
@@ -406,12 +407,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                   details: {
                     serviceName: 'consumer-multiple',
                     agentName: 'nodejs',
-                    transactionId: ids.producerMultiple.transactionDId,
                     spanName: 'Span E',
                     duration: 100000,
                     spanSubtype: 'http',
                     spanType: 'external',
                     environment: 'production',
+                    ...(isDefaultPipeline && {
+                      transactionId: ids.producerMultiple.transactionDId,
+                    }),
                   },
                 },
               ]);
@@ -421,7 +424,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               expect(spanCLinksDetails.parentsLinks.spanLinksDetails.length).to.be(0);
             });
 
-            maybeIt(pipeline)('returns consumer-multiple as Child on producer-consumer', () => {
+            it('returns consumer-multiple as Child on producer-consumer', () => {
               expect(spanCLinksDetails.childrenLinks.spanLinksDetails.length).to.be(1);
               expect(spanCLinksDetails.childrenLinks.spanLinksDetails).to.eql([
                 {
@@ -465,82 +468,82 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               spanELinksDetails = spanALinksDetailsResponse;
             });
 
-            maybeIt(pipeline)(
-              'returns producer-internal-only Span A and producer-consumer Span C as parents of Transaction D',
-              () => {
-                expect(transactionDLinksDetails.parentsLinks.spanLinksDetails.length).to.be(2);
-                expect(transactionDLinksDetails.parentsLinks.spanLinksDetails).to.eql([
-                  {
-                    traceId: ids.producerInternalOnly.traceId,
-                    spanId: ids.producerInternalOnly.spanAId,
-                    details: {
-                      serviceName: 'producer-internal-only',
-                      agentName: 'go',
+            it('returns producer-internal-only Span A and producer-consumer Span C as parents of Transaction D', () => {
+              expect(transactionDLinksDetails.parentsLinks.spanLinksDetails.length).to.be(2);
+              expect(transactionDLinksDetails.parentsLinks.spanLinksDetails).to.eql([
+                {
+                  traceId: ids.producerInternalOnly.traceId,
+                  spanId: ids.producerInternalOnly.spanAId,
+                  details: {
+                    serviceName: 'producer-internal-only',
+                    agentName: 'go',
+                    spanName: 'Span A',
+                    duration: 100000,
+                    spanSubtype: 'http',
+                    spanType: 'external',
+                    environment: 'production',
+                    ...(isDefaultPipeline && {
                       transactionId: ids.producerInternalOnly.transactionAId,
-                      spanName: 'Span A',
-                      duration: 100000,
-                      spanSubtype: 'http',
-                      spanType: 'external',
-                      environment: 'production',
-                    },
+                    }),
                   },
-                  {
-                    traceId: ids.producerConsumer.traceId,
-                    spanId: ids.producerConsumer.spanCId,
-                    details: {
-                      serviceName: 'producer-consumer',
-                      agentName: 'ruby',
+                },
+                {
+                  traceId: ids.producerConsumer.traceId,
+                  spanId: ids.producerConsumer.spanCId,
+                  details: {
+                    serviceName: 'producer-consumer',
+                    agentName: 'ruby',
+                    spanName: 'Span C',
+                    duration: 100000,
+                    spanSubtype: 'http',
+                    spanType: 'external',
+                    environment: 'production',
+                    ...(isDefaultPipeline && {
                       transactionId: ids.producerConsumer.transactionCId,
-                      spanName: 'Span C',
-                      duration: 100000,
-                      spanSubtype: 'http',
-                      spanType: 'external',
-                      environment: 'production',
-                    },
+                    }),
                   },
-                ]);
-              }
-            );
+                },
+              ]);
+            });
 
             it('returns no children on Transaction D', () => {
               expect(transactionDLinksDetails.childrenLinks.spanLinksDetails.length).to.be(0);
             });
 
-            maybeIt(pipeline)(
-              'returns producer-external-only Span B and producer-consumer Transaction C as parents of Span E',
-              () => {
-                expect(spanELinksDetails.parentsLinks.spanLinksDetails.length).to.be(2);
+            it('returns producer-external-only Span B and producer-consumer Transaction C as parents of Span E', () => {
+              expect(spanELinksDetails.parentsLinks.spanLinksDetails.length).to.be(2);
 
-                expect(spanELinksDetails.parentsLinks.spanLinksDetails).to.eql([
-                  {
-                    traceId: ids.producerExternalOnly.traceId,
-                    spanId: ids.producerExternalOnly.spanBId,
-                    details: {
-                      serviceName: 'producer-external-only',
-                      agentName: 'java',
+              expect(spanELinksDetails.parentsLinks.spanLinksDetails).to.eql([
+                {
+                  traceId: ids.producerExternalOnly.traceId,
+                  spanId: ids.producerExternalOnly.spanBId,
+                  details: {
+                    serviceName: 'producer-external-only',
+                    agentName: 'java',
+                    spanName: 'Span B',
+                    duration: 100000,
+                    spanSubtype: 'http',
+                    spanType: 'external',
+                    environment: 'production',
+                    ...(isDefaultPipeline && {
                       transactionId: ids.producerExternalOnly.transactionBId,
-                      spanName: 'Span B',
-                      duration: 100000,
-                      spanSubtype: 'http',
-                      spanType: 'external',
-                      environment: 'production',
-                    },
+                    }),
                   },
-                  {
-                    traceId: ids.producerConsumer.traceId,
-                    spanId: ids.producerConsumer.transactionCId,
-                    details: {
-                      serviceName: 'producer-consumer',
-                      agentName: 'ruby',
-                      transactionId: ids.producerConsumer.transactionCId,
-                      spanName: 'Transaction C',
-                      duration: 1000000,
-                      environment: 'production',
-                    },
+                },
+                {
+                  traceId: ids.producerConsumer.traceId,
+                  spanId: ids.producerConsumer.transactionCId,
+                  details: {
+                    serviceName: 'producer-consumer',
+                    agentName: 'ruby',
+                    transactionId: ids.producerConsumer.transactionCId,
+                    spanName: 'Transaction C',
+                    duration: 1000000,
+                    environment: 'production',
                   },
-                ]);
-              }
-            );
+                },
+              ]);
+            });
 
             it('returns no children on Span E', () => {
               expect(spanELinksDetails.childrenLinks.spanLinksDetails.length).to.be(0);

@@ -10,7 +10,7 @@ pageLoadAssetSize:
   banners: 17946
   canvas: 29355
   cases: 180037
-  charts: 55000
+  charts: 60000
   cloud: 21076
   cloudDataMigration: 19170
   cloudExperiments: 109746
@@ -18,6 +18,7 @@ pageLoadAssetSize:
   cloudLinks: 55984
   cloudSecurityPosture: 34398
   console: 61298
+  contentConnectors: 65000
   contentManagement: 16254
   controls: 12000
   core: 564663
@@ -50,18 +51,12 @@ pageLoadAssetSize:
   eventAnnotation: 30000
   eventAnnotationListing: 25841
   exploratoryView: 74673
-  expressionError: 22127
   expressionGauge: 25000
   expressionHeatmap: 27505
-  expressionImage: 19288
   expressionLegacyMetricVis: 23121
-  expressionMetric: 22238
   expressionMetricVis: 23121
   expressionPartitionVis: 44888
-  expressionRepeatImage: 22341
-  expressionRevealImage: 25675
   expressions: 140958
-  expressionShape: 34008
   expressionTagcloud: 27505
   expressionXY: 45000
   features: 21723
@@ -85,7 +80,7 @@ pageLoadAssetSize:
   infra: 184320
   ingestPipelines: 58003
   inputControlVis: 172675
-  inspector: 17900
+  inspector: 18000
   interactiveSetup: 80000
   inventory: 27430
   kibanaOverview: 56279
@@ -95,7 +90,7 @@ pageLoadAssetSize:
   lens: 76079
   licenseManagement: 41817
   licensing: 29004
-  links: 8000
+  links: 9000
   lists: 22900
   logsDataAccess: 16759
   logsShared: 281060
@@ -136,7 +131,6 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchAssistant: 19831
-  searchConnectors: 65000
   searchHomepage: 19831
   searchIndices: 20519
   searchInferenceEndpoints: 20470
@@ -174,7 +168,6 @@ pageLoadAssetSize:
   uiActions: 35121
   uiActionsEnhanced: 38494
   unifiedDocViewer: 25099
-  unifiedHistogram: 19928
   unifiedSearch: 23000
   upgradeAssistant: 81241
   uptime: 60000
@@ -201,3 +194,4 @@ pageLoadAssetSize:
   wciIndexSource: 40000
   wciSalesforce: 25000
   workchatApp: 25000
+  workchatFramework: 25000

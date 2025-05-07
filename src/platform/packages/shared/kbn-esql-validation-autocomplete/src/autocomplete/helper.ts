@@ -16,6 +16,8 @@ import {
   type ESQLFunction,
   type ESQLLiteral,
   type ESQLSource,
+  ESQLAstQueryExpression,
+  BasicPrettyPrinter,
 } from '@kbn/esql-ast';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
@@ -47,11 +49,11 @@ import {
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
-import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+import { ESQLFieldWithMetadata, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
 import { listCompleteItem } from './complete_items';
 import {
   TIME_SYSTEM_PARAMS,
-  buildVariablesDefinitions,
+  buildUserDefinedColumnsDefinitions,
   getCompatibleLiterals,
   getDateLiterals,
   getFunctionSuggestions,
@@ -107,10 +109,46 @@ export function strictlyGetParamAtPosition(
   return params[position] ? params[position] : null;
 }
 
-export function getQueryForFields(queryString: string, commands: ESQLCommand[]) {
+/**
+ * This function is used to build the query that will be used to compute the
+ * available fields for the current cursor location.
+ *
+ * Generally, this is the user's query up to the end of the previous command.
+ *
+ * @param queryString The original query string
+ * @param commands
+ * @returns
+ */
+export function getQueryForFields(queryString: string, root: ESQLAstQueryExpression): string {
+  const commands = root.commands;
+  const lastCommand = commands[commands.length - 1];
+  if (lastCommand && lastCommand.name === 'fork' && lastCommand.args.length > 0) {
+    /**
+     * This translates the current fork command branch into a simpler but equivalent
+     * query that is compatible with the existing field computation/caching strategy.
+     *
+     * The intuition here is that if the cursor is within a fork branch, the
+     * previous context is equivalent to a query without the FORK command.:
+     *
+     * Original query: FROM lolz | EVAL foo = 1 | FORK (EVAL bar = 2) (EVAL baz = 3 | WHERE /)
+     * Simplified: FROM lolz | EVAL foo = 1 | EVAL baz = 3 | WHERE /
+     */
+    const currentBranch = lastCommand.args[lastCommand.args.length - 1] as ESQLAstQueryExpression;
+    const newCommands = commands.slice(0, -1).concat(currentBranch.commands.slice(0, -1));
+    return BasicPrettyPrinter.print({ ...root, commands: newCommands });
+  }
+
   // If there is only one source command and it does not require fields, do not
   // fetch fields, hence return an empty string.
-  return commands.length === 1 && ['row', 'show'].includes(commands[0].name) ? '' : queryString;
+  return commands.length === 1 && ['row', 'show'].includes(commands[0].name)
+    ? ''
+    : buildQueryUntilPreviousCommand(queryString, commands);
+}
+
+// TODO consider replacing this with a pretty printer-based solution
+function buildQueryUntilPreviousCommand(queryString: string, commands: ESQLCommand[]) {
+  const prevCommand = commands[Math.max(commands.length - 2, 0)];
+  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
 }
 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
@@ -266,7 +304,10 @@ export function isLiteralDateItem(nodeArg: ESQLAstItem): boolean {
 
 export function getValidSignaturesAndTypesToSuggestNext(
   node: ESQLFunction,
-  references: { fields: Map<string, ESQLRealField>; variables: Map<string, ESQLVariable[]> },
+  references: {
+    fields: Map<string, ESQLFieldWithMetadata>;
+    userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
+  },
   fnDefinition: FunctionDefinition,
   fullText: string,
   offset: number
@@ -388,13 +429,13 @@ export async function getFieldsOrFunctionsSuggestions(
   {
     functions,
     fields,
-    variables,
+    userDefinedColumns,
     values = false,
     literals = false,
   }: {
     functions: boolean;
     fields: boolean;
-    variables?: Map<string, ESQLVariable[]>;
+    userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>;
     literals?: boolean;
     values?: boolean;
   },
@@ -417,25 +458,25 @@ export async function getFieldsOrFunctionsSuggestions(
     functions
   );
 
-  const filteredVariablesByType: string[] = [];
-  if (variables) {
-    for (const variable of variables.values()) {
+  const filteredColumnByType: string[] = [];
+  if (userDefinedColumns) {
+    for (const userDefinedColumn of userDefinedColumns.values()) {
       if (
-        (types.includes('any') || types.includes(variable[0].type)) &&
-        !ignoreColumns.includes(variable[0].name)
+        (types.includes('any') || types.includes(userDefinedColumn[0].type)) &&
+        !ignoreColumns.includes(userDefinedColumn[0].name)
       ) {
-        filteredVariablesByType.push(variable[0].name);
+        filteredColumnByType.push(userDefinedColumn[0].name);
       }
     }
-    // due to a bug on the ES|QL table side, filter out fields list with underscored variable names (??)
+    // due to a bug on the ES|QL table side, filter out fields list with underscored userDefinedColumns names (??)
     // avg( numberField ) => avg_numberField_
     const ALPHANUMERIC_REGEXP = /[^a-zA-Z\d]/g;
     if (
-      filteredVariablesByType.length &&
-      filteredVariablesByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
+      filteredColumnByType.length &&
+      filteredColumnByType.some((v) => ALPHANUMERIC_REGEXP.test(v))
     ) {
-      for (const variable of filteredVariablesByType) {
-        const underscoredName = variable.replace(ALPHANUMERIC_REGEXP, '_');
+      for (const userDefinedColumn of filteredColumnByType) {
+        const underscoredName = userDefinedColumn.replace(ALPHANUMERIC_REGEXP, '_');
         const index = filteredFieldsByType.findIndex(
           ({ label }) => underscoredName === label || `_${underscoredName}_` === label
         );
@@ -458,8 +499,8 @@ export async function getFieldsOrFunctionsSuggestions(
           ignored: ignoreFn,
         })
       : [],
-    variables
-      ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
+    userDefinedColumns
+      ? pushItUpInTheList(buildUserDefinedColumnsDefinitions(filteredColumnByType), functions)
       : [],
     literals ? getCompatibleLiterals(types) : []
   );
@@ -480,7 +521,7 @@ export function pushItUpInTheList(suggestions: SuggestionRawDefinition[], should
 /** @deprecated — use getExpressionType instead (src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts) */
 export function extractTypeFromASTArg(
   arg: ESQLAstItem,
-  references: Pick<ReferenceMaps, 'fields' | 'variables'>
+  references: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
 ):
   | ESQLLiteral['literalType']
   | SupportedDataType

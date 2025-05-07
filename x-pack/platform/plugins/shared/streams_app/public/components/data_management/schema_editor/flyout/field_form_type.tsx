@@ -67,6 +67,13 @@ interface FieldTypeSelectorProps {
   value?: FieldTypeOption;
 }
 
+const typeSelectorOptions = Object.entries(FIELD_TYPE_MAP)
+  .filter(([_, { readonly }]) => !readonly)
+  .map(([optionKey, { label }]) => ({
+    text: label,
+    value: optionKey,
+  }));
+
 const FieldTypeSelector = ({ value, onChange, isLoading = false }: FieldTypeSelectorProps) => {
   return (
     <EuiSelect
@@ -77,10 +84,7 @@ const FieldTypeSelector = ({ value, onChange, isLoading = false }: FieldTypeSele
         onChange(event.target.value as FieldTypeOption);
       }}
       value={value}
-      options={Object.entries(FIELD_TYPE_MAP).map(([optionKey, optionConfig]) => ({
-        text: optionConfig.label,
-        value: optionKey,
-      }))}
+      options={typeSelectorOptions}
     />
   );
 };

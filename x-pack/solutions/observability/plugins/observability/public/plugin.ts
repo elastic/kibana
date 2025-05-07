@@ -71,6 +71,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -165,6 +166,7 @@ export interface ObservabilityPublicPluginsStart {
   toastNotifications: ToastsStart;
   streams?: StreamsPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  inspector: InspectorPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

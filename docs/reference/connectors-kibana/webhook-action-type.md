@@ -2,23 +2,23 @@
 navigation_title: "Webhook"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/webhook-action-type.html
+applies_to:
+  stack: all
+  serverless: all
 ---
 
 # Webhook connector and action [webhook-action-type]
 
-
 The Webhook connector uses [axios](https://github.com/axios/axios) to send a POST or PUT request to a web service.
-
 
 ## Create connectors in {{kib}} [define-webhook-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} /reference/images/webhook-connector.png
+:::{image} ../images/webhook-connector.png
 :alt: Webhook connector
-:class: screenshot
+:screenshot:
 :::
-
 
 ### Connector configuration [webhook-connector-configuration]
 
@@ -47,20 +47,17 @@ Certificate authority
 
     Verification mode
     :   Controls the certificate verification.
-
         * Use `full` to validate that the certificate has an issue date within the `not_before` and `not_after` dates, chains to a trusted certificate authority, and has a hostname or IP address that matches the names within the certificate.
         * Use `certificate` to validate the certificate and verifies that it is signed by a trusted authority; this option does not check the certificate hostname.
         * Use `none` to skip certificate validation.
-
-
 
 ## Test connectors [webhook-action-configuration]
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} /reference/images/webhook-params-test.png
+:::{image} ../images/webhook-params-test.png
 :alt: Webhook params test
-:class: screenshot
+:screenshot:
 :::
 
 Webhook actions have the following properties.
@@ -76,11 +73,8 @@ Body
     }
     ```
 
-
 Mustache template variables (the text enclosed in double braces, for example, `context.rule.name`) have their values escaped, so that the final JSON will be valid (escaping double quote characters). For more information on Mustache template variables, refer to [Actions](docs-content://explore-analyze/alerts-cases/alerts/create-manage-rules.md#defining-rules-actions-details).
-
 
 ## Connector networking configuration [webhook-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-

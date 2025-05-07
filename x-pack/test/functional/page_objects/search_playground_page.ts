@@ -26,7 +26,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
     await testSubjects.click('addDataSourcesButton');
     await testSubjects.existOrFail('selectIndicesFlyout');
     await findService.clickByCssSelector(`li[title="${indexName}"]`);
-    await testSubjects.click('saveButton');
+    await testSubjects.clickWhenNotDisabled('saveButton');
   };
 
   const SESSION_KEY = 'search_playground_session';
@@ -146,11 +146,11 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectSuccessButtonAfterCreatingConnector(createConnector: () => Promise<void>) {
         await createConnector();
         await browser.refresh();
-        await testSubjects.existOrFail('successConnectLLMButton');
+        await testSubjects.existOrFail('successConnectLLMText');
       },
 
-      async expectShowSuccessLLMButton() {
-        await testSubjects.existOrFail('successConnectLLMButton');
+      async expectShowSuccessLLMText() {
+        await testSubjects.existOrFail('successConnectLLMText');
       },
     },
     PlaygroundChatPage: {

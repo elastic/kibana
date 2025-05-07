@@ -8061,20 +8061,20 @@
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/collect_saved_objects.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "graph",
@@ -8135,6 +8135,18 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -11732,6 +11744,10 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/threshold/expression.tsx"
+            },
+            {
+              "plugin": "expressionPartitionVis",
+              "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
@@ -22492,6 +22508,128 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SerializableField",
+        "type": "Class",
+        "tags": [],
+        "label": "SerializableField",
+        "description": [
+          "\nClass to extends that enabled serializing and deserializing instance values"
+        ],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataPluginApi",
+            "section": "def-common.SerializableField",
+            "text": "SerializableField"
+          },
+          "<S>"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SerializableField.isSerializable",
+            "type": "Function",
+            "tags": [],
+            "label": "isSerializable",
+            "description": [],
+            "signature": [
+              "<T>(field: unknown) => field is ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.SerializableField",
+                "text": "SerializableField"
+              },
+              "<T>"
+            ],
+            "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.SerializableField.isSerializable.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SerializableField.serialize",
+            "type": "Function",
+            "tags": [],
+            "label": "serialize",
+            "description": [
+              "\nSerializes the class instance to a known `SerializedValue` that can be used to instantiate a new instance\n\nIdeally this returns the same params as found in the constructor."
+            ],
+            "signature": [
+              "() => S"
+            ],
+            "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SerializableField.deserialize",
+            "type": "Function",
+            "tags": [],
+            "label": "deserialize",
+            "description": [
+              "\ntypescript forbids abstract static methods but this is a workaround to require it\n"
+            ],
+            "signature": [
+              "(serializedValue: unknown) => unknown"
+            ],
+            "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.SerializableField.deserialize.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "serializedValue",
+                "description": [
+                  "type of `SerializedValue`"
+                ],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "`instanceValue` should same type as instantiating class"
+            ]
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -22648,6 +22786,39 @@
               "CSVOptions"
             ],
             "path": "src/platform/plugins/shared/data/common/exports/export_csv.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.deserializeField",
+        "type": "Function",
+        "tags": [],
+        "label": "deserializeField",
+        "description": [],
+        "signature": [
+          "(field: unknown) => unknown"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.deserializeField.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -23098,6 +23269,39 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.serializeField",
+        "type": "Function",
+        "tags": [],
+        "label": "serializeField",
+        "description": [],
+        "signature": [
+          "(field: unknown) => unknown"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.serializeField.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -24254,20 +24458,20 @@
                 "path": "src/core/packages/saved-objects/import-export-server-internal/src/import/lib/collect_saved_objects.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "graph",
@@ -24328,6 +24532,18 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/server/utils/playgrounds.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -25351,6 +25567,23 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.RawValue",
+        "type": "Type",
+        "tags": [],
+        "label": "RawValue",
+        "description": [
+          "\nAlias for unknown raw field value, could be instance of a field Class"
+        ],
+        "signature": [
+          "unknown"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serializable_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.SAVED_QUERY_BASE_URL",
         "type": "string",
         "tags": [],
@@ -25375,6 +25608,42 @@
           "\"1\""
         ],
         "path": "src/platform/plugins/shared/data/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SerializedField",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializedField",
+        "description": [
+          "\nAll available serialized forms of complex/instance fields. Excludes non-complex/primitive fields.\n\nUse `SerializedValue` for all generalize serial values which includes non-complex/primitive fields.\n\nCurrently includes:\n- `RangeKey`\n- `MultiFieldKey`"
+        ],
+        "signature": [
+          "SerializedMultiFieldKey",
+          " | ",
+          "SerializedRangeKey"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SerializedValue",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializedValue",
+        "description": [
+          "\nAlias for unknown serialized value. This value is what we store in the SO and app state\nto persist the color assignment based on the raw row value.\n\nIn most cases this is a `string` or `number` or plain `object`, in other cases this is an\nobject serialized from an instance of a given field (i.e. `RangeKey` or `MultiFieldKey`)."
+        ],
+        "signature": [
+          "unknown"
+        ],
+        "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -25481,6 +25750,48 @@
         "path": "src/platform/plugins/shared/data_views/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SerializableType",
+        "type": "Object",
+        "tags": [],
+        "label": "SerializableType",
+        "description": [],
+        "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SerializableType.MultiFieldKey",
+            "type": "string",
+            "tags": [],
+            "label": "MultiFieldKey",
+            "description": [],
+            "signature": [
+              "\"multiFieldKey\""
+            ],
+            "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SerializableType.RangeKey",
+            "type": "string",
+            "tags": [],
+            "label": "RangeKey",
+            "description": [],
+            "signature": [
+              "\"rangeKey\""
+            ],
+            "path": "src/platform/plugins/shared/data/common/serialize_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

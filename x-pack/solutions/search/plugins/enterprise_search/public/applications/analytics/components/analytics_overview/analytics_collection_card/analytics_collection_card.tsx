@@ -10,15 +10,7 @@ import React, { MouseEvent } from 'react';
 import { parsePath } from 'history';
 import { useValues } from 'kea';
 
-import {
-  AreaSeries,
-  Chart,
-  CurveType,
-  ScaleType,
-  Settings,
-  Tooltip,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
+import { AreaSeries, Chart, CurveType, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import {
   EuiBadge,
   EuiCard,
@@ -29,8 +21,8 @@ import {
   EuiLoadingChart,
   useEuiTheme,
 } from '@elastic/eui';
-
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 import { i18n } from '@kbn/i18n';
 
@@ -105,6 +97,7 @@ export const AnalyticsCollectionCard: React.FC<
   AnalyticsCollectionCardProps & AnalyticsCollectionCardLensProps
 > = ({ collection, isLoading, isCreatedByEngine, subtitle, data, metric, secondaryMetric }) => {
   const { euiTheme } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
   const { history, navigateToUrl } = useValues(KibanaLogic);
   const cardStyles = AnalyticsCollectionCardStyles(euiTheme);
   const status = getChartStatus(secondaryMetric);
@@ -188,8 +181,7 @@ export const AnalyticsCollectionCard: React.FC<
           css={cardStyles.chart}
         >
           <Settings
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={LEGACY_LIGHT_THEME}
+            baseTheme={chartBaseTheme}
             theme={{
               areaSeriesStyle: {
                 area: {

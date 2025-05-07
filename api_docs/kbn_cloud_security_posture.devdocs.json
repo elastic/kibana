@@ -1254,46 +1254,146 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.FindingMisconfigurationFlyoutProps",
+        "id": "def-public.FindingMisconfigurationFlyoutContentProps",
         "type": "Interface",
         "tags": [],
-        "label": "FindingMisconfigurationFlyoutProps",
+        "label": "FindingMisconfigurationFlyoutContentProps",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/cloud-security-posture",
-            "scope": "public",
-            "docId": "kibKbnCloudSecurityPosturePluginApi",
-            "section": "def-public.FindingMisconfigurationFlyoutProps",
-            "text": "FindingMisconfigurationFlyoutProps"
-          },
-          " extends Record<string, unknown>"
-        ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.FindingMisconfigurationFlyoutProps.ruleId",
-            "type": "string",
+            "id": "def-public.FindingMisconfigurationFlyoutContentProps.finding",
+            "type": "Object",
             "tags": [],
-            "label": "ruleId",
+            "label": "finding",
             "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cloud-security-posture-common",
+                "scope": "common",
+                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+                "section": "def-common.CspFinding",
+                "text": "CspFinding"
+              }
+            ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.FindingMisconfigurationFlyoutProps.resourceId",
-            "type": "string",
+            "id": "def-public.FindingMisconfigurationFlyoutContentProps.createRuleFn",
+            "type": "Function",
             "tags": [],
-            "label": "resourceId",
+            "label": "createRuleFn",
             "description": [],
+            "signature": [
+              "(http: ",
+              "HttpSetup",
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/cloud-security-posture-common",
+                "scope": "common",
+                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+                "section": "def-common.RuleResponse",
+                "text": "RuleResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cloud-security-posture",
+                "id": "def-public.FindingMisconfigurationFlyoutContentProps.createRuleFn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  "HttpSetup"
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.FindingMisconfigurationFlyoutContentProps.isPreviewMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isPreviewMode",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.FindingMisconfigurationFlyoutFooterProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindingMisconfigurationFlyoutFooterProps",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.FindingMisconfigurationFlyoutFooterProps.createRuleFn",
+            "type": "Function",
+            "tags": [],
+            "label": "createRuleFn",
+            "description": [],
+            "signature": [
+              "(http: ",
+              "HttpSetup",
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/cloud-security-posture-common",
+                "scope": "common",
+                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+                "section": "def-common.RuleResponse",
+                "text": "RuleResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cloud-security-posture",
+                "id": "def-public.FindingMisconfigurationFlyoutFooterProps.createRuleFn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  "HttpSetup"
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1331,41 +1431,30 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.FindingsMisconfigurationPanelExpandableFlyoutProps",
+        "id": "def-public.FindingsMisconfigurationFlyoutContentProps",
         "type": "Interface",
         "tags": [],
-        "label": "FindingsMisconfigurationPanelExpandableFlyoutProps",
+        "label": "FindingsMisconfigurationFlyoutContentProps",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/cloud-security-posture",
-            "scope": "public",
-            "docId": "kibKbnCloudSecurityPosturePluginApi",
-            "section": "def-public.FindingsMisconfigurationPanelExpandableFlyoutProps",
-            "text": "FindingsMisconfigurationPanelExpandableFlyoutProps"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/expandable-flyout",
-            "scope": "public",
-            "docId": "kibKbnExpandableFlyoutPluginApi",
-            "section": "def-public.FlyoutPanelProps",
-            "text": "FlyoutPanelProps"
-          }
-        ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.FindingsMisconfigurationPanelExpandableFlyoutProps.key",
-            "type": "string",
+            "id": "def-public.FindingsMisconfigurationFlyoutContentProps.finding",
+            "type": "Object",
             "tags": [],
-            "label": "key",
+            "label": "finding",
             "description": [],
             "signature": [
-              "\"findings-misconfiguration-panel\""
+              {
+                "pluginId": "@kbn/cloud-security-posture-common",
+                "scope": "common",
+                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+                "section": "def-common.CspFinding",
+                "text": "CspFinding"
+              }
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,
@@ -1373,18 +1462,46 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.FindingsMisconfigurationPanelExpandableFlyoutProps.params",
+            "id": "def-public.FindingsMisconfigurationFlyoutContentProps.isPreviewMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isPreviewMode",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.FindingsMisconfigurationFlyoutHeaderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindingsMisconfigurationFlyoutHeaderProps",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.FindingsMisconfigurationFlyoutHeaderProps.finding",
             "type": "Object",
             "tags": [],
-            "label": "params",
+            "label": "finding",
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/cloud-security-posture",
-                "scope": "public",
-                "docId": "kibKbnCloudSecurityPosturePluginApi",
-                "section": "def-public.FindingMisconfigurationFlyoutProps",
-                "text": "FindingMisconfigurationFlyoutProps"
+                "pluginId": "@kbn/cloud-security-posture-common",
+                "scope": "common",
+                "docId": "kibKbnCloudSecurityPostureCommonPluginApi",
+                "section": "def-common.CspFinding",
+                "text": "CspFinding"
               }
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
@@ -1544,6 +1661,79 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.FindingsMisconfigurationPanelExpandableFlyoutProps",
+        "type": "Type",
+        "tags": [],
+        "label": "FindingsMisconfigurationPanelExpandableFlyoutProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/cloud-security-posture",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPosturePluginApi",
+            "section": "def-public.FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview",
+            "text": "FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/cloud-security-posture",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPosturePluginApi",
+            "section": "def-public.FindingsMisconfigurationPanelExpandableFlyoutPropsPreview",
+            "text": "FindingsMisconfigurationPanelExpandableFlyoutPropsPreview"
+          }
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview",
+        "type": "Type",
+        "tags": [],
+        "label": "FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/expandable-flyout",
+            "scope": "public",
+            "docId": "kibKbnExpandableFlyoutPluginApi",
+            "section": "def-public.FlyoutPanelProps",
+            "text": "FlyoutPanelProps"
+          },
+          " & { id: \"findings-misconfiguration-panel\"; params: BaseFlyoutProps & NonPreviewModeProps; }"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.FindingsMisconfigurationPanelExpandableFlyoutPropsPreview",
+        "type": "Type",
+        "tags": [],
+        "label": "FindingsMisconfigurationPanelExpandableFlyoutPropsPreview",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/expandable-flyout",
+            "scope": "public",
+            "docId": "kibKbnExpandableFlyoutPluginApi",
+            "section": "def-public.FlyoutPanelProps",
+            "text": "FlyoutPanelProps"
+          },
+          " & { id: \"findings-misconfiguration-panel-preview\"; params: BaseFlyoutProps & PreviewModeProps; }"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.LatestFindingsRequest",

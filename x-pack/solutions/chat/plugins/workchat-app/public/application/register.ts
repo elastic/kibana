@@ -26,8 +26,8 @@ export const registerApp = ({
     title: 'WorkChat',
     updater$: undefined,
     deepLinks: [
-      { id: 'agents', path: '/agents', title: 'Agents' },
-      { id: 'integrations', path: '/integrations', title: 'Integrations' },
+      { id: 'agents', path: '/assistants', title: 'Assistants' },
+      { id: 'integrations', path: '/tools', title: 'Tools' },
     ],
     visibleIn: ['sideNav', 'globalSearch'],
     async mount({ element, history }) {
