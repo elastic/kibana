@@ -120,6 +120,7 @@
     "@kbn/core-capabilities-common",
     "@kbn/presentation-panel-plugin",
     "@kbn/esql-types",
+    "@kbn/react-kibana-context-theme",
   ],
   "exclude": ["target/**/*"]
 }
