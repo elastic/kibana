@@ -8,4 +8,3 @@
  */
 
 export { suggest } from './suggest';
-export { fieldsSuggestionsAfter } from './fields_suggestions_after';

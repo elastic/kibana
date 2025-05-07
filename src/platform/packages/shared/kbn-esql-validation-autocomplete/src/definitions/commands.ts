@@ -50,10 +50,7 @@ import {
 } from '../autocomplete/commands/drop';
 import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
 import { suggest as suggestForEval } from '../autocomplete/commands/eval';
-import {
-  suggest as suggestForFork,
-  fieldsSuggestionsAfter as fieldsSuggestionsAfterFork,
-} from '../autocomplete/commands/fork';
+import { suggest as suggestForFork } from '../autocomplete/commands/fork';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 import {
   suggest as suggestForGrok,
@@ -78,10 +75,7 @@ import {
   fieldsSuggestionsAfter as fieldsSuggestionsAfterStats,
 } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
-import {
-  suggest as suggestForChangePoint,
-  fieldsSuggestionsAfter as fieldsSuggestionsAfterChangePoint,
-} from '../autocomplete/commands/change_point';
+import { suggest as suggestForChangePoint } from '../autocomplete/commands/change_point';
 
 import { METADATA_FIELDS } from '../shared/constants';
 import { getMessageFromId } from '../validation/errors';
@@ -686,23 +680,9 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         });
       }
 
-      // validate AS
-      const asArg = command.args.find((arg) => isOptionItem(arg) && arg.name === 'as');
-      if (asArg && isOptionItem(asArg)) {
-        // populate userDefinedColumns references to prevent the common check from failing with unknown column
-        asArg.args.forEach((arg, index) => {
-          if (isColumnItem(arg)) {
-            references.userDefinedColumns.set(arg.name, [
-              { name: arg.name, location: arg.location, type: index === 0 ? 'keyword' : 'long' },
-            ]);
-          }
-        });
-      }
-
       return messages;
     },
     suggest: suggestForChangePoint,
-    fieldsSuggestionsAfter: fieldsSuggestionsAfterChangePoint,
   },
   {
     hidden: true,
@@ -733,7 +713,5 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
 
       return messages;
     },
-
-    fieldsSuggestionsAfter: fieldsSuggestionsAfterFork,
   },
 ];

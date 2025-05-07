@@ -66,11 +66,32 @@ describe('validation', () => {
           await expectErrors('FROM index | CHANGE_POINT longField ON keywordField', []);
         });
 
+        test('recognizes implicit type and pvalue columns', async () => {
+          const { expectErrors } = await setup();
+          await expectErrors(
+            `FROM index
+| STATS field = AVG(longField) BY @timestamp=BUCKET(@timestamp, 8 hours)
+| CHANGE_POINT field ON @timestamp 
+| KEEP type, pvalue`,
+            []
+          );
+        });
+
         test('allows renaming for change point type and pValue columns', async () => {
           const { expectErrors } = await setup();
           await expectErrors(
-            'FROM index | STATS field = AVG(longField) BY @timestamp=BUCKET(@timestamp, 8 hours) | CHANGE_POINT field ON @timestamp AS changePointType, pValue',
+            `FROM index 
+| STATS field = AVG(longField) BY @timestamp=BUCKET(@timestamp, 8 hours)
+| CHANGE_POINT field ON @timestamp AS changePointType, pValue
+| KEEP changePointType, pValue`,
             []
+          );
+          await expectErrors(
+            `FROM index 
+| STATS field = AVG(longField) BY @timestamp=BUCKET(@timestamp, 8 hours)
+| CHANGE_POINT field ON @timestamp AS changePointType, pValue
+| KEEP type, pvalue`,
+            ['Unknown column [pvalue]', 'Unknown column [type]']
           );
         });
 

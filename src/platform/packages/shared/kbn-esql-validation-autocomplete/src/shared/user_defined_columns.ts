@@ -137,6 +137,27 @@ export function collectUserDefinedColumns(
         addUserDefinedColumnFromExpression(node, queryString, userDefinedColumns, fields);
       }
     })
+    .on('visitForkCommand', () => {
+      addToUserDefinedColumnOccurrences(userDefinedColumns, {
+        name: '_fork',
+        type: 'keyword',
+        location: undefined,
+      });
+    })
+    .on('visitChangePointCommand', (ctx) => {
+      const { target } = ctx.node;
+      addToUserDefinedColumnOccurrences(userDefinedColumns, {
+        name: target ? target.pvalue.parts.join('.') : 'pvalue',
+        type: 'double',
+        location: target?.pvalue.location,
+      });
+
+      addToUserDefinedColumnOccurrences(userDefinedColumns, {
+        name: target ? target.type.parts.join('.') : 'type',
+        type: 'keyword',
+        location: target?.type.location,
+      });
+    })
     .on('visitCommandOption', (ctx) => {
       if (ctx.node.name === 'by') {
         return [...ctx.visitArguments()];

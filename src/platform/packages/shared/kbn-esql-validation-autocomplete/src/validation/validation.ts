@@ -234,11 +234,6 @@ function validateCommand(
       break;
     }
     case 'fork': {
-      references.fields.set('_fork', {
-        name: '_fork',
-        type: 'keyword',
-      });
-
       for (const arg of command.args.flat()) {
         if (isSingleItem(arg) && arg.type === 'query') {
           // all the args should be commands
@@ -352,17 +347,19 @@ function validateFieldsShadowing(
         const userDefinedColumnType = userDefinedColumnHits[0].type;
         const flatFieldType = fieldType;
         const flatUserDefinedColumnType = userDefinedColumnType;
-        messages.push(
-          getMessageFromId({
-            messageId: 'shadowFieldType',
-            values: {
-              field: userDefinedColumn,
-              fieldType: flatFieldType,
-              newType: flatUserDefinedColumnType,
-            },
-            locations: userDefinedColumnHits[0].location,
-          })
-        );
+        if (userDefinedColumnHits[0].location) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'shadowFieldType',
+              values: {
+                field: userDefinedColumn,
+                fieldType: flatFieldType,
+                newType: flatUserDefinedColumnType,
+              },
+              locations: userDefinedColumnHits[0].location,
+            })
+          );
+        }
       }
     }
   }
