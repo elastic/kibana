@@ -128,8 +128,12 @@ describe('v2 migration', () => {
         await clearLog(logFilePath);
         unknownTypesKit = await getReindexingMigratorTestKit({
           logFilePath,
-          // filter out 'task' objects in order to not spawn that migrator for this test
-          types: getReindexingBaselineTypes(true).filter(({ name }) => name !== 'task'),
+          // we must exclude 'deprecated' from the list of registered types
+          // so that it is considered unknown
+          types: getReindexingBaselineTypes(['server', 'task', 'deprecated']),
+          // however we don't want to flag 'deprecated' as a removed type
+          // because we want the migrator to consider it unknown
+          removedTypes: ['server', 'task'],
           settings: {
             migrations: {
               discardUnknownObjects: currentVersion, // instead of the actual target, 'nextMinor'
@@ -164,7 +168,7 @@ describe('v2 migration', () => {
         transformErrorsKit = await getReindexingMigratorTestKit({
           logFilePath,
           // filter out 'task' objects in order to not spawn that migrator for this test
-          types: getReindexingBaselineTypes(true).filter(({ name }) => name !== 'task'),
+          removedTypes: ['deprecated', 'server', 'task'],
           settings: {
             migrations: {
               discardCorruptObjects: currentVersion, // instead of the actual target, 'nextMinor'
@@ -223,8 +227,8 @@ describe('v2 migration', () => {
         await clearLog(logFilePath);
         kit = await getReindexingMigratorTestKit({
           logFilePath,
-          filterDeprecated: true,
         });
+
         migrationResults = await kit.runMigrations();
         logs = await readLog(logFilePath);
       });
