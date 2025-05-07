@@ -32,7 +32,6 @@ import { initInfraAssetRoutes } from './routes/infra';
 import { initMetricsExplorerViewRoutes } from './routes/metrics_explorer_views';
 import { initProfilingRoutes } from './routes/profiling';
 import { initServicesRoute } from './routes/services';
-import { initCustomDashboardsRoutes } from './routes/custom_dashboards/custom_dashboards';
 import type { InfraBackendLibs } from './lib/infra_types';
 import { initEntitiesConfigurationRoutes } from './routes/entities';
 
@@ -63,6 +62,5 @@ export const registerRoutes = (libs: InfraBackendLibs) => {
   initInfraAssetRoutes(libs);
   initProfilingRoutes(libs);
   initServicesRoute(libs);
-  initCustomDashboardsRoutes(libs.framework);
   initEntitiesConfigurationRoutes(libs);
 };
