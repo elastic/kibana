@@ -6,7 +6,7 @@
  */
 
 import url from 'url';
-import { synthtraceOtel } from '../../../synthtrace';
+import { synthtrace } from '../../../synthtrace';
 import { sendotlp } from '../../fixtures/synthtrace/sendotlp';
 import { checkA11y } from '../../support/commands';
 
@@ -22,16 +22,17 @@ const baseUrl = url.format({
 
 describe('Service Overview', () => {
   before(() => {
-    synthtraceOtel.index(
+    synthtrace.index(
       sendotlp({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
+      'otelToApm'
     );
   });
 
   after(() => {
-    synthtraceOtel.clean();
+    synthtrace.clean();
   });
 
   describe('renders', () => {
@@ -106,9 +107,9 @@ describe('Service Overview', () => {
 
       cy.wait('@transactionTypesRequest');
 
-      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'unknown');
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'request');
       cy.contains('Transactions').click();
-      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'unknown');
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'request');
       cy.contains('parent-synth');
     });
 

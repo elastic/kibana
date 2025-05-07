@@ -10,7 +10,7 @@
 import { ESDocumentWithOperation, ApmOtelFields } from '@kbn/apm-synthtrace-client';
 import { Transform } from 'stream';
 
-export function getRoutingTransform() {
+export function getOtelRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<ApmOtelFields>, encoding, callback) {

@@ -6,7 +6,7 @@
  */
 
 import url from 'url';
-import { synthtraceOtel } from '../../../synthtrace';
+import { synthtrace } from '../../../synthtrace';
 import { adserviceEdot } from '../../fixtures/synthtrace/adservice_edot';
 import { checkA11y } from '../../support/commands';
 
@@ -22,16 +22,17 @@ const baseUrl = url.format({
 
 describe('Service Overview', () => {
   before(() => {
-    synthtraceOtel.index(
+    synthtrace.index(
       adserviceEdot({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
+      'otelToApm'
     );
   });
 
   after(() => {
-    synthtraceOtel.clean();
+    synthtrace.clean();
   });
 
   describe('renders', () => {
