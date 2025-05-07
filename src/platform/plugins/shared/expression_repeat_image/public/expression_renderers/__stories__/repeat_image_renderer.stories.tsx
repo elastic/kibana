@@ -8,11 +8,10 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import type { Meta } from '@storybook/react';
 import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
-import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { getRepeatImageRenderer } from '../repeat_image_renderer';
 
 const Renderer = ({
@@ -39,10 +38,15 @@ const Renderer = ({
   );
 };
 
-storiesOf('enderers/repeatImage', module).add(
-  'default',
-  (_, props) => (
+export default {
+  title: 'enderers/repeatImage',
+};
+
+export const Default = {
+  render: (_, props) => (
     <Renderer elasticLogo={props?.elasticLogo} elasticOutline={props?.elasticOutline} />
   ),
-  { decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())] }
-);
+
+  name: 'default',
+  decorators: [waitFor(getElasticLogo()), waitFor(getElasticOutline())],
+} as Meta;

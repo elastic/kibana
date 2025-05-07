@@ -7,7 +7,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type { RawBucket, GroupStatsItem } from '@kbn/grouping';
+import type { GroupStatsItem, RawBucket } from '@kbn/grouping';
 import type { AlertsGroupingAggregation } from './types';
 import * as i18n from '../translations';
 
@@ -77,16 +77,16 @@ export const getStats = (
       ? multiSeverity
       : singleSeverityComponent;
 
-  const severityStat = !severityComponent
+  const severityStat: GroupStatsItem[] = !severityComponent
     ? []
     : [
         {
           title: i18n.STATS_GROUP_SEVERITY,
-          renderer: severityComponent,
+          component: severityComponent,
         },
       ];
 
-  const defaultBadges = [
+  const defaultBadges: GroupStatsItem[] = [
     {
       title: i18n.STATS_GROUP_ALERTS,
       badge: {
@@ -133,22 +133,6 @@ export const getStats = (
         ...defaultBadges,
       ];
     case 'user.name':
-      return [
-        ...severityStat,
-        {
-          title: i18n.STATS_GROUP_HOSTS,
-          badge: {
-            value: bucket.hostsCountAggregation?.value ?? 0,
-          },
-        },
-        {
-          title: i18n.STATS_GROUP_RULES,
-          badge: {
-            value: bucket.rulesCountAggregation?.value ?? 0,
-          },
-        },
-        ...defaultBadges,
-      ];
     case 'source.ip':
       return [
         ...severityStat,

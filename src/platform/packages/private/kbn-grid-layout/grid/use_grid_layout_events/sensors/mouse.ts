@@ -8,7 +8,7 @@
  */
 
 import { UserInteractionEvent } from '../types';
-import { handleAutoscroll, stopAutoScroll } from './autoscroll';
+import { handleAutoscroll, startAutoScroll, stopAutoScroll } from './autoscroll';
 
 export type UserMouseEvent = MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>;
 
@@ -36,6 +36,7 @@ export const startMouseInteraction = ({
   onEnd: () => void;
 }) => {
   if (e.button !== MOUSE_BUTTON_LEFT) return;
+  startAutoScroll();
 
   const handleMouseMove = (ev: UserMouseEvent) => {
     handleAutoscroll(ev);

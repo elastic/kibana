@@ -32,6 +32,7 @@ describe('Stage: init', () => {
   const createState = (parts: Partial<InitState> = {}): InitState => ({
     controlState: 'INIT',
     retryDelay: 0,
+    skipRetryReset: false,
     retryCount: 0,
     logs: [],
     skipDocumentMigration: false,

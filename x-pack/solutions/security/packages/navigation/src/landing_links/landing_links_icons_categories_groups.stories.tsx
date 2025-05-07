@@ -115,27 +115,27 @@ const mockCore = {
   },
 } as unknown as CoreStart;
 
-export const LandingLinksIconsCategoriesGroups = (
-  params: LandingLinksIconsCategoriesGroupsProps
-) => (
-  <div style={{ padding: '25px' }}>
-    <NavigationProvider core={mockCore}>
-      <LandingLinksIconsCategoriesGroupsComponent {...params} />
-    </NavigationProvider>
-  </div>
-);
+export const LandingLinksIconsCategoriesGroups = {
+  render: (params: LandingLinksIconsCategoriesGroupsProps) => (
+    <div style={{ padding: '25px' }}>
+      <NavigationProvider core={mockCore}>
+        <LandingLinksIconsCategoriesGroupsComponent {...params} />
+      </NavigationProvider>
+    </div>
+  ),
 
-LandingLinksIconsCategoriesGroups.argTypes = {
-  links: {
-    control: 'object',
-    defaultValue: items,
+  argTypes: {
+    links: {
+      control: 'object',
+      defaultValue: items,
+    },
+    categories: {
+      control: 'object',
+      defaultValue: categories,
+    },
   },
-  categories: {
-    control: 'object',
-    defaultValue: categories,
-  },
-};
 
-LandingLinksIconsCategoriesGroups.parameters = {
-  layout: 'fullscreen',
+  parameters: {
+    layout: 'fullscreen',
+  },
 };

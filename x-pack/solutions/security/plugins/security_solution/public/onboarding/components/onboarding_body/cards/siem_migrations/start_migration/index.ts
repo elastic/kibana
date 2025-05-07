@@ -9,15 +9,17 @@ import React from 'react';
 import type { OnboardingCardConfig } from '../../../../../types';
 import { OnboardingCardId } from '../../../../../constants';
 import { START_MIGRATION_CARD_TITLE } from './translations';
-import cardIcon from './images/card_header_icon.png';
 import type { StartMigrationCardMetadata } from './types';
 import { checkStartMigrationCardComplete } from './start_migration_check_complete';
+import startMigrationIcon from './images/start_migration_icon.png';
+import startMigrationDarkIcon from './images/start_migration_icon_dark.png';
 
 export const startMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMetadata> = {
-  id: OnboardingCardId.siemMigrationsStart,
+  id: OnboardingCardId.siemMigrationsRules,
   title: START_MIGRATION_CARD_TITLE,
-  icon: cardIcon,
-  licenseTypeRequired: 'enterprise',
+  badge: 'tech_preview',
+  icon: startMigrationIcon,
+  iconDark: startMigrationDarkIcon,
   Component: React.lazy(
     () =>
       import(

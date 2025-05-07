@@ -14,7 +14,11 @@ paths:
         - Actions
         - Exception lists
         > info
-        > You cannot export prebuilt rules.
+        > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
+
+        > You can use Kibana’s [Saved Objects](https://www.elastic.co/guide/en/kibana/current/managing-saved-objects.html) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+
+        > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       tags:
         - Import/Export API
       parameters:
@@ -28,10 +32,27 @@ paths:
         - name: file_name
           in: query
           required: false
-          description: File name for saving the exported rules.
+          description: |
+            File name for saving the exported rules.
+            > info
+            > When using cURL to export rules to a file, use the -O and -J options to save the rules to the file name specified in the URL.
           schema:
             type: string
             default: export.ndjson
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl -X POST "localhost:5601/api/detection_engine/rules/_export?exclude_export_details=true&file_name=exported_rules.ndjson" -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d'
+            {
+              "objects": [
+                {
+                  "rule_id":"343580b5-c811-447c-8d2d-2ccf052c6900"
+                },
+                {
+                  "rule_id":"2938c9fa-53eb-4c04-b79c-33cbf041b18d"
+                }
+              ]
+            }
       requestBody:
         required: false
         content:
@@ -60,4 +81,7 @@ paths:
               schema:
                 type: string
                 format: binary
-                description: An `.ndjson` file containing the returned rules.
+                description: |
+                  An `.ndjson` file containing the returned rules.
+
+                  Each line in the file represents an object (a rule, exception list parent container, or exception list item), and the last line includes a summary of what was exported.

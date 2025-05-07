@@ -75,19 +75,11 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           functionCalling: 'auto',
         });
 
-        if (contentReferencesStore) {
-          const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));
-
-          return {
-            content: {
-              documents: enrichedDocuments,
-            },
-          };
-        }
+        const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));
 
         return {
           content: {
-            documents: response.documents,
+            documents: enrichedDocuments,
           },
         };
       },
@@ -98,11 +90,14 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
 };
 
 type EnrichedDocument = RetrieveDocumentationResultDoc & {
-  citation: string;
+  citation?: string;
 };
 
-const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
+const enrichDocument = (contentReferencesStore: ContentReferencesStore | undefined) => {
   return (document: RetrieveDocumentationResultDoc): EnrichedDocument => {
+    if (contentReferencesStore == null) {
+      return document;
+    }
     const reference = contentReferencesStore.add((p) =>
       productDocumentationReference(p.id, document.title, document.url)
     );

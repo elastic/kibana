@@ -51,6 +51,7 @@ import {
 import type {
   THRESHOLD_MET_GROUP,
   ApmRuleParamsType,
+  AdditionalContext,
 } from '../../../../../common/rules/apm_rule_types';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
@@ -96,6 +97,7 @@ export function registerAnomalyRuleType({
     id: ApmRuleType.Anomaly,
     name: ruleTypeConfig.name,
     actionGroups: ruleTypeConfig.actionGroups,
+    doesSetRecoveryContext: true,
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
     validate: { params: anomalyParamsSchema },
     schemas: {
@@ -256,7 +258,7 @@ export function registerAnomalyRuleType({
             const job = mlJobs.find((j) => j.jobId === latest.job_id);
 
             if (!job) {
-              logger.warn(`Could not find matching job for job id ${latest.job_id}`);
+              logger.debug(`Could not find matching job for job id ${latest.job_id}`);
               return undefined;
             }
 
@@ -355,6 +357,45 @@ export function registerAnomalyRuleType({
           context,
         });
       });
+      // Handle recovered alerts context
+      const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
+      for (const recoveredAlert of recoveredAlerts) {
+        const alertHits = recoveredAlert.hit as AdditionalContext;
+        const recoveredAlertId = recoveredAlert.alert.getId();
+        const alertUuid = recoveredAlert.alert.getUuid();
+        const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, alertUuid);
+
+        const environment = alertHits?.[SERVICE_ENVIRONMENT];
+        const serviceName = alertHits?.[SERVICE_NAME];
+        const transactionType = alertHits?.[TRANSACTION_TYPE];
+        const severityLevel = alertHits?.[ALERT_SEVERITY];
+        const reasonMessage = alertHits?.[ALERT_REASON];
+
+        const relativeViewInAppUrl = getAlertUrlTransaction(
+          serviceName,
+          environment,
+          transactionType
+        );
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          relativeViewInAppUrl
+        );
+        const recoveredContext = {
+          alertDetailsUrl,
+          environment: getEnvironmentLabel(environment),
+          reason: reasonMessage,
+          serviceName,
+          threshold: selectedOption?.label,
+          transactionType,
+          triggerValue: severityLevel,
+          viewInAppUrl,
+        };
+        alertsClient.setAlertData({
+          id: recoveredAlertId,
+          context: recoveredContext,
+        });
+      }
 
       return { state: {} };
     },

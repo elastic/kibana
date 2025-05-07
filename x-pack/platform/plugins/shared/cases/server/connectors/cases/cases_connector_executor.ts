@@ -22,6 +22,8 @@ import {
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
   MAX_TITLE_LENGTH,
+  MAX_RULE_NAME_LENGTH,
+  MAX_SUFFIX_LENGTH,
 } from '../../../common/constants';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
@@ -819,21 +821,41 @@ export class CasesConnectorExecutor {
       })
       .join(' & ');
 
-    const suffix = `${
-      groupingDescription.length > 0 ? ` - ${GROUPED_BY_TITLE(groupingDescription)}` : ''
-    }${
-      oracleCounter > INITIAL_ORACLE_RECORD_COUNTER ? ` (${oracleCounter})` : ''
-    } (${AUTO_CREATED_TITLE})`;
+    const oracleCounterString =
+      oracleCounter > INITIAL_ORACLE_RECORD_COUNTER ? ` (${oracleCounter})` : '';
 
-    const ruleNameTrimmed = params.rule.name.slice(
-      0,
-      MAX_TITLE_LENGTH - suffix.length - totalDots - 1
-    );
+    const staticSuffixStart = groupingDescription.length > 0 ? ` - ${GROUPED_BY_TITLE('')}` : '';
+
+    const staticSuffixEnd = `${oracleCounterString} (${AUTO_CREATED_TITLE})`;
+
+    const ruleName = params.rule.name;
+
+    const ruleNameTrimmed =
+      ruleName.length > MAX_RULE_NAME_LENGTH
+        ? ruleName.slice(0, MAX_RULE_NAME_LENGTH - totalDots)
+        : ruleName;
 
     const ruleNameTrimmedWithDots =
-      params.rule.name.length > ruleNameTrimmed.length
+      ruleName.length > ruleNameTrimmed.length
         ? `${ruleNameTrimmed}${'.'.repeat(totalDots)}`
         : ruleNameTrimmed;
+
+    const maxSuffixLength =
+      ruleNameTrimmedWithDots.length < MAX_RULE_NAME_LENGTH
+        ? MAX_TITLE_LENGTH - ruleNameTrimmedWithDots.length
+        : MAX_SUFFIX_LENGTH;
+
+    const maxGroupingDescriptionLength =
+      maxSuffixLength - (staticSuffixStart.length + staticSuffixEnd.length);
+
+    const groupingDescriptionTrimmed =
+      groupingDescription.length > maxGroupingDescriptionLength
+        ? `${groupingDescription.slice(0, maxGroupingDescriptionLength - totalDots)}${'.'.repeat(
+            totalDots
+          )}`
+        : groupingDescription;
+
+    const suffix = `${staticSuffixStart}${groupingDescriptionTrimmed}${staticSuffixEnd}`;
 
     return `${ruleNameTrimmedWithDots}${suffix}`;
   }

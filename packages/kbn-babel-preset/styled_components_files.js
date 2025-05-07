@@ -20,8 +20,8 @@ module.exports = {
    * Used by `kbn-babel-preset` and `kbn-eslint-config`.
    */
   USES_STYLED_COMPONENTS: [
-    /packages[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
-    /packages[\/\\]kbn-ui-shared-deps-src[\/\\]/,
+    /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-npm[\/\\]/,
+    /src[\/\\]platform[\/\\]packages[\/\\]private[\/\\]kbn-ui-shared-deps-src[\/\\]/,
 
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]assistant_overlay[\/\\]index.tsx/,
     /x-pack[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-elastic-assistant[\/\\]impl[\/\\]assistant[\/\\]settings[\/\\]assistant_settings.tsx/,
@@ -123,7 +123,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]monitor_add_edit[\/\\]fields[\/\\]key_value_field.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]monitors_page[\/\\]overview[\/\\]overview[\/\\]actions_popover.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]monitors_page[\/\\]overview[\/\\]overview[\/\\]grid_by_group[\/\\]grid_items_by_group.tsx/,
-    /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]monitors_page[\/\\]overview[\/\\]overview[\/\\]metric_item_icon.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]settings[\/\\]alerting_defaults[\/\\]connector_field.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]test_now_mode[\/\\]browser[\/\\]browser_test_results.tsx/,
     /x-pack[\/\\]solutions[\/\\]observability[\/\\]plugins[\/\\]synthetics[\/\\]public[\/\\]apps[\/\\]synthetics[\/\\]components[\/\\]test_now_mode[\/\\]simple[\/\\]ping_list[\/\\]columns[\/\\]ping_error.tsx/,
@@ -289,6 +288,7 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_management_ui[\/\\]components[\/\\]rules_table[\/\\]rules_table_filters[\/\\]rules_table_filters.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_management_ui[\/\\]components[\/\\]rules_table[\/\\]upgrade_prebuilt_rules_table[\/\\]upgrade_prebuilt_rules_table_filters.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_management_ui[\/\\]components[\/\\]rules_table[\/\\]upgrade_prebuilt_rules_table[\/\\]use_ml_jobs_upgrade_modal[\/\\]ml_jobs_upgrade_modal.tsx/,
+    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_management_ui[\/\\]pages[\/\\]rule_management[\/\\]__integration_tests__[\/\\]rules_upgrade[\/\\]test_utils[\/\\]rule_upgrade_test_providers.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_response_actions[\/\\]response_action_type_form.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detection_engine[\/\\]rule_response_actions[\/\\]response_actions_form.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]detections[\/\\]components[\/\\]alerts_kpis[\/\\]alerts_by_rule_panel[\/\\]alerts_by_rule.tsx/,
@@ -332,12 +332,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]flyout[\/\\]rule_details[\/\\]right[\/\\]content.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]flyout[\/\\]rule_details[\/\\]right[\/\\]index.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_card_grid[\/\\]components[\/\\]grid_header.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]artifact_entry_card_minified.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]card_compressed_header.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]card_container_panel.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]card_header.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]card_section_panel.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]criteria_conditions.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]date_field_value.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]effect_scope.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]artifact_entry_card[\/\\]components[\/\\]touched_by_users.tsx/,
@@ -357,7 +351,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]console[\/\\]components[\/\\]history_item.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]console[\/\\]components[\/\\]side_panel[\/\\]side_panel_content_layout.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]console[\/\\]components[\/\\]side_panel[\/\\]side_panel_content_manager.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]console[\/\\]components[\/\\]side_panel[\/\\]side_panel_flex_item.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]console[\/\\]components[\/\\]user_command_input.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]console[\/\\]console.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]components[\/\\]context_menu_with_router_support[\/\\]context_menu_item_nav_by_router.tsx/,

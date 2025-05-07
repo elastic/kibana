@@ -130,7 +130,6 @@ describe('Observability AI Assistant client', () => {
     getActions: jest.fn(),
     validate: jest.fn(),
     getInstructions: jest.fn(),
-    getAdhocInstructions: jest.fn(),
   } as any;
 
   let llmSimulator: LlmSimulator;
@@ -171,7 +170,6 @@ describe('Observability AI Assistant client', () => {
     knowledgeBaseServiceMock.getUserInstructions.mockResolvedValue([]);
 
     functionClientMock.getInstructions.mockReturnValue([EXPECTED_STORED_SYSTEM_MESSAGE]);
-    functionClientMock.getAdhocInstructions.mockReturnValue([]);
 
     return new ObservabilityAIAssistantClient({
       config: {} as ObservabilityAIAssistantConfig,
@@ -323,6 +321,11 @@ describe('Observability AI Assistant client', () => {
             functionCalling: 'auto',
             toolChoice: undefined,
             tools: undefined,
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'observability_ai_assistant',
+              },
+            },
           },
         ]);
       });
@@ -766,6 +769,7 @@ describe('Observability AI Assistant client', () => {
           chat: expect.any(Function),
           args: JSON.stringify({ foo: 'bar' }),
           signal: expect.any(AbortSignal),
+          logger: expect.any(Object),
           connectorId: 'foo',
           messages: [
             {
@@ -839,6 +843,11 @@ describe('Observability AI Assistant client', () => {
             functionCalling: 'auto',
             toolChoice: 'auto',
             tools: expect.any(Object),
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'observability_ai_assistant',
+              },
+            },
           },
         ]);
       });
@@ -988,6 +997,11 @@ describe('Observability AI Assistant client', () => {
             functionCalling: 'auto',
             toolChoice: 'auto',
             tools: expect.any(Object),
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'observability_ai_assistant',
+              },
+            },
           },
         ]);
       });

@@ -437,14 +437,12 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
-                  index_exists:
-                    type: boolean
                   is_setup_available:
                     type: boolean
                   is_setup_in_progress:
                     type: boolean
-                  pipeline_exists:
-                    type: boolean
+                  product_documentation_status:
+                    type: string
                   security_labs_exists:
                     type: boolean
                   user_data_exists:
@@ -746,7 +744,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KnowledgeBaseEntryUpdateProps'
+              $ref: '#/components/schemas/KnowledgeBaseEntryUpdateRouteProps'
         required: true
       responses:
         '200':
@@ -1091,7 +1089,7 @@ components:
         connectorId:
           type: string
         conversationId:
-          type: string
+          $ref: '#/components/schemas/NonEmptyString'
         isStream:
           type: boolean
         langSmithApiKey:
@@ -1301,6 +1299,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -1317,6 +1318,7 @@ components:
           required:
             - name
             - namespace
+            - global
             - users
         - $ref: '#/components/schemas/ResponseFields'
         - $ref: '#/components/schemas/DocumentEntryResponseFields'
@@ -1324,6 +1326,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -1353,10 +1358,7 @@ components:
       type: object
       properties:
         kbResource:
-          description: >-
-            Knowledge Base resource name for grouping entries, e.g. 'esql',
-            'lens-docs', etc
-          type: string
+          $ref: '#/components/schemas/KnowledgeBaseResource'
         source:
           description: Source document name or filepath
           type: string
@@ -1381,6 +1383,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             id:
               $ref: '#/components/schemas/NonEmptyString'
             name:
@@ -1463,6 +1468,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -1479,6 +1487,7 @@ components:
           required:
             - name
             - namespace
+            - global
             - users
         - $ref: '#/components/schemas/ResponseFields'
         - $ref: '#/components/schemas/IndexEntryResponseFields'
@@ -1486,6 +1495,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             name:
               description: Name of the Knowledge Base Entry
               type: string
@@ -1553,6 +1565,9 @@ components:
       allOf:
         - type: object
           properties:
+            global:
+              description: Whether this Knowledge Base Entry is global, defaults to false
+              type: boolean
             id:
               $ref: '#/components/schemas/NonEmptyString'
             name:
@@ -1736,6 +1751,20 @@ components:
         - $ref: '#/components/schemas/IndexEntryUpdateFields'
       discriminator:
         propertyName: type
+    KnowledgeBaseEntryUpdateRouteProps:
+      anyOf:
+        - $ref: '#/components/schemas/DocumentEntryCreateFields'
+        - $ref: '#/components/schemas/IndexEntryCreateFields'
+      discriminator:
+        propertyName: type
+    KnowledgeBaseResource:
+      description: >-
+        Knowledge Base resource name for grouping entries, e.g. 'security_labs',
+        'user', etc
+      enum:
+        - security_labs
+        - user
+      type: string
     KnowledgeBaseResponse:
       description: AI assistant KnowledgeBase.
       type: object

@@ -5,13 +5,7 @@
  * 2.0.
  */
 import { get, pick } from 'lodash';
-import {
-  ConfigKey,
-  MonitorTypeEnum,
-  FormMonitorType,
-  MonitorFields,
-  SyntheticsMonitorSchedule,
-} from '../types';
+import { ConfigKey, MonitorTypeEnum, FormMonitorType, MonitorFields, ScheduleUnit } from '../types';
 import { DEFAULT_FIELDS } from '../constants';
 
 export const serializeNestedFormField = (fields: Record<string, any>) => {
@@ -28,6 +22,14 @@ export const serializeNestedFormField = (fields: Record<string, any>) => {
 
 export const ALLOWED_FIELDS = [ConfigKey.ENABLED, ConfigKey.ALERT_CONFIG];
 
+const formatSchedule = (schedule: { number: string; unit: ScheduleUnit }) => {
+  const isFrequencyInSeconds = schedule.number.endsWith('s');
+  return {
+    number: isFrequencyInSeconds ? schedule.number.slice(0, -1) : schedule.number,
+    unit: isFrequencyInSeconds ? ScheduleUnit.SECONDS : ScheduleUnit.MINUTES,
+  };
+};
+
 export const format = (fields: Record<string, unknown>, readOnly: boolean = false) => {
   const formattedFields = serializeNestedFormField(fields) as MonitorFields;
   const textAssertion = formattedFields[ConfigKey.TEXT_ASSERTION]
@@ -35,13 +37,7 @@ export const format = (fields: Record<string, unknown>, readOnly: boolean = fals
           await page.getByText('${formattedFields[ConfigKey.TEXT_ASSERTION]}').first().waitFor();`
     : ``;
 
-  const schedule = formattedFields[ConfigKey.SCHEDULE];
-  if (schedule.number.endsWith('s')) {
-    formattedFields[ConfigKey.SCHEDULE] = {
-      number: `${schedule.number.slice(0, -1)}`,
-      unit: 's' as SyntheticsMonitorSchedule['unit'],
-    };
-  }
+  formattedFields[ConfigKey.SCHEDULE] = formatSchedule(formattedFields[ConfigKey.SCHEDULE]);
 
   const formattedMap = {
     [FormMonitorType.SINGLE]: {

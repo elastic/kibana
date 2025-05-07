@@ -4513,6 +4513,7 @@ const notLikeDefinition: FunctionDefinition = {
   }),
   preview: false,
   alias: undefined,
+  ignoreAsSuggestion: true,
   signatures: [
     {
       params: [
@@ -4563,6 +4564,7 @@ const notRlikeDefinition: FunctionDefinition = {
   }),
   preview: false,
   alias: undefined,
+  ignoreAsSuggestion: true,
   signatures: [
     {
       params: [

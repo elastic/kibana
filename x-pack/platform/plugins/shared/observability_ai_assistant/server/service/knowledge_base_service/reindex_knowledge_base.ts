@@ -36,7 +36,7 @@ export async function reIndexKnowledgeBase({
     // Check if the index was created before version 8.11
     const versionThreshold = 8110000; // Version 8.11.0
     if (createdVersion >= versionThreshold) {
-      logger.warn(
+      logger.debug(
         `Knowledge base index "${originalIndex}" was created in version ${createdVersion}, and does not require re-indexing. Semantic text field is already supported. Aborting`
       );
       return;

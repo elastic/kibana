@@ -31,9 +31,9 @@ export interface BuildOptions {
   createRpmPackage: boolean;
   createDebPackage: boolean;
   createDockerUBI: boolean;
-  createDockerUbuntu: boolean;
   createDockerWolfi: boolean;
   createDockerCloud: boolean;
+  createDockerCloudFIPS: boolean;
   createDockerServerless: boolean;
   createDockerContexts: boolean;
   createDockerFIPS: boolean;
@@ -146,11 +146,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateDockerUBI);
   }
 
-  if (options.createDockerUbuntu) {
-    // control w/ --docker-images or --skip-docker-ubuntu or --skip-os-packages
-    await run(Tasks.CreateDockerUbuntu);
-  }
-
   if (options.createDockerWolfi) {
     // control w/ --docker-images or --skip-docker-wolfi or --skip-os-packages
     await run(Tasks.CreateDockerWolfi);
@@ -172,6 +167,12 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createDockerFIPS) {
     // control w/ --docker-images or --skip-docker-fips or --skip-os-packages
     await run(Tasks.CreateDockerFIPS);
+  }
+
+  if (options.createDockerCloudFIPS) {
+    // control w/ --docker-images and --skip-docker-cloud-fips
+    // v9.0 does not have a Cloud FIPS release, this is a NOOP
+    await run(Tasks.CreateDockerCloudFIPS);
   }
 
   if (options.createDockerContexts) {

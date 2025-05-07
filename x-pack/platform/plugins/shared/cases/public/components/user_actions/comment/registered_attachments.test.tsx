@@ -156,6 +156,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     const userAction =
       createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build()[0];
 
+    // eslint-disable-next-line testing-library/no-node-access
     render(userAction.children);
 
     expect(await screen.findByText('My component')).toBeInTheDocument();

@@ -46,7 +46,7 @@ import {
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  type AdHocInstruction,
+  type Instruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -161,7 +161,7 @@ export class ObservabilityAIAssistantClient {
     functionClient,
     connectorId,
     simulateFunctionCalling = false,
-    instructions: adHocInstructions = [],
+    userInstructions: apiUserInstructions = [],
     messages: initialMessages,
     signal,
     persist,
@@ -180,7 +180,7 @@ export class ObservabilityAIAssistantClient {
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: AdHocInstruction[];
+    userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
     disableFunctions?:
       | boolean
@@ -196,18 +196,16 @@ export class ObservabilityAIAssistantClient {
         const conversationId = persist ? predefinedConversationId || v4() : '';
 
         if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          adHocInstructions.push({
-            instruction_type: 'application_instruction',
-            text: `This conversation will be persisted in Kibana and available at this url: ${
+          functionClient.registerInstruction(
+            `This conversation will be persisted in Kibana and available at this url: ${
               kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-            }.`,
-          });
+            }.`
+          );
         }
 
-        const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
-
-        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
-        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+        const kbUserInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(
+          shareReplay()
+        );
 
         // if it is:
         // - a new conversation
@@ -232,12 +230,12 @@ export class ObservabilityAIAssistantClient {
                 tracer: completeTracer,
               }).pipe(shareReplay());
 
-        const systemMessage$ = userInstructions$.pipe(
-          map((userInstructions) => {
+        const systemMessage$ = kbUserInstructions$.pipe(
+          map((kbUserInstructions) => {
             return getSystemMessageFromInstructions({
               applicationInstructions: functionClient.getInstructions(),
-              userInstructions,
-              adHocInstructions: allAdHocInstructions,
+              kbUserInstructions,
+              apiUserInstructions,
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
             });
           }),
@@ -246,8 +244,8 @@ export class ObservabilityAIAssistantClient {
 
         // we continue the conversation here, after resolving both the materialized
         // messages and the knowledge base instructions
-        const nextEvents$ = forkJoin([systemMessage$, userInstructions$]).pipe(
-          switchMap(([systemMessage, userInstructions]) => {
+        const nextEvents$ = forkJoin([systemMessage$, kbUserInstructions$]).pipe(
+          switchMap(([systemMessage, kbUserInstructions]) => {
             // if needed, inject a context function request here
             const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
               ? getContextFunctionRequestIfNeeded(initialMessages)
@@ -263,8 +261,8 @@ export class ObservabilityAIAssistantClient {
                 chat: (name, chatParams) => {
                   // inject a chat function with predefined parameters
                   return this.chat(name, {
-                    ...chatParams,
                     systemMessage,
+                    ...chatParams,
                     signal,
                     simulateFunctionCalling,
                     connectorId,
@@ -274,8 +272,8 @@ export class ObservabilityAIAssistantClient {
                 // start out with the max number of function calls
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
-                userInstructions,
-                adHocInstructions,
+                kbUserInstructions,
+                apiUserInstructions,
                 signal,
                 logger: this.dependencies.logger,
                 disableFunctions,
@@ -467,7 +465,17 @@ export class ObservabilityAIAssistantClient {
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'observability_ai_assistant',
+        },
+      },
     };
+
+    this.dependencies.logger.debug(
+      () =>
+        `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
+    );
 
     if (stream) {
       return defer(() =>
@@ -720,7 +728,12 @@ export class ObservabilityAIAssistantClient {
     sortBy: string;
     sortDirection: 'asc' | 'desc';
   }) => {
-    return this.dependencies.knowledgeBaseService.getEntries({ query, sortBy, sortDirection });
+    return this.dependencies.knowledgeBaseService.getEntries({
+      query,
+      sortBy,
+      sortDirection,
+      namespace: this.dependencies.namespace,
+    });
   };
 
   deleteKnowledgeBaseEntry = async (id: string) => {

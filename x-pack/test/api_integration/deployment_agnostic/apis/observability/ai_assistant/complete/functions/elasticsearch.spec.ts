@@ -38,9 +38,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       // intercept the LLM request and return a fixed response
-      void proxy
-        .intercept('conversation', () => true, 'Hello from LLM Proxy')
-        .completeAfterIntercept();
+      void proxy.interceptConversation('Hello from LLM Proxy');
 
       await generateApmData(apmSynthtraceEsClient);
 
@@ -67,7 +65,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         },
       });
 
-      await proxy.waitForAllInterceptorsSettled();
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
       events = getMessageAddedEvents(responseBody);
     });

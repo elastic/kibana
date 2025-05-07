@@ -27,6 +27,8 @@ import {
   ERROR_LOG_MESSAGE,
   EVENT_OUTCOME,
   FAAS_COLDSTART,
+  OTEL_SPAN_LINKS_SPAN_ID,
+  OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -59,6 +61,7 @@ import type { APMEventClient } from '../../lib/helpers/create_es_client/create_a
 import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
+import { mapOtelToSpanLink } from '../span_links/utils';
 
 export interface TraceItems {
   exceedsMax: boolean;
@@ -301,6 +304,8 @@ async function getTraceDocsPerPage({
     SPAN_COMPOSITE_SUM,
     SPAN_SYNC,
     CHILD_ID,
+    OTEL_SPAN_LINKS_SPAN_ID,
+    OTEL_SPAN_LINKS_TRACE_ID,
   ] as const);
 
   const body = {
@@ -347,7 +352,10 @@ async function getTraceDocsPerPage({
   return {
     hits: res.hits.hits.map((hit) => {
       const sort = hit.sort;
-      const spanLinksSource = 'span' in hit._source ? hit._source.span?.links : undefined;
+      const fields = unflattenKnownApmEventFields(hit?.fields);
+
+      const spanLinks =
+        'span' in hit._source ? hit._source.span?.links : mapOtelToSpanLink(fields.links);
 
       if (hit.fields[PROCESSOR_EVENT]?.[0] === ProcessorEvent.span) {
         const spanEvent = unflattenKnownApmEventFields(hit.fields, [
@@ -365,7 +373,7 @@ async function getTraceDocsPerPage({
             composite: spanEvent.span.composite
               ? (spanEvent.span.composite as Required<WaterfallSpan['span']>['composite'])
               : undefined,
-            links: spanLinksSource,
+            links: spanLinks,
           },
           ...(spanEvent.child ? { child: spanEvent.child as WaterfallSpan['child'] } : {}),
         };
@@ -384,7 +392,7 @@ async function getTraceDocsPerPage({
         },
         span: {
           ...txEvent.span,
-          links: spanLinksSource,
+          links: spanLinks,
         },
       };
 

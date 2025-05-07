@@ -40,7 +40,6 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
       const params: estypes.IndicesSimulateTemplateRequest = templateName
         ? {
             name: templateName,
-            index_patterns,
           }
         : {
             ...template,

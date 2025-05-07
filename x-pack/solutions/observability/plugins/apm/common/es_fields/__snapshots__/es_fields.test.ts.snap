@@ -242,6 +242,12 @@ exports[`Error OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
 
+exports[`Error OTEL_SPAN_LINKS 1`] = `undefined`;
+
+exports[`Error OTEL_SPAN_LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Error OTEL_SPAN_LINKS_TRACE_ID 1`] = `undefined`;
+
 exports[`Error PARENT_ID 1`] = `"parentId"`;
 
 exports[`Error PROCESS_ARGS 1`] = `undefined`;
@@ -251,6 +257,10 @@ exports[`Error PROCESS_PID 1`] = `undefined`;
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
 exports[`Error PROCESSOR_NAME 1`] = `"error"`;
+
+exports[`Error SERVER_ADDRESS 1`] = `undefined`;
+
+exports[`Error SERVER_PORT 1`] = `undefined`;
 
 exports[`Error SERVICE 1`] = `
 Object {
@@ -336,8 +346,6 @@ exports[`Error TIMESTAMP_US 1`] = `1337`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
-exports[`Error TRANSACTION_AGENT_MARKS 1`] = `undefined`;
-
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
@@ -347,6 +355,8 @@ exports[`Error TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
 exports[`Error TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Error TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
 
@@ -368,9 +378,15 @@ exports[`Error TRANSACTION_TYPE 1`] = `"request"`;
 
 exports[`Error URL_FULL 1`] = `undefined`;
 
+exports[`Error URL_PATH 1`] = `undefined`;
+
+exports[`Error URL_SCHEME 1`] = `undefined`;
+
 exports[`Error USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Error USER_AGENT_ORIGINAL 1`] = `undefined`;
+
+exports[`Error USER_AGENT_VERSION 1`] = `undefined`;
 
 exports[`Error USER_ID 1`] = `undefined`;
 
@@ -607,6 +623,12 @@ exports[`Span OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
 
+exports[`Span OTEL_SPAN_LINKS 1`] = `undefined`;
+
+exports[`Span OTEL_SPAN_LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Span OTEL_SPAN_LINKS_TRACE_ID 1`] = `undefined`;
+
 exports[`Span PARENT_ID 1`] = `"parentId"`;
 
 exports[`Span PROCESS_ARGS 1`] = `undefined`;
@@ -616,6 +638,10 @@ exports[`Span PROCESS_PID 1`] = `undefined`;
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
 exports[`Span PROCESSOR_NAME 1`] = `"transaction"`;
+
+exports[`Span SERVER_ADDRESS 1`] = `undefined`;
+
+exports[`Span SERVER_PORT 1`] = `undefined`;
 
 exports[`Span SERVICE 1`] = `
 Object {
@@ -697,8 +723,6 @@ exports[`Span TIMESTAMP_US 1`] = `1337`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
-exports[`Span TRANSACTION_AGENT_MARKS 1`] = `undefined`;
-
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
@@ -708,6 +732,8 @@ exports[`Span TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
 exports[`Span TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Span TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
 
@@ -729,9 +755,15 @@ exports[`Span TRANSACTION_TYPE 1`] = `undefined`;
 
 exports[`Span URL_FULL 1`] = `undefined`;
 
+exports[`Span URL_PATH 1`] = `undefined`;
+
+exports[`Span URL_SCHEME 1`] = `undefined`;
+
 exports[`Span USER_AGENT_NAME 1`] = `undefined`;
 
 exports[`Span USER_AGENT_ORIGINAL 1`] = `undefined`;
+
+exports[`Span USER_AGENT_VERSION 1`] = `undefined`;
 
 exports[`Span USER_ID 1`] = `undefined`;
 
@@ -982,6 +1014,12 @@ exports[`Transaction OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
 
+exports[`Transaction OTEL_SPAN_LINKS 1`] = `undefined`;
+
+exports[`Transaction OTEL_SPAN_LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Transaction OTEL_SPAN_LINKS_TRACE_ID 1`] = `undefined`;
+
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 
 exports[`Transaction PROCESS_ARGS 1`] = `undefined`;
@@ -991,6 +1029,10 @@ exports[`Transaction PROCESS_PID 1`] = `undefined`;
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
 exports[`Transaction PROCESSOR_NAME 1`] = `"transaction"`;
+
+exports[`Transaction SERVER_ADDRESS 1`] = `undefined`;
+
+exports[`Transaction SERVER_PORT 1`] = `undefined`;
 
 exports[`Transaction SERVICE 1`] = `
 Object {
@@ -1076,8 +1118,6 @@ exports[`Transaction TIMESTAMP_US 1`] = `1337`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 
-exports[`Transaction TRANSACTION_AGENT_MARKS 1`] = `undefined`;
-
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 
 exports[`Transaction TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
@@ -1087,6 +1127,8 @@ exports[`Transaction TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
 exports[`Transaction TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Transaction TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
 
@@ -1108,9 +1150,15 @@ exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
 
 exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
 
+exports[`Transaction URL_PATH 1`] = `undefined`;
+
+exports[`Transaction URL_SCHEME 1`] = `undefined`;
+
 exports[`Transaction USER_AGENT_NAME 1`] = `"Other"`;
 
 exports[`Transaction USER_AGENT_ORIGINAL 1`] = `"test original"`;
+
+exports[`Transaction USER_AGENT_VERSION 1`] = `undefined`;
 
 exports[`Transaction USER_ID 1`] = `"1337"`;
 

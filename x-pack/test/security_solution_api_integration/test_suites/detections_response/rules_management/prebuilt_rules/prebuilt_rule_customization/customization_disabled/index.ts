@@ -11,5 +11,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Rules Management - Prebuilt Rules - Prebuilt Rule Customization Disabled', function () {
     loadTestFile(require.resolve('./is_customized_calculation'));
     loadTestFile(require.resolve('./upgrade_perform_prebuilt_rules'));
+    loadTestFile(require.resolve('./rules_export/export_prebuilt_rules'));
   });
 };

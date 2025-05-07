@@ -78,7 +78,6 @@ import {
 } from '../../../../../common/constants';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { RulePreview } from '../../components/rule_preview';
-import { getIsRulePreviewDisabled } from '../../components/rule_preview/helpers';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
 import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
@@ -218,24 +217,6 @@ const CreateRulePageComponent: React.FC = () => {
   );
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
-
-  const defineStepFormFields = defineStepForm.getFields();
-  const isPreviewDisabled = getIsRulePreviewDisabled({
-    ruleType,
-    isQueryBarValid,
-    isThreatQueryBarValid:
-      defineStepFormFields.threatIndex?.isValid &&
-      defineStepFormFields.threatQueryBar?.isValid &&
-      defineStepFormFields.threatMapping?.isValid,
-    index: memoizedIndex,
-    dataViewId: defineStepData.dataViewId,
-    dataSourceType: defineStepData.dataSourceType,
-    threatIndex: defineStepData.threatIndex,
-    threatMapping: defineStepData.threatMapping,
-    machineLearningJobId: defineStepData.machineLearningJobId,
-    queryBar: defineStepData.queryBar,
-    newTermsFields: defineStepData.newTermsFields,
-  });
 
   useEffect(() => {
     if (prevRuleType !== ruleType) {
@@ -379,6 +360,11 @@ const CreateRulePageComponent: React.FC = () => {
 
     return { valid, warnings };
   }, [validateStep]);
+
+  const verifyRuleDefinitionForPreview = useCallback(
+    () => defineStepForm.validate(),
+    [defineStepForm]
+  );
 
   const editStep = useCallback(
     async (step: RuleStep) => {
@@ -921,7 +907,7 @@ const CreateRulePageComponent: React.FC = () => {
                   onToggleCollapsed={onToggleCollapsedMemo}
                 >
                   <RulePreview
-                    isDisabled={isPreviewDisabled && activeStep === RuleStep.defineRule}
+                    verifyRuleDefinition={verifyRuleDefinitionForPreview}
                     defineRuleData={defineStepData}
                     aboutRuleData={aboutStepData}
                     scheduleRuleData={scheduleStepData}

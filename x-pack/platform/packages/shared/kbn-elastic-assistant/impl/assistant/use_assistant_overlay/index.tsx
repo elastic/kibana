@@ -181,7 +181,6 @@ export const useAssistantOverlay = (
 
   useEffect(() => {
     unRegisterPromptContext(promptContextId); // a noop if the current prompt context id is not registered
-
     const newContext: PromptContext = {
       category: _category,
       description: _description,
@@ -191,7 +190,6 @@ export const useAssistantOverlay = (
       tooltip: _tooltip,
       replacements: _replacements ?? undefined,
     };
-
     registerPromptContext(newContext);
 
     return () => unRegisterPromptContext(promptContextId);
