@@ -135,7 +135,7 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
   skip = false,
   to,
   from,
-  runtimeMappings = {},
+  runtimeMappings,
 }) => {
   const dispatch = useDispatch();
   const [updatedAt, setUpdatedAt] = useState(Date.now());
