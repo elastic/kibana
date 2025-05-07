@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
