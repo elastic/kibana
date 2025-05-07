@@ -89,7 +89,8 @@ export const getAxiosOptions = (
   provider: string,
   apiKey: string,
   stream: boolean,
-  config?: Config
+  config?: Config,
+  httpsAgent?: https.Agent
 ): { headers: Record<string, string>; httpsAgent?: https.Agent; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
   const configAny = config as Config & {
@@ -112,6 +113,13 @@ export const getAxiosOptions = (
         ...responseType,
       };
     case OpenAiProviderType.Other:
+      if (httpsAgent) {
+        return {
+          headers: { ['content-type']: 'application/json', Accept: 'application/json' },
+          httpsAgent,
+          ...responseType,
+        };
+      }
       if (
         config &&
         (configAny.certificateFile ||
@@ -156,19 +164,20 @@ export const getAxiosOptions = (
           throw new Error('Invalid private key format: Must be PEM-encoded');
         }
 
-        const httpsAgent = new https.Agent({
+        const verificationMode = configAny.verificationMode ?? 'full';
+        const agent = new https.Agent({
           cert,
           key,
-          rejectUnauthorized: configAny.verificationMode !== 'none',
+          rejectUnauthorized: verificationMode !== 'none',
           checkServerIdentity:
-            configAny.verificationMode === 'certificate' || configAny.verificationMode === 'none'
+            verificationMode === 'certificate' || verificationMode === 'none'
               ? () => undefined
               : undefined,
         });
 
         return {
           headers: { ['content-type']: 'application/json', Accept: 'application/json' },
-          httpsAgent,
+          httpsAgent: agent,
           ...responseType,
         };
       }

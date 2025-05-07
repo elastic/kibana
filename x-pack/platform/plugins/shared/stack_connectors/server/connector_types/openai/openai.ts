@@ -65,6 +65,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private openAI: OpenAI;
   private headers: Record<string, string>;
   private hasPKI: boolean;
+  private httpsAgent?: https.Agent;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -108,7 +109,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           logger: this.logger,
         });
 
-        const httpsAgent = new https.Agent({
+        this.httpsAgent = new https.Agent({
           cert,
           key,
           rejectUnauthorized: this.config.verificationMode !== 'none',
@@ -123,7 +124,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           apiKey: this.key,
           baseURL: removeEndpointFromUrl(this.url),
           defaultHeaders: this.headers,
-          httpAgent: httpsAgent,
+          httpAgent: this.httpsAgent,
         });
       } else {
         this.openAI =
@@ -225,7 +226,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     if (this.provider === OpenAiProviderType.Other && this.hasPKI) {
       try {
         const sanitizedBody = JSON.parse(body);
-        const axiosOptions = getAxiosOptions(this.provider, this.key, false, this.config);
+        const axiosOptions = getAxiosOptions(this.provider, this.key, false, this.config, this.httpsAgent);
 
         const response = await this.request(
           {
@@ -295,7 +296,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     if (this.provider === OpenAiProviderType.Other && this.hasPKI) {
       try {
         const sanitizedBody = JSON.parse(body);
-        const axiosOptions = getAxiosOptions(this.provider, this.key, stream, this.config);
+        const axiosOptions = getAxiosOptions(this.provider, this.key, stream, this.config, this.httpsAgent);
 
         const response = await this.request(
           {
