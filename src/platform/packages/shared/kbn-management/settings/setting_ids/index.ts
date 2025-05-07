@@ -111,8 +111,6 @@ export const OBSERVABILITY_APM_LABS_BUTTON_ID = 'observability:apmLabsButton';
 export const OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID = 'observability:apmProgressiveLoading';
 export const OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVCIE_ID =
   'observability:apmServiceGroupMaxNumberOfServices';
-export const OBSERVABILITY_APM_TRACE_EXPLORER_TAB_ID = 'observability:apmTraceExplorerTab';
-export const OBSERVABILITY_ENABLE_AWS_LAMBDA_METRICS_ID = 'observability:enableAwsLambdaMetrics';
 export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =
@@ -121,8 +119,6 @@ export const OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID = 'observability:enableI
 export const OBSERVABILITY_MAX_SUGGESTIONS_ID = 'observability:maxSuggestions';
 export const OBSERVABILITY_PROFILING_ELASTICSEARCH_PLUGIN_ID =
   'observability:profilingElasticsearchPlugin';
-export const OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID =
-  'observability:apmEnableContinuousRollups';
 export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =
   'observability:apmEnableProfilingIntegration';
 export const OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR = 'observability:apmEnableTableSearchBar';
