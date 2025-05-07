@@ -79,6 +79,7 @@ export const getPreloadedState = ({
   embeddableEditorIncomingState,
   datasourceMap,
   visualizationMap,
+  visualizationType,
 }: LensStoreDeps) => {
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
@@ -136,7 +137,7 @@ export const getPreloadedState = ({
     datasourceStates,
     visualization: {
       state: null,
-      activeId: Object.keys(visualizationMap)[0] ?? null,
+      activeId: visualizationType ?? Object.keys(visualizationMap)[0] ?? null,
     },
   };
   return state;
