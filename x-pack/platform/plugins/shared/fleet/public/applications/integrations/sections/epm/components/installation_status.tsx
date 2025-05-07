@@ -11,7 +11,7 @@ import { EuiCallOut, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import { installationStatuses } from '../../../../../../common/constants';
 import type { EpmPackageInstallStatus } from '../../../../../../common/types';
@@ -44,7 +44,7 @@ interface InstallationStatusProps {
 
 const useInstallationStatusStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const successBackgroundColor = euiTheme.colors.backgroundBaseSuccess;
 
   return {

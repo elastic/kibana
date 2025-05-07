@@ -19,7 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import useMountedState from 'react-use/lib/useMountedState';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
@@ -36,7 +36,7 @@ export function DashboardEmptyScreen() {
   const isMounted = useMountedState();
   const dashboardApi = useDashboardApi();
   const [isLoading, setIsLoading] = useState(false);
-  const isDarkTheme = useKibanaDarkMode();
+  const isDarkTheme = useKibanaIsDarkMode();
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = useMemo(() => {
     return viewMode === 'edit';

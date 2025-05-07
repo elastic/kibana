@@ -17,7 +17,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { APP_NAME } from '../../common/constants';
@@ -48,7 +48,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
     upselling,
   } = services;
 
-  const darkMode = useKibanaDarkMode();
+  const darkMode = useKibanaIsDarkMode();
 
   return (
     <KibanaRenderContextProvider {...services}>

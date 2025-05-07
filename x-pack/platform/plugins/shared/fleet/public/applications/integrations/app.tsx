@@ -18,7 +18,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
@@ -80,7 +80,7 @@ export const IntegrationsAppContext: React.FC<{
     fleetStatus,
   }) => {
     const XXL_BREAKPOINT = 1600;
-    const isDarkMode = useKibanaDarkMode();
+    const isDarkMode = useKibanaIsDarkMode();
 
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 

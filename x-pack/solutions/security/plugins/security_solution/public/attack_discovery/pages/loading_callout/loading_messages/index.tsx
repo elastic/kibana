@@ -12,7 +12,7 @@ import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
 import React, { useMemo } from 'react';
 
 import { getAttackDiscoveryLoadingMessage } from '@kbn/elastic-assistant-common';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useDateFormat } from '../../../../common/lib/kibana';
 import { getCanceledResultMessage } from './get_canceled_result_message';
 import { getFormattedDate } from './get_formatted_time';
@@ -50,7 +50,7 @@ const LoadingMessagesComponent: React.FC<Props> = ({
   start,
   status,
 }) => {
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const dateFormat = useDateFormat();
 
   const formattedStart = useMemo(

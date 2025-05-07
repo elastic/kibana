@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useCurrentUser } from '../../../common/lib/kibana/hooks';
 import { OnboardingHeaderTopicSelector } from './onboarding_header_topic_selector';
 import { useOnboardingHeaderStyles } from './onboarding_header.styles';
@@ -23,7 +23,7 @@ import { useKibana } from '../../../common/lib/kibana';
 
 export const OnboardingHeader = React.memo(() => {
   const currentUser = useCurrentUser();
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
 
   const styles = useOnboardingHeaderStyles();
 

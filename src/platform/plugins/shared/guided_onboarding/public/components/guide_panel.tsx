@@ -17,7 +17,7 @@ import { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
 import type { GuideId, GuideConfig, StepConfig } from '@kbn/guided-onboarding';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { GuidedOnboardingApi } from '../types';
 
 import type { PluginState } from '../../common';
@@ -49,7 +49,7 @@ const getProgress = (state?: GuideState): number => {
 export const GuidePanel = ({ api, application, notifications }: GuidePanelProps) => {
   const euiThemeContext = useEuiTheme();
   const euiTheme = euiThemeContext.euiTheme;
-  const isDarkTheme = useKibanaDarkMode();
+  const isDarkTheme = useKibanaIsDarkMode();
 
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isQuitGuideModalOpen, setIsQuitGuideModalOpen] = useState(false);

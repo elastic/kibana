@@ -9,7 +9,7 @@
 
 import { useEuiTheme, COLOR_MODES_STANDARD } from '@elastic/eui';
 
-export const useKibanaDarkMode = (): boolean => {
+export const useKibanaIsDarkMode = (): boolean => {
   const { colorMode } = useEuiTheme();
 
   return colorMode === COLOR_MODES_STANDARD.dark;

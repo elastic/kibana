@@ -10,7 +10,7 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -86,7 +86,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const darkMode = useKibanaDarkMode();
+    const darkMode = useKibanaIsDarkMode();
     const filterQuery = useMemo(
       () => (userName ? buildUserNamesFilter([userName]) : undefined),
       [userName]

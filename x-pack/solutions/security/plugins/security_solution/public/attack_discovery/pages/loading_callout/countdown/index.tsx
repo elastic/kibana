@@ -19,7 +19,7 @@ import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { InfoPopoverBody } from '../info_popover_body';
 import { getTimerPrefix } from './last_times_popover/helpers';
 import * as i18n from '../translations';
@@ -42,7 +42,7 @@ const CountdownComponent: React.FC<Props> = ({
 }) => {
   // theming:
   const { euiTheme } = useEuiTheme();
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
 
   // popover state:
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

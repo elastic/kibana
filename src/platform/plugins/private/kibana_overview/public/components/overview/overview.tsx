@@ -35,7 +35,7 @@ import {
   RedirectAppLinksContainer as RedirectAppLinks,
   RedirectAppLinksKibanaProvider,
 } from '@kbn/shared-ux-link-redirect-app';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { FetchResult } from '@kbn/newsfeed-plugin/public';
 import {
   FeatureCatalogueEntry,
@@ -70,7 +70,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     services;
   const addBasePath = http.basePath.prepend;
   const { euiTheme } = useEuiTheme();
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const minBreakpointM = useEuiMinBreakpoint('m');
 
   // Home does not have a locator implemented, so hard-code it here.

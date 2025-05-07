@@ -11,7 +11,7 @@ import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 import React from 'react';
 
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { PreferenceFormattedDate } from '../../../../../../common/components/formatted_date';
 import { MAX_SECONDS_BADGE_WIDTH } from '../helpers';
 import * as i18n from '../translations';
@@ -22,7 +22,7 @@ interface Props {
 
 const GenerationTimingComponent: React.FC<Props> = ({ interval }) => {
   const { euiTheme } = useEuiTheme();
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
 
   return (
     <EuiFlexGroup alignItems="center" data-test-subj="generationTiming" gutterSize="none">

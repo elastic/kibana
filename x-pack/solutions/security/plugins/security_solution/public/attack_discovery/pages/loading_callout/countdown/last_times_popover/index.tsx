@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@ela
 import { css } from '@emotion/react';
 import React from 'react';
 import type { GenerationInterval } from '@kbn/elastic-assistant-common';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 import { GenerationTiming } from './generation_timing';
 import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
@@ -25,7 +25,7 @@ const LastTimesPopoverComponent: React.FC<Props> = ({
   successfulGenerations,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const calculatedBy = attackDiscoveryAlertsEnabled

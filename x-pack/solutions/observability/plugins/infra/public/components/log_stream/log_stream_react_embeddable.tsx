@@ -17,7 +17,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -63,7 +63,7 @@ export function getLogStreamEmbeddableFactory(services: Services) {
       return {
         api,
         Component: () => {
-          const darkMode = useKibanaDarkMode();
+          const darkMode = useKibanaIsDarkMode();
           const { filters, query, timeRange } = useFetchContext(api);
           const { startTimestamp, endTimestamp } = useMemo(() => {
             return {

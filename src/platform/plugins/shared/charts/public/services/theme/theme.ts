@@ -26,7 +26,7 @@ export class ThemeService {
   /**
    * An observable boolean for dark mode of kibana
    *
-   * @deprecated use `useKibanaDarkMode`
+   * @deprecated use `useKibanaIsDarkMode`
    */
   public get darkModeEnabled$(): Observable<CoreTheme> {
     if (!this.theme$) {
@@ -39,7 +39,7 @@ export class ThemeService {
   /**
    * A React hook for consuming the dark mode value
    *
-   * @deprecated use `useKibanaDarkMode`
+   * @deprecated use `useKibanaIsDarkMode`
    */
   public useDarkMode = (): boolean => {
     const [value, update] = useState(false);

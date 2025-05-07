@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
@@ -13,7 +13,7 @@ export const HEIGHT_ANIMATION_DURATION = 250;
 
 export const useCardPanelStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const successBackgroundColor = euiTheme.colors.backgroundBaseSuccess;
   const darkModeStyles = useDarkPanelStyles(isDarkMode);
 

@@ -7,7 +7,7 @@
 import React, { type PropsWithChildren } from 'react';
 import { css, type CSSInterpolation } from '@emotion/css';
 import { EuiText, useEuiTheme, type EuiTextProps } from '@elastic/eui';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 export interface PanelTextProps extends PropsWithChildren<EuiTextProps> {
   subdued?: true;
@@ -17,7 +17,7 @@ export interface PanelTextProps extends PropsWithChildren<EuiTextProps> {
 export const PanelText = React.memo<PanelTextProps>(
   ({ children, subdued, semiBold, cursive, ...props }) => {
     const { euiTheme } = useEuiTheme();
-    const isDarkMode = useKibanaDarkMode();
+    const isDarkMode = useKibanaIsDarkMode();
 
     let color;
     if (subdued && !isDarkMode) {

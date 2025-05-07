@@ -24,7 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { Chart, BarSeries, Settings, ScaleType } from '@elastic/charts';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
@@ -53,7 +53,7 @@ const headerStyle = css`
 
 const useCompleteBadgeStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   return css`
     background-color: ${isDarkMode
       ? euiTheme.colors.success

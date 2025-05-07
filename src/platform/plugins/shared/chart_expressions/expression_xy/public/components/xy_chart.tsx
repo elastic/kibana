@@ -58,7 +58,7 @@ import {
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {
   FilterEvent,
   BrushEvent,
@@ -234,7 +234,7 @@ export function XYChart({
   } = args;
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
-  const darkMode = useKibanaDarkMode();
+  const darkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = getFilteredLayers(layers);

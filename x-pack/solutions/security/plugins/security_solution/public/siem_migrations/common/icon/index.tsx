@@ -6,12 +6,12 @@
  */
 import React from 'react';
 import { EuiIcon, type EuiIconProps } from '@elastic/eui';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import SiemMigrationsIconSVG from './siem_migrations.svg';
 import SiemMigrationsIconDarkSVG from './siem_migrations_dark.svg';
 
 export const SiemMigrationsIcon = React.memo<Omit<EuiIconProps, 'type'>>((props) => {
-  const isDark = useKibanaDarkMode();
+  const isDark = useKibanaIsDarkMode();
   if (isDark) {
     return <EuiIcon type={SiemMigrationsIconDarkSVG} {...props} />;
   }

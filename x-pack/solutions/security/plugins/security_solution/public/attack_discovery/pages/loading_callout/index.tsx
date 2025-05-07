@@ -18,7 +18,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { GenerationInterval } from '@kbn/elastic-assistant-common';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { Countdown } from './countdown';
 import { LoadingMessages } from './loading_messages';
 import * as i18n from './translations';
@@ -69,7 +69,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
   successfulGenerations,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   const isTerminalState = useMemo(() => getIsTerminalState(status), [status]);

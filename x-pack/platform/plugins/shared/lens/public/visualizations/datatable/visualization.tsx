@@ -25,7 +25,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { getSortingCriteria } from '@kbn/sort-predicates';
 import { getKbnPalettes, useKbnPalettes } from '@kbn/palettes';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -493,7 +493,7 @@ export const getDatatableVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useKibanaDarkMode();
+    const isDarkMode = useKibanaIsDarkMode();
     const palettes = useKbnPalettes();
 
     return (

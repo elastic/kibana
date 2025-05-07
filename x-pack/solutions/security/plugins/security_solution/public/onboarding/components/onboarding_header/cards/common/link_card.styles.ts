@@ -8,11 +8,11 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 export const useCardStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
 
   return css`
     min-width: 315px;

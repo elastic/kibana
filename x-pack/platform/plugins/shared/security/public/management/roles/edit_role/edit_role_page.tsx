@@ -42,7 +42,7 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
@@ -340,7 +340,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   cloudOrgUrl,
   ...startServices
 }) => {
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
 
   if (!dataViews) {
     // The dataViews plugin is technically marked as an optional dependency because we don't need to pull it in for Anonymous pages (such

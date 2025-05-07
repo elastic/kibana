@@ -27,7 +27,7 @@ import {
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
 
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { ExpressionTagcloudRendererDependencies } from '../plugin';
 import { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
@@ -120,7 +120,7 @@ export const tagcloudRenderer: (
                 fireEvent={handlers.event}
                 syncColors={config.syncColors}
                 overrides={config.overrides}
-                isDarkMode={useKibanaDarkMode()}
+                isDarkMode={useKibanaIsDarkMode()}
               />
             </VisualizationContainer>
           )}

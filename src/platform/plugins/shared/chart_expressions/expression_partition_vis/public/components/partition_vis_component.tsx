@@ -43,7 +43,7 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { useKbnPalettes } from '@kbn/palettes';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { consolidateMetricColumns } from '../../common/utils';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
@@ -304,7 +304,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     },
   });
 
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const layers = useMemo(
     () =>
       getLayers(

@@ -34,7 +34,7 @@ import { useKbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getColorCategories, getLegacyColorCategories } from '@kbn/chart-expressions-common';
 import { css } from '@emotion/react';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme/hooks';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme/hooks';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import { RowHeightMode } from '../../../../common/types';
 import { LensGridDirection } from '../../../../common/expressions';
@@ -81,7 +81,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
   const isInteractive = props.interactive;
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
 
   const [columnConfig, setColumnConfig] = useState({
