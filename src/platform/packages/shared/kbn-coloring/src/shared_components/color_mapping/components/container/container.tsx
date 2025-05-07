@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiButtonIcon, EuiToolTip } from
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { KbnPalettes } from '@kbn/palettes';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { PaletteSelector } from '../palette_selector/palette_selector';
 
 import { changeGradientSortOrder } from '../../state/color_mapping';
@@ -21,19 +22,23 @@ import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { Gradient } from '../palette_selector/gradient';
 import { ScaleMode } from '../palette_selector/scale';
 import { UnassignedTermsConfig } from './unassigned_terms_config';
-import { AssignmentsConfig } from './assigments';
+import { Assignments } from './assignments';
 
 export function Container({
   data,
   palettes,
   isDarkMode,
   specialTokens,
+  formatter,
+  allowCustomMatch,
 }: {
   palettes: KbnPalettes;
   data: ColorMappingInputData;
   isDarkMode: boolean;
   /** map between original and formatted tokens used to handle special cases, like the Other bucket and the empty bucket */
   specialTokens: Map<string, string>;
+  formatter?: IFieldFormat;
+  allowCustomMatch?: boolean;
 }) {
   const dispatch = useDispatch();
   const palette = useSelector(selectPalette(palettes));
@@ -111,11 +116,13 @@ export function Container({
             defaultMessage: 'Color assignments',
           })}
         >
-          <AssignmentsConfig
+          <Assignments
             isDarkMode={isDarkMode}
             data={data}
             palettes={palettes}
             specialTokens={specialTokens}
+            formatter={formatter}
+            allowCustomMatch={allowCustomMatch}
           />
         </EuiFormRow>
       </EuiFlexItem>

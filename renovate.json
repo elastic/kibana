@@ -3476,6 +3476,12 @@
       "enabled": true
     },
     {
+      "matchDepNames": [
+        "chromedriver"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "chromedriver",
       "matchDepNames": [
         "chromedriver"
