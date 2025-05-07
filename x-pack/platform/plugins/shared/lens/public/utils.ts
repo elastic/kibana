@@ -39,24 +39,12 @@ import {
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';
-import type { RangeTypeLens } from './datasources/form_based/operations/definitions/ranges';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {
     defaultMessage: `Lens cannot visualize {fieldType} fields`,
     values: { fieldType },
   });
-}
-
-export function isLensRange(range: unknown = {}): range is RangeTypeLens {
-  if (!range || typeof range !== 'object') return false;
-  const { from, to, label } = range as RangeTypeLens;
-
-  return (
-    label !== undefined &&
-    (typeof from === 'number' || from === null) &&
-    (typeof to === 'number' || to === null)
-  );
 }
 
 export function getResolvedDateRange(timefilter: TimefilterContract) {

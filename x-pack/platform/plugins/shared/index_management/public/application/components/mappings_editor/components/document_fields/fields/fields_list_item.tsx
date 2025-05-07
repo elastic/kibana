@@ -6,7 +6,6 @@
  */
 
 import React, { forwardRef } from 'react';
-import classNames from 'classnames';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,10 +13,13 @@ import {
   EuiButtonIcon,
   EuiToolTip,
   EuiIcon,
+  useEuiTheme,
+  EuiThemeComputed,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
+import { css } from '@emotion/react';
 import { NormalizedField, NormalizedFields, State } from '../../../types';
+
 import { getTypeLabelFromField } from '../../../lib';
 import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '../../../constants';
 
@@ -45,6 +47,51 @@ const i18nTexts = {
     defaultMessage: 'Field shadowed by a runtime field with the same name.',
   }),
 };
+
+const getListItemStyle = ({ border, colors, size }: EuiThemeComputed<{}>) => ({
+  dotted: css`
+    border-bottom-style: dashed;
+  `,
+  field: css`
+    border-bottom: ${border.thin};
+    height: calc(${size.xl} * 2);
+    margin-top: ${size.xs};
+  `,
+  fieldEnabled: css`
+    &:hover {
+      background-color: ${colors.backgroundBaseHighlighted};
+    }
+  `,
+  fieldHighlighted: css`
+    background-color: ${colors.backgroundBaseHighlighted};
+  `,
+  fieldDim: css`
+    opacity: 0.3;
+    &:hover {
+      background-color: initial;
+    }
+  `,
+  wrapper: css`
+    padding-left: ${size.xs};
+  `,
+  wrapperIndent: css`
+    padding-left: ${size};
+  `,
+  content: css`
+    height: calc(${size.xl} * 2);
+    position: relative;
+  `,
+  contentIndent: css`
+    padding-left: ${size.xl};
+  `,
+  toggle: css`
+    padding-left: ${size.xs};
+    width: ${size.l};
+  `,
+  actions: css`
+    padding-left: ${size.s};
+  `,
+});
 
 interface Props {
   field: NormalizedField;
@@ -101,6 +148,8 @@ function FieldListItemComponent(
     isExpanded,
     path,
   } = field;
+  const { euiTheme } = useEuiTheme();
+  const styles = getListItemStyle(euiTheme);
 
   // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
@@ -145,7 +194,7 @@ function FieldListItemComponent(
     const { addMultiFieldButtonLabel, addPropertyButtonLabel, editButtonLabel, deleteButtonLabel } =
       i18nTexts;
     return (
-      <EuiFlexGroup gutterSize="s" className="mappingsEditor__fieldsListItem__actions">
+      <EuiFlexGroup gutterSize="s" css={styles.actions}>
         {canHaveMultiFields && (
           <EuiFlexItem grow={false}>
             <EuiToolTip content={addMultiFieldButtonLabel}>
@@ -205,39 +254,33 @@ function FieldListItemComponent(
   const dataTestSubj = `${path.join('')}Field`;
 
   return (
-    <li
-      className={classNames('mappingsEditor__fieldsListItem', {
-        'mappingsEditor__fieldsListItem--dottedLine': hasDottedLine,
-      })}
-      data-test-subj={`fieldsListItem ${dataTestSubj}`}
-      ref={ref}
-    >
+    <li data-test-subj={`fieldsListItem ${dataTestSubj}`} ref={ref}>
       <div
         style={{ paddingLeft: `${indent}px` }}
-        className={classNames('mappingsEditor__fieldsListItem__field', {
-          'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
-          'mappingsEditor__fieldsListItem__field--highlighted': isHighlighted,
-          'mappingsEditor__fieldsListItem__field--dim': isDimmed,
-        })}
+        css={[
+          styles.field,
+          areActionButtonsVisible && styles.fieldEnabled,
+          isHighlighted && styles.fieldHighlighted,
+          isDimmed && styles.fieldDim,
+          hasDottedLine && styles.dotted,
+        ]}
       >
         <div
-          className={classNames('mappingsEditor__fieldsListItem__wrapper', {
-            'mappingsEditor__fieldsListItem__wrapper--indent':
-              treeDepth === 0 && maxNestedDepth === 0,
-          })}
+          css={[styles.wrapper, treeDepth === 0 && maxNestedDepth === 0 && styles.wrapperIndent]}
         >
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
-            className={classNames('mappingsEditor__fieldsListItem__content', {
-              'mappingsEditor__fieldsListItem__content--toggle': hasChildFields || hasMultiFields,
-              'mappingsEditor__fieldsListItem__content--multiField': isMultiField,
-              'mappingsEditor__fieldsListItem__content--indent':
-                !hasChildFields && !hasMultiFields && maxNestedDepth > treeDepth,
-            })}
+            css={[
+              styles.content,
+              !hasChildFields &&
+                !hasMultiFields &&
+                maxNestedDepth > treeDepth &&
+                styles.contentIndent,
+            ]}
           >
             {(hasChildFields || hasMultiFields) && (
-              <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__toggle">
+              <EuiFlexItem grow={false} css={styles.toggle}>
                 <EuiButtonIcon
                   color="text"
                   onClick={toggleExpand}
@@ -263,16 +306,12 @@ function FieldListItemComponent(
             )}
 
             {isMultiField && (
-              <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__icon">
+              <EuiFlexItem grow={false}>
                 <EuiIcon color="subdued" type="documents" />
               </EuiFlexItem>
             )}
 
-            <EuiFlexItem
-              grow={false}
-              className="mappingsEditor__fieldsListItem__name"
-              data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
-            >
+            <EuiFlexItem grow={false} data-test-subj={`fieldName ${dataTestSubj}-fieldName`}>
               {source.name}
             </EuiFlexItem>
 
