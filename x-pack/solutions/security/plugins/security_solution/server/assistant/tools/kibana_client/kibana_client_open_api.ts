@@ -8,14 +8,14 @@
 import fs from 'node:fs';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import { tool } from '@langchain/core/tools';
-import { memoize, pickBy } from 'lodash';
+import { castArray, first, memoize, pick, pickBy } from 'lodash';
 import { StdUriTemplate } from '@std-uritemplate/std-uritemplate';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { SystemMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import { z } from '@kbn/zod';
 import path from 'path';
 import Oas from 'oas';
-import { parse } from 'yaml';
+import { parse as yamlParse } from 'yaml';
 import type { BuildFlavor } from '@kbn/config';
 import axios from 'axios';
 import type { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
@@ -25,6 +25,7 @@ import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import { formatToolName, type Operation } from '../../../utils/open_api_tool/utils';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { format, parse as urlParse } from 'url';
 
 export const kibanaServerlessOpenApiSpec = path.resolve(
   REPO_ROOT,
@@ -97,7 +98,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
       ...(args?.options ?? {}),
     };
     const yamlOpenApiSpec = await fs.promises.readFile(options.apiSpecPath, 'utf8');
-    const jsonOpenApiSpec = await parse(yamlOpenApiSpec);
+    const jsonOpenApiSpec = await yamlParse(yamlOpenApiSpec);
     const dereferencedOas = new Oas(jsonOpenApiSpec);
     await dereferencedOas.dereference();
     return new this({
@@ -122,24 +123,23 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
   }: RuntimeOptions & { operation: Operation }) {
     return tool(
       async (input, config) => {
-        const { request, assistantContext } = assistantToolParams;
-        const { origin } = request.rewrittenUrl || request.url;
+        const { request } = assistantToolParams;
+        const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
+
+        const origin = first(castArray(request.headers.origin));
 
         const pathname = StdUriTemplate.expand(operation.path, input.path);
 
-        const pathnameWithBasePath = path.posix.join(
-          assistantContext.getServerBasePath(),
-          pathname
-        );
-
-        const serializedQuery = Object.entries(input.query ?? {}).map(([key, value]) => {
-          const shouldStringify = typeof value === 'object' && value !== null;
-          return [key, shouldStringify ? JSON.stringify(value) : value] as [string, string];
-        });
-
-        const params = new URLSearchParams(serializedQuery);
-        const url = new URL(pathnameWithBasePath, origin);
-        url.search = params.toString();
+        const nextUrl = {
+          host,
+          protocol,
+          ...(origin ? pick(urlParse(origin), 'host', 'protocol') : {}),
+          pathname: pathnameFromRequest.replace(
+            /\/internal\/elastic_assistant\/actions\/connector\/[^/]+\/_execute/,
+            pathname
+          ),
+          query: input.query ? (input.query as Record<string, string>) : undefined,
+        };
 
         const headers = pickBy(request.headers, (value, key) => {
           return (
@@ -152,7 +152,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
           const result = await axios({
             method: operation.method.toUpperCase(),
             headers: { ...input.header, ...headers, 'kbn-xsrf': 'mock-kbn-xsrf' },
-            url: url.toString(),
+            url: format(nextUrl),
             data: input.body ? JSON.stringify(input.body) : undefined,
           });
 
