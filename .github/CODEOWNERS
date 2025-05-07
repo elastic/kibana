@@ -411,6 +411,7 @@ src/platform/packages/shared/kbn-analytics @elastic/kibana-core
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-apm-types-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
@@ -533,12 +534,15 @@ src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-std @elastic/kibana-core
 src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui
 src/platform/packages/shared/kbn-storybook @elastic/kibana-operations
+src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-assistant
+src/platform/packages/shared/kbn-telemetry-config @elastic/kibana-core
 src/platform/packages/shared/kbn-test @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-timerange @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-tooling-log @elastic/kibana-operations
 src/platform/packages/shared/kbn-traced-es-client @elastic/observability-ui
+src/platform/packages/shared/kbn-tracing @elastic/kibana-core @elastic/obs-ai-assistant
 src/platform/packages/shared/kbn-triggers-actions-ui-types @elastic/response-ops
 src/platform/packages/shared/kbn-try-in-console @elastic/search-kibana
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
