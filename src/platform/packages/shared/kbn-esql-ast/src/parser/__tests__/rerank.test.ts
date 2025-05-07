@@ -190,16 +190,11 @@ describe('RERANK command', () => {
         });
       });
 
-      it('can be functions', () => {
+      it('cannot be functions without assignments', () => {
         const text = `FROM index | RERANK "query text" ON AVG(123) WITH \`reranker-inference-id\``;
         const query = EsqlQuery.fromSrc(text);
 
-        expect(query.errors.length).toBe(0);
-        expect(query.ast.commands[1]).toMatchObject({
-          type: 'command',
-          name: 'rerank',
-          fields: [{ type: 'function', name: 'avg' }],
-        });
+        expect(query.errors.length > 0).toBe(true);
       });
 
       it('can be assignments', () => {
@@ -215,14 +210,28 @@ describe('RERANK command', () => {
       });
 
       it('can be param', () => {
-        const text = `FROM index | RERANK "query text" ON ?123 WITH \`reranker-inference-id\``;
+        const text = `FROM index | RERANK "query text" ON a = ?123 WITH \`reranker-inference-id\``;
         const query = EsqlQuery.fromSrc(text);
 
         expect(query.errors.length).toBe(0);
         expect(query.ast.commands[1]).toMatchObject({
           type: 'command',
           name: 'rerank',
-          fields: [{ type: 'literal', literalType: 'param', value: 123 }],
+          fields: [
+            {
+              type: 'function',
+              name: '=',
+              args: [
+                {},
+                {
+                  type: 'literal',
+                  literalType: 'param',
+                  paramType: 'positional',
+                  value: 123,
+                },
+              ],
+            },
+          ],
         });
       });
     });

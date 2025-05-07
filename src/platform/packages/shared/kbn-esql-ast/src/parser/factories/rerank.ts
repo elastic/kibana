@@ -7,18 +7,70 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RerankCommandContext } from '../../antlr/esql_parser';
-import { Builder } from '../../builder';
-import { ESQLAstRerankCommand } from '../../types';
-import { resolveItem } from '../../visitor/utils';
-import { createCommand, createIdentifierOrParam } from '../factories';
+import { ParserRuleContext } from 'antlr4';
+import {
+  RerankCommandContext,
+  RerankFieldContext,
+  RerankFieldsContext,
+} from '../../antlr/esql_parser';
+import { AstNodeParserFields, Builder } from '../../builder';
+import { ESQLAstField, ESQLAstRerankCommand } from '../../types';
+import { firstItem, resolveItem } from '../../visitor/utils';
+import { createColumn, createCommand, createIdentifierOrParam } from '../factories';
 import { getPosition } from '../helpers';
-import { collectAllFields, getConstant } from '../walkers';
+import { collectBooleanExpression, getConstant } from '../walkers';
+
+const parserFieldsFromCtx = (ctx: ParserRuleContext): AstNodeParserFields => {
+  const min: number = ctx.start.start;
+  const max: number = ctx.stop?.stop ?? ctx.start.stop;
+
+  return {
+    text: ctx.getText(),
+    location: { min, max },
+    incomplete: Boolean(ctx.exception),
+  };
+};
+
+const visitRerankField = (ctx: RerankFieldContext): ESQLAstField => {
+  const columnCtx = ctx.qualifiedName();
+  const column = createColumn(columnCtx);
+  const assignCtx = ctx.ASSIGN();
+
+  if (assignCtx) {
+    const booleanExpression = firstItem(collectBooleanExpression(ctx.booleanExpression()));
+    const assignment = Builder.expression.func.binary(
+      '=',
+      [column, booleanExpression!],
+      {},
+      parserFieldsFromCtx(ctx)
+    );
+
+    return assignment;
+  }
+
+  return column;
+};
+
+const visitRerankFields = (ctx: RerankFieldsContext | undefined): ESQLAstField[] => {
+  const ast: ESQLAstField[] = [];
+
+  if (!ctx) {
+    return ast;
+  }
+
+  for (const fieldCtx of ctx.rerankField_list()) {
+    const field = visitRerankField(fieldCtx);
+
+    ast.push(field);
+  }
+
+  return ast;
+};
 
 export const createRerankCommand = (ctx: RerankCommandContext): ESQLAstRerankCommand => {
   const query = resolveItem(getConstant(ctx._queryText)) as ESQLAstRerankCommand['query'];
-  const fieldsCtx = ctx.fields();
-  const fields = collectAllFields(fieldsCtx);
+  const fieldsCtx = ctx.rerankFields();
+  const fields = visitRerankFields(fieldsCtx);
   const inferenceIdCtx = ctx._inferenceId;
   const maybeInferenceId = inferenceIdCtx ? createIdentifierOrParam(inferenceIdCtx) : undefined;
   const inferenceId = maybeInferenceId ?? Builder.identifier('', { incomplete: true });

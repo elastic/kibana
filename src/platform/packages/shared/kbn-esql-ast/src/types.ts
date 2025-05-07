@@ -40,7 +40,7 @@ export type ESQLSingleAstItem =
   | ESQLMap
   | ESQLMapEntry;
 
-export type ESQLAstField = ESQLFunction | ESQLColumn;
+export type ESQLAstField = ESQLFunction | ESQLColumn | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
