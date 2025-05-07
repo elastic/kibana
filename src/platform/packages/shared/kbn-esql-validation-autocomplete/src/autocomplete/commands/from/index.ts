@@ -65,7 +65,12 @@ export async function suggest({
 
   // FROM /
   if (indexes.length === 0) {
-    addSuggestionsBasedOnQuote(getSourceSuggestions(await getSources()));
+    addSuggestionsBasedOnQuote(
+      getSourceSuggestions(
+        await getSources(),
+        indexes.map(({ name }) => name)
+      )
+    );
   }
   // FROM something /
   else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
@@ -91,7 +96,10 @@ export async function suggest({
       (fragment) =>
         sourceExists(fragment, new Set(sources.map(({ name: sourceName }) => sourceName))),
       (_fragment, rangeToReplace) => {
-        return getSourceSuggestions(sources).map((suggestion) => ({
+        return getSourceSuggestions(
+          sources,
+          indexes.map(({ name }) => name)
+        ).map((suggestion) => ({
           ...suggestion,
           rangeToReplace,
         }));
@@ -144,11 +152,11 @@ export async function suggest({
   return suggestions;
 }
 
-function getSourceSuggestions(sources: ESQLSourceResult[]) {
+function getSourceSuggestions(sources: ESQLSourceResult[], ignored: string[]) {
   // hide indexes that start with .
   return buildSourcesDefinitions(
     sources
-      .filter(({ hidden }) => !hidden)
+      .filter(({ hidden, name }) => !hidden && !ignored.includes(name))
       .map(({ name, dataStreams, title, type }) => {
         return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
       })
