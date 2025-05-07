@@ -99,12 +99,14 @@ components:
           type: array
           items:
             type: object
-            required: [field, value]
+            required:
+            - fields
+            - values
             properties:
               fields:
                 type: array
                 items:
-                  type: string
+                  type: string                  
               values:
                 type: array
                 items:
@@ -129,14 +131,16 @@ components:
           type: boolean
         matchers:
           type: array
-          required: [field, value]
           items:
             type: object
+            required:
+            - fields
+            - values
             properties:
               fields:
                 type: array
                 items:
-                  type: string
+                  type: string                
               values:
                 type: array
                 items:
