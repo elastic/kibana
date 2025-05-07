@@ -38,6 +38,8 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from './types';
 import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
+import { PadPrecheckAndInstallClient } from './lib/entity_analytics/privilege_monitoring/pad_precheck_and_install_client';
+import { PadRemoveInstallationClient } from './lib/entity_analytics/privilege_monitoring/pad_remove_installation';
 
 export interface IRequestContextFactory {
   create(
@@ -266,6 +268,24 @@ export class RequestContextFactory implements IRequestContextFactory {
           kibanaVersion: options.kibanaVersion,
           telemetry: core.analytics,
           // TODO: add apiKeyManager
+        });
+      }),
+      getPadPrecheckAndInstallClient: memoize(() => {
+        return new PadPrecheckAndInstallClient({
+          clusterClient: coreContext.elasticsearch.client,
+          soClient: coreContext.savedObjects.client,
+          logger: options.logger,
+          namespace: getSpaceId(),
+          dataViewsService,
+          // auditService: getAuditLogger(),
+        });
+      }),
+      getRemovePadInstallationClient: memoize(() => {
+        return new PadRemoveInstallationClient({
+          clusterClient: coreContext.elasticsearch.client,
+          soClient: coreContext.savedObjects.client,
+          logger: options.logger,
+          namespace: getSpaceId(),
         });
       }),
       getEntityStoreDataClient: memoize(() => {
