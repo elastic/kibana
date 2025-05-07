@@ -111,10 +111,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         const httpsAgent = new https.Agent({
           cert,
           key,
-          rejectUnauthorized: this.config.verificationMode === 'none',
+          rejectUnauthorized: this.config.verificationMode !== 'none',
           checkServerIdentity:
-            this.config.verificationMode === 'certificate' ||
-            this.config.verificationMode === 'none'
+            this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
               ? () => undefined
               : undefined,
         });
