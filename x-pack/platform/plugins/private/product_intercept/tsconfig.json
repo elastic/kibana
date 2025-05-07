@@ -17,7 +17,8 @@
     "@kbn/core-analytics-browser",
     "@kbn/config-schema",
     "@kbn/i18n",
-    "@kbn/intercepts-plugin"
+    "@kbn/intercepts-plugin",
+    "@kbn/i18n-react"
   ],
   "exclude": ["target/**/*"]
 }
