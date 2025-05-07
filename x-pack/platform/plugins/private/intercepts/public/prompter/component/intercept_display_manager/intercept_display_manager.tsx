@@ -256,13 +256,16 @@ export function InterceptDisplayManager({
                   <EuiFlexItem>
                     <EuiButton
                       size="s"
-                      color="success"
                       data-test-subj="productInterceptProgressionButton"
                       onClick={() => nextStep(isLastStep)}
                     >
-                      {i18n.translate('core.notifications.productIntercept.nextStep', {
-                        defaultMessage: 'Next',
-                      })}
+                      {isLastStep
+                        ? i18n.translate('core.notifications.productIntercept.nextStep', {
+                            defaultMessage: 'Close',
+                          })
+                        : i18n.translate('core.notifications.productIntercept.nextStep', {
+                            defaultMessage: 'Next',
+                          })}
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>

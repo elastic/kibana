@@ -8,9 +8,10 @@
 import { Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { InterceptsStart } from '@kbn/intercepts-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { NPSScoreInput } from './components';
 import { PromptTelemetry } from './telemetry';
@@ -107,9 +108,22 @@ export class ProductInterceptPublicPlugin implements Plugin {
               return React.createElement(
                 EuiText,
                 { size: 's' },
-                i18n.translate('productIntercept.prompter.step.completion.content', {
+                React.createElement(FormattedMessage, {
+                  id: 'productIntercept.prompter.step.completion.content',
                   defaultMessage:
-                    "If you'd like to participate in future research to help improve kibana, click here",
+                    "If you'd like to participate in future research to help improve kibana, <link>click here</link>.",
+                  values: {
+                    link: (chunks) =>
+                      React.createElement(
+                        EuiLink,
+                        {
+                          external: true,
+                          href: 'https://www.elastic.co/feedback',
+                          target: '_blank',
+                        },
+                        chunks
+                      ),
+                  },
                 })
               );
             },
