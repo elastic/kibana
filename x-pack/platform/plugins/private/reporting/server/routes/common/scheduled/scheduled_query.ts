@@ -5,48 +5,74 @@
  * 2.0.
  */
 
-import { errors, estypes } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type {
+  ElasticsearchClient,
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import type { ReportSource } from '@kbn/reporting-common/types';
-import { transformResponse } from '@kbn/alerting-plugin/server/routes/backfill/apis/schedule/transforms';
-import { RawScheduledReport } from '../../../saved_objects/scheduled_report/schemas/latest';
 import type { ReportingCore } from '../../..';
-import { runtimeFieldKeys, runtimeFields } from '../../../lib/store/runtime_fields';
-import type { ReportingUser } from '../../../types';
+import type { ListScheduledReportApiJSON, ReportingUser, ScheduledReportType } from '../../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../../saved_objects';
+import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { RRule } from '@kbn/rrule';
 
-const defaultSize = 10;
+export const MAX_SCHEDULED_REPORT_LIST_SIZE = 100;
+export const DEFAULT_SCHEDULED_REPORT_LIST_SIZE = 10;
+
+// TODO - remove .keyword when mapping is fixed
+const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id.keyword';
+const CREATED_AT_FIELD = 'created_at';
 const getUsername = (user: ReportingUser) => (user ? user.username : false);
 
-function getSearchBody(body: estypes.SearchRequest): estypes.SearchRequest {
-  return {
-    _source: {
-      excludes: ['output.content', 'payload.headers'],
-    },
-    sort: [{ created_at: { order: 'desc' } }],
-    size: defaultSize,
-    fields: runtimeFieldKeys,
-    runtime_mappings: runtimeFields,
-    ...body,
-  };
+interface ApiResponse {
+  page: number;
+  per_page: number;
+  total: number;
+  data: ListScheduledReportApiJSON[];
 }
 
-export function transformResponse(result: SavedObjectsFindResponse<RawScheduledReport>) {
+const getEmptyApiResponse = (page: number, perPage: number) => ({
+  page,
+  per_page: perPage,
+  total: 0,
+  data: [],
+});
+
+export type CreatedAtSearchResponse = SearchResponse<{created_at: string}>;
+
+export function transformResponse(result: SavedObjectsFindResponse<ScheduledReportType>, lastResponse: CreatedAtSearchResponse): ApiResponse {
   return {
     page: result.page,
     per_page: result.per_page,
     total: result.total,
-    data: result.saved_objects.map((so) => ({})
+    data: result.saved_objects.map((so) => {
+      const id = so.id;
+      const lastRunForId = lastResponse.hits.hits.find((hit) => hit.fields?.[SCHEDULED_REPORT_ID_FIELD]?.[0] === id);
+
+      const schedule = so.attributes.schedule;
+      const _rrule = new RRule({
+        ...schedule.rrule,
+        dtstart: new Date(),
+      })
+
+      return {
+        id,
+        created_at: so.attributes.createdAt,
+        created_by: so.attributes.createdBy,
+        enabled: so.attributes.enabled,
+        jobtype: so.attributes.jobType,
+        last_run: lastRunForId?._source?.[CREATED_AT_FIELD],
+        next_run: _rrule.after(new Date())?.toISOString(),
+        notification: so.attributes.notification,
+        schedule: so.attributes.schedule,
+        title: so.attributes.title,
+      };
+    }),
   };
 }
-
-export type ReportContent = Pick<ReportSource, 'status' | 'jobtype' | 'output'> & {
-  payload?: Pick<ReportSource['payload'], 'title'>;
-};
 
 export interface ScheduledQueryFactory {
   list(
@@ -54,12 +80,11 @@ export interface ScheduledQueryFactory {
     user: ReportingUser,
     page: number,
     size: number
-  ): Promise<SavedObjectsFindResponse<RawScheduledReport>>;
+  ): Promise<ApiResponse>;
 }
 
 export function scheduledQueryFactory(
-  reportingCore: ReportingCore,
-  { isInternal }: { isInternal: boolean }
+  reportingCore: ReportingCore
 ): ScheduledQueryFactory {
   async function execQuery<
     T extends (client: SavedObjectsClientContract) => Promise<Awaited<ReturnType<T>> | undefined>
@@ -77,28 +102,74 @@ export function scheduledQueryFactory(
     }
   }
 
+  async function execLastRunQuery<
+    T extends (client: ElasticsearchClient) => Promise<Awaited<ReturnType<T>> | undefined>
+  >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
+    try {
+      const { asInternalUser: client } = await reportingCore.getEsClient();
+
+      return await callback(client);
+    } catch (error) {
+      if (error instanceof errors.ResponseError && [401, 403, 404].includes(error.statusCode!)) {
+        return;
+      }
+
+      throw error;
+    }
+  }
+
   return {
-    async list(req, user, page = 1, size = defaultSize) {
+    async list(req, user, page = 1, size = DEFAULT_SCHEDULED_REPORT_LIST_SIZE) {
       const username = getUsername(user);
 
       // if user has Manage Reporting privileges, we can list
       // scheduled reports for all users in this space, otherwise
       // we will filter only to the scheduled reports created by the user
       const canManageReporting = await reportingCore.canManageReportingForSpace(req);
-      console.log(`canManageReporting: ${canManageReporting}`);
 
       const response = await execQuery(req, (soClient) =>
-        soClient.find<RawScheduledReport>({
+        soClient.find<ScheduledReportType>({
           type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
           page,
           perPage: size,
-          ...(!canManageReporting ? { filter: `createdBy: "${username}` } : {}),
+          ...(!canManageReporting ? { filter: `createdBy: "${username}"` } : {}),
         })
       );
 
-      console.log(`response ${JSON.stringify(response)}`);
+      if (!response) {
+        return getEmptyApiResponse(page, size);
+      }
 
-      return transformResponse(response as SavedObjectsFindResponse<RawScheduledReport>);
+      const scheduledReportSoIds = response?.saved_objects.map((so) => so.id);
+      console.log(`scheduledReportSoIds ${JSON.stringify(scheduledReportSoIds)}`);
+
+      if (!scheduledReportSoIds || scheduledReportSoIds.length === 0) {
+        return getEmptyApiResponse(page, size);
+      }
+
+      const lastRunResponse = (await execLastRunQuery((esClient) =>
+      esClient.search({
+        index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
+        size,
+        _source: [CREATED_AT_FIELD],
+        sort: [ { [CREATED_AT_FIELD]: { order: 'desc' } } ],
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  [SCHEDULED_REPORT_ID_FIELD]: scheduledReportSoIds,
+                }
+              },
+            ]
+          }
+        },
+        collapse: { field: SCHEDULED_REPORT_ID_FIELD }
+      }))) as SearchResponse<{created_at: string}>;
+
+      console.log(`lastRunResponse ${JSON.stringify(lastRunResponse)}`);
+
+      return transformResponse(response, lastRunResponse);
     },
   };
 }

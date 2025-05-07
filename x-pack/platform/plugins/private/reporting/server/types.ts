@@ -120,6 +120,19 @@ export type ScheduledReportType = Omit<RawScheduledReport, 'schedule'> & {
   schedule: RruleSchedule;
 };
 
+export interface ListScheduledReportApiJSON {
+  id: string;
+  created_at: RawScheduledReport['createdAt'];
+  created_by: RawScheduledReport['createdBy'];
+  enabled: RawScheduledReport['enabled'];
+  jobtype: RawScheduledReport['jobType'];
+  last_run: string | undefined;
+  next_run: string | undefined;
+  notification: RawScheduledReport['notification'];
+  schedule: RruleSchedule;
+  title: RawScheduledReport['title'];
+}
+
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }

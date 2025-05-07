@@ -10,14 +10,7 @@ import { rawScheduledReportSchemaV1 } from './schemas';
 
 export const scheduledReportModelVersions: SavedObjectsModelVersionMap = {
   '1': {
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          createdBy: { type: 'keyword' },
-        },
-      },
-    ],
+    changes: [],
     schemas: {
       forwardCompatibility: rawScheduledReportSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: rawScheduledReportSchemaV1,
