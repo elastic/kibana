@@ -176,7 +176,6 @@ export function App({
       setIndicateNoData(false);
     }
   }, [setIndicateNoData, indicateNoData, searchSessionId]);
-
   const getIsByValueMode = useCallback(
     () => Boolean(isLinkedToOriginatingApp && !savedObjectId),
     [isLinkedToOriginatingApp, savedObjectId]

@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const samlAuth = getService('samlAuth');
 
   describe('get_alerts_dataset_info', function () {
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
     let messageAddedEvents: MessageAddEvent[];
