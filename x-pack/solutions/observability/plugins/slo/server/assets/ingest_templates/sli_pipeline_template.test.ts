@@ -15,7 +15,7 @@ describe('getSLIPipelineTemplate', () => {
       groupBy: [''],
     });
 
-    expect(getSLIPipelineTemplate(slo)).toMatchSnapshot();
+    expect(getSLIPipelineTemplate(slo, 'default')).toMatchSnapshot();
   });
 
   it('handles slo with many fields as groupBy', () => {
@@ -24,6 +24,6 @@ describe('getSLIPipelineTemplate', () => {
       groupBy: ['host.name', 'some.labelId'],
     });
 
-    expect(getSLIPipelineTemplate(slo)).toMatchSnapshot();
+    expect(getSLIPipelineTemplate(slo, 'default')).toMatchSnapshot();
   });
 });

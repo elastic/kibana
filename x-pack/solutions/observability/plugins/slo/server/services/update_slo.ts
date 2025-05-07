@@ -114,7 +114,7 @@ export class UpdateSLO {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-            getSLIPipelineTemplate(updatedSlo)
+            getSLIPipelineTemplate(updatedSlo, this.spaceId)
           ),
         { logger: this.logger }
       );
