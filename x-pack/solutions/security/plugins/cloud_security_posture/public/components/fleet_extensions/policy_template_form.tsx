@@ -51,7 +51,6 @@ import {
   isPostureInput,
   isBelowMinVersion,
   type NewPackagePolicyPostureInput,
-  POSTURE_NAMESPACE,
   POLICY_TEMPLATE_FORM_DTS,
   hasErrors,
 } from './utils';
@@ -541,23 +540,6 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
     ))}
   </div>
 );
-
-const useEnsureDefaultNamespace = ({
-  newPolicy,
-  input,
-  updatePolicy,
-}: {
-  newPolicy: NewPackagePolicy;
-  input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
-}) => {
-  useEffect(() => {
-    if (newPolicy.namespace === POSTURE_NAMESPACE) return;
-
-    const policy = { ...getPosturePolicy(newPolicy, input.type), namespace: newPolicy.namespace };
-    updatePolicy(policy);
-  }, [newPolicy, input, updatePolicy]);
-};
 
 const usePolicyTemplateInitialName = ({
   isEditPage,
