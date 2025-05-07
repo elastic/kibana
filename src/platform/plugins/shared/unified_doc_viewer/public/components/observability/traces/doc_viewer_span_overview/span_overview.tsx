@@ -11,12 +11,13 @@ import React, { useMemo } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
+  SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
   TRACE_ID_FIELD,
   SPAN_ID_FIELD,
   SPAN_NAME_FIELD,
   TRANSACTION_ID_FIELD,
-  getTraceDocumentOverview,
+  getSpanDocumentOverview,
 } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { TransactionProvider } from './hooks/use_transaction';
@@ -43,16 +44,17 @@ export function SpanOverview({
   dataView,
 }: SpanOverviewProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
-  const parsedDoc = useMemo(
-    () => getTraceDocumentOverview(hit, { dataView, fieldFormats }),
+  const formattedDoc = useMemo(
+    () => getSpanDocumentOverview(hit, { dataView, fieldFormats }),
     [dataView, fieldFormats, hit]
   );
+  const fieldConfigurations = useMemo(
+    () => getSpanFieldConfiguration({ attributes: formattedDoc, flattenedDoc: hit.flattened }),
+    [hit.flattened, formattedDoc]
+  );
+
   const spanDuration = getTraceDocValue(SPAN_DURATION_FIELD, hit.flattened);
   const transactionId = getTraceDocValue(TRANSACTION_ID_FIELD, hit.flattened);
-  const fieldConfigurations = useMemo(
-    () => getSpanFieldConfiguration({ attributes: parsedDoc, flattenedDoc: hit.flattened }),
-    [hit.flattened, parsedDoc]
-  );
 
   return (
     <TransactionProvider transactionId={transactionId} indexPattern={transactionIndexPattern}>
@@ -66,9 +68,9 @@ export function SpanOverview({
           <EuiSpacer size="m" />
           <SpanSummaryTitle
             spanName={getTraceDocValue(SPAN_NAME_FIELD, hit.flattened)}
-            formattedSpanName={parsedDoc[SPAN_NAME_FIELD]}
+            formattedSpanName={formattedDoc[SPAN_NAME_FIELD]}
             id={getTraceDocValue(SPAN_ID_FIELD, hit.flattened)}
-            formattedId={parsedDoc[SPAN_ID_FIELD]}
+            formattedId={formattedDoc[SPAN_ID_FIELD]}
           />
           <EuiSpacer size="m" />
           {spanFields.map((fieldId) => (
@@ -82,7 +84,11 @@ export function SpanOverview({
           {spanDuration && (
             <>
               <EuiSpacer size="m" />
-              <SpanDurationSummary duration={spanDuration} />
+              <SpanDurationSummary
+                spanDuration={spanDuration}
+                spanName={formattedDoc[SPAN_NAME_FIELD]}
+                serviceName={formattedDoc[SERVICE_NAME_FIELD]}
+              />
             </>
           )}
           <EuiSpacer size="m" />

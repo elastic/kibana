@@ -53,7 +53,6 @@ export function ServiceNameLink({
     ? getRouterLinkProps({
         href,
         onClick: () => {
-          // TODO add telemetry (https://github.com/elastic/kibana/issues/208919)
           apmLinkToServiceEntityLocator?.navigate({
             serviceName,
             rangeFrom: timeRangeFrom,

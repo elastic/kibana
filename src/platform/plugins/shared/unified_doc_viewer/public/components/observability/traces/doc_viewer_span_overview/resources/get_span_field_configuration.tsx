@@ -9,13 +9,13 @@
 
 import { EuiBadge } from '@elastic/eui';
 import {
-  DataTableRecord,
   SERVICE_ENVIRONMENT_FIELD,
   SPAN_DESTINATION_SERVICE_RESOURCE_FIELD,
   SPAN_NAME_FIELD,
   SPAN_SUBTYPE_FIELD,
   SPAN_TYPE_FIELD,
-  TraceDocumentOverview,
+  SpanDocumentOverview,
+  type DataTableRecord,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -31,7 +31,7 @@ export const getSpanFieldConfiguration = ({
   attributes,
   flattenedDoc,
 }: {
-  attributes: TraceDocumentOverview;
+  attributes: SpanDocumentOverview;
   flattenedDoc: DataTableRecord['flattened'];
 }): Record<string, FieldConfiguration> => {
   return {

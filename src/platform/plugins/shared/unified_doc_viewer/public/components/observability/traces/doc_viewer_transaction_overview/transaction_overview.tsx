@@ -14,9 +14,10 @@ import {
   SERVICE_NAME_FIELD,
   TRACE_ID_FIELD,
   TRANSACTION_DURATION_FIELD,
-  TRANSACTION_ID_FIELD,
   TRANSACTION_NAME_FIELD,
-  getTraceDocumentOverview,
+  TRANSACTION_TYPE_FIELD,
+  getTransactionDocumentOverview,
+  TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields } from './resources/fields';
@@ -43,14 +44,15 @@ export function TransactionOverview({
   dataView,
 }: TransactionOverviewProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
-  const parsedDoc = useMemo(
-    () => getTraceDocumentOverview(hit, { dataView, fieldFormats }),
+  const formattedDoc = useMemo(
+    () => getTransactionDocumentOverview(hit, { dataView, fieldFormats }),
     [dataView, fieldFormats, hit]
   );
   const transactionDuration = getTraceDocValue(TRANSACTION_DURATION_FIELD, hit.flattened);
   const fieldConfigurations = useMemo(
-    () => getTransactionFieldConfiguration({ attributes: parsedDoc, flattenedDoc: hit.flattened }),
-    [hit.flattened, parsedDoc]
+    () =>
+      getTransactionFieldConfiguration({ attributes: formattedDoc, flattenedDoc: hit.flattened }),
+    [hit.flattened, formattedDoc]
   );
   const traceId = getTraceDocValue(TRACE_ID_FIELD, hit.flattened);
   const transactionId = getTraceDocValue(TRANSACTION_ID_FIELD, hit.flattened);
@@ -68,9 +70,9 @@ export function TransactionOverview({
           <TransactionSummaryTitle
             serviceName={getTraceDocValue(SERVICE_NAME_FIELD, hit.flattened)}
             id={transactionId}
-            formattedId={parsedDoc[TRANSACTION_ID_FIELD]}
+            formattedId={formattedDoc[TRANSACTION_ID_FIELD]}
             transactionName={getTraceDocValue(TRANSACTION_NAME_FIELD, hit.flattened)}
-            formattedTransactionName={parsedDoc[TRANSACTION_NAME_FIELD]}
+            formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
           />
           <EuiSpacer size="m" />
           {transactionFields.map((fieldId) => (
@@ -81,10 +83,15 @@ export function TransactionOverview({
             />
           ))}
 
-          {transactionDuration && (
+          {transactionDuration !== undefined && (
             <>
               <EuiSpacer size="m" />
-              <TransactionDurationSummary duration={transactionDuration} />
+              <TransactionDurationSummary
+                transactionDuration={transactionDuration}
+                transactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
+                transactionType={formattedDoc[TRANSACTION_TYPE_FIELD]}
+                serviceName={formattedDoc[SERVICE_NAME_FIELD]}
+              />
             </>
           )}
           {traceId && transactionId ? (

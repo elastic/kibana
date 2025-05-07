@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
+import { SPAN_ID_FIELD, SPAN_NAME_FIELD } from '@kbn/discover-utils';
 import React from 'react';
+import { FieldHoverActionPopover } from '../../components/field_with_actions/field_hover_popover_action';
 import { HighlightField } from '../../components/highlight_field.tsx';
 
 export interface SpanSummaryTitleProps {
@@ -24,24 +26,39 @@ export const SpanSummaryTitle = ({
   formattedId,
   formattedSpanName,
 }: SpanSummaryTitleProps) => {
-  const idContent = <HighlightField value={id} formattedValue={formattedId} />;
   return spanName ? (
     <>
-      <EuiTitle size="xs">
-        <h2>
-          <HighlightField
-            textSize="m"
-            value={spanName}
-            formattedValue={formattedSpanName}
-            as="strong"
-          />
-        </h2>
-      </EuiTitle>
-      {idContent}
+      <div>
+        <FieldHoverActionPopover title={spanName} value={spanName} field={SPAN_NAME_FIELD}>
+          <EuiTitle size="xs">
+            <h2>
+              <HighlightField
+                textSize="m"
+                value={spanName}
+                formattedValue={formattedSpanName}
+                as="strong"
+              />
+            </h2>
+          </EuiTitle>
+        </FieldHoverActionPopover>
+      </div>
+      <FieldHoverActionPopover title={id} value={id} field={SPAN_ID_FIELD}>
+        <HighlightField value={id} formattedValue={formattedId} />
+      </FieldHoverActionPopover>
     </>
   ) : (
-    <EuiTitle size="xs">
-      <h2>{idContent}</h2>
-    </EuiTitle>
+    <FieldHoverActionPopover title={id} value={id} field={SPAN_ID_FIELD}>
+      <EuiTitle size="xs">
+        <HighlightField value={id} formattedValue={formattedId} as="h2" />
+      </EuiTitle>
+    </FieldHoverActionPopover>
   );
 };
+
+/* <HighlightField
+  textSize="m"
+  value={spanName}
+  formattedValue={formattedSpanName}
+  as="strong"
+/>
+</h2> */

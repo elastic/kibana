@@ -52,7 +52,6 @@ export function DependencyNameLink({
     ? getRouterLinkProps({
         href,
         onClick: () => {
-          // TODO add telemetry (https://github.com/elastic/kibana/issues/208919)
           apmLinkToDependencyOverviewLocator?.navigate({
             dependencyName,
             environment,

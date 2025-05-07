@@ -65,7 +65,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'enterpriseSearch',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
@@ -121,7 +120,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'elasticsearchIndexManagement',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
@@ -241,9 +239,14 @@ export default function searchSolutionNavigation({
 
     it('renders only expected items', async () => {
       await solutionNavigation.sidenav.openSection('search_project_nav.otherTools');
-      await solutionNavigation.sidenav.openSection('project_settings_project_nav');
       await solutionNavigation.sidenav.expectSectionOpen('search_project_nav.otherTools');
-      await solutionNavigation.sidenav.expectSectionOpen('project_settings_project_nav');
+
+      await solutionNavigation.sidenav.openSection(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
+      await solutionNavigation.sidenav.expectSectionOpen(
+        'search_project_nav_footer.project_settings_project_nav'
+      );
 
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
@@ -265,6 +268,7 @@ export default function searchSolutionNavigation({
         'otherTools',
         'maps',
         'graph',
+        'search_project_nav_footer',
         'project_settings_project_nav',
         'management:trained_models',
         'stack_management',

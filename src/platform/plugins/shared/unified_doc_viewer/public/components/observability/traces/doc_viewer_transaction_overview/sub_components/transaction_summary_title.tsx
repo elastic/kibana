@@ -8,7 +8,13 @@
  */
 
 import { EuiTitle } from '@elastic/eui';
+import {
+  SERVICE_NAME_FIELD,
+  TRANSACTION_ID_FIELD,
+  TRANSACTION_NAME_FIELD,
+} from '@kbn/discover-utils';
 import React from 'react';
+import { FieldHoverActionPopover } from '../../components/field_with_actions/field_hover_popover_action';
 import { HighlightField } from '../../components/highlight_field.tsx';
 import { TransactionNameLink } from '../../components/transaction_name_link';
 
@@ -32,26 +38,42 @@ export const TransactionSummaryTitle = ({
       <EuiTitle size="xs">
         <h2>
           {transactionName ? (
-            <HighlightField
+            <FieldHoverActionPopover
+              title={transactionName}
               value={transactionName}
-              formattedValue={formattedTransactionName}
-              as="strong"
+              field={TRANSACTION_NAME_FIELD}
             >
-              {({ content }) => (
-                <TransactionNameLink
-                  serviceName={serviceName}
-                  transactionName={transactionName}
-                  renderContent={() => content}
-                />
-              )}
-            </HighlightField>
+              <HighlightField
+                value={transactionName}
+                formattedValue={formattedTransactionName}
+                as="strong"
+              >
+                {({ content }) => (
+                  <TransactionNameLink
+                    serviceName={serviceName}
+                    transactionName={transactionName}
+                    renderContent={() => content}
+                  />
+                )}
+              </HighlightField>
+            </FieldHoverActionPopover>
           ) : (
-            serviceName
+            <FieldHoverActionPopover
+              title={serviceName}
+              value={serviceName}
+              field={SERVICE_NAME_FIELD}
+            >
+              {serviceName}
+            </FieldHoverActionPopover>
           )}
         </h2>
       </EuiTitle>
 
-      {id && <HighlightField value={id} formattedValue={formattedId} textSize="xs" />}
+      {id && (
+        <FieldHoverActionPopover title={id} value={id} field={TRANSACTION_ID_FIELD}>
+          <HighlightField value={id} formattedValue={formattedId} textSize="xs" />
+        </FieldHoverActionPopover>
+      )}
     </>
   );
 };

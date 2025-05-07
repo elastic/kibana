@@ -12,10 +12,11 @@ import {
   TRACE_ID_FIELD,
   TIMESTAMP_FIELD,
   HTTP_RESPONSE_STATUS_CODE_FIELD,
-  TraceDocumentOverview,
   AGENT_NAME_FIELD,
   TRANSACTION_NAME_FIELD,
   type DataTableRecord,
+  SpanDocumentOverview,
+  TransactionDocumentOverview,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -42,7 +43,7 @@ export const getCommonFieldConfiguration = ({
   attributes,
   flattenedDoc,
 }: {
-  attributes: TraceDocumentOverview;
+  attributes: TransactionDocumentOverview | SpanDocumentOverview;
   flattenedDoc: DataTableRecord['flattened'];
 }): Record<string, FieldConfiguration> => {
   return {

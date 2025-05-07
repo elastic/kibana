@@ -9,9 +9,9 @@
 
 import {
   USER_AGENT_NAME_FIELD,
-  TraceDocumentOverview,
   USER_AGENT_VERSION_FIELD,
   DataTableRecord,
+  TransactionDocumentOverview,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -26,7 +26,7 @@ export const getTransactionFieldConfiguration = ({
   attributes,
   flattenedDoc,
 }: {
-  attributes: TraceDocumentOverview;
+  attributes: TransactionDocumentOverview;
   flattenedDoc: DataTableRecord['flattened'];
 }): Record<string, FieldConfiguration> => {
   return {

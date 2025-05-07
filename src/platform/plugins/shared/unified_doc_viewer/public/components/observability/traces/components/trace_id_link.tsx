@@ -44,7 +44,6 @@ export function TraceIdLink({ traceId, formattedTraceId }: TraceIdLinkProps) {
     ? getRouterLinkProps({
         href,
         onClick: () => {
-          // TODO add telemetry (https://github.com/elastic/kibana/issues/208919)
           apmLinkToTransactionByTraceIdLocator?.navigate({
             traceId,
             rangeFrom: timeRangeFrom,
