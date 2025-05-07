@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst, ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
+import type {
+  ESQLAst,
+  ESQLAstItem,
+  ESQLCommand,
+  ESQLFunction,
+  ESQLSingleAstItem,
+} from '@kbn/esql-ast';
 import { Visitor } from '@kbn/esql-ast/src/visitor';
 import type { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../validation/types';
 import { EDITOR_MARKER } from './constants';
@@ -88,7 +94,7 @@ function addUserDefinedColumnFromAssignment(
 }
 
 function addUserDefinedColumnFromExpression(
-  expressionOperation: ESQLFunction,
+  expressionOperation: ESQLSingleAstItem,
   queryString: string,
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>,
   fields: Map<string, ESQLFieldWithMetadata>
@@ -137,6 +143,27 @@ export function collectUserDefinedColumns(
         addUserDefinedColumnFromExpression(node, queryString, userDefinedColumns, fields);
       }
     })
+    .on('visitForkCommand', () => {
+      addToUserDefinedColumnOccurrences(userDefinedColumns, {
+        name: '_fork',
+        type: 'keyword',
+        location: undefined,
+      });
+    })
+    .on('visitChangePointCommand', (ctx) => {
+      const { target } = ctx.node;
+      addToUserDefinedColumnOccurrences(userDefinedColumns, {
+        name: target ? target.pvalue.parts.join('.') : 'pvalue',
+        type: 'double',
+        location: target?.pvalue.location,
+      });
+
+      addToUserDefinedColumnOccurrences(userDefinedColumns, {
+        name: target ? target.type.parts.join('.') : 'type',
+        type: 'keyword',
+        location: target?.type.location,
+      });
+    })
     .on('visitCommandOption', (ctx) => {
       if (ctx.node.name === 'by') {
         return [...ctx.visitArguments()];
@@ -157,8 +184,8 @@ export function collectUserDefinedColumns(
       if (['row', 'eval', 'stats', 'inlinestats', 'ts', 'rename'].includes(ctx.node.name)) {
         ret.push(...ctx.visitArgs());
       }
-      if (['stats', 'inlinestats', 'enrich'].includes(ctx.node.name)) {
-        // BY and WITH can contain userDefinedColumns
+      if (['stats', 'inlinestats', 'enrich', 'change_point'].includes(ctx.node.name)) {
+        // BY and WITH
         ret.push(...ctx.visitOptions());
       }
       return ret;

@@ -17,7 +17,7 @@ export interface ESQLUserDefinedColumn {
   // also, there are some cases where we can't yet infer the type of
   // a valid expression as with `CASE` which can return union types
   type: SupportedDataType | 'unknown';
-  location: ESQLLocation;
+  location?: ESQLLocation;
 }
 
 export interface ESQLFieldWithMetadata {
