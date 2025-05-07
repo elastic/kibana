@@ -24,7 +24,6 @@ const secrets = {
 export default function xsoarTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
-  const retry = getService('retry');
 
   const createConnector = async (url: string) => {
     const { body } = await supertest
