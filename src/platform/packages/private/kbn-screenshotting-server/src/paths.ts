@@ -71,7 +71,7 @@ export class ChromiumArchivePaths {
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-ea6ef4c-locales-linux_x64.zip',
+      archiveFilename: 'chromium-031848b-locales-linux_x64.zip',
       archiveChecksum: '2f8ede6c874cbf71f6d64ad5c88b33e0f91bdddb4f5684fa6148702ce85550d7',
       binaryChecksum: '12ba32eadf7dc1e3bd2c72707dfc100d4c9dd6eaddd5568f407a2ed66156e1d1',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
@@ -81,7 +81,7 @@ export class ChromiumArchivePaths {
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-ea6ef4c-locales-linux_arm64.zip',
+      archiveFilename: 'chromium-031848b-locales-linux_arm64.zip',
       archiveChecksum: 'de7571709d3b25cd15c48949bb5d72665b98ed527d73dbffbb96116dd5aeaae9',
       binaryChecksum: 'c2cee1a7906e0c0905153bcc40ece031be5028d075b88736629280ac80877246',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
