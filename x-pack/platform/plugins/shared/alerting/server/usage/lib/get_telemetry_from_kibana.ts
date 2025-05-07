@@ -47,6 +47,8 @@ type GetTotalCountsResults = Pick<
   | 'count_rules_snoozed'
   | 'count_rules_muted'
   | 'count_rules_with_muted_alerts'
+  | 'count_rules_with_linked_dashboards'
+  | 'count_rules_with_investigation_guide'
   | 'count_connector_types_by_consumers'
   | 'throttle_time'
   | 'schedule_time'
@@ -228,64 +230,94 @@ export async function getTotalCountAggregations({
                     emit(0);
                   }
                 }`,
-            },
           },
         },
-        aggs: {
-          by_rule_type_id: {
-            terms: {
-              field: 'alert.alertTypeId',
-              size: NUM_ALERTING_RULE_TYPES,
-            },
+        rule_with_linked_dashboards: {
+          type: 'long' as const,
+          script: {
+            source: `
+               def rule = params._source['alert'];
+                if (rule != null && rule.artifacts != null && rule.artifacts.dashboards != null) {
+                  if (rule.artifacts.dashboards.size() > 0) {
+                    emit(1);
+                  } else {
+                    emit(0);
+                  }
+                }`,
           },
-          max_throttle_time: { max: { field: 'rule_throttle_interval' } },
-          min_throttle_time: { min: { field: 'rule_throttle_interval' } },
-          avg_throttle_time: { avg: { field: 'rule_throttle_interval' } },
-          max_interval_time: { max: { field: 'rule_schedule_interval' } },
-          min_interval_time: { min: { field: 'rule_schedule_interval' } },
-          avg_interval_time: { avg: { field: 'rule_schedule_interval' } },
-          max_actions_count: { max: { field: 'rule_action_count' } },
-          min_actions_count: { min: { field: 'rule_action_count' } },
-          avg_actions_count: { avg: { field: 'rule_action_count' } },
-          by_execution_status: {
-            terms: {
-              field: 'alert.executionStatus.status',
-            },
+        },
+        rule_with_investigation_guide: {
+          type: 'long' as const,
+          script: {
+            source: `
+               def rule = params._source['alert'];
+                if (rule != null && rule.artifacts != null && rule.artifacts.investigation_guide != null && rule.artifacts.investigation_guide.blob != null) {
+                  if (rule.artifacts.investigation_guide.blob.trim() != '') {
+                    emit(1);
+                  } else {
+                    emit(0);
+                  }
+                }`,
           },
-          by_notify_when: {
-            terms: {
-              field: 'alert.notifyWhen',
-            },
+        },
+      },
+      aggs: {
+        by_rule_type_id: {
+          terms: {
+            field: 'alert.alertTypeId',
+            size: NUM_ALERTING_RULE_TYPES,
           },
-          connector_types_by_consumers: {
-            terms: {
-              field: 'alert.consumer',
-            },
-            aggs: {
-              actions: {
-                nested: {
-                  path: 'alert.actions',
-                },
-                aggs: {
-                  connector_types: {
-                    terms: {
-                      field: 'alert.actions.actionTypeId',
-                    },
+        },
+        max_throttle_time: { max: { field: 'rule_throttle_interval' } },
+        min_throttle_time: { min: { field: 'rule_throttle_interval' } },
+        avg_throttle_time: { avg: { field: 'rule_throttle_interval' } },
+        max_interval_time: { max: { field: 'rule_schedule_interval' } },
+        min_interval_time: { min: { field: 'rule_schedule_interval' } },
+        avg_interval_time: { avg: { field: 'rule_schedule_interval' } },
+        max_actions_count: { max: { field: 'rule_action_count' } },
+        min_actions_count: { min: { field: 'rule_action_count' } },
+        avg_actions_count: { avg: { field: 'rule_action_count' } },
+        by_execution_status: {
+          terms: {
+            field: 'alert.executionStatus.status',
+          },
+        },
+        by_notify_when: {
+          terms: {
+            field: 'alert.notifyWhen',
+          },
+        },
+        connector_types_by_consumers: {
+          terms: {
+            field: 'alert.consumer',
+          },
+          aggs: {
+            actions: {
+              nested: {
+                path: 'alert.actions',
+              },
+              aggs: {
+                connector_types: {
+                  terms: {
+                    field: 'alert.actions.actionTypeId',
                   },
                 },
               },
             },
           },
-          by_search_type: {
-            terms: {
-              field: 'alert.params.searchType',
-            },
-          },
-          sum_rules_with_tags: { sum: { field: 'rule_with_tags' } },
-          sum_rules_snoozed: { sum: { field: 'rule_snoozed' } },
-          sum_rules_muted: { sum: { field: 'rule_muted' } },
-          sum_rules_with_muted_alerts: { sum: { field: 'rule_with_muted_alerts' } },
         },
+        by_search_type: {
+          terms: {
+            field: 'alert.params.searchType',
+          },
+        },
+        sum_rules_with_tags: { sum: { field: 'rule_with_tags' } },
+        sum_rules_snoozed: { sum: { field: 'rule_snoozed' } },
+        sum_rules_muted: { sum: { field: 'rule_muted' } },
+        sum_rules_with_muted_alerts: { sum: { field: 'rule_with_muted_alerts' } },
+        sum_rules_with_linked_dashboards: { sum: { field: 'rule_with_linked_dashboards' } },
+        sum_rules_with_investigation_guide: { sum: { field: 'rule_with_investigation_guide' } },
+      },
       },
     };
 
@@ -313,6 +345,8 @@ export async function getTotalCountAggregations({
       sum_rules_snoozed: AggregationsSingleMetricAggregateBase;
       sum_rules_muted: AggregationsSingleMetricAggregateBase;
       sum_rules_with_muted_alerts: AggregationsSingleMetricAggregateBase;
+      sum_rules_with_linked_dashboards: AggregationsSingleMetricAggregateBase;
+      sum_rules_with_investigation_guide: AggregationsSingleMetricAggregateBase;
     };
 
     const totalRulesCount =
@@ -347,6 +381,9 @@ export async function getTotalCountAggregations({
       count_rules_snoozed: aggregations.sum_rules_snoozed.value ?? 0,
       count_rules_muted: aggregations.sum_rules_muted.value ?? 0,
       count_rules_with_muted_alerts: aggregations.sum_rules_with_muted_alerts.value ?? 0,
+      count_rules_with_linked_dashboards: aggregations.sum_rules_with_linked_dashboards.value ?? 0,
+      count_rules_with_investigation_guide:
+        aggregations.sum_rules_with_investigation_guide.value ?? 0,
       count_connector_types_by_consumers: countConnectorTypesByConsumers,
       throttle_time: {
         min: `${aggregations.min_throttle_time.value ?? 0}s`,
@@ -392,6 +429,8 @@ export async function getTotalCountAggregations({
       count_rules_snoozed: 0,
       count_rules_muted: 0,
       count_rules_with_muted_alerts: 0,
+      count_rules_with_linked_dashboards: 0,
+      count_rules_with_investigation_guide: 0,
       count_connector_types_by_consumers: {},
       throttle_time: {
         min: '0s',
