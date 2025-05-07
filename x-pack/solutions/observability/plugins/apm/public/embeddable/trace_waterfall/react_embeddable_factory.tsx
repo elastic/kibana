@@ -4,11 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
-import { initializeTitleManager, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  initializeTitleManager,
+  titleComparators,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { ApmEmbeddableContext } from '../embeddable_context';
 import type { EmbeddableDeps } from '../types';
 import { APM_TRACE_WATERFALL_EMBEDDABLE } from './constant';
@@ -24,16 +29,13 @@ export interface ApmTraceWaterfallEmbeddableProps extends SerializedTitles {
 }
 
 export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
-  const factory: ReactEmbeddableFactory<
-    ApmTraceWaterfallEmbeddableProps,
+  const factory: EmbeddableFactory<
     ApmTraceWaterfallEmbeddableProps,
     DefaultEmbeddableApi<ApmTraceWaterfallEmbeddableProps>
   > = {
     type: APM_TRACE_WATERFALL_EMBEDDABLE,
-    deserializeState: (state) => {
-      return state.rawState as ApmTraceWaterfallEmbeddableProps;
-    },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState.rawState;
       const titleManager = initializeTitleManager(state);
       const serviceName$ = new BehaviorSubject(state.serviceName);
       const traceId$ = new BehaviorSubject(state.traceId);
@@ -42,33 +44,61 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
       const rangeTo$ = new BehaviorSubject(state.rangeTo);
       const displayLimit$ = new BehaviorSubject(state.displayLimit);
 
-      const api = buildApi(
-        {
-          ...titleManager.api,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...titleManager.serialize(),
-                serviceName: serviceName$.getValue(),
-                traceId: traceId$.getValue(),
-                entryTransactionId: entryTransactionId$.getValue(),
-                rangeFrom: rangeFrom$.getValue(),
-                rangeTo: rangeTo$.getValue(),
-                displayLimit: displayLimit$.getValue(),
-              },
-            };
+      function serializeState() {
+        return {
+          rawState: {
+            ...titleManager.getLatestState(),
+            serviceName: serviceName$.getValue(),
+            traceId: traceId$.getValue(),
+            entryTransactionId: entryTransactionId$.getValue(),
+            rangeFrom: rangeFrom$.getValue(),
+            rangeTo: rangeTo$.getValue(),
+            displayLimit: displayLimit$.getValue(),
           },
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<ApmTraceWaterfallEmbeddableProps>({
+        uuid,
+        parentApi,
+        serializeState,
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          serviceName$,
+          traceId$,
+          entryTransactionId$,
+          rangeFrom$,
+          rangeTo$,
+          displayLimit$
+        ).pipe(map(() => undefined)),
+        getComparators: () => {
+          return {
+            ...titleComparators,
+            serviceName: 'referenceEquality',
+            traceId: 'referenceEquality',
+            entryTransactionId: 'referenceEquality',
+            rangeFrom: 'referenceEquality',
+            rangeTo: 'referenceEquality',
+            displayLimit: 'referenceEquality',
+          };
         },
-        {
-          ...titleManager.comparators,
-          serviceName: [serviceName$, (value) => serviceName$.next(value)],
-          traceId: [traceId$, (value) => traceId$.next(value)],
-          entryTransactionId: [entryTransactionId$, (value) => entryTransactionId$.next(value)],
-          rangeFrom: [rangeFrom$, (value) => rangeFrom$.next(value)],
-          rangeTo: [rangeTo$, (value) => rangeFrom$.next(value)],
-          displayLimit: [displayLimit$, (value) => displayLimit$.next(value)],
-        }
-      );
+        onReset: (lastSaved) => {
+          titleManager.reinitializeState(lastSaved?.rawState);
+
+          traceId$.next(lastSaved?.rawState.traceId ?? '');
+          rangeFrom$.next(lastSaved?.rawState.rangeFrom ?? '');
+          rangeFrom$.next(lastSaved?.rawState.rangeTo ?? '');
+          serviceName$.next(lastSaved?.rawState.serviceName ?? '');
+          entryTransactionId$.next(lastSaved?.rawState.entryTransactionId ?? '');
+          displayLimit$.next(lastSaved?.rawState.displayLimit ?? 0);
+        },
+      });
+
+      const api = finalizeApi({
+        ...unsavedChangesApi,
+        ...titleManager.api,
+        serializeState,
+      });
 
       return {
         api,

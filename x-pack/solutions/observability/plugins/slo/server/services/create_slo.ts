@@ -4,13 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import {
+  IngestPutPipelineRequest,
+  TransformPutTransformRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+import {
+  IBasePath,
+  IScopedClusterClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import {
   SLO_MODEL_VERSION,
   SUMMARY_TEMP_INDEX_NAME,
@@ -21,7 +29,7 @@ import {
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
-import { Duration, DurationUnit, SLODefinition } from '../domain/models';
+import { Duration, DurationUnit, SLODefinition, StoredSLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
@@ -30,11 +38,13 @@ import { createTempSummaryDocument } from './summary_transform_generator/helpers
 import { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 import { getTransformQueryComposite } from './utils/get_transform_compite_query';
+import { SO_SLO_TYPE } from '../saved_objects';
 
 export class CreateSLO {
   constructor(
     private scopedClusterClient: IScopedClusterClient,
     private repository: SLORepository,
+    private internalSOClient: SavedObjectsClientContract,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private logger: Logger,
@@ -59,7 +69,7 @@ export class CreateSLO {
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
-      const sloPipelinePromise = this.createPipeline(getSLIPipelineTemplate(slo));
+      const sloPipelinePromise = this.createPipeline(getSLIPipelineTemplate(slo, this.spaceId));
       rollbackOperations.push(() => this.deletePipeline(getSLOPipelineId(slo.id, slo.revision)));
 
       const rollupTransformPromise = this.transformManager.install(slo);
@@ -122,7 +132,15 @@ export class CreateSLO {
   }
 
   private async assertSLOInexistant(slo: SLODefinition) {
-    const exists = await this.repository.exists(slo.id);
+    const findResponse = await this.internalSOClient.find<StoredSLODefinition>({
+      type: SO_SLO_TYPE,
+      perPage: 0,
+      filter: `slo.attributes.id:(${slo.id})`,
+      namespaces: [ALL_SPACES_ID],
+    });
+
+    const exists = findResponse.total > 0;
+
     if (exists) {
       throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
     }
@@ -180,7 +198,7 @@ export class CreateSLO {
     validateSLO(slo);
 
     const rollUpTransform = await this.transformManager.inspect(slo);
-    const rollUpPipeline = getSLIPipelineTemplate(slo);
+    const rollUpPipeline = getSLIPipelineTemplate(slo, this.spaceId);
     const summaryPipeline = getSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
     const summaryTransform = await this.summaryTransformManager.inspect(slo);
     const temporaryDoc = createTempSummaryDocument(slo, this.spaceId, this.basePath);
@@ -192,9 +210,7 @@ export class CreateSLO {
       temporaryDoc,
       summaryTransform,
       rollUpTransform,
-      // @ts-expect-error there is some issue with deprecated types being used in es types
       rollUpTransformCompositeQuery: getTransformQueryComposite(rollUpTransform),
-      // @ts-expect-error there is some issue with deprecated types being used in es types
       summaryTransformCompositeQuery: getTransformQueryComposite(summaryTransform),
     };
   }
