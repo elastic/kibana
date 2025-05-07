@@ -77,7 +77,6 @@ export class SpacesPopoverList extends Component<Props, State> {
 
     return (
       <EuiSelectable
-        className={'spcMenu'}
         title={i18n.translate('xpack.security.management.editRole.spacesPopoverList.popoverTitle', {
           defaultMessage: 'Spaces',
         })}

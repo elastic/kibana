@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import classNames from 'classnames';
 import type { ReactElement } from 'react';
 import React, { Component } from 'react';
@@ -240,7 +241,11 @@ export class FeatureTable extends Component<Props, State> {
               }}
             >
               <EuiSpacer size="s" />
-              <EuiPanel color="subdued" paddingSize="s" className="subFeaturePanel">
+              <EuiPanel
+                color="subdued"
+                paddingSize="s"
+                css={({ euiTheme }) => css({ marginLeft: euiTheme.size.l + euiTheme.size.xs })}
+              >
                 <FeatureTableExpandedRow
                   feature={feature}
                   privilegeIndex={this.props.privilegeIndex}

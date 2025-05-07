@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import './feature_table_cell.scss';
-
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 
 import type { SecuredFeature } from '@kbn/security-role-management-model';
@@ -41,7 +40,15 @@ export const FeatureTableCell = ({ feature, className }: Props) => {
     <EuiFlexGroup className={className} direction="column" gutterSize="none" component="span">
       <EuiFlexItem data-test-subj={`featureTableCell`} component="span">
         <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem className="featurePrivilegeName" grow={false}>
+          <EuiFlexItem
+            css={css`
+              &:hover,
+              &:focus {
+                text-decoration: underline;
+              }
+            `}
+            grow={false}
+          >
             {feature.name}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{tooltipElement}</EuiFlexItem>
