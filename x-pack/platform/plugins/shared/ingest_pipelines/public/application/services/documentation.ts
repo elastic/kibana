@@ -22,9 +22,12 @@ export class DocumentationService {
   private regressionUrl: string = '';
   private documentationUrl: string = '';
   private createIndexParameters: string = '';
+  private docLinks: DocLinksStart | undefined;
 
   public setup(docLinks: DocLinksStart): void {
     const { links } = docLinks;
+
+    this.docLinks = docLinks;
 
     this.esDocBasePath = links.elasticsearch.docsBase;
     this.ingestNodeUrl = links.ingest.pipelines;
@@ -96,6 +99,10 @@ export class DocumentationService {
 
   public getIndexParametersUrl() {
     return this.createIndexParameters;
+  }
+
+  public getDocLinks(): undefined | DocLinksStart {
+    return this.docLinks;
   }
 }
 

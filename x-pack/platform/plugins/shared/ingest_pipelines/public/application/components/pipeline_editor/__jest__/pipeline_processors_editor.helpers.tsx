@@ -9,8 +9,11 @@ import { act } from 'react-dom/test-utils';
 import React from 'react';
 
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { Props } from '..';
 import { ProcessorsEditorWithDeps } from './processors_editor';
+import { documentationService, uiMetricService } from '../../../services';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -62,6 +65,12 @@ const testBedSetup = registerTestBed<TestSubject>(
 export interface SetupResult extends TestBed<TestSubject> {
   actions: ReturnType<typeof createActions>;
 }
+
+export const setupEnvironment = () => {
+  // Initialize mock services
+  uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
+  documentationService.setup(docLinksServiceMock.createStartContract());
+};
 
 /**
  * We make heavy use of "processorSelector" in these actions. They are a way to uniquely identify

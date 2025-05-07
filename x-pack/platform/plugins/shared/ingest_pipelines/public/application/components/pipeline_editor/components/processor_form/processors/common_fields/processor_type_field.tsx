@@ -24,6 +24,7 @@ import {
   fieldValidators,
   useKibana,
 } from '../../../../../../../shared_imports';
+import type { DocumentationService } from '../../../../../../services';
 
 import { getProcessorDescriptor, mapProcessorTypeToDescriptor } from '../../../shared';
 
@@ -49,7 +50,7 @@ type ProcessorWithCategory = ProcessorTypeAndLabel & {
 
 export const getProcessorTypesAndLabels = (license: ILicense | null) => {
   return (
-    extractProcessorDetails(mapProcessorTypeToDescriptor)
+    extractProcessorDetails(mapProcessorTypeToDescriptor())
       // Filter out any processors that are not available for the current license type
       .filter((option) => {
         return option.forLicenseAtLeast ? license?.hasAtLeast(option.forLicenseAtLeast) : true;
