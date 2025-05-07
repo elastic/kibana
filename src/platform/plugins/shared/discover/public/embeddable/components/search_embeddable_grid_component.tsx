@@ -84,9 +84,9 @@ export function SearchEmbeddableGridComponent({
     stateManager.columnsMeta,
     stateManager.grid,
     api.title$,
-    api.description$ ?? new BehaviorSubject(undefined),
-    api.defaultTitle$ ?? new BehaviorSubject(undefined),
-    api.defaultDescription$ ?? new BehaviorSubject(undefined)
+    api.description$,
+    api.defaultTitle$,
+    api.defaultDescription$
   );
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
