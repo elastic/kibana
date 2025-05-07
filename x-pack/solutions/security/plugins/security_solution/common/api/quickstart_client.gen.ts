@@ -2372,7 +2372,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Updates rules migrations data or last execution params for a single migration
+   * Updates rules migrations data
    */
   async updateRuleMigration(props: UpdateRuleMigrationProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
