@@ -161,13 +161,13 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                 title={<h3>Base configuration</h3>}
                 description="Configure your tool"
               >
-                <EuiFormRow 
+                <EuiFormRow
                   label="Name"
                   isInvalid={!!formMethods.formState.errors.name}
-                  error={formMethods.formState.errors.name ? "Name is required" : undefined}
+                  error={formMethods.formState.errors.name ? 'Name is required' : undefined}
                 >
                   <Controller
-                    rules={{ required: "Name is required" }}
+                    rules={{ required: 'Name is required' }}
                     name="name"
                     control={control}
                     render={({ field }) => (
@@ -179,13 +179,15 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                     )}
                   />
                 </EuiFormRow>
-                <EuiFormRow 
+                <EuiFormRow
                   label="Description"
                   isInvalid={!!formMethods.formState.errors.description}
-                  error={formMethods.formState.errors.description ? "Description is required" : undefined}
+                  error={
+                    formMethods.formState.errors.description ? 'Description is required' : undefined
+                  }
                 >
                   <Controller
-                    rules={{ required: "Description is required" }}
+                    rules={{ required: 'Description is required' }}
                     name="description"
                     control={control}
                     render={({ field }) => (
