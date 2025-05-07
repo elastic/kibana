@@ -195,7 +195,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         id="ConAppEditorActions"
         gutterSize="xs"
         responsive={false}
-        css={editorActionsCss}
+        style={editorActionsCss}
         justifyContent="center"
         alignItems="center"
       >
