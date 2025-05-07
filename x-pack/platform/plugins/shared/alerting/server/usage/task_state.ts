@@ -121,6 +121,11 @@ const stateSchemaV2 = stateSchemaV1.extends({
   count_alerts_by_rule_type: schema.recordOf(schema.string(), schema.number()),
 });
 
+const stateSchemaV3 = stateSchemaV2.extends({
+  count_rules_with_linked_dashboards: schema.number(),
+  count_rules_with_investigation_guide: schema.number(),
+});
+
 export const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
@@ -219,9 +224,17 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV2,
   },
+  3: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[2].up(state),
+      count_rules_with_linked_dashboards: state.count_rules_with_linked_dashboards || 0,
+      count_rules_with_investigation_guide: state.count_rules_with_investigation_guide || 0,
+    }),
+    schema: stateSchemaV3,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[2].schema;
+const latestTaskStateSchema = stateSchemaByVersion[3].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
@@ -300,4 +313,6 @@ export const emptyState: LatestTaskStateSchema = {
   percentile_num_alerts_by_type_per_day: {},
   count_alerts_total: 0,
   count_alerts_by_rule_type: {},
+  count_rules_with_linked_dashboards: 0,
+  count_rules_with_investigation_guide: 0,
 };

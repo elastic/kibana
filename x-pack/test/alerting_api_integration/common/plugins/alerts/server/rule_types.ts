@@ -1254,6 +1254,40 @@ export function defineRuleTypes(
       params: schema.any(),
     },
   };
+  const artifactsRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
+    id: 'test.artifacts',
+    name: 'Test: Artifacts',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor() {
+      return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
+    },
+  };
+  const artifactsAndActionsRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
+    id: 'test.artifactsAndActions',
+    name: 'Test: Artifacts and Actions',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    async executor() {
+      return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
+    },
+  };
   const goldNoopRuleType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
     id: 'test.gold.noop',
     name: 'Test: Noop',
@@ -1453,6 +1487,8 @@ export function defineRuleTypes(
   alerting.registerType(getValidationRuleType());
   alerting.registerType(getAuthorizationRuleType(core));
   alerting.registerType(noopRuleType);
+  alerting.registerType(artifactsRuleType);
+  alerting.registerType(artifactsAndActionsRuleType);
   alerting.registerType(onlyContextVariablesRuleType);
   alerting.registerType(onlyStateVariablesRuleType);
   alerting.registerType(getPatternFiringRuleType());
