@@ -462,6 +462,9 @@ describe('start', () => {
     it('allows the project breadcrumb to also be set', async () => {
       const { chrome } = await start();
 
+      chrome.project.setCloudUrls({
+        deploymentUrl: 'my-deployment-url.com',
+      });
       chrome.setBreadcrumbs([{ text: 'foo' }, { text: 'bar' }]); // only setting the classic breadcrumbs
 
       {

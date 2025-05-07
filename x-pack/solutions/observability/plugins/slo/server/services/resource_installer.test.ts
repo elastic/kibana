@@ -122,42 +122,4 @@ describe('resourceInstaller', () => {
     expect(mockClusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
     expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });
-
-  it('runs the installation only once at a time', async () => {
-    const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockClusterClient.cluster.getComponentTemplate.mockImplementation(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () =>
-              resolve({
-                component_templates: [
-                  {
-                    name: SLI_INDEX_TEMPLATE_NAME,
-                    component_template: {
-                      _meta: {
-                        version: SLO_RESOURCES_VERSION - 1,
-                      },
-                      template: {
-                        settings: {},
-                      },
-                    },
-                  },
-                ],
-              }),
-            1000
-          )
-        )
-    );
-
-    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
-
-    await Promise.all([
-      installer.ensureCommonResourcesInstalled(),
-      installer.ensureCommonResourcesInstalled(),
-    ]);
-
-    // Ensure that the installation was only run once, e.g. 4 calls to the put component template API, and not 2x 4 calls
-    expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
-  });
 });

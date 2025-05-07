@@ -92,10 +92,7 @@ const getUnassignedTermsType = (
 };
 
 const getTotalTermsCount = (assignments: ColorMapping.Config['assignments']) =>
-  assignments.reduce(
-    (acc, cur) => ('values' in cur.rule ? acc + cur.rule.values.length : acc + 1),
-    0
-  );
+  assignments.reduce((acc, { rules }) => acc + rules.length, 0);
 
 const getAvgCountTermsPerColor = (
   assignments: ColorMapping.Config['assignments'],
