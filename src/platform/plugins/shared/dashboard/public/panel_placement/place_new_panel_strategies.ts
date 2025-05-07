@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { cloneDeep } from 'lodash';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/content_management';
 import { PanelPlacementStrategy } from '../plugin_constants';
 import { PanelPlacementProps, PanelPlacementReturn } from './types';
