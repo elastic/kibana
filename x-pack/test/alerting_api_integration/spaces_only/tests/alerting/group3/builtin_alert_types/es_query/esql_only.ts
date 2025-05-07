@@ -128,15 +128,17 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       const messagePattern =
         /Document count is 1 in the last 30s for group-\d. Alert when greater than 0./;
       const conditionPattern = /Query matched documents for group "group-\d"/;
+      const groupPattern = /{"group":"group-\d"}/;
 
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i];
-        const { hits } = doc._source;
+        const { hits, grouping } = doc._source;
         const { name, title, message } = doc._source.params;
         expect(name).to.be('always fire');
         expect(title).to.match(titlePattern);
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
+        expect(grouping).to.match(groupPattern);
       }
 
       const aadDocs = await getAllAADDocs(3, ALERT_INSTANCE_ID);
@@ -176,15 +178,18 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         /Query matched documents for group "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"/;
       const idPattern =
         /[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/;
+      const groupPattern =
+        /{"_id":"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"}/;
 
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i];
-        const { hits } = doc._source;
+        const { hits, grouping } = doc._source;
         const { name, title, message } = doc._source.params;
         expect(name).to.be('always fire');
         expect(title).to.match(titlePattern);
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
+        expect(grouping).to.match(groupPattern);
       }
 
       const aadDocs = await getAllAADDocs(2);
@@ -224,11 +229,23 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i];
         const { hits } = doc._source;
+        const grouping = JSON.parse(doc._source.grouping);
         const { name, title, message } = doc._source.params;
         expect(name).to.be('always fire');
         expect(title).to.match(titlePattern);
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
+        expect(grouping['@timestamp']).to.be.ok();
+        expect(grouping.date).to.be.ok();
+        expect(grouping.date_epoch_millis).to.be.ok();
+        expect(grouping.group).to.be.ok();
+        expect(grouping.host.hostname).to.be.ok();
+        expect(grouping.host.id).to.be.ok();
+        expect(grouping.host.name).to.be.ok();
+        expect(grouping.reference).to.be.ok();
+        expect(grouping.source).to.be.ok();
+        expect(grouping.testedValue).to.be.ok();
+        expect(grouping.testedValueFloat).to.be.ok();
       }
 
       const aadDocs = await getAllAADDocs(3);
@@ -578,6 +595,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               hits: '{{context.hits}}',
               date: '{{{context.date}}}',
               previousTimestamp: '{{{state.latestTimestamp}}}',
+              grouping: '{{context.grouping}}',
             },
           ],
         },
@@ -599,6 +617,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
               },
               hits: '{{context.hits}}',
               date: '{{{context.date}}}',
+              grouping: '{{context.grouping}}',
             },
           ],
         },
