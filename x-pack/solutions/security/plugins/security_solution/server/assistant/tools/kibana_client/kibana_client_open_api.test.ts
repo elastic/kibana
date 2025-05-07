@@ -23,7 +23,7 @@ const assistantToolParams = {
       pathname: 'basepath/internal/elastic_assistant/actions/connector/1234/_execute',
     },
     headers: {
-      'origin': 'http://localhost:5601',
+      origin: 'http://localhost:5601',
       'kbn-version': '8.0.0',
     },
   },

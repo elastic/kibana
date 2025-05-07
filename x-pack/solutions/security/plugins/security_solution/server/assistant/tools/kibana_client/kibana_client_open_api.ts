@@ -22,10 +22,10 @@ import type { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
 import { Command, END } from '@langchain/langgraph';
 import type { JsonSchema, JsonSchemaObject, Refs } from '@n8n/json-schema-to-zod';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { format, URL } from 'url';
 import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import { formatToolName, type Operation } from '../../../utils/open_api_tool/utils';
-import { format, URL } from 'url';
 
 export const kibanaServerlessOpenApiSpec = path.resolve(
   REPO_ROOT,
@@ -121,7 +121,11 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     return tool(
       async (input, config) => {
         const { request } = assistantToolParams;
-        const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
+        const {
+          protocol,
+          host,
+          pathname: pathnameFromRequest,
+        } = request.rewrittenUrl || request.url;
 
         const origin = first(castArray(request.headers.origin));
 
