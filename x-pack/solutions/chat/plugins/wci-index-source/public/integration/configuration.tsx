@@ -158,21 +158,6 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
           />
         </EuiFormRow>
 
-        <EuiFormRow label="Description">
-          <Controller
-            name="configuration.description"
-            control={control}
-            render={({ field }) => (
-              <EuiTextArea
-                data-test-subj="workchatAppIntegrationEditViewDescription"
-                placeholder="Enter description"
-                rows={3}
-                {...field}
-              />
-            )}
-          />
-        </EuiFormRow>
-
         <EuiFormRow label="Query Template">
           <Controller
             name="configuration.queryTemplate"

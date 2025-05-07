@@ -19,6 +19,7 @@ import {
   EuiSelect,
   EuiConfirmModal,
   EuiButtonEmpty,
+  EuiTextArea,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { IntegrationType } from '@kbn/wci-common';
@@ -177,11 +178,12 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                 <EuiFormRow label="Description">
                   <Controller
                     rules={{ required: true }}
-                    name="description"
+                    name="configuration.description"
                     control={control}
                     render={({ field }) => (
-                      <EuiFieldText
+                      <EuiTextArea
                         data-test-subj="workchatAppIntegrationEditViewFieldText"
+                        rows={3}
                         {...field}
                       />
                     )}
