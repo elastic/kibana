@@ -257,16 +257,16 @@
       "children": [
         {
           "parentPluginId": "embeddableEnhanced",
-          "id": "def-public.StartContract.initializeReactEmbeddableDynamicActions",
+          "id": "def-public.StartContract.initializeEmbeddableDynamicActions",
           "type": "Function",
           "tags": [],
-          "label": "initializeReactEmbeddableDynamicActions",
+          "label": "initializeEmbeddableDynamicActions",
           "description": [],
           "signature": [
             "(uuid: string, getTitle: () => string | undefined, state: ",
             "DynamicActionsSerializedState",
             ") => ",
-            "ReactEmbeddableDynamicActionsApi"
+            "EmbeddableDynamicActionsManager"
           ],
           "path": "x-pack/platform/plugins/shared/embeddable_enhanced/public/plugin.ts",
           "deprecated": false,
@@ -274,7 +274,7 @@
           "children": [
             {
               "parentPluginId": "embeddableEnhanced",
-              "id": "def-public.StartContract.initializeReactEmbeddableDynamicActions.$1",
+              "id": "def-public.StartContract.initializeEmbeddableDynamicActions.$1",
               "type": "string",
               "tags": [],
               "label": "uuid",
@@ -289,7 +289,7 @@
             },
             {
               "parentPluginId": "embeddableEnhanced",
-              "id": "def-public.StartContract.initializeReactEmbeddableDynamicActions.$2",
+              "id": "def-public.StartContract.initializeEmbeddableDynamicActions.$2",
               "type": "Function",
               "tags": [],
               "label": "getTitle",
@@ -304,7 +304,7 @@
             },
             {
               "parentPluginId": "embeddableEnhanced",
-              "id": "def-public.StartContract.initializeReactEmbeddableDynamicActions.$3",
+              "id": "def-public.StartContract.initializeEmbeddableDynamicActions.$3",
               "type": "Object",
               "tags": [],
               "label": "state",

@@ -154,7 +154,15 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string>; }>; }>"
+          "<string>; }>; attachments: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Readonly<{ contentType?: string | undefined; encoding?: string | undefined; } & { content: string; filename: string; }>[] | undefined>; }>"
         ],
         "path": "x-pack/platform/plugins/shared/stack_connectors/server/connector_types/email/index.ts",
         "deprecated": false,
