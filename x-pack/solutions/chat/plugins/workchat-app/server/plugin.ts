@@ -70,8 +70,8 @@ export class WorkChatAppPlugin
 
     return {
       integrations: {
-        register: (integration) => {
-          return this.integrationRegistry.register(integration);
+        register: (tool) => {
+          return this.integrationRegistry.register(tool);
         },
       },
     };
