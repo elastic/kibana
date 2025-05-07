@@ -20,8 +20,9 @@ const isNotNull = _.negate(_.isNull);
 /**
  * BOOKMARK - List of Kibana project types
  * @type {import('@kbn/projects-solutions-groups').KibanaProject[]}
+ * @internal
  * */
-const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security', 'chat'];
+export const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security', 'chat'];
 
 /**
  * Collects paths to configurations to be included in the final configuration stack.

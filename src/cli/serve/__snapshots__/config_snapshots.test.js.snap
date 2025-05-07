@@ -1,0 +1,4765 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Serverless configuration snapshots Serverless chat should match snapshot 1`] = `
+Object {
+  "advanced_settings": Object {
+    "globalSettingsEnabled": false,
+  },
+  "console": Object {
+    "autocompleteDefinitions": Object {
+      "endpointsAvailability": "serverless",
+    },
+  },
+  "core": Object {
+    "lifecycle": Object {
+      "disablePreboot": true,
+    },
+  },
+  "data": Object {
+    "enableUiSettingsValidations": true,
+    "search": Object {
+      "sessions": Object {
+        "enabled": false,
+      },
+    },
+  },
+  "dev_tools": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "discover": Object {
+    "enableUiSettingsValidations": true,
+  },
+  "elasticsearch": Object {
+    "ignoreVersionMismatch": true,
+    "maxResponseSize": "100mb",
+    "maxSockets": 800,
+  },
+  "guided_onboarding": Object {
+    "enabled": false,
+  },
+  "input_control_vis": Object {
+    "readOnly": true,
+  },
+  "interactiveSetup": Object {
+    "enabled": false,
+  },
+  "management": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "migrations": Object {
+    "algorithm": "zdt",
+    "batchSize": 250,
+    "zdt": Object {
+      "metaPickupSyncDelaySec": 5,
+    },
+  },
+  "monitoring": Object {
+    "enabled": false,
+    "ui": Object {
+      "enabled": false,
+    },
+  },
+  "newsfeed": Object {
+    "enabled": false,
+  },
+  "plugins": Object {
+    "allowlistPluginGroups": Array [
+      "platform",
+      "chat",
+    ],
+  },
+  "server": Object {
+    "restrictInternalApis": true,
+    "securityResponseHeaders": Object {
+      "disableEmbedding": true,
+      "strictTransportSecurity": "max-age=31536000; includeSubDomains",
+    },
+    "versioned": Object {
+      "strictClientVersionCheck": false,
+      "versionResolution": "newest",
+    },
+  },
+  "telemetry": Object {
+    "allowChangingOptInStatus": false,
+    "optIn": true,
+  },
+  "uiSettings": Object {
+    "overrides": Object {
+      "bfetch:disable": true,
+      "defaultRoute": "/app/workchat",
+      "enableESQL": true,
+      "labs:dashboard:deferBelowFold": false,
+    },
+  },
+  "vis_type_gauge": Object {
+    "readOnly": true,
+  },
+  "vis_type_heatmap": Object {
+    "readOnly": true,
+  },
+  "vis_type_metric": Object {
+    "readOnly": true,
+  },
+  "vis_type_pie": Object {
+    "readOnly": true,
+  },
+  "vis_type_table": Object {
+    "readOnly": true,
+  },
+  "vis_type_tagcloud": Object {
+    "readOnly": true,
+  },
+  "vis_type_timelion": Object {
+    "readOnly": true,
+  },
+  "vis_type_timeseries": Object {
+    "readOnly": true,
+  },
+  "vis_type_vislib": Object {
+    "readOnly": true,
+  },
+  "vis_type_xy": Object {
+    "readOnly": true,
+  },
+  "xpack": Object {
+    "actions": Object {
+      "queued": Object {
+        "max": 10000,
+      },
+      "run": Object {
+        "maxAttempts": 10,
+      },
+    },
+    "alerting": Object {
+      "rules": Object {
+        "maxScheduledPerMinute": 400,
+        "minimumScheduleInterval": Object {
+          "enforce": true,
+        },
+        "run": Object {
+          "actions": Object {
+            "max": 3000,
+          },
+          "ruleTypeOverrides": Array [
+            Object {
+              "id": "siem.indicatorRule",
+              "timeout": "10m",
+            },
+            Object {
+              "id": "siem.eqlRule",
+              "timeout": "5m",
+            },
+          ],
+          "timeout": "1m",
+        },
+      },
+    },
+    "canvas": Object {
+      "enabled": false,
+    },
+    "cases": Object {
+      "stack": Object {
+        "enabled": false,
+      },
+    },
+    "ccr": Object {
+      "enabled": false,
+    },
+    "cloud": Object {
+      "base_url": "https://cloud.elastic.co",
+      "serverless": Object {
+        "project_type": "search",
+      },
+    },
+    "cloud_integrations": Object {
+      "data_migration": Object {
+        "enabled": false,
+      },
+    },
+    "contentConnectors": Object {
+      "enabled": false,
+    },
+    "dataUsage": Object {
+      "enableExperimental": Array [
+        "dataUsageDisabled",
+      ],
+      "enabled": true,
+    },
+    "features": Object {
+      "overrides": Object {
+        "dashboard": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "dashboard_v2": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover": Object {
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover_v2": Object {
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "filesSharedImage": Object {
+          "hidden": true,
+        },
+        "maps_v2": Object {
+          "hidden": true,
+        },
+        "reporting": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "download_csv_report",
+                  ],
+                },
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "generate_report",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "visualize": Object {
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "visualize_v2": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+      },
+    },
+    "fleet": Object {
+      "internal": Object {
+        "activeAgentsSoftLimit": 25000,
+        "disableILMPolicies": true,
+        "fleetServerStandalone": true,
+        "onlyAllowAgentUpgradeToKnownVersions": true,
+        "retrySetupOnBoot": true,
+        "useMeteringApi": true,
+      },
+    },
+    "graph": Object {
+      "enabled": false,
+    },
+    "ilm": Object {
+      "enabled": false,
+    },
+    "index_management": Object {
+      "editableIndexSettings": "limited",
+      "enableDataStreamStats": false,
+      "enableIndexActions": false,
+      "enableIndexStats": false,
+      "enableLegacyTemplates": false,
+      "enableMappingsSourceFieldSection": false,
+      "enableProjectLevelRetentionChecks": false,
+      "enableSizeAndDocCount": true,
+      "enableTogglingDataRetention": false,
+    },
+    "ingest_pipelines": Object {
+      "enableManageProcessors": false,
+    },
+    "license_management": Object {
+      "enabled": false,
+    },
+    "remote_clusters": Object {
+      "enabled": false,
+    },
+    "reporting": Object {
+      "csv": Object {
+        "maxConcurrentShardRequests": 0,
+      },
+      "queue": Object {
+        "pollInterval": "3m",
+      },
+      "statefulSettings": Object {
+        "enabled": false,
+      },
+    },
+    "rollup": Object {
+      "enabled": false,
+    },
+    "screenshotting": Object {
+      "enabled": false,
+    },
+    "security": Object {
+      "showInsecureClusterWarning": false,
+      "ui": Object {
+        "roleMappingManagementEnabled": false,
+        "userManagementEnabled": false,
+      },
+    },
+    "serverless": Object {
+      "chat": Object {
+        "enabled": true,
+      },
+      "plugin": Object {
+        "enabled": true,
+      },
+    },
+    "snapshot_restore": Object {
+      "enabled": false,
+    },
+    "spaces": Object {
+      "allowFeatureVisibility": false,
+      "allowSolutionVisibility": false,
+      "maxSpaces": 1,
+    },
+    "task_manager": Object {
+      "allow_reading_invalid_state": false,
+      "metrics_reset_interval": 120000,
+      "request_timeouts": Object {
+        "update_by_query": 60000,
+      },
+    },
+    "upgrade_assistant": Object {
+      "enabled": false,
+    },
+    "watcher": Object {
+      "enabled": false,
+    },
+    "wciExternalServer": Object {
+      "enabled": true,
+    },
+    "wciIndexSource": Object {
+      "enabled": true,
+    },
+    "wciSalesforce": Object {
+      "enabled": true,
+    },
+    "workchatApp": Object {
+      "enabled": true,
+    },
+    "workchatFramework": Object {
+      "enabled": true,
+    },
+  },
+}
+`;
+
+exports[`Serverless configuration snapshots Serverless observability should match snapshot 1`] = `
+Object {
+  "advanced_settings": Object {
+    "globalSettingsEnabled": false,
+  },
+  "aiAssistantManagementSelection": Object {
+    "preferredAIAssistantType": "observability",
+  },
+  "console": Object {
+    "autocompleteDefinitions": Object {
+      "endpointsAvailability": "serverless",
+    },
+    "ui": Object {
+      "embeddedEnabled": false,
+    },
+  },
+  "core": Object {
+    "lifecycle": Object {
+      "disablePreboot": true,
+    },
+  },
+  "data": Object {
+    "enableUiSettingsValidations": true,
+    "search": Object {
+      "sessions": Object {
+        "enabled": false,
+      },
+    },
+  },
+  "dev_tools": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "discover": Object {
+    "enableUiSettingsValidations": true,
+  },
+  "elasticsearch": Object {
+    "ignoreVersionMismatch": true,
+    "maxResponseSize": "100mb",
+    "maxSockets": 800,
+  },
+  "guided_onboarding": Object {
+    "enabled": false,
+  },
+  "input_control_vis": Object {
+    "readOnly": true,
+  },
+  "interactiveSetup": Object {
+    "enabled": false,
+  },
+  "management": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "migrations": Object {
+    "algorithm": "zdt",
+    "batchSize": 250,
+    "zdt": Object {
+      "metaPickupSyncDelaySec": 5,
+    },
+  },
+  "monitoring": Object {
+    "enabled": false,
+    "ui": Object {
+      "enabled": false,
+    },
+  },
+  "newsfeed": Object {
+    "enabled": false,
+  },
+  "no_data_page": Object {
+    "analyticsNoDataPageFlavor": "serverless_observability",
+  },
+  "plugins": Object {
+    "allowlistPluginGroups": Array [
+      "platform",
+      "observability",
+    ],
+  },
+  "server": Object {
+    "restrictInternalApis": true,
+    "securityResponseHeaders": Object {
+      "disableEmbedding": true,
+      "strictTransportSecurity": "max-age=31536000; includeSubDomains",
+    },
+    "versioned": Object {
+      "strictClientVersionCheck": false,
+      "versionResolution": "newest",
+    },
+  },
+  "telemetry": Object {
+    "allowChangingOptInStatus": false,
+    "labels": Object {
+      "serverless": "observability",
+    },
+    "optIn": true,
+  },
+  "uiSettings": Object {
+    "overrides": Object {
+      "bfetch:disable": true,
+      "defaultRoute": "/app/observability/landing",
+      "enableESQL": true,
+      "labs:dashboard:deferBelowFold": false,
+    },
+  },
+  "vis_type_gauge": Object {
+    "readOnly": true,
+  },
+  "vis_type_heatmap": Object {
+    "readOnly": true,
+  },
+  "vis_type_metric": Object {
+    "readOnly": true,
+  },
+  "vis_type_pie": Object {
+    "readOnly": true,
+  },
+  "vis_type_table": Object {
+    "readOnly": true,
+  },
+  "vis_type_tagcloud": Object {
+    "readOnly": true,
+  },
+  "vis_type_timelion": Object {
+    "readOnly": true,
+  },
+  "vis_type_timeseries": Object {
+    "readOnly": true,
+  },
+  "vis_type_vislib": Object {
+    "readOnly": true,
+  },
+  "vis_type_xy": Object {
+    "readOnly": true,
+  },
+  "xpack": Object {
+    "actions": Object {
+      "queued": Object {
+        "max": 10000,
+      },
+      "run": Object {
+        "maxAttempts": 10,
+      },
+    },
+    "alerting": Object {
+      "rules": Object {
+        "maxScheduledPerMinute": 400,
+        "minimumScheduleInterval": Object {
+          "enforce": true,
+        },
+        "overwriteProducer": "observability",
+        "run": Object {
+          "actions": Object {
+            "max": 3000,
+          },
+          "ruleTypeOverrides": Array [
+            Object {
+              "id": "siem.indicatorRule",
+              "timeout": "10m",
+            },
+            Object {
+              "id": "siem.eqlRule",
+              "timeout": "5m",
+            },
+          ],
+          "timeout": "1m",
+        },
+      },
+    },
+    "apm": Object {
+      "featureFlags": Object {
+        "agentConfigurationAvailable": false,
+        "configurableIndicesAvailable": false,
+        "infraUiAvailable": true,
+        "infrastructureTabAvailable": true,
+        "migrationToFleetAvailable": false,
+        "sourcemapApiAvailable": false,
+        "storageExplorerAvailable": false,
+      },
+      "serverlessOnboarding": true,
+    },
+    "canvas": Object {
+      "enabled": false,
+    },
+    "cases": Object {
+      "stack": Object {
+        "enabled": false,
+      },
+    },
+    "ccr": Object {
+      "enabled": false,
+    },
+    "cloud": Object {
+      "base_url": "https://cloud.elastic.co",
+      "serverless": Object {
+        "project_type": "observability",
+      },
+    },
+    "cloud_integrations": Object {
+      "data_migration": Object {
+        "enabled": false,
+      },
+    },
+    "contentConnectors": Object {
+      "enabled": true,
+    },
+    "dataUsage": Object {
+      "enableExperimental": Array [
+        "dataUsageDisabled",
+      ],
+      "enabled": true,
+    },
+    "features": Object {
+      "overrides": Object {
+        "apm": Object {
+          "name": "Applications",
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "logs",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "logs",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "dashboard": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "dashboard_v2": Object {
+          "category": "observability",
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover_v2": Object {
+          "category": "observability",
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "filesSharedImage": Object {
+          "hidden": true,
+        },
+        "fleetv2": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "logs",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "logs",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "infrastructure": Object {
+          "name": "Infrastructure",
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "logs",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "logs",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "logs": Object {
+          "hidden": true,
+        },
+        "maps_v2": Object {
+          "hidden": true,
+        },
+        "ml": Object {
+          "category": "observability",
+          "order": 1200,
+        },
+        "observability": Object {
+          "hidden": true,
+        },
+        "reporting": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "download_csv_report",
+                  ],
+                },
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "generate_report",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "slo": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "stackAlerts": Object {
+          "hidden": true,
+        },
+        "uptime": Object {
+          "name": "Synthetics",
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "observability",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "visualize": Object {
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "visualize_v2": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+      },
+    },
+    "fleet": Object {
+      "agentIdVerificationEnabled": false,
+      "eventIngestedEnabled": true,
+      "internal": Object {
+        "activeAgentsSoftLimit": 25000,
+        "disableILMPolicies": true,
+        "fleetServerStandalone": true,
+        "onlyAllowAgentUpgradeToKnownVersions": true,
+        "registry": Object {
+          "capabilities": Array [
+            "apm",
+            "observability",
+            "uptime",
+          ],
+          "excludePackages": Array [
+            "endpoint",
+            "beaconing",
+            "cloud_security_posture",
+            "cloud_defend",
+            "security_detection_engine",
+            "bluecoat",
+            "cisco",
+            "cyberark",
+            "cylance",
+            "f5",
+            "fortinet_forticlient",
+            "juniper_junos",
+            "juniper_netscreen",
+            "microsoft",
+            "netscout",
+            "radware",
+            "symantec",
+            "tomcat",
+            "dga",
+            "profiler_agent",
+          ],
+          "kibanaVersionCheckEnabled": false,
+          "spec": Object {
+            "max": "3.3",
+            "min": "3.0",
+          },
+        },
+        "retrySetupOnBoot": true,
+        "useMeteringApi": true,
+      },
+      "packages": Array [
+        Object {
+          "name": "fleet_server",
+          "version": "latest",
+        },
+      ],
+    },
+    "graph": Object {
+      "enabled": false,
+    },
+    "ilm": Object {
+      "enabled": false,
+    },
+    "index_management": Object {
+      "editableIndexSettings": "limited",
+      "enableDataStreamStats": false,
+      "enableIndexActions": false,
+      "enableIndexStats": false,
+      "enableLegacyTemplates": false,
+      "enableMappingsSourceFieldSection": false,
+      "enableProjectLevelRetentionChecks": false,
+      "enableSizeAndDocCount": true,
+      "enableTogglingDataRetention": false,
+    },
+    "infra": Object {
+      "enabled": true,
+    },
+    "ingest_pipelines": Object {
+      "enableManageProcessors": false,
+    },
+    "legacy_uptime": Object {
+      "enabled": false,
+    },
+    "license_management": Object {
+      "enabled": false,
+    },
+    "ml": Object {
+      "ad": Object {
+        "enabled": true,
+      },
+      "compatibleModuleType": "observability",
+      "dfa": Object {
+        "enabled": true,
+      },
+      "nlp": Object {
+        "enabled": true,
+        "modelDeployment": Object {
+          "allowStaticAllocations": false,
+          "vCPURange": Object {
+            "high": Object {
+              "max": 128,
+              "min": 1,
+            },
+            "low": Object {
+              "max": 2,
+              "min": 0,
+            },
+            "medium": Object {
+              "max": 32,
+              "min": 1,
+            },
+          },
+        },
+      },
+    },
+    "observability": Object {
+      "createO11yGenericFeatureId": true,
+    },
+    "observabilityAIAssistant": Object {
+      "scope": "observability",
+    },
+    "remote_clusters": Object {
+      "enabled": false,
+    },
+    "reporting": Object {
+      "csv": Object {
+        "maxConcurrentShardRequests": 0,
+      },
+      "queue": Object {
+        "pollInterval": "3m",
+      },
+      "statefulSettings": Object {
+        "enabled": false,
+      },
+    },
+    "rollup": Object {
+      "enabled": false,
+    },
+    "screenshotting": Object {
+      "enabled": false,
+    },
+    "security": Object {
+      "roleManagementEnabled": false,
+      "showInsecureClusterWarning": false,
+      "ui": Object {
+        "roleMappingManagementEnabled": false,
+        "userManagementEnabled": false,
+      },
+    },
+    "serverless": Object {
+      "observability": Object {
+        "enabled": true,
+      },
+      "plugin": Object {
+        "enabled": true,
+      },
+    },
+    "slo": Object {
+      "enabled": true,
+    },
+    "snapshot_restore": Object {
+      "enabled": false,
+    },
+    "spaces": Object {
+      "allowFeatureVisibility": false,
+      "allowSolutionVisibility": false,
+      "maxSpaces": 100,
+    },
+    "task_manager": Object {
+      "allow_reading_invalid_state": false,
+      "metrics_reset_interval": 120000,
+      "request_timeouts": Object {
+        "update_by_query": 60000,
+      },
+    },
+    "upgrade_assistant": Object {
+      "enabled": false,
+    },
+    "uptime": Object {
+      "service": Object {
+        "tls": Object {
+          "certificate": "/mnt/elastic-internal/http-certs/tls.crt",
+          "key": "/mnt/elastic-internal/http-certs/tls.key",
+        },
+      },
+    },
+    "ux": Object {
+      "enabled": false,
+    },
+    "watcher": Object {
+      "enabled": false,
+    },
+  },
+}
+`;
+
+exports[`Serverless configuration snapshots Serverless search should match snapshot 1`] = `
+Object {
+  "advanced_settings": Object {
+    "globalSettingsEnabled": false,
+  },
+  "aiAssistantManagementSelection": Object {
+    "preferredAIAssistantType": "observability",
+  },
+  "console": Object {
+    "autocompleteDefinitions": Object {
+      "endpointsAvailability": "serverless",
+    },
+  },
+  "core": Object {
+    "lifecycle": Object {
+      "disablePreboot": true,
+    },
+  },
+  "data": Object {
+    "enableUiSettingsValidations": true,
+    "search": Object {
+      "sessions": Object {
+        "enabled": false,
+      },
+    },
+  },
+  "data_visualizer": Object {
+    "resultLinks": Object {
+      "fileBeat": Object {
+        "enabled": false,
+      },
+    },
+  },
+  "dev_tools": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "discover": Object {
+    "enableUiSettingsValidations": true,
+  },
+  "elasticsearch": Object {
+    "ignoreVersionMismatch": true,
+    "maxResponseSize": "100mb",
+    "maxSockets": 800,
+  },
+  "guided_onboarding": Object {
+    "enabled": false,
+  },
+  "input_control_vis": Object {
+    "readOnly": true,
+  },
+  "interactiveSetup": Object {
+    "enabled": false,
+  },
+  "management": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "migrations": Object {
+    "algorithm": "zdt",
+    "batchSize": 250,
+    "zdt": Object {
+      "metaPickupSyncDelaySec": 5,
+    },
+  },
+  "monitoring": Object {
+    "enabled": false,
+    "ui": Object {
+      "enabled": false,
+    },
+  },
+  "newsfeed": Object {
+    "enabled": false,
+  },
+  "no_data_page": Object {
+    "analyticsNoDataPageFlavor": "serverless_search",
+  },
+  "plugins": Object {
+    "allowlistPluginGroups": Array [
+      "platform",
+      "search",
+    ],
+  },
+  "server": Object {
+    "restrictInternalApis": true,
+    "securityResponseHeaders": Object {
+      "disableEmbedding": true,
+      "strictTransportSecurity": "max-age=31536000; includeSubDomains",
+    },
+    "versioned": Object {
+      "strictClientVersionCheck": false,
+      "versionResolution": "newest",
+    },
+  },
+  "telemetry": Object {
+    "allowChangingOptInStatus": false,
+    "labels": Object {
+      "serverless": "search",
+    },
+    "optIn": true,
+  },
+  "uiSettings": Object {
+    "overrides": Object {
+      "bfetch:disable": true,
+      "defaultRoute": "/app/elasticsearch",
+      "enableESQL": true,
+      "labs:dashboard:deferBelowFold": false,
+    },
+  },
+  "vis_type_gauge": Object {
+    "readOnly": true,
+  },
+  "vis_type_heatmap": Object {
+    "readOnly": true,
+  },
+  "vis_type_metric": Object {
+    "readOnly": true,
+  },
+  "vis_type_pie": Object {
+    "readOnly": true,
+  },
+  "vis_type_table": Object {
+    "readOnly": true,
+  },
+  "vis_type_tagcloud": Object {
+    "readOnly": true,
+  },
+  "vis_type_timelion": Object {
+    "readOnly": true,
+  },
+  "vis_type_timeseries": Object {
+    "readOnly": true,
+  },
+  "vis_type_vislib": Object {
+    "readOnly": true,
+  },
+  "vis_type_xy": Object {
+    "readOnly": true,
+  },
+  "xpack": Object {
+    "actions": Object {
+      "enabledActionTypes": Array [
+        ".email",
+        ".index",
+        ".slack",
+        ".jira",
+        ".webhook",
+        ".teams",
+        ".gen-ai",
+        ".bedrock",
+        ".gemini",
+        ".inference",
+      ],
+      "queued": Object {
+        "max": 10000,
+      },
+      "run": Object {
+        "maxAttempts": 10,
+      },
+    },
+    "alerting": Object {
+      "rules": Object {
+        "maxScheduledPerMinute": 400,
+        "minimumScheduleInterval": Object {
+          "enforce": true,
+        },
+        "run": Object {
+          "actions": Object {
+            "max": 3000,
+          },
+          "ruleTypeOverrides": Array [
+            Object {
+              "id": "siem.indicatorRule",
+              "timeout": "10m",
+            },
+            Object {
+              "id": "siem.eqlRule",
+              "timeout": "5m",
+            },
+          ],
+          "timeout": "1m",
+        },
+      },
+    },
+    "canvas": Object {
+      "enabled": false,
+    },
+    "cases": Object {
+      "stack": Object {
+        "enabled": false,
+      },
+    },
+    "ccr": Object {
+      "enabled": false,
+    },
+    "cloud": Object {
+      "base_url": "https://cloud.elastic.co",
+      "serverless": Object {
+        "project_type": "search",
+      },
+    },
+    "cloud_integrations": Object {
+      "data_migration": Object {
+        "enabled": false,
+      },
+    },
+    "contentConnectors": Object {
+      "enabled": true,
+      "ui": Object {
+        "enabled": false,
+      },
+    },
+    "dataUsage": Object {
+      "enableExperimental": Array [
+        "dataUsageDisabled",
+      ],
+      "enabled": true,
+    },
+    "features": Object {
+      "overrides": Object {
+        "dashboard": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "dashboard_v2": Object {
+          "category": "enterpriseSearch",
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "dev_tools": Object {
+          "category": "enterpriseSearch",
+        },
+        "discover": Object {
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover_v2": Object {
+          "category": "enterpriseSearch",
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "filesSharedImage": Object {
+          "hidden": true,
+        },
+        "maps_v2": Object {
+          "hidden": true,
+        },
+        "ml": Object {
+          "category": "management",
+        },
+        "observabilityAIAssistant": Object {
+          "category": "enterpriseSearch",
+          "name": "AI Assistant",
+        },
+        "reporting": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "download_csv_report",
+                  ],
+                },
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "generate_report",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "stackAlerts": Object {
+          "category": "enterpriseSearch",
+          "name": "Alerts",
+        },
+        "visualize": Object {
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "visualize_v2": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+      },
+    },
+    "fleet": Object {
+      "enabled": true,
+      "internal": Object {
+        "activeAgentsSoftLimit": 25000,
+        "disableILMPolicies": true,
+        "fleetServerStandalone": true,
+        "onlyAllowAgentUpgradeToKnownVersions": true,
+        "registry": Object {
+          "excludePackages": Array [
+            "endpoint",
+            "beaconing",
+            "cloud_security_posture",
+            "cloud_defend",
+            "security_detection_engine",
+            "apm",
+            "synthetics",
+            "synthetics_dashboards",
+            "cisco",
+            "microsoft",
+            "symantec",
+            "cyberark",
+            "profiler_agent",
+            "elastic_connectors",
+          ],
+          "kibanaVersionCheckEnabled": false,
+          "spec": Object {
+            "max": "3.3",
+            "min": "3.0",
+          },
+        },
+        "retrySetupOnBoot": true,
+        "useMeteringApi": true,
+      },
+      "packages": Array [
+        Object {
+          "name": "fleet_server",
+          "version": "latest",
+        },
+      ],
+    },
+    "graph": Object {
+      "enabled": false,
+    },
+    "ilm": Object {
+      "enabled": false,
+    },
+    "index_management": Object {
+      "dev": Object {
+        "enableSemanticText": true,
+      },
+      "editableIndexSettings": "limited",
+      "enableDataStreamStats": false,
+      "enableIndexActions": false,
+      "enableIndexStats": false,
+      "enableLegacyTemplates": false,
+      "enableMappingsSourceFieldSection": false,
+      "enableProjectLevelRetentionChecks": false,
+      "enableSizeAndDocCount": true,
+      "enableTogglingDataRetention": false,
+    },
+    "ingest_pipelines": Object {
+      "enableManageProcessors": false,
+    },
+    "license_management": Object {
+      "enabled": false,
+    },
+    "ml": Object {
+      "ad": Object {
+        "enabled": false,
+      },
+      "compatibleModuleType": "search",
+      "dfa": Object {
+        "enabled": false,
+      },
+      "nlp": Object {
+        "enabled": true,
+        "modelDeployment": Object {
+          "allowStaticAllocations": true,
+          "vCPURange": Object {
+            "high": Object {
+              "max": 512,
+              "min": 1,
+              "static": 512,
+            },
+            "low": Object {
+              "max": 2,
+              "min": 0,
+              "static": 2,
+            },
+            "medium": Object {
+              "max": 32,
+              "min": 1,
+              "static": 32,
+            },
+          },
+        },
+      },
+    },
+    "observabilityAIAssistant": Object {
+      "enabled": true,
+      "scope": "search",
+    },
+    "osquery": Object {
+      "enabled": false,
+    },
+    "painless_lab": Object {
+      "enabled": false,
+    },
+    "remote_clusters": Object {
+      "enabled": false,
+    },
+    "reporting": Object {
+      "csv": Object {
+        "maxConcurrentShardRequests": 0,
+      },
+      "queue": Object {
+        "pollInterval": "3m",
+      },
+      "statefulSettings": Object {
+        "enabled": false,
+      },
+    },
+    "rollup": Object {
+      "enabled": false,
+    },
+    "screenshotting": Object {
+      "enabled": false,
+    },
+    "search": Object {
+      "enabled": false,
+    },
+    "searchAssistant": Object {
+      "enabled": true,
+      "ui": Object {
+        "enabled": true,
+      },
+    },
+    "searchNotebooks": Object {
+      "catalog": Object {
+        "url": "https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json",
+      },
+    },
+    "searchQueryRules": Object {
+      "enabled": false,
+    },
+    "security": Object {
+      "showInsecureClusterWarning": false,
+      "ui": Object {
+        "roleMappingManagementEnabled": false,
+        "userManagementEnabled": false,
+      },
+    },
+    "serverless": Object {
+      "plugin": Object {
+        "enabled": true,
+      },
+      "search": Object {
+        "enabled": true,
+      },
+    },
+    "snapshot_restore": Object {
+      "enabled": false,
+    },
+    "spaces": Object {
+      "allowFeatureVisibility": false,
+      "allowSolutionVisibility": false,
+      "maxSpaces": 100,
+    },
+    "task_manager": Object {
+      "allow_reading_invalid_state": false,
+      "metrics_reset_interval": 120000,
+      "request_timeouts": Object {
+        "update_by_query": 60000,
+      },
+    },
+    "upgrade_assistant": Object {
+      "enabled": false,
+    },
+    "watcher": Object {
+      "enabled": false,
+    },
+  },
+}
+`;
+
+exports[`Serverless configuration snapshots Serverless security base tier should match snapshot 1`] = `
+Object {
+  "advanced_settings": Object {
+    "globalSettingsEnabled": false,
+  },
+  "console": Object {
+    "autocompleteDefinitions": Object {
+      "endpointsAvailability": "serverless",
+    },
+    "ui": Object {
+      "embeddedEnabled": false,
+    },
+  },
+  "core": Object {
+    "lifecycle": Object {
+      "disablePreboot": true,
+    },
+  },
+  "data": Object {
+    "enableUiSettingsValidations": true,
+    "search": Object {
+      "sessions": Object {
+        "enabled": false,
+      },
+    },
+  },
+  "dev_tools": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "discover": Object {
+    "enableUiSettingsValidations": true,
+  },
+  "elasticsearch": Object {
+    "ignoreVersionMismatch": true,
+    "maxResponseSize": "100mb",
+    "maxSockets": 800,
+  },
+  "guided_onboarding": Object {
+    "enabled": false,
+  },
+  "input_control_vis": Object {
+    "readOnly": true,
+  },
+  "interactiveSetup": Object {
+    "enabled": false,
+  },
+  "management": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "migrations": Object {
+    "algorithm": "zdt",
+    "batchSize": 250,
+    "zdt": Object {
+      "metaPickupSyncDelaySec": 5,
+    },
+  },
+  "monitoring": Object {
+    "enabled": false,
+    "ui": Object {
+      "enabled": false,
+    },
+  },
+  "newsfeed": Object {
+    "enabled": true,
+  },
+  "plugins": Object {
+    "allowlistPluginGroups": Array [
+      "platform",
+      "security",
+    ],
+  },
+  "server": Object {
+    "restrictInternalApis": true,
+    "securityResponseHeaders": Object {
+      "disableEmbedding": true,
+      "strictTransportSecurity": "max-age=31536000; includeSubDomains",
+    },
+    "versioned": Object {
+      "strictClientVersionCheck": false,
+      "versionResolution": "newest",
+    },
+  },
+  "telemetry": Object {
+    "allowChangingOptInStatus": false,
+    "labels": Object {
+      "serverless": "security",
+    },
+    "optIn": true,
+  },
+  "uiSettings": Object {
+    "overrides": Object {
+      "bfetch:disable": true,
+      "defaultRoute": "/app/security/get_started",
+      "enableESQL": true,
+      "labs:dashboard:deferBelowFold": false,
+    },
+  },
+  "vis_type_gauge": Object {
+    "readOnly": true,
+  },
+  "vis_type_heatmap": Object {
+    "readOnly": true,
+  },
+  "vis_type_metric": Object {
+    "readOnly": true,
+  },
+  "vis_type_pie": Object {
+    "readOnly": true,
+  },
+  "vis_type_table": Object {
+    "readOnly": true,
+  },
+  "vis_type_tagcloud": Object {
+    "readOnly": true,
+  },
+  "vis_type_timelion": Object {
+    "readOnly": true,
+  },
+  "vis_type_timeseries": Object {
+    "readOnly": true,
+  },
+  "vis_type_vislib": Object {
+    "readOnly": true,
+  },
+  "vis_type_xy": Object {
+    "readOnly": true,
+  },
+  "xpack": Object {
+    "actions": Object {
+      "queued": Object {
+        "max": 10000,
+      },
+      "run": Object {
+        "maxAttempts": 10,
+      },
+    },
+    "alerting": Object {
+      "rules": Object {
+        "maxScheduledPerMinute": 400,
+        "minimumScheduleInterval": Object {
+          "enforce": true,
+        },
+        "run": Object {
+          "actions": Object {
+            "max": 3000,
+          },
+          "ruleTypeOverrides": Array [
+            Object {
+              "id": "siem.indicatorRule",
+              "timeout": "10m",
+            },
+            Object {
+              "id": "siem.eqlRule",
+              "timeout": "5m",
+            },
+          ],
+          "timeout": "1m",
+        },
+      },
+    },
+    "canvas": Object {
+      "enabled": false,
+    },
+    "cases": Object {
+      "stack": Object {
+        "enabled": false,
+      },
+    },
+    "ccr": Object {
+      "enabled": false,
+    },
+    "cloud": Object {
+      "base_url": "https://cloud.elastic.co",
+      "serverless": Object {
+        "project_type": "security",
+      },
+    },
+    "cloud_integrations": Object {
+      "data_migration": Object {
+        "enabled": false,
+      },
+    },
+    "contentConnectors": Object {
+      "enabled": true,
+    },
+    "dataUsage": Object {
+      "enableExperimental": Array [
+        "dataUsageDisabled",
+      ],
+      "enabled": true,
+    },
+    "features": Object {
+      "overrides": Object {
+        "dashboard": Object {
+          "hidden": true,
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "dashboard_v2": Object {
+          "hidden": true,
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover_v2": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "filesSharedImage": Object {
+          "hidden": true,
+        },
+        "maps": Object {
+          "hidden": true,
+        },
+        "maps_v2": Object {
+          "hidden": true,
+        },
+        "ml": Object {
+          "category": "security",
+          "order": 1101,
+        },
+        "reporting": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "download_csv_report",
+                  ],
+                },
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "generate_report",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "siem": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "savedQueryManagement",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "savedQueryManagement",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "siemV2": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "visualize": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "visualize_v2": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+      },
+    },
+    "fleet": Object {
+      "internal": Object {
+        "activeAgentsSoftLimit": 25000,
+        "disableILMPolicies": true,
+        "fleetServerStandalone": true,
+        "onlyAllowAgentUpgradeToKnownVersions": true,
+        "registry": Object {
+          "capabilities": Array [
+            "security",
+          ],
+          "excludePackages": Array [
+            "apm",
+            "synthetics",
+            "synthetics_dashboards",
+            "bluecoat",
+            "cisco",
+            "cyberark",
+            "cylance",
+            "f5",
+            "fortinet_forticlient",
+            "juniper_junos",
+            "juniper_netscreen",
+            "microsoft",
+            "netscout",
+            "radware",
+            "symantec",
+            "tomcat",
+            "dga",
+            "cloud_defend",
+          ],
+          "kibanaVersionCheckEnabled": false,
+          "spec": Object {
+            "max": "3.3",
+            "min": "3.0",
+          },
+        },
+        "retrySetupOnBoot": true,
+        "useMeteringApi": true,
+      },
+      "packages": Array [
+        Object {
+          "name": "fleet_server",
+          "version": "latest",
+        },
+      ],
+    },
+    "graph": Object {
+      "enabled": false,
+    },
+    "ilm": Object {
+      "enabled": false,
+    },
+    "index_management": Object {
+      "editableIndexSettings": "limited",
+      "enableDataStreamStats": false,
+      "enableIndexActions": false,
+      "enableIndexStats": false,
+      "enableLegacyTemplates": false,
+      "enableMappingsSourceFieldSection": false,
+      "enableProjectLevelRetentionChecks": true,
+      "enableSizeAndDocCount": true,
+      "enableTogglingDataRetention": false,
+    },
+    "ingest_pipelines": Object {
+      "enableManageProcessors": false,
+    },
+    "license_management": Object {
+      "enabled": false,
+    },
+    "ml": Object {
+      "ad": Object {
+        "enabled": true,
+      },
+      "compatibleModuleType": "security",
+      "dfa": Object {
+        "enabled": true,
+      },
+      "nlp": Object {
+        "enabled": true,
+        "modelDeployment": Object {
+          "allowStaticAllocations": false,
+          "vCPURange": Object {
+            "high": Object {
+              "max": 128,
+              "min": 1,
+            },
+            "low": Object {
+              "max": 2,
+              "min": 0,
+            },
+            "medium": Object {
+              "max": 32,
+              "min": 1,
+            },
+          },
+        },
+      },
+    },
+    "observabilityAIAssistant": Object {
+      "enabled": false,
+    },
+    "remote_clusters": Object {
+      "enabled": false,
+    },
+    "reporting": Object {
+      "csv": Object {
+        "maxConcurrentShardRequests": 0,
+      },
+      "queue": Object {
+        "pollInterval": "3m",
+      },
+      "statefulSettings": Object {
+        "enabled": false,
+      },
+    },
+    "rollup": Object {
+      "enabled": false,
+    },
+    "screenshotting": Object {
+      "enabled": false,
+    },
+    "security": Object {
+      "showInsecureClusterWarning": false,
+      "ui": Object {
+        "roleMappingManagementEnabled": false,
+        "userManagementEnabled": false,
+      },
+    },
+    "securitySolution": Object {
+      "enableUiSettingsValidations": true,
+      "offeringSettings": Object {
+        "ILMEnabled": false,
+      },
+    },
+    "securitySolutionEss": Object {
+      "enabled": false,
+    },
+    "securitySolutionServerless": Object {
+      "enabled": true,
+      "productTypes": Array [
+        Object {
+          "product_line": "security",
+          "product_tier": "complete",
+        },
+        Object {
+          "product_line": "endpoint",
+          "product_tier": "complete",
+        },
+        Object {
+          "product_line": "cloud",
+          "product_tier": "complete",
+        },
+      ],
+    },
+    "serverless": Object {
+      "plugin": Object {
+        "enabled": true,
+      },
+    },
+    "snapshot_restore": Object {
+      "enabled": false,
+    },
+    "spaces": Object {
+      "allowFeatureVisibility": false,
+      "allowSolutionVisibility": false,
+      "maxSpaces": 100,
+    },
+    "task_manager": Object {
+      "allow_reading_invalid_state": false,
+      "capacity": 20,
+      "metrics_reset_interval": 120000,
+      "request_timeouts": Object {
+        "update_by_query": 60000,
+      },
+    },
+    "upgrade_assistant": Object {
+      "enabled": false,
+    },
+    "watcher": Object {
+      "enabled": false,
+    },
+  },
+}
+`;
+
+exports[`Serverless configuration snapshots Serverless security complete tier should match snapshot 1`] = `
+Object {
+  "advanced_settings": Object {
+    "globalSettingsEnabled": false,
+  },
+  "console": Object {
+    "autocompleteDefinitions": Object {
+      "endpointsAvailability": "serverless",
+    },
+    "ui": Object {
+      "embeddedEnabled": false,
+    },
+  },
+  "core": Object {
+    "lifecycle": Object {
+      "disablePreboot": true,
+    },
+  },
+  "data": Object {
+    "enableUiSettingsValidations": true,
+    "search": Object {
+      "sessions": Object {
+        "enabled": false,
+      },
+    },
+  },
+  "dev_tools": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "discover": Object {
+    "enableUiSettingsValidations": true,
+  },
+  "elasticsearch": Object {
+    "ignoreVersionMismatch": true,
+    "maxResponseSize": "100mb",
+    "maxSockets": 800,
+  },
+  "guided_onboarding": Object {
+    "enabled": false,
+  },
+  "input_control_vis": Object {
+    "readOnly": true,
+  },
+  "interactiveSetup": Object {
+    "enabled": false,
+  },
+  "management": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "migrations": Object {
+    "algorithm": "zdt",
+    "batchSize": 250,
+    "zdt": Object {
+      "metaPickupSyncDelaySec": 5,
+    },
+  },
+  "monitoring": Object {
+    "enabled": false,
+    "ui": Object {
+      "enabled": false,
+    },
+  },
+  "newsfeed": Object {
+    "enabled": true,
+  },
+  "plugins": Object {
+    "allowlistPluginGroups": Array [
+      "platform",
+      "security",
+    ],
+  },
+  "server": Object {
+    "restrictInternalApis": true,
+    "securityResponseHeaders": Object {
+      "disableEmbedding": true,
+      "strictTransportSecurity": "max-age=31536000; includeSubDomains",
+    },
+    "versioned": Object {
+      "strictClientVersionCheck": false,
+      "versionResolution": "newest",
+    },
+  },
+  "telemetry": Object {
+    "allowChangingOptInStatus": false,
+    "labels": Object {
+      "serverless": "security",
+    },
+    "optIn": true,
+  },
+  "uiSettings": Object {
+    "overrides": Object {
+      "bfetch:disable": true,
+      "defaultRoute": "/app/security/get_started",
+      "enableESQL": true,
+      "labs:dashboard:deferBelowFold": false,
+    },
+  },
+  "vis_type_gauge": Object {
+    "readOnly": true,
+  },
+  "vis_type_heatmap": Object {
+    "readOnly": true,
+  },
+  "vis_type_metric": Object {
+    "readOnly": true,
+  },
+  "vis_type_pie": Object {
+    "readOnly": true,
+  },
+  "vis_type_table": Object {
+    "readOnly": true,
+  },
+  "vis_type_tagcloud": Object {
+    "readOnly": true,
+  },
+  "vis_type_timelion": Object {
+    "readOnly": true,
+  },
+  "vis_type_timeseries": Object {
+    "readOnly": true,
+  },
+  "vis_type_vislib": Object {
+    "readOnly": true,
+  },
+  "vis_type_xy": Object {
+    "readOnly": true,
+  },
+  "xpack": Object {
+    "actions": Object {
+      "queued": Object {
+        "max": 10000,
+      },
+      "run": Object {
+        "maxAttempts": 10,
+      },
+    },
+    "alerting": Object {
+      "rules": Object {
+        "maxScheduledPerMinute": 400,
+        "minimumScheduleInterval": Object {
+          "enforce": true,
+        },
+        "run": Object {
+          "actions": Object {
+            "max": 3000,
+          },
+          "ruleTypeOverrides": Array [
+            Object {
+              "id": "siem.indicatorRule",
+              "timeout": "10m",
+            },
+            Object {
+              "id": "siem.eqlRule",
+              "timeout": "5m",
+            },
+          ],
+          "timeout": "1m",
+        },
+      },
+    },
+    "canvas": Object {
+      "enabled": false,
+    },
+    "cases": Object {
+      "stack": Object {
+        "enabled": false,
+      },
+    },
+    "ccr": Object {
+      "enabled": false,
+    },
+    "cloud": Object {
+      "base_url": "https://cloud.elastic.co",
+      "serverless": Object {
+        "project_type": "security",
+      },
+    },
+    "cloud_integrations": Object {
+      "data_migration": Object {
+        "enabled": false,
+      },
+    },
+    "contentConnectors": Object {
+      "enabled": true,
+    },
+    "dataUsage": Object {
+      "enableExperimental": Array [
+        "dataUsageDisabled",
+      ],
+      "enabled": true,
+    },
+    "features": Object {
+      "overrides": Object {
+        "dashboard": Object {
+          "hidden": true,
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "dashboard_v2": Object {
+          "hidden": true,
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover_v2": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "filesSharedImage": Object {
+          "hidden": true,
+        },
+        "maps": Object {
+          "hidden": true,
+        },
+        "maps_v2": Object {
+          "hidden": true,
+        },
+        "ml": Object {
+          "category": "security",
+          "order": 1101,
+        },
+        "reporting": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "download_csv_report",
+                  ],
+                },
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "generate_report",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "siem": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "savedQueryManagement",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "savedQueryManagement",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "siemV2": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "visualize": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "visualize_v2": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+      },
+    },
+    "fleet": Object {
+      "internal": Object {
+        "activeAgentsSoftLimit": 25000,
+        "disableILMPolicies": true,
+        "fleetServerStandalone": true,
+        "onlyAllowAgentUpgradeToKnownVersions": true,
+        "registry": Object {
+          "capabilities": Array [
+            "security",
+          ],
+          "excludePackages": Array [
+            "apm",
+            "synthetics",
+            "synthetics_dashboards",
+            "bluecoat",
+            "cisco",
+            "cyberark",
+            "cylance",
+            "f5",
+            "fortinet_forticlient",
+            "juniper_junos",
+            "juniper_netscreen",
+            "microsoft",
+            "netscout",
+            "radware",
+            "symantec",
+            "tomcat",
+            "dga",
+            "cloud_defend",
+          ],
+          "kibanaVersionCheckEnabled": false,
+          "spec": Object {
+            "max": "3.3",
+            "min": "3.0",
+          },
+        },
+        "retrySetupOnBoot": true,
+        "useMeteringApi": true,
+      },
+      "packages": Array [
+        Object {
+          "name": "fleet_server",
+          "version": "latest",
+        },
+      ],
+    },
+    "graph": Object {
+      "enabled": false,
+    },
+    "ilm": Object {
+      "enabled": false,
+    },
+    "index_management": Object {
+      "editableIndexSettings": "limited",
+      "enableDataStreamStats": false,
+      "enableIndexActions": false,
+      "enableIndexStats": false,
+      "enableLegacyTemplates": false,
+      "enableMappingsSourceFieldSection": false,
+      "enableProjectLevelRetentionChecks": true,
+      "enableSizeAndDocCount": true,
+      "enableTogglingDataRetention": false,
+    },
+    "ingest_pipelines": Object {
+      "enableManageProcessors": false,
+    },
+    "license_management": Object {
+      "enabled": false,
+    },
+    "ml": Object {
+      "ad": Object {
+        "enabled": true,
+      },
+      "compatibleModuleType": "security",
+      "dfa": Object {
+        "enabled": true,
+      },
+      "nlp": Object {
+        "enabled": true,
+        "modelDeployment": Object {
+          "allowStaticAllocations": false,
+          "vCPURange": Object {
+            "high": Object {
+              "max": 128,
+              "min": 1,
+            },
+            "low": Object {
+              "max": 2,
+              "min": 0,
+            },
+            "medium": Object {
+              "max": 32,
+              "min": 1,
+            },
+          },
+        },
+      },
+    },
+    "observabilityAIAssistant": Object {
+      "enabled": false,
+    },
+    "remote_clusters": Object {
+      "enabled": false,
+    },
+    "reporting": Object {
+      "csv": Object {
+        "maxConcurrentShardRequests": 0,
+      },
+      "queue": Object {
+        "pollInterval": "3m",
+      },
+      "statefulSettings": Object {
+        "enabled": false,
+      },
+    },
+    "rollup": Object {
+      "enabled": false,
+    },
+    "screenshotting": Object {
+      "enabled": false,
+    },
+    "security": Object {
+      "showInsecureClusterWarning": false,
+      "ui": Object {
+        "roleMappingManagementEnabled": false,
+        "userManagementEnabled": false,
+      },
+    },
+    "securitySolution": Object {
+      "enableUiSettingsValidations": true,
+      "offeringSettings": Object {
+        "ILMEnabled": false,
+      },
+    },
+    "securitySolutionEss": Object {
+      "enabled": false,
+    },
+    "securitySolutionServerless": Object {
+      "enabled": true,
+      "productTypes": Array [
+        Object {
+          "product_line": "security",
+          "product_tier": "complete",
+        },
+        Object {
+          "product_line": "endpoint",
+          "product_tier": "complete",
+        },
+        Object {
+          "product_line": "cloud",
+          "product_tier": "complete",
+        },
+      ],
+    },
+    "serverless": Object {
+      "plugin": Object {
+        "enabled": true,
+      },
+    },
+    "snapshot_restore": Object {
+      "enabled": false,
+    },
+    "spaces": Object {
+      "allowFeatureVisibility": false,
+      "allowSolutionVisibility": false,
+      "maxSpaces": 100,
+    },
+    "task_manager": Object {
+      "allow_reading_invalid_state": false,
+      "capacity": 20,
+      "metrics_reset_interval": 120000,
+      "request_timeouts": Object {
+        "update_by_query": 60000,
+      },
+    },
+    "upgrade_assistant": Object {
+      "enabled": false,
+    },
+    "watcher": Object {
+      "enabled": false,
+    },
+  },
+}
+`;
+
+exports[`Serverless configuration snapshots Serverless security essentials tier should match snapshot 1`] = `
+Object {
+  "advanced_settings": Object {
+    "globalSettingsEnabled": false,
+  },
+  "console": Object {
+    "autocompleteDefinitions": Object {
+      "endpointsAvailability": "serverless",
+    },
+    "ui": Object {
+      "embeddedEnabled": false,
+    },
+  },
+  "core": Object {
+    "lifecycle": Object {
+      "disablePreboot": true,
+    },
+  },
+  "data": Object {
+    "enableUiSettingsValidations": true,
+    "search": Object {
+      "sessions": Object {
+        "enabled": false,
+      },
+    },
+  },
+  "dev_tools": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "discover": Object {
+    "enableUiSettingsValidations": true,
+  },
+  "elasticsearch": Object {
+    "ignoreVersionMismatch": true,
+    "maxResponseSize": "100mb",
+    "maxSockets": 800,
+  },
+  "guided_onboarding": Object {
+    "enabled": false,
+  },
+  "input_control_vis": Object {
+    "readOnly": true,
+  },
+  "interactiveSetup": Object {
+    "enabled": false,
+  },
+  "management": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "migrations": Object {
+    "algorithm": "zdt",
+    "batchSize": 250,
+    "zdt": Object {
+      "metaPickupSyncDelaySec": 5,
+    },
+  },
+  "monitoring": Object {
+    "enabled": false,
+    "ui": Object {
+      "enabled": false,
+    },
+  },
+  "newsfeed": Object {
+    "enabled": true,
+  },
+  "plugins": Object {
+    "allowlistPluginGroups": Array [
+      "platform",
+      "security",
+    ],
+  },
+  "server": Object {
+    "restrictInternalApis": true,
+    "securityResponseHeaders": Object {
+      "disableEmbedding": true,
+      "strictTransportSecurity": "max-age=31536000; includeSubDomains",
+    },
+    "versioned": Object {
+      "strictClientVersionCheck": false,
+      "versionResolution": "newest",
+    },
+  },
+  "telemetry": Object {
+    "allowChangingOptInStatus": false,
+    "labels": Object {
+      "serverless": "security",
+    },
+    "optIn": true,
+  },
+  "uiSettings": Object {
+    "overrides": Object {
+      "bfetch:disable": true,
+      "defaultRoute": "/app/security/get_started",
+      "enableESQL": true,
+      "labs:dashboard:deferBelowFold": false,
+    },
+  },
+  "vis_type_gauge": Object {
+    "readOnly": true,
+  },
+  "vis_type_heatmap": Object {
+    "readOnly": true,
+  },
+  "vis_type_metric": Object {
+    "readOnly": true,
+  },
+  "vis_type_pie": Object {
+    "readOnly": true,
+  },
+  "vis_type_table": Object {
+    "readOnly": true,
+  },
+  "vis_type_tagcloud": Object {
+    "readOnly": true,
+  },
+  "vis_type_timelion": Object {
+    "readOnly": true,
+  },
+  "vis_type_timeseries": Object {
+    "readOnly": true,
+  },
+  "vis_type_vislib": Object {
+    "readOnly": true,
+  },
+  "vis_type_xy": Object {
+    "readOnly": true,
+  },
+  "xpack": Object {
+    "actions": Object {
+      "queued": Object {
+        "max": 10000,
+      },
+      "run": Object {
+        "maxAttempts": 10,
+      },
+    },
+    "alerting": Object {
+      "rules": Object {
+        "maxScheduledPerMinute": 400,
+        "minimumScheduleInterval": Object {
+          "enforce": true,
+        },
+        "run": Object {
+          "actions": Object {
+            "max": 3000,
+          },
+          "ruleTypeOverrides": Array [
+            Object {
+              "id": "siem.indicatorRule",
+              "timeout": "10m",
+            },
+            Object {
+              "id": "siem.eqlRule",
+              "timeout": "5m",
+            },
+          ],
+          "timeout": "1m",
+        },
+      },
+    },
+    "canvas": Object {
+      "enabled": false,
+    },
+    "cases": Object {
+      "stack": Object {
+        "enabled": false,
+      },
+    },
+    "ccr": Object {
+      "enabled": false,
+    },
+    "cloud": Object {
+      "base_url": "https://cloud.elastic.co",
+      "serverless": Object {
+        "project_type": "security",
+      },
+    },
+    "cloud_integrations": Object {
+      "data_migration": Object {
+        "enabled": false,
+      },
+    },
+    "contentConnectors": Object {
+      "enabled": true,
+    },
+    "dataUsage": Object {
+      "enableExperimental": Array [
+        "dataUsageDisabled",
+      ],
+      "enabled": true,
+    },
+    "features": Object {
+      "overrides": Object {
+        "dashboard": Object {
+          "hidden": true,
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "dashboard_v2": Object {
+          "hidden": true,
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover_v2": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "filesSharedImage": Object {
+          "hidden": true,
+        },
+        "maps": Object {
+          "hidden": true,
+        },
+        "maps_v2": Object {
+          "hidden": true,
+        },
+        "ml": Object {
+          "category": "security",
+          "order": 1101,
+        },
+        "reporting": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "download_csv_report",
+                  ],
+                },
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "generate_report",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "siem": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "savedQueryManagement",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "savedQueryManagement",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "siemV2": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "visualize": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "visualize_v2": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+      },
+    },
+    "fleet": Object {
+      "internal": Object {
+        "activeAgentsSoftLimit": 25000,
+        "disableILMPolicies": true,
+        "fleetServerStandalone": true,
+        "onlyAllowAgentUpgradeToKnownVersions": true,
+        "registry": Object {
+          "capabilities": Array [
+            "security",
+          ],
+          "excludePackages": Array [
+            "apm",
+            "synthetics",
+            "synthetics_dashboards",
+            "bluecoat",
+            "cisco",
+            "cyberark",
+            "cylance",
+            "f5",
+            "fortinet_forticlient",
+            "juniper_junos",
+            "juniper_netscreen",
+            "microsoft",
+            "netscout",
+            "radware",
+            "symantec",
+            "tomcat",
+            "dga",
+            "cloud_defend",
+          ],
+          "kibanaVersionCheckEnabled": false,
+          "spec": Object {
+            "max": "3.3",
+            "min": "3.0",
+          },
+        },
+        "retrySetupOnBoot": true,
+        "useMeteringApi": true,
+      },
+      "packages": Array [
+        Object {
+          "name": "fleet_server",
+          "version": "latest",
+        },
+      ],
+    },
+    "graph": Object {
+      "enabled": false,
+    },
+    "ilm": Object {
+      "enabled": false,
+    },
+    "index_management": Object {
+      "editableIndexSettings": "limited",
+      "enableDataStreamStats": false,
+      "enableIndexActions": false,
+      "enableIndexStats": false,
+      "enableLegacyTemplates": false,
+      "enableMappingsSourceFieldSection": false,
+      "enableProjectLevelRetentionChecks": true,
+      "enableSizeAndDocCount": true,
+      "enableTogglingDataRetention": false,
+    },
+    "ingest_pipelines": Object {
+      "enableManageProcessors": false,
+    },
+    "license_management": Object {
+      "enabled": false,
+    },
+    "ml": Object {
+      "ad": Object {
+        "enabled": true,
+      },
+      "compatibleModuleType": "security",
+      "dfa": Object {
+        "enabled": true,
+      },
+      "nlp": Object {
+        "enabled": true,
+        "modelDeployment": Object {
+          "allowStaticAllocations": false,
+          "vCPURange": Object {
+            "high": Object {
+              "max": 128,
+              "min": 1,
+            },
+            "low": Object {
+              "max": 2,
+              "min": 0,
+            },
+            "medium": Object {
+              "max": 32,
+              "min": 1,
+            },
+          },
+        },
+      },
+    },
+    "observabilityAIAssistant": Object {
+      "enabled": false,
+    },
+    "remote_clusters": Object {
+      "enabled": false,
+    },
+    "reporting": Object {
+      "csv": Object {
+        "maxConcurrentShardRequests": 0,
+      },
+      "queue": Object {
+        "pollInterval": "3m",
+      },
+      "statefulSettings": Object {
+        "enabled": false,
+      },
+    },
+    "rollup": Object {
+      "enabled": false,
+    },
+    "screenshotting": Object {
+      "enabled": false,
+    },
+    "security": Object {
+      "showInsecureClusterWarning": false,
+      "ui": Object {
+        "roleMappingManagementEnabled": false,
+        "userManagementEnabled": false,
+      },
+    },
+    "securitySolution": Object {
+      "enableUiSettingsValidations": true,
+      "offeringSettings": Object {
+        "ILMEnabled": false,
+      },
+    },
+    "securitySolutionEss": Object {
+      "enabled": false,
+    },
+    "securitySolutionServerless": Object {
+      "enabled": true,
+      "productTypes": Array [
+        Object {
+          "product_line": "security",
+          "product_tier": "complete",
+        },
+        Object {
+          "product_line": "endpoint",
+          "product_tier": "complete",
+        },
+        Object {
+          "product_line": "cloud",
+          "product_tier": "complete",
+        },
+      ],
+    },
+    "serverless": Object {
+      "plugin": Object {
+        "enabled": true,
+      },
+    },
+    "snapshot_restore": Object {
+      "enabled": false,
+    },
+    "spaces": Object {
+      "allowFeatureVisibility": false,
+      "allowSolutionVisibility": false,
+      "maxSpaces": 100,
+    },
+    "task_manager": Object {
+      "allow_reading_invalid_state": false,
+      "capacity": 20,
+      "metrics_reset_interval": 120000,
+      "request_timeouts": Object {
+        "update_by_query": 60000,
+      },
+    },
+    "upgrade_assistant": Object {
+      "enabled": false,
+    },
+    "watcher": Object {
+      "enabled": false,
+    },
+  },
+}
+`;
+
+exports[`Serverless configuration snapshots Serverless security search ai lake tier should match snapshot 1`] = `
+Object {
+  "advanced_settings": Object {
+    "globalSettingsEnabled": false,
+  },
+  "console": Object {
+    "autocompleteDefinitions": Object {
+      "endpointsAvailability": "serverless",
+    },
+    "ui": Object {
+      "embeddedEnabled": false,
+    },
+  },
+  "core": Object {
+    "lifecycle": Object {
+      "disablePreboot": true,
+    },
+  },
+  "data": Object {
+    "enableUiSettingsValidations": true,
+    "search": Object {
+      "sessions": Object {
+        "enabled": false,
+      },
+    },
+  },
+  "dev_tools": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "discover": Object {
+    "enableUiSettingsValidations": true,
+  },
+  "elasticsearch": Object {
+    "ignoreVersionMismatch": true,
+    "maxResponseSize": "100mb",
+    "maxSockets": 800,
+  },
+  "guided_onboarding": Object {
+    "enabled": false,
+  },
+  "input_control_vis": Object {
+    "readOnly": true,
+  },
+  "interactiveSetup": Object {
+    "enabled": false,
+  },
+  "management": Object {
+    "deeplinks": Object {
+      "navLinkStatus": "visible",
+    },
+  },
+  "migrations": Object {
+    "algorithm": "zdt",
+    "batchSize": 250,
+    "zdt": Object {
+      "metaPickupSyncDelaySec": 5,
+    },
+  },
+  "monitoring": Object {
+    "enabled": false,
+    "ui": Object {
+      "enabled": false,
+    },
+  },
+  "newsfeed": Object {
+    "enabled": true,
+  },
+  "plugins": Object {
+    "allowlistPluginGroups": Array [
+      "platform",
+      "security",
+    ],
+  },
+  "server": Object {
+    "restrictInternalApis": true,
+    "securityResponseHeaders": Object {
+      "disableEmbedding": true,
+      "strictTransportSecurity": "max-age=31536000; includeSubDomains",
+    },
+    "versioned": Object {
+      "strictClientVersionCheck": false,
+      "versionResolution": "newest",
+    },
+  },
+  "telemetry": Object {
+    "allowChangingOptInStatus": false,
+    "labels": Object {
+      "serverless": "security",
+    },
+    "optIn": true,
+  },
+  "uiSettings": Object {
+    "overrides": Object {
+      "bfetch:disable": true,
+      "defaultRoute": "/app/security/get_started",
+      "enableESQL": true,
+      "labs:dashboard:deferBelowFold": false,
+    },
+  },
+  "vis_type_gauge": Object {
+    "readOnly": true,
+  },
+  "vis_type_heatmap": Object {
+    "readOnly": true,
+  },
+  "vis_type_metric": Object {
+    "readOnly": true,
+  },
+  "vis_type_pie": Object {
+    "readOnly": true,
+  },
+  "vis_type_table": Object {
+    "readOnly": true,
+  },
+  "vis_type_tagcloud": Object {
+    "readOnly": true,
+  },
+  "vis_type_timelion": Object {
+    "readOnly": true,
+  },
+  "vis_type_timeseries": Object {
+    "readOnly": true,
+  },
+  "vis_type_vislib": Object {
+    "readOnly": true,
+  },
+  "vis_type_xy": Object {
+    "readOnly": true,
+  },
+  "xpack": Object {
+    "actions": Object {
+      "queued": Object {
+        "max": 10000,
+      },
+      "run": Object {
+        "maxAttempts": 10,
+      },
+    },
+    "alerting": Object {
+      "maintenanceWindow": Object {
+        "enabled": false,
+      },
+      "rules": Object {
+        "maxScheduledPerMinute": 400,
+        "minimumScheduleInterval": Object {
+          "enforce": true,
+        },
+        "run": Object {
+          "actions": Object {
+            "max": 3000,
+          },
+          "ruleTypeOverrides": Array [
+            Object {
+              "id": "siem.indicatorRule",
+              "timeout": "10m",
+            },
+            Object {
+              "id": "siem.eqlRule",
+              "timeout": "5m",
+            },
+          ],
+          "timeout": "1m",
+        },
+      },
+      "rulesSettings": Object {
+        "enabled": false,
+      },
+    },
+    "canvas": Object {
+      "enabled": false,
+    },
+    "cases": Object {
+      "stack": Object {
+        "enabled": false,
+      },
+    },
+    "ccr": Object {
+      "enabled": false,
+    },
+    "cloud": Object {
+      "base_url": "https://cloud.elastic.co",
+      "serverless": Object {
+        "project_type": "security",
+      },
+    },
+    "cloud_integrations": Object {
+      "data_migration": Object {
+        "enabled": false,
+      },
+    },
+    "contentConnectors": Object {
+      "enabled": true,
+    },
+    "dataUsage": Object {
+      "enableExperimental": Array [
+        "dataUsageDisabled",
+      ],
+      "enabled": true,
+    },
+    "features": Object {
+      "overrides": Object {
+        "dashboard": Object {
+          "hidden": true,
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "dashboard_v2": Object {
+          "hidden": true,
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+          "subFeatures": Object {
+            "privileges": Object {
+              "download_csv_report": Object {
+                "disabled": true,
+              },
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "discover_v2": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "generate_report": Object {
+                "disabled": true,
+              },
+              "store_search_session": Object {
+                "disabled": true,
+              },
+              "url_create": Object {
+                "disabled": true,
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "filesSharedImage": Object {
+          "hidden": true,
+        },
+        "maps": Object {
+          "hidden": true,
+        },
+        "maps_v2": Object {
+          "hidden": true,
+        },
+        "ml": Object {
+          "category": "security",
+          "order": 1101,
+        },
+        "reporting": Object {
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "download_csv_report",
+                  ],
+                },
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "generate_report",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "securitySolutionNotes": Object {
+          "hidden": true,
+        },
+        "securitySolutionSiemMigrations": Object {
+          "hidden": true,
+        },
+        "securitySolutionTimeline": Object {
+          "hidden": true,
+        },
+        "siem": Object {
+          "description": null,
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "savedQueryManagement",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "savedQueryManagement",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "siemV2": Object {
+          "description": null,
+          "privileges": Object {
+            "all": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "all",
+                  ],
+                },
+              ],
+            },
+            "read": Object {
+              "composedOf": Array [
+                Object {
+                  "feature": "discover_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "dashboard_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "visualize_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+                Object {
+                  "feature": "maps_v2",
+                  "privileges": Array [
+                    "read",
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        "visualize": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+        "visualize_v2": Object {
+          "hidden": true,
+          "subFeatures": Object {
+            "privileges": Object {
+              "url_create": Object {
+                "includeIn": "read",
+              },
+            },
+          },
+        },
+      },
+    },
+    "fleet": Object {
+      "agentless": Object {
+        "isDefault": true,
+      },
+      "integrationsHomeOverride": "/app/security/configurations/integrations",
+      "internal": Object {
+        "activeAgentsSoftLimit": 25000,
+        "disableILMPolicies": true,
+        "fleetServerStandalone": true,
+        "onlyAllowAgentUpgradeToKnownVersions": true,
+        "registry": Object {
+          "capabilities": Array [
+            "security",
+          ],
+          "excludePackages": Array [
+            "apm",
+            "synthetics",
+            "synthetics_dashboards",
+            "bluecoat",
+            "cisco",
+            "cyberark",
+            "cylance",
+            "f5",
+            "fortinet_forticlient",
+            "juniper_junos",
+            "juniper_netscreen",
+            "microsoft",
+            "netscout",
+            "radware",
+            "symantec",
+            "tomcat",
+            "dga",
+            "cloud_defend",
+          ],
+          "kibanaVersionCheckEnabled": false,
+          "spec": Object {
+            "max": "3.3",
+            "min": "3.0",
+          },
+        },
+        "retrySetupOnBoot": true,
+        "useMeteringApi": true,
+      },
+      "packages": Array [
+        Object {
+          "name": "fleet_server",
+          "version": "latest",
+        },
+      ],
+      "prereleaseEnabledByDefault": true,
+    },
+    "graph": Object {
+      "enabled": false,
+    },
+    "ilm": Object {
+      "enabled": false,
+    },
+    "index_management": Object {
+      "editableIndexSettings": "limited",
+      "enableDataStreamStats": false,
+      "enableIndexActions": false,
+      "enableIndexStats": false,
+      "enableLegacyTemplates": false,
+      "enableMappingsSourceFieldSection": false,
+      "enableProjectLevelRetentionChecks": true,
+      "enableSizeAndDocCount": true,
+      "enableTogglingDataRetention": false,
+    },
+    "ingest_pipelines": Object {
+      "enableManageProcessors": false,
+    },
+    "license_management": Object {
+      "enabled": false,
+    },
+    "ml": Object {
+      "ad": Object {
+        "enabled": false,
+      },
+      "compatibleModuleType": "security",
+      "dfa": Object {
+        "enabled": false,
+      },
+      "nlp": Object {
+        "enabled": true,
+        "modelDeployment": Object {
+          "allowStaticAllocations": false,
+          "vCPURange": Object {
+            "high": Object {
+              "max": 128,
+              "min": 1,
+            },
+            "low": Object {
+              "max": 2,
+              "min": 0,
+            },
+            "medium": Object {
+              "max": 32,
+              "min": 1,
+            },
+          },
+        },
+      },
+    },
+    "observabilityAIAssistant": Object {
+      "enabled": false,
+    },
+    "osquery": Object {
+      "enabled": false,
+    },
+    "remote_clusters": Object {
+      "enabled": false,
+    },
+    "reporting": Object {
+      "csv": Object {
+        "maxConcurrentShardRequests": 0,
+      },
+      "queue": Object {
+        "pollInterval": "3m",
+      },
+      "statefulSettings": Object {
+        "enabled": false,
+      },
+    },
+    "rollup": Object {
+      "enabled": false,
+    },
+    "screenshotting": Object {
+      "enabled": false,
+    },
+    "security": Object {
+      "showInsecureClusterWarning": false,
+      "ui": Object {
+        "roleMappingManagementEnabled": false,
+        "userManagementEnabled": false,
+      },
+    },
+    "securitySolution": Object {
+      "enableUiSettingsValidations": true,
+      "offeringSettings": Object {
+        "ILMEnabled": false,
+      },
+    },
+    "securitySolutionEss": Object {
+      "enabled": false,
+    },
+    "securitySolutionServerless": Object {
+      "enabled": true,
+      "productTypes": Array [
+        Object {
+          "product_line": "security",
+          "product_tier": "complete",
+        },
+        Object {
+          "product_line": "endpoint",
+          "product_tier": "complete",
+        },
+        Object {
+          "product_line": "cloud",
+          "product_tier": "complete",
+        },
+      ],
+    },
+    "serverless": Object {
+      "plugin": Object {
+        "enabled": true,
+      },
+    },
+    "snapshot_restore": Object {
+      "enabled": false,
+    },
+    "spaces": Object {
+      "allowFeatureVisibility": false,
+      "allowSolutionVisibility": false,
+      "maxSpaces": 100,
+    },
+    "task_manager": Object {
+      "allow_reading_invalid_state": false,
+      "capacity": 20,
+      "metrics_reset_interval": 120000,
+      "request_timeouts": Object {
+        "update_by_query": 60000,
+      },
+    },
+    "trigger_actions_ui": Object {
+      "rules": Object {
+        "enabled": false,
+      },
+    },
+    "upgrade_assistant": Object {
+      "enabled": false,
+    },
+    "watcher": Object {
+      "enabled": false,
+    },
+  },
+}
+`;
