@@ -10,7 +10,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
-import { LockAcquisitionError } from '@kbn/lock-manager';
+import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import {
   Instruction,
@@ -449,7 +449,7 @@ export class KnowledgeBaseService {
           esClient: this.dependencies.esClient,
           inferenceId,
         }).catch((e) => {
-          if (error instanceof LockAcquisitionError) {
+          if (isLockAcquisitionError(e)) {
             this.dependencies.logger.info(`Re-indexing operation is already in progress`);
             return;
           }
