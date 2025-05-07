@@ -57,7 +57,7 @@ function ofName(
     getNumberFormat: memoize(
       (locale, opts) =>
         new Intl.NumberFormat(locale, {
-          ...opts,
+          ...(opts as Intl.NumberFormatOptions), // To resolve a type mismatch in the 'useGrouping' property
           maximumFractionDigits: 4,
         })
     ),
