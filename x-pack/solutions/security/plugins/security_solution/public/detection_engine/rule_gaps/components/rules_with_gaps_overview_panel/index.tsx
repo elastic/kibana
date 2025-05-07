@@ -37,14 +37,14 @@ import { useGetGlobalRuleExecutionSummary } from '../../api/hooks/use_get_global
 
 const DoubleDivider = styled.div`
   border-right: ${(props) => props.theme.euiTheme.border.thin};
-  padding-left: 16px;
-  margin-right: 16px;
-  height: 24px;
+  padding-left: ${(props) => props.theme.euiTheme.size.base};
+  margin-right: ${(props) => props.theme.euiTheme.size.base};
+  height: ${(props) => props.theme.euiTheme.size.l};
 `;
 
 const SingleDivider = styled.div`
-  padding-left: 16px;
-  height: 24px;
+  padding-left: ${(props) => props.theme.euiTheme.size.base};
+  height: ${(props) => props.theme.euiTheme.size.l};
 `;
 
 export const RulesWithGapsOverviewPanel = () => {
