@@ -304,7 +304,7 @@ export const createCustomThresholdExecutor = ({
     alertsClient.setAlertLimitReached(hasReachedLimit);
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 
-    let groupingObjectForRecovered: Record<string, unknown> = {};
+    let groupingObjectForRecovered: Record<string, any> = {};
 
     // extracing group by fields from kibana.alert.rule.params,
     // since all recovered alert documents will have same group by fields,

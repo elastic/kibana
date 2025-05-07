@@ -11,7 +11,7 @@ import { Group } from './types';
 export const getGroupByObject = (
   groupBy: string | string[] | undefined,
   groupValueSet: Set<string>
-): Record<string, unknown> => {
+): Record<string, any> => {
   const groupKeyValueMappingsObject: Record<string, unknown> = {};
   if (groupBy) {
     groupValueSet.forEach((groupValueStr) => {
