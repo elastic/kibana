@@ -23,7 +23,6 @@ import type {
   LensCreateAlertRuleInitialValues,
   LensEmbeddableStartServices,
 } from '../types';
-import { buildObservableVariable } from '../helper';
 
 export function initializeAlertRules(
   uuid: string,
@@ -54,13 +53,12 @@ export function initializeAlertRules(
           );
         }
 
-        const [esqlVariables$] = buildObservableVariable(
-          apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$ : []
-        );
-
+        const esqlVariables$ = apiPublishesESQLVariables(parentApi)
+          ? parentApi.esqlVariables$
+          : undefined;
         let initialValues = { ...passedInitialValues };
 
-        const esqlVariables = esqlVariables$.getValue();
+        const esqlVariables = esqlVariables$?.getValue() ?? [];
         if (esqlVariables.length) {
           initialValues = {
             params: {
