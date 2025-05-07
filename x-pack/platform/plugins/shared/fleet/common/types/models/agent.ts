@@ -34,7 +34,6 @@ export type SimplifiedAgentStatus =
 export type AgentActionType =
   | 'UNENROLL'
   | 'UPGRADE'
-  | 'MIGRATE'
   | 'SETTINGS'
   | 'POLICY_REASSIGN'
   | 'CANCEL'
