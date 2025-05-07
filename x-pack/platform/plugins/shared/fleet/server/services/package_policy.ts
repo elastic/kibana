@@ -891,7 +891,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     return {
       items: packagePolicies?.saved_objects.map((so) =>
-        mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces)
+        mapPackagePolicySavedObjectToPackagePolicy(so)
       ),
       total: packagePolicies?.total,
       page,
@@ -1134,15 +1134,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const bumpPromise = pMap(
       associatedPolicyIds,
       (policyId) => {
+        const isEndpointPolicy = newPolicy.package?.name === 'endpoint';
         // Check if the agent policy is in both old and updated package policies
         const assignedInOldPolicy = oldPackagePolicy.policy_ids.includes(policyId);
         const assignedInNewPolicy = newPolicy.policy_ids.includes(policyId);
 
         // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
         const removeProtection =
-          (assignedInOldPolicy && !assignedInNewPolicy) ||
-          (!assignedInOldPolicy && assignedInNewPolicy);
-
+          isEndpointPolicy &&
+          ((assignedInOldPolicy && !assignedInNewPolicy) ||
+            (!assignedInOldPolicy && assignedInNewPolicy));
         return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
           user: options?.user,
           removeProtection,
@@ -1888,7 +1889,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                     context,
                     request
                   );
-                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = PackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else if (externalCallbackType === 'packagePolicyPostUpdate') {
                   thisCallbackResponse = await (callback as PutPackagePolicyPostUpdateCallback)(
                     updatedNewData as PackagePolicy,
@@ -1897,7 +1900,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                     context,
                     request
                   );
-                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = PackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else {
                   thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
                     updatedNewData as NewPackagePolicy,
@@ -1909,7 +1914,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 }
 
                 if (externalCallbackType === 'packagePolicyCreate') {
-                  updatedNewData = NewPackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = NewPackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else if (externalCallbackType === 'packagePolicyUpdate') {
                   const omitted = {
                     ...omit(thisCallbackResponse, [
@@ -2031,7 +2038,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           perPage: SO_SEARCH_LIMIT,
           namespaces: ['*'],
         })
-    ).saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces));
+    ).saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so));
 
     if (packagePolicies.length > 0) {
       const getPackagePolicyUpdate = (packagePolicy: PackagePolicy) => ({
@@ -2150,10 +2157,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             savedObjectType,
           });
 
-          return mapPackagePolicySavedObjectToPackagePolicy(
-            packagePolicySO,
-            packagePolicySO.namespaces
-          );
+          return mapPackagePolicySavedObjectToPackagePolicy(packagePolicySO);
         });
       },
     });

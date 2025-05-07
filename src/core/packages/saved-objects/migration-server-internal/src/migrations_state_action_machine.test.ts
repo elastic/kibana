@@ -34,6 +34,11 @@ describe('migrationsStateActionMachine', () => {
   const abort = jest.fn();
   const mockLogger = loggingSystemMock.create();
   const typeRegistry = typeRegistryMock.create();
+  typeRegistry.getLegacyTypes.mockReturnValue([
+    'deprecated_type_1',
+    'deprecatedType2',
+    'deprecated-type-3',
+  ]);
   const docLinks = docLinksServiceMock.createSetupContract();
 
   const initialState = createInitialState({

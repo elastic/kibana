@@ -33,6 +33,7 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
           onClose={() => setRuleIdToEdit(null)}
         />
       )}
+
       <EuiFlexGroup justifyContent="spaceBetween" direction="column">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">

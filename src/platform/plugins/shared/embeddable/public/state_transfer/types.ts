@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SerializedPanelState } from '@kbn/presentation-publishing';
+
 export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 
 /**
@@ -36,12 +38,9 @@ export const EMBEDDABLE_PACKAGE_STATE_KEY = 'embeddable_package_state';
  * A state package that contains all fields necessary to create or update an embeddable by reference or by value in a container.
  * @public
  */
-export interface EmbeddablePackageState {
+export interface EmbeddablePackageState<SerializedStateType extends object = object> {
   type: string;
-  /**
-   * For react embeddables, this input must be runtime state.
-   */
-  input: object;
+  serializedState: SerializedPanelState<SerializedStateType>;
   embeddableId?: string;
   size?: {
     width?: number;
@@ -57,7 +56,7 @@ export interface EmbeddablePackageState {
 export function isEmbeddablePackageState(state: unknown): state is EmbeddablePackageState {
   return (
     ensureFieldOfTypeExists('type', state, 'string') &&
-    ensureFieldOfTypeExists('input', state, 'object')
+    ensureFieldOfTypeExists('serializedState', state, 'object')
   );
 }
 

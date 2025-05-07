@@ -9,6 +9,6 @@ export const PLUGIN_ROUTE_ROOT = '/app/elasticsearch/query_rules';
 
 export enum APIRoutes {
   QUERY_RULES_SETS = '/internal/search_query_rules/query_rules_sets',
-  QUERY_RULES_RULESET_FETCH = '/internal/search_query_rules/ruleset/{ruleset_id}',
   QUERY_RULES_QUERY_RULE_FETCH = '/internal/search_query_rules/ruleset/{ruleset_id}/rule/{rule_id}',
+  QUERY_RULES_RULESET_ID = '/internal/search_query_rules/ruleset/{ruleset_id}',
 }

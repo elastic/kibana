@@ -13,7 +13,7 @@ applies_to:
 
 ::::{note}
 In {{ecloud}}, {{fleet}} flags are already configured.
-If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
 ::::
 
 By default, {{fleet}} is enabled. To use {{fleet}}, you also need to configure {{kib}} and {{es}} hosts.
@@ -24,13 +24,13 @@ Go to the [{{fleet}}](docs-content://reference/fleet/index.md) docs for more inf
 
 ## General {{fleet}} settings [general-fleet-settings-kb]
 
-`xpack.fleet.agents.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`xpack.fleet.agents.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set to `true` (default) to enable {{fleet}}.
 
 `xpack.fleet.isAirGapped`
 :   Set to `true` to indicate {{fleet}} is running in an air-gapped environment. Refer to [Air-gapped environments](docs-content://reference/fleet/air-gapped.md) for details. Enabling this flag helps Fleet skip needless requests and improve the user experience for air-gapped environments.
 
-`xpack.fleet.createArtifactsBulkBatchSize` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`xpack.fleet.createArtifactsBulkBatchSize` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Allow to configure batch size for creating and updating Fleet user artifacts.  Examples include creation of Trusted Applications and Endpoint Exceptions in Security. It is available in {{ecloud}} 8.9.0 and later versions.
 % TBD: Supported only in Elastic Cloud?
 
@@ -348,7 +348,7 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
     :::::
 
 
-`xpack.fleet.enableExperimental` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`xpack.fleet.enableExperimental` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   List of experimental feature flag to enable in Fleet.
     It is available in {{ecloud}} 8.6.0 and later versions.
 
