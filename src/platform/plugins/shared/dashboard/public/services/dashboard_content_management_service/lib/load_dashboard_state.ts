@@ -132,7 +132,7 @@ export const loadDashboardState = async ({
     }
     try {
       searchSourceValues = injectSearchSourceReferences(
-        searchSourceValues as any,
+        searchSourceValues,
         references
       ) as DashboardSearchSource;
       return await dataSearchService.searchSource.create(searchSourceValues);
