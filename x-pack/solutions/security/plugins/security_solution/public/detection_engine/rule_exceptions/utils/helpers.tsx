@@ -293,89 +293,68 @@ export const lowercaseHashValues = (
 };
 
 /**
+ * Generic function to get code signature entries from any entity
+ */
+export const getEntityCodeSignature = <
+  T extends {
+    Ext?: { code_signature?: CodeSignature[] | CodeSignature };
+    code_signature?: CodeSignature;
+  }
+>(
+  entity: T | undefined,
+  fieldPrefix: string
+): EntriesArrayOrUndefined => {
+  if (!entity) return undefined;
+
+  // Check Ext.code_signature first
+  if (entity.Ext?.code_signature) {
+    return getCodeSignatureValue(entity.Ext.code_signature, `${fieldPrefix}.Ext.code_signature`);
+  }
+
+  // Then check direct code_signature
+  if (entity.code_signature?.trusted === true) {
+    return [
+      {
+        field: `${fieldPrefix}.code_signature.subject_name`,
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: entity.code_signature?.subject_name ?? '',
+      },
+      {
+        field: `${fieldPrefix}.code_signature.trusted`,
+        operator: 'included' as const,
+        type: 'match' as const,
+        value: entity.code_signature.trusted.toString(),
+      },
+    ];
+  }
+  return undefined;
+};
+
+/**
  * Returns an array of exception entries for either
  * `file.Ext.code_signature` or 'file.code_signature`
  * as long as the `trusted` field is `true`.
  */
-export const getFileCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUndefined => {
-  const { file } = alertData;
-  const codeSignature = file && file.Ext && file.Ext.code_signature;
-
-  if (codeSignature) {
-    return getCodeSignatureValue(codeSignature, 'file.Ext.code_signature');
-  } else if (file?.code_signature?.trusted === true) {
-    return [
-      {
-        field: 'file.code_signature.subject_name',
-        operator: 'included' as const,
-        type: 'match' as const,
-        value: file?.code_signature?.subject_name ?? '',
-      },
-      {
-        field: 'file.code_signature.trusted',
-        operator: 'included' as const,
-        type: 'match' as const,
-        value: file.code_signature.trusted.toString(),
-      },
-    ];
-  }
-};
+export const getFileCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUndefined =>
+  getEntityCodeSignature(alertData.file, 'file');
 
 /**
  * Returns an array of exception entries for either
  * `process.Ext.code_signature` or 'process.code_signature`
  * as long as the `trusted` field is `true`.
  */
-export const getProcessCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUndefined => {
-  const { process } = alertData;
-  const codeSignature = process && process.Ext && process.Ext.code_signature;
-  if (codeSignature) {
-    return getCodeSignatureValue(codeSignature, 'process.Ext.code_signature');
-  } else if (process?.code_signature?.trusted === true) {
-    return [
-      {
-        field: 'process.code_signature.subject_name',
-        operator: 'included' as const,
-        type: 'match' as const,
-        value: process?.code_signature?.subject_name ?? '',
-      },
-      {
-        field: 'process.code_signature.trusted',
-        operator: 'included' as const,
-        type: 'match' as const,
-        value: process.code_signature.trusted.toString(),
-      },
-    ];
-  }
-};
+export const getProcessCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUndefined =>
+  getEntityCodeSignature(alertData.process, 'process');
 
 /**
  * Returns an array of exception entries for either
  * `dll.Ext.code_signature` or 'dll.code_signature`
  * as long as the `trusted` field is `true`.
  */
-export const getDllCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUndefined => {
-  const { dll } = alertData;
-  const codeSignature = dll && dll.Ext && dll.Ext.code_signature;
-  if (codeSignature) {
-    return getCodeSignatureValue(codeSignature, 'dll.Ext.code_signature');
-  } else if (dll?.code_signature?.trusted === true) {
-    return [
-      {
-        field: 'dll.code_signature.subject_name',
-        operator: 'included' as const,
-        type: 'match' as const,
-        value: dll?.code_signature?.subject_name ?? '',
-      },
-      {
-        field: 'dll.code_signature.trusted',
-        operator: 'included' as const,
-        type: 'match' as const,
-        value: dll.code_signature.trusted.toString(),
-      },
-    ];
-  }
-};
+export const getDllCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUndefined =>
+  getEntityCodeSignature(alertData.dll, 'dll');
+
 /**
  * Pre 7.10 `Ext.code_signature` fields were mistakenly populated as
  * a single object with subject_name and trusted.
