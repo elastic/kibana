@@ -80,7 +80,6 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.lastRun !== undefined ? { lastRun: rule.lastRun } : {}),
     ...(rule.nextRun !== undefined ? { nextRun: rule.nextRun?.toISOString() || null } : {}),
     revision: rule.revision,
-    ...(rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
     ...(rule.running !== undefined ? { running: rule.running } : {}),
     ...(rule.alertDelay !== undefined ? { alertDelay: rule.alertDelay } : {}),
     ...(rule.flapping !== undefined ? { flapping: rule.flapping } : {}),

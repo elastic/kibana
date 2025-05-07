@@ -85,7 +85,6 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
 
     throw e;
   }
-
   if (rawRule.enabled) {
     let scheduledTaskId: string;
     try {

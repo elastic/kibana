@@ -111,7 +111,7 @@ export const updateRuleRoute = (
 
             // Assert versioned response type
             const response: UpdateRuleResponseV1<RuleParamsV1> = {
-              body: transformRuleToRuleResponseV1<RuleParamsV1>(updatedRule, true),
+              body: transformRuleToRuleResponseV1<RuleParamsV1>(updatedRule),
             };
 
             return res.ok(response);

@@ -12,12 +12,8 @@ export const transformGetResponse = <Params extends RuleParams>(
   rule: Rule<Params>,
   includeArtifacts: boolean = false
 ) => {
-  const transformedResponse = {
+  return {
     ...transformRuleToRuleResponseV1<Params>(rule),
     ...(includeArtifacts && rule.artifacts !== undefined ? { artifacts: rule.artifacts } : {}),
   };
-  if (!includeArtifacts) {
-    delete transformedResponse.artifacts;
-  }
-  return transformedResponse;
 };
