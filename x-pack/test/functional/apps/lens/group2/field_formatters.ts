@@ -220,5 +220,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await lens.getDatatableCellText(0, 0)).to.eql('5.727kbitblah');
       });
     });
+
+    describe('percentile formatter', () => {
+      before(async () => {
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisType('lens');
+      });
+
+      it('should display percentile axis label correctly, without rounding after 3 decimal digits', async () => {
+        await lens.configureDimension({
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
+        await lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'percentile',
+          field: 'bytes',
+          keepOpen: true,
+        });
+        await retry.try(async () => {
+          const value = `99.9999`;
+          // Can not use testSubjects because the same data-test-subj is used in both range input and number input
+          const percentileInput = await lens.getNumericFieldReady(
+            'lns-indexPattern-percentile-input'
+          );
+          await percentileInput.clearValue();
+          await percentileInput.type(value);
+          const attrValue = await percentileInput.getAttribute('value');
+          if (attrValue !== value) {
+            throw new Error(
+              `[date-test-subj="lns-indexPattern-percentile-input"] not set to ${value}`
+            );
+          }
+        });
+        await lens.closeDimensionEditor();
+        await lens.waitForVisualization('xyVisChart');
+        expect(await lens.getDimensionTriggersTexts('lnsXY_yDimensionPanel')).to.eql([
+          '99.9999th percentile of bytes',
+        ]);
+      });
+    });
   });
 }
