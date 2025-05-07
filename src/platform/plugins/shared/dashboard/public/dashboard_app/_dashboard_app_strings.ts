@@ -250,6 +250,11 @@ export const getAddControlButtonTitle = () =>
     defaultMessage: 'Add control',
   });
 
+export const getAddESQLControlButtonTitle = () =>
+  i18n.translate('dashboard.editingToolbar.addESQLControlButtonTitle', {
+    defaultMessage: 'Add ES|QL control',
+  });
+
 export const getEditControlGroupButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.editControlGroupButtonTitle', {
     defaultMessage: 'Settings',
