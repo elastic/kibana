@@ -44,7 +44,6 @@ export const getViewInAppUrl = ({
   const searchConfigurationFilters = searchConfiguration?.filter || [];
   const groupFilters = getGroupFilters(groups);
   const timeRange: TimeRange | undefined = getPaddedAlertTimeRange(startedAt, endedAt);
-  timeRange.to = endedAt ? timeRange.to : 'now';
 
   const query = {
     query: '',
@@ -59,7 +58,6 @@ export const getViewInAppUrl = ({
   } else if (searchConfigurationQuery) {
     query.query = searchConfigurationQuery;
   }
-
   return logsLocator.getRedirectUrl(
     {
       dataViewId,

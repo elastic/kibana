@@ -130,6 +130,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   if (!ruleParams.criteria) {
     return null;
   }
+
   return (
     <EuiFlexGroup direction="column" data-test-subj="thresholdAlertOverviewSection">
       {ruleParams.criteria.map((criterion, index) => {

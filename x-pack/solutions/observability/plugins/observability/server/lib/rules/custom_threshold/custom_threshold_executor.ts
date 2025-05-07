@@ -19,6 +19,7 @@ import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { getEcsGroups, getFormattedGroupBy, getGroupByObject } from '@kbn/alerting-rule-utils';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { getDataViewSpecFromSearchConfig } from '../../../../common/custom_threshold_rule/helpers/get_data_view_spec';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
@@ -270,7 +271,7 @@ export const createCustomThresholdExecutor = ({
           typeof params.searchConfiguration?.index === 'string'
             ? params.searchConfiguration?.index
             : params.searchConfiguration?.index?.title;
-        const dataViewSpec = dataView.toSpec();
+        const dataViewSpec = getDataViewSpecFromSearchConfig(params.searchConfiguration);
         alertsClient.setAlertData({
           id: `${group}`,
           context: {
@@ -334,6 +335,7 @@ export const createCustomThresholdExecutor = ({
       const grouping = groupingObjectForRecovered[recoveredAlertId];
       const alertHits = recoveredAlert.hit;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
+      const dataViewSpec = getDataViewSpecFromSearchConfig(params.searchConfiguration);
 
       const context = {
         alertDetailsUrl: getAlertDetailsUrl(basePath, spaceId, alertUuid),
@@ -342,6 +344,7 @@ export const createCustomThresholdExecutor = ({
         timestamp: startedAt.toISOString(),
         viewInAppUrl: getViewInAppUrl({
           dataViewId,
+          dataViewSpec,
           groups: group,
           logsLocator,
           metrics: params.criteria[0]?.metrics,
