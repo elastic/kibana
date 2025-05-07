@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import type { StoryObj } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
-import { HttpStart, NotificationsSetup } from '@kbn/core/public';
+import { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { AlertDeleteDescriptiveFormGroup } from './components/descriptive_form_group';
 import { AlertDeleteModal } from './components/modal';
 
@@ -42,7 +42,7 @@ const meta = {
 
 export default meta;
 
-const notifications: NotificationsSetup = {
+const notifications = {
   toasts: {
     addSuccess: (...params: unknown[]) => {
       alert(`Success: ${JSON.stringify(params)}`);
@@ -51,7 +51,7 @@ const notifications: NotificationsSetup = {
       alert(`Danger: ${JSON.stringify(params)}`);
     },
   },
-} as unknown as NotificationsSetup;
+} as unknown as NotificationsStart;
 
 const DefaultStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(true);

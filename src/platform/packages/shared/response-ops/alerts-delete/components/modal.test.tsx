@@ -17,7 +17,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 
 const http = httpServiceMock.createStartContract();
-const notifications = notificationServiceMock.createSetupContract();
+const notifications = notificationServiceMock.createStartContract();
 
 describe('AlertDelete Modal', () => {
   const closeModalMock = jest.fn();

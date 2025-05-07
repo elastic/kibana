@@ -25,7 +25,7 @@ import {
   EuiFieldText,
   EuiPanel,
 } from '@elastic/eui';
-import type { NotificationsSetup } from '@kbn/core-notifications-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { HttpStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -123,7 +123,7 @@ const getThresholdErrorMessages = (threshold: number, thresholdUnit: EuiSelectOp
 };
 
 export interface AlertDeleteProps {
-  services: { http: HttpStart; notifications: NotificationsSetup };
+  services: { http: HttpStart; notifications: NotificationsStart };
   categoryIds: AlertDeleteCategoryIds[];
   onCloseModal: () => void;
   isVisible: boolean;

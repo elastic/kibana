@@ -13,13 +13,13 @@ import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { HttpStart } from '@kbn/core/public';
 import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
-import type { NotificationsSetup } from '@kbn/core-notifications-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import * as i18n from '../translations';
 
 const ModalComponent = lazy(() => import('./modal'));
 
 interface AlertDeleteDescriptiveFormGroupProps {
-  services: { http: HttpStart; notifications: NotificationsSetup };
+  services: { http: HttpStart; notifications: NotificationsStart };
   categoryIds: AlertDeleteCategoryIds[];
   isDisabled?: boolean;
 }

@@ -16,7 +16,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const http = httpServiceMock.createStartContract();
-const notifications = notificationServiceMock.createSetupContract();
+const notifications = notificationServiceMock.createStartContract();
 
 describe('AlertDeleteRuleSettingsSection', () => {
   const queryClient = new QueryClient({
