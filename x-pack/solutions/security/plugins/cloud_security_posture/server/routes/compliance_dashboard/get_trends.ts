@@ -179,6 +179,7 @@ export const getTrends = async (
         return { [namespace]: { documents } };
       }) ?? [];
 
+    if (!scoreTrendDocs.length) return []; // No trends data available
     const result = Object.fromEntries(
       scoreTrendDocs.map((entry) => {
         const [key, value] = Object.entries(entry)[0];
