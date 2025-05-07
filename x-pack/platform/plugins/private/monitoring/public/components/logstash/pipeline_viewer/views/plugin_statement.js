@@ -76,6 +76,7 @@ export function PluginStatement({
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj={`pluginStatement-${pluginType}-${name}-EmptyButton`}
               aria-label={name}
               className="monPipelineViewer__plugin"
               color="primary"
@@ -90,6 +91,7 @@ export function PluginStatement({
           {hasExplicitId && (
             <EuiFlexItem grow={false}>
               <EuiBadge
+                data-test-subj={`pluginStatement-${pluginType}-${name}-Badge`}
                 onClick={onNameButtonClick}
                 onClickAriaLabel={i18n.translate(
                   'xpack.monitoring.logstash.pipelineStatement.viewDetailsAriaLabel',

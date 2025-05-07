@@ -135,8 +135,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await unloadDashboards();
         await unlinkDashboard(SEARCH_DASHBOARD_ID);
+        await unloadDashboards();
       });
 
       it('lists the dashboard in the stream response', async () => {
@@ -177,7 +177,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('recovers on write and lists the linked dashboard ', async () => {
-          await unlinkDashboard(SEARCH_DASHBOARD_ID);
           await linkDashboard(SEARCH_DASHBOARD_ID);
 
           const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
@@ -241,6 +240,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           expect(response.body.dashboards[0].id).to.eql(BASIC_DASHBOARD_ID);
         });
+      });
+    });
+
+    describe('on class stream that has not been touched yet', () => {
+      before(async () => {
+        await esClient.indices.createDataStream({
+          name: 'logs-testlogs-default',
+        });
+      });
+      after(async () => {
+        await esClient.indices.deleteDataStream({
+          name: 'logs-testlogs-default',
+        });
+      });
+      it('does not list any dashboards but returns 200', async () => {
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+          params: { path: { name: 'logs-testlogs-default' } },
+        });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.dashboards.length).to.eql(0);
       });
     });
 

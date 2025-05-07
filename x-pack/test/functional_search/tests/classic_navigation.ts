@@ -49,6 +49,7 @@ export default function searchSolutionNavigation({
         { id: 'BehavioralAnalytics', label: 'Behavioral Analytics' },
         { id: 'Relevance', label: 'Relevance' },
         { id: 'InferenceEndpoints', label: 'Inference Endpoints' },
+        { id: 'Synonyms', label: 'Synonyms' },
         { id: 'GettingStarted', label: 'Getting started' },
         { id: 'Elasticsearch', label: 'Elasticsearch' },
         { id: 'VectorSearch', label: 'Vector Search' },

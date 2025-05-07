@@ -21,11 +21,10 @@ export function CurrentStreamEntry({ definition }: { definition: WiredStreamGetR
         text: parentId,
         href: isBreadcrumbsTail
           ? undefined
-          : router.link('/{key}/{tab}/{subtab}', {
+          : router.link('/{key}/management/{tab}', {
               path: {
                 key: parentId,
-                tab: 'management',
-                subtab: 'route',
+                tab: 'route',
               },
             }),
       };

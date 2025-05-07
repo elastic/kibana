@@ -85,7 +85,7 @@ describe('ContextAppContent test', () => {
 
     const component = mountWithIntl(
       <KibanaContextProvider services={discoverServiceMock}>
-        <EuiProvider>
+        <EuiProvider highContrastMode={false}>
           <ContextAppContent {...props} />
         </EuiProvider>
       </KibanaContextProvider>

@@ -34,6 +34,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { ExpandablePanel } from '../../../flyout/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 import {
   buildColumns,
@@ -70,6 +71,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const riskData = data && data.length > 0 ? data[0] : undefined;
   const entityData = getEntityData<T>(entityType, riskData);
   const { euiTheme } = useEuiTheme();
+  const spaceId = useSpaceId();
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const fieldName = EntityTypeToIdentifierField[entityType];
@@ -77,12 +79,12 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     return getRiskScoreSummaryAttributes({
       severity: entityData?.risk?.calculated_level,
       query: `${fieldName}: ${entityName}`,
-      spaceId: 'default',
+      spaceId,
       riskEntity: entityType,
       // TODO: add in riskColors when severity palette agreed on.
       // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
     });
-  }, [entityData?.name, entityData?.risk?.calculated_level, entityType]);
+  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId]);
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
   const columns = useMemo(() => buildColumns(), []);

@@ -18,7 +18,7 @@ import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { StreamDeleteModal } from '../../stream_delete_modal';
-import { useRoutingState } from './hooks/routing_state';
+import { RoutingStateContext, useRoutingState } from './hooks/routing_state';
 import { ControlBar } from './control_bar';
 import { PreviewPanel } from './preview_panel';
 import { ChildStreamList } from './child_stream_list';
@@ -27,7 +27,7 @@ export function StreamDetailRouting({
   definition,
   refreshDefinition,
 }: {
-  definition?: WiredStreamGetResponse;
+  definition: WiredStreamGetResponse;
   refreshDefinition: () => void;
 }) {
   const { appParams, core } = useKibana();
@@ -61,93 +61,91 @@ export function StreamDetailRouting({
     openConfirm: core.overlays.openConfirm,
   });
 
-  if (!definition) {
-    return null;
-  }
-
   const closeModal = () => routingAppState.setShowDeleteModal(false);
 
+  const routingStateContextValue = {
+    routingAppState,
+    definition,
+    refreshDefinition,
+  };
+
   return (
-    <EuiFlexItem
-      className={css`
-        overflow: auto;
-      `}
-      grow
-    >
-      {routingAppState.showDeleteModal && routingAppState.childUnderEdit && (
-        <StreamDeleteModal
-          closeModal={closeModal}
-          clearChildUnderEdit={() => routingAppState.selectChildUnderEdit(undefined)}
-          refreshDefinition={refreshDefinition}
-          name={routingAppState.childUnderEdit.child.destination}
-          availableStreams={availableStreams}
-        />
-      )}
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
+    <RoutingStateContext.Provider value={routingStateContextValue}>
+      <EuiFlexItem
         className={css`
           overflow: auto;
         `}
+        grow
       >
-        <EuiPanel
-          hasShadow={false}
-          hasBorder
-          className={css`
-            display: flex;
-            max-width: 100%;
-            overflow: auto;
-            flex-grow: 1;
-          `}
-          paddingSize="xs"
-        >
-          <EuiResizableContainer>
-            {(EuiResizablePanel, EuiResizableButton) => (
-              <>
-                <EuiResizablePanel
-                  initialSize={30}
-                  minSize="300px"
-                  tabIndex={0}
-                  paddingSize="s"
-                  className={css`
-                    background-color: ${theme.colors.emptyShade};
-                    overflow: auto;
-                    display: flex;
-                  `}
-                >
-                  <ChildStreamList
-                    definition={definition}
-                    routingAppState={routingAppState}
-                    availableStreams={availableStreams}
-                  />
-                </EuiResizablePanel>
-
-                <EuiResizableButton accountForScrollbars="both" />
-
-                <EuiResizablePanel
-                  initialSize={70}
-                  tabIndex={0}
-                  minSize="300px"
-                  paddingSize="s"
-                  className={css`
-                    display: flex;
-                    flex-direction: column;
-                  `}
-                >
-                  <PreviewPanel definition={definition} routingAppState={routingAppState} />
-                </EuiResizablePanel>
-              </>
-            )}
-          </EuiResizableContainer>
-        </EuiPanel>
-        <EuiFlexItem grow={false}>
-          <ControlBar
-            definition={definition}
-            routingAppState={routingAppState}
+        {routingAppState.showDeleteModal && routingAppState.childUnderEdit && (
+          <StreamDeleteModal
+            closeModal={closeModal}
+            clearChildUnderEdit={() => routingAppState.selectChildUnderEdit(undefined)}
             refreshDefinition={refreshDefinition}
+            name={routingAppState.childUnderEdit.child.destination}
+            availableStreams={availableStreams}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+        )}
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          className={css`
+            overflow: auto;
+          `}
+        >
+          <EuiPanel
+            hasShadow={false}
+            hasBorder
+            className={css`
+              display: flex;
+              max-width: 100%;
+              overflow: auto;
+              flex-grow: 1;
+            `}
+            paddingSize="xs"
+          >
+            <EuiResizableContainer>
+              {(EuiResizablePanel, EuiResizableButton) => (
+                <>
+                  <EuiResizablePanel
+                    initialSize={40}
+                    minSize="400px"
+                    tabIndex={0}
+                    paddingSize="s"
+                    className={css`
+                      background-color: ${theme.colors.backgroundBaseSubdued};
+                      overflow: auto;
+                      display: flex;
+                    `}
+                  >
+                    <ChildStreamList availableStreams={availableStreams} />
+                  </EuiResizablePanel>
+
+                  <EuiResizableButton accountForScrollbars="both" />
+
+                  <EuiResizablePanel
+                    initialSize={60}
+                    tabIndex={0}
+                    minSize="300px"
+                    paddingSize="s"
+                    className={css`
+                      display: flex;
+                      flex-direction: column;
+                    `}
+                  >
+                    <PreviewPanel definition={definition} routingAppState={routingAppState} />
+                  </EuiResizablePanel>
+                </>
+              )}
+            </EuiResizableContainer>
+          </EuiPanel>
+          {routingAppState.hasChildStreamsOrderChanged && (
+            <EuiFlexItem grow={false}>
+              <ControlBar />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </RoutingStateContext.Provider>
   );
 }

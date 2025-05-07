@@ -218,6 +218,9 @@ export function MockApmPluginContextWrapper({
     createCallApmApi(contextValue.core);
   }
 
+  performance.mark = jest.fn();
+  performance.clearMeasures = jest.fn();
+
   const contextHistory = useHistory();
 
   const usedHistory = useMemo(() => {

@@ -10,42 +10,9 @@
  * valid deprecations
  */
 
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const translogSettingsIndexDeprecation: IndicesCreateRequest = {
-  index: 'deprecated_settings',
-  settings: {
-    'translog.retention.size': '1b',
-    'translog.retention.age': '5m',
-    'index.soft_deletes.enabled': true,
-  },
-};
-
-const multiFieldsIndexDeprecation: IndicesCreateRequest = {
-  index: 'nested_multi_fields',
-  mappings: {
-    properties: {
-      text: {
-        type: 'text',
-        fields: {
-          english: {
-            type: 'text',
-            analyzer: 'english',
-            fields: {
-              english: {
-                type: 'text',
-                analyzer: 'english',
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-};
-
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function upgradeAssistantPage({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
@@ -53,14 +20,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  describe.skip('Upgrade Assistant Accessibility', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/217262
+  describe.skip('Upgrade Assistant Accessibility', function () {
+    // Only run this test in 8 as the deprecation we are testing is only available in 8
+    this.onlyEsVersion('8');
+
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
 
       try {
-        // Create two indices that will trigger deprecation warnings to test the ES deprecations page
-        await es.indices.create(multiFieldsIndexDeprecation);
-        await es.indices.create(translogSettingsIndexDeprecation);
+        // Create an ES deprecation
+        await es.cluster.putComponentTemplate({
+          name: 'deprecated_template',
+          template: {
+            mappings: {
+              _source: {
+                mode: 'stored',
+              },
+            },
+          },
+        });
       } catch (e) {
         log.debug('[Setup error] Error creating indices');
         throw e;
@@ -69,8 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       try {
-        await es.indices.delete({
-          index: [multiFieldsIndexDeprecation.index, translogSettingsIndexDeprecation.index],
+        await es.cluster.deleteComponentTemplate({
+          name: 'deprecated_template',
         });
       } catch (e) {
         log.debug('[Cleanup error] Error deleting indices');
@@ -91,12 +70,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('ES deprecations logs page', () => {
+    describe('ES deprecations logs flyout', () => {
       beforeEach(async () => {
-        await PageObjects.upgradeAssistant.navigateToEsDeprecationLogs();
+        await PageObjects.upgradeAssistant.navigateToPage();
       });
 
       it('with logs collection disabled', async () => {
+        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (loggingEnabled) {
           await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
@@ -109,6 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('with logs collection enabled', async () => {
+        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (!loggingEnabled) {
           await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
@@ -140,16 +121,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Deprecations table', async () => {
-        await a11y.testAppSnapshot();
-      });
-
-      it('Index settings deprecation flyout', async () => {
-        await PageObjects.upgradeAssistant.clickEsDeprecation(
-          'indexSettings' // An index setting deprecation was added in the before() hook so should be guaranteed
-        );
-        await retry.waitFor('ES index settings deprecation flyout to be visible', async () => {
-          return testSubjects.exists('indexSettingsDetails');
-        });
         await a11y.testAppSnapshot();
       });
 

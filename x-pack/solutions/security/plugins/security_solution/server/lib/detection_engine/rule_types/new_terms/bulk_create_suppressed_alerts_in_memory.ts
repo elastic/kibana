@@ -6,10 +6,9 @@
  */
 
 import type {
-  SearchAfterAndBulkCreateParams,
+  SecurityRuleServices,
   SearchAfterAndBulkCreateReturnType,
   SecuritySharedParams,
-  WrapSuppressedHits,
 } from '../types';
 
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -23,21 +22,16 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { partitionMissingFieldsEvents } from '../utils/partition_missing_fields_events';
 import type { EventsAndTerms } from './types';
-import type { ExperimentalFeatures } from '../../../../../common';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 import { wrapSuppressedNewTermsAlerts } from './wrap_suppressed_new_terms_alerts';
 import type { NewTermsRuleParams } from '../../rule_schema';
 
-interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
-  wrapSuppressedHits: WrapSuppressedHits;
-  alertSuppression?: AlertSuppressionCamel;
-}
-export interface BulkCreateSuppressedAlertsParams
-  extends Pick<SearchAfterAndBulkCreateSuppressedAlertsParams, 'services' | 'alertSuppression'> {
+export interface BulkCreateSuppressedAlertsParams {
+  services: SecurityRuleServices;
+  alertSuppression: AlertSuppressionCamel;
   sharedParams: SecuritySharedParams<NewTermsRuleParams>;
   eventsAndTerms: EventsAndTerms[];
   toReturn: SearchAfterAndBulkCreateReturnType;
-  experimentalFeatures: ExperimentalFeatures;
 }
 /**
  * wraps, bulk create and suppress alerts in memory, also takes care of missing fields logic.
@@ -51,10 +45,9 @@ export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
   toReturn,
   services,
   alertSuppression,
-  experimentalFeatures,
 }: BulkCreateSuppressedAlertsParams) => {
   const suppressOnMissingFields =
-    (alertSuppression?.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
+    (alertSuppression.missingFieldsStrategy ?? DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
     AlertSuppressionMissingFieldsStrategyEnum.suppress;
 
   let suppressibleEvents = eventsAndTerms;
@@ -63,7 +56,7 @@ export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
   if (!suppressOnMissingFields) {
     const partitionedEvents = partitionMissingFieldsEvents(
       eventsAndTerms,
-      alertSuppression?.groupBy || [],
+      alertSuppression.groupBy || [],
       ['event', 'fields']
     );
 
@@ -87,6 +80,5 @@ export const bulkCreateSuppressedNewTermsAlertsInMemory = async ({
     toReturn,
     services,
     alertSuppression,
-    experimentalFeatures,
   });
 };

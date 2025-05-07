@@ -6,10 +6,10 @@ exports[`LineToolTipContent renders correctly against snapshot 1`] = `
   justifyContent="center"
 >
   <EuiFlexItem>
-    <Styled(EuiBadge)
+    <FlowBadge
       color="hollow"
     >
-      <Styled(EuiFlexGroup)
+      <EuiFlexGroupStyled
         direction="column"
       >
         <EuiFlexItem
@@ -17,8 +17,8 @@ exports[`LineToolTipContent renders correctly against snapshot 1`] = `
         >
           Source
         </EuiFlexItem>
-      </Styled(EuiFlexGroup)>
-    </Styled(EuiBadge)>
+      </EuiFlexGroupStyled>
+    </FlowBadge>
   </EuiFlexItem>
   <SourceDestinationArrows
     contextId="contextId"
@@ -35,17 +35,17 @@ exports[`LineToolTipContent renders correctly against snapshot 1`] = `
     }
   />
   <EuiFlexItem>
-    <Styled(EuiBadge)
+    <FlowBadge
       color="hollow"
     >
-      <Styled(EuiFlexGroup)>
+      <EuiFlexGroupStyled>
         <EuiFlexItem
           grow={false}
         >
           Destination
         </EuiFlexItem>
-      </Styled(EuiFlexGroup)>
-    </Styled(EuiBadge)>
+      </EuiFlexGroupStyled>
+    </FlowBadge>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -56,10 +56,10 @@ exports[`LineToolTipContent renders correctly against snapshot when rendering cl
   justifyContent="center"
 >
   <EuiFlexItem>
-    <Styled(EuiBadge)
+    <FlowBadge
       color="hollow"
     >
-      <Styled(EuiFlexGroup)
+      <EuiFlexGroupStyled
         direction="column"
       >
         <EuiFlexItem
@@ -67,8 +67,8 @@ exports[`LineToolTipContent renders correctly against snapshot when rendering cl
         >
           Client
         </EuiFlexItem>
-      </Styled(EuiFlexGroup)>
-    </Styled(EuiBadge)>
+      </EuiFlexGroupStyled>
+    </FlowBadge>
   </EuiFlexItem>
   <SourceDestinationArrows
     contextId="contextId"
@@ -85,17 +85,17 @@ exports[`LineToolTipContent renders correctly against snapshot when rendering cl
     }
   />
   <EuiFlexItem>
-    <Styled(EuiBadge)
+    <FlowBadge
       color="hollow"
     >
-      <Styled(EuiFlexGroup)>
+      <EuiFlexGroupStyled>
         <EuiFlexItem
           grow={false}
         >
           Server
         </EuiFlexItem>
-      </Styled(EuiFlexGroup)>
-    </Styled(EuiBadge)>
+      </EuiFlexGroupStyled>
+    </FlowBadge>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;

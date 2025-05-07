@@ -74,7 +74,7 @@ as uiSettings within the code.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/data_view_management[dataViewManagement]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/data_views/README.mdx[dataViews]
@@ -107,7 +107,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/esql_datagrid/README.md[esqlDataGrid]
-|Contains a Discover-like table specifically for ES|QL queries:
+|Contains a Discover-like table specifically for ES\|QL queries:
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/es_ui_shared/README.md[esUiShared]
@@ -127,11 +127,11 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_gauge[expressionGauge]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_heatmap[expressionHeatmap]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/expression_image/README.md[expressionImage]
@@ -389,11 +389,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/gauge[visTypeGauge]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/heatmap[visTypeHeatmap]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_type_markdown/README.md[visTypeMarkdown]
@@ -401,11 +401,11 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/metric[visTypeMetric]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/pie[visTypePie]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/table/README.md[visTypeTable]
@@ -413,7 +413,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/tagcloud[visTypeTagcloud]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/timelion/README.md[visTypeTimelion]
@@ -421,23 +421,23 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/timeseries[visTypeTimeseries]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/vega[visTypeVega]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/vislib[visTypeVislib]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/xy[visTypeXy]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/src/platform/plugins/shared/visualizations[visualizations]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |===
@@ -468,7 +468,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/apm_data_access[apmDataAccess]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/private/banners/README.md[banners]
@@ -558,6 +558,10 @@ Plugin server-side only. Plugin has three main functions:
 |This plugin implements (only) server APIs for the Elastic AI Assistant.
 
 
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/embeddable_alerts_table/README.md[embeddableAlertsTable]
+|Embeddable wrapper for the alerts table
+
+
 |<<enhanced-embeddables-plugin>>
 |Enhances Embeddables by registering a custom factory provider. The enhanced factory provider
 adds dynamic actions to every embeddables state, in order to support drilldowns.
@@ -602,7 +606,7 @@ activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/private/file_upload[fileUpload]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/fleet/README.md[fleet]
@@ -667,11 +671,11 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate/README.md[investigate]
-|undefined
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate_app/README.md[investigateApp]
-|undefined
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]
@@ -716,7 +720,7 @@ using the CURL scripts in the scripts folder.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/private/logstash[logstash]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/maps/README.md[maps]
@@ -789,7 +793,7 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/profiling_data_access[profilingDataAccess]
-|WARNING: Missing README.
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/private/remote_clusters/README.md[remoteClusters]
@@ -860,6 +864,10 @@ detailed information on how Elasticsearch executed the search request. People us
 to understand why a search request might be slow.
 
 
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_query_rules/README.md[searchQueryRules]
+|A plugin to manage Query Rules in Elasticsearch through Query Rules API
+
+
 |{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_synonyms/README.md[searchSynonyms]
 |A plugin to manage synonyms in Elasticsearch through Synonyms APIs through Kibana.
 
@@ -884,7 +892,7 @@ This plugin is only enabled when the application is built for serverless project
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/serverless/README.mdx[serverless]
-|
+|WARNING: Missing or empty README.
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/serverless_observability/README.mdx[serverlessObservability]

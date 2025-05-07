@@ -6,31 +6,29 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Subject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import stats from 'stats-lite';
 import sinon from 'sinon';
 import { take, tap, bufferCount, skip, map } from 'rxjs';
 import { mockLogger } from '../test_utils';
 
-import { ConcreteTaskInstance, TaskStatus } from '../task';
+import type { ConcreteTaskInstance } from '../task';
+import { TaskStatus } from '../task';
+import type { TaskTiming } from '../task_events';
 import {
   asTaskRunEvent,
   asTaskPollingCycleEvent,
-  TaskTiming,
   asTaskManagerStatEvent,
   TaskPersistence,
   asTaskClaimEvent,
 } from '../task_events';
 import { asOk } from '../lib/result_type';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRunResult } from '../task_running';
-import {
-  createTaskRunAggregator,
-  summarizeTaskRunStat,
-  TaskRunStat,
-  SummarizedTaskRunStat,
-} from './task_run_statistics';
-import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import type { TaskRunStat, SummarizedTaskRunStat } from './task_run_statistics';
+import { createTaskRunAggregator, summarizeTaskRunStat } from './task_run_statistics';
+import type { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { FillPoolResult } from '../lib/fill_pool';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 import { configSchema } from '../config';

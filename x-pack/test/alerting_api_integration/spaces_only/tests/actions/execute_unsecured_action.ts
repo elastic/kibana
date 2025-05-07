@@ -9,7 +9,7 @@ import getPort from 'get-port';
 import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getWebhookServer } from '@kbn/actions-simulators-plugin/server/plugin';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover } from '../../../common/lib';
 import { Spaces } from '../../scenarios';
 import { createWebhookAction } from './connector_types/stack/webhook';

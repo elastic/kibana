@@ -11,36 +11,18 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const supertest = getService('supertest');
   describe('dashboards - list', () => {
-    const createManyDashboards = async (count: number) => {
-      const fileChunks: string[] = [];
-      for (let i = 0; i < count; i++) {
-        const id = `test-dashboard-${i}`;
-        fileChunks.push(
-          JSON.stringify({
-            type: 'dashboard',
-            id,
-            attributes: {
-              title: `My dashboard (${i})`,
-              kibanaSavedObjectMeta: { searchSourceJSON: '{}' },
-            },
-            references: [],
-          })
-        );
-      }
-
-      await supertest
-        .post(`/api/saved_objects/_import`)
-        .attach('file', Buffer.from(fileChunks.join('\n'), 'utf8'), 'export.ndjson')
-        .expect(200);
-    };
     before(async () => {
-      await createManyDashboards(100);
+      await kibanaServer.importExport.load(
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many-dashboards.json'
+      );
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.unload(
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/many-dashboards.json'
+      );
     });
     loadTestFile(require.resolve('./main'));
   });

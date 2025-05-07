@@ -49,7 +49,7 @@ import {
   defaultPaletteParams,
   findMinMaxByColumnId,
   getColorStops,
-  shouldColorByTerms,
+  getAccessorType,
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { DatatableInspectorTables } from '../../../common/expressions/datatable/datatable_fn';
@@ -140,11 +140,11 @@ export const getDatatableVisualization = ({
 
     const hasTransposedColumn = state.columns.some(({ isTransposed }) => isTransposed);
     const columns = state.columns.map((column) => {
-      if (column.palette) {
-        const accessor = column.columnId;
+      const accessor = column.columnId;
+      const { isNumeric, isCategory: isBucketable } = getAccessorType(datasource, accessor);
+      if (column.palette && (isNumeric || isBucketable)) {
+        const showColorByTerms = isBucketable;
         const currentData = frame?.activeData?.[state.layerId];
-        const { dataType, isBucketed } = datasource?.getOperationForColumnId(column.columnId) ?? {};
-        const showColorByTerms = shouldColorByTerms(dataType, isBucketed);
         const palette = paletteMap.get(column.palette?.name ?? '');
         const columnsToCheck = hasTransposedColumn
           ? currentData?.columns
@@ -156,7 +156,7 @@ export const getDatatableVisualization = ({
         if (palette && !showColorByTerms && !palette?.canDynamicColoring && dataBounds) {
           const newPalette: PaletteOutput<CustomPaletteParams> = {
             type: 'palette',
-            name: showColorByTerms ? 'default' : defaultPaletteParams.name,
+            name: defaultPaletteParams.name,
           };
           return {
             ...column,
@@ -553,6 +553,10 @@ export const getDatatableVisualization = ({
       columns: columns
         .filter((c) => !c.collapseFn)
         .map((column) => {
+          const { isNumeric, isCategory: isBucketable } = getAccessorType(
+            datasource,
+            column.columnId
+          );
           const paletteParams = {
             ...column.palette?.params,
             // rewrite colors and stops as two distinct arguments
@@ -563,11 +567,11 @@ export const getDatatableVisualization = ({
                 : [],
             reverse: false, // managed at UI level
           };
-          const { dataType, isBucketed, sortingHint, inMetricDimension } =
+          const { sortingHint, inMetricDimension } =
             datasource?.getOperationForColumnId(column.columnId) ?? {};
           const hasNoSummaryRow = column.summaryRow == null || column.summaryRow === 'none';
-          const canColor = dataType !== 'date';
-          const colorByTerms = shouldColorByTerms(dataType, isBucketed);
+          const canColor = isNumeric || isBucketable;
+          const colorByTerms = isBucketable;
           let isTransposable =
             !isTextBasedLanguage &&
             !datasource!.getOperationForColumnId(column.columnId)?.isBucketed;

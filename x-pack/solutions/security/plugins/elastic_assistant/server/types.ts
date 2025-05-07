@@ -50,6 +50,7 @@ import {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import {
@@ -60,6 +61,7 @@ import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_c
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
 import type { DefendInsightsDataClient } from './ai_assistant_data_clients/defend_insights';
+import { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -112,12 +114,14 @@ export interface ElasticAssistantPluginStart {
 
 export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
+  alerting: AlertingServerSetup;
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  alerting: AlertingServerStart;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
@@ -142,6 +146,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
     params?: GetAIAssistantKnowledgeBaseDataClientParams
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
+  getAttackDiscoverySchedulingDataClient: () => Promise<AttackDiscoveryScheduleDataClient | null>;
   getDefendInsightsDataClient: () => Promise<DefendInsightsDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
@@ -239,8 +244,8 @@ export interface AssistantToolParams {
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
   connectorId?: string;
+  contentReferencesStore: ContentReferencesStore;
   description?: string;
-  contentReferencesStore: ContentReferencesStore | undefined;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;

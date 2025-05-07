@@ -23,7 +23,7 @@ const urlStyles = css`
 interface HttpInfoProps {
   method?: string;
   status?: number;
-  url: string;
+  url?: string;
 }
 
 export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
@@ -54,11 +54,13 @@ export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
             <span data-test-subj="apmHttpInfoRequestMethod">{method.toUpperCase()}</span>
           </EuiToolTip>
         )}{' '}
-        <EuiToolTip content={url}>
-          <span data-test-subj="apmHttpInfoUrl" css={urlStyles}>
-            {url}
-          </span>
-        </EuiToolTip>
+        {url && (
+          <EuiToolTip content={url}>
+            <span data-test-subj="apmHttpInfoUrl" css={urlStyles}>
+              {url}
+            </span>
+          </EuiToolTip>
+        )}
       </EuiBadge>
       {status && <HttpStatusBadge status={status} />}
     </span>

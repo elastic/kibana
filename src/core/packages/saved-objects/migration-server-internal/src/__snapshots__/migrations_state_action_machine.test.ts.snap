@@ -201,6 +201,7 @@ Object {
               "retryAttempts": 5,
               "retryCount": 0,
               "retryDelay": 0,
+              "skipRetryReset": false,
               "targetIndexMappings": Object {
                 "properties": Object {},
               },
@@ -427,6 +428,7 @@ Object {
               "retryAttempts": 5,
               "retryCount": 0,
               "retryDelay": 0,
+              "skipRetryReset": false,
               "targetIndexMappings": Object {
                 "properties": Object {},
               },
@@ -657,6 +659,7 @@ Object {
               "retryAttempts": 5,
               "retryCount": 0,
               "retryDelay": 0,
+              "skipRetryReset": false,
               "targetIndexMappings": Object {
                 "properties": Object {},
               },
@@ -891,6 +894,7 @@ Object {
               "retryAttempts": 5,
               "retryCount": 0,
               "retryDelay": 0,
+              "skipRetryReset": false,
               "targetIndexMappings": Object {
                 "properties": Object {},
               },
@@ -1150,6 +1154,7 @@ Object {
               "retryAttempts": 5,
               "retryCount": 0,
               "retryDelay": 0,
+              "skipRetryReset": false,
               "targetIndexMappings": Object {
                 "properties": Object {},
               },
@@ -1387,6 +1392,7 @@ Object {
               "retryAttempts": 5,
               "retryCount": 0,
               "retryDelay": 0,
+              "skipRetryReset": false,
               "targetIndexMappings": Object {
                 "properties": Object {},
               },

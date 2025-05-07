@@ -6,4 +6,3 @@
  */
 
 export { isMinimalPrivilegeId, getMinimalPrivilegeId } from './minimal_privileges';
-export { ApiPrivileges } from './api_privileges';

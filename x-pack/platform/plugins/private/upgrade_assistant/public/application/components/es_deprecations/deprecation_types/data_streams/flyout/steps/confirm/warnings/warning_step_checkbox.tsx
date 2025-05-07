@@ -30,7 +30,7 @@ export const WarningCheckbox: React.FunctionComponent<{
   <>
     <EuiText>
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="migrationWarningCheckbox">
           <EuiCheckbox
             id={warningId}
             label={<strong>{label}</strong>}

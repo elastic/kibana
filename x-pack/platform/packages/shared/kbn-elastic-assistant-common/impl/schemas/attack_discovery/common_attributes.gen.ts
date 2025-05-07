@@ -18,6 +18,7 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString, User } from '../common_attributes.gen';
 import { Replacements, ApiConfig } from '../conversations/common_attributes.gen';
+import { AnonymizationFieldResponse } from '../anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 
 /**
  * An attack discovery generated from one or more alerts
@@ -246,4 +247,23 @@ export const AttackDiscoveryCreateProps = z.object({
    */
   apiConfig: ApiConfig,
   replacements: Replacements.optional(),
+});
+
+export type AttackDiscoveryGenerationConfig = z.infer<typeof AttackDiscoveryGenerationConfig>;
+export const AttackDiscoveryGenerationConfig = z.object({
+  alertsIndexPattern: z.string(),
+  anonymizationFields: z.array(AnonymizationFieldResponse),
+  /**
+   * LLM API configuration.
+   */
+  apiConfig: ApiConfig,
+  end: z.string().optional(),
+  filter: z.object({}).catchall(z.unknown()).optional(),
+  langSmithProject: z.string().optional(),
+  langSmithApiKey: z.string().optional(),
+  model: z.string().optional(),
+  replacements: Replacements.optional(),
+  size: z.number(),
+  start: z.string().optional(),
+  subAction: z.enum(['invokeAI', 'invokeStream']),
 });

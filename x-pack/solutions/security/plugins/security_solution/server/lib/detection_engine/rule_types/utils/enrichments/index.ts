@@ -18,16 +18,12 @@ import {
   createUserAssetCriticalityEnrichments,
 } from './enrichment_by_type/asset_criticality';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
-import type {
-  EnrichEventsFunction,
-  EventsMapByEnrichments,
-  CreateEnrichEventsFunction,
-} from './types';
+import type { EnrichEvents, EventsMapByEnrichments } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
 import { isIndexExist } from './utils/is_index_exist';
 import { createServiceRiskEnrichments } from './enrichment_by_type/service_risk';
 
-export const enrichEvents: EnrichEventsFunction = async ({
+export const enrichEvents: EnrichEvents = async ({
   services,
   logger,
   events,
@@ -146,14 +142,3 @@ export const enrichEvents: EnrichEventsFunction = async ({
     return events;
   }
 };
-
-export const createEnrichEventsFunction: CreateEnrichEventsFunction =
-  ({ services, logger }) =>
-  (events, { spaceId }: { spaceId: string }, experimentalFeatures) =>
-    enrichEvents({
-      events,
-      services,
-      logger,
-      spaceId,
-      experimentalFeatures,
-    });

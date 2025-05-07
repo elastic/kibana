@@ -396,6 +396,16 @@ describe('Ad Hoc Task Runner', () => {
     mockValidateRuleTypeParams.mockReturnValue(mockedAdHocRunSO.attributes.rule.params);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedAdHocRunSO);
     actionsClient.bulkEnqueueExecution.mockResolvedValue({ errors: false, items: [] });
+
+    clusterClient.search.mockResolvedValue({
+      took: 10,
+      timed_out: false,
+      _shards: { failed: 0, successful: 1, total: 0, skipped: 0 },
+      hits: {
+        total: { relation: 'eq', value: 0 },
+        hits: [],
+      },
+    });
   });
 
   afterAll(() => fakeTimer.restore());
@@ -454,6 +464,7 @@ describe('Ad Hoc Task Runner', () => {
 
     expect(call.executionId).toEqual(UUID);
     expect(call.services).toBeTruthy();
+    expect(call.services.actionsClient).toBeUndefined();
     expect(call.services.alertsClient).not.toBe(null);
     expect(call.services.alertsClient?.report).toBeTruthy();
     expect(call.services.alertsClient?.setAlertData).toBeTruthy();

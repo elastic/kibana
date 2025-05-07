@@ -1568,47 +1568,96 @@ export default function (providerContext: FtrProviderContext) {
         expect(updatedPolicy.global_data_tags).to.eql([{ name: 'newTag', value: 'newValue' }]);
       });
 
-      it('should return 400 if updating data output to non-local ES for agentless policy', async () => {
-        const { body: outputResponse } = await supertest
-          .post(`/api/fleet/outputs`)
+      it('should allow to set required_versions', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'logstash-output',
-            type: 'logstash',
-            hosts: ['test.fr:443'],
-            ssl: {
-              certificate: 'CERTIFICATE',
-              key: 'KEY',
-              certificate_authorities: ['CA1', 'CA2'],
+            name: `Override Test ${Date.now()}`,
+            description: 'Initial description',
+            namespace: 'default',
+          })
+          .expect(200);
+        agentPolicyId = originalPolicy.id;
+        createdPolicyIds.push(agentPolicyId as string);
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: originalPolicy.name,
+            description: originalPolicy.description,
+            namespace: 'default',
+            required_versions: [
+              {
+                version: '9.0.0',
+                percentage: 10,
+              },
+            ],
+          })
+          .expect(200);
+
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
+
+        expect(newPolicy).to.eql({
+          status: 'active',
+          name: originalPolicy.name,
+          description: originalPolicy.description,
+          namespace: 'default',
+          is_managed: false,
+          revision: 2,
+          schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
+          updated_by: 'elastic',
+          inactivity_timeout: 1209600,
+          package_policies: [],
+          is_protected: false,
+          space_ids: [],
+          required_versions: [
+            {
+              version: '9.0.0',
+              percentage: 10,
             },
-          })
-          .expect(200);
+          ],
+        });
+      });
 
-        const agentPolicyResponse = await supertest
-          .post(`/api/fleet/agent_policies?sys_monitoring=false`)
+      it('should not allow to set invalid required_versions', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-agentless-policy',
+            name: `Override Test ${Date.now()}`,
+            description: 'Initial description',
             namespace: 'default',
           })
           .expect(200);
-
-        const agentPolicy = agentPolicyResponse.body.item;
-
-        const response = await supertest
-          .put(`/api/fleet/agent_policies/${agentPolicy.id}`)
+        agentPolicyId = originalPolicy.id;
+        createdPolicyIds.push(agentPolicyId as string);
+        await supertest
+          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'test-agentless-policy',
+            name: `Override Test ${Date.now()}`,
+            description: 'Updated description',
             namespace: 'default',
-            supports_agentless: true,
-            data_output_id: outputResponse.item.id,
+            required_versions: [
+              {
+                version: '9.0.0',
+                percentage: 50,
+              },
+              {
+                version: '9.1.0',
+                percentage: 60,
+              },
+            ],
           })
           .expect(400);
-
-        expect(response.body.message).to.eql(
-          'Output of type "logstash" is not usable with policy "test-agentless-policy".'
-        );
       });
     });
 
@@ -1898,6 +1947,49 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(items.length).equal(1);
+      });
+    });
+
+    describe('GET /api/fleet/agent_policies/{id}/auto_upgrade_agents_status', () => {
+      it('should get auto upgrade agents status', async () => {
+        const {
+          body: { item: policyWithAgents },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Policy with agents 2',
+            namespace: 'default',
+          })
+          .expect(200);
+        await generateAgent(providerContext, 'healhty', 'agent-1', policyWithAgents.id, '8.16.1');
+        await generateAgent(providerContext, 'healhty', 'agent-2', policyWithAgents.id, '8.16.1', {
+          state: 'UPG_FAILED',
+          target_version: '8.16.3',
+        });
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyWithAgents.id}/auto_upgrade_agents_status`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        expect(body).to.eql({
+          currentVersions: [
+            {
+              agents: 2,
+              failedUpgradeAgents: 0,
+              version: '8.16.1',
+            },
+            {
+              agents: 0,
+              failedUpgradeAgents: 1,
+              version: '8.16.3',
+            },
+          ],
+          totalAgents: 2,
+        });
+
+        await supertest.delete(`/api/fleet/agents/agent-1`).set('kbn-xsrf', 'xx').expect(200);
+        await supertest.delete(`/api/fleet/agents/agent-2`).set('kbn-xsrf', 'xx').expect(200);
       });
     });
   });

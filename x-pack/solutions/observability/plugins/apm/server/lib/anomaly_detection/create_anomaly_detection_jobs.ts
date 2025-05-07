@@ -49,7 +49,7 @@ export async function createAnomalyDetectionJobs({
   }
 
   return withApmSpan('create_anomaly_detection_jobs', async () => {
-    logger.info(`Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`);
+    logger.debug(`Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`);
     const apmMetricIndex = indices.metric;
     const responses = [];
     const failedJobs = [];

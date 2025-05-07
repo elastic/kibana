@@ -11,18 +11,11 @@ import AdmZip from 'adm-zip';
 import path from 'path';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  deleteKnowledgeBaseModel,
-  importTinyElserModel,
-  deleteInferenceEndpoint,
-  setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
-} from './helpers';
+import { deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-  const ml = getService('ml');
   const retry = getService('retry');
   const log = getService('log');
 
@@ -36,9 +29,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       log.debug(`Unzipping ${zipFilePath} to ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`);
       new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
 
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
     });
 
     beforeEach(async () => {
@@ -50,8 +41,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     after(async () => {
       await deleteKbIndex();
       await createOrUpdateIndexAssets();
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel(getService);
     });
 
     it('has an index created version earlier than 8.11', async () => {

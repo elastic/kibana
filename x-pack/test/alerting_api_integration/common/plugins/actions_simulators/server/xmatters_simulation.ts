@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,

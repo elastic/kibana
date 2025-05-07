@@ -39,7 +39,7 @@ jest.mock('../../../../../../../app_context', () => {
 
 describe('ReindexDetailsFlyoutStep', () => {
   const defaultDeprecation: () => EnrichedDeprecationInfo = () => ({
-    isCritical: true,
+    level: 'critical',
     message: 'foo',
     resolveDuringUpgrade: false,
     type: 'index_settings',
@@ -100,7 +100,30 @@ describe('ReindexDetailsFlyoutStep', () => {
                         id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.description"
                       />
                     </EuiText>,
-                    "title": "Option 1: Reindex data",
+                    "title": <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="s"
+                      justifyContent="flexStart"
+                    >
+                      <EuiFlexItem
+                        grow={false}
+                      >
+                        <Memo(MemoizedFormattedMessage)
+                          defaultMessage="Option {optionCount}: Reindex data"
+                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.title"
+                          values={
+                            Object {
+                              "optionCount": 1,
+                            }
+                          }
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                      >
+                        <RecommendedOptionBadge />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>,
                   },
                   Object {
                     "description": <EuiText
@@ -121,7 +144,25 @@ describe('ReindexDetailsFlyoutStep', () => {
                         }
                       />
                     </EuiText>,
-                    "title": "Option 2: Mark as read-only",
+                    "title": <EuiFlexGroup
+                      alignItems="center"
+                      gutterSize="s"
+                      justifyContent="flexStart"
+                    >
+                      <EuiFlexItem
+                        grow={false}
+                      >
+                        <Memo(MemoizedFormattedMessage)
+                          defaultMessage="Option {optionCount}: Mark as read-only"
+                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.title"
+                          values={
+                            Object {
+                              "optionCount": 2,
+                            }
+                          }
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>,
                   },
                   Object {
                     "description": <EuiText
@@ -182,7 +223,7 @@ describe('ReindexDetailsFlyoutStep', () => {
                   grow={false}
                 >
                   <EuiButton
-                    color="accent"
+                    color="primary"
                     data-test-subj="startIndexReadonlyButton"
                     disabled={false}
                     fill={false}
@@ -260,7 +301,7 @@ describe('ReindexDetailsFlyoutStep', () => {
                     ],
                     "type": "reindex",
                   },
-                  "isCritical": true,
+                  "level": "critical",
                   "message": "foo",
                   "resolveDuringUpgrade": false,
                   "type": "index_settings",
@@ -296,6 +337,22 @@ describe('ReindexDetailsFlyoutStep', () => {
               <EuiFlexGroup
                 gutterSize="s"
               >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiButton
+                    color="primary"
+                    data-test-subj="startIndexReadonlyButton"
+                    disabled={false}
+                    fill={false}
+                    onClick={[MockFunction]}
+                  >
+                    <MemoizedFormattedMessage
+                      defaultMessage="Mark as read-only"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
                 <EuiFlexItem
                   grow={false}
                 >
@@ -458,7 +515,7 @@ describe('ReindexDetailsFlyoutStep', () => {
                   grow={false}
                 >
                   <EuiButton
-                    color="accent"
+                    color="primary"
                     data-test-subj="startIndexReadonlyButton"
                     disabled={false}
                     fill={false}

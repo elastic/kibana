@@ -99,7 +99,7 @@ export class ReindexWorker {
 
     this.reindexService = reindexServiceFactory(
       callAsInternalUser,
-      reindexActionsFactory(this.client, callAsInternalUser),
+      reindexActionsFactory(this.client, callAsInternalUser, this.log),
       log,
       this.licensing
     );
@@ -195,7 +195,7 @@ export class ReindexWorker {
     const fakeRequest: FakeRequest = { headers: credential };
     const scopedClusterClient = this.clusterClient.asScoped(fakeRequest);
     const callAsCurrentUser = scopedClusterClient.asCurrentUser;
-    const actions = reindexActionsFactory(this.client, callAsCurrentUser);
+    const actions = reindexActionsFactory(this.client, callAsCurrentUser, this.log);
     return reindexServiceFactory(callAsCurrentUser, actions, this.log, this.licensing);
   };
 

@@ -6,13 +6,13 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
-import './rule_actions_popopver.scss';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+
 import { Rule } from '../../../..';
 
 export interface RuleActionsPopoverProps {
   rule: Rule;
-  canSaveRule: boolean;
   onDelete: (ruleId: string) => void;
   onApiKeyUpdate: (ruleId: string) => void;
   onEnableDisable: (enable: boolean) => void;
@@ -21,13 +21,18 @@ export interface RuleActionsPopoverProps {
 
 export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps> = ({
   rule,
-  canSaveRule,
   onDelete,
   onApiKeyUpdate,
   onEnableDisable,
   onRunRule,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const { euiTheme } = useEuiTheme();
+  const ruleActionsPopover = css`
+    .ruleActionsPopover__deleteButton {
+      color: ${euiTheme.colors.textDanger};
+    }
+  `;
 
   return (
     <EuiPopover
@@ -56,7 +61,6 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
             id: 0,
             items: [
               {
-                disabled: !canSaveRule,
                 'data-test-subj': 'disableButton',
                 onClick: async () => {
                   setIsPopoverOpen(false);
@@ -73,7 +77,6 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
                     ),
               },
               {
-                disabled: !canSaveRule,
                 'data-test-subj': 'updateAPIKeyButton',
                 onClick: () => {
                   setIsPopoverOpen(false);
@@ -85,7 +88,6 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
                 ),
               },
               {
-                disabled: !canSaveRule,
                 'data-test-subj': 'runRuleButton',
                 onClick: () => {
                   setIsPopoverOpen(false);
@@ -97,7 +99,6 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
                 ),
               },
               {
-                disabled: !canSaveRule,
                 className: 'ruleActionsPopover__deleteButton',
                 'data-test-subj': 'deleteRuleButton',
                 onClick: () => {
@@ -115,6 +116,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
         className="ruleActionsPopover"
         data-test-subj="ruleActionsPopover"
         data-testid="ruleActionsPopover"
+        css={ruleActionsPopover}
       />
     </EuiPopover>
   );

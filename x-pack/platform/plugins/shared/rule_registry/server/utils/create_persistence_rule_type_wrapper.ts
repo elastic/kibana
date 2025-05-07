@@ -8,7 +8,7 @@
 import sortBy from 'lodash/sortBy';
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { chunk, partition } from 'lodash';
 import {
   ALERT_INSTANCE_ID,
@@ -30,9 +30,9 @@ import { mapKeys, snakeCase } from 'lodash/fp';
 
 import type { IRuleDataClient } from '..';
 import { getCommonAlertFields } from './get_common_alert_fields';
-import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
+import type { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
-import { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
+import type { AlertWithSuppressionFields870 } from '../../common/schemas/8.7.0';
 
 /**
  * Alerts returned from BE have date type coerced to ISO strings

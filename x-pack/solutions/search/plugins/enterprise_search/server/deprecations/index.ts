@@ -97,6 +97,10 @@ export function getEnterpriseSearchNodeDeprecation(
             defaultMessage:
               "Edit 'kibana.yml' to remove 'enterpriseSearch.customHeaders' if it exists",
           }),
+          i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.removeappsdisabled', {
+            defaultMessage:
+              "Edit 'kibana.yml' to remove 'enterpriseSearch.appsDisabled' if it exists",
+          }),
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.restart', {
             defaultMessage: 'Restart Kibana',
           }),

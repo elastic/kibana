@@ -21,11 +21,11 @@ import { Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import { getDiscoverFiltersFromState } from '@kbn/logs-explorer-plugin/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { sloFeatureId } from '@kbn/observability-shared-plugin/common';
-import { loadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import useAsync from 'react-use/lib/useAsync';
 import { useBoolean } from '@kbn/react-hooks';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 import { useObservabilityLogsExplorerPageStateContext } from '../state_machines/observability_logs_explorer/src';
 
@@ -138,7 +138,7 @@ export const AlertsPopover = () => {
 
   // Check whether the user has the necessary permissions to create a rule
   const canCreateRuleState = useAsync(async () => {
-    const ruleTypes = await loadRuleTypes({ http });
+    const ruleTypes = await getRuleTypes({ http });
     const customThresholdRuleType = ruleTypes.find(
       (ruleType) => ruleType.id === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID
     );

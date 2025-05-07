@@ -331,6 +331,7 @@ export interface DocLinks {
     readonly reindexWithPipeline: string;
     readonly logsDatastream: string;
     readonly usingLogsDbIndexModeWithESSecurity: string;
+    readonly dataStreamReindex: string;
   };
   readonly rollupJobs: string;
   readonly elasticsearch: Record<string, string>;
@@ -708,6 +709,10 @@ export interface DocLinks {
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
+  };
+
+  readonly queryRules: {
+    readonly queryRulesAPIDocumentation: string;
   };
 }
 

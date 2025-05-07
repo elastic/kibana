@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css, ThemeProvider } from '@emotion/react';
-import { Story } from '@storybook/react';
+import type { StoryFn, StoryObj } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { NodeProps, NodeViewModel } from '..';
 import { Graph } from '..';
@@ -152,7 +152,7 @@ const useNodePopover = () => {
   );
 };
 
-const Template: Story = () => {
+const Template: StoryFn = () => {
   const expandNodePopover = useExpandButtonPopover();
   const nodePopover = useNodePopover();
   const popovers = [expandNodePopover, nodePopover];
@@ -211,4 +211,6 @@ const Template: Story = () => {
   );
 };
 
-export const LargeGraphWithPopovers = Template.bind({});
+export const LargeGraphWithPopovers: StoryObj = {
+  render: Template,
+};

@@ -7,6 +7,7 @@
 import React, { FunctionComponent } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlyout } from '@elastic/eui';
 import { SectionLoading, useKibana } from '../../../shared_imports';
 import { Pipeline } from '../../../../common/types';
 import { PipelineDetailsFlyout } from './details_flyout';
@@ -18,6 +19,7 @@ export interface Props {
   onCloneClick: (pipelineName: string) => void;
   onDeleteClick: (pipelineName: Pipeline[]) => void;
   onClose: () => void;
+  embedded?: boolean;
 }
 
 export const PipelineFlyout: FunctionComponent<Props> = ({
@@ -26,6 +28,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
   onEditClick,
   onCloneClick,
   onDeleteClick,
+  embedded,
 }) => {
   const { services } = useKibana();
   const pipelineName = pipeline && typeof pipeline === 'string' ? pipeline : '';
@@ -33,7 +36,7 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
 
   return (
     <>
-      {isLoading && (
+      {!embedded && isLoading && (
         <SectionLoading>
           <FormattedMessage
             id="xpack.ingestPipelines.list.pipelineDetails.loading"
@@ -42,9 +45,20 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
         </SectionLoading>
       )}
 
-      {error && (
-        <PipelineNotFoundFlyout pipelineName={pipelineName} onClose={onClose} error={error} />
-      )}
+      {error &&
+        (embedded ? (
+          <EuiFlyout
+            onClose={onClose}
+            aria-labelledby="pipelineDetailsFlyoutTitle"
+            data-test-subj="pipelineDetails"
+            size="m"
+            maxWidth={550}
+          >
+            <PipelineNotFoundFlyout pipelineName={pipelineName} onClose={onClose} error={error} />
+          </EuiFlyout>
+        ) : (
+          <PipelineNotFoundFlyout pipelineName={pipelineName} onClose={onClose} error={error} />
+        ))}
 
       {data && (
         <PipelineDetailsFlyout

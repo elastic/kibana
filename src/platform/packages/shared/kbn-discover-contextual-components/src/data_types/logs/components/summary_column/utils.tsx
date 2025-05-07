@@ -25,8 +25,10 @@ import {
   ORCHESTRATOR_NAMESPACE_FIELD,
   ORCHESTRATOR_RESOURCE_ID_FIELD,
   SERVICE_NAME_FIELD,
+  DataTableRecord,
+  getFieldValue,
+  FILTER_OUT_EXACT_FIELDS_FOR_CONTENT,
 } from '@kbn/discover-utils';
-import { DataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import { LogDocument, ResourceFields, getAvailableResourceFields } from '@kbn/discover-utils/src';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
@@ -143,5 +145,11 @@ export const formatJsonDocumentForContent = (row: DataTableRecord) => {
   };
 };
 
-const isFieldAllowed = (field: string) =>
-  !FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) => field.startsWith(prefix));
+export const isFieldAllowed = (field: string): boolean => {
+  const isExactMatchExcluded = FILTER_OUT_EXACT_FIELDS_FOR_CONTENT.includes(field);
+  const isPrefixMatchExcluded = FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT.some((prefix) =>
+    field.startsWith(prefix)
+  );
+
+  return !isExactMatchExcluded && !isPrefixMatchExcluded;
+};

@@ -7,12 +7,12 @@
 
 import expect from '@kbn/expect';
 import { flatten } from 'lodash';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from '@kbn/alerting-plugin/server/config';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover, getTestRuleData, getEventLog } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createNotifyWhenTests({ getService }: FtrProviderContext) {

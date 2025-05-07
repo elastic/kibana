@@ -100,13 +100,15 @@ export class SloOrphanSummaryCleanupTask {
         );
 
         if (sloSummaryIdsToDelete.length > 0) {
-          this.logger.info(
+          this.logger.debug(
             `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO Summary documents from the summary index`
           );
 
           await this.esClient.deleteByQuery({
-            wait_for_completion: false,
             index: SUMMARY_DESTINATION_INDEX_PATTERN,
+            wait_for_completion: false,
+            conflicts: 'proceed',
+            slices: 'auto',
             query: {
               bool: {
                 should: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),
@@ -227,7 +229,7 @@ export class SloOrphanSummaryCleanupTask {
     this.esClient = esClient;
 
     if (!taskManager) {
-      this.logger.info(
+      this.logger.debug(
         'Missing required service during startup, skipping orphan-slo-summary-cleanup task.'
       );
       return;

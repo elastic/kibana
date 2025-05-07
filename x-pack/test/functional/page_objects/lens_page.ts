@@ -347,7 +347,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async waitForWorkspaceWithVisualization() {
+    async waitForDatatableVisualization() {
       await retry.try(async () => {
         await testSubjects.existOrFail(`lnsVisualizationContainer`);
       });
@@ -398,7 +398,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       metaKey?: 'shift' | 'alt' | 'ctrl'
     ) {
       const field = await find.byCssSelector(
-        `[data-test-subj="lnsFieldListPanelField-${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+        `[data-attr-field="${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
       await field.focus();
       await retry.try(async () => {
@@ -433,17 +433,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       metaKey?: 'shift' | 'alt' | 'ctrl'
     ) {
       const elements = await find.allByCssSelector(
-        `[data-test-subj="${group}"]  [data-test-subj="lnsDragDrop-keyboardHandler"]`
+        `[data-test-subj="${group}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
       const el = elements[index];
       await el.focus();
       await browser.pressKeys(browser.keys.ENTER);
       for (let i = 0; i < steps; i++) {
+        // This needs to be slowed down to avoid flakiness
+        await common.sleep(200);
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
       }
       if (metaKey) {
         await this.pressMetaKey(metaKey);
       }
+
+      await common.sleep(200);
       await browser.pressKeys(browser.keys.ENTER);
 
       await this.waitForLensDragDropToFinish();
@@ -465,8 +469,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await el.focus();
       await browser.pressKeys(browser.keys.ENTER);
       for (let i = 0; i < steps; i++) {
+        // This needs to be slowed down to avoid flakiness
+        await common.sleep(200);
         await browser.pressKeys(reverse ? browser.keys.ARROW_UP : browser.keys.ARROW_DOWN);
       }
+
+      await common.sleep(200);
       await browser.pressKeys(browser.keys.ENTER);
 
       await this.waitForLensDragDropToFinish();
@@ -1535,10 +1543,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async assertFocusedField(name: string) {
       const input = await find.activeElement();
-      const fieldAncestor = await input.findByXpath('./../..');
-      const focusedElementText = await fieldAncestor.getVisibleText();
-      const dataTestSubj = await fieldAncestor.getAttribute('data-test-subj');
+      const fieldPopover = await input.findByXpath('./..');
+      const focusedElementText = await fieldPopover.getVisibleText();
       expect(focusedElementText).to.eql(name);
+      const dataTestSubj = await fieldPopover.getAttribute('data-test-subj');
       expect(dataTestSubj).to.eql('lnsFieldListPanelField');
     },
 
@@ -1549,7 +1557,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async assertFocusedDimension(name: string) {
       const input = await find.activeElement();
-      const fieldAncestor = await input.findByXpath('./../../..');
+      const fieldAncestor = await input.findByXpath('./../..');
       const focusedElementText = await fieldAncestor.getVisibleText();
       expect(focusedElementText).to.eql(name);
     },

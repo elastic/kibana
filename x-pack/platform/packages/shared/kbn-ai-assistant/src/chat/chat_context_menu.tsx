@@ -24,18 +24,22 @@ export function ChatContextMenu({
   disabled = false,
   isConversationOwnedByCurrentUser,
   conversationTitle,
+  isArchived,
   onCopyToClipboardClick,
   onCopyUrlClick,
   onDeleteClick,
   onDuplicateConversationClick,
+  onArchiveConversation,
 }: {
   disabled?: boolean;
   isConversationOwnedByCurrentUser: boolean;
   conversationTitle: string;
+  isArchived: boolean;
   onCopyToClipboardClick: () => void;
   onCopyUrlClick: () => void;
   onDeleteClick: () => void;
   onDuplicateConversationClick: () => void;
+  onArchiveConversation: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -92,6 +96,29 @@ export function ChatContextMenu({
   ];
 
   if (isConversationOwnedByCurrentUser) {
+    menuItems.push(
+      <EuiContextMenuItem
+        key="archive"
+        icon="folderOpen"
+        onClick={() => {
+          onArchiveConversation();
+          setIsPopoverOpen(false);
+        }}
+        data-test-subj={
+          !isArchived
+            ? 'observabilityAiAssistantContextMenuArchive'
+            : 'observabilityAiAssistantContextMenuUnarchive'
+        }
+      >
+        {!isArchived
+          ? i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.archiveConversation', {
+              defaultMessage: 'Archive',
+            })
+          : i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.unarchiveConversation', {
+              defaultMessage: 'Unarchive',
+            })}
+      </EuiContextMenuItem>
+    );
     menuItems.push(<EuiHorizontalRule key="seperator" margin="none" />);
     menuItems.push(
       <EuiContextMenuItem

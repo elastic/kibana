@@ -259,7 +259,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
       {flyoutStep !== 'initializing' && (
         <EuiFlyoutHeader hasBorder>
           <DeprecationBadge
-            isCritical={deprecation.isCritical}
+            level={deprecation.level}
             isResolved={status === DataStreamMigrationStatus.completed}
           />
           <EuiSpacer size="s" />
@@ -284,6 +284,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                         description: lastIndexCreationDateFormatted,
                       },
                     ]}
+                    data-test-subj="dataStreamLastIndexCreationDate"
                   />
                 </EuiFlexItem>
                 <EuiFlexGroup>
@@ -301,6 +302,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                           description: docsSizeFormatted,
                         },
                       ]}
+                      data-test-subj="dataStreamSize"
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -317,6 +319,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                           description: indicesRequiringUpgradeDocsCount,
                         },
                       ]}
+                      data-test-subj="dataStreamDocumentCount"
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

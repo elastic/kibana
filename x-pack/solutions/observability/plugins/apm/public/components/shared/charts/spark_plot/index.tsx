@@ -124,7 +124,7 @@ export function SparkPlotItem({
           justifyContent: 'center',
         }}
       >
-        <EuiLoadingChart mono />
+        <EuiLoadingChart />
       </div>
     );
   }

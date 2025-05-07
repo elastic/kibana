@@ -180,6 +180,24 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
+      GITHUB_PR_LABELS.includes('ci:build-cloud-image') &&
+      !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
+      !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
+      !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_cloud_image.yml'));
+    }
+
+    if (
+      GITHUB_PR_LABELS.includes('ci:build-cloud-fips-image') &&
+      !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
+      !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
+      !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_cloud_fips_image.yml'));
+    }
+
+    if (
       GITHUB_PR_LABELS.includes('ci:deploy-cloud') ||
       GITHUB_PR_LABELS.includes('ci:cloud-deploy') ||
       GITHUB_PR_LABELS.includes('ci:cloud-redeploy')
@@ -403,6 +421,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/observability\/packages\/kbn-scout-oblt/,
         /^x-pack\/solutions\/observability\/plugins\/apm/,
         /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
+        /^x-pack\/solutions\/security\/packages\/kbn-scout-security/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
     ) {

@@ -7,19 +7,21 @@
 
 import expect from '@kbn/expect';
 
-import {
+import type {
   Case,
-  CaseSeverity,
-  CaseStatuses,
   UserCommentAttachmentPayload,
-  AttachmentType,
   CreateCaseUserAction,
-  ConnectorTypes,
-  CustomFieldTypes,
   CaseCustomFields,
 } from '@kbn/cases-plugin/common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  AttachmentType,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '@kbn/cases-plugin/common/types/domain';
 import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,

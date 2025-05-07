@@ -168,7 +168,7 @@ Object {
           </p>
           <div>
             <div
-              class="euiContextMenuPanel eui-scrollBar emotion-euiContextMenuPanel-Render"
+              class="euiContextMenuPanel eui-scrollBar emotion-euiContextMenuPanel-popoverHeightStyle"
               data-test-subj="MenuPanel"
               tabindex="-1"
             >

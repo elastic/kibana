@@ -58,7 +58,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
 
   return (
     <Fragment>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="dataStreamMigrationChecklistFlyout">
         {hasRequiredPrivileges === false && (
           <Fragment>
             <EuiSpacer />
@@ -71,6 +71,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               }
               color="danger"
               iconType="warning"
+              data-test-subj="dsInsufficientPrivilegesCallout"
             />
           </Fragment>
         )}
@@ -159,7 +160,12 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="closeDataStreamReindexingButton"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.closeButtonLabel"
                 defaultMessage="Close"

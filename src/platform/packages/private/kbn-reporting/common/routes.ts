@@ -25,6 +25,7 @@ export const INTERNAL_ROUTES = {
     DOWNLOAD_PREFIX: prefixInternalPath + '/jobs/download', // docId is added to the final path
   },
   DOWNLOAD_CSV: prefixInternalPath + '/generate/immediate/csv_searchsource', // DEPRECATED
+  HEALTH: prefixInternalPath + '/_health',
   GENERATE_PREFIX: prefixInternalPath + '/generate', // exportTypeId is added to the final path
 };
 

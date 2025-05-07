@@ -8,21 +8,26 @@
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
 
-import { TaskPollingLifecycle, claimAvailableTasks, TaskLifecycleEvent } from './polling_lifecycle';
+import type { TaskLifecycleEvent } from './polling_lifecycle';
+import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
 import { createInitialMiddleware } from './lib/middleware';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskStoreMock } from './task_store.mock';
 import { mockLogger } from './test_utils';
 import { taskClaimingMock } from './queries/task_claiming.mock';
-import { TaskClaiming, ClaimOwnershipResult } from './queries/task_claiming';
-import type { TaskClaiming as TaskClaimingClass } from './queries/task_claiming';
-import { asOk, Err, isErr, isOk, Ok } from './lib/result_type';
+import { TaskClaiming } from './queries/task_claiming';
+import type {
+  TaskClaiming as TaskClaimingClass,
+  ClaimOwnershipResult,
+} from './queries/task_claiming';
+import type { Err, Ok } from './lib/result_type';
+import { asOk, isErr, isOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
 import { CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
-import { KibanaDiscoveryService } from './kibana_discovery_service';
+import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
 
 const executionContext = executionContextServiceMock.createSetupContract();

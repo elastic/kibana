@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import { esFieldTypeToKibanaFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type {
   IKibanaSearchRequest,
@@ -21,11 +21,17 @@ import type {
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getIndexPatternFromESQLQuery, getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
+import {
+  getIndexPatternFromESQLQuery,
+  fixESQLQueryWithVariables,
+  getNamedParams,
+  mapVariableToColumn,
+} from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
+import DateMath from '@kbn/datemath';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import {
@@ -179,8 +185,12 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         })
       ).pipe(
         switchMap(({ search, uiSettings }) => {
+          // this is for backward compatibility, if the query is of fields or functions type
+          // and the query is not set with ?? in the query, we should set it
+          // https://github.com/elastic/elasticsearch/pull/122459
+          const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
           const params: ESQLSearchParams = {
-            query,
+            query: fixedQuery,
             // time_zone: timezone,
             locale,
             include_ccs_metadata: true,
@@ -190,7 +200,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
 
-            const namedParams = getNamedParams(query, input.timeRange, input.esqlVariables);
+            const namedParams = getNamedParams(fixedQuery, input.timeRange, input.esqlVariables);
 
             if (namedParams.length) {
               params.params = namedParams;
@@ -332,29 +342,42 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           );
           const indexPattern = getIndexPatternFromESQLQuery(query);
 
-          const allColumns =
-            (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
-              id: name,
-              name,
-              meta: {
-                type: esFieldTypeToKibanaFieldType(type),
-                esType: type,
-                sourceParams:
-                  type === 'date'
-                    ? {
-                        appliedTimeRange: input?.timeRange,
-                        params: {},
-                        indexPattern,
-                      }
-                    : {
-                        indexPattern,
-                      },
-              },
-              isNull: hasEmptyColumns ? !lookup.has(name) : false,
-            })) ?? [];
+          const appliedTimeRange = input?.timeRange
+            ? {
+                from: DateMath.parse(input.timeRange.from)?.toISOString(),
+                to: DateMath.parse(input.timeRange.to, { roundUp: true })?.toISOString(),
+              }
+            : undefined;
 
+          const allColumns =
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
+              const originalTypes = original_types ?? [];
+              const hasConflict = type === 'unsupported' && originalTypes.length > 1;
+              return {
+                id: name,
+                name,
+                meta: {
+                  type: hasConflict ? KBN_FIELD_TYPES.CONFLICT : esFieldTypeToKibanaFieldType(type),
+                  esType: type,
+                  sourceParams:
+                    type === 'date'
+                      ? {
+                          appliedTimeRange,
+                          params: {},
+                          indexPattern,
+                        }
+                      : {
+                          indexPattern,
+                        },
+                },
+                isNull: hasEmptyColumns ? !lookup.has(name) : false,
+              };
+            }) ?? [];
+
+          const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
           const updatedWithVariablesColumns = mapVariableToColumn(
-            query,
+            fixedQuery,
             input?.esqlVariables ?? [],
             allColumns as DatatableColumn[]
           );

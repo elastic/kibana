@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   const openInfraSection = async () => {
-    await pageObjects.svlCommonNavigation.sidenav.openPanel('metrics', { button: 'link' });
+    await pageObjects.svlCommonNavigation.sidenav.openPanel('metrics');
   };
 
   describe('Infra Side Navigation', () => {

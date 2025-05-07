@@ -7,7 +7,7 @@
 
 import type {
   AggregationsCardinalityAggregate,
-  AggregationsCompositeBucket,
+  AggregationsCompositeBucketKeys,
   AggregationsMaxAggregate,
   AggregationsMinAggregate,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -44,8 +44,7 @@ export type ThresholdSingleBucketAggregationResult = ESSearchResponse<
   }
 >;
 
-export type ThresholdCompositeBucket = AggregationsCompositeBucket & ThresholdLeafAggregates;
-export type ThresholdBucket = ThresholdCompositeBucket;
+export type ThresholdCompositeBucket = AggregationsCompositeBucketKeys & ThresholdLeafAggregates;
 
 export interface ThresholdResult {
   terms?: Array<{

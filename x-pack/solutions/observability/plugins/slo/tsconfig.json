@@ -104,6 +104,7 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/security-plugin",
     "@kbn/response-ops-rule-form",
-    "@kbn/fields-metadata-plugin"
+    "@kbn/fields-metadata-plugin",
+    "@kbn/server-route-repository-utils",
   ]
 }

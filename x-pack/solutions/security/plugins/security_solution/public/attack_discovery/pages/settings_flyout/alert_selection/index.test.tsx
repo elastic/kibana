@@ -28,18 +28,17 @@ jest.mock('../../../../sourcerer/containers');
 const defaultProps = {
   alertsPreviewStackBy0: 'defaultAlertPreview',
   alertSummaryStackBy0: 'defaultAlertSummary',
-  end: '2024-10-01T00:00:00.000Z',
   filterManager: jest.fn() as unknown as FilterManager,
-  filters: [],
-  maxAlerts: 100,
-  query: { query: '', language: 'kuery' },
+  settings: {
+    end: '2024-10-01T00:00:00.000Z',
+    filters: [],
+    query: { query: '', language: 'kuery' },
+    size: 100,
+    start: '2024-09-01T00:00:00.000Z',
+  },
+  onSettingsChanged: jest.fn(),
   setAlertsPreviewStackBy0: jest.fn(),
   setAlertSummaryStackBy0: jest.fn(),
-  setEnd: jest.fn(),
-  setMaxAlerts: jest.fn(),
-  setQuery: jest.fn(),
-  setStart: jest.fn(),
-  start: '2024-09-01T00:00:00.000Z',
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;

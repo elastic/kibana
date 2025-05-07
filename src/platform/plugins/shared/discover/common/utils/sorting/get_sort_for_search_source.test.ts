@@ -9,7 +9,11 @@
 
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { getSortForSearchSource } from './get_sort_for_search_source';
-import { stubDataView, stubDataViewWithoutTimeField } from '@kbn/data-plugin/common/stubs';
+import {
+  stubDataView,
+  stubDataViewWithoutTimeField,
+  stubRollupDataView,
+} from '@kbn/data-plugin/common/stubs';
 
 describe('getSortForSearchSource function', function () {
   test('should be a function', function () {
@@ -93,5 +97,25 @@ describe('getSortForSearchSource function', function () {
         defaultSortDir: 'asc',
       })
     ).toEqual([{ _score: 'asc' }]);
+  });
+
+  test('should return an object including format when data view is not a rollup', function () {
+    expect(
+      getSortForSearchSource({
+        sort: [['@timestamp', 'desc']],
+        dataView: stubDataView,
+        defaultSortDir: 'desc',
+      })
+    ).toEqual([{ '@timestamp': { format: 'strict_date_optional_time', order: 'desc' } }]);
+  });
+
+  test('should not return an object excluding format when data view is a rollup', function () {
+    expect(
+      getSortForSearchSource({
+        sort: [['@timestamp', 'desc']],
+        dataView: stubRollupDataView,
+        defaultSortDir: 'desc',
+      })
+    ).toEqual([{ '@timestamp': 'desc' }]);
   });
 });

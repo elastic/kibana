@@ -62,6 +62,12 @@ export interface NewAgentPolicy {
       max_dur?: string;
     };
   };
+  required_versions?: AgentTargetVersion[] | null;
+}
+
+export interface AgentTargetVersion {
+  version: string;
+  percentage: number;
 }
 
 export interface AgentlessPolicy {

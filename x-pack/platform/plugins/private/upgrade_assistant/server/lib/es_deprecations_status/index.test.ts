@@ -65,6 +65,30 @@ describe('getESUpgradeStatus', () => {
   // @ts-expect-error not full interface of response
   esClient.indices.resolveIndex.mockResponse(resolvedIndices);
 
+  // Mock the indices.stats API call for index sizes
+  esClient.indices.stats.mockResponse({
+    _shards: { failed: 0, successful: 1, total: 1 },
+    _all: {},
+    indices: {
+      'test-index-1': {
+        total: {
+          store: {
+            size_in_bytes: 500000000, // 500MB
+            reserved_in_bytes: 500000000, // 500MB
+          },
+        },
+      },
+      'test-index-2': {
+        total: {
+          store: {
+            size_in_bytes: 1500000000, // 1.5GB
+            reserved_in_bytes: 500000000, // 500MB
+          },
+        },
+      },
+    },
+  });
+
   it('calls /_migration/deprecations', async () => {
     await getESUpgradeStatus(esClient, { featureSet, dataSourceExclusions });
     expect(esClient.migration.deprecations).toHaveBeenCalled();
@@ -450,7 +474,7 @@ describe('getESUpgradeStatus', () => {
             "type": "healthIndicator",
           },
           "details": "Cluster is close to reaching the configured maximum number of shards for data nodes.",
-          "isCritical": true,
+          "level": "critical",
           "message": "Elasticsearch is about to reach the maximum number of shards it can host, based on your current settings.",
           "resolveDuringUpgrade": false,
           "type": "health_indicator",
@@ -468,7 +492,7 @@ describe('getESUpgradeStatus', () => {
           },
           "details": "This index was created using version: 6.8.13",
           "index": undefined,
-          "isCritical": true,
+          "level": "critical",
           "message": "Index created before 7.0",
           "resolveDuringUpgrade": false,
           "type": "node_settings",

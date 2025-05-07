@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { css } from '@emotion/react';
 import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
@@ -198,10 +199,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterLabel',
               { defaultMessage: 'Filter' }
             ),
-            description: i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
-              { defaultMessage: 'Filter by value' }
-            ),
+            description: ({ fieldName }) =>
+              i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
+                { defaultMessage: 'Filter by {fieldName}', values: { fieldName } }
+              ),
             icon: 'plusInCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
@@ -216,10 +218,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
               'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeLabel',
               { defaultMessage: 'Exclude' }
             ),
-            description: i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
-              { defaultMessage: 'Filter out value' }
-            ),
+            description: ({ fieldName }) =>
+              i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
+                { defaultMessage: 'Filter out {fieldName}', values: { fieldName } }
+              ),
             icon: 'minusInCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: LatencyCorrelation) =>
@@ -289,7 +292,13 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   return (
     <div data-test-subj="apmLatencyCorrelationsTabContent">
-      <EuiFlexGroup style={{ minHeight: MIN_TAB_TITLE_HEIGHT }} alignItems="center" gutterSize="s">
+      <EuiFlexGroup
+        css={css`
+          min-height: ${MIN_TAB_TITLE_HEIGHT};
+        `}
+        alignItems="center"
+        gutterSize="s"
+      >
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">

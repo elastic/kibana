@@ -81,6 +81,7 @@ export const AGENT_POLICY_API_ROUTES = {
   DELETE_PATTERN: `${AGENT_POLICY_API_ROOT}/delete`,
   FULL_INFO_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/full`,
   FULL_INFO_DOWNLOAD_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/download`,
+  AUTO_UPGRADE_AGENTS_STATUS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/auto_upgrade_agents_status`,
 };
 
 // Kubernetes Manifest API routes

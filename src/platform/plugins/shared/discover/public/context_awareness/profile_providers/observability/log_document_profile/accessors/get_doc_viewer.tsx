@@ -23,6 +23,8 @@ export const createGetDocViewer =
       'observability-logs-ai-assistant'
     );
 
+    const streamsFeature = services.discoverShared.features.registry.getById('streams');
+
     return {
       ...prevDocViewer,
       docViewsRegistry: (registry) => {
@@ -36,6 +38,7 @@ export const createGetDocViewer =
             <UnifiedDocViewerLogsOverview
               {...props}
               renderAIAssistant={logsAIAssistantFeature?.render}
+              renderStreamsField={streamsFeature?.renderStreamsField}
             />
           ),
         });

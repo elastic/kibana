@@ -115,6 +115,7 @@ export interface ReindexOperation {
   errorMessage: string | null;
   // This field is only used for the singleton IndexConsumerType documents.
   runningReindexCount: number | null;
+  rollupJob?: string;
 
   /**
    * The original index settings to set after reindex is completed.
@@ -220,6 +221,11 @@ export interface ReindexAction extends IndexAction {
    * The actions that should be excluded from the reindex corrective action.
    */
   excludedActions?: string[];
+
+  /**
+   * The size of the index in bytes
+   */
+  indexSizeInBytes?: number;
 }
 
 export interface UnfreezeAction extends IndexAction {
@@ -269,7 +275,7 @@ export interface EnrichedDeprecationInfo
     | 'health_indicator'
     | 'ilm_policies'
     | 'templates';
-  isCritical: boolean;
+  level: MIGRATION_DEPRECATION_LEVEL;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
   correctiveAction?: CorrectiveAction;
@@ -314,6 +320,23 @@ export interface MlOperation {
 export interface DeprecationLoggingStatus {
   isDeprecationLogIndexingEnabled: boolean;
   isDeprecationLoggingEnabled: boolean;
+}
+
+export interface EsDeprecationLog {
+  // Define expected properties from the logs
+  '@timestamp'?: string;
+  message?: string;
+  [key: string]: any; // Allow for any additional ES log properties
+}
+
+export interface StatusResponseBody {
+  readyForUpgrade: boolean;
+  details: string;
+  recentEsDeprecationLogs?: {
+    count: number;
+    logs: EsDeprecationLog[];
+  };
+  kibanaApiDeprecations?: any[]; // Uses DomainDeprecationDetails type from Kibana core
 }
 
 export type MIGRATION_STATUS = 'MIGRATION_NEEDED' | 'NO_MIGRATION_NEEDED' | 'IN_PROGRESS' | 'ERROR';

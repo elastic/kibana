@@ -75,10 +75,7 @@ describe('ResetSLO', () => {
       await resetSLO.execute(slo.id);
 
       // delete existing resources and data
-      expect(mockSummaryTransformManager.stop).toMatchSnapshot();
       expect(mockSummaryTransformManager.uninstall).toMatchSnapshot();
-
-      expect(mockTransformManager.stop).toMatchSnapshot();
       expect(mockTransformManager.uninstall).toMatchSnapshot();
 
       expect(mockEsClient.deleteByQuery).toMatchSnapshot();

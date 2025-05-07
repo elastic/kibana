@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { taskSchemaV1, taskSchemaV2, taskSchemaV3 } from '../schemas/task';
 
 // IMPORTANT!!!

@@ -10,6 +10,8 @@ xpack.fleet.internal.retrySetupOnBoot: true
 xpack.fleet.internal.useMeteringApi: true
 xpack.searchSynonyms.enabled: false
 
+xpack.searchQueryRules.enabled: false
+
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
   dashboard:
@@ -227,7 +229,6 @@ monitoring.enabled: false
 monitoring.ui.enabled: false
 
 ## Enable uiSettings validations
-xpack.securitySolution.enableUiSettingsValidations: true
 data.enableUiSettingsValidations: true
 discover.enableUiSettingsValidations: true
 

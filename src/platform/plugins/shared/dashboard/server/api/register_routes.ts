@@ -255,7 +255,15 @@ export function registerAPIRoutes({
       let result;
       try {
         // TODO add filtering
-        ({ result } = await client.search({ cursor: page.toString(), limit }));
+        ({ result } = await client.search(
+          {
+            cursor: page.toString(),
+            limit,
+          },
+          {
+            fields: ['title', 'description', 'timeRestore'],
+          }
+        ));
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();

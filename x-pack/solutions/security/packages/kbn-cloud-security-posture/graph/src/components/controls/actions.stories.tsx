@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { ThemeProvider, css } from '@emotion/react';
 import { action } from '@storybook/addon-actions';
 import { Actions as ActionsComponent, type ActionsProps } from './actions';
@@ -21,7 +21,7 @@ export default {
   },
 } as Meta;
 
-const Template: Story<ActionsProps> = (props) => {
+const Template: StoryFn<ActionsProps> = (props) => {
   return (
     <ThemeProvider theme={{ darkMode: false }}>
       <ActionsComponent
@@ -36,11 +36,13 @@ const Template: Story<ActionsProps> = (props) => {
   );
 };
 
-export const Actions = Template.bind({});
+export const Actions: StoryObj<ActionsProps> = {
+  render: Template,
 
-Actions.args = {
-  showToggleSearch: true,
-  searchFilterCounter: 0,
-  showInvestigateInTimeline: true,
-  searchToggled: false,
+  args: {
+    showToggleSearch: true,
+    searchFilterCounter: 0,
+    showInvestigateInTimeline: true,
+    searchToggled: false,
+  },
 };

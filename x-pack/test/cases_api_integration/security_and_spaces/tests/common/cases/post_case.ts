@@ -13,7 +13,8 @@ import {
   CaseSeverity,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { ConnectorJiraTypeFields, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import type { ConnectorJiraTypeFields } from '@kbn/cases-plugin/common/types/domain';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -33,7 +34,7 @@ import {
   noKibanaPrivileges,
   testDisabled,
 } from '../../../../common/lib/authentication/users';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

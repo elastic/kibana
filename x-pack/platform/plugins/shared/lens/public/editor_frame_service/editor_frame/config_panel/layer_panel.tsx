@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './layer_panel.scss';
-
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   EuiPanel,
@@ -16,12 +14,14 @@ import {
   EuiFormRow,
   EuiText,
   EuiIconTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { LayerActions } from './layer_actions';
 import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
 import { LayerHeader } from './layer_header';
@@ -40,6 +40,7 @@ import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
+import { ESQLEditor } from './esql_editor';
 
 export function LayerPanel(props: LayerPanelProps) {
   const [openDimension, setOpenDimension] = useState<{
@@ -49,6 +50,7 @@ export function LayerPanel(props: LayerPanelProps) {
   }>({});
 
   const [isPanelSettingsOpen, setPanelSettingsOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
 
   const {
     framePublicAPI,
@@ -73,6 +75,7 @@ export function LayerPanel(props: LayerPanelProps) {
     onDropToDimension,
     setIsInlineFlyoutVisible,
     onlyAllowSwitchToSubtypes,
+    ...editorProps
   } = props;
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -125,8 +128,8 @@ export function LayerPanel(props: LayerPanelProps) {
   };
 
   const datasourcePublicAPI = framePublicAPI.datasourceLayers?.[layerId];
-  const datasourceId = datasourcePublicAPI?.datasourceId;
-  let layerDatasourceState = datasourceId ? datasourceStates?.[datasourceId]?.state : undefined;
+  const datasourceId = datasourcePublicAPI?.datasourceId! as 'formBased' | 'textBased';
+  let layerDatasourceState = datasourceStates?.[datasourceId]?.state;
   // try again with aliases
   if (!layerDatasourceState && datasourcePublicAPI?.datasourceAliasIds && datasourceStates) {
     const aliasId = datasourcePublicAPI.datasourceAliasIds.find(
@@ -284,7 +287,10 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
-  const isTextBasedLanguage = Boolean(datasource?.isTextBasedLanguage());
+  const isTextBasedLanguage =
+    datasource?.isTextBasedLanguage() ||
+    isOfAggregateQueryType(editorProps.attributes?.state.query) ||
+    false;
 
   const visualizationLayerSettings = useMemo(
     () =>
@@ -360,13 +366,30 @@ export function LayerPanel(props: LayerPanelProps) {
       <section
         tabIndex={-1}
         ref={registerLayerRef}
-        className="lnsLayerPanel"
+        css={css`
+          margin-bottom: ${euiTheme.size.base};
+          // disable focus ring for mouse clicks, leave it for keyboard users
+          &:focus:not(:focus-visible) {
+            animation: none !important; // sass-lint:disable-line no-important
+          }
+        `}
         data-test-subj={`lns-layerPanel-${layerIndex}`}
       >
         <EuiPanel paddingSize="none">
-          <header className="lnsLayerPanel__layerHeader">
+          <header
+            className="lnsLayerPanel__layerHeader"
+            css={css`
+              padding: ${euiTheme.size.base};
+              border-bottom: ${euiTheme.border.thin};
+            `}
+          >
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-              <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
+              <EuiFlexItem
+                grow
+                css={css`
+                  min-width: 0; // fixes truncation for too long chart switcher labels
+                `}
+              >
                 <LayerHeader
                   layerConfigProps={{
                     ...layerVisualizationConfigProps,
@@ -400,7 +423,7 @@ export function LayerPanel(props: LayerPanelProps) {
               (layerDatasource || activeVisualization.LayerPanelComponent) && (
                 <EuiSpacer size="s" />
               )}
-            {layerDatasource && props.indexPatternService && (
+            {layerDatasource && props.indexPatternService && !isTextBasedLanguage && (
               <layerDatasource.LayerPanelComponent
                 {...{
                   layerId,
@@ -412,6 +435,14 @@ export function LayerPanel(props: LayerPanelProps) {
                 }}
               />
             )}
+            <ESQLEditor
+              isTextBasedLanguage={isTextBasedLanguage}
+              framePublicAPI={framePublicAPI}
+              datasourceMap={datasourceMap}
+              layerId={layerId}
+              visualizationMap={visualizationMap}
+              {...editorProps}
+            />
             {activeVisualization.LayerPanelComponent && (
               <activeVisualization.LayerPanelComponent
                 {...{
@@ -471,6 +502,33 @@ export function LayerPanel(props: LayerPanelProps) {
               const isOptional = !group.requiredMinDimensionCount && !group.suggestedValue;
               return (
                 <EuiFormRow
+                  css={css`
+                    padding: ${euiTheme.size.base};
+                    background-color: ${euiTheme.colors.lightestShade};
+
+                    &:last-child {
+                      border-radius: 0 0 ${euiTheme.border.radius.medium}
+                        ${euiTheme.border.radius.medium};
+                    }
+
+                    // Add border to the top of the next same panel
+                    & + & {
+                      border-top: ${euiTheme.border.thin};
+                      margin-top: 0;
+                    }
+
+                    & > * {
+                      margin-bottom: 0;
+                    }
+
+                    // Targeting EUI class as we are unable to apply a class to this element in component
+                    &,
+                    .euiFormRow__fieldWrapper {
+                      & > * + * {
+                        margin-top: ${euiTheme.size.s};
+                      }
+                    }
+                  `}
                   className="lnsLayerPanel__row"
                   fullWidth
                   label={
@@ -509,8 +567,11 @@ export function LayerPanel(props: LayerPanelProps) {
                   <>
                     {group.accessors.length ? (
                       <ReorderProvider
-                        className={'lnsLayerPanel__group'}
                         dataTestSubj="lnsDragDrop"
+                        css={css`
+                          margin: -${euiTheme.size.xs} -${euiTheme.size.base};
+                          padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+                        `}
                       >
                         {group.accessors.map((accessorConfig, accessorIndex) => {
                           const { columnId } = accessorConfig;
@@ -644,6 +705,7 @@ export function LayerPanel(props: LayerPanelProps) {
                         }}
                         onDrop={onDrop}
                         indexPatterns={dataViews.indexPatterns}
+                        isInlineEditing={isInlineEditing}
                       />
                     ) : null}
                   </>
@@ -730,7 +792,7 @@ export function LayerPanel(props: LayerPanelProps) {
         isInlineEditing={isInlineEditing}
         handleClose={closeDimensionEditor}
         panel={
-          <>
+          <div>
             {openColumnGroup &&
               openColumnId &&
               layerDatasource &&
@@ -776,7 +838,11 @@ export function LayerPanel(props: LayerPanelProps) {
               activeVisualization.DimensionEditorComponent &&
               openColumnGroup?.enableDimensionEditor && (
                 <>
-                  <div className="lnsLayerPanel__styleEditor">
+                  <div
+                    css={css`
+                      padding: ${euiTheme.size.base};
+                    `}
+                  >
                     <activeVisualization.DimensionEditorComponent
                       {...{
                         ...layerVisualizationConfigProps,
@@ -807,7 +873,7 @@ export function LayerPanel(props: LayerPanelProps) {
                   )}
                 </>
               )}
-          </>
+          </div>
         }
       />
     </>

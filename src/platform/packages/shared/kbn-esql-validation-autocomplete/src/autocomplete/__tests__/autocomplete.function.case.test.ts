@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Location } from '../../definitions/types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
 import {
   AssertSuggestionsFn,
@@ -30,7 +31,9 @@ describe('case', () => {
   const allSuggestions = [
     // With extra space after field name to open suggestions
     ...getFieldNamesByType('any').map((field) => `${field} `),
-    ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, ['case']),
+    ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }, undefined, [
+      'case',
+    ]),
   ];
 
   test('first position', async () => {
@@ -61,7 +64,7 @@ describe('case', () => {
         // Notice no extra space after field name
         ...getFieldNamesByType(['keyword', 'text', 'boolean']).map((field) => `${field}`),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           ['keyword', 'text', 'boolean'],
           { scalar: true },
           undefined,
@@ -77,7 +80,7 @@ describe('case', () => {
       // Notice no extra space after field name
       ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES).map((field) => `${field}`),
       ...getFunctionSignaturesByReturnType(
-        'eval',
+        Location.EVAL,
         ESQL_COMMON_NUMERIC_TYPES,
         { scalar: true },
         undefined,
@@ -97,7 +100,9 @@ describe('case', () => {
       [
         // With extra space after field name to open suggestions
         ...getFieldNamesByType('any').map((field) => `${field}`),
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, ['case']),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }, undefined, [
+          'case',
+        ]),
       ],
       {
         triggerCharacter: ' ',
@@ -110,7 +115,9 @@ describe('case', () => {
       [
         // With extra space after field name to open suggestions
         ...getFieldNamesByType('any').map((field) => `${field} `),
-        ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }, undefined, ['case']),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }, undefined, [
+          'case',
+        ]),
       ],
       {
         triggerCharacter: ' ',

@@ -182,6 +182,8 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
             startReindex={startReindexWithWarnings}
             reindexState={reindexState}
             cancelReindex={onStopReindex}
+            startReadonly={onMakeReadonly}
+            deprecation={deprecation}
           />
         );
       case 'unfreeze':
@@ -225,7 +227,7 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <DeprecationBadge
-          isCritical={deprecation.isCritical}
+          level={deprecation.level}
           isResolved={reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete'}
         />
         <EuiSpacer size="s" />

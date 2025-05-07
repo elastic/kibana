@@ -12,7 +12,9 @@ import { childrenUnsavedChanges$, initializeUnsavedChanges } from '@kbn/presenta
 import {
   PublishesSavedObjectId,
   PublishingSubject,
+  SerializedPanelState,
   StateComparators,
+  apiHasSerializableState,
 } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
 import { BehaviorSubject, Subject, combineLatest, debounceTime, skipWhile, switchMap } from 'rxjs';
@@ -93,17 +95,34 @@ export function initializeUnsavedChangesManager({
 
       // backup unsaved changes if configured to do so
       if (creationOptions?.useSessionStorageIntegration) {
+        const dashboardBackupService = getDashboardBackupService();
+
         // Current behaviour expects time range not to be backed up. Revisit this?
         const dashboardStateToBackup = omit(dashboardChanges ?? {}, [
           'timeRange',
           'refreshInterval',
         ]);
+
+        // TEMPORARY - back up serialized state for all panels with changes
+        if (unsavedPanelState) {
+          const serializedPanelBackup: { [key: string]: SerializedPanelState<object> } = {};
+          for (const uuid of Object.keys(unsavedPanelState)) {
+            const childApi = panelsManager.api.children$.value[uuid];
+            if (!apiHasSerializableState(childApi)) continue;
+            serializedPanelBackup[uuid] = childApi.serializeState();
+          }
+          dashboardBackupService.setSerializedPanelsBackups(
+            serializedPanelBackup,
+            savedObjectId$.value
+          );
+        }
+
         const reactEmbeddableChanges = unsavedPanelState ? { ...unsavedPanelState } : {};
         if (controlGroupChanges) {
           reactEmbeddableChanges[PANELS_CONTROL_GROUP_KEY] = controlGroupChanges;
         }
 
-        getDashboardBackupService().setState(
+        dashboardBackupService.setState(
           savedObjectId$.value,
           dashboardStateToBackup,
           reactEmbeddableChanges
@@ -130,6 +149,8 @@ export function initializeUnsavedChangesManager({
       getLastSavedState: () => lastSavedState$.value,
       onSave: (savedState: DashboardState) => {
         lastSavedState$.next(savedState);
+        // sync panels manager with latest saved state
+        panelsManager.internalApi.setPanels(savedState.panels);
         saveNotification$.next();
       },
     },

@@ -13,7 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { InnerFieldItem, FieldItemIndexPatternFieldProps } from './field_item';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -399,10 +399,15 @@ describe('Lens Field Item', () => {
     };
 
     render(
-      <KibanaContextProvider services={services}>
-        <InnerFieldItem {...defaultProps} />
-      </KibanaContextProvider>
+      <KibanaRenderContextProvider {...mockedServices.core}>
+        <KibanaContextProvider services={services}>
+          <InnerFieldItem {...defaultProps} />
+        </KibanaContextProvider>
+      </KibanaRenderContextProvider>
     );
+    await waitFor(() => {
+      expect(screen.getByTestId('field-bytes-showDetails')).toBeInTheDocument();
+    });
     await clickField('bytes');
     expect(
       screen.queryByTestId('lnsFieldListPanel-exploreInDiscover-bytes')

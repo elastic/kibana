@@ -110,7 +110,11 @@ import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { escapeSearchQueryPhrase, normalizeKuery as _normalizeKuery } from './saved_object';
-import { getFullAgentPolicy, validateOutputForPolicy } from './agent_policies';
+import {
+  getFullAgentPolicy,
+  validateOutputForPolicy,
+  validateRequiredVersions,
+} from './agent_policies';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -408,6 +412,7 @@ class AgentPolicyService {
       {},
       getAllowedOutputTypesForAgentPolicy(agentPolicy)
     );
+    validateRequiredVersions(agentPolicy.name, agentPolicy.required_versions);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       savedObjectType,
@@ -690,6 +695,7 @@ class AgentPolicyService {
       spaceId?: string;
       authorizationHeader?: HTTPAuthorizationHeader | null;
       skipValidation?: boolean;
+      bumpRevision?: boolean;
     }
   ): Promise<AgentPolicy> {
     const logger = appContextService.getLogger();
@@ -708,6 +714,7 @@ class AgentPolicyService {
         namespace: agentPolicy.namespace,
       });
     }
+    validateRequiredVersions(agentPolicy.name ?? id, agentPolicy.required_versions);
 
     const existingAgentPolicy = await this.get(soClient, id, true);
 
@@ -760,7 +767,7 @@ class AgentPolicyService {
     }
 
     return this._update(soClient, esClient, id, agentPolicy, options?.user, {
-      bumpRevision: true,
+      bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
     }).then((updatedAgentPolicy) => {
@@ -824,32 +831,48 @@ class AgentPolicyService {
       options
     );
 
-    // Copy all package policies and append (copy n) to their names
     if (baseAgentPolicy.package_policies) {
-      const newPackagePolicies = await pMap(
-        baseAgentPolicy.package_policies as PackagePolicy[],
-        async (packagePolicy: PackagePolicy) => {
-          const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
+      // Copy non-shared package policies and append (copy n) to their names.
+      const basePackagePolicies = baseAgentPolicy.package_policies.filter(
+        (packagePolicy) => packagePolicy.policy_ids.length < 2
+      );
+      if (basePackagePolicies.length > 0) {
+        const newPackagePolicies = await pMap(
+          basePackagePolicies,
+          async (packagePolicy: PackagePolicy) => {
+            const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
 
-          const updatedPackagePolicy = {
+            const updatedPackagePolicy = {
+              ...newPackagePolicy,
+              name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
+            };
+            return updatedPackagePolicy;
+          }
+        );
+        await packagePolicyService.bulkCreate(
+          soClient,
+          esClient,
+          newPackagePolicies.map((newPackagePolicy) => ({
             ...newPackagePolicy,
-            name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
-          };
-          return updatedPackagePolicy;
-        }
+            policy_ids: [newAgentPolicy.id],
+          })),
+          {
+            ...options,
+            bumpRevision: false,
+          }
+        );
+      }
+      // Link shared package policies to new agent policy.
+      const sharedBasePackagePolicies = baseAgentPolicy.package_policies.filter(
+        (packagePolicy) => packagePolicy.policy_ids.length > 1
       );
-      await packagePolicyService.bulkCreate(
-        soClient,
-        esClient,
-        newPackagePolicies.map((newPackagePolicy) => ({
-          ...newPackagePolicy,
-          policy_ids: [newAgentPolicy.id],
-        })),
-        {
-          ...options,
-          bumpRevision: false,
-        }
-      );
+      if (sharedBasePackagePolicies.length > 0) {
+        const updatedSharedPackagePolicies = sharedBasePackagePolicies.map((packagePolicy) => ({
+          ...packagePolicy,
+          policy_ids: [...packagePolicy.policy_ids, newAgentPolicy.id],
+        }));
+        await packagePolicyService.bulkUpdate(soClient, esClient, updatedSharedPackagePolicies);
+      }
     }
 
     // Tamper protection is dependent on endpoint package policy

@@ -967,7 +967,7 @@ module.exports = {
       files: [
         'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
         'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/plugins/{streams,streams_app}/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/{streams,streams_app}/**/*.{ts,tsx}',
         'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
       ],
       rules: {
@@ -1449,6 +1449,56 @@ module.exports = {
       },
     },
     {
+      files: [
+        'packages/kbn-scout/src/playwright/**/*.ts',
+        'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
+        'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
+        'src/platform/plugins/**/ui_tests/**/*.ts',
+        'x-pack/platform/plugins/**/ui_tests/**/*.ts',
+        'x-pack/solutions/**/plugins/**/ui_tests/**/*.ts',
+      ],
+      excludedFiles: ['packages/kbn-scout/src/playwright/**/*.test.ts'],
+      extends: ['plugin:playwright/recommended'],
+      plugins: ['playwright'],
+      settings: {
+        playwright: {
+          globalAliases: {
+            test: ['test', 'spaceTest'],
+          },
+        },
+      },
+      rules: {
+        'playwright/no-commented-out-tests': 'error',
+        'playwright/no-conditional-expect': 'error',
+        'playwright/no-conditional-in-test': 'warn',
+        'playwright/no-duplicate-hooks': 'error',
+        'playwright/no-focused-test': 'error',
+        'playwright/no-get-by-title': 'error',
+        'playwright/no-nth-methods': 'error',
+        'playwright/no-page-pause': 'error',
+        'playwright/no-restricted-matchers': 'error',
+        'playwright/no-slowed-test': 'error',
+        'playwright/no-standalone-expect': 'error',
+        'playwright/no-unsafe-references': 'error',
+        'playwright/no-useless-await': 'error',
+        'playwright/no-wait-for-selector': 'error',
+        'playwright/max-nested-describe': ['error', { max: 1 }],
+        'playwright/missing-playwright-await': 'error',
+        'playwright/prefer-comparison-matcher': 'error',
+        'playwright/prefer-equality-matcher': 'error',
+        'playwright/prefer-hooks-in-order': 'error',
+        'playwright/prefer-hooks-on-top': 'error',
+        'playwright/prefer-strict-equal': 'error',
+        'playwright/prefer-to-be': 'error',
+        'playwright/prefer-to-contain': 'error',
+        'playwright/prefer-to-have-count': 'error',
+        'playwright/prefer-to-have-length': 'error',
+        'playwright/prefer-web-first-assertions': 'error',
+        'playwright/require-to-throw-message': 'error',
+        'playwright/require-top-level-describe': 'error',
+      },
+    },
+    {
       files: ['x-pack/solutions/security/plugins/lists/public/**/!(*.test).{js,mjs,ts,tsx}'],
       plugins: ['react-perf'],
       rules: {
@@ -1587,11 +1637,9 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
-
     /**
      * ResponseOps overrides
      */
-
     {
       files: [
         'src/platform/packages/shared/response-ops/**/*.{ts, tsx}',
@@ -1600,6 +1648,25 @@ module.exports = {
         'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/event_log/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/rule_registry/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/task_manager/**/*.{ts, tsx}',
+        'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerting-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-cases-components/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-actions-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-as-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rrule/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rule-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts, tsx}',
+        'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
+        'x-pack/test/alerting_api_integration/**/*.{ts, tsx}',
+        'x-pack/test/cases_api_integration/**/*.{ts, tsx}',
+        'x-pack/test/rule_registry/**/*.{ts, tsx}',
+        'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',

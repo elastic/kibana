@@ -16,7 +16,10 @@ export { FilterContent, FilterContentLazy } from './filter_content';
  * The Lazily-loaded `FilterBadge` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */
-export const FilterBadgeLazy = React.lazy(() => import('./filter_badge'));
+export const FilterBadgeLazy = React.lazy(async () => {
+  const { FilterBadge } = await import('../ui_module');
+  return { default: FilterBadge };
+});
 
 /**
  * A `FilterBadge` component that is wrapped by the `withSuspense` HOC. This component can
@@ -29,7 +32,10 @@ export const FilterBadge = withSuspense(FilterBadgeLazy);
  * The Lazily-loaded `FilterBadgeGroup` component.  Consumers should use `React.Suspense` or
  * the withSuspense` HOC to load this component.
  */
-export const FilterBadgeGroupLazy = React.lazy(() => import('./filter_badge_group'));
+export const FilterBadgeGroupLazy = React.lazy(async () => {
+  const { FilterBadgeGroup } = await import('../ui_module');
+  return { default: FilterBadgeGroup };
+});
 
 /**
  * A `FilterBadgeGroup` component that is wrapped by the `withSuspense` HOC. This component can

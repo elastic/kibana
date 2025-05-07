@@ -39,6 +39,7 @@ pageLoadAssetSize:
   discoverEnhanced: 42730
   discoverShared: 17111
   embeddable: 24000
+  embeddableAlertsTable: 19615
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
   entityManager: 17175
@@ -148,10 +149,11 @@ pageLoadAssetSize:
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080
+  searchQueryRules: 19708
   searchSynonyms: 20262
   security: 81771
   securitySolution: 98429
-  securitySolutionEss: 31781
+  securitySolutionEss: 36000
   securitySolutionServerless: 62488
   serverless: 16573
   serverlessObservability: 68747
@@ -177,7 +179,7 @@ pageLoadAssetSize:
   uiActionsEnhanced: 38494
   unifiedDocViewer: 25099
   unifiedHistogram: 19928
-  unifiedSearch: 71059
+  unifiedSearch: 23000
   upgradeAssistant: 81241
   uptime: 60000
   urlDrilldown: 30063

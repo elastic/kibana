@@ -209,35 +209,23 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           return false;
         }
       },
-      async openPanel(
-        sectionId: NavigationId,
-        { button }: { button: 'icon' | 'link' } = { button: 'icon' }
-      ) {
+      async openPanel(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.openPanel', sectionId);
 
         const isOpen = await this.isPanelOpen(sectionId);
         if (isOpen) return;
 
-        const panelOpenerBtn = await testSubjects.find(
-          button === 'icon' ? `~panelOpener-id-${sectionId}` : `~nav-item-id-${sectionId}`,
-          TIMEOUT_CHECK
-        );
+        const panelOpenerBtn = await testSubjects.find(`~nav-item-id-${sectionId}`, TIMEOUT_CHECK);
 
         await panelOpenerBtn.click();
       },
-      async closePanel(
-        sectionId: NavigationId,
-        { button }: { button: 'icon' | 'link' } = { button: 'icon' }
-      ) {
+      async closePanel(sectionId: NavigationId) {
         log.debug('SolutionNavigation.sidenav.closePanel', sectionId);
 
         const isOpen = await this.isPanelOpen(sectionId);
         if (!isOpen) return;
 
-        const panelOpenerBtn = await testSubjects.find(
-          button === 'icon' ? `~panelOpener-id-${sectionId}` : `~nav-item-id-${sectionId}`,
-          TIMEOUT_CHECK
-        );
+        const panelOpenerBtn = await testSubjects.find(`~nav-item-id-${sectionId}`, TIMEOUT_CHECK);
 
         await panelOpenerBtn.click();
       },

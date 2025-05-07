@@ -68,7 +68,6 @@ describe('listAlertTypesRoute', () => {
         solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
-        hasFieldsForAAD: false,
         validLegacyConsumers: [],
       },
     ];
@@ -96,7 +95,6 @@ describe('listAlertTypesRoute', () => {
             "defaultActionGroupId": "default",
             "enabledInLicense": true,
             "hasAlertsMappings": false,
-            "hasFieldsForAAD": false,
             "id": "1",
             "isExportable": true,
             "minimumLicenseRequired": "basic",
@@ -165,7 +163,6 @@ describe('listAlertTypesRoute', () => {
         solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
-        hasFieldsForAAD: false,
         validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
@@ -223,7 +220,6 @@ describe('listAlertTypesRoute', () => {
         solution: 'stack',
         enabledInLicense: true,
         hasAlertsMappings: false,
-        hasFieldsForAAD: false,
         validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];

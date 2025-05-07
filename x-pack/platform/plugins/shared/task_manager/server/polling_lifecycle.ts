@@ -5,50 +5,56 @@
  * 2.0.
  */
 
-import { Subject, Observable, withLatestFrom, BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, withLatestFrom, BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, startWith } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map as mapOptional, none } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
-import { Result, asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
+import type { Result } from './lib/result_type';
+import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
+import type { TaskManagerConfig } from './config';
 import {
-  TaskManagerConfig,
   CLAIM_STRATEGY_UPDATE_BY_QUERY,
   WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS,
 } from './config';
 
-import {
+import type {
   TaskMarkRunning,
   TaskRun,
   TaskClaim,
   TaskRunRequest,
-  asTaskRunRequestEvent,
   TaskPollingCycle,
-  asTaskPollingCycleEvent,
   TaskManagerStat,
-  asTaskManagerStatEvent,
-  EphemeralTaskRejectedDueToCapacity,
   TaskManagerMetric,
+  EphemeralTaskRejectedDueToCapacity,
 } from './task_events';
-import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
-import { Middleware } from './lib/middleware';
+import {
+  asTaskRunRequestEvent,
+  asTaskPollingCycleEvent,
+  asTaskManagerStatEvent,
+} from './task_events';
+import type { TimedFillPoolResult } from './lib/fill_pool';
+import { fillPool, FillPoolResult } from './lib/fill_pool';
+import type { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
-import { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool } from './task_pool';
-import { TaskManagerRunner, TaskRunner } from './task_running';
-import { TaskStore } from './task_store';
+import type { TaskRunner } from './task_running';
+import { TaskManagerRunner } from './task_running';
+import type { TaskStore } from './task_store';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
-import { TaskTypeDictionary } from './task_type_dictionary';
+import type { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
-import { ClaimOwnershipResult } from './task_claimers';
-import { TaskPartitioner } from './lib/task_partitioner';
-import { TaskPoller } from './polling/task_poller';
+import type { ClaimOwnershipResult } from './task_claimers';
+import type { TaskPartitioner } from './lib/task_partitioner';
+import type { TaskPoller } from './polling/task_poller';
 import {
   createCapacityScan,
   createPollIntervalScan,

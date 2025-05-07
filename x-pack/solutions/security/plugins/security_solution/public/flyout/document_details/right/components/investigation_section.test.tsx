@@ -23,11 +23,20 @@ import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useFetchIndex } from '../../../../common/containers/source';
 
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_highlighted_fields');
 jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('../../../../common/containers/source');
+
+const mockAddSuccess = jest.fn();
+jest.mock('../../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: () => ({
+    addSuccess: mockAddSuccess,
+  }),
+}));
 
 const panelContextValue = {
   ...mockContextValue,
@@ -52,6 +61,7 @@ describe('<InvestigationSection />', () => {
     jest.clearAllMocks();
     (useRuleWithFallback as jest.Mock).mockReturnValue({ rule: { note: 'test note' } });
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useFetchIndex as jest.Mock).mockReturnValue([false, { indexPatterns: { fields: ['field'] } }]);
   });
 
   it('should render investigation component', () => {

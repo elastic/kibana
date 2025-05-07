@@ -7,13 +7,14 @@
 
 import { Subject } from 'rxjs';
 
-import { TaskLifecycleEvent } from './polling_lifecycle';
+import type { TaskLifecycleEvent } from './polling_lifecycle';
 import { createInitialMiddleware } from './lib/middleware';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { asErr, asOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
-import { EphemeralTaskLifecycle, EphemeralTaskLifecycleOpts } from './ephemeral_task_lifecycle';
+import type { EphemeralTaskLifecycleOpts } from './ephemeral_task_lifecycle';
+import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { v4 as uuidv4 } from 'uuid';
 import { asTaskPollingCycleEvent, asTaskRunEvent, TaskPersistence } from './task_events';
 import { TaskRunResult } from './task_running';

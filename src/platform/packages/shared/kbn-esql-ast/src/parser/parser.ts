@@ -19,8 +19,32 @@ import { default as ESQLLexer } from '../antlr/esql_lexer';
 import { default as ESQLParser } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 
+/**
+ * Some changes to the grammar deleted the literal names for some tokens.
+ * This is a workaround to restore the literals that were lost.
+ *
+ * See https://github.com/elastic/elasticsearch/pull/124177 for context.
+ */
+const replaceSymbolsWithLiterals = (
+  symbolicNames: Array<string | null>,
+  literalNames: Array<string | null>
+) => {
+  const symbolReplacements: Map<string, string> = new Map([
+    ['LP', '('],
+    ['OPENING_BRACKET', '['],
+  ]);
+
+  for (let i = 0; i < symbolicNames.length; i++) {
+    const name = symbolicNames[i];
+    if (name && symbolReplacements.has(name)) {
+      literalNames[i] = `'${symbolReplacements.get(name)!}'`;
+    }
+  }
+};
+
 export const getLexer = (inputStream: CharStream, errorListener: ErrorListener<any>) => {
   const lexer = new ESQLLexer(inputStream);
+  replaceSymbolsWithLiterals(lexer.symbolicNames, lexer.literalNames);
 
   lexer.removeErrorListeners();
   lexer.addErrorListener(errorListener);
@@ -36,8 +60,7 @@ export const getParser = (
   const lexer = getLexer(inputStream, errorListener);
   const tokens = new CommonTokenStream(lexer);
   const parser = new ESQLParser(tokens);
-
-  // lexer.symbolicNames
+  replaceSymbolsWithLiterals(parser.symbolicNames, parser.literalNames);
 
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
@@ -61,11 +84,6 @@ export const createParser = (src: string) => {
 
   return getParser(CharStreams.fromString(src), errorListener, parseListener);
 };
-
-// These will need to be manually updated whenever the relevant grammar changes.
-const SYNTAX_ERRORS_TO_IGNORE = [
-  `SyntaxError: mismatched input '<EOF>' expecting {'explain', 'from', 'row', 'show'}`,
-];
 
 export interface ParseOptions {
   /**
@@ -115,9 +133,7 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
 
     parser[GRAMMAR_ROOT_RULE]();
 
-    const errors = errorListener.getErrors().filter((error) => {
-      return !SYNTAX_ERRORS_TO_IGNORE.includes(error.message);
-    });
+    const errors = errorListener.getErrors();
     const { ast: commands } = parseListener.getAst();
     const root = Builder.expression.query(commands, {
       location: {
@@ -133,12 +149,9 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
 
     return { root, ast: commands, errors, tokens: tokens.tokens };
   } catch (error) {
-    /**
-     * Parsing should never fail, meaning this branch should never execute. But
-     * if it does fail, we want to log the error message for easier debugging.
-     */
-    // eslint-disable-next-line no-console
-    console.error(error);
+    if (error !== 'Empty Stack')
+      // eslint-disable-next-line no-console
+      console.error(error);
 
     const root = Builder.expression.query();
 
@@ -151,9 +164,7 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
           endLineNumber: 0,
           startColumn: 0,
           endColumn: 0,
-          message:
-            'Parsing internal error: ' +
-            (!!error && typeof error === 'object' ? String(error.message) : String(error)),
+          message: `Invalid query [${text}]`,
           severity: 'error',
         },
       ],

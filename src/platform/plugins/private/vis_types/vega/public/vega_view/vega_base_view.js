@@ -236,6 +236,11 @@ export class VegaBaseView {
 
       return result;
     };
+
+    const vegaSpec = this._parser.isVegaLite ? this._parser.vlspec : this._parser.spec;
+    const usermetaLoaderOptions = vegaSpec.usermeta?.embedOptions?.loader;
+    vegaLoader.options = usermetaLoaderOptions ?? {};
+
     config.loader = vegaLoader;
 
     const vegaLogger = logger(Warn);

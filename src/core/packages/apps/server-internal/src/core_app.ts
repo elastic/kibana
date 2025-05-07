@@ -143,7 +143,17 @@ export class CoreAppsService {
     const resources = coreSetup.httpResources.createRegistrar(router);
 
     router.get(
-      { path: '/', validate: false, options: { access: 'public' } },
+      {
+        path: '/',
+        validate: false,
+        options: { access: 'public' },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is only used for serving the default route.',
+          },
+        },
+      },
       async (context, req, res) => {
         const { uiSettings } = await context.core;
         let defaultRoute = await uiSettings.client.get<string>('defaultRoute', { request: req });

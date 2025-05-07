@@ -56,7 +56,8 @@
       "spaces",
       "telemetry",
       "licenseManagement",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "embeddableEnhanced",
     ],
     "requiredBundles": [
       "data",

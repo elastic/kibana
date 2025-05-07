@@ -14,12 +14,7 @@ import { overviewStatusReducer, OverviewStatusStateReducer } from './overview_st
 import { browserJourneyReducer } from './browser_journey';
 import { defaultAlertingReducer, DefaultAlertingState } from './alert_rules';
 import { manualTestRunsReducer, ManualTestRunsState } from './manual_test_runs';
-import {
-  dynamicSettingsReducer,
-  DynamicSettingsState,
-  settingsReducer,
-  SettingsState,
-} from './settings';
+import { dynamicSettingsReducer, DynamicSettingsState } from './settings';
 import { elasticsearchReducer, QueriesState } from './elasticsearch';
 import { PrivateLocationsState, privateLocationsStateReducer } from './private_locations';
 import { networkEventsReducer, NetworkEventsState } from './network_events';
@@ -51,7 +46,6 @@ export interface SyntheticsAppState {
   overviewStatus: OverviewStatusStateReducer;
   privateLocations: PrivateLocationsState;
   serviceLocations: ServiceLocationsState;
-  settings: SettingsState;
   syntheticsEnablement: SyntheticsEnablementState;
   ui: UiState;
 }
@@ -74,7 +68,6 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   overviewStatus: overviewStatusReducer,
   privateLocations: privateLocationsStateReducer,
   serviceLocations: serviceLocationsReducer,
-  settings: settingsReducer,
   syntheticsEnablement: syntheticsEnablementReducer,
   ui: uiReducer,
 });

@@ -22,6 +22,7 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
           aria-label="mutate"
           className="monPipelineViewer__plugin"
           color="primary"
+          data-test-subj="pluginStatement-filter-mutate-EmptyButton"
           flush="left"
           iconType="dot"
           onClick={[Function]}
@@ -36,6 +37,7 @@ exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
         grow={false}
       >
         <EuiBadge
+          data-test-subj="pluginStatement-filter-mutate-Badge"
           onClick={[Function]}
           onClickAriaLabel="View details"
         >
@@ -94,6 +96,7 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
           aria-label="mutate"
           className="monPipelineViewer__plugin"
           color="primary"
+          data-test-subj="pluginStatement-filter-mutate-EmptyButton"
           flush="left"
           iconType="dot"
           onClick={[Function]}
@@ -108,6 +111,7 @@ exports[`PluginStatement component adds warning highlight for event millis 1`] =
         grow={false}
       >
         <EuiBadge
+          data-test-subj="pluginStatement-filter-mutate-Badge"
           onClick={[Function]}
           onClickAriaLabel="View details"
         >
@@ -166,6 +170,7 @@ exports[`PluginStatement component does not render explicit id field if no id is
           aria-label="stdin"
           className="monPipelineViewer__plugin"
           color="primary"
+          data-test-subj="pluginStatement-input-stdin-EmptyButton"
           flush="left"
           iconType="dot"
           onClick={[Function]}
@@ -216,6 +221,7 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
           aria-label="stdin"
           className="monPipelineViewer__plugin"
           color="primary"
+          data-test-subj="pluginStatement-input-stdin-EmptyButton"
           flush="left"
           iconType="dot"
           onClick={[Function]}
@@ -230,6 +236,7 @@ exports[`PluginStatement component renders input metrics and explicit id fields 
         grow={false}
       >
         <EuiBadge
+          data-test-subj="pluginStatement-input-stdin-Badge"
           onClick={[Function]}
           onClickAriaLabel="View details"
         >
@@ -276,6 +283,7 @@ exports[`PluginStatement component renders processor statement metrics 1`] = `
           aria-label="mutate"
           className="monPipelineViewer__plugin"
           color="primary"
+          data-test-subj="pluginStatement-filter-mutate-EmptyButton"
           flush="left"
           iconType="dot"
           onClick={[Function]}
@@ -290,6 +298,7 @@ exports[`PluginStatement component renders processor statement metrics 1`] = `
         grow={false}
       >
         <EuiBadge
+          data-test-subj="pluginStatement-filter-mutate-Badge"
           onClick={[Function]}
           onClickAriaLabel="View details"
         >

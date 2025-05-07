@@ -11,6 +11,7 @@ import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public'
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
+import { syntheticsAddMonitorLocatorID } from '@kbn/observability-plugin/common';
 import { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon } from '../shared/logo_icon';
 
@@ -24,6 +25,7 @@ export function useCustomCards(
       application,
       http,
       context: { isServerless, isCloud },
+      share,
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
@@ -41,6 +43,7 @@ export function useCustomCards(
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
   const otelApmUrl = isServerless ? `${apmUrl}?agent=openTelemetry` : apmUrl;
+  const syntheticsLocator = share?.url.locators.get(syntheticsAddMonitorLocatorID);
 
   const firehoseQuickstartCard: IntegrationCardItem = {
     id: 'firehose-quick-start',
@@ -283,7 +286,10 @@ export function useCustomCards(
           src: 'logoUptime',
         },
       ],
-      url: getUrlForApp?.('synthetics') ?? '',
+      url:
+        syntheticsLocator?.getRedirectUrl({
+          scope: 'create',
+        }) ?? '',
       version: '',
       integration: '',
     },

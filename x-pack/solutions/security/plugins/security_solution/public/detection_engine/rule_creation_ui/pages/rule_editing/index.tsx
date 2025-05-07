@@ -38,8 +38,8 @@ import { useListsConfig } from '../../../../detections/containers/detection_engi
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import {
-  getRuleDetailsUrl,
   getDetectionEngineUrl,
+  getRuleDetailsUrl,
 } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
@@ -51,22 +51,22 @@ import { StepScheduleRule } from '../../components/step_schedule_rule';
 import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
 import { formatRule } from '../rule_creation/helpers';
 import {
-  getStepsData,
-  redirectToDetections,
   getActionMessageParams,
+  getStepsData,
   MaxWidthEuiFlexItem,
-} from '../../../../detections/pages/detection_engine/rules/helpers';
-import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
-import { RuleStep } from '../../../../detections/pages/detection_engine/rules/types';
+  redirectToDetections,
+} from '../../../common/helpers';
+import * as ruleI18n from '../../../common/translations';
+import type { DefineStepRule } from '../../../common/types';
+import { RuleStep } from '../../../common/types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../app/types';
-import { ruleStepsOrder } from '../../../../detections/pages/detection_engine/rules/utils';
+import { ruleStepsOrder } from '../../../common/utils';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import { APP_UI_ID, DEFAULT_INDEX_KEY } from '../../../../../common/constants';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
+import { useGetSavedQuery } from '../../../common/use_get_saved_query';
 import { extractValidationMessages } from '../../../rule_creation/logic/extract_validation_messages';
 import { VALIDATION_WARNING_CODE_FIELD_NAME_MAP } from '../../../rule_creation/constants/validation_warning_codes';
 import { useRuleForms, useRuleIndexPattern } from '../form';

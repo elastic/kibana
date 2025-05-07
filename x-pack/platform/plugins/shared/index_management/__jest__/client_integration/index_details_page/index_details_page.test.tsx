@@ -78,7 +78,7 @@ describe('<IndexDetailsPage />', () => {
         dependencies: {
           url: {
             locators: {
-              get: () => ({ navigate: jest.fn() }),
+              get: () => ({ navigate: jest.fn(), getUrl: jest.fn() }),
             },
           },
         },
@@ -833,6 +833,8 @@ describe('<IndexDetailsPage />', () => {
                           switch (id) {
                             case INFERENCE_LOCATOR:
                               return mockInferenceManagementLocator;
+                            case 'DISCOVER_APP_LOCATOR':
+                              return createMockLocator('DISCOVER_APP_LOCATOR');
                             default:
                               throw new Error(`Unknown locator id: ${id}`);
                           }

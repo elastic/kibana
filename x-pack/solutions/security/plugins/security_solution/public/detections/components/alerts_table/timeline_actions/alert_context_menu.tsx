@@ -36,6 +36,7 @@ import { useAlertsActions } from './use_alerts_actions';
 import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useAlertExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
+import { TimelineId } from '../../../../../common/types/timeline';
 import type {
   DataViewId,
   IndexPatternArray,
@@ -44,13 +45,14 @@ import type {
   Status,
 } from '../../../../../common/api/detection_engine';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
+import { selectTimelineById } from '../../../../timelines/store/selectors';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertTagsActions } from './use_alert_tags_actions';
 import { useAlertAssigneesActions } from './use_alert_assignees_actions';
-
+import { timelineDefaults } from '../../../../timelines/store/defaults';
 interface AlertContextMenuProps {
   ariaLabel?: string;
   ariaRowindex: number;
@@ -78,11 +80,15 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const onMenuItemClick = useCallback(() => {
     setPopover(false);
   }, []);
-
+  const { activeTab } = useSelector(
+    (state: State) => selectTimelineById(state, TimelineId.active) ?? timelineDefaults
+  );
   const getGlobalQueries = useMemo(() => inputsSelectors.globalQuery(), []);
-  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
+  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelectorFactory(), []);
   const globalQuery = useSelector((state: State) => getGlobalQueries(state));
-  const timelineQuery = useSelector((state: State) => getTimelineQuery(state, scopeId));
+  const timelineQuery = useSelector((state: State) =>
+    getTimelineQuery(state, `${TimelineId.active}-${activeTab}`)
+  );
 
   const getAlertId = () => (ecsRowData?.kibana?.alert ? ecsRowData?._id : null);
   const alertId = getAlertId();

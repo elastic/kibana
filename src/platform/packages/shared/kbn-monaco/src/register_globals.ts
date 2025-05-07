@@ -30,7 +30,6 @@ export const DEFAULT_WORKER_ID = 'default';
 const langSpecificWorkerIds = [
   XJsonLang.ID,
   PainlessLang.ID,
-  ESQLLang.ID,
   monaco.languages.json.jsonDefaults.languageId,
   YAML_LANG_ID,
   ConsoleLang.ID,

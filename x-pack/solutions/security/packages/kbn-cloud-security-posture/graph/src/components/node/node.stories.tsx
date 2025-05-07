@@ -9,7 +9,7 @@ import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
-import { Story } from '@storybook/react';
+import type { StoryFn, StoryObj } from '@storybook/react';
 import { NodeViewModel } from '../types';
 import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
 
@@ -40,7 +40,7 @@ const nodeTypes = {
   label: LabelNode,
 };
 
-const Template: Story<NodeViewModel> = (args: NodeViewModel) => (
+const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
   <ThemeProvider theme={{ darkMode: false }}>
     <ReactFlow
       fitView
@@ -61,13 +61,15 @@ const Template: Story<NodeViewModel> = (args: NodeViewModel) => (
   </ThemeProvider>
 );
 
-export const Node = Template.bind({});
+export const Node: StoryObj<NodeViewModel> = {
+  render: Template,
 
-Node.args = {
-  id: 'siem-windows',
-  label: '',
-  color: 'primary',
-  shape: 'hexagon',
-  icon: 'okta',
-  interactive: true,
+  args: {
+    id: 'siem-windows',
+    label: '',
+    color: 'primary',
+    shape: 'hexagon',
+    icon: 'okta',
+    interactive: true,
+  },
 };

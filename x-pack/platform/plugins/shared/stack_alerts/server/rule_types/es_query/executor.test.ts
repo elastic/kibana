@@ -153,7 +153,6 @@ describe('es_query executor', () => {
         name: 'test-rule-name',
         alertLimit: 1000,
         params: defaultProps,
-        publicBaseUrl: 'https://localhost:5601',
         spacePrefix: '',
         timestamp: undefined,
         services: {
@@ -228,7 +227,6 @@ describe('es_query executor', () => {
           share: undefined,
         },
         spacePrefix: '',
-        publicBaseUrl: 'https://localhost:5601',
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
       });

@@ -39,6 +39,19 @@ export type BuildkiteStep =
   | BuildkiteTriggerStep
   | BuildkiteWaitStep;
 
+export interface BuildkiteAgentQueue {
+  queue: string;
+}
+
+export interface BuildkiteAgentTargetingRule {
+  provider?: string;
+  image?: string;
+  imageProject?: string;
+  machineType?: string;
+  minCpuPlatform?: string;
+  preemptible?: boolean;
+}
+
 export interface BuildkiteCommandStep {
   command: string;
   label: string;
@@ -46,18 +59,7 @@ export interface BuildkiteCommandStep {
   concurrency?: number;
   concurrency_group?: string;
   concurrency_method?: 'eager' | 'ordered';
-  agents:
-    | {
-        queue: string;
-      }
-    | {
-        provider?: string;
-        image?: string;
-        imageProject?: string;
-        machineType?: string;
-        minCpuPlatform?: string;
-        preemptible?: boolean;
-      };
+  agents: BuildkiteAgentQueue | BuildkiteAgentTargetingRule;
   timeout_in_minutes?: number;
   key?: string;
   cancel_on_build_failing?: boolean;
@@ -161,21 +163,23 @@ export interface BuildkiteWaitStep {
 export class BuildkiteClient {
   http: AxiosInstance;
   exec: ExecType;
+  baseUrl: string;
 
   constructor(config: BuildkiteClientConfig = {}) {
-    const BUILDKITE_BASE_URL =
-      config.baseUrl ?? process.env.BUILDKITE_BASE_URL ?? 'https://api.buildkite.com';
     const BUILDKITE_TOKEN = config.token ?? process.env.BUILDKITE_TOKEN;
+
+    this.baseUrl = config.baseUrl ?? process.env.BUILDKITE_BASE_URL ?? 'https://api.buildkite.com';
 
     // const BUILDKITE_AGENT_BASE_URL =
     //   process.env.BUILDKITE_AGENT_BASE_URL || 'https://agent.buildkite.com/v3';
     // const BUILDKITE_AGENT_TOKEN = process.env.BUILDKITE_AGENT_TOKEN;
 
     this.http = axios.create({
-      baseURL: BUILDKITE_BASE_URL,
+      baseURL: this.baseUrl,
       headers: {
         Authorization: `Bearer ${BUILDKITE_TOKEN}`,
       },
+      allowAbsoluteUrls: false,
     });
 
     this.exec = config.exec ?? execSync;
@@ -326,10 +330,10 @@ export class BuildkiteClient {
       const resp = await this.http.get(link);
       link = '';
 
-      artifacts.push(await resp.data);
+      artifacts.push(resp.data);
 
       if (resp.headers.link) {
-        const result = parseLinkHeader(resp.headers.link as string);
+        const result = parseLinkHeader(resp.headers.link as string, this.baseUrl);
         if (result?.next) {
           link = result.next;
         }

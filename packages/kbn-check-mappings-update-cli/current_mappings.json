@@ -1685,6 +1685,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -2068,6 +2072,10 @@
         "type": "keyword"
       },
       "overrides": {
+        "index": false,
+        "type": "flattened"
+      },
+      "required_versions": {
         "index": false,
         "type": "flattened"
       },

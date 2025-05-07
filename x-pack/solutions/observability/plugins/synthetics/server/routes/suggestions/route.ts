@@ -65,15 +65,9 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
       savedObjectsClient,
       server: { logger },
     } = route;
-    const { tags, locations, projects, monitorQueryIds, query } = route.request.query;
+    const { query } = route.request.query;
 
-    const { filtersStr } = await getMonitorFilters({
-      tags,
-      locations,
-      projects,
-      monitorQueryIds,
-      context: route,
-    });
+    const { filtersStr } = await getMonitorFilters(route);
     const { allLocations = [] } = await getAllLocations(route);
     try {
       const data = await savedObjectsClient.find<EncryptedSyntheticsMonitorAttributes>({

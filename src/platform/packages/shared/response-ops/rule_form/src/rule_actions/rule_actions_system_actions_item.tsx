@@ -60,7 +60,7 @@ interface SystemActionAccordionContentProps extends RuleActionsSystemActionsItem
 
 const SystemActionAccordionContent: React.FC<SystemActionAccordionContentProps> = React.memo(
   ({ connector, checkEnabledResult, action, index, producerId, warning, onParamsChange }) => {
-    const { aadTemplateFields } = useRuleFormState();
+    const { alertFields } = useRuleFormState();
     const { euiTheme } = useEuiTheme();
     const plain = useEuiBackgroundColor('plain');
 
@@ -100,7 +100,7 @@ const SystemActionAccordionContent: React.FC<SystemActionAccordionContentProps> 
             connector={connector}
             producerId={producerId}
             warning={warning}
-            templateFields={aadTemplateFields}
+            templateFields={alertFields}
             onParamsChange={onParamsChange}
           />
         </EuiFlexItem>
@@ -128,6 +128,12 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
 
   const subdued = useEuiBackgroundColor('subdued');
   const { euiTheme } = useEuiTheme();
+
+  const ruleActionsSystemActionsItemCss = css`
+    .actCheckActionTypeEnabled__disabledActionWarningCard {
+      background-color: ${subdued};
+    }
+  `;
 
   const dispatch = useRuleFormDispatch();
   const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
@@ -230,6 +236,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
       data-test-subj="ruleActionsSystemActionsItem"
       initialIsOpen
       borders="all"
+      css={ruleActionsSystemActionsItemCss}
       style={{
         backgroundColor: subdued,
         borderRadius: euiTheme.border.radius.medium,

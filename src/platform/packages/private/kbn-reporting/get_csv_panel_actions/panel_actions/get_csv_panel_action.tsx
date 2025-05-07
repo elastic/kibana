@@ -16,7 +16,7 @@ import {
   I18nStart,
   NotificationsSetup,
 } from '@kbn/core/public';
-import { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, type SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import {
   loadSharingDataHelpers,
   SEARCH_EMBEDDABLE_TYPE,
@@ -25,6 +25,7 @@ import {
   HasTimeRange,
 } from '@kbn/discover-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
   apiCanAccessViewMode,
   apiHasType,
@@ -34,16 +35,24 @@ import {
   EmbeddableApiContext,
   getInheritedViewMode,
   HasType,
+  type PublishesSavedObjectId,
   PublishesTitle,
+  type PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
+import {
+  getSearchCsvJobParams,
+  CsvSearchModeParams,
+} from '@kbn/reporting-public/share/shared/get_search_csv_job_params';
 import type { ReportingAPIClient } from '@kbn/reporting-public/reporting_api_client';
+import { LocatorParams } from '@kbn/reporting-common/types';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getI18nStrings } from './strings';
 
 export interface PanelActionDependencies {
@@ -75,9 +84,16 @@ interface Params {
   usesUiCapabilities: boolean;
 }
 
-interface ExecutionParams {
+interface ExecutionParamsOld {
   searchSource: SerializedSearchSourceFields;
   columns: string[] | undefined;
+  title: string;
+  analytics: AnalyticsServiceStart;
+  i18nStart: I18nStart;
+}
+
+interface ExecutionParams {
+  searchModeParams: CsvSearchModeParams;
   title: string;
   analytics: AnalyticsServiceStart;
   i18nStart: I18nStart;
@@ -134,7 +150,16 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   public async getSharingData(savedSearch: SavedSearch) {
     const [{ uiSettings }, { data }] = await firstValueFrom(this.startServices$);
     const { getSharingData } = await loadSharingDataHelpers();
-    return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
+    return await getSharingData(
+      savedSearch.searchSource,
+      savedSearch,
+      { uiSettings, data },
+      this.isEsqlMode(savedSearch)
+    );
+  }
+
+  private isEsqlMode(savedSearch: SavedSearch) {
+    return isOfAggregateQueryType(savedSearch.searchSource.getField('query'));
   }
 
   public isCompatible = async (context: EmbeddableApiContext) => {
@@ -164,7 +189,8 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
    * Requires `xpack.reporting.csv.enablePanelActionDownload: true` in kibana.yml
    * @deprecated
    */
-  private executeDownload = async (params: ExecutionParams) => {
+  private executeDownload = async (params: ExecutionParamsOld) => {
+    // Deprecated and does not support ES|QL mode
     const [startServices] = await firstValueFrom(this.startServices$);
     const { searchSource, columns, title } = params;
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
@@ -223,16 +249,15 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
 
   private executeGenerate = async (params: ExecutionParams) => {
     const [startServices] = await firstValueFrom(this.startServices$);
-    const { searchSource, columns, title } = params;
-    const csvJobParams = this.apiClient.getDecoratedJobParams<JobAppParamsCSV>({
-      searchSource,
-      columns,
+    const { searchModeParams, title } = params;
+    const { reportType, decoratedJobParams } = getSearchCsvJobParams({
+      apiClient: this.apiClient,
+      searchModeParams,
       title,
-      objectType: 'search',
     });
 
     await this.apiClient
-      .createReportingJob('csv_searchsource', csvJobParams)
+      .createReportingJob(reportType, decoratedJobParams)
       .then((job) => {
         if (job) {
           this.notifications.toasts.addSuccess({
@@ -253,6 +278,21 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       });
   };
 
+  private getDiscoverLocatorParamsForEsqlCSV = (
+    api: PublishesSavedSearch & Partial<PublishesSavedObjectId & PublishesUnifiedSearch>,
+    searchSourceFields: SerializedSearchSourceFields,
+    columns: string[]
+  ): DiscoverAppLocatorParams => {
+    const savedObjectId = api.savedObjectId$?.getValue();
+
+    return {
+      ...(savedObjectId ? { savedSearchId: savedObjectId } : {}),
+      query: searchSourceFields.query,
+      filters: searchSourceFields.parent?.filter, // time range filter
+      columns,
+    };
+  };
+
   public execute = async (context: EmbeddableApiContext) => {
     const { embeddable } = context;
 
@@ -267,17 +307,38 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     }
 
     const [{ i18n: i18nStart, analytics }] = await firstValueFrom(this.startServices$);
+
+    const title = embeddable.title$.getValue() ?? '';
+    const executionParamsCommon = { title, i18nStart, analytics };
+
     const { columns, getSearchSource } = await this.getSharingData(savedSearch);
     const searchSource = getSearchSource({
       addGlobalTimeFilter: !embeddable.hasTimeRange(),
       absoluteTime: true,
     });
-    const title = embeddable.title$.getValue() ?? '';
-    const executionParams = { searchSource, columns, title, savedSearch, i18nStart, analytics };
 
     if (this.enablePanelActionDownload) {
+      const executionParams = { searchSource, columns, title, savedSearch, i18nStart, analytics };
       return this.executeDownload(executionParams);
     }
-    return this.executeGenerate(executionParams);
+    if (this.isEsqlMode(savedSearch)) {
+      return this.executeGenerate({
+        ...executionParamsCommon,
+        searchModeParams: {
+          isEsqlMode: true,
+          locatorParams: [
+            {
+              id: DISCOVER_APP_LOCATOR,
+              params: this.getDiscoverLocatorParamsForEsqlCSV(embeddable, searchSource, columns),
+            } as LocatorParams,
+          ],
+        },
+      });
+    }
+
+    return this.executeGenerate({
+      ...executionParamsCommon,
+      searchModeParams: { isEsqlMode: false, searchSource, columns },
+    });
   };
 }

@@ -412,6 +412,7 @@ x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-g
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 x-pack/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
+x-pack/platform/plugins/shared/embeddable_alerts_table @elastic/response-ops
 x-pack/platform/plugins/shared/embeddable_enhanced @elastic/kibana-presentation
 examples/embeddable_examples @elastic/kibana-presentation
 src/platform/plugins/shared/embeddable @elastic/kibana-presentation
@@ -515,6 +516,7 @@ x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/platform/plugins/private/graph @elastic/kibana-visualizations
 examples/grid_example @elastic/kibana-presentation
 src/platform/packages/private/kbn-grid-layout @elastic/kibana-presentation
+src/platform/packages/shared/kbn-grok-ui @elastic/streams-program-team
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 src/platform/packages/shared/kbn-grouping @elastic/response-ops
 src/platform/packages/shared/kbn-guided-onboarding @elastic/appex-sharedux
@@ -541,6 +543,7 @@ x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-manag
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
 src/platform/test/plugin_functional/plugins/index_patterns @elastic/kibana-data-discovery
+x-pack/platform/packages/shared/kbn-inference-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/inference_endpoint @elastic/ml-ui
 x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/response-ops @elastic/appex-ai-infra @elastic/obs-ai-assistant @elastic/security-generative-ai
@@ -566,12 +569,14 @@ src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations
 src/platform/packages/private/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
 x-pack/platform/packages/private/ml/json_schemas @elastic/ml-ui
+x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-knowledge-team
 src/platform/test/health_gateway/plugins/status @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
 src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
 src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
@@ -719,6 +724,7 @@ src/platform/plugins/shared/presentation_util @elastic/kibana-presentation
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
+x-pack/platform/packages/shared/kbn-profiler-cli @elastic/obs-knowledge-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/profiling @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team
@@ -763,6 +769,7 @@ src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/respons
 src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
+src/platform/packages/shared/response-ops/rules-apis @elastic/response-ops
 examples/response_stream @elastic/ml-ui
 src/platform/packages/shared/kbn-rison @elastic/kibana-operations
 x-pack/platform/packages/private/rollup @elastic/kibana-management
@@ -776,6 +783,7 @@ x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/obs-
 x-pack/platform/plugins/private/runtime_fields @elastic/kibana-management
 src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
 x-pack/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
+x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
 x-pack/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
 src/platform/test/plugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
@@ -795,6 +803,7 @@ src/platform/packages/shared/kbn-scout @elastic/appex-qa
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
+x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
 examples/screenshot_mode_example @elastic/appex-sharedux
 src/platform/plugins/shared/screenshot_mode @elastic/appex-sharedux
 x-pack/examples/screenshotting_example @elastic/appex-sharedux
@@ -815,6 +824,7 @@ x-pack/solutions/search/plugins/search_inference_endpoints @elastic/search-kiban
 x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/search-kibana
 x-pack/solutions/search/plugins/search_notebooks @elastic/search-kibana
 x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
+x-pack/solutions/search/plugins/search_query_rules @elastic/search-kibana
 src/platform/packages/shared/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
@@ -1615,8 +1625,10 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /.devcontainer/ @elastic/kibana-operations
 /.eslintrc.js @elastic/kibana-operations
 /.eslintignore @elastic/kibana-operations
+/.ci/.storybook @elastic/kibana-operations
 
 # QA - Appex QA
+.buildkite/scout_ci_config.yml @elastic/appex-qa
 /x-pack/test/.gitignore @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/es/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/oblt/roles.yml @elastic/appex-qa
@@ -1880,7 +1892,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional_gen_ai/inference @elastic/appex-ai-infra
 
 # AppEx Platform Services Security
-//x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
+/x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
 /x-pack/test/api_integration/apis/es  @elastic/kibana-security
 /x-pack/test/api_integration/apis/features  @elastic/kibana-security
 
@@ -2266,6 +2278,8 @@ x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elas
 
 /x-pack/solutions/security/plugins/security_solution/common/api/timeline @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/common/search_strategy/timeline @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/common/timelines @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/common/types/header_actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/common/types/timeline @elastic/security-threat-hunting-investigations
 
 /x-pack/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-threat-hunting-investigations
@@ -2274,36 +2288,35 @@ x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elas
 x-pack/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-threat-hunting-investigations
 x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-threat-hunting-investigations
 
-/x-pack/solutions/security/plugins/security_solution/common/timelines @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/app/home/template_wrapper/timeline @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_resolve_conflict.tsx @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/timeline_action @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/draggables @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/event_details @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/events_tab @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/exit_full_screen @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/components/header_actions @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/markdown_editor @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/common/mock/mock_timeline_control_columns.tsx @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_kpis @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/detections/components/alert_summary @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_info @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/detections/configurations/security_solution_detections @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/detections/pages/detections/alert_summary @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/detections/pages/alerts @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/document_details @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/flyout/network_details @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/shared @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/flyout/rule_details @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/plugins/security_solution/public/investigations @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/notes @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/resolver @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/threat_intelligence @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution/public/timelines @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/header_actions @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/common/types/header_actions @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/flyout/network_details @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/flyout/rule_details @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/investigations @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/detections/configurations/security_solution_detections @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/detections/pages/detection_engine/detection_engine.tsx @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_resolve_conflict.tsx @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/draggables @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/events_tab @elastic/security-threat-hunting-investigations
 /x-pack/solutions/security/plugins/security_solution_serverless/public/upselling/pages/threat_intelligence_paywall.tsx @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/mock/mock_timeline_control_columns.tsx @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/common/components/exit_full_screen @elastic/security-threat-hunting-investigations
-/x-pack/solutions/security/plugins/security_solution/public/app/home/template_wrapper/timeline @elastic/security-threat-hunting-investigations
 
 /x-pack/solutions/security/plugins/security_solution/server/lib/timeline @elastic/security-threat-hunting-investigations
 /x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts @elastic/security-threat-hunting-investigations
@@ -2439,7 +2452,7 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/rules/rule_preview @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/detections/mitre @elastic/security-detection-rule-management
-/x-pack/solutions/security/plugins/security_solution/public/detections/pages/detection_engine/rules @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/public/detection_engine/common @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/rules @elastic/security-detection-rule-management
 /x-pack/solutions/security/plugins/security_solution/public/common/components/toolbar/bulk_actions @elastic/security-detection-rule-management
 
@@ -2473,7 +2486,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_gaps @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/detections/containers/detection_engine/lists @elastic/security-detection-engine
-/x-pack/solutions/security/plugins/security_solution/public/detections/pages/alerts @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/exceptions @elastic/security-detection-engine
 
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detection-engine
@@ -2713,9 +2725,13 @@ docs/settings-gen                             @elastic/platform-docs
 /x-pack/plugins/**/kibana.jsonc @elastic/kibana-core
 /x-pack/platform/plugins/shared/**/kibana.jsonc @elastic/kibana-core
 /x-pack/platform/plugins/private/**/kibana.jsonc @elastic/kibana-core
-/x-pack//solutions/observability/plugins/**/kibana.jsonc @elastic/kibana-core
-/x-pack//solutions/search/plugins/**/kibana.jsonc @elastic/kibana-core
-/x-pack//solutions/security/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/solutions/observability/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/solutions/search/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/solutions/security/plugins/**/kibana.jsonc @elastic/kibana-core
+
+# Plugin manifests for test plugins
+/src/platform/test/**/kibana.jsonc @elastic/appex-qa @elastic/kibana-core
+/x-pack/test/**/kibana.jsonc @elastic/appex-qa @elastic/kibana-core
 
 # Temporary Encrypted Saved Objects (ESO) guarding
 # This additional code-ownership is meant to be a temporary precaution to notify the Kibana platform security team

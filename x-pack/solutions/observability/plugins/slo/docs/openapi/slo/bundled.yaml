@@ -1346,7 +1346,7 @@ components:
           example: Bad Request
         message:
           type: string
-          example: 'Invalid value ''foo'' supplied to: [...]'
+          example: "Invalid value 'foo' supplied to: [...]"
     401_response:
       title: Unauthorized
       type: object

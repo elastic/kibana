@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext as CommonFtrProviderContext } from '../../ftr_provider_context';
-import { Role, User, UserInfo } from './types';
+import type { FtrProviderContext as CommonFtrProviderContext } from '../../ftr_provider_context';
+import type { Role, User, UserInfo } from './types';
 import { obsOnly, secOnly, secOnlyNoDelete, secOnlyRead, users } from './users';
 import { roles } from './roles';
 import { spaces } from './spaces';

@@ -75,12 +75,15 @@ export const runActionTestSuite = ({
   };
 
   beforeAll(async () => {
+    // start ES and get capabilities
     const { esServer: _esServer, client: _client } = await startEs();
     esServer = _esServer;
     client = _client;
     esCapabilities = await getCapabilitiesFromClient(client);
+  });
 
-    // Create test fixture data:
+  beforeAll(async () => {
+    // Create small size test fixture data
     await createIndex({
       client,
       indexName: 'existing_index_with_docs',
@@ -101,11 +104,11 @@ export const runActionTestSuite = ({
       },
     })();
     const docs = [
-      { _source: { title: 'doc 1' } },
-      { _source: { title: 'doc 2' } },
-      { _source: { title: 'doc 3' } },
-      { _source: { title: 'saved object 4', type: 'another_unused_type' } },
-      { _source: { title: 'f-agent-event 5', type: 'f_agent_event' } },
+      { _source: { title: 'doc 1', order: 1 } },
+      { _source: { title: 'doc 2', order: 2 } },
+      { _source: { title: 'doc 3', order: 3 } },
+      { _source: { title: 'saved object 4', type: 'another_unused_type', order: 4 } },
+      { _source: { title: 'f-agent-event 5', type: 'f_agent_event', order: 5 } },
       {
         _source: { title: new Array(1000).fill('a').join(), type: 'large' },
       }, // "large" saved objects
@@ -117,29 +120,6 @@ export const runActionTestSuite = ({
       refresh: 'wait_for',
     })();
 
-    await createIndex({
-      client,
-      indexName: 'existing_index_with_100k_docs',
-      aliases: ['existing_index_with_100k_docs_alias'],
-      esCapabilities,
-      mappings: {
-        dynamic: true,
-        properties: {},
-      },
-    })();
-    const docs10k = new Array(10000).fill({
-      _source: { title: new Array(1000).fill('a').join(), type: 'large' },
-    }) as unknown as SavedObjectsRawDoc[]; // 10k "large" saved objects
-    const operations = docs10k.map((doc) => createBulkIndexOperationTuple(doc));
-
-    for (let i = 0; i < 10; i++) {
-      await bulkOverwriteTransformedDocuments({
-        client,
-        index: 'existing_index_with_100k_docs',
-        operations,
-        refresh: 'wait_for',
-      })();
-    }
     await createIndex({
       client,
       indexName: 'existing_index_2',
@@ -163,6 +143,33 @@ export const runActionTestSuite = ({
       client,
       aliasActions: [{ add: { index: 'existing_index_2', alias: 'existing_index_2_alias' } }],
     })();
+  });
+
+  beforeAll(async () => {
+    // Create large test fixture data (added dynamically to always stay at latest)
+    await createIndex({
+      client,
+      indexName: 'existing_index_with_100k_docs',
+      aliases: ['existing_index_with_100k_docs_alias'],
+      esCapabilities,
+      mappings: {
+        dynamic: true,
+        properties: {},
+      },
+    })();
+    const docs10k = new Array(10000).fill({
+      _source: { title: new Array(1000).fill('a').join(), type: 'large' },
+    }) as unknown as SavedObjectsRawDoc[]; // 10k "large" saved objects
+    const operations = docs10k.map((doc) => createBulkIndexOperationTuple(doc));
+
+    for (let i = 0; i < 10; i++) {
+      await bulkOverwriteTransformedDocuments({
+        client,
+        index: 'existing_index_with_100k_docs',
+        operations,
+        refresh: i === 10 ? 'wait_for' : false,
+      })();
+    }
   });
 
   afterAll(async () => {
@@ -569,14 +576,14 @@ export const runActionTestSuite = ({
         });
         expect.assertions(3);
         await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": Object {
-            "acknowledged": true,
-            "shardsAcknowledged": true,
-          },
-        }
-      `);
+          Object {
+            "_tag": "Right",
+            "right": Object {
+              "acknowledged": true,
+              "shardsAcknowledged": true,
+            },
+          }
+        `);
         const { clone_target_1: cloneTarget1 } = await client.indices.getSettings({
           index: 'clone_target_1',
         });
@@ -628,14 +635,14 @@ export const runActionTestSuite = ({
           // Assert that the promise didn't resolve before the index became green
           expect(indexGreen).toBe(true);
           expect(res).toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Right",
-            "right": Object {
-              "acknowledged": true,
-              "shardsAcknowledged": true,
-            },
-          }
-        `);
+            Object {
+              "_tag": "Right",
+              "right": Object {
+                "acknowledged": true,
+                "shardsAcknowledged": true,
+              },
+            }
+          `);
         });
       });
       it('resolves left with a index_not_green_timeout if clone target already exists but takes longer than the specified timeout before turning green', async () => {
@@ -666,14 +673,14 @@ export const runActionTestSuite = ({
         })();
 
         await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "message": "[index_not_green_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'green'",
-            "type": "index_not_green_timeout",
-          },
-        }
-      `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "message": "[index_not_green_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'green'",
+              "type": "index_not_green_timeout",
+            },
+          }
+        `);
 
         // Now make the index yellow and repeat
 
@@ -695,14 +702,14 @@ export const runActionTestSuite = ({
         })();
 
         await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "message": "[index_not_green_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'green'",
-            "type": "index_not_green_timeout",
-          },
-        }
-      `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "message": "[index_not_green_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'green'",
+              "type": "index_not_green_timeout",
+            },
+          }
+        `);
 
         // Now make the index green and it should succeed
 
@@ -724,14 +731,14 @@ export const runActionTestSuite = ({
         })();
 
         await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": Object {
-            "acknowledged": true,
-            "shardsAcknowledged": true,
-          },
-        }
-      `);
+          Object {
+            "_tag": "Right",
+            "right": Object {
+              "acknowledged": true,
+              "shardsAcknowledged": true,
+            },
+          }
+        `);
       });
       it('resolves left index_not_found_exception if the source index does not exist', async () => {
         expect.assertions(1);
@@ -742,14 +749,14 @@ export const runActionTestSuite = ({
           esCapabilities,
         });
         await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "index": "no_such_index",
-            "type": "index_not_found_exception",
-          },
-        }
-      `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "index": "no_such_index",
+              "type": "index_not_found_exception",
+            },
+          }
+        `);
       });
       it('resolves left cluster_shard_limit_exceeded when the action would exceed the maximum normal open shards', async () => {
         // Set the max shards per node really low so that any new index that's created would exceed the maximum open shards for this cluster
@@ -761,22 +768,19 @@ export const runActionTestSuite = ({
           esCapabilities,
         })();
         await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "cluster_shard_limit_exceeded",
-          },
-        }
-      `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "type": "cluster_shard_limit_exceeded",
+            },
+          }
+        `);
       });
     });
   });
 
-  // Reindex doesn't return any errors on its own, so we have to test
   // together with waitForReindexTask
-  // Flaky: https://github.com/elastic/kibana/issues/166190
-  // Reported here: https://github.com/elastic/kibana/issues/167273
-  describe.skip('reindex & waitForReindexTask', () => {
+  describe('reindex & waitForReindexTask', () => {
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex({
         client,
@@ -928,7 +932,7 @@ export const runActionTestSuite = ({
       `);
     });
     it('resolves right and proceeds to add missing documents if there are some existing docs conflicts', async () => {
-      expect.assertions(2);
+      expect.assertions(4);
       // Simulate a reindex that only adds some of the documents from the
       // source index into the target index
       await createIndex({
@@ -937,13 +941,20 @@ export const runActionTestSuite = ({
         mappings: { properties: {} },
         esCapabilities,
       })();
-      const response = await client.search({ index: 'existing_index_with_docs', size: 1000 });
-      const sourceDocs = (response.hits?.hits as SavedObjectsRawDoc[])
-        .slice(0, 2)
-        .map(({ _id, _source }) => ({
-          _id,
-          _source,
-        }));
+
+      const response = await client.search({
+        index: 'existing_index_with_docs',
+        size: 2,
+        sort: 'order',
+      });
+
+      const sourceDocs = (response.hits?.hits as SavedObjectsRawDoc[]).map(({ _id, _source }) => ({
+        _id,
+        _source,
+      }));
+      expect(sourceDocs[0]._source.title).toEqual('doc 1');
+      expect(sourceDocs[1]._source.title).toEqual('doc 2');
+
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'reindex_target_4',
@@ -1907,14 +1918,14 @@ export const runActionTestSuite = ({
           // Assert that the promise didn't resolve before the index became yellow
           expect(indexYellow).toBe(true);
           expect(err).toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Left",
-            "left": Object {
-              "message": "[index_not_green_timeout] Timeout waiting for the status of the [red_then_yellow_index] index to become 'green'",
-              "type": "index_not_green_timeout",
-            },
-          }
-        `);
+            Object {
+              "_tag": "Left",
+              "left": Object {
+                "message": "[index_not_green_timeout] Timeout waiting for the status of the [red_then_yellow_index] index to become 'green'",
+                "type": "index_not_green_timeout",
+              },
+            }
+          `);
         });
       });
       it('resolves right after waiting for an existing index status to become green', async () => {
@@ -1960,11 +1971,11 @@ export const runActionTestSuite = ({
           // Assert that the promise didn't resolve before the index became green
           expect(indexGreen).toBe(true);
           expect(res).toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Right",
-            "right": "index_already_exists",
-          }
-        `);
+            Object {
+              "_tag": "Right",
+              "right": "index_already_exists",
+            }
+          `);
         });
       });
     });

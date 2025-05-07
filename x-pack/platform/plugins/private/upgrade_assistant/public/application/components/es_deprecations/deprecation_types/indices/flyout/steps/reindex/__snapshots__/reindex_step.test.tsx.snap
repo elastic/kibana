@@ -70,23 +70,28 @@ exports[`ReindexStep renders 1`] = `
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="flexEnd"
       >
-        <EuiButton
-          color="primary"
-          data-test-subj="startReindexingButton"
-          disabled={false}
-          fill={true}
-          isLoading={false}
-          onClick={[MockFunction]}
+        <EuiFlexItem
+          grow={false}
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Start reindexing"
-            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
-          />
-        </EuiButton>
-      </EuiFlexItem>
+          <EuiButton
+            color="primary"
+            data-test-subj="startReindexingButton"
+            disabled={false}
+            fill={true}
+            isLoading={false}
+            onClick={[MockFunction]}
+          >
+            <MemoizedFormattedMessage
+              defaultMessage="Start reindexing"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   </EuiFlyoutFooter>
 </Fragment>
@@ -163,23 +168,28 @@ exports[`ReindexStep renders for frozen indices 1`] = `
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="flexEnd"
       >
-        <EuiButton
-          color="primary"
-          data-test-subj="startReindexingButton"
-          disabled={false}
-          fill={true}
-          isLoading={false}
-          onClick={[MockFunction]}
+        <EuiFlexItem
+          grow={false}
         >
-          <MemoizedFormattedMessage
-            defaultMessage="Start reindexing"
-            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
-          />
-        </EuiButton>
-      </EuiFlexItem>
+          <EuiButton
+            color="primary"
+            data-test-subj="startReindexingButton"
+            disabled={false}
+            fill={true}
+            isLoading={false}
+            onClick={[MockFunction]}
+          >
+            <MemoizedFormattedMessage
+              defaultMessage="Start reindexing"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexButton.runReindexLabel"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   </EuiFlyoutFooter>
 </Fragment>

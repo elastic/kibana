@@ -83,7 +83,8 @@
     "@kbn/core-rendering-browser",
     "@kbn/grid-layout",
     "@kbn/ui-actions-browser",
-    "@kbn/esql-types"
+    "@kbn/esql-types",
+    "@kbn/saved-objects-tagging-plugin"
   ],
   "exclude": ["target/**/*"]
 }

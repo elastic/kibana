@@ -8,7 +8,7 @@
  */
 
 import { ConsoleWorkerProxyService } from './console_worker_proxy';
-import { ParsedRequest } from './types';
+import { ErrorAnnotation, ParsedRequest } from './types';
 import { monaco } from '../monaco_imports';
 
 /*
@@ -28,5 +28,12 @@ export class ConsoleParsedRequestsProvider {
     }
     const parserResult = await this.workerProxyService.getParserResult(this.model.uri);
     return parserResult?.requests ?? [];
+  }
+  public async getErrors(): Promise<ErrorAnnotation[]> {
+    if (!this.model) {
+      return [];
+    }
+    const parserResult = await this.workerProxyService.getParserResult(this.model.uri);
+    return parserResult?.errors ?? [];
   }
 }
