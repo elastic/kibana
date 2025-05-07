@@ -191,6 +191,7 @@ export class PackageInstaller {
         archive: zipArchive,
         esClient: this.esClient,
         log: this.log,
+        elserInferenceId: this.elserInferenceId,
       });
       await this.productDocClient.setInstallationSuccessful(productName, indexName);
 

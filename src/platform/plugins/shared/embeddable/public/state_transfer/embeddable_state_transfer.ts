@@ -133,14 +133,18 @@ export class EmbeddableStateTransfer {
    * A wrapper around the {@link ApplicationStart.navigateToApp} method which navigates to the specified appId
    * with {@link EmbeddablePackageState | embeddable package state}
    */
-  public async navigateToWithEmbeddablePackage(
+  public async navigateToWithEmbeddablePackage<SerializedStateType extends object = object>(
     appId: string,
-    options?: { path?: string; state: EmbeddablePackageState }
+    options?: { path?: string; state: EmbeddablePackageState<SerializedStateType> }
   ): Promise<void> {
     this.isTransferInProgress = true;
-    await this.navigateToWithState<EmbeddablePackageState>(appId, EMBEDDABLE_PACKAGE_STATE_KEY, {
-      ...options,
-    });
+    await this.navigateToWithState<EmbeddablePackageState<SerializedStateType>>(
+      appId,
+      EMBEDDABLE_PACKAGE_STATE_KEY,
+      {
+        ...options,
+      }
+    );
   }
 
   private getIncomingState<IncomingStateType>(

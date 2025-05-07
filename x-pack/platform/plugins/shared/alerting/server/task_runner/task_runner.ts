@@ -593,6 +593,7 @@ export class TaskRunner<
         if (isOk(schedule)) {
           nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
         } else if (taskSchedule) {
+          // rules cannot use rrule for scheduling yet
           nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
         }
 
@@ -828,6 +829,7 @@ export class TaskRunner<
 
     let nextRun: string | null = null;
     if (taskSchedule) {
+      // rules cannot use rrule for scheduling yet
       nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
     }
 

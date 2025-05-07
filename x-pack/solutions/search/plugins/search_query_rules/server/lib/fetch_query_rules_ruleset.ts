@@ -7,13 +7,17 @@
 
 import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { isQueryRulesetExist } from './is_query_ruleset_exist';
 
 export const fetchQueryRulesRuleset = async (
   client: ElasticsearchClient,
   rulesetId: string
-): Promise<QueryRulesQueryRuleset> => {
-  const result = await client.queryRules.getRuleset({
-    ruleset_id: rulesetId,
-  });
-  return result;
+): Promise<QueryRulesQueryRuleset | null> => {
+  if (await isQueryRulesetExist(client, rulesetId)) {
+    const ruleset = await client.queryRules.getRuleset({
+      ruleset_id: rulesetId,
+    });
+    return ruleset;
+  }
+  return null;
 };

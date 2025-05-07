@@ -232,20 +232,38 @@ export function useSetupTechnology({
   };
 }
 
-const isAgentlessSetupDefault = (
+export const isAgentlessSetupDefault = (
   isAgentlessDefault: boolean,
   packageInfo?: PackageInfo,
   integrationToEnable?: string
-) => {
-  if (
-    isAgentlessDefault ||
-    ((packageInfo?.policy_templates ?? []).length > 0 &&
-      ((integrationToEnable &&
-        packageInfo?.policy_templates?.find((p) => p.name === integrationToEnable)?.deployment_modes
-          ?.agentless.is_default) ||
-        packageInfo?.policy_templates?.every((p) => p.deployment_modes?.agentless.is_default)))
-  ) {
+): boolean => {
+  const policyTemplates = packageInfo?.policy_templates ?? [];
+  if (policyTemplates.length === 0) {
+    return false;
+  }
+
+  const hasDefaultAgentlessIntegration =
+    integrationToEnable &&
+    policyTemplates.find((p) => p.name === integrationToEnable)?.deployment_modes?.agentless
+      ?.is_default;
+  if (hasDefaultAgentlessIntegration) {
     return true;
+  }
+
+  const allPolicyTemplatesAreDefaultAgentless = policyTemplates.every(
+    (template) => template.deployment_modes?.agentless?.is_default
+  );
+  if (allPolicyTemplatesAreDefaultAgentless) {
+    return true;
+  }
+
+  if (isAgentlessDefault) {
+    const allPolicyTemplatesHaveAgentlessDefined = policyTemplates.every(
+      (template) => template.deployment_modes?.agentless
+    );
+    if (allPolicyTemplatesHaveAgentlessDefined) {
+      return true;
+    }
   }
 
   return false;
