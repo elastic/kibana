@@ -25,7 +25,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { OpenApiTool } from '../../../utils/open_api_tool/open_api_tool';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import { formatToolName, type Operation } from '../../../utils/open_api_tool/utils';
-import { format, parse as urlParse } from 'url';
+import { format, URL } from 'url';
 
 export const kibanaServerlessOpenApiSpec = path.resolve(
   REPO_ROOT,
@@ -130,7 +130,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
         const nextUrl = {
           host,
           protocol,
-          ...(origin ? pick(urlParse(origin), 'host', 'protocol') : {}),
+          ...(origin ? pick(new URL(origin), 'host', 'protocol') : {}),
           pathname: pathnameFromRequest.replace(
             /\/internal\/elastic_assistant\/actions\/connector\/[^/]+\/_execute/,
             pathname
