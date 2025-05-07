@@ -25,32 +25,33 @@ export const getDeleteUnusedUrlTaskInstance = (interval: Duration): TaskInstance
   schedule: {
     interval: durationToSeconds(interval),
   },
+  scope: ['share'],
 });
 
 export const deleteUnusedUrls = async ({
   savedObjectsRepository,
   unusedUrls,
-  logger,
   namespace,
+  logger,
 }: {
   savedObjectsRepository: ISavedObjectsRepository;
   unusedUrls: SavedObjectsBulkDeleteObject[];
-  logger: Logger;
   namespace: string;
+  logger: Logger;
 }) => {
-  logger.info(`Deleting ${unusedUrls.length} unused URL(s) in namespace: ${namespace}`);
-
   try {
+    logger.info(`Deleting ${unusedUrls.length} unused URL(s) in namespace "${namespace}"`);
+
     await savedObjectsRepository.bulkDelete(unusedUrls, {
       refresh: 'wait_for',
       namespace,
     });
 
     logger.info(
-      `Succesfully deleted ${unusedUrls.length} unused URL(s) in namespace: ${namespace}`
+      `Succesfully deleted ${unusedUrls.length} unused URL(s) in namespace "${namespace}"`
     );
   } catch (e) {
-    logger.error(`Failed to delete unused URL(s): ${e.message}`);
+    throw new Error(`Failed to delete unused URL(s) in namespace "${namespace}": ${e.message}`);
   }
 };
 
@@ -61,12 +62,10 @@ type SavedObjectsBulkDeleteObjectWithNamespace = SavedObjectsBulkDeleteObject & 
 export const fetchAllUnusedUrls = async ({
   savedObjectsRepository,
   filter,
-  logger,
   pitKeepAlive,
 }: {
   savedObjectsRepository: ISavedObjectsRepository;
   filter: string;
-  logger: Logger;
   pitKeepAlive: string;
 }) => {
   const results: SavedObjectsBulkDeleteObjectWithNamespace[] = [];
@@ -104,7 +103,7 @@ export const fetchAllUnusedUrls = async ({
       }
     }
   } catch (e) {
-    logger.error(`Failed to fetch unused URLs: ${e.message}`);
+    throw new Error(`Failed to fetch unused URLs: ${e.message}`);
   } finally {
     await savedObjectsRepository.closePointInTime(pitId);
   }
@@ -115,47 +114,44 @@ export const fetchAllUnusedUrls = async ({
 export const runDeleteUnusedUrlsTask = async ({
   core,
   urlExpirationDuration,
-  logger,
   pitKeepAlive,
+  logger,
 }: {
   core: CoreSetup;
   urlExpirationDuration: Duration;
-  logger: Logger;
   pitKeepAlive: Duration;
+  logger: Logger;
 }) => {
-  try {
-    logger.info('Unused URLs cleanup started');
-    const [coreStart] = await core.getStartServices();
+  logger.info('Unused URLs cleanup started');
 
-    const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
+  const [coreStart] = await core.getStartServices();
 
-    const filter = `url.attributes.accessDate <= now-${durationToSeconds(urlExpirationDuration)}`;
+  const savedObjectsRepository = coreStart.savedObjects.createInternalRepository();
 
-    const unusedUrlsGroupedByNamespace = await fetchAllUnusedUrls({
-      savedObjectsRepository,
-      filter,
-      logger,
-      pitKeepAlive: durationToSeconds(pitKeepAlive),
-    });
+  const filter = `url.attributes.accessDate <= now-${durationToSeconds(urlExpirationDuration)}`;
 
-    if (Object.keys(unusedUrlsGroupedByNamespace).length) {
-      const deletionPromises = Object.entries(unusedUrlsGroupedByNamespace).map(
-        async ([namespace, unusedUrls]) => {
-          logger.info(`Found ${unusedUrls.length} unused URL(s) in namespace: ${namespace}`);
-          await deleteUnusedUrls({
-            savedObjectsRepository,
-            unusedUrls,
-            logger,
-            namespace,
-          });
-        }
-      );
+  const unusedUrlsGroupedByNamespace = await fetchAllUnusedUrls({
+    savedObjectsRepository,
+    filter,
+    pitKeepAlive: durationToSeconds(pitKeepAlive),
+  });
 
-      await Promise.all(deletionPromises);
-    } else {
-      logger.info('No unused URLs found');
-    }
-  } catch (e) {
-    logger.error(`Failed to run: ${e.message}`);
+  if (Object.keys(unusedUrlsGroupedByNamespace).length) {
+    const deletionPromises = Object.entries(unusedUrlsGroupedByNamespace).map(
+      async ([namespace, unusedUrls]) => {
+        logger.info(`Found ${unusedUrls.length} unused URL(s) in namespace "${namespace}"`);
+
+        await deleteUnusedUrls({
+          savedObjectsRepository,
+          unusedUrls,
+          logger,
+          namespace,
+        });
+      }
+    );
+
+    await Promise.all(deletionPromises);
+  } else {
+    logger.info('No unused URLs found');
   }
 };

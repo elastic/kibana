@@ -119,13 +119,14 @@ export class SharePlugin
         [TASK_ID]: {
           title: 'Unused URLs Cleanup',
           description: "Deletes unused saved objects of type 'url'",
+          maxAttempts: 5,
           createTaskRunner: () => ({
             run: async () => {
               runDeleteUnusedUrlsTask({
                 core,
                 urlExpirationDuration: this.config.url_expiration.duration,
-                logger: this.logger,
                 pitKeepAlive: this.config.url_expiration.pit_keep_alive,
+                logger: this.logger,
               });
             },
           }),
