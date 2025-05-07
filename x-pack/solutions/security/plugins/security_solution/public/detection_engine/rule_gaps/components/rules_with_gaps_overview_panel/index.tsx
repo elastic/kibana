@@ -180,19 +180,14 @@ export const RulesWithGapsOverviewPanel = () => {
 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="xs">
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="rule-execution-success-rate-label">
               <EuiText
                 size="xs"
                 css={css`
                   font-weight: ${theme.euiTheme.font.weight.semiBold};
                 `}
               >
-                {i18n.RULE_GAPS_OVERVIEW_EXECUTION_SUCCESS_RATE_LABEL}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" data-test-subj="rule-execution-success-rate-label">
-                {i18n.RULE_GAPS_OVERVIEW_EXECUTION_SUCCESS_RATE_VALUE(executionSuccessRate)}
+                {i18n.RULE_GAPS_OVERVIEW_EXECUTION_SUCCESS_RATE_LABEL(executionSuccessRate)}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>

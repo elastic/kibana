@@ -41,17 +41,10 @@ export const RULE_GAPS_OVERVIEW_PANEL_LAST_7_DAYS_LABEL = i18n.translate(
   }
 );
 
-export const RULE_GAPS_OVERVIEW_EXECUTION_SUCCESS_RATE_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.executionSuccessRateLabel',
-  {
-    defaultMessage: 'Total execution success:',
-  }
-);
-
-export const RULE_GAPS_OVERVIEW_EXECUTION_SUCCESS_RATE_VALUE = (rate: number): string =>
-  i18n.translate('xpack.securitySolution.ruleGapsOverviewPanel.executionSuccessRateValue', {
+export const RULE_GAPS_OVERVIEW_EXECUTION_SUCCESS_RATE_LABEL = (rate: number) =>
+  i18n.translate('xpack.securitySolution.ruleGapsOverviewPanel.executionSuccessRateLabel', {
     values: { rate },
-    defaultMessage: '{rate}%',
+    defaultMessage: 'Total execution success: {rate}%',
   });
 
 export const RULE_GAPS_OVERVIEW_LAST_EXECUTION_STATUS_LABEL = i18n.translate(
