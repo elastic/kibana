@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { spanTraceFields } from '../doc_viewer_span_overview/resources/fields';
@@ -20,21 +20,12 @@ import { FieldConfiguration } from '../resources/get_field_configuration';
 
 export interface TraceProps {
   fields: Record<string, FieldConfiguration>;
-  serviceName: string;
   traceId: string;
-  transactionId?: string;
   displayType: 'span' | 'transaction';
-  displayLimit?: number;
+  docId: string;
 }
 
-export const Trace = ({
-  serviceName,
-  traceId,
-  transactionId,
-  fields,
-  displayType,
-  displayLimit = 5,
-}: TraceProps) => {
+export const Trace = ({ traceId, fields, displayType, docId }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
 
   const {
@@ -47,16 +38,14 @@ export const Trace = ({
     () => ({
       getSerializedStateForChild: () => ({
         rawState: {
-          serviceName,
           traceId,
-          entryTransactionId: transactionId,
           rangeFrom,
           rangeTo,
-          displayLimit,
+          docId,
         },
       }),
     }),
-    [rangeFrom, rangeTo, displayLimit, serviceName, traceId, transactionId]
+    [docId, rangeFrom, rangeTo, traceId]
   );
 
   const fieldRows =
@@ -86,7 +75,7 @@ export const Trace = ({
         <EuiFlexItem>{fieldRows}</EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type="APM_TRACE_WATERFALL_EMBEDDABLE"
         getParentApi={getParentApi}
         hidePanelChrome={true}

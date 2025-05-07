@@ -43,8 +43,7 @@ export function registerLanguageClients(
       shipper: 'language_clients',
       uiInternalPath: integration.exportLanguageUiComponent
         ? integration?.integrationsAppUrl
-        : // Documentation for `main` branches is still published at a `master` URL.
-          integration.docUrlTemplate.replace('{branch}', branch === 'main' ? 'master' : branch),
+        : integration.docUrlTemplate,
       isBeta: false,
       icons,
       categories: ['elastic_stack', 'elasticsearch_sdk'],

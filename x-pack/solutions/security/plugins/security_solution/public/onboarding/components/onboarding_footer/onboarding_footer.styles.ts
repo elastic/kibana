@@ -11,10 +11,18 @@ import { css } from '@emotion/css';
 export const useFooterStyles = () => {
   const { euiTheme } = useEuiTheme();
   return css`
-    padding: ${euiTheme.size.m} ${euiTheme.size.l};
-
     .footerItemTitle {
       font-weight: ${euiTheme.font.weight.semiBold};
+    }
+    .itemPanel {
+      padding: ${euiTheme.base * 0.75}px;
+    }
+
+    .itemIconWrapper {
+      display: inline-block;
+      padding: ${euiTheme.size.s};
+      background-color: ${euiTheme.colors.backgroundLightText};
+      border-radius: ${euiTheme.border.radius.small};
     }
   `;
 };

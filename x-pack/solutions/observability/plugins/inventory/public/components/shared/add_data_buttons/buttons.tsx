@@ -62,7 +62,7 @@ export function AddData({ onClick }: { onClick?: () => void }) {
       onClick={onClick}
       color="primary"
       fill
-      href={onboardingLocator?.getRedirectUrl({ category: '' })}
+      href={onboardingLocator?.getRedirectUrl({})}
     >
       {addDataItem}
     </EuiButton>

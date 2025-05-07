@@ -153,6 +153,15 @@ const SecretsSchema = schema.object(SecretsSchemaProps);
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
+const AttachmentSchemaProps = {
+  content: schema.string(),
+  contentType: schema.maybe(schema.string()),
+  filename: schema.string(),
+  encoding: schema.maybe(schema.string()),
+};
+export const AttachmentSchema = schema.object(AttachmentSchemaProps);
+export type Attachment = TypeOf<typeof AttachmentSchema>;
+
 const ParamsSchemaProps = {
   to: schema.arrayOf(schema.string(), { defaultValue: [] }),
   cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -170,16 +179,7 @@ const ParamsSchemaProps = {
       }),
     }),
   }),
-  attachments: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        content: schema.string(),
-        contentType: schema.maybe(schema.string()),
-        filename: schema.string(),
-        encoding: schema.maybe(schema.string()),
-      })
-    )
-  ),
+  attachments: schema.maybe(schema.arrayOf(AttachmentSchema)),
 };
 
 export const ParamsSchema = schema.object(ParamsSchemaProps);

@@ -10,9 +10,9 @@
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { DashboardStart } from './plugin';
-import { DashboardState } from './dashboard_api/types';
+import { DashboardState } from '../common/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
-import { DashboardPanelState } from '../common';
+import { DashboardPanelState } from '../common/dashboard_container/types';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -74,7 +74,7 @@ export const mockControlGroupApi = {
   timeslice$: new BehaviorSubject(undefined),
   esqlVariables$: new BehaviorSubject(undefined),
   dataViews$: new BehaviorSubject(undefined),
-  unsavedChanges$: new BehaviorSubject(undefined),
+  hasUnsavedChanges$: new BehaviorSubject(false),
 } as unknown as ControlGroupApi;
 
 export function buildMockDashboardApi({

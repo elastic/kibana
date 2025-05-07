@@ -9,6 +9,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
+import { MAX_RUNTIME_FIELD_SIZE } from '.';
 export const getEmptyValue = () => '—';
 
 export const checkIsFlattenResults = (groupByField: string, fields: string[] = []): boolean =>
@@ -82,15 +83,34 @@ export const getNullGroupFilter = (selectedGroup: string): StrictFilter[] => [
   {
     meta: {
       disabled: false,
-      negate: true,
+      negate: false,
       alias: null,
       key: selectedGroup,
-      value: 'exists',
-      type: 'exists',
+      type: FILTERS.CUSTOM,
     },
     query: {
-      exists: {
-        field: selectedGroup,
+      // Matches documents where selectedGroup is missing or array length is greater than 100
+      bool: {
+        should: [
+          {
+            bool: {
+              must_not: {
+                exists: {
+                  field: selectedGroup,
+                },
+              },
+            },
+          },
+          {
+            script: {
+              script: {
+                source: `doc['${selectedGroup}'].size() > ${MAX_RUNTIME_FIELD_SIZE}`,
+                lang: 'painless',
+              },
+            },
+          },
+        ],
+        minimum_should_match: 1,
       },
     },
   },

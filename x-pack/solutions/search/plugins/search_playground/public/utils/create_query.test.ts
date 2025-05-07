@@ -982,7 +982,7 @@ describe('create_query', () => {
           semantic_fields: [],
         },
       };
-      expect(getIndicesWithNoSourceFields(fieldDescriptors)).toBe('empty_index');
+      expect(getIndicesWithNoSourceFields(fieldDescriptors)).toEqual(['empty_index']);
     });
   });
 });

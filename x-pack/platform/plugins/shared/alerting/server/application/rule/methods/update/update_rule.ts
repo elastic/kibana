@@ -306,6 +306,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   let updatedRule = { ...originalRule };
 
   const allActions = [...updateRuleData.actions, ...(updateRuleData.systemActions ?? [])];
+  const artifacts = updateRuleData.artifacts ?? {};
   const ruleType = context.ruleTypeRegistry.get(updatedRule.alertTypeId);
 
   // Extract saved object references for this rule
@@ -313,11 +314,13 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     references: extractedReferences,
     params: updatedParams,
     actions: actionsWithRefs,
+    artifacts: artifactsWithRefs,
   } = await extractReferences(
     context,
     ruleType,
     allActions as NormalizedAlertActionWithGeneratedValues[],
-    validatedRuleTypeParams
+    validatedRuleTypeParams,
+    artifacts
   );
 
   // Increment revision if applicable field has changed
@@ -360,7 +363,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
 
   const updatedRuleAttributes = updateMetaAttributes(context, {
     ...updatedRule,
-    ...omit(updateRuleData, 'actions', 'systemActions'),
+    ...omit(updateRuleData, 'actions', 'systemActions', 'artifacts'),
     ...apiKeyAttributes,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
@@ -368,6 +371,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     revision,
     updatedBy: username,
     updatedAt: new Date().toISOString(),
+    artifacts: artifactsWithRefs,
   });
 
   const mappedParams = getMappedParams(updatedParams);

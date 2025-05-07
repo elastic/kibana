@@ -26,6 +26,7 @@ import type {
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmailGraphApi } from './send_email_graph_api';
+import type { Attachment } from '.';
 
 // an email "service" which doesn't actually send, just returns what it would send
 export const JSON_TRANSPORT_SERVICE = '__json';

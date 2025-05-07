@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiCard } from '@elastic/eui';
+import { EuiBadge, EuiCard, useEuiTheme } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { useLink } from '@kbn/fleet-plugin/public';
@@ -40,6 +40,9 @@ export interface IntegrationCardProps {
  */
 export const IntegrationCard = memo(
   ({ integration, 'data-test-subj': dataTestSubj }: IntegrationCardProps) => {
+    const { euiTheme } = useEuiTheme();
+    const iconStyle = useMemo(() => ({ marginInlineEnd: euiTheme.size.base }), [euiTheme]);
+
     const {
       services: { application },
     } = useKibana();
@@ -66,7 +69,13 @@ export const IntegrationCard = memo(
         display="plain"
         hasBorder
         icon={
-          <IntegrationIcon data-test-subj={dataTestSubj} iconSize="xl" integration={integration} />
+          <div style={iconStyle}>
+            <IntegrationIcon
+              data-test-subj={dataTestSubj}
+              iconSize="xl"
+              integration={integration}
+            />
+          </div>
         }
         layout="horizontal"
         onClick={onClick}

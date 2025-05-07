@@ -17,6 +17,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 
+import { useStartServices } from '../../../../../../../hooks';
 import { SetupTechnology } from '../../../../../types';
 
 export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
@@ -34,6 +35,8 @@ export const SetupTechnologySelector = ({
   onSetupTechnologyChange: (value: SetupTechnology) => void;
   isAgentlessDefault: boolean;
 }) => {
+  const { docLinks } = useStartServices();
+
   return (
     <EuiDescribedFormGroup
       title={
@@ -76,7 +79,9 @@ export const SetupTechnologySelector = ({
                     </EuiBadge>
                   ) : (
                     <EuiBetaBadge
-                      label="Beta"
+                      href={docLinks.links.fleet.agentlessIntegrations}
+                      target="_blank"
+                      label={'Beta'}
                       size="s"
                       tooltipContent="This module is not yet GA. Please help us by reporting any bugs."
                       alignment="middle"

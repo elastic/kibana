@@ -10,7 +10,7 @@ import moment from 'moment';
 
 import { APPROXIMATE_TIME_REMAINING, ABOVE_THE_AVERAGE_TIME } from '../translations';
 
-export const MAX_SECONDS_BADGE_WIDTH = 64; // px
+export const MAX_SECONDS_BADGE_WIDTH = 128; // px
 
 export const getAverageIntervalSeconds = (intervals: GenerationInterval[]) => {
   const intervalSeconds = intervals.map((interval) => interval.durationMs / 1000);
