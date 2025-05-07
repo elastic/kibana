@@ -147,9 +147,12 @@ module.exports = (_, argv) => {
         '@elastic/eui$': useEuiAmsterdamRelease
           ? '@elastic/eui-amsterdam/optimize/es'
           : '@elastic/eui/optimize/es',
-        '@elastic/eui/optimize/es/*': useEuiAmsterdamRelease
-          ? '@elastic/eui-amsterdam/optimize/es/*'
-          : '@elastic/eui/optimize/es/*',
+        '@elastic/eui/optimize/es/components/provider/nested$': useEuiAmsterdamRelease
+          ? '@elastic/eui-amsterdam/optimize/es/components/provider/nested'
+          : '@elastic/eui/optimize/es/components/provider/nested',
+        '@elastic/eui/optimize/es/services/theme/warning$': useEuiAmsterdamRelease
+          ? '@elastic/eui-amsterdam/optimize/es/services/theme/warning'
+          : '@elastic/eui/optimize/es/services/theme/warning',
         moment: MOMENT_SRC,
         // NOTE: Used to include react profiling on bundles
         // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
