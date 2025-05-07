@@ -76,16 +76,16 @@ describe('Global HTTP API options', () => {
   });
 
   it('filters plain objects, using comma separated string inputs', async () => {
-    const { body: result2 } = await supertest(server.listener)
+    const { body: result } = await supertest(server.listener)
       .post('/echo')
       .query({ filter_path: 'foo,bar.baz' })
       .expect(200)
       .send({ foo: true, bar: { baz: 1 }, doNotReturn: 1 });
-    expect(result2).toEqual({ foo: true, bar: { baz: 1 } });
+    expect(result).toEqual({ foo: true, bar: { baz: 1 } });
   });
 
   it('filters plain objects, excluding elements from arrays that do not match', async () => {
-    const { body: result3 } = await supertest(server.listener)
+    const { body: result } = await supertest(server.listener)
       .post('/echo')
       .query({ filter_path: 'foo,bar.baz' })
       .expect(200)
@@ -94,16 +94,16 @@ describe('Global HTTP API options', () => {
         bar: [{ baz: 1 }, { baz: 2 }, { zab: 0 /* Will also be ignored */ }],
         doNotReturn: 1,
       });
-    expect(result3).toEqual({ foo: true, bar: [{ baz: 1 }, { baz: 2 }] });
+    expect(result).toEqual({ foo: true, bar: [{ baz: 1 }, { baz: 2 }] });
   });
 
   it('filters plain arrays', async () => {
-    const { body: result4 } = await supertest(server.listener)
+    const { body: result } = await supertest(server.listener)
       .post('/echo')
       .query({ filter_path: ['test.foo'] })
       .expect(200)
       .send([{ test: 1 }, { test: 2 }, { test: { foo: 1 } }]);
-    expect(result4).toEqual([{ test: { foo: 1 } }]);
+    expect(result).toEqual([{ test: { foo: 1 } }]);
   });
 
   it('ignores non plain object responses', async () => {
