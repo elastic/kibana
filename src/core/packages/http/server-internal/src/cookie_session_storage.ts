@@ -40,10 +40,22 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
         return session[0] as T;
       }
 
-      // Otherwise, we have more than one and won't be authing the user because we don't
-      // know which session identifies the actual user. There's potential to change this behavior
-      // to ensure all valid sessions identify the same user, or choose one valid one, but this
-      // is the safest option.
+      // If we have more than one session, we need to check if they are all the same
+      // If they are all the same, we can return the first one
+      if (session.length > 1) {
+        const [firstSession] = session;
+        const allEqual = session.every((s) => {
+          return JSON.stringify(s) === JSON.stringify(firstSession);
+        });
+        if (allEqual) {
+          return firstSession as T;
+        }
+      }
+
+      // Otherwise, we have more than one session that are not the same as each other
+      // and won't be authing the user because we don't know which session identifies
+      // the actual user. There's potential to change this behavior to ensure all valid sessions
+      // identify the same user, or choose one valid one, but this is the safest option.
       this.log.warn(`Found ${session.length} auth sessions when we were only expecting 1.`);
       return null;
     } catch (error) {
