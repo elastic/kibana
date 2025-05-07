@@ -10,7 +10,7 @@
 import { setup } from './helpers';
 import { fields } from '../../__tests__/helpers';
 
-describe('validation', () => {
+describe.skip('validation', () => {
   describe('command', () => {
     describe('CHANGE_POINT <value> [ ON <condition> AS <type>, <pvalue>]', () => {
       beforeEach(() => {

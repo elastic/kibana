@@ -22,6 +22,7 @@ import {
 import {
   ESQLIdentifier,
   ESQLInlineCast,
+  ESQLLocation,
   ESQLParamLiteral,
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
@@ -47,7 +48,11 @@ import {
   FunctionDefinitionTypes,
   getLocationFromCommandOrOptionName,
 } from '../definitions/types';
-import type { ESQLRealField, ESQLUserDefinedColumn, ReferenceMaps } from '../validation/types';
+import type {
+  ESQLFieldWithMetadata,
+  ESQLUserDefinedColumn,
+  ReferenceMaps,
+} from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
 import type { ReasonTypes, ESQLCallbacks } from './types';
 import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
@@ -103,6 +108,9 @@ export function isAssignmentComplete(node: ESQLFunction | undefined) {
 export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
+
+export const within = (position: number, location: ESQLLocation | undefined) =>
+  Boolean(location && location.min <= position && location.max >= position);
 
 function isMathFunction(query: string) {
   const queryTrimmed = query.trimEnd();
@@ -255,7 +263,7 @@ function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQ
 export function getColumnForASTNode(
   node: ESQLColumn | ESQLIdentifier,
   { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
-): ESQLRealField | ESQLUserDefinedColumn | undefined {
+): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
   const formatted = node.type === 'identifier' ? node.name : node.parts.join('.');
   return getColumnByName(formatted, { fields, userDefinedColumns });
 }
@@ -278,7 +286,7 @@ export function unescapeColumnName(columnName: string) {
 export function getColumnByName(
   columnName: string,
   { fields, userDefinedColumns }: Pick<ReferenceMaps, 'fields' | 'userDefinedColumns'>
-): ESQLRealField | ESQLUserDefinedColumn | undefined {
+): ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined {
   const unescaped = unescapeColumnName(columnName);
   return fields.get(unescaped) || userDefinedColumns.get(unescaped)?.[0];
 }
@@ -545,7 +553,7 @@ export function hasWildcard(name: string) {
   return /\*/.test(name);
 }
 export function isUserDefinedColumn(
-  column: ESQLRealField | ESQLUserDefinedColumn | undefined
+  column: ESQLFieldWithMetadata | ESQLUserDefinedColumn | undefined
 ): column is ESQLUserDefinedColumn {
   return Boolean(column && 'location' in column);
 }
@@ -809,7 +817,7 @@ export function getParamAtPosition(
  */
 export function getExpressionType(
   root: ESQLAstItem | undefined,
-  fields?: Map<string, ESQLRealField>,
+  fields?: Map<string, ESQLFieldWithMetadata>,
   userDefinedColumns?: Map<string, ESQLUserDefinedColumn[]>
 ): SupportedDataType | 'unknown' {
   if (!root) {
@@ -929,16 +937,16 @@ export function getExpressionType(
   return 'unknown';
 }
 
-export function transformMapToRealFields(
+export function transformMapToESQLFields(
   inputMap: Map<string, ESQLUserDefinedColumn[]>
-): ESQLRealField[] {
-  const realFields: ESQLRealField[] = [];
+): ESQLFieldWithMetadata[] {
+  const esqlFields: ESQLFieldWithMetadata[] = [];
 
   for (const [, userDefinedColumns] of inputMap) {
     for (const userDefinedColumn of userDefinedColumns) {
       // Only include userDefinedColumns that have a known type
       if (userDefinedColumn.type) {
-        realFields.push({
+        esqlFields.push({
           name: userDefinedColumn.name,
           type: userDefinedColumn.type as FieldType,
         });
@@ -946,7 +954,7 @@ export function transformMapToRealFields(
     }
   }
 
-  return realFields;
+  return esqlFields;
 }
 
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
@@ -978,9 +986,9 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
 export async function getCurrentQueryAvailableFields(
   query: string,
   commands: ESQLAstCommand[],
-  previousPipeFields: ESQLRealField[]
+  previousPipeFields: ESQLFieldWithMetadata[]
 ) {
-  const cacheCopy = new Map<string, ESQLRealField>();
+  const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
   previousPipeFields?.forEach((field) => cacheCopy.set(field.name, field));
   const lastCommand = commands[commands.length - 1];
   const commandDef = getCommandDefinition(lastCommand.name);
@@ -988,7 +996,7 @@ export async function getCurrentQueryAvailableFields(
   // If the command has a fieldsSuggestionsAfter function, use it to get the fields
   if (commandDef.fieldsSuggestionsAfter) {
     const userDefinedColumns = collectUserDefinedColumns([lastCommand], cacheCopy, query);
-    const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
+    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
       userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
     );
 
@@ -1000,7 +1008,7 @@ export async function getCurrentQueryAvailableFields(
   } else {
     // If the command doesn't have a fieldsSuggestionsAfter function, use the default behavior
     const userDefinedColumns = collectUserDefinedColumns(commands, cacheCopy, query);
-    const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
+    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
       userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
     );
     const allFields = uniqBy([...(previousPipeFields ?? []), ...arrayOfUserDefinedColumns], 'name');

@@ -6,47 +6,28 @@
  */
 
 import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { History } from 'history';
-import React, { useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo, useState } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import {
-  VerticalLinesContainer,
   TimelineAxisContainer,
+  VerticalLinesContainer,
 } from '../../../../../shared/charts/timeline';
-import { fromQuery, toQuery } from '../../../../../shared/links/url_helpers';
 import { getAgentMarks } from '../marks/get_agent_marks';
 import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
-import { WaterfallFlyout } from './waterfall_flyout';
-import type { IWaterfall, IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
+import type {
+  IWaterfall,
+  IWaterfallSpanOrTransaction,
+} from './waterfall_helpers/waterfall_helpers';
 
-const Container = euiStyled.div`
+const Container = styled.div`
   transition: 0.1s padding ease;
   position: relative;
 `;
-
-const toggleFlyout = ({
-  history,
-  item,
-  flyoutDetailTab,
-}: {
-  history: History;
-  item?: IWaterfallItem;
-  flyoutDetailTab?: string;
-}) => {
-  history.replace({
-    ...history.location,
-    search: fromQuery({
-      ...toQuery(location.search),
-      flyoutDetailTab,
-      waterfallItemId: item?.id,
-    }),
-  });
-};
 
 const WaterfallItemsContainer = euiStyled.div`
   border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorMediumShade};
@@ -56,6 +37,9 @@ interface Props {
   waterfallItemId?: string;
   waterfall: IWaterfall;
   showCriticalPath: boolean;
+  onNodeClick?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
+  displayLimit?: number;
+  isEmbeddable?: boolean;
 }
 
 function getWaterfallMaxLevel(waterfall: IWaterfall) {
@@ -88,8 +72,14 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
 
 const MAX_DEPTH_OPEN_LIMIT = 2;
 
-export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Props) {
-  const history = useHistory();
+export function Waterfall({
+  waterfall,
+  waterfallItemId,
+  showCriticalPath,
+  onNodeClick,
+  displayLimit,
+  isEmbeddable,
+}: Props) {
   const theme = useTheme();
   const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
@@ -182,22 +172,16 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
             duration={duration}
             waterfall={waterfall}
             timelineMargins={timelineMargins}
-            onClickWaterfallItem={(item: IWaterfallItem, flyoutDetailTab: string) =>
-              toggleFlyout({ history, item, flyoutDetailTab })
-            }
+            onClickWaterfallItem={onNodeClick}
             showCriticalPath={showCriticalPath}
             maxLevelOpen={
               waterfall.traceDocsTotal > 500 ? MAX_DEPTH_OPEN_LIMIT : waterfall.traceDocsTotal
             }
+            displayLimit={displayLimit}
+            isEmbeddable={isEmbeddable}
           />
         )}
       </WaterfallItemsContainer>
-
-      <WaterfallFlyout
-        waterfallItemId={waterfallItemId}
-        waterfall={waterfall}
-        toggleFlyout={toggleFlyout}
-      />
     </Container>
   );
 }

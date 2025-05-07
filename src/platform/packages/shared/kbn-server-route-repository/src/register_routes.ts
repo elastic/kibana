@@ -126,6 +126,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
             attributes: {
               data: {},
             },
+          } as {
+            message: string | undefined;
+            attributes: {
+              data: unknown;
+              caused_by?: Array<{ message: string | undefined }>;
+            };
           },
         };
 
@@ -136,6 +142,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         if (isBoom(error)) {
           opts.statusCode = error.output.statusCode;
           opts.body.attributes.data = error?.data;
+        }
+
+        if (error instanceof AggregateError) {
+          opts.body.attributes.caused_by = error.errors.map((innerError) => {
+            return { message: innerError.message };
+          });
         }
 
         if (opts.statusCode >= 500) {
