@@ -1583,6 +1583,7 @@
     "@kbn/test-suites-xpack-observability": "link:x-pack/solutions/observability/test",
     "@kbn/test-suites-xpack-performance": "link:x-pack/performance",
     "@kbn/test-suites-xpack-platform": "link:x-pack/platform/test",
+    "@kbn/test-suites-xpack-security": "link:x-pack/solutions/security/test",
     "@kbn/tooling-log": "link:src/platform/packages/shared/kbn-tooling-log",
     "@kbn/ts-projects": "link:packages/kbn-ts-projects",
     "@kbn/ts-type-check-cli": "link:packages/kbn-ts-type-check-cli",

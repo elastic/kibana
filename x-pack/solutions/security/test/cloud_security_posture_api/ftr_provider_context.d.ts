@@ -7,6 +7,6 @@
 
 import { GenericFtrProviderContext } from '@kbn/test';
 
-import { services } from '../api_integration/services';
+import { services } from '@kbn/test-suites-xpack-platform/api_integration/services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

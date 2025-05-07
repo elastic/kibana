@@ -1,0 +1,43 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "node",
+      "cheerio",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
+      "@kbn/ambient-ftr-types"
+    ],
+    "resolveJsonModule": true,
+  },
+  "include": [
+    "**/*",
+    "../../../../typings/**/*",
+    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+  ],
+  "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
+  "kbn_references": [
+    "@kbn/test",
+    "@kbn/expect",
+    "@kbn/core-http-common",
+    "@kbn/scout-info",
+    "@kbn/security-plugin",
+    "@kbn/ftr-common-functional-services",
+    "@kbn/ml-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/logs-shared-plugin",
+    "@kbn/infra-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/server-route-repository",
+    "@kbn/test-suites-xpack-platform",
+    "@kbn/tooling-log",
+    "@kbn/rule-data-utils",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/rule-registry-plugin",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/observability-plugin",
+    "@kbn/utility-types",
+    "@kbn/std",
+  ]
+}

@@ -7664,6 +7664,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-suites-xpack-security@link:x-pack/solutions/security/test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-suites-xpack@link:x-pack/test":
   version "0.0.0"
   uid ""
