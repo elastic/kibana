@@ -73,11 +73,11 @@ export class TutorialsRegistry {
   private tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
   private staticAssets!: IStaticAssets;
+  private readonly isServerless: boolean;
 
-  constructor(
-    private readonly initContext: PluginInitializerContext,
-    private readonly isServerless = false
-  ) {}
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
+  }
 
   public setup(core: CoreSetup, customIntegrations?: CustomIntegrationsPluginSetup) {
     this.staticAssets = core.http.staticAssets;
