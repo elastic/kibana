@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, solutionNavigation, indexManagement, console } = getPageObjects([
+  const { common, solutionNavigation, console } = getPageObjects([
     'common',
-    'indexManagement',
     'solutionNavigation',
     'console',
   ]);
@@ -155,7 +155,7 @@ export default function searchSolutionNavigation({
         for (const breadcrumb of testCase.breadcrumbs) {
           await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
         }
-        if (testCase.extraCheck !== undefined) {
+        if (testCase.extraChecks !== undefined) {
           for (const check of testCase.extraChecks) {
             await check();
           }

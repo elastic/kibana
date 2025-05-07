@@ -11,11 +11,7 @@ export default function searchSolutionNavigation({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
-  const { common, searchClassicNavigation, indexManagement } = getPageObjects([
-    'common',
-    'searchClassicNavigation',
-    'indexManagement',
-  ]);
+  const { common, searchClassicNavigation } = getPageObjects(['common', 'searchClassicNavigation']);
   const spaces = getService('spaces');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
