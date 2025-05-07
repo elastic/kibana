@@ -130,6 +130,9 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
         {
           data_output_id: correctOutputId,
           fleet_server_host_id: correctFleetServerId,
+        },
+        {
+          force: true,
         }
       );
     },

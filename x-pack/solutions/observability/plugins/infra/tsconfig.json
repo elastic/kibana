@@ -122,6 +122,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/deeplinks-analytics",
     "@kbn/core-chrome-browser",
+    "@kbn/presentation-containers",
     "@kbn/object-utils"
   ],
   "exclude": ["target/**/*"]
