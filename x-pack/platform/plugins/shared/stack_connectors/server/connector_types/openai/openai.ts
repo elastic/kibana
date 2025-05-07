@@ -227,6 +227,25 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       try {
         const sanitizedBody = JSON.parse(body);
         const axiosOptions = getAxiosOptions(this.provider, this.key, false);
+        const { cert, key } = getKeyAndCert({
+          certificateFile: (this.config as Config & { certificateFile?: string | string[] }).certificateFile,
+          certificateData: (this.config as Config & { certificateData?: string }).certificateData,
+          privateKeyFile: (this.config as Config & { privateKeyFile?: string | string[] }).privateKeyFile,
+          privateKeyData: (this.config as Config & { privateKeyData?: string }).privateKeyData,
+          logger: this.logger,
+        });
+
+        const httpsAgent = new https.Agent({
+          cert,
+          key,
+          rejectUnauthorized: (this.config as Config & { verificationMode?: 'full' | 'certificate' | 'none' }).verificationMode === 'none',
+          checkServerIdentity:
+            (this.config as Config & { verificationMode?: 'full' | 'certificate' | 'none' }).verificationMode === 'certificate' ||
+            (this.config as Config & { verificationMode?: 'full' | 'certificate' | 'none' }).verificationMode === 'none'
+              ? () => undefined
+              : undefined,
+        });
+
         const response = await this.request(
           {
             url: this.url,
@@ -241,6 +260,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             signal,
             timeout: timeout ?? DEFAULT_TIMEOUT_MS,
             ...axiosOptions,
+            httpsAgent,
             headers: {
               ...this.headers,
               ...axiosOptions.headers,
@@ -296,6 +316,25 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       try {
         const sanitizedBody = JSON.parse(body);
         const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
+        const { cert, key } = getKeyAndCert({
+          certificateFile: (this.config as Config & { certificateFile?: string | string[] }).certificateFile,
+          certificateData: (this.config as Config & { certificateData?: string }).certificateData,
+          privateKeyFile: (this.config as Config & { privateKeyFile?: string | string[] }).privateKeyFile,
+          privateKeyData: (this.config as Config & { privateKeyData?: string }).privateKeyData,
+          logger: this.logger,
+        });
+
+        const httpsAgent = new https.Agent({
+          cert,
+          key,
+          rejectUnauthorized: (this.config as Config & { verificationMode?: 'full' | 'certificate' | 'none' }).verificationMode === 'none',
+          checkServerIdentity:
+            (this.config as Config & { verificationMode?: 'full' | 'certificate' | 'none' }).verificationMode === 'certificate' ||
+            (this.config as Config & { verificationMode?: 'full' | 'certificate' | 'none' }).verificationMode === 'none'
+              ? () => undefined
+              : undefined,
+        });
+
         const response = await this.request(
           {
             url: this.url,
@@ -311,6 +350,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
             signal,
             timeout: timeout ?? DEFAULT_TIMEOUT_MS,
             ...axiosOptions,
+            httpsAgent,
             headers: {
               ...this.headers,
               ...axiosOptions.headers,
