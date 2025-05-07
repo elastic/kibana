@@ -9,8 +9,6 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { matchers } from '@emotion/jest';
-expect.extend(matchers);
 
 import { ToolbarPopover } from './popover';
 

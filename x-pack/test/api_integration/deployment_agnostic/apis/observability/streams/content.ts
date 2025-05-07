@@ -100,6 +100,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               processing: [],
               wired: { fields: {}, routing: [] },

@@ -29,6 +29,6 @@ export const onboardingConfig: TopicConfig[] = [
     }),
     body: siemMigrationsBodyConfig,
     disabledExperimentalFlagRequired: 'siemMigrationsDisabled',
-    capabilitiesRequired: `${SECURITY_FEATURE_ID}.advancedInsights`,
+    capabilitiesRequired: `${SECURITY_FEATURE_ID}.detections`,
   },
 ];

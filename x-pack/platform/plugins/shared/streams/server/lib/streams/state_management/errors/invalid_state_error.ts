@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { StatusError } from '../../errors/status_error';
+import { AggregateStatusError } from '../../errors/aggregate_status_error';
 
-export class InvalidStateError extends StatusError {
-  constructor(message: string) {
-    super(message, 400);
+export class InvalidStateError extends AggregateStatusError {
+  constructor(errors: Error[], message: string) {
+    super(errors, message, 400);
     this.name = 'InvalidStateError';
   }
 }

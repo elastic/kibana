@@ -5,120 +5,18 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
-import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
-import { ToolingLog } from '@kbn/tooling-log';
-import { RetryService } from '@kbn/ftr-common-functional-services';
 import {
   Instruction,
+  KnowledgeBaseEntry,
   KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
+import expect from '@kbn/expect';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
-import { MachineLearningProvider } from '../../../../../services/ml';
-import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 import { setAdvancedSettings } from './advanced_settings';
-
-export const TINY_ELSER = {
-  ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
-  id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
-};
-
-export async function importTinyElserModel(ml: ReturnType<typeof MachineLearningProvider>) {
-  const config = {
-    ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
-    input: {
-      field_names: ['text_field'],
-    },
-  };
-  // necessary for MKI, check indices before importing model.  compatible with stateful
-  await ml.api.assureMlStatsIndexExists();
-  await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
-}
-
-export async function setupKnowledgeBase(
-  getService: DeploymentAgnosticFtrProviderContext['getService'],
-  {
-    deployModel: deployModel = true,
-  }: {
-    deployModel?: boolean;
-  } = {}
-) {
-  const log = getService('log');
-  const ml = getService('ml');
-  const retry = getService('retry');
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-
-  if (deployModel) {
-    await importTinyElserModel(ml);
-  }
-
-  const { status, body } = await observabilityAIAssistantAPIClient.admin({
-    endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-    params: {
-      query: {
-        model_id: TINY_ELSER.id,
-      },
-    },
-  });
-
-  if (deployModel) {
-    await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
-  }
-
-  return { status, body };
-}
-
-export async function waitForKnowledgeBaseReady({
-  observabilityAIAssistantAPIClient,
-  log,
-  retry,
-}: {
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
-  log: ToolingLog;
-  retry: RetryService;
-}) {
-  await retry.tryForTime(5 * 60 * 1000, async () => {
-    log.debug(`Waiting for knowledge base to be ready...`);
-    const res = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'GET /internal/observability_ai_assistant/kb/status',
-    });
-    expect(res.status).to.be(200);
-    expect(res.body.kbState).to.be(KnowledgeBaseState.READY);
-  });
-}
-
-export async function deleteKnowledgeBaseModel(
-  getService: DeploymentAgnosticFtrProviderContext['getService'],
-  {
-    shouldDeleteInferenceEndpoint = true,
-  }: {
-    shouldDeleteInferenceEndpoint?: boolean;
-  } = {}
-) {
-  const log = getService('log');
-  const ml = getService('ml');
-  const es = getService('es');
-
-  try {
-    await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
-    await ml.api.deleteTrainedModelES(TINY_ELSER.id);
-    await ml.testResources.cleanMLSavedObjects();
-
-    if (shouldDeleteInferenceEndpoint) {
-      await deleteInferenceEndpoint({ es });
-    }
-  } catch (e) {
-    if (e.message.includes('resource_not_found_exception')) {
-      log.debug(`Knowledge base model was already deleted.`);
-      return;
-    }
-
-    log.error(`Could not delete knowledge base model: ${e}`);
-  }
-}
+import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
+import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 
 export async function clearKnowledgeBase(es: Client) {
   return es.deleteByQuery({
@@ -129,22 +27,48 @@ export async function clearKnowledgeBase(es: Client) {
   });
 }
 
-export async function getAllKbEntries(es: Client) {
-  const response = await es.search({
-    index: resourceNames.indexPatterns.kb,
-    query: { match_all: {} },
+export async function waitForKnowledgeBaseIndex(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  expectedIndex: string
+) {
+  const retry = getService('retry');
+  const es = getService('es');
+
+  await retry.try(async () => {
+    const currentIndex = await getConcreteWriteIndexFromAlias(es);
+    expect(currentIndex).to.be(expectedIndex);
   });
-  return response.hits.hits;
 }
 
-export async function deleteInferenceEndpoint({
-  es,
-  name = AI_ASSISTANT_KB_INFERENCE_ID,
-}: {
-  es: Client;
-  name?: string;
-}) {
-  return es.inference.delete({ inference_id: name, force: true });
+export async function waitForKnowledgeBaseReady(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  const retry = getService('retry');
+  const log = getService('log');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+
+  await retry.tryForTime(5 * 60 * 1000, async () => {
+    log.debug(`Waiting for knowledge base to be ready...`);
+    const res = await observabilityAIAssistantAPIClient.editor({
+      endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+    });
+    expect(res.status).to.be(200);
+    expect(res.body.kbState).to.be(KnowledgeBaseState.READY);
+    expect(res.body.isReIndexing).to.be(false);
+    log.debug(`Knowledge base is in ready state.`);
+  });
+}
+
+export async function setupKnowledgeBase(
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient,
+  inferenceId: string
+) {
+  return observabilityAIAssistantAPIClient.admin({
+    endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+    params: {
+      query: { inference_id: inferenceId },
+    },
+  });
 }
 
 export async function addSampleDocsToInternalKb(
@@ -152,6 +76,7 @@ export async function addSampleDocsToInternalKb(
   sampleDocs: Array<Instruction & { title: string }>
 ) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const es = getService('es');
 
   await observabilityAIAssistantAPIClient.editor({
     endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
@@ -161,6 +86,9 @@ export async function addSampleDocsToInternalKb(
       },
     },
   });
+
+  // refresh the index to make sure the documents are searchable
+  await es.indices.refresh({ index: resourceNames.indexPatterns.kb });
 }
 
 export async function addSampleDocsToCustomIndex(
@@ -179,7 +107,7 @@ export async function addSampleDocsToCustomIndex(
     mappings: {
       properties: {
         title: { type: 'text' },
-        text: { type: 'semantic_text', inference_id: AI_ASSISTANT_KB_INFERENCE_ID },
+        text: { type: 'semantic_text', inference_id: TINY_ELSER_INFERENCE_ID },
       },
     },
   });
@@ -222,14 +150,96 @@ export async function deleteKbIndices(es: Client) {
 }
 
 export async function getConcreteWriteIndexFromAlias(es: Client) {
-  const response = await es.indices.getAlias({ index: resourceNames.aliases.kb });
-  return Object.entries(response).find(
-    ([index, aliasInfo]) => aliasInfo.aliases[resourceNames.aliases.kb]?.is_write_index
+  const response = await es.indices.getAlias({ index: resourceNames.writeIndexAlias.kb });
+  const writeIndex = Object.entries(response).find(
+    ([index, aliasInfo]) => aliasInfo.aliases[resourceNames.writeIndexAlias.kb]?.is_write_index
   )?.[0];
+
+  if (!writeIndex) {
+    throw new Error(`Could not find write index for alias ${resourceNames.writeIndexAlias.kb}`);
+  }
+
+  return writeIndex;
 }
 
 export async function hasIndexWriteBlock(es: Client, index: string) {
   const response = await es.indices.getSettings({ index });
   const writeBlockSetting = Object.values(response)[0]?.settings?.index?.blocks?.write;
   return writeBlockSetting === 'true' || writeBlockSetting === true;
+}
+
+export async function getKbIndexCreatedVersion(es: Client) {
+  const indexSettings = await es.indices.getSettings({
+    index: resourceNames.writeIndexAlias.kb,
+    human: true,
+  });
+
+  const { settings } = Object.values(indexSettings)[0];
+  const createdVersion = settings?.index?.version?.created_string;
+  if (!createdVersion) {
+    throw new Error(`Could not find created version for index ${resourceNames.writeIndexAlias.kb}`);
+  }
+  return createdVersion;
+}
+
+export async function reIndexKnowledgeBase(
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
+) {
+  return observabilityAIAssistantAPIClient.admin({
+    endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
+    params: {
+      query: {
+        inference_id: TINY_ELSER_INFERENCE_ID,
+      },
+    },
+  });
+}
+
+interface SemanticTextField {
+  semantic_text: string;
+  _inference_fields: {
+    semantic_text: {
+      inference: {
+        inference_id: string;
+        chunks: {
+          semantic_text: Array<{
+            embeddings:
+              | Record<string, number> // sparse embedding
+              | number[]; // dense embedding;
+          }>;
+        };
+      };
+    };
+  };
+}
+
+export async function getKnowledgeBaseEntriesFromEs(es: Client) {
+  const res = await es.search<KnowledgeBaseEntry & SemanticTextField>({
+    size: 1000,
+    index: resourceNames.writeIndexAlias.kb,
+    // Add fields parameter to include inference metadata
+    fields: ['_inference_fields'],
+    query: {
+      match_all: {},
+    },
+  });
+
+  return res.hits.hits;
+}
+
+export function getKnowledgeBaseEntriesFromApi({
+  observabilityAIAssistantAPIClient,
+  query = '',
+  sortBy = 'title',
+  sortDirection = 'asc',
+}: {
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
+  query?: string;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+}) {
+  return observabilityAIAssistantAPIClient.editor({
+    endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+    params: { query: { query, sortBy, sortDirection } },
+  });
 }

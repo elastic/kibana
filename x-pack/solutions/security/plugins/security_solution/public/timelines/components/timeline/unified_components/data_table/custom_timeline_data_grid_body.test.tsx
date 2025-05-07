@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import { render } from '@testing-library/react';
 import type { CustomTimelineDataGridBodyProps } from './custom_timeline_data_grid_body';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';

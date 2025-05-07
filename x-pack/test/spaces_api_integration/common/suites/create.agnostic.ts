@@ -102,6 +102,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'siem',
         'siemV2',
         'slo',
+        'streams',
         'uptime',
       ],
       solution: 'es',

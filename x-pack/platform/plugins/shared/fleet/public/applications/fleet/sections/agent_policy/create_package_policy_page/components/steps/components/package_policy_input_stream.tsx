@@ -72,6 +72,7 @@ interface Props {
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  totalStreams?: number;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -83,6 +84,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     inputStreamValidationResults,
     forceShowErrors,
     isEditPage,
+    totalStreams,
   }) => {
     const { docLinks } = useStartServices();
 
@@ -101,7 +103,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       !!packagePolicyInputStream.id &&
       packagePolicyInputStream.id === defaultDataStreamId;
     const isPackagePolicyEdit = !!packagePolicyId;
-
+    const shouldShowStreamsToggles = totalStreams ? totalStreams > 1 : true;
     const customDatasetVar = packagePolicyInputStream.vars?.[DATASET_VAR_NAME];
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
 
@@ -195,7 +197,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   alignItems="flexStart"
                   justifyContent="spaceBetween"
                 >
-                  {packageInfo.type !== 'input' && (
+                  {packageInfo.type !== 'input' && shouldShowStreamsToggles && (
                     <EuiFlexItem grow={false}>
                       <EuiSwitch
                         data-test-subj="streamOptions.switch"
@@ -222,7 +224,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                     </EuiFlexItem>
                   ) : null}
                 </EuiFlexGroup>
-                {packageInfo.type !== 'input' && packageInputStream.description ? (
+                {packageInfo.type !== 'input' &&
+                packageInputStream.description &&
+                shouldShowStreamsToggles ? (
                   <>
                     <EuiSpacer size="s" />
                     <EuiText size="s" color="subdued">

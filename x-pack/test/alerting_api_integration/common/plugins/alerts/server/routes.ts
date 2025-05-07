@@ -604,6 +604,17 @@ export function defineRoutes(
           subject: schema.string(),
           message: schema.string(),
           messageHTML: schema.maybe(schema.string()),
+          spaceId: schema.maybe(schema.string()),
+          attachments: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                content: schema.string(),
+                contentType: schema.maybe(schema.string()),
+                filename: schema.string(),
+                encoding: schema.maybe(schema.string()),
+              })
+            )
+          ),
         }),
       },
     },
@@ -613,7 +624,7 @@ export function defineRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> => {
       const notifications = await notificationsStart;
-      const { to, subject, message, messageHTML } = req.body;
+      const { to, subject, message, messageHTML, spaceId, attachments } = req.body;
 
       if (!notifications.isEmailServiceAvailable()) {
         return res.ok({ body: { error: 'notifications are not available' } });
@@ -623,6 +634,9 @@ export function defineRoutes(
 
       await emailService.sendPlainTextEmail({ to, subject, message });
       await emailService.sendHTMLEmail({ to, subject, message, messageHTML });
+      if (spaceId && attachments) {
+        await emailService.sendAttachmentEmail({ to, subject, message, spaceId, attachments });
+      }
 
       return res.ok({ body: { ok: true } });
     }
