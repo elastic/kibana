@@ -9,6 +9,8 @@ import type { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/serve
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+
+// This feature is deprecated and will be removed in https://github.com/elastic/kibana/issues/220340
 export const INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE = 'infra-custom-dashboards';
 
 interface InfraCustomDashboard {
