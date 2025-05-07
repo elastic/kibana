@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
+import type { IndicesDataStream } from 'elasticsearch-8.x/lib/api/types';
+
 import type { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '../../../types';
 import { DATASET_VAR_NAME } from '../../../../common/constants';
 import { PackagePolicyValidationError, PackageNotFoundError, FleetError } from '../../../errors';
@@ -32,6 +34,26 @@ import { cleanupAssets } from './remove';
 export const getDatasetName = (packagePolicyInput: NewPackagePolicyInput[]): string =>
   packagePolicyInput[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
 
+export const findDataStreamsFromDifferentPackages = async (
+  datasetName: string,
+  pkgInfo: PackageInfo,
+  esClient: ElasticsearchClient
+) => {
+  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
+  const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
+    type: dataStream.type,
+    dataset: datasetName,
+  });
+  return { dataStream, existingDataStreams };
+};
+
+export const checkExistingDataStreamsAreFromDifferentPackage = (
+  pkgInfo: PackageInfo,
+  existingDataStreams: IndicesDataStream[]
+) => {
+  return (existingDataStreams || []).some((ds) => ds._meta?.package?.name !== pkgInfo.name);
+};
+
 // install the assets needed for inputs type packages
 export async function installAssetsForInputPackagePolicy(opts: {
   pkgInfo: PackageInfo;
@@ -46,16 +68,16 @@ export async function installAssetsForInputPackagePolicy(opts: {
   if (pkgInfo.type !== 'input') return;
 
   const datasetName = getDatasetName(packagePolicy.inputs);
-  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
-  const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
-    type: dataStream.type,
-    dataset: datasetName,
-  });
+
+  const { dataStream, existingDataStreams } = await findDataStreamsFromDifferentPackages(
+    datasetName,
+    pkgInfo,
+    esClient
+  );
 
   if (existingDataStreams.length) {
-    const existingDataStreamsAreFromDifferentPackage = existingDataStreams.some(
-      (ds) => ds._meta?.package?.name !== pkgInfo.name
-    );
+    const existingDataStreamsAreFromDifferentPackage =
+      checkExistingDataStreamsAreFromDifferentPackage(pkgInfo, existingDataStreams);
     if (existingDataStreamsAreFromDifferentPackage && !force) {
       // user has opted to send data to an existing data stream which is managed by another
       // package. This means certain custom setting such as elasticsearch settings
@@ -178,9 +200,12 @@ export async function removeAssetsForInputPackagePolicy(opts: {
         installed_kibana: installedKibana,
         es_index_patterns: esIndexPatterns,
       } = installation;
-      const filteredInstalledEs = installedEs.filter((asset) => asset.id.includes(datasetName));
-      const filteredInstalledKibana = installedKibana.filter((asset) =>
-        asset.id.includes(datasetName)
+
+      // regex matching names with word boundary, allows to match `generic` and not `generic1`
+      const regex = new RegExp(`${datasetName}\\b`);
+      const filteredInstalledEs = installedEs.filter((asset) => asset.id.search(regex) > -1);
+      const filteredInstalledKibana = installedKibana.filter(
+        (asset) => asset.id.search(regex) > -1
       );
       const filteredEsIndexPatterns: Record<string, string> = {};
       filteredEsIndexPatterns[datasetName] = esIndexPatterns[datasetName];
@@ -191,7 +216,14 @@ export async function removeAssetsForInputPackagePolicy(opts: {
         es_index_patterns: filteredEsIndexPatterns,
         package_assets: [],
       };
-      await cleanupAssets(installationToDelete, installation, esClient, savedObjectsClient);
+
+      await cleanupAssets(
+        datasetName,
+        installationToDelete,
+        installation,
+        esClient,
+        savedObjectsClient
+      );
     } catch (error) {
       logger.error(
         `Failed to remove assets for input package ${packageInfo.name}:${packageInfo.version}: ${error.message}`

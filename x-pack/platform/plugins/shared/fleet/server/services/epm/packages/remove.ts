@@ -341,8 +341,7 @@ async function deleteAssets(
     name,
     version,
   }: Installation,
-  esClient: ElasticsearchClient,
-  isInputPackage?: boolean
+  esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
   const { indexTemplatesAndPipelines, indexAssets, transformAssets, otherAssets } =
@@ -497,19 +496,26 @@ export function cleanupTransforms(
  * e.g. when a package policy is deleted and the package has no more policies.
  */
 export async function cleanupAssets(
+  datasetName: string,
   installationToDelete: Installation,
   originalInstallation: Installation,
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
 ) {
-  await deleteAssets(installationToDelete, esClient, true);
+  await deleteAssets(installationToDelete, esClient);
 
-  const { installed_es: installedEs, installed_kibana: installedKibana } = originalInstallation;
+  const {
+    installed_es: installedEs,
+    installed_kibana: installedKibana,
+    es_index_patterns: installedIndexPatterns,
+  } = originalInstallation;
   const { installed_es: ESToRemove, installed_kibana: kibanaToRemove } = installationToDelete;
+  delete installedIndexPatterns[datasetName];
 
   await soClient.update(PACKAGES_SAVED_OBJECT_TYPE, originalInstallation.name, {
     installed_es: difference(installedEs, ESToRemove),
     installed_kibana: difference(installedKibana, kibanaToRemove),
+    es_index_patterns: installedIndexPatterns,
   });
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
