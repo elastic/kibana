@@ -55,11 +55,9 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row, onToggl
           iconType={isPinned ? 'pinFilled' : 'pin'}
           color="text"
           aria-label={label}
-          onMouseUp={() => onTogglePinned(fieldName, { isKeyboardEvent: false })}
-          onKeyUp={(e: { key: string }) => {
-            if (e.key === 'Enter') {
-              onTogglePinned(fieldName, { isKeyboardEvent: true });
-            }
+          onClick={(e: { detail: number }) => {
+            const isKeyboardEvent = e.detail === 0; // Mouse = non-zero, Keyboard = 0
+            onTogglePinned(fieldName, { isKeyboardEvent });
           }}
         />
       </EuiToolTip>

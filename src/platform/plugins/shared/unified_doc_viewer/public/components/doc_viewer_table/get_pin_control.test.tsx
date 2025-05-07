@@ -72,7 +72,7 @@ describe('getPinControl', () => {
 
         const button = screen.getByRole('button', { name: 'Pin field' });
         button.focus();
-        await user.keyboard('{space}');
+        await user.keyboard('A');
 
         expect(onTogglePinned).not.toHaveBeenCalled();
       });
