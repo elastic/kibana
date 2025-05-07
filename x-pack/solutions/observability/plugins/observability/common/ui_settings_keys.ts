@@ -18,14 +18,12 @@ export const enableInfrastructureProfilingIntegration =
   'observability:enableInfrastructureProfilingIntegration';
 export const enableInfrastructureAssetCustomDashboards =
   'observability:enableInfrastructureAssetCustomDashboards';
-export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
 export const entityCentricExperience = 'observability:entityCentricExperience';
 export const apmEnableServiceInventoryTableSearchBar =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
 export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequestCostPerMillion';
-export const apmEnableContinuousRollups = 'observability:apmEnableContinuousRollups';
 export const syntheticsThrottlingEnabled = 'observability:syntheticsThrottlingEnabled';
 export const enableLegacyUptimeApp = 'observability:enableLegacyUptimeApp';
 export const apmEnableProfilingIntegration = 'observability:apmEnableProfilingIntegration';
