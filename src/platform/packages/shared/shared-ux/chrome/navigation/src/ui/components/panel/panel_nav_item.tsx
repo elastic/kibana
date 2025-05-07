@@ -23,21 +23,27 @@ interface Props {
 
 const panelNavStyles = ({ euiTheme }: Theme) => css`
   background-color: ${euiTheme.colors.backgroundBaseSubdued};
+
+  &:focus,
   &:focus-within {
     background-color: ${euiTheme.colors.backgroundBaseSubdued};
   }
+
   &:hover {
     background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
   }
 
   &.isSelected {
     background-color: ${euiTheme.colors.backgroundLightPrimary};
+
     &:focus-within {
       background-color: ${euiTheme.colors.backgroundLightPrimary};
     }
+
     &:hover {
       background-color: ${euiTheme.colors.backgroundLightPrimary};
     }
+
     * {
       color: ${euiTheme.colors.textPrimary};
     }

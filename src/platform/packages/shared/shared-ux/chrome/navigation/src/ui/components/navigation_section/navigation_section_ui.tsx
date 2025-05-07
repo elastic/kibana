@@ -44,15 +44,33 @@ const sectionStyles = {
   }),
   euiCollapsibleNavSection: ({ euiTheme }: Theme) => css`
     & > .euiCollapsibleNavLink {
+      /* solution title in primary nav  */
       font-weight: ${euiTheme.font.weight.bold};
       margin: ${euiTheme.size.s} 0;
       margin-bottom: calc(${euiTheme.size.xs} * 1.5);
     }
 
-    .euiCollapsibleNavAccordion.isSelected {
-      .euiAccordion__triggerWrapper,
-      .euiCollapsibleNavLink {
-        background-color: ${euiTheme.colors.backgroundLightPrimary};
+    .euiCollapsibleNavAccordion {
+      &.euiAccordion__triggerWrapper,
+      &.euiCollapsibleNavLink {
+        &:focus-within {
+          background: ${euiTheme.colors.backgroundBasePlain};
+        }
+
+        &:hover {
+          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        }
+      }
+
+      &.isSelected {
+        .euiAccordion__triggerWrapper,
+        .euiCollapsibleNavLink {
+          background-color: ${euiTheme.colors.backgroundLightPrimary};
+
+          * {
+            color: ${euiTheme.colors.textPrimary};
+          }
+        }
       }
     }
 
@@ -66,20 +84,23 @@ const sectionStyles = {
     }
   `,
   euiCollapsibleNavSubItem: ({ euiTheme }: Theme) => css`
-    .euiAccordion__button {
+    .euiAccordion__button:focus,
+    .euiAccordion__button:hover {
       text-decoration: none;
     }
 
     &.euiLink,
     &.euiCollapsibleNavLink {
-      :hover {
+      &:focus,
+      &:hover {
         background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
         text-decoration: none;
       }
 
       &.isSelected {
         background-color: ${euiTheme.colors.backgroundLightPrimary};
-        :hover {
+        &:focus,
+        &:hover {
           background-color: ${euiTheme.colors.backgroundLightPrimary};
         }
 
