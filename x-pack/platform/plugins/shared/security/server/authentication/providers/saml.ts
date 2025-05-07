@@ -31,7 +31,7 @@ type RequestId = string;
 /**
  * The state supported by the provider (for the SAML handshake or established session).
  */
-interface ProviderState extends Partial<TokenPair> {
+export interface ProviderState extends Partial<TokenPair> {
   /**
    * Map of redirectURLs by requestId.
    */

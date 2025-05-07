@@ -14,11 +14,6 @@ import { AuthenticationResult } from './authentication_result';
 import { canRedirectRequest } from './can_redirect_request';
 import { DeauthenticationResult } from './deauthentication_result';
 import { HTTPAuthorizationHeader } from './http_authentication';
-import type {
-  AuthenticationProviderOptions,
-  AuthenticationProviderSpecificOptions,
-  BaseAuthenticationProvider,
-} from './providers';
 import {
   AnonymousAuthenticationProvider,
   BasicAuthenticationProvider,
@@ -28,6 +23,12 @@ import {
   PKIAuthenticationProvider,
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
+} from './providers';
+import type {
+  AuthenticationProviderOptions,
+  AuthenticationProviderSpecificOptions,
+  BaseAuthenticationProvider,
+  SAMLProviderState,
 } from './providers';
 import { Tokens } from './tokens';
 import type { AuthenticatedUser, AuthenticationProvider, SecurityLicense } from '../../common';
@@ -318,7 +319,7 @@ export class Authenticator {
     }
 
     for (const [providerName, provider] of providers) {
-      // Check if current session has been set by this provider.
+      // Check if this `provider` has set current session.
       const ownsSession =
         existingSessionValue?.provider.name === providerName &&
         existingSessionValue?.provider.type === provider.type;
@@ -700,6 +701,7 @@ export class Authenticator {
    */
   private async getSessionValue(request: KibanaRequest) {
     const existingSession = await this.session.get(request);
+    console.log(existingSession);
 
     // If we detect that for some reason we have a session stored for the provider that is not
     // available anymore (e.g. when user was logged in with one provider, but then configuration has
@@ -792,11 +794,14 @@ export class Authenticator {
     }
 
     const isExistingSessionAuthenticated = isSessionAuthenticated(existingSessionValue);
+
     const isNewSessionAuthenticated = !!authenticationResult.user;
 
     const providerHasChanged = !!existingSessionValue && !ownsSession;
+
     const sessionHasBeenAuthenticated =
       !!existingSessionValue && !isExistingSessionAuthenticated && isNewSessionAuthenticated;
+
     const usernameHasChanged =
       isExistingSessionAuthenticated &&
       isNewSessionAuthenticated &&
@@ -817,15 +822,24 @@ export class Authenticator {
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
-      this.logger.debug(
-        'Session is authenticated, existing unauthenticated session will be invalidated.'
-      );
-      await this.invalidateSessionValue({
-        request,
-        sessionValue: existingSessionValue,
-        skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
-      });
-      existingSessionValue = null;
+      if (
+        this.isSamlProvider(provider) &&
+        this.hasRemainingRequestIds(existingSessionValue?.state as SAMLProviderState)
+      ) {
+        this.logger.debug(
+          'Session is authenticated, existing unauthenticated session still has pending SAML requests. Preserving state.'
+        );
+      } else {
+        this.logger.debug(
+          'Session is authenticated, existing unauthenticated session will be invalidated.'
+        );
+        await this.invalidateSessionValue({
+          request,
+          sessionValue: existingSessionValue,
+          skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
+        });
+        existingSessionValue = null;
+      }
     } else if (usernameHasChanged) {
       this.logger.warn('Username has changed, existing session will be invalidated.');
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
@@ -834,7 +848,7 @@ export class Authenticator {
 
     let userProfileId = existingSessionValue?.userProfileId;
 
-    // If authentication result includes user profile grant, we should try to activate user profile for this user and
+    // If the authentication result includes user profile grant, we should try to activate user profile for this user and
     // store user profile identifier in the session value.
     const shouldActivateProfile = authenticationResult.userProfileGrant;
 
@@ -900,6 +914,20 @@ export class Authenticator {
         isNewSessionAuthenticated &&
         (providerHasChanged || usernameHasChanged),
     };
+  }
+
+  private isSamlProvider(provider: AuthenticationProvider) {
+    return provider.type === 'saml';
+  }
+
+  private hasRemainingRequestIds(state: SAMLProviderState): boolean {
+    let result = false;
+
+    if (state && state.requestIdMap && Object.keys(state.requestIdMap).length > 0) {
+      result = true;
+    }
+
+    return result;
   }
 
   /**

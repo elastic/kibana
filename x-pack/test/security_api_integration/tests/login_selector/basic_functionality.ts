@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   // Failing: See https://github.com/elastic/kibana/issues/218378
-  describe.skip('Login Selector', () => {
+  describe('Login Selector', () => {
     it('should redirect user to a login selector', async () => {
       const response = await supertest
         .get('/abc/xyz/handshake?one=two three')
