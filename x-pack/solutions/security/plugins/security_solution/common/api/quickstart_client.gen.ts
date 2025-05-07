@@ -264,6 +264,29 @@ import type {
 } from './entity_analytics/monitoring/search_indices.gen';
 import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
 import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
+import type {
+  CreatePrivMonUserRequestBodyInput,
+  CreatePrivMonUserResponse,
+} from './entity_analytics/privilege_monitoring/users/create.gen';
+import type {
+  DeletePrivMonUserRequestParamsInput,
+  DeletePrivMonUserResponse,
+} from './entity_analytics/privilege_monitoring/users/delete.gen';
+import type {
+  GetPrivMonUserRequestParamsInput,
+  GetPrivMonUserResponse,
+} from './entity_analytics/privilege_monitoring/users/get.gen';
+import type {
+  ListPrivMonUsersRequestQueryInput,
+  ListPrivMonUsersResponse,
+} from './entity_analytics/privilege_monitoring/users/list.gen';
+import type {
+  UpdatePrivMonUserRequestParamsInput,
+  UpdatePrivMonUserRequestBodyInput,
+  UpdatePrivMonUserResponse,
+} from './entity_analytics/privilege_monitoring/users/update.gen';
+import type { BulkUploadUsersCSVResponse } from './entity_analytics/privilege_monitoring/users/upload_csv.gen';
+import type { BulkUploadUsersJSONResponse } from './entity_analytics/privilege_monitoring/users/upload_json.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -460,6 +483,30 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async bulkUploadUsersCsv() {
+    this.log.info(`${new Date().toISOString()} Calling API BulkUploadUsersCSV`);
+    return this.kbnClient
+      .request<BulkUploadUsersCSVResponse>({
+        path: '/api/entity_analytics/monitoring/users/_csv',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async bulkUploadUsersJson() {
+    this.log.info(`${new Date().toISOString()} Calling API BulkUploadUsersJSON`);
+    return this.kbnClient
+      .request<BulkUploadUsersJSONResponse>({
+        path: '/api/entity_analytics/monitoring/users/_json',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
     * Bulk upsert up to 1000 asset criticality records.
 
@@ -587,6 +634,19 @@ If a record already exists for the specified entity, that record is overwritten 
     return this.kbnClient
       .request<CreateAssetCriticalityRecordResponse>({
         path: '/api/asset_criticality',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createPrivMonUser(props: CreatePrivMonUserProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreatePrivMonUser`);
+    return this.kbnClient
+      .request<CreatePrivMonUserResponse>({
+        path: '/api/entity_analytics/monitoring/users',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -769,6 +829,18 @@ For detailed information on Kibana actions and alerting, and additional API call
         },
         method: 'DELETE',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deletePrivMonUser(props: DeletePrivMonUserProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeletePrivMonUser`);
+    return this.kbnClient
+      .request<DeletePrivMonUserResponse>({
+        path: replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -1347,6 +1419,18 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async getPrivMonUser(props: GetPrivMonUserProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetPrivMonUser`);
+    return this.kbnClient
+      .request<GetPrivMonUserResponse>({
+        path: replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetProtectionUpdatesNote`);
     return this.kbnClient
@@ -1794,6 +1878,20 @@ providing you with the most current and effective threat detection capabilities.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async listPrivMonUsers(props: ListPrivMonUsersProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListPrivMonUsers`);
+    return this.kbnClient
+      .request<ListPrivMonUsersResponse>({
+        path: '/api/entity_analytics/monitoring/users/list',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2298,6 +2396,19 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async updatePrivMonUser(props: UpdatePrivMonUserProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdatePrivMonUser`);
+    return this.kbnClient
+      .request<UpdatePrivMonUserResponse>({
+        path: replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'PUT',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
     * Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
 
@@ -2405,6 +2516,9 @@ export interface CreateAlertsMigrationProps {
 export interface CreateAssetCriticalityRecordProps {
   body: CreateAssetCriticalityRecordRequestBodyInput;
 }
+export interface CreatePrivMonUserProps {
+  body: CreatePrivMonUserRequestBodyInput;
+}
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
@@ -2428,6 +2542,9 @@ export interface DeleteEntityEngineProps {
 }
 export interface DeleteNoteProps {
   body: DeleteNoteRequestBodyInput;
+}
+export interface DeletePrivMonUserProps {
+  params: DeletePrivMonUserRequestParamsInput;
 }
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
@@ -2522,6 +2639,9 @@ export interface GetNotesProps {
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
 }
+export interface GetPrivMonUserProps {
+  params: GetPrivMonUserRequestParamsInput;
+}
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
 }
@@ -2588,6 +2708,9 @@ export interface InternalUploadAssetCriticalityRecordsProps {
 }
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;
+}
+export interface ListPrivMonUsersProps {
+  query: ListPrivMonUsersRequestQueryInput;
 }
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
@@ -2660,6 +2783,10 @@ export interface SuggestUserProfilesProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
+}
+export interface UpdatePrivMonUserProps {
+  params: UpdatePrivMonUserRequestParamsInput;
+  body: UpdatePrivMonUserRequestBodyInput;
 }
 export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;

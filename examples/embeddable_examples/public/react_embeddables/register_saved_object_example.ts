@@ -18,7 +18,9 @@ export const registerMyEmbeddableSavedObject = (embeddableSetup: EmbeddableSetup
     onAdd: (container, savedObject) => {
       container.addNewPanel({
         panelType: MY_EMBEDDABLE_TYPE,
-        initialState: savedObject.attributes,
+        serializedState: {
+          rawState: savedObject.attributes,
+        },
       });
     },
     savedObjectType: MY_SAVED_OBJECT_TYPE,
