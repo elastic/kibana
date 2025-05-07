@@ -105,8 +105,8 @@ export const addRulesToMigration = async ({
   migrationId,
   body,
   signal,
-}: AddRulesToMigrationParams): Promise<AddRulesToMigrationParams> => {
-  return KibanaServices.get().http.post(
+}: AddRulesToMigrationParams) => {
+  return KibanaServices.get().http.post<void>(
     replaceParams(SIEM_RULE_MIGRATION_RULES_PATH, { migration_id: migrationId }),
     { body: JSON.stringify(body), version: '1', signal }
   );

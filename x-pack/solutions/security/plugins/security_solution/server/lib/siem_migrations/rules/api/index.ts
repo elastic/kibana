@@ -24,7 +24,7 @@ import { registerSiemRuleMigrationsPrebuiltRulesRoute } from './get_prebuilt_rul
 import { registerSiemRuleMigrationsIntegrationsRoute } from './get_integrations';
 import { registerSiemRuleMigrationsGetMissingPrivilegesRoute } from './privileges/get_missing_privileges';
 import { registerSiemRuleMigrationsEvaluateRoute } from './evaluation/evaluate';
-import { registerSiemRuleMigrationsCreateRulesRoute } from './rules/add';
+import { registerSiemRuleMigrationsCreateRulesRoute } from './rules/create';
 import { registerSiemRuleMigrationsGetRulesRoute } from './rules/get';
 import { registerSiemRuleMigrationsDeleteRoute } from './delete';
 

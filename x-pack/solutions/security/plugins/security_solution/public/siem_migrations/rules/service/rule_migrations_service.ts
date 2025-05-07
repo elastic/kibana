@@ -129,16 +129,10 @@ export class SiemRulesMigrationsService {
       throw new Error(i18n.EMPTY_RULES_ERROR);
     }
 
-    try {
-      // Batching creation to avoid hitting the max payload size limit of the API
-      for (let i = 0; i < rulesCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
-        const rulesBatch = rules.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-        await addRulesToMigration({ migrationId, body: rulesBatch });
-      }
-      this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount });
-    } catch (error) {
-      this.telemetry.reportSetupMigrationCreated({ migrationId, rulesCount, error });
-      throw error;
+    // Batching creation to avoid hitting the max payload size limit of the API
+    for (let i = 0; i < rulesCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
+      const rulesBatch = rules.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
+      await addRulesToMigration({ migrationId, body: rulesBatch });
     }
   }
 
