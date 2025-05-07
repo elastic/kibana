@@ -33,9 +33,7 @@
     "@kbn/shared-ux-router",
     "@kbn/esql-editor",
     "@kbn/data-views-plugin",
-    "@kbn/core-lifecycle-browser",
     "@kbn/esql-validation-autocomplete",
-    "@kbn/index-management-shared-types",
   ],
   "exclude": [
     "target/**/*",
