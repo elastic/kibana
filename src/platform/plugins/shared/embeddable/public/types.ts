@@ -38,13 +38,21 @@ export interface EmbeddableSetup {
   /**
    * Register a saved object type with the "Add from library" flyout.
    *
+   * `onAdd` receives the container and the saved object. You may pass a second boolean parameter
+   *  to `addNewPanel` to enable a success message and automatic scrolling.
+   *
    * @example
    *  registerAddFromLibraryType({
    *    onAdd: (container, savedObject) => {
-   *      container.addNewPanel({
-   *        panelType: CONTENT_ID,
-   *        initialState: savedObject.attributes,
-   *      });
+   *     container.addNewPanel(
+   *         {
+   *           panelType: MY_EMBEDDABLE_TYPE,
+   *           serializedState: {
+   *             rawState: savedObject.attributes,
+   *           },
+   *         },
+   *         true // shows a toast and scrolls to panel
+   *       );
    *    },
    *    savedObjectType: MAP_SAVED_OBJECT_TYPE,
    *    savedObjectName: i18n.translate('xpack.maps.mapSavedObjectLabel', {
