@@ -22,10 +22,10 @@ export const appPaths = {
     workflow: ({ agentId }: { agentId: string }) => `/assistants/${agentId}/workflow`,
   },
 
-  integrations: {
-    list: '/integrations',
-    create: '/integrations/create',
-    catalog: '/integrations/catalog',
-    edit: ({ integrationId }: { integrationId: string }) => `/integrations/${integrationId}/edit`,
+  tools: {
+    list: '/tools',
+    create: '/tools/create',
+    catalog: '/tools/catalog',
+    edit: ({ integrationId }: { integrationId: string }) => `/tools/${integrationId}/edit`,
   },
 };
