@@ -54,11 +54,3 @@ export const SpanSummaryTitle = ({
     </FieldHoverActionPopover>
   );
 };
-
-/* <HighlightField
-  textSize="m"
-  value={spanName}
-  formattedValue={formattedSpanName}
-  as="strong"
-/>
-</h2> */
