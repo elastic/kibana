@@ -92,13 +92,6 @@ export const getAxiosOptions = (
   config?: Config
 ): { headers: Record<string, string>; httpsAgent?: https.Agent; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
-  const configAny = config as Config & {
-    certificateFile?: string | string[];
-    certificateData?: string;
-    privateKeyFile?: string | string[];
-    privateKeyData?: string;
-    verificationMode?: 'full' | 'certificate' | 'none';
-  };
 
   switch (provider) {
     case OpenAiProviderType.OpenAi:
@@ -114,57 +107,84 @@ export const getAxiosOptions = (
     case OpenAiProviderType.Other:
       if (
         config &&
-        (configAny.certificateFile ||
-          configAny.certificateData ||
-          configAny.privateKeyFile ||
-          configAny.privateKeyData)
+        (config.certificateFile ||
+          config.certificateData ||
+          config.privateKeyFile ||
+          config.privateKeyData)
       ) {
-        if (!configAny.certificateFile && !configAny.certificateData) {
+        if (!config.certificateFile && !config.certificateData) {
           throw new Error('Either certificate file or certificate data must be provided for PKI');
         }
-        if (!configAny.privateKeyFile && !configAny.privateKeyData) {
+        if (!config.privateKeyFile && !config.privateKeyData) {
           throw new Error('Either private key file or private key data must be provided for PKI');
         }
 
-        let cert: string | Buffer;
-        let key: string | Buffer;
+        // Debug: Log file paths and existence
+        const certPath = config.certificateFile ? (Array.isArray(config.certificateFile) ? config.certificateFile[0] : config.certificateFile) : undefined;
+        const keyPath = config.privateKeyFile ? (Array.isArray(config.privateKeyFile) ? config.privateKeyFile[0] : config.privateKeyFile) : undefined;
+        const caPath = config.caFile ? (Array.isArray(config.caFile) ? config.caFile[0] : config.caFile) : undefined;
+        console.log('PKI DEBUG:', {
+          certPath,
+          keyPath,
+          caPath,
+          certExists: certPath ? fs.existsSync(certPath) : false,
+          keyExists: keyPath ? fs.existsSync(keyPath) : false,
+          caExists: caPath ? fs.existsSync(caPath) : false,
+        });
 
-        if (configAny.certificateFile) {
-          cert = fs.readFileSync(
-            Array.isArray(configAny.certificateFile)
-              ? configAny.certificateFile[0]
-              : configAny.certificateFile
-          );
-        } else {
-          cert = configAny.certificateData!;
+        let cert, key, ca;
+        try {
+          if (config.certificateFile) {
+            cert = fs.readFileSync(Array.isArray(config.certificateFile) ? config.certificateFile[0] : config.certificateFile, 'utf8');
+          } else {
+            cert = config.certificateData!;
+          }
+        } catch (e) {
+          console.error('Failed to read client cert:', e);
+        }
+        try {
+          if (config.privateKeyFile) {
+            key = fs.readFileSync(Array.isArray(config.privateKeyFile) ? config.privateKeyFile[0] : config.privateKeyFile, 'utf8');
+          } else {
+            key = config.privateKeyData!;
+          }
+        } catch (e) {
+          console.error('Failed to read client key:', e);
+        }
+        try {
+          if (config.caFile) {
+            ca = fs.readFileSync(Array.isArray(config.caFile) ? config.caFile[0] : config.caFile, 'utf8');
+          } else if (config.caData) {
+            ca = config.caData;
+          }
+        } catch (e) {
+          console.error('Failed to read CA cert:', e);
         }
 
-        if (configAny.privateKeyFile) {
-          key = fs.readFileSync(
-            Array.isArray(configAny.privateKeyFile)
-              ? configAny.privateKeyFile[0]
-              : configAny.privateKeyFile
-          );
-        } else {
-          key = configAny.privateKeyData!;
-        }
+        // Debug: Log loaded values
+        console.log('Loaded cert:', cert ? cert.slice(0, 40) : 'undefined');
+        console.log('Loaded key:', key ? key.slice(0, 40) : 'undefined');
+        console.log('Loaded ca:', ca ? ca.slice(0, 40) : 'undefined');
 
-        if (!cert.toString().includes('-----BEGIN CERTIFICATE-----')) {
+        if (!cert || !cert.toString().includes('-----BEGIN CERTIFICATE-----')) {
           throw new Error('Invalid certificate format: Must be PEM-encoded');
         }
-        if (!key.toString().includes('-----BEGIN PRIVATE KEY-----')) {
+        if (!key || !key.toString().includes('-----BEGIN PRIVATE KEY-----')) {
           throw new Error('Invalid private key format: Must be PEM-encoded');
         }
 
         const httpsAgent = new https.Agent({
           cert,
           key,
-          rejectUnauthorized: configAny.verificationMode === 'none',
+          ...(ca ? { ca } : {}),
+          rejectUnauthorized: config.verificationMode !== 'none',
           checkServerIdentity:
-            configAny.verificationMode === 'certificate' || configAny.verificationMode === 'none'
+            config.verificationMode === 'certificate' || config.verificationMode === 'none'
               ? () => undefined
               : undefined,
         });
+        // Debug: Print the https.Agent options
+        console.log('https.Agent options:', httpsAgent.options);
 
         return {
           headers: { ['content-type']: 'application/json', Accept: 'application/json' },

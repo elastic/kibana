@@ -18,16 +18,15 @@ import type {
   InvokeAIActionResponseSchema,
 } from './schema';
 
-// PKI configuration interface for OpenAiProviderType.Other
-export interface PKIConfig {
+export type Config = TypeOf<typeof ConfigSchema> & {
   certificateFile?: string | string[];
   certificateData?: string;
   privateKeyFile?: string | string[];
   privateKeyData?: string;
   verificationMode?: 'full' | 'certificate' | 'none';
-}
-
-export type Config = TypeOf<typeof ConfigSchema>;
+  caFile?: string | string[];
+  caData?: string;
+};
 export type Secrets = TypeOf<typeof SecretsSchema>;
 export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
 export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
