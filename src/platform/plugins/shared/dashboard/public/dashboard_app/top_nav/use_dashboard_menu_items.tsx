@@ -61,10 +61,9 @@ export const useDashboardMenuItems = ({
         anchorElement,
         savedObjectId: lastSavedId,
         isDirty: Boolean(hasUnsavedChanges),
-        getPanelsState: () => dashboardApi.panels$.value,
       });
     },
-    [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboardApi]
+    [dashboardTitle, hasUnsavedChanges, lastSavedId]
   );
 
   /**

@@ -12,7 +12,6 @@ export const defaultApmServiceEnvironment = 'observability:apmDefaultServiceEnvi
 export const apmProgressiveLoading = 'observability:apmProgressiveLoading';
 export const apmServiceGroupMaxNumberOfServices =
   'observability:apmServiceGroupMaxNumberOfServices';
-export const apmTraceExplorerTab = 'observability:apmTraceExplorerTab';
 export const apmLabsButton = 'observability:apmLabsButton';
 export const enableInfrastructureProfilingIntegration =
   'observability:enableInfrastructureProfilingIntegration';
@@ -24,7 +23,6 @@ export const apmEnableServiceInventoryTableSearchBar =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
 export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequestCostPerMillion';
-export const apmEnableContinuousRollups = 'observability:apmEnableContinuousRollups';
 export const syntheticsThrottlingEnabled = 'observability:syntheticsThrottlingEnabled';
 export const enableLegacyUptimeApp = 'observability:enableLegacyUptimeApp';
 export const apmEnableProfilingIntegration = 'observability:apmEnableProfilingIntegration';

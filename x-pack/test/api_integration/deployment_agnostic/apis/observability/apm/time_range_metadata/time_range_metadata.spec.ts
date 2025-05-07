@@ -39,7 +39,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         query: {
           start: overrides.start.toISOString(),
           end: overrides.end.toISOString(),
-          enableContinuousRollups: true,
           useSpanName: false,
           kuery: '',
           ...omit(overrides, 'start', 'end'),
@@ -325,37 +324,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.SixtyMinutes,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-          ]);
-        });
-      });
-
-      describe('with continuous rollups disabled', () => {
-        it('returns only 1m intervals', async () => {
-          const response = await getTimeRangeMetadata({
-            start,
-            end,
-            enableContinuousRollups: false,
-          });
-
-          expect(response.sources).to.eql([
-            {
-              documentType: ApmDocumentType.ServiceTransactionMetric,
-              rollupInterval: RollupInterval.OneMinute,
-              hasDocs: true,
-              hasDurationSummaryField: true,
-            },
-            {
-              documentType: ApmDocumentType.TransactionEvent,
-              rollupInterval: RollupInterval.None,
-              hasDocs: true,
-              hasDurationSummaryField: false,
-            },
-            {
-              documentType: ApmDocumentType.TransactionMetric,
-              rollupInterval: RollupInterval.OneMinute,
               hasDocs: true,
               hasDurationSummaryField: true,
             },
