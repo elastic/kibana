@@ -48,6 +48,20 @@ const SingleDivider = styled.div`
   height: ${(props) => props.theme.euiTheme.size.l};
 `;
 
+const resolveBadgeCounterBadgeColor = ({
+  isLoading,
+  gapsTotal,
+}: {
+  isLoading: boolean;
+  gapsTotal?: number;
+}) => {
+  if (isLoading) {
+    return 'hollow';
+  }
+
+  return gapsTotal === 0 ? 'success' : 'warning';
+};
+
 export const RulesWithGapsOverviewPanel = () => {
   const {
     state: {
@@ -121,11 +135,10 @@ export const RulesWithGapsOverviewPanel = () => {
 
   const executionSuccessRate = getExecutionSuccessRate(executionSummaryData?.executions);
 
-  const gapsCounterBadgeColor = isLoadingGapsData
-    ? 'hollow'
-    : data?.total === 0
-    ? 'success'
-    : 'warning';
+  const gapsCounterBadgeColor = resolveBadgeCounterBadgeColor({
+    isLoading: isLoadingGapsData,
+    gapsTotal: data?.total,
+  });
 
   const DoubleDividerElement = isMediumOrBiggerScreen ? (
     <EuiFlexItem grow={false}>
