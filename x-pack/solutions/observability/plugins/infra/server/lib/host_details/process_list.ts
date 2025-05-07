@@ -148,7 +148,8 @@ export const getProcessList = async (
       };
     });
 
-    const summary = result.aggregations!.summaryEvent.summary.hits.hits.length
+    const summary: { [p: string]: number } = result.aggregations!.summaryEvent.summary.hits.hits
+      .length
       ? result.aggregations!.summaryEvent.summary.hits.hits[0]._source.system.process.summary
       : {};
 
