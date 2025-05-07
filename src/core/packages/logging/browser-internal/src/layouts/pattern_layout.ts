@@ -15,9 +15,10 @@ import {
   MetaConversion,
   MessageConversion,
   DateConversion,
+  ErrorConversion,
 } from '@kbn/core-logging-common-internal';
 
-const DEFAULT_PATTERN = `[%date][%level][%logger] %message`;
+const DEFAULT_PATTERN = `[%date][%level][%logger] %message %error`;
 
 const conversions: Conversion[] = [
   LoggerConversion,
@@ -25,6 +26,7 @@ const conversions: Conversion[] = [
   LevelConversion,
   MetaConversion,
   DateConversion,
+  ErrorConversion,
 ];
 
 /**
