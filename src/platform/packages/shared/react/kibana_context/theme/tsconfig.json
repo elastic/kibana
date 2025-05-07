@@ -21,6 +21,5 @@
     "@kbn/react-kibana-context-root",
     "@kbn/core-user-profile-browser",
     "@kbn/core-user-profile-browser-mocks",
-    "@kbn/core-theme-browser",
   ]
 }
