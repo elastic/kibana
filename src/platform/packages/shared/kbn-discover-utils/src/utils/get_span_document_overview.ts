@@ -12,6 +12,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, SpanDocumentOverview } from '../types';
 import { fieldConstants } from '..';
 import { getFormattedFields } from './get_formatted_fields';
+import { getFlattenedFields } from './get_flattened_fields';
 
 const fields: Array<keyof SpanDocumentOverview> = [
   fieldConstants.TIMESTAMP_FIELD,
@@ -40,4 +41,8 @@ export function getSpanDocumentOverview(
   { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
 ): SpanDocumentOverview {
   return getFormattedFields<SpanDocumentOverview>(doc, fields, { dataView, fieldFormats });
+}
+
+export function getFlattenedSpanDocumentOverview(doc: DataTableRecord): SpanDocumentOverview {
+  return getFlattenedFields<SpanDocumentOverview>(doc, fields);
 }

@@ -10,7 +10,6 @@
 import {
   USER_AGENT_NAME_FIELD,
   USER_AGENT_VERSION_FIELD,
-  DataTableRecord,
   TransactionDocumentOverview,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
@@ -20,14 +19,13 @@ import {
   getCommonFieldConfiguration,
 } from '../../resources/get_field_configuration';
 import { HighlightField } from '../../components/highlight_field.tsx';
-import { getTraceDocValue } from '../../resources/get_field_value';
 
 export const getTransactionFieldConfiguration = ({
   attributes,
   flattenedDoc,
 }: {
   attributes: TransactionDocumentOverview;
-  flattenedDoc: DataTableRecord['flattened'];
+  flattenedDoc: TransactionDocumentOverview;
 }): Record<string, FieldConfiguration> => {
   return {
     ...getCommonFieldConfiguration({ attributes, flattenedDoc }),
@@ -38,7 +36,7 @@ export const getTransactionFieldConfiguration = ({
       content: (value, formattedValue) => (
         <HighlightField value={value} formattedValue={formattedValue} />
       ),
-      value: getTraceDocValue(USER_AGENT_NAME_FIELD, flattenedDoc),
+      value: flattenedDoc[USER_AGENT_NAME_FIELD],
       formattedValue: attributes[USER_AGENT_NAME_FIELD],
     },
     [USER_AGENT_VERSION_FIELD]: {
@@ -51,7 +49,7 @@ export const getTransactionFieldConfiguration = ({
       content: (value, formattedValue) => (
         <HighlightField value={value} formattedValue={formattedValue} />
       ),
-      value: getTraceDocValue(USER_AGENT_VERSION_FIELD, flattenedDoc),
+      value: flattenedDoc[USER_AGENT_VERSION_FIELD],
       formattedValue: attributes[USER_AGENT_VERSION_FIELD],
     },
   };

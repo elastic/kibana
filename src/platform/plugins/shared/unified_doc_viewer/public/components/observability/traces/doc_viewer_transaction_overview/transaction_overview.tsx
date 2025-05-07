@@ -19,6 +19,7 @@ import {
   getTransactionDocumentOverview,
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
+import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields } from './resources/fields';
 import { getTransactionFieldConfiguration } from './resources/get_transaction_field_configuration';
@@ -29,7 +30,6 @@ import { Trace } from '../components/trace';
 
 import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
-import { getTraceDocValue } from '../resources/get_field_value';
 export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
 };
@@ -44,18 +44,21 @@ export function TransactionOverview({
   dataView,
 }: TransactionOverviewProps) {
   const { fieldFormats } = getUnifiedDocViewerServices();
-  const formattedDoc = useMemo(
-    () => getTransactionDocumentOverview(hit, { dataView, fieldFormats }),
+  const { formattedDoc, flattenedDoc } = useMemo(
+    () => ({
+      formattedDoc: getTransactionDocumentOverview(hit, { dataView, fieldFormats }),
+      flattenedDoc: getFlattenedTransactionDocumentOverview(hit),
+    }),
     [dataView, fieldFormats, hit]
   );
-  const transactionDuration = getTraceDocValue(TRANSACTION_DURATION_FIELD, hit.flattened);
+
+  const transactionDuration = flattenedDoc[TRANSACTION_DURATION_FIELD];
   const fieldConfigurations = useMemo(
-    () =>
-      getTransactionFieldConfiguration({ attributes: formattedDoc, flattenedDoc: hit.flattened }),
-    [hit.flattened, formattedDoc]
+    () => getTransactionFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
+    [formattedDoc, flattenedDoc]
   );
-  const traceId = getTraceDocValue(TRACE_ID_FIELD, hit.flattened);
-  const transactionId = getTraceDocValue(TRANSACTION_ID_FIELD, hit.flattened);
+  const traceId = flattenedDoc[TRACE_ID_FIELD];
+  const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
   return (
     <RootTransactionProvider traceId={traceId} indexPattern={tracesIndexPattern}>
@@ -68,11 +71,11 @@ export function TransactionOverview({
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
           <TransactionSummaryTitle
-            serviceName={getTraceDocValue(SERVICE_NAME_FIELD, hit.flattened)}
+            serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
+            transactionName={flattenedDoc[TRANSACTION_NAME_FIELD]}
+            formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
             id={transactionId}
             formattedId={formattedDoc[TRANSACTION_ID_FIELD]}
-            transactionName={getTraceDocValue(TRANSACTION_NAME_FIELD, hit.flattened)}
-            formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
           />
           <EuiSpacer size="m" />
           {transactionFields.map((fieldId) => (

@@ -14,7 +14,6 @@ import {
   HTTP_RESPONSE_STATUS_CODE_FIELD,
   AGENT_NAME_FIELD,
   TRANSACTION_NAME_FIELD,
-  type DataTableRecord,
   SpanDocumentOverview,
   TransactionDocumentOverview,
 } from '@kbn/discover-utils';
@@ -26,7 +25,6 @@ import { TraceIdLink } from '../components/trace_id_link';
 import { Timestamp } from '../components/timestamp';
 import { HttpStatusCode } from '../components/http_status_code';
 import { TransactionNameLink } from '../components/transaction_name_link';
-import { getTraceDocValue } from './get_field_value';
 import { HighlightField } from '../components/highlight_field.tsx';
 
 export type FieldConfigValue = string | number | undefined;
@@ -44,7 +42,7 @@ export const getCommonFieldConfiguration = ({
   flattenedDoc,
 }: {
   attributes: TransactionDocumentOverview | SpanDocumentOverview;
-  flattenedDoc: DataTableRecord['flattened'];
+  flattenedDoc: TransactionDocumentOverview | SpanDocumentOverview;
 }): Record<string, FieldConfiguration> => {
   return {
     [TRANSACTION_NAME_FIELD]: {
@@ -55,14 +53,14 @@ export const getCommonFieldConfiguration = ({
         <HighlightField value={value} formattedValue={formattedValue}>
           {({ content }) => (
             <TransactionNameLink
-              serviceName={getTraceDocValue(SERVICE_NAME_FIELD, flattenedDoc)}
+              serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
               transactionName={value as string}
               renderContent={() => content}
             />
           )}
         </HighlightField>
       ),
-      value: getTraceDocValue(TRANSACTION_NAME_FIELD, flattenedDoc),
+      value: flattenedDoc[TRANSACTION_NAME_FIELD],
       formattedValue: attributes[TRANSACTION_NAME_FIELD],
     },
     [SERVICE_NAME_FIELD]: {
@@ -74,13 +72,13 @@ export const getCommonFieldConfiguration = ({
           {({ content }) => (
             <ServiceNameLink
               serviceName={value as string}
-              agentName={getTraceDocValue(AGENT_NAME_FIELD, flattenedDoc)}
+              agentName={flattenedDoc[AGENT_NAME_FIELD]}
               formattedServiceName={content}
             />
           )}
         </HighlightField>
       ),
-      value: getTraceDocValue(SERVICE_NAME_FIELD, flattenedDoc),
+      value: flattenedDoc[SERVICE_NAME_FIELD],
       formattedValue: attributes[SERVICE_NAME_FIELD],
     },
     [TRACE_ID_FIELD]: {
@@ -92,7 +90,7 @@ export const getCommonFieldConfiguration = ({
           {({ content }) => <TraceIdLink traceId={value as string} formattedTraceId={content} />}
         </HighlightField>
       ),
-      value: getTraceDocValue(TRACE_ID_FIELD, flattenedDoc),
+      value: flattenedDoc[TRACE_ID_FIELD],
       formattedValue: attributes[TRACE_ID_FIELD],
     },
     [TIMESTAMP_FIELD]: {
@@ -100,7 +98,7 @@ export const getCommonFieldConfiguration = ({
         defaultMessage: 'Start time',
       }),
       content: (value) => <Timestamp timestamp={value as number} />,
-      value: getTraceDocValue(TIMESTAMP_FIELD, flattenedDoc),
+      value: flattenedDoc[TIMESTAMP_FIELD],
     },
     [HTTP_RESPONSE_STATUS_CODE_FIELD]: {
       title: i18n.translate(
@@ -110,7 +108,7 @@ export const getCommonFieldConfiguration = ({
         }
       ),
       content: (value) => <HttpStatusCode code={value as number} />,
-      value: getTraceDocValue(HTTP_RESPONSE_STATUS_CODE_FIELD, flattenedDoc),
+      value: flattenedDoc[HTTP_RESPONSE_STATUS_CODE_FIELD],
     },
   };
 };

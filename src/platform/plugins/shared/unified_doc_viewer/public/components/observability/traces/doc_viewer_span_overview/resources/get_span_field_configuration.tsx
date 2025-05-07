@@ -15,7 +15,6 @@ import {
   SPAN_SUBTYPE_FIELD,
   SPAN_TYPE_FIELD,
   SpanDocumentOverview,
-  type DataTableRecord,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -24,7 +23,6 @@ import {
   FieldConfiguration,
   getCommonFieldConfiguration,
 } from '../../resources/get_field_configuration';
-import { getTraceDocValue } from '../../resources/get_field_value';
 import { DependencyNameLink } from '../sub_components/dependency_name_link';
 
 export const getSpanFieldConfiguration = ({
@@ -32,7 +30,7 @@ export const getSpanFieldConfiguration = ({
   flattenedDoc,
 }: {
   attributes: SpanDocumentOverview;
-  flattenedDoc: DataTableRecord['flattened'];
+  flattenedDoc: SpanDocumentOverview;
 }): Record<string, FieldConfiguration> => {
   return {
     ...getCommonFieldConfiguration({ attributes, flattenedDoc }),
@@ -43,7 +41,7 @@ export const getSpanFieldConfiguration = ({
       content: (value, formattedValue) => (
         <HighlightField value={value} formattedValue={formattedValue} />
       ),
-      value: getTraceDocValue(SPAN_NAME_FIELD, flattenedDoc),
+      value: flattenedDoc[SPAN_NAME_FIELD],
       formattedValue: attributes[SPAN_NAME_FIELD],
     },
     [SPAN_DESTINATION_SERVICE_RESOURCE_FIELD]: {
@@ -58,13 +56,13 @@ export const getSpanFieldConfiguration = ({
           {({ content }) => (
             <DependencyNameLink
               dependencyName={value as string}
-              environment={getTraceDocValue(SERVICE_ENVIRONMENT_FIELD, flattenedDoc)}
+              environment={flattenedDoc[SERVICE_ENVIRONMENT_FIELD]}
               formattedDependencyName={content}
             />
           )}
         </HighlightField>
       ),
-      value: getTraceDocValue(SPAN_DESTINATION_SERVICE_RESOURCE_FIELD, flattenedDoc),
+      value: flattenedDoc[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD],
       formattedValue: attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD],
       fieldMetadata: {
         flat_name: 'span.destination.service.resource',
@@ -79,7 +77,7 @@ export const getSpanFieldConfiguration = ({
           {({ content }) => <EuiBadge color="hollow">{content}</EuiBadge>}
         </HighlightField>
       ),
-      value: getTraceDocValue(SPAN_TYPE_FIELD, flattenedDoc),
+      value: flattenedDoc[SPAN_TYPE_FIELD],
       formattedValue: attributes[SPAN_TYPE_FIELD],
     },
     [SPAN_SUBTYPE_FIELD]: {
@@ -91,7 +89,7 @@ export const getSpanFieldConfiguration = ({
           {({ content }) => <EuiBadge color="hollow">{content}</EuiBadge>}
         </HighlightField>
       ),
-      value: getTraceDocValue(SPAN_SUBTYPE_FIELD, flattenedDoc),
+      value: flattenedDoc[SPAN_SUBTYPE_FIELD],
       formattedValue: attributes[SPAN_SUBTYPE_FIELD],
     },
   };
