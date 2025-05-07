@@ -22,8 +22,6 @@ import {
   ErrorConversion,
 } from './conversions';
 
-const DEFAULT_PATTERN = `[%date][%level][%logger] %message %error`;
-
 export const patternSchema = schema.string({
   maxLength: 1000,
   validate: (string) => {
@@ -55,7 +53,7 @@ const conversions: Conversion[] = [
 export class PatternLayout extends BasePatternLayout {
   public static configSchema = patternLayoutSchema;
 
-  constructor(pattern: string = DEFAULT_PATTERN, highlight: boolean = false) {
+  constructor(pattern?: string, highlight: boolean = false) {
     super({
       pattern,
       highlight,
