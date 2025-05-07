@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { DashboardActions } from './dashboard_actions';
 import { useKibana } from '../../../utils/kibana_react';
 import { TopAlert } from '../../..';
 
@@ -105,9 +104,6 @@ export function RelatedDashboards({ alert, relatedDashboards }: RelatedDashboard
               <EuiText color={'subdued'} size="s">
                 {dashboard.description}
               </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <DashboardActions dashboardTitle={dashboard.title} dashboardId={dashboard.id} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiHorizontalRule margin="xs" />
