@@ -25,7 +25,8 @@
       "savedObjectsTagging",
       "share",
       "streams",
-      "unifiedSearch"
+      "unifiedSearch",
+      "dashboard",
     ],
     "requiredBundles": ["kibanaReact"]
   }

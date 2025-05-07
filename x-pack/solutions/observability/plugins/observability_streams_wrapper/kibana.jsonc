@@ -14,7 +14,9 @@
       "observabilityShared",
       "navigation",
     ],
-    "requiredBundles": [],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
     "optionalPlugins": [],
     "extraPublicDirs": []
   }

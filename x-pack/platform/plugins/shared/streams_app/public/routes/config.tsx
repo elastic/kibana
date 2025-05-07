@@ -15,6 +15,7 @@ import { RedirectTo } from '../components/redirect_to';
 import { StreamListView } from '../components/stream_list_view';
 import { StreamManagementView } from '../components/stream_management_view';
 import { StreamDetailRoot } from '../components/stream_root';
+import { LinkedDashboardView } from '../components/linked_dashboard_view';
 
 /**
  * The array of route definitions to be used when the application
@@ -52,6 +53,14 @@ const streamsAppRoutes = {
         children: {
           '/{key}': {
             element: <RedirectTo path="/{key}/{tab}" params={{ path: { tab: 'overview' } }} />,
+          },
+          '/{key}/dashboard/{id}': {
+            element: <LinkedDashboardView />,
+            params: t.type({
+              path: t.type({
+                id: t.string,
+              }),
+            }),
           },
           '/{key}/{tab}': {
             element: <StreamDetailView />,

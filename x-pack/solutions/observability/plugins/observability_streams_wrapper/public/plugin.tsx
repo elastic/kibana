@@ -17,7 +17,7 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { STREAMS_APP_ID } from '@kbn/deeplinks-observability/constants';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { APP_WRAPPER_CLASS, type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import { css } from '@emotion/css';
@@ -28,6 +28,7 @@ import { useAbortableAsync } from '@kbn/react-hooks';
 import { isGroupStreamDefinition, isGroupStreamGetResponse } from '@kbn/streams-schema';
 import { EuiLink } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { createObservabilityStreamsAppPageTemplate } from './observability_streams_page_template';
 import type {
   ConfigSchema,
@@ -203,6 +204,8 @@ const createGroupStreamNavigationComponent =
   () => {
     const { streamsRepositoryClient } = pluginsStart.streams;
 
+    // This state obviously isn't in sync with the Streams app breadcrumbs...
+    const [currentDashboard, setCurrentDashboard] = useState<string>('');
     const [currentStream, setCurrentStream] = useLocalStorage<string | undefined>(
       'observability_streams_wrapper.current_stream',
       undefined
@@ -240,14 +243,14 @@ const createGroupStreamNavigationComponent =
     }
 
     if (!currentStream) {
-      // find the group streams of type application and render links to them
+      // find the group streams of type product and render links to them
       const groupStreams = value.filter((stream) => {
         const def = stream.stream;
         return isGroupStreamDefinition(def) && def.group.category === 'products';
       });
 
       return (
-        <div style={{ margin: '17px' }}>
+        <div style={{ marginBottom: '16px' }}>
           <h2>
             {i18n.translate('xpack.streams.createGroupStreamNavigationComponent.h2.productsLabel', {
               defaultMessage: 'Products',
@@ -279,7 +282,7 @@ const createGroupStreamNavigationComponent =
       );
     }
 
-    // upstream sstreams are other group streams that link to the current stream. Use the list of streams to calculate
+    // upstream streams are other group streams that link to the current stream. Use the list of streams to calculate
     const upstreamStreams = currentStream
       ? value.filter((stream) => {
           const def = stream.stream;
@@ -300,11 +303,12 @@ const createGroupStreamNavigationComponent =
 
     // render upstream streams, then current stream, then downstream streams
     return (
-      <div style={{ margin: '17px' }}>
+      <div style={{ marginBottom: '16px' }}>
         <EuiLink
           data-test-subj="observabilityStreamsWrapperCreateGroupStreamNavigationComponentAllLink"
           onClick={() => {
             setCurrentStream('');
+            setCurrentDashboard('');
             coreStart.application.navigateToApp(STREAMS_APP_ID, {
               path: '/',
             });
@@ -314,6 +318,7 @@ const createGroupStreamNavigationComponent =
             defaultMessage: 'All products',
           })}
         </EuiLink>
+
         {upstreamStreams.map((stream) => {
           const groupStream = stream.stream;
           return (
@@ -322,6 +327,7 @@ const createGroupStreamNavigationComponent =
                 data-test-subj="observabilityStreamsWrapperCreateGroupStreamNavigationComponentLink"
                 onClick={() => {
                   setCurrentStream(groupStream.name);
+                  setCurrentDashboard('');
                   if (plugin.localHistory) {
                     plugin.localHistory.push(`/${groupStream.name}`);
                   } else {
@@ -336,10 +342,15 @@ const createGroupStreamNavigationComponent =
             </div>
           );
         })}
-        <div style={{ fontWeight: 'bold', marginLeft: '15px' }}>
+
+        <div style={{ marginLeft: upstreamStreams.length === 0 ? '0' : '8px' }}>
           <EuiLink
-            css={{ fontWeight: 'bold', color: 'black' }}
+            css={{
+              fontWeight: currentDashboard ? 'normal' : 'bold',
+              color: currentDashboard ? '#1750B' : 'black',
+            }}
             onClick={() => {
+              setCurrentDashboard('');
               if (plugin.localHistory) {
                 plugin.localHistory.push(`/${currentStream}`);
               } else {
@@ -353,13 +364,15 @@ const createGroupStreamNavigationComponent =
             {currentStream}
           </EuiLink>
         </div>
+
         {downstreamStreams.map((stream) => {
           return (
-            <div key={stream} style={{ marginLeft: '30px' }}>
+            <div key={stream} style={{ marginLeft: upstreamStreams.length === 0 ? '8px' : '16px' }}>
               <EuiLink
                 data-test-subj="observabilityStreamsWrapperCreateGroupStreamNavigationComponentLink"
                 onClick={() => {
                   setCurrentStream(stream);
+                  setCurrentDashboard('');
                   if (plugin.localHistory) {
                     plugin.localHistory.push(`/${stream}`);
                   } else {
@@ -374,6 +387,83 @@ const createGroupStreamNavigationComponent =
             </div>
           );
         })}
+
+        {currentStream && currentStreamValue && currentStreamValue.dashboards.length !== 0 && (
+          <div
+            style={{
+              marginLeft:
+                upstreamStreams.length === 0 || downstreamStreams.length === 0 ? '8px' : '16px',
+              marginTop: '18px',
+            }}
+          >
+            {currentStreamValue.dashboards.map((dashboard) => (
+              <DashboardLink
+                setCurrentDashboard={setCurrentDashboard}
+                currentDashboard={currentDashboard}
+                key={dashboard}
+                id={dashboard}
+                plugin={plugin}
+                stream={currentStream}
+                coreStart={coreStart}
+              />
+            ))}
+          </div>
+        )}
       </div>
     );
   };
+
+function DashboardLink({
+  id,
+  plugin,
+  stream,
+  coreStart,
+  currentDashboard,
+  setCurrentDashboard,
+}: {
+  id: string;
+  plugin: ObservabilityStreamsWrapperPlugin;
+  stream: string;
+  coreStart: CoreStart;
+  currentDashboard: string;
+  setCurrentDashboard: (value: string) => void;
+}) {
+  const {
+    services: { http },
+  } = useKibana();
+
+  const [dashboardTitle, setDashboardTitle] = useState('');
+
+  useEffect(() => {
+    async function loadDashboard() {
+      const response = await http?.fetch(`/api/dashboards/dashboard/${id}`);
+      setDashboardTitle((response as any).item.attributes.title);
+    }
+
+    loadDashboard();
+  }, [id, http]);
+
+  const handleClick = () => {
+    setCurrentDashboard(id);
+    if (plugin.localHistory) {
+      plugin.localHistory.push(`/${stream}/dashboard/${id}`);
+    } else {
+      coreStart.application.navigateToApp(STREAMS_APP_ID, {
+        path: `/${stream}/dashboard/${id}`,
+      });
+    }
+  };
+
+  return (
+    <EuiLink
+      data-test-subj="observabilityStreamsWrapperDashboardLinkLink"
+      css={{
+        fontWeight: id === currentDashboard ? 'bold' : 'normal',
+        color: id === currentDashboard ? 'black' : '#1750B',
+      }}
+      onClick={handleClick}
+    >
+      {dashboardTitle}
+    </EuiLink>
+  );
+}
