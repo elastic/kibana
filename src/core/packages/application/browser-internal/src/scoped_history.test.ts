@@ -200,12 +200,12 @@ describe('ScopedHistory', () => {
         `"ScopedHistory instance has fell out of navigation scope for basePath: /app/wow"`
       );
       expect(() => h.replace('/new-page')).toThrow();
-      expect(() => h.go()).toThrow();
+      expect(() => h.go(1)).toThrow();
       expect(() => h.goBack()).toThrow();
       expect(() => h.goForward()).toThrow();
       expect(() => h.block()).toThrow();
-      expect(() => h.listen()).toThrow();
-      expect(() => h.createHref()).toThrow();
+      expect(() => h.listen(() => {})).toThrow();
+      expect(() => h.createHref({ pathname: '/test', search: '' })).toThrow();
     });
   });
 
