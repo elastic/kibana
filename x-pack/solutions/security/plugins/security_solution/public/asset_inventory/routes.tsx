@@ -12,7 +12,7 @@ import { SecurityPageName } from '../app/types';
 import { ASSET_INVENTORY_PATH } from '../../common/constants';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { AssetInventoryLoading } from './components/asset_inventory_loading';
 
 const AssetsPageLazy = lazy(() => import('./pages'));
@@ -32,13 +32,11 @@ export const AssetInventoryRoutes = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <PluginTemplateWrapper>
-        <SecurityRoutePageWrapper pageName={SecurityPageName.assetInventory}>
-          <SecuritySolutionPageWrapper noPadding>
-            <Suspense fallback={<AssetInventoryLoading />}>
-              <AssetsPageLazy />
-            </Suspense>
-          </SecuritySolutionPageWrapper>
-        </SecurityRoutePageWrapper>
+        <SecuritySolutionPageWrapper noPadding>
+          <Suspense fallback={<AssetInventoryLoading />}>
+            <AssetsPageLazy />
+          </Suspense>
+        </SecuritySolutionPageWrapper>
       </PluginTemplateWrapper>
     </QueryClientProvider>
   );
@@ -47,6 +45,8 @@ export const AssetInventoryRoutes = () => {
 export const routes: SecuritySubPluginRoutes = [
   {
     path: ASSET_INVENTORY_PATH,
-    component: AssetInventoryRoutes,
+    component: withSecurityRoutePageWrapper(AssetInventoryRoutes, SecurityPageName.assetInventory, {
+      redirectOnMissing: true,
+    }),
   },
 ];
