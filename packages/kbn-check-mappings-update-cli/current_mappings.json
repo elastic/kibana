@@ -2738,6 +2738,52 @@
       }
     }
   },
+  "monitoring-entity-source": {
+    "dynamic": false,
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "error": {
+        "type": "keyword"
+      },
+      "filter": {
+        "dynamic": false,
+        "type": "object"
+      },
+      "indexPattern": {
+        "index": false,
+        "type": "keyword"
+      },
+      "integrationName": {
+        "index": false,
+        "type": "keyword"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "matchers": {
+        "dynamic": false,
+        "properties": {
+          "field": {
+            "index": false,
+            "type": "keyword"
+          },
+          "value": {
+            "index": false,
+            "type": "keyword"
+          }
+        },
+        "type": "object"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      }
+    }
+  },
   "monitoring-telemetry": {
     "properties": {
       "reportedClusterUuids": {

@@ -814,6 +814,19 @@
     "job.job_id",
     "model_id"
   ],
+  "monitoring-entity-source": [
+    "enabled",
+    "error",
+    "filter",
+    "indexPattern",
+    "integrationName",
+    "managed",
+    "matchers",
+    "matchers.field",
+    "matchers.value",
+    "name",
+    "type"
+  ],
   "monitoring-telemetry": [
     "reportedClusterUuids"
   ],
