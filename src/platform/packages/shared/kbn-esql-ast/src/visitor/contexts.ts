@@ -195,11 +195,6 @@ export class CommandVisitorContext<
     return this.node.name.toUpperCase();
   }
 
-  public visitSubQuery(queryNode: ESQLAstQueryExpression) {
-    this.ctx.assertMethodExists('visitQuery');
-    return this.ctx.visitQuery(this, queryNode, undefined as any);
-  }
-
   public *options(): Iterable<ESQLCommandOption> {
     for (const arg of this.node.args) {
       if (!arg || Array.isArray(arg)) {
@@ -284,6 +279,25 @@ export class CommandVisitorContext<
         const sourceContext = new SourceExpressionVisitorContext(this.ctx, arg, this);
         const result = this.ctx.methods.visitSourceExpression!(sourceContext, input);
 
+        yield result;
+      }
+    }
+  }
+
+  public visitSubQuery(queryNode: ESQLAstQueryExpression) {
+    this.ctx.assertMethodExists('visitQuery');
+    return this.ctx.visitQuery(this, queryNode, undefined as any);
+  }
+
+  public *visitSubQueries() {
+    this.ctx.assertMethodExists('visitQuery');
+    for (const arg of this.node.args) {
+      if (!arg || Array.isArray(arg)) {
+        continue;
+      }
+
+      if (arg.type === 'query') {
+        const result = this.visitSubQuery(arg);
         yield result;
       }
     }

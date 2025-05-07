@@ -88,7 +88,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup>
-            <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
+            <EuiFlexItem css={{ maxHeight: 120 }} grow={1}>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
@@ -155,7 +155,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
           <EuiFlexGroup>
-            <EuiFlexItem style={{ maxHeight: 120 }} grow={1}>
+            <EuiFlexItem css={{ maxHeight: 120 }} grow={1}>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}

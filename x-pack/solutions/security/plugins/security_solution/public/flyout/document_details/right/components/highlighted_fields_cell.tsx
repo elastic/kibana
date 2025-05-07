@@ -11,7 +11,6 @@ import { EuiFlexItem } from '@elastic/eui';
 import { getAgentTypeForAgentIdField } from '../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
-import { useDocumentDetailsContext } from '../../shared/context';
 import { AGENT_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 import {
   HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID,
@@ -34,6 +33,16 @@ export interface HighlightedFieldsCellProps {
    * Highlighted field's value to display
    */
   values: string[] | null | undefined;
+  /**
+   * Maintain backwards compatibility // TODO remove when possible
+   * Only needed if alerts page flyout (which has PreviewLink), NOT in the AI for SOC alert summary flyout.
+   */
+  scopeId?: string;
+  /**
+   * If true, we show a PreviewLink for some specific fields.
+   * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
+   */
+  showPreview?: boolean;
 }
 
 /**
@@ -43,9 +52,9 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   values,
   field,
   originalField = '',
+  scopeId = '',
+  showPreview = false,
 }) => {
-  const { scopeId } = useDocumentDetailsContext();
-
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
   }, [originalField]);
@@ -60,7 +69,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
               key={`${i}-${value}`}
               data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
             >
-              {hasPreview(field) ? (
+              {showPreview && hasPreview(field) ? (
                 <PreviewLink
                   field={field}
                   value={value}

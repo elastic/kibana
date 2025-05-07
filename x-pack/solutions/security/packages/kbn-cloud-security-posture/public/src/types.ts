@@ -81,20 +81,45 @@ export interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
-export interface FindingMisconfigurationFlyoutProps extends Record<string, unknown> {
+interface BaseFlyoutProps {
   ruleId: string;
   resourceId: string;
 }
-export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'findings-misconfiguration-panel';
-  params: FindingMisconfigurationFlyoutProps;
+
+interface PreviewModeProps {
+  isPreviewMode: true;
+  scopeId: string;
+  banner: {
+    title: string;
+    backgroundColor: string;
+    textColor: string;
+  };
 }
+
+interface NonPreviewModeProps {
+  isPreviewMode?: false | undefined;
+}
+export type FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview = FlyoutPanelProps & {
+  id: 'findings-misconfiguration-panel';
+  params: BaseFlyoutProps & NonPreviewModeProps;
+};
+
+export type FindingsMisconfigurationPanelExpandableFlyoutPropsPreview = FlyoutPanelProps & {
+  id: 'findings-misconfiguration-panel-preview';
+  params: BaseFlyoutProps & PreviewModeProps;
+};
+
+export type FindingsMisconfigurationPanelExpandableFlyoutProps =
+  | FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview
+  | FindingsMisconfigurationPanelExpandableFlyoutPropsPreview;
+
 export interface FindingsMisconfigurationFlyoutHeaderProps {
   finding: CspFinding;
 }
 
 export interface FindingsMisconfigurationFlyoutContentProps {
   finding: CspFinding;
+  isPreviewMode?: boolean;
 }
 
 export interface FindingMisconfigurationFlyoutFooterProps {
@@ -104,4 +129,5 @@ export interface FindingMisconfigurationFlyoutFooterProps {
 export interface FindingMisconfigurationFlyoutContentProps {
   finding: CspFinding;
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
+  isPreviewMode?: boolean;
 }

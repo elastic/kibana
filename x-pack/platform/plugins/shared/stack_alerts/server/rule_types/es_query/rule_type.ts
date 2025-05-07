@@ -21,7 +21,7 @@ import type { EsQueryRuleParamsExtractedParams, EsQueryRuleState } from './rule_
 import { validateServerless } from './rule_type_params';
 
 import type { ExecutorOptions } from './types';
-import { ActionGroupId } from './constants';
+import { ActionGroupId } from '../../../common/es_query';
 import { executor } from './executor';
 import { isSearchSourceRule } from './util';
 import type { StackAlertType } from '../types';
@@ -149,6 +149,13 @@ export function getRuleType(
     }
   );
 
+  const actionVariableContextGroupingLabel = i18n.translate(
+    'xpack.stackAlerts.esQuery.actionVariableContextGroupingLabel',
+    {
+      defaultMessage: 'The object containing groups that are reporting data',
+    }
+  );
+
   return {
     id: ES_QUERY_ID,
     name: ruleTypeName,
@@ -180,6 +187,7 @@ export function getRuleType(
         { name: 'hits', description: actionVariableContextHitsLabel },
         { name: 'conditions', description: actionVariableContextConditionsLabel },
         { name: 'link', description: actionVariableContextLinkLabel, usesPublicBaseUrl: true },
+        { name: 'grouping', description: actionVariableContextGroupingLabel },
       ],
       params: [
         { name: 'size', description: actionVariableContextSizeLabel },

@@ -47,6 +47,7 @@ export type ExecutionUuidAggBucket = estypes.AggregationsStringTermsBucketKeys &
     searchDuration: estypes.AggregationsMinAggregate;
     indexDuration: estypes.AggregationsMinAggregate;
     gapDuration: estypes.AggregationsMinAggregate;
+    frozenIndicesQueriedCount: estypes.AggregationsMinAggregate;
   };
 };
 

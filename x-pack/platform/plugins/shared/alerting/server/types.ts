@@ -51,6 +51,7 @@ import type {
   SanitizedRuleConfig,
   SanitizedRule,
   RuleAlertData,
+  Artifacts,
 } from '../common';
 import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -59,6 +60,7 @@ import type { GetTimeRangeResult } from './lib/get_time_range';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
+export type { Artifacts };
 /**
  * @public
  */
@@ -139,6 +141,7 @@ export interface RuleExecutorOptions<
   flappingSettings: RulesSettingsFlappingProperties;
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
   isServerless: boolean;
+  ruleExecutionTimeout?: string;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {

@@ -22,9 +22,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('retrieve_elastic_doc', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/218819
+  // Failing: See https://github.com/elastic/kibana/issues/218820
+  describe.skip('retrieve_elastic_doc', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     const supertest = getService('supertest');
     const USER_PROMPT = 'What is Kibana Lens?';
 
@@ -37,7 +39,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
           port: llmProxy.getPort(),
         });
-        void llmProxy.interceptConversation('Hello from LLM Proxy');
+        void llmProxy.interceptWithResponse('Hello from LLM Proxy');
 
         await chatComplete({
           userPrompt: USER_PROMPT,
@@ -104,7 +106,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           when: () => true,
         });
 
-        void llmProxy.interceptConversation('Hello from LLM Proxy');
+        void llmProxy.interceptWithResponse('Hello from LLM Proxy');
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: USER_PROMPT,

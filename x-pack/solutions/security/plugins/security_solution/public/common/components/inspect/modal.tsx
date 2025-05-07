@@ -17,6 +17,7 @@ import {
   EuiModalFooter,
   EuiSpacer,
   EuiTabbedContent,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import type { ReactNode } from 'react';
@@ -24,12 +25,15 @@ import React, { useMemo, Fragment } from 'react';
 import styled from '@emotion/styled';
 
 import { useLocation } from 'react-router-dom';
+import { isString } from 'lodash/fp';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
 import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export interface ModalInspectProps {
   adHocDataViews?: string[] | null;
@@ -118,9 +122,19 @@ export const ModalInspectQuery = ({
   title,
 }: ModalInspectProps) => {
   const { pathname } = useLocation();
-  const { selectedPatterns } = useSourcererDataView(
-    inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname)
-  );
+  const sourcererScope =
+    inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname);
+
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(sourcererScope);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+
+  const modalTitleId = useGeneratedHtmlId();
 
   const requests: string[] = useMemo(
     () => [request, ...(additionalRequests != null ? additionalRequests : [])],
@@ -235,7 +249,7 @@ export const ModalInspectQuery = ({
               <Fragment key={index}>
                 <EuiCodeBlock
                   data-test-subj="modal-inspect-request-preview"
-                  language="json"
+                  language={isString(inspectRequest.body) ? 'esql' : 'json'}
                   fontSize="m"
                   paddingSize="m"
                   color="dark"
@@ -244,7 +258,9 @@ export const ModalInspectQuery = ({
                   isVirtualized
                   lineNumbers
                 >
-                  {manageStringify(inspectRequest.body)}
+                  {isString(inspectRequest.body)
+                    ? inspectRequest.body
+                    : manageStringify(inspectRequest.body)}
                 </EuiCodeBlock>
               </Fragment>
             ))
@@ -284,9 +300,13 @@ export const ModalInspectQuery = ({
   );
 
   return (
-    <MyEuiModal onClose={closeModal} data-test-subj="modal-inspect-euiModal">
+    <MyEuiModal
+      aria-labelledby={modalTitleId}
+      onClose={closeModal}
+      data-test-subj="modal-inspect-euiModal"
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.INSPECT} {title}
         </EuiModalHeaderTitle>
       </EuiModalHeader>

@@ -18,8 +18,12 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { isDefendInsightsEnabled, updateDefendInsightsLastViewedAt } from './helpers';
+import { CallbackIds, ElasticAssistantRequestHandlerContext } from '../../types';
+import {
+  isDefendInsightsEnabled,
+  runExternalCallbacks,
+  updateDefendInsightsLastViewedAt,
+} from './helpers';
 
 export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
@@ -89,14 +93,27 @@ export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHa
             });
           }
 
-          const defendInsights = await updateDefendInsightsLastViewedAt({
-            dataClient,
+          const defendInsights = await dataClient.findDefendInsightsByParams({
             params: request.query,
             authenticatedUser,
           });
+
+          if (defendInsights.length) {
+            const agentIds = Array.from(
+              new Set(defendInsights.flatMap((insight) => insight.endpointIds))
+            );
+            await runExternalCallbacks(CallbackIds.DefendInsightsPostFetch, request, agentIds);
+          }
+
+          const updatedDefendInsights = await updateDefendInsightsLastViewedAt({
+            dataClient,
+            defendInsights,
+            authenticatedUser,
+          });
+
           return response.ok({
             body: {
-              data: defendInsights,
+              data: updatedDefendInsights,
             },
           });
         } catch (err) {

@@ -10,7 +10,7 @@
 import { apm } from '@elastic/apm-rum';
 import React from 'react';
 
-import { mutateError } from '../../lib';
+import { getErrorBoundaryLabels } from '../../lib';
 import type { KibanaErrorBoundaryServices } from '../../types';
 import { useErrorBoundary } from '../services';
 import { FatalPrompt, RecoverablePrompt } from './message_components';
@@ -41,10 +41,11 @@ class ErrorBoundaryInternal extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    const customError = mutateError(error);
-    apm.captureError(customError);
+    apm.captureError(error, {
+      labels: getErrorBoundaryLabels('PageFatalReactError'),
+    });
     console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
-    console.error(customError); // eslint-disable-line no-console
+    console.error(error); // eslint-disable-line no-console
 
     const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);
     this.setState(() => {

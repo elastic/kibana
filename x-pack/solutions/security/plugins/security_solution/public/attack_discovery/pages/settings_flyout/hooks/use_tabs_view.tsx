@@ -14,6 +14,8 @@ import {
   type EuiTabbedContentTab,
   EuiSpacer,
 } from '@elastic/eui';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+
 import * as i18n from './translations';
 import { useSettingsView } from './use_settings_view';
 import type { AlertsSelectionSettings } from '../types';
@@ -36,23 +38,33 @@ export interface UseTabsView {
 }
 
 interface Props {
+  connectorId: string | undefined;
+  onConnectorIdSelected: (connectorId: string) => void;
+  onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
   onSettingsReset?: () => void;
   onSettingsSave?: () => void;
-  onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
   settings: AlertsSelectionSettings;
+  stats: AttackDiscoveryStats | null;
 }
 
 export const useTabsView = ({
+  connectorId,
+  onConnectorIdSelected,
   onSettingsReset,
   onSettingsSave,
   onSettingsChanged,
   settings,
+  stats,
 }: Props): UseTabsView => {
   const { settingsView, actionButtons: filterActionButtons } = useSettingsView({
+    connectorId,
+    onConnectorIdSelected,
     onSettingsReset,
     onSettingsSave,
     onSettingsChanged,
     settings,
+    showConnectorSelector: true,
+    stats,
   });
   const { scheduleView, actionButtons: scheduleTabButtons } = useScheduleView();
 

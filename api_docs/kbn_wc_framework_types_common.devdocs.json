@@ -1,0 +1,528 @@
+{
+  "id": "@kbn/wc-framework-types-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/wc-framework-types-common",
+        "id": "def-common.isNodeProgressionEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "isNodeProgressionEvent",
+        "description": [
+          "\nChecks if the given workflow run event is a {@link NodeProgressionEvent}"
+        ],
+        "signature": [
+          "(event: ",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.WorkflowRunEvent",
+            "text": "WorkflowRunEvent"
+          },
+          ") => event is ",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.NodeProgressionEvent",
+            "text": "NodeProgressionEvent"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/workflows/workflow_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.isNodeProgressionEvent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.WorkflowRunEvent",
+                "text": "WorkflowRunEvent"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/workflows/workflow_events.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-common",
+        "id": "def-common.isWorkflowProgressionEvent",
+        "type": "Function",
+        "tags": [],
+        "label": "isWorkflowProgressionEvent",
+        "description": [
+          "\nChecks if the given workflow run event is a {@link WorkflowProgressionEvent}"
+        ],
+        "signature": [
+          "(event: ",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.WorkflowRunEvent",
+            "text": "WorkflowRunEvent"
+          },
+          ") => event is ",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.WorkflowProgressionEvent",
+            "text": "WorkflowProgressionEvent"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/workflows/workflow_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.isWorkflowProgressionEvent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "event",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.WorkflowRunEvent",
+                "text": "WorkflowRunEvent"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/workflows/workflow_events.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/wc-framework-types-common",
+        "id": "def-common.NodeEventMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeEventMeta",
+        "description": [
+          "\nMeta information attached to a node event."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/nodes/node_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.NodeEventMeta.nodeId",
+            "type": "string",
+            "tags": [],
+            "label": "nodeId",
+            "description": [
+              "\nThe id of the node this event was fired from."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/nodes/node_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.NodeEventMeta.nodeType",
+            "type": "string",
+            "tags": [],
+            "label": "nodeType",
+            "description": [
+              "\nThe type of the node this event was fired from."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/nodes/node_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.NodeEventMeta.workflowId",
+            "type": "string",
+            "tags": [],
+            "label": "workflowId",
+            "description": [
+              "\nThe id of the workflow this event was fired from"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/nodes/node_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-common",
+        "id": "def-common.NodeProgressionEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "NodeProgressionEvent",
+        "description": [
+          "\nNode progression event.\n\nCan be emitted to do real time status update during a workflow execution."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/nodes/node_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.NodeProgressionEvent.eventType",
+            "type": "string",
+            "tags": [],
+            "label": "eventType",
+            "description": [
+              "\nThe type of event, `node_progression`."
+            ],
+            "signature": [
+              "\"node_progression\""
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/nodes/node_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.NodeProgressionEvent.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "\nMeta bound to this event"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/wc-framework-types-common",
+                "scope": "common",
+                "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+                "section": "def-common.NodeEventMeta",
+                "text": "NodeEventMeta"
+              }
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/nodes/node_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.NodeProgressionEvent.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [
+              "\nA human-readable label to display for this progression event."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/nodes/node_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.NodeProgressionEvent.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nOptional, arbitrary data associated with this event."
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/nodes/node_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-common",
+        "id": "def-common.ToolDescriptor",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolDescriptor",
+        "description": [
+          "\nRepresents the definition of a tool, without its handler or schema."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/tools/tool.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.ToolDescriptor.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nA unique id for this tool."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/tools/tool.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.ToolDescriptor.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the tool, which will be exposed to the LLM."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/tools/tool.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.ToolDescriptor.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "\nThe description for this tool, which will be exposed to the LLM."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/tools/tool.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.ToolDescriptor.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "\nAn arbitrary record of meta, that can be used for filtering / identifying tools in workflows."
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/tools/tool.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-common",
+        "id": "def-common.WorkflowProgressionEvent",
+        "type": "Interface",
+        "tags": [],
+        "label": "WorkflowProgressionEvent",
+        "description": [
+          "\nWorkflow progression event.\n\nCan be emitted to do real time status update during a workflow execution."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/workflows/workflow_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.WorkflowProgressionEvent.eventType",
+            "type": "string",
+            "tags": [],
+            "label": "eventType",
+            "description": [
+              "\nThe type of event, `workflow_progression`."
+            ],
+            "signature": [
+              "\"workflow_progression\""
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/workflows/workflow_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.WorkflowProgressionEvent.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "\nMeta bound to this event"
+            ],
+            "signature": [
+              "{ workflowId: string; }"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/workflows/workflow_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.WorkflowProgressionEvent.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [
+              "\nA human-readable label to display for this progression event."
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/workflows/workflow_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/wc-framework-types-common",
+            "id": "def-common.WorkflowProgressionEvent.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [
+              "\nOptional, arbitrary data associated with this event."
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/workflows/workflow_events.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/wc-framework-types-common",
+        "id": "def-common.NodeType",
+        "type": "Enum",
+        "tags": [],
+        "label": "NodeType",
+        "description": [],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/nodes/node_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/wc-framework-types-common",
+        "id": "def-common.BuiltInToolId",
+        "type": "string",
+        "tags": [],
+        "label": "BuiltInToolId",
+        "description": [
+          "\nList of built-in tool names."
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/tools/tool_names.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-common",
+        "id": "def-common.NodeEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "NodeEvent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.NodeProgressionEvent",
+            "text": "NodeProgressionEvent"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/nodes/node_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-common",
+        "id": "def-common.WorkflowEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowEvent",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.WorkflowProgressionEvent",
+            "text": "WorkflowProgressionEvent"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/workflows/workflow_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/wc-framework-types-common",
+        "id": "def-common.WorkflowRunEvent",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowRunEvent",
+        "description": [
+          "\nRepresent all type of events that can be fired during a workflow run"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.NodeProgressionEvent",
+            "text": "NodeProgressionEvent"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/wc-framework-types-common",
+            "scope": "common",
+            "docId": "kibKbnWcFrameworkTypesCommonPluginApi",
+            "section": "def-common.WorkflowProgressionEvent",
+            "text": "WorkflowProgressionEvent"
+          }
+        ],
+        "path": "x-pack/solutions/chat/packages/wc-framework-types-common/src/workflows/workflow_events.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

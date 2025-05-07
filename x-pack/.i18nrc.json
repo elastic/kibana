@@ -22,6 +22,7 @@
     "xpack.cloud": "platform/plugins/shared/cloud",
     "xpack.cloudLinks": "platform/plugins/private/cloud_integrations/cloud_links",
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
+    "xpack.contentConnectors": "solutions/search/plugins/content_connectors",
     "xpack.csp": [
       "solutions/security/plugins/cloud_security_posture",
       "packages/kbn-cloud-security-posture-common",
@@ -162,7 +163,10 @@
     "xpack.timelines": "platform/plugins/shared/timelines",
     "xpack.transform": "platform/plugins/private/transform",
     "xpack.triggersActionsUI": "platform/plugins/shared/triggers_actions_ui",
-    "xpack.upgradeAssistant": "platform/plugins/private/upgrade_assistant",
+    "xpack.upgradeAssistant": [
+      "platform/plugins/private/upgrade_assistant",
+      "platform/packages/private/upgrade-assistant"
+    ],
     "xpack.uptime": [
       "solutions/observability/plugins/uptime"
     ],

@@ -9,6 +9,8 @@ import { EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
 import { RIGHT_SECTION_TEST_ID } from './test_ids';
 
+const styles = { height: '100%' };
+
 interface RightSectionProps {
   /**
    * Component to be rendered
@@ -21,7 +23,7 @@ interface RightSectionProps {
  */
 export const RightSection: React.FC<RightSectionProps> = memo(
   ({ component }: RightSectionProps) => (
-    <EuiFlexItem grow={false} style={{ height: '100%' }} data-test-subj={RIGHT_SECTION_TEST_ID}>
+    <EuiFlexItem grow={false} css={styles} data-test-subj={RIGHT_SECTION_TEST_ID}>
       {component}
     </EuiFlexItem>
   )
