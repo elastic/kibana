@@ -9,14 +9,15 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { DashboardApi, DashboardCreationOptions } from '../types';
+import { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from '../types';
 import { dataService } from '../../services/kibana_services';
 import { startDashboardSearchSessionIntegration } from './start_dashboard_search_session_integration';
 
 export function initializeSearchSessionManager(
   searchSessionSettings: DashboardCreationOptions['searchSessionSettings'],
   incomingEmbeddable: EmbeddablePackageState | undefined,
-  dashboardApi: Omit<DashboardApi, 'searchSessionId$'>
+  dashboardApi: Omit<DashboardApi, 'searchSessionId$'>,
+  dashboardInternalApi: DashboardInternalApi
 ) {
   const searchSessionId$ = new BehaviorSubject<string | undefined>(undefined);
 
@@ -45,6 +46,7 @@ export function initializeSearchSessionManager(
         ...dashboardApi,
         searchSessionId$,
       },
+      dashboardInternalApi,
       searchSessionSettings,
       (searchSessionId: string) => searchSessionId$.next(searchSessionId)
     );
