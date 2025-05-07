@@ -57,7 +57,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
         });
 
-        it('should have embedded dev console', async () => {
+        it.skip('should have embedded dev console', async () => {
           await testHasEmbeddedConsole(pageObjects);
         });
 

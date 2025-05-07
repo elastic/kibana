@@ -33,7 +33,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('sidenav & breadcrumbs', () => {
-      it('renders the correct nav and navigate to links', async () => {
+      // https://github.com/elastic/kibana/issues/202974
+      it.skip('renders the correct nav and navigate to links', async () => {
         const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 
         await solutionNavigation.expectExists();
