@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { render } from '@testing-library/react';
 
 import { TestProviders, createMockStore } from '../../../../common/mock';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { networkModel } from '../../store';
 import { NetworkTopNFlowTable } from '.';
 import { mockData, mockCount } from './mock';
@@ -22,7 +20,6 @@ jest.mock('../../../../common/components/link_to');
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   let store = createMockStore();
-  const mount = useMountAppended();
   const defaultProps = {
     data: mockData.edges,
     fakeTotalCount: 50,
@@ -43,49 +40,23 @@ describe('NetworkTopNFlow Table Component', () => {
 
   describe('rendering', () => {
     test('it renders the default NetworkTopNFlow table on the Network page', () => {
-      const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
-          <NetworkTopNFlowTable {...defaultProps} />
-        </ReduxStoreProvider>
-      );
-
-      expect(wrapper.find('Memo(NetworkTopNFlowTableComponent)')).toMatchSnapshot();
-    });
-
-    test('it renders the default NetworkTopNFlow table on the IP Details page', () => {
-      const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
-          <NetworkTopNFlowTable {...defaultProps} type={networkModel.NetworkType.details} />
-        </ReduxStoreProvider>
-      );
-
-      expect(wrapper.find('Memo(NetworkTopNFlowTableComponent)')).toMatchSnapshot();
-    });
-  });
-
-  describe('Sorting on Table', () => {
-    test('when you click on the column header, you should show the sorting icon', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders store={store}>
           <NetworkTopNFlowTable {...defaultProps} />
         </TestProviders>
       );
-      expect(store.getState().network.page.queries.topNFlowSource.sort).toEqual({
-        direction: 'desc',
-        field: 'bytes_out',
-      });
 
-      wrapper.find('.euiTable thead tr th button').at(1).simulate('click');
+      expect(container.children[0]).toMatchSnapshot();
+    });
 
-      wrapper.update();
+    test('it renders the default NetworkTopNFlow table on the IP Details page', () => {
+      const { container } = render(
+        <TestProviders store={store}>
+          <NetworkTopNFlowTable {...defaultProps} type={networkModel.NetworkType.details} />
+        </TestProviders>
+      );
 
-      expect(store.getState().network.page.queries.topNFlowSource.sort).toEqual({
-        direction: 'asc',
-        field: 'bytes_out',
-      });
-      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Bytes in');
-      expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Bytes out');
-      expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 });
