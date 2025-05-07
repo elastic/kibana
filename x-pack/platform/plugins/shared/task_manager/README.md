@@ -131,7 +131,7 @@ export class Plugin {
   }
 
   public start(core: CoreStart, plugins: { taskManager }) {
-    
+
   }
 }
 ```
@@ -161,12 +161,12 @@ When Kibana attempts to claim and run a task instance, it looks its definition u
 
 The task runner's `run` method is expected to return a promise that resolves to undefined or to an object that looks like the following:
 
-|Property|Description|Type|
-|---|---|---|
-|runAt| Optional. If specified, this is used as the tasks' next `runAt`, overriding the default system scheduler. | Date ISO String | 
-|schedule| Optional. If specified, this is used as the tasks' new recurring schedule, overriding the default system scheduler and any existing schedule.  | { interval: string } | 
-|error| Optional, an error object, logged out as a warning. The pressence of this property indicates that the task did not succeed.| Error |
-|state| Optional, this will be passed into the next run of the task, if this is a recurring task. |Record<string, unknown>|
+| Property | Description                                                                                                                                   | Type                    |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| runAt    | Optional. If specified, this is used as the tasks' next `runAt`, overriding the default system scheduler.                                     | Date ISO String         |
+| schedule | Optional. If specified, this is used as the tasks' new recurring schedule, overriding the default system scheduler and any existing schedule. | { interval: string }    |
+| error    | Optional, an error object, logged out as a warning. The pressence of this property indicates that the task did not succeed.                   | Error                   |
+| state    | Optional, this will be passed into the next run of the task, if this is a recurring task.                                                     | Record<string, unknown> |
 
 ### Examples
 
@@ -187,7 +187,7 @@ The task runner's `run` method is expected to return a promise that resolves to 
 ```js
 {
   schedule: { interval: '30s' },
-  
+
   state: {
     anything: 'goes here',
   },
@@ -197,16 +197,19 @@ The task runner's `run` method is expected to return a promise that resolves to 
 Other return values will result in a warning, but the system should continue to work.
 
 ### Task retries when the Task Runner fails
+
 If a task runner throws an error, task manager will try to rerun the task shortly after (up to the task definition's `maxAttempts`).
 Normal tasks will wait a default amount of 5m before trying again and every subsequent attempt will add an additonal 5m cool off period to avoid a stampeding herd of failed tasks from storming Elasticsearch.
 
 Recurring tasks will also get retried, but instead of using the 5m interval for the retry, they will be retried on their next scheduled run.
 
 ### Force failing a task
+
 If you wish to purposfully fail a task, you can throw an error of any kind and the retry logic will apply.
 If, on the other hand, you wish not only to fail the task, but you'd also like to indicate the Task Manager that it shouldn't retry the task, you can throw an Unrecoverable Error, using the `throwUnrecoverableError` helper function.
 
 For example:
+
 ```js
   taskManager.registerTaskDefinitions({
     myTask: {
@@ -306,12 +309,15 @@ The data stored for a task instance looks something like this:
 The task manager mixin exposes a taskManager object on the Kibana server which plugins can use to manage scheduled tasks. Each method takes an optional `scope` argument and ensures that only tasks with the specified scope(s) will be affected.
 
 ### Overview
+
 Interaction with the TaskManager Plugin is done via the Kibana Platform Plugin system.
 When developing your Plugin, you're asked to define a `setup` method and a `start` method.
 These methods are handed Kibana's Plugin APIs for these two stages, which means you'll have access to the following apis in these two stages:
 
 #### Setup
+
 The _Setup_ Plugin api includes methods which configure Task Manager to support your Plugin's requirements, such as defining custom Middleware and Task Definitions.
+
 ```js
 {
   addMiddleware: (middleware: Middleware) => {
@@ -324,6 +330,7 @@ The _Setup_ Plugin api includes methods which configure Task Manager to support 
 ```
 
 #### Start
+
 The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's behaviour, such as scheduling tasks.
 
 ```js
@@ -361,8 +368,9 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
 ### Detailed APIs
 
 #### schedule
-Using `schedule` you can instruct TaskManger to schedule an instance of a TaskType at some point in the future.
 
+Using `schedule` you can instruct TaskManger to schedule an instance of a TaskType at some point in the future.
+Please check the [Schedule options](#schedule-options) for the scheduling config details
 
 ```js
 export class Plugin {
@@ -395,27 +403,32 @@ export class Plugin {
   }
 }
 ```
-*results* then look something like this:
+
+_results_ then look something like this:
 
 ```json
+{
+  "searchAfter": ["233322"],
+  // Tasks is an array of task instances
+  "tasks": [
     {
-      "searchAfter": ["233322"],
-      // Tasks is an array of task instances
-      "tasks": [{
-        "id": "3242342",
-        "taskType": "reporting",
-        // etc
-      }]
+      "id": "3242342",
+      "taskType": "reporting"
+      // etc
     }
+  ]
+}
 ```
 
 #### ensureScheduling
+
 When using the `schedule` api to schedule a Task you can provide a hard coded `id` on the Task. This tells TaskManager to use this `id` to identify the Task Instance rather than generate an `id` on its own.
 The danger is that in such a situation, a Task with that same `id` might already have been scheduled at some earlier point, and this would result in an error. In some cases, this is the expected behavior, but often you only care about ensuring the task has been _scheduled_ and don't need it to be scheduled a fresh.
 
 To achieve this you should use the `ensureScheduling` api which has the exact same behavior as `schedule`, except it allows the scheduling of a Task with an `id` that's already in assigned to another Task and it will assume that the existing Task is the one you wished to `schedule`, treating this as a successful operation.
 
 #### runSoon
+
 Using `runSoon` you can instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be now
 
 ```js
@@ -434,15 +447,17 @@ export class Plugin {
       // If running the task has failed, we throw an error with an appropriate message.
       // For example, if the requested task doesnt exist: `Error: failed to run task "91760f10-ba42-de9799" as it does not exist`
       // Or if, for example, the task is already running: `Error: failed to run task "91760f10-ba42-de9799" as it is currently running`
-    }    
+    }
   }
 }
 ```
 
 #### bulkDisable
+
 Using `bulkDisable` you can instruct TaskManger to disable tasks by setting the `enabled` status of specific tasks to `false`.
 
 Example:
+
 ```js
 export class Plugin {
   constructor() {
@@ -460,15 +475,17 @@ export class Plugin {
       // But some updates of some tasks can be failed, due to OCC 409 conflict for example
     } catch(err: Error) {
       // if error is caught, means the whole method requested has failed and tasks weren't updated
-    }    
+    }
   }
 }
 ```
 
 #### bulkEnable
+
 Using `bulkEnable` you can instruct TaskManger to enable tasks by setting the `enabled` status of specific tasks to `true`. Specify the `runSoon` parameter to run the task immediately on enable.
 
 Example:
+
 ```js
 export class Plugin {
   constructor() {
@@ -487,20 +504,23 @@ export class Plugin {
       // But some updates of some tasks can be failed, due to OCC 409 conflict for example
     } catch(err: Error) {
       // if error is caught, means the whole method requested has failed and tasks weren't updated
-    }    
+    }
   }
 }
 ```
 
 #### bulkUpdateSchedules
+
 Using `bulkUpdatesSchedules` you can instruct TaskManger to update interval of tasks that are in `idle` status
-(for the tasks which have `running` status,  `schedule` and `runAt` will be recalculated after task run finishes).
+(for the tasks which have `running` status, `schedule` and `runAt` will be recalculated after task run finishes).
 When interval updated, new `runAt` will be computed and task will be updated with that value, using formula
+
 ```
 newRunAt = oldRunAt - oldInterval + newInterval
 ```
 
 Example:
+
 ```js
 export class Plugin {
   constructor() {
@@ -519,7 +539,7 @@ export class Plugin {
       // But some updates of some tasks can be failed, due to OCC 409 conflict for example
     } catch(err: Error) {
       // if error is caught, means the whole method requested has failed and tasks weren't updated
-    }    
+    }
   }
 }
 ```
@@ -533,6 +553,7 @@ More custom access to the tasks can be done directly via Elasticsearch, though t
 The task manager exposes a middleware layer that allows modifying tasks before they are scheduled / persisted to the task manager index, and modifying tasks / the run context before a task is run.
 
 For example:
+
 ```js
 export class Plugin {
   constructor() {
@@ -568,12 +589,13 @@ export class Plugin {
   }
 
   public start(core: CoreStart, plugins: { taskManager }) {
-    
+
   }
 }
 ```
 
 ## Task Poller: polling for work
+
 TaskManager used to work in a `pull` model, but it now needs to support both `push` and `pull`, so it has been remodeled internally to support a single `push` model.
 
 Task Manager's _push_ mechanism is driven by the following operations:
@@ -596,11 +618,12 @@ Luckily, `Polling Interval` and `Task Scheduled` simply denote a request to "pol
 We achieve this model by buffering requests into a queue using a Set (which removes duplicated). As we don't want an unbounded queue in our system, we have limited the size of this queue (configurable by the `xpack.task_manager.request_capacity` config, defaulting to 1,000 requests) which forces us to throw an error once this cap is reached until the queue drain bellow the cap.
 
 Our current model, then, is this:
+
 ```
-  Polling Interval  --> filter(availableWorkers > 0) - mapTo([]) -------\\ 
+  Polling Interval  --> filter(availableWorkers > 0) - mapTo([]) -------\\
   Task Scheduled    --> filter(availableWorkers > 0) - mapTo([]) --------||==>Set([]+[]+[`1`,`2`]) ==> work([`1`,`2`])
   Run Task `1` Now --\                                                  //
-                      ----> buffer(availableWorkers > 0) -- [`1`,`2`] -// 
+                      ----> buffer(availableWorkers > 0) -- [`1`,`2`] -//
   Run Task `2` Now --/
 ```
 
@@ -616,16 +639,17 @@ The task manager's public API is create / delete / list. Updates aren't directly
 
 - Unit tests:
 
-   Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
+  Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
-   ```
-   yarn test:jest x-pack/platform/plugins/shared/task_manager --watch
-   ```
+  ```
+  yarn test:jest x-pack/platform/plugins/shared/task_manager --watch
+  ```
+
 - Integration tests:
-   ```
-   node scripts/functional_tests_server.js --config x-pack/test/plugin_api_integration/config.ts
-   node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.ts
-   ```
+  ```
+  node scripts/functional_tests_server.js --config x-pack/test/plugin_api_integration/config.ts
+  node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.ts
+  ```
 
 ## Monitoring
 
@@ -633,3 +657,122 @@ Task Manager exposes runtime statistics which enable basic observability into it
 
 Public Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-health-monitoring.html
 Developer Documentation: [./MONITORING](./MONITORING.MD)
+
+### Schedule options
+
+We keep the scheduling config under the schedule field.
+And there are 2 different config options for scheduling a task:
+
+- `schedule.interval`
+  This is a basic interval string such as `1h`,`3m` or `7d` etc.
+
+- `schedule.rrule`
+  This is a subset of the rrule library.
+  We support only daily, weekly and monthly schedules so far.
+
+Monthly schedule options:
+
+```typescript
+  freq: Frequency.MONTHLY, -> Import the enum Frequency from TaskManager (Required field)
+  interval: number; -> Any number. 1 means `every 1 month` (Required field)
+  tzid: string; -> Timezone e.g.: 'UTC' (Required field)
+  bymonthday: number[]; -> number between 1 and 31
+  byhour?: number[]; -> number between 0 and 23
+  byminute?: number[]; -> number between 0 and 59
+  byweekday?: Weekday[]; -> Import the enum Weekday from TaskManager. Weekday.MO is monday
+```
+
+Weekly schedule options:
+
+```typescript
+  freq: Frequency.WEEKLY, -> Import the enum Frequency from TaskManager (Required field)
+  interval: number; -> Any number. 1 means `every 1 week` (Required field)
+  tzid: string; -> Timezone e.g.: 'UTC' (Required field)
+  byhour?: number[]; -> number between 0 and 23
+  byminute?: number[]; -> number between 0 and 59
+  byweekday?: Weekday[]; -> Import the enum Weekday from TaskManager. Weekday.MO is monday
+```
+
+Daily schedule options:
+
+```typescript
+  freq: Frequency.DAILY, -> Import the enum Frequency from TaskManager (Required field)
+  interval: number; -> Any number. 1 means `every 1 day` (Required field)
+  tzid: string; -> Timezone e.g.: 'UTC' (Required field)
+  byhour?: number[]; -> number between 0 and 23
+  byminute?: number[]; -> number between 0 and 59
+  byweekday?: Weekday[]; -> Import the enum Weekday from TaskManager. Weekday.MO is monday
+```
+
+Examples:
+
+Every day at current time:
+
+```js
+  schedule: {
+    rrule: {
+      freq: Frequency.DAILY,
+      tzid: 'UTC',
+      interval: 1
+    }
+  }
+```
+
+Every day at 13:15:
+
+```js
+  schedule: {
+    rrule: {
+      freq: Frequency.DAILY,
+      tzid: 'UTC',
+      interval: 1,
+      byhour: [13],
+      byminute: [15]
+    }
+  }
+```
+
+Every Monday at 17:30
+
+```js
+  schedule: {
+    rrule: {
+      freq: Frequency.DAILY,
+      tzid: 'UTC',
+      interval: 1,
+      byhour: [17],
+      byminute: [30]
+      byweekday: Weekday.MO
+    }
+  }
+```
+
+Every 2 weeks on Friday at 08:45
+
+```js
+  schedule: {
+    rrule: {
+      freq: Frequency.WEEKLY,
+      tzid: 'UTC',
+      interval: 2,
+      byhour: [8],
+      byminute: [45]
+      byweekday: Weekday.FR
+    }
+  }
+```
+
+Every Month on 1st, 15th and 30th at 12:10 and 18:10
+
+```js
+  schedule: {
+    rrule: {
+      freq: Frequency.MONTHLY,
+      tzid: 'UTC',
+      interval: 1,
+      byhour: [12,18],
+      byminute: [10]
+      bymonthday: [1,15,30]
+    }
+  }
+```

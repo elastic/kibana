@@ -9,7 +9,13 @@
 
 import { EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import {
+  SERVICE_NAME_FIELD,
+  TRANSACTION_ID_FIELD,
+  TRANSACTION_NAME_FIELD,
+} from '@kbn/discover-utils';
 import { TransactionNameLink } from '../../components/transaction_name_link';
+import { FieldHoverActionPopover } from '../../components/field_with_actions/field_hover_popover_action';
 
 export interface TransactionSummaryTitleProps {
   serviceName: string;
@@ -29,21 +35,31 @@ export const TransactionSummaryTitle = ({
       <EuiTitle size="xs">
         <h2>
           {name ? (
-            <TransactionNameLink
-              serviceName={serviceName}
-              transactionName={name}
-              renderContent={renderTransactionTitle}
-            />
+            <FieldHoverActionPopover title={name} value={name} field={TRANSACTION_NAME_FIELD}>
+              <TransactionNameLink
+                serviceName={serviceName}
+                transactionName={name}
+                renderContent={renderTransactionTitle}
+              />
+            </FieldHoverActionPopover>
           ) : (
-            serviceName
+            <FieldHoverActionPopover
+              title={serviceName}
+              value={serviceName}
+              field={SERVICE_NAME_FIELD}
+            >
+              {serviceName}
+            </FieldHoverActionPopover>
           )}
         </h2>
       </EuiTitle>
 
       {id && (
-        <EuiText size="xs" color="subdued">
-          {id}
-        </EuiText>
+        <FieldHoverActionPopover title={id} value={id} field={TRANSACTION_ID_FIELD}>
+          <EuiText size="xs" color="subdued">
+            {id}
+          </EuiText>
+        </FieldHoverActionPopover>
       )}
     </>
   );
