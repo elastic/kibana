@@ -16,24 +16,16 @@ import {
 import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
 
-export interface PanelPackage<
-  SerializedStateType extends object = object,
-  RuntimeStateType extends object = object
-> {
+export interface PanelPackage<SerializedStateType extends object = object> {
   panelType: string;
 
   /**
    * The serialized state of this panel.
    */
   serializedState?: SerializedPanelState<SerializedStateType>;
-
-  /**
-   * The runtime state of this panel. @deprecated Use `serializedState` instead.
-   */
-  initialState?: RuntimeStateType;
 }
 
-export interface PresentationContainer extends CanAddNewPanel {
+export interface PresentationContainer<ApiType extends unknown = unknown> extends CanAddNewPanel {
   /**
    * Removes a panel from the container.
    */
@@ -58,11 +50,18 @@ export interface PresentationContainer extends CanAddNewPanel {
   getPanelCount: () => number;
 
   /**
+   * Gets a child API for the given ID. This is asynchronous and should await for the
+   * child API to be available. It is best practice to retrieve a child API using this method
+   */
+  getChildApi: (uuid: string) => Promise<ApiType | undefined>;
+
+  /**
    * A publishing subject containing the child APIs of the container. Note that
    * children are created asynchronously. This means that the children$ observable might
-   * contain fewer children than the actual number of panels in the container.
+   * contain fewer children than the actual number of panels in the container. Use getChildApi
+   * to retrieve the child API for a specific panel.
    */
-  children$: PublishingSubject<{ [key: string]: unknown }>;
+  children$: PublishingSubject<{ [key: string]: ApiType }>;
 }
 
 export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {

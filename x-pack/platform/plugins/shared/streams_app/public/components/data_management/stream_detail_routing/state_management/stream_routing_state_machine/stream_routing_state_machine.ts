@@ -6,7 +6,7 @@
  */
 import { MachineImplementationsFrom, assign, and, setup, ActorRefFrom } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { WiredStreamGetResponse, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
+import { Streams, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION } from '../../../../../util/condition';
 import {
   StreamRoutingContext,
@@ -68,7 +68,7 @@ export const streamRoutingMachine = setup({
       currentRuleId: null,
       routing: context.initialRouting,
     })),
-    setupRouting: assign((_, params: { definition: WiredStreamGetResponse }) => {
+    setupRouting: assign((_, params: { definition: Streams.WiredStream.GetResponse }) => {
       const routing = params.definition.stream.ingest.wired.routing.map(
         routingConverter.toUIDefinition
       );
@@ -82,7 +82,7 @@ export const streamRoutingMachine = setup({
     storeCurrentRuleId: assign((_, params: { id: StreamRoutingContext['currentRuleId'] }) => ({
       currentRuleId: params.id,
     })),
-    storeDefinition: assign((_, params: { definition: WiredStreamGetResponse }) => ({
+    storeDefinition: assign((_, params: { definition: Streams.WiredStream.GetResponse }) => ({
       definition: params.definition,
     })),
   },
