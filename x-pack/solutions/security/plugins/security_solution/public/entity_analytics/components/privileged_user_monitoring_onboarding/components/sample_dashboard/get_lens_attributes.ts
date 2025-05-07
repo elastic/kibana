@@ -74,6 +74,7 @@ export const getLensAttributes: GetLensAttributes = ({ esql, stackByField, extra
         textBased: {
           layers: {
             [layerId]: {
+              type: 'esql',
               index: dataViewId,
               query: {
                 esql: esql ?? '',
