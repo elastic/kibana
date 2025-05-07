@@ -143,7 +143,16 @@ export const reportingCsvExportProvider = ({
           defaultMessage="Generate CSV"
         />
       ),
-      renderCopyURIButton: true,
+      copyURIConfig: {
+        headingText: i18n.translate('reporting.export.csv.exportFlyout.csvExportCopyUriHeading', {
+          defaultMessage: 'Post URL',
+        }),
+        helpText: i18n.translate('reporting.export.csv.exportFlyout.csvExportCopyUriHelpText', {
+          defaultMessage:
+            'Allows to generate selected file format programmatically outside Kibana or in Watcher.',
+        }),
+        contentType: 'text',
+      },
     };
   };
 

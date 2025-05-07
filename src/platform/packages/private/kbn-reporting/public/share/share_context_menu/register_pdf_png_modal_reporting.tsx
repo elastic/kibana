@@ -134,7 +134,22 @@ export const reportingPDFExportProvider = ({
       exportType: 'printablePdfV2',
       requiresSavedState,
       renderLayoutOptionSwitch: objectType === 'dashboard',
-      renderCopyURIButton: true,
+      copyURIConfig: {
+        headingText: i18n.translate(
+          'reporting.shareContextMenu.copyUriModal.pdfExportCopyUriHeading',
+          {
+            defaultMessage: 'Post URL',
+          }
+        ),
+        helpText: i18n.translate(
+          'reporting.shareContextMenu.copyUriModal.pdfExportCopyUriHelpText',
+          {
+            defaultMessage:
+              'Allows to generate selected file format programmatically outside Kibana or in Watcher.',
+          }
+        ),
+        contentType: 'text',
+      },
     };
   };
 
@@ -277,7 +292,22 @@ export const reportingPNGExportProvider = ({
       generateAssetURIValue: generateExportUrlPNG,
       exportType: 'pngV2',
       requiresSavedState,
-      renderCopyURIButton: true,
+      copyURIConfig: {
+        headingText: i18n.translate(
+          'reporting.shareContextMenu.copyUriModal.pngExportCopyUriHeading',
+          {
+            defaultMessage: 'Post URL',
+          }
+        ),
+        helpText: i18n.translate(
+          'reporting.shareContextMenu.copyUriModal.pngExportCopyUriHelpText',
+          {
+            defaultMessage:
+              'Allows to generate selected file format programmatically outside Kibana or in Watcher.',
+          }
+        ),
+        contentType: 'text',
+      },
     };
   };
 

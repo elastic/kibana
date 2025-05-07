@@ -207,17 +207,12 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                 )}
               </Fragment>
               <Fragment>
-                {selectedMenuItem?.config.renderCopyURIButton && publicAPIEnabled && (
+                {selectedMenuItem?.config.copyURIConfig && publicAPIEnabled && (
                   <EuiFlexItem>
                     <EuiFormRow
                       label={
                         <EuiText size="s">
-                          <h4>
-                            <FormattedMessage
-                              id="share.export.postURLHeading"
-                              defaultMessage="Post URL"
-                            />
-                          </h4>
+                          <h4>{selectedMenuItem?.config.copyURIConfig.headingText}</h4>
                         </EuiText>
                       }
                       fullWidth
@@ -225,17 +220,14 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                       <EuiFlexGroup direction="column">
                         <EuiFlexItem>
                           <EuiText size="s" color="subdued">
-                            <FormattedMessage
-                              id="share.export.postURLDescription"
-                              defaultMessage="Allows to generate selected file format programmatically outside Kibana or in Watcher."
-                            />
+                            {selectedMenuItem?.config.copyURIConfig.helpText}
                           </EuiText>
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiCodeBlock
                             data-test-subj="exportAssetValue"
                             css={{ overflowWrap: 'break-word' }}
-                            language="text"
+                            language={selectedMenuItem?.config.copyURIConfig.contentType}
                             isCopyable
                             copyAriaLabel={i18n.translate('share.export.copyPostURLAriaLabel', {
                               defaultMessage: 'Copy export asset value',

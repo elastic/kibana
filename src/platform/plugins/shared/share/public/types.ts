@@ -9,11 +9,10 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
-import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenuPanelDescriptor, type EuiCodeProps, type EuiIconProps } from '@elastic/eui';
+import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { Capabilities, ToastsSetup } from '@kbn/core/public';
-import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { EuiIconProps } from '@elastic/eui';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
@@ -139,7 +138,7 @@ export interface ExportShare
     label: string;
     exportType: string;
     /**
-     * allows disabling the export action based on there factors, for instance licensing
+     * allows disabling the export action, for instance the current app has no data to export
      */
     disabled?: boolean;
     helpText?: ReactNode;
@@ -147,6 +146,11 @@ export interface ExportShare
     generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
     generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
     renderCopyURIButton?: boolean;
+    copyURIConfig?: {
+      headingText: string;
+      helpText: string;
+      contentType: EuiCodeProps['language'];
+    };
     warnings?: Array<{ title: string; message: string }>;
     requiresSavedState?: boolean;
     supportedLayoutOptions?: Array<'print'>;
