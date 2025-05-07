@@ -35,7 +35,7 @@ export type PageApi = PresentationContainer &
   PublishesViewMode &
   PublishesReload &
   PublishesTimeRange &
-  PublishesUnsavedChanges;
+  PublishesUnsavedChanges & { getVersionForPanelType: (panelType: string) => number | null };
 
 export interface LastSavedState {
   timeRange: TimeRange;

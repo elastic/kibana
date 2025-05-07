@@ -10,6 +10,7 @@
 import React, { useEffect, useMemo } from 'react';
 import {
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,6 +25,7 @@ import { AddButton } from './add_button';
 import { TopNav } from './top_nav';
 import { lastSavedStateSessionStorage } from '../session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from '../session_storage/unsaved_changes';
+import { versionSessionStorage } from '../session_storage/version';
 
 export const PresentationContainerExample = ({
   embeddable,
@@ -47,6 +49,8 @@ export const PresentationContainerExample = ({
     componentApi.panels$,
     pageApi.timeRange$
   );
+
+  const selectedVersion = useMemo(() => versionSessionStorage.load(), []);
 
   return (
     <div>
@@ -74,6 +78,29 @@ export const PresentationContainerExample = ({
           >
             Reset
           </EuiButtonEmpty>
+        </p>
+        <p>
+          You can switch between API versions of embeddables using these buttons. A production
+          implementation will always display the most recent version of an embeddable and use
+          versioning logic strictly on the backend.
+        </p>
+        <p>
+          <EuiButtonGroup
+            color="primary"
+            legend="Selected version"
+            options={[
+              { id: '1', label: 'v1' },
+              { id: '2', label: 'v2' },
+              { id: '3', label: 'v3' },
+              { id: 'latest', label: 'latest' },
+            ]}
+            type="single"
+            idSelected={selectedVersion}
+            onChange={(id) => {
+              versionSessionStorage.save(id);
+              window.location.reload();
+            }}
+          />
         </p>
       </EuiCallOut>
 

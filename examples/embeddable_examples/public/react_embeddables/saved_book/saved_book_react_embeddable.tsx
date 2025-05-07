@@ -42,6 +42,7 @@ import {
   BookRuntimeState,
   BookSerializedState,
 } from './types';
+import { PageApi } from '../../app/presentation_container_example/types';
 
 const bookSerializedStateIsByReference = (
   state?: BookSerializedState
@@ -164,6 +165,11 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart, embeddable: Embed
       const showLibraryCallout =
         apiHasParentApi(api) &&
         typeof (api.parentApi as PresentationContainer)?.replacePanel === 'function';
+
+      const embeddableVersion =
+        (apiHasParentApi(api) &&
+          (api.parentApi as PageApi)?.getVersionForPanelType?.(SAVED_BOOK_ID)) ??
+        1;
 
       return {
         api,

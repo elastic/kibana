@@ -8,8 +8,12 @@
  */
 
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { SavedObjectAttributesWithReferences } from '@kbn/embeddable-plugin/common/types';
+import {
+  EmbeddableContentManagementDefinition,
+  SavedObjectAttributesWithReferences,
+} from '@kbn/embeddable-plugin/common/types';
 import { LastSavedState } from '../types';
+import { versionSessionStorage } from './version';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.embeddables.presentationContainerExample.savedState';
@@ -24,6 +28,16 @@ export const DEFAULT_STATE: LastSavedState = {
 
 const isByValue = (rawState: object): rawState is SavedObjectAttributesWithReferences<any> =>
   'attributes' in rawState;
+
+const getVersionOfDefinition = (
+  version: string,
+  embeddableCmDefinitions?: EmbeddableContentManagementDefinition
+) => {
+  if (!embeddableCmDefinitions) return {};
+  if (version === 'latest' || !embeddableCmDefinitions.versions[Number(version)])
+    return embeddableCmDefinitions.versions[embeddableCmDefinitions.latestVersion];
+  return embeddableCmDefinitions?.versions[Number(version)];
+};
 
 export const lastSavedStateSessionStorage = {
   clear: () => {
@@ -42,8 +56,10 @@ export const lastSavedStateSessionStorage = {
       const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
         panel.type
       );
-      const { savedObjectToItem } =
-        embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
+      const { savedObjectToItem } = getVersionOfDefinition(
+        versionSessionStorage.load(),
+        embeddableCmDefinitions
+      );
       if (!savedObjectToItem) return panel;
       const newState = savedObjectToItem(rawState);
       return {
@@ -64,8 +80,10 @@ export const lastSavedStateSessionStorage = {
       const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
         panel.type
       );
-      const { itemToSavedObject } =
-        embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
+      const { itemToSavedObject } = getVersionOfDefinition(
+        versionSessionStorage.load(),
+        embeddableCmDefinitions
+      );
       if (!itemToSavedObject) return panel;
       const savedState = itemToSavedObject(rawState);
       return {
