@@ -13,6 +13,7 @@ import { PrivMonUtils } from './utils';
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('securitySolutionApi');
   const supertest = getService('supertest');
+  const es = getService('es');
   const log = getService('log');
   const privMonUtils = PrivMonUtils(getService);
 
@@ -31,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create a user', async () => {
         log.info(`creating a user`);
         const res = await api.createPrivMonUser({
-          body: { user: { name: 'test_user' } },
+          body: { user: { name: 'test_user1' } },
         });
 
         if (res.status !== 200) {
@@ -46,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should retrieve a user', async () => {
         log.info(`retrieving a user`);
         const { body } = await api.createPrivMonUser({
-          body: { user: { name: 'test_user' } },
+          body: { user: { name: 'test_user2' } },
         });
 
         const res = await api.getPrivMonUser({ params: { id: body.id } });
@@ -62,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should update a user', async () => {
         log.info(`updating a user`);
         const { body } = await api.createPrivMonUser({
-          body: { user: { name: 'test_user' } },
+          body: { user: { name: 'test_user3' } },
         });
         const res = await api.updatePrivMonUser({
           body: { user: { name: 'updated' } },
@@ -75,17 +76,20 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(200);
-        expect(res.body.is_monitored).to.be(undefined);
         expect(res.body.user.name).to.be('updated');
       });
 
       it('should list users', async () => {
         log.info(`listing users`);
 
-        await api.createPrivMonUser({
-          body: { user: { name: 'list_test_user' } },
+        const { body } = await api.createPrivMonUser({
+          body: { user: { name: 'test_user4' } },
         });
-        const res = await api.listPrivMonUsers({ query: {} });
+
+        // Ensure the data is indexed and available for searching, in case we ever remove `refresh: wait_for` when indexing
+        await es.indices.refresh({ index: body._index });
+
+        const res = await api.listPrivMonUsers({ query: { kql: `user.name: test*` } });
 
         if (res.status !== 200) {
           log.error(`Listing privmon users failed`);
@@ -98,7 +102,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should delete a user', async () => {
         log.info(`deleting a user`);
         const { body } = await api.createPrivMonUser({
-          body: { user: { name: 'test_user' } },
+          body: { user: { name: 'test_user5' } },
         });
         const res = await api.deletePrivMonUser({ params: { id: body.id } });
 

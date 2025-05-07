@@ -192,6 +192,7 @@ export class PrivilegeMonitoringDataClient {
     });
     const res = await this.esClient.index({
       index: this.getIndex(),
+      refresh: 'wait_for',
       document: doc,
     });
 
@@ -218,6 +219,7 @@ export class PrivilegeMonitoringDataClient {
   ): Promise<MonitoredUserDoc | undefined> {
     await this.esClient.update<MonitoredUserDoc>({
       index: this.getIndex(),
+      refresh: 'wait_for',
       id,
       doc: user,
     });
@@ -232,7 +234,7 @@ export class PrivilegeMonitoringDataClient {
   }
 
   public async listUsers(kuery?: string): Promise<MonitoredUserDoc[]> {
-    const query = toElasticsearchQuery(fromKueryExpression(kuery ?? ''));
+    const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
     const response = await this.esClient.search({
       index: this.getIndex(),
       query,

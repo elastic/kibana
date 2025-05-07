@@ -28,5 +28,18 @@ export const PrivMonUtils = (
     expect(res.status).to.eql(200);
   };
 
-  return { initPrivMonEngine };
+  const retry = async <T>(fn: () => Promise<T>, retries: number = 5, delay: number = 1000) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (i === retries - 1) {
+          throw error;
+        }
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  };
+
+  return { initPrivMonEngine, retry };
 };
