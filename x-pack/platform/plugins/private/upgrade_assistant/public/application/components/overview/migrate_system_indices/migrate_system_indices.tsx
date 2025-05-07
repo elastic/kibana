@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
   EuiCode,
   EuiLink,
-  EuiConfirmModal,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -28,23 +27,55 @@ import { DocLinksStart } from '@kbn/core/public';
 import type { SystemIndicesMigrationFeature } from '../../../../../common/types';
 import type { OverviewStepProps } from '../../types';
 import { useMigrateSystemIndices } from './use_migrate_system_indices';
+import { MigrateSystemIndicesButton } from './migrate_button';
 
 interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
 }
 
-const getFailureCause = (features: SystemIndicesMigrationFeature[]) => {
-  const featureWithError = features.find((feature) => feature.migration_status === 'ERROR');
+const getFailureCauses = (features: SystemIndicesMigrationFeature[]) => {
+  const errorsByFeature: Record<string, { errors: Set<string>; indices: number }> = {};
 
-  if (featureWithError) {
-    const indexWithError = featureWithError.indices.find((index) => index.failure_cause);
-    return {
-      feature: featureWithError?.feature_name,
-      failureCause: indexWithError?.failure_cause?.error.type,
-    };
-  }
+  features.forEach((feature) => {
+    if (feature.migration_status === 'ERROR') {
+      feature.indices.forEach((index) => {
+        if (index.failure_cause) {
+          if (!errorsByFeature[feature.feature_name]) {
+            errorsByFeature[feature.feature_name] = { errors: new Set(), indices: 0 };
+          }
+          errorsByFeature[feature.feature_name].errors.add(index.failure_cause.error.type);
+          errorsByFeature[feature.feature_name].indices += 1;
+        }
+      });
+    }
+  });
 
-  return {};
+  return (
+    <ul>
+      {Object.entries(errorsByFeature).map(([feature, { errors, indices }]) => {
+        const indicesAffectedText = i18n.translate(
+          'xpack.upgradeAssistant.systemIndices.migrationFailed.indicesAffected',
+          {
+            defaultMessage: '{count, plural, =1 {# index affected} other {# indices affected}}',
+            values: { count: indices },
+          }
+        );
+
+        return (
+          <li key={feature}>
+            <strong>{feature}</strong>:{' '}
+            {Array.from(errors).map((error, index) => (
+              <React.Fragment key={error}>
+                <EuiCode>{error}</EuiCode>
+                {index < errors.size - 1 && ', '}
+              </React.Fragment>
+            ))}{' '}
+            ({indicesAffectedText})
+          </li>
+        );
+      })}
+    </ul>
+  );
 };
 
 const i18nTexts = {
@@ -69,18 +100,6 @@ const i18nTexts = {
       />
     );
   },
-  startButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.systemIndices.startButtonLabel',
-    {
-      defaultMessage: 'Migrate indices',
-    }
-  ),
-  inProgressButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.systemIndices.inProgressButtonLabel',
-    {
-      defaultMessage: 'Migration in progress',
-    }
-  ),
   noMigrationNeeded: i18n.translate(
     'xpack.upgradeAssistant.overview.systemIndices.noMigrationNeeded',
     {
@@ -109,69 +128,28 @@ const i18nTexts = {
     }
   ),
   migrationFailedBody: (features: SystemIndicesMigrationFeature[]) => {
-    const { feature, failureCause } = getFailureCause(features);
-
+    const failureCauses = getFailureCauses(features);
     return (
-      <FormattedMessage
-        id="xpack.upgradeAssistant.overview.systemIndices.migrationFailedBody"
-        defaultMessage="An error ocurred while migrating system indices for {feature}: {failureCause}"
-        values={{
-          feature,
-          failureCause: <EuiCode>{failureCause}</EuiCode>,
-        }}
-      />
+      <EuiText size="s">
+        <FormattedMessage
+          id="xpack.upgradeAssistant.overview.systemIndices.migrationFailedBodyFirstParagraph"
+          defaultMessage="Errors occurred while migrating system indices:"
+        />
+        <EuiSpacer size="s" />
+        {failureCauses}
+        <FormattedMessage
+          id="xpack.upgradeAssistant.overview.systemIndices.migrationFailedBodySecondParagraph"
+          defaultMessage="Check migration details for more information."
+          tagName="p"
+        />
+      </EuiText>
     );
   },
 };
 
-const ConfirmModal: React.FC<{
-  onCancel: () => void;
-  onConfirm: () => void;
-}> = ({ onCancel, onConfirm }) => (
-  <EuiConfirmModal
-    title={i18n.translate('xpack.upgradeAssistant.overview.systemIndices.confirmModal.title', {
-      defaultMessage: 'Migrate Indices',
-    })}
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    cancelButtonText={i18n.translate(
-      'xpack.upgradeAssistant.overview.systemIndices.confirmModal.cancelButton.label',
-      {
-        defaultMessage: 'Cancel',
-      }
-    )}
-    confirmButtonText={i18n.translate(
-      'xpack.upgradeAssistant.overview.systemIndices.confirmModal.confirmButton.label',
-      {
-        defaultMessage: 'Confirm',
-      }
-    )}
-    defaultFocusedButton="confirm"
-    data-test-subj="migrationConfirmModal"
-  >
-    {i18n.translate('xpack.upgradeAssistant.overview.systemIndices.confirmModal.description', {
-      defaultMessage: 'Migrating system indices may lead to downtime while they are reindexed.',
-    })}
-  </EuiConfirmModal>
-);
-
 const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   const { beginSystemIndicesMigration, startMigrationStatus, migrationStatus, setShowFlyout } =
     useMigrateSystemIndices();
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const openMigrationModal = () => {
-    setIsModalVisible(true);
-  };
-  const onCancel = () => {
-    setIsModalVisible(false);
-  };
-
-  const confirmMigrationAction = () => {
-    beginSystemIndicesMigration();
-    setIsModalVisible(false);
-  };
 
   useEffect(() => {
     setIsComplete(migrationStatus.data?.migration_status === 'NO_MIGRATION_NEEDED');
@@ -246,24 +224,20 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
             title={i18nTexts.migrationFailedTitle}
             data-test-subj="migrationFailedCallout"
           >
-            <p>{i18nTexts.migrationFailedBody(migrationStatus.data?.features)}</p>
+            {i18nTexts.migrationFailedBody(migrationStatus.data?.features)}
           </EuiCallOut>
           <EuiSpacer size="m" />
         </>
       )}
 
-      {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={confirmMigrationAction} />}
-
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            isLoading={isMigrating}
-            isDisabled={isButtonDisabled}
-            onClick={openMigrationModal}
-            data-test-subj="startSystemIndicesMigrationButton"
-          >
-            {isMigrating ? i18nTexts.inProgressButtonLabel : i18nTexts.startButtonLabel}
-          </EuiButton>
+          <MigrateSystemIndicesButton
+            beginSystemIndicesMigration={beginSystemIndicesMigration}
+            isInitialRequest={migrationStatus.isInitialRequest}
+            isLoading={migrationStatus.isLoading}
+            isMigrating={isMigrating}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -297,7 +271,7 @@ export const getMigrateSystemIndicesStep = ({
     'data-test-subj': `migrateSystemIndicesStep-${status}`,
     children: (
       <>
-        <EuiText>
+        <EuiText data-test-subj="migrateSystemIndicesText">
           <p>{i18nTexts.bodyDescription(docLinks.links.elasticsearch.hiddenIndices)}</p>
         </EuiText>
 

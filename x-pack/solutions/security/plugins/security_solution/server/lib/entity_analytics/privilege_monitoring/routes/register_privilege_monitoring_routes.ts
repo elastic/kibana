@@ -11,14 +11,30 @@ import { initPrivilegeMonitoringEngineRoute } from './init';
 import { monitoringEntitySourceSyncRoute } from './monitoring_entity_source_sync';
 import { searchPrivilegeMonitoringIndicesRoute } from './search_indices';
 
+import {
+  getUserRoute,
+  createUserRoute,
+  deleteUserRoute,
+  listUsersRoute,
+  updateUserRoute,
+  uploadUsersCSVRoute,
+  uploadUsersJSONRoute,
+} from './users';
+
 export const registerPrivilegeMonitoringRoutes = ({
   router,
   logger,
-  getStartServices,
   config,
 }: EntityAnalyticsRoutesDeps) => {
   initPrivilegeMonitoringEngineRoute(router, logger, config);
   healthCheckPrivilegeMonitoringRoute(router, logger, config);
   searchPrivilegeMonitoringIndicesRoute(router, logger, config);
   monitoringEntitySourceSyncRoute(router, logger, config);
+  getUserRoute(router, logger);
+  createUserRoute(router, logger);
+  deleteUserRoute(router, logger);
+  listUsersRoute(router, logger);
+  updateUserRoute(router, logger);
+  uploadUsersCSVRoute(router, logger);
+  uploadUsersJSONRoute(router, logger);
 };
