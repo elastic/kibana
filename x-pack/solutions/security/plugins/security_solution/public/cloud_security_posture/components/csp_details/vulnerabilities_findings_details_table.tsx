@@ -141,15 +141,15 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
   const getVulnerabilityUrlFilteredByVulnerabilityAndResourceId = (
     vulnerabilityId: string | string[],
     resourceId: string,
-    vulnerabilityPackageName: string,
-    vulnerabilityPackageVersion: string
+    packageName: string,
+    packageVersion: string
   ) => {
     return getNavUrlParams(
       {
         'vulnerability.id': vulnerabilityId,
         'resource.id': resourceId,
-        'vulnerability.package.name': encodeURIComponent(vulnerabilityPackageName),
-        'vulnerability.package.version': encodeURIComponent(vulnerabilityPackageVersion),
+        'package.name': encodeURIComponent(packageName),
+        'package.version': encodeURIComponent(packageVersion),
       },
       'vulnerabilities'
     );
