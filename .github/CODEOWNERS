@@ -728,6 +728,9 @@ src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-react-hooks @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-telemetry @elastic/kibana-core @elastic/obs-ai-assistant
+src/platform/packages/shared/kbn-telemetry-config @elastic/kibana-core
+src/platform/packages/shared/kbn-tracing @elastic/kibana-core @elastic/obs-ai-assistant
 src/platform/packages/shared/react/kibana_context/common @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/render @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/root @elastic/appex-sharedux
