@@ -40,8 +40,7 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
         return session[0] as T;
       }
 
-      // If we have more than one session, we need to check if they are all the same
-      // If they are all the same, we can return the first one
+      // If we have more than one session, return the first one if they are all the same
       if (session.length > 1) {
         const [firstSession] = session;
         const allEqual = session.every((s) => {
