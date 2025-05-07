@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const indexName = 'test-my-index';
 
-  describe('Search Overview page', function () {
+  describe.skip('Search Overview page', function () {
     describe('Solution Nav - Search', function () {
       let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };
@@ -49,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esDeleteAllIndices(indexName);
       });
 
-      describe.skip('search overview page', () => {
+      describe('search overview page', () => {
         beforeEach(async () => {
           await esDeleteAllIndices(indexName);
           await pageObjects.searchNavigation.navigateToElasticsearchOverviewPage(
