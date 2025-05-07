@@ -41,11 +41,11 @@ export const monitoringEntitySourceTypeNameMappings: SavedObjectsType['mappings'
       type: 'object',
       dynamic: false,
       properties: {
-        field: {
+        fields: {
           type: 'keyword',
           index: false,
         },
-        value: {
+        values: {
           type: 'keyword',
           index: false,
         },
