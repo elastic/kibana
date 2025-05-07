@@ -11,17 +11,15 @@ Authorization is an important aspect of API design. It must be considered for al
 
 Table of contents:
 1.  [API authorization](#api-authorization)
-2.  [[Deprecated] Adding API authorization with `access` tags](#deprecated-adding-api-authorization-with-access-tags)
-    - [Why not add `access` tags to all routes by default?](#why-not-add-access-tags-to-all-routes-by-default)
-3.  [Adding API authorization with `security` configuration](#adding-api-authorization-with-security-configuration)
+2.  [Adding API authorization with `security` configuration](#adding-api-authorization-with-security-configuration)
     - [Key features](#key-features)
     - [Configuring authorization on routes](#configuring-authorization-on-routes)
     - [Opting out of authorization for specific routes](#opting-out-of-authorization-for-specific-routes)
     - [Classic router security configuration examples](#classic-router-security-configuration-examples)
     - [Versioned router security configuration examples](#versioned-router-security-configuration-examples)
-4. [Authorization response available in route handlers](#authorization-response-available-in-route-handlers)
-5. [OpenAPI specification (OAS) documentation](#openapi-specification-oas-documentation)
-6. [Questions?](#questions)
+3. [Authorization response available in route handlers](#authorization-response-available-in-route-handlers)
+4. [OpenAPI specification (OAS) documentation](#openapi-specification-oas-documentation)
+5. [Questions?](#questions)
 
 ## API authorization
 Kibana API routes do not have any authorization checks applied by default. This means that your APIs are accessible to anyone with valid credentials, regardless of their permissions. This includes users with no roles assigned.
@@ -36,29 +34,6 @@ This is **especially** important if your route does any of the following:
 2. Calls Elasticsearch APIs using the internal `kibana_system` user.
 3. Calls a third-party service.
 4. Exposes any non-public information to the caller, such as system configuration or state, as part of the successful or even error response.
-
-## [Deprecated] Adding API authorization with `access` tags
-**Note**: `access` tags were deprecated in favour of `security` configuration.
-
-`access` tags are used to restrict access to API routes. They are used to ensure that only users with the required privileges can access the route.
-
-Example configuration:
-```ts
-router.get({
-  path: '/api/path',
-  options: {
-    tags: ['access:<privilege_1>', 'access:<privilege_2>'],
-  },
-  ...
-}, handler);
-```
-
-More information on adding `access` tags to your routes can be found temporarily in the [legacy documentation](https://www.elastic.co/guide/en/kibana/current/development-security.html#development-plugin-feature-registration)
-
-### Why not add `access` tags to all routes by default?
-Each authorization check that we perform involves a round-trip to Elasticsearch, so they are not as cheap as we'd like. Therefore, we want to keep the number of authorization checks we perform within a single route to a minimum.
-Adding an `access` tag to routes that leverage the Saved Objects Service would be redundant in most cases, since the Saved Objects Service will be performing authorization anyway.
-
 
 ## Adding API authorization with `security` configuration
 `KibanaRouteOptions` provides a security configuration at the route definition level, offering robust security configurations for both **Classic** and **Versioned** routes.
