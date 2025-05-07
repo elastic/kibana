@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import partition from 'lodash/partition';
+import { partition } from 'lodash';
 
 import { FEATURED_INTEGRATIONS_BY_CATEGORY } from '@kbn/custom-integrations-plugin/common';
 

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN, AI_SEARCH_PLUGIN } from '../../common/constants';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN, AI_SEARCH_PLUGIN } from '../../common/constants';
 
 type ServiceDefinition =
   | ConnectorServerSideDefinition
@@ -38,7 +38,7 @@ export function toSearchResult({
   serviceType: string;
   url?: string;
 }) {
-  const newUrl = `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector`;
+  const newUrl = `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/connectors/select_connector`;
 
   return {
     icon: iconPath || 'logoElasticsearch',

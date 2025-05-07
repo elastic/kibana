@@ -51,16 +51,19 @@ const QuickPromptSettingsManagementComponent = () => {
     currentAppId,
     http,
     promptsLoaded,
+    toasts,
   });
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
-      await saveQuickPromptSettings();
-      toasts?.addSuccess({
-        iconType: 'check',
-        title: SETTINGS_UPDATED_TOAST_TITLE,
-      });
-      param?.callback?.();
+      const didSucceed = await saveQuickPromptSettings();
+      if (didSucceed) {
+        toasts?.addSuccess({
+          iconType: 'check',
+          title: SETTINGS_UPDATED_TOAST_TITLE,
+        });
+        param?.callback?.();
+      }
     },
     [saveQuickPromptSettings, toasts]
   );

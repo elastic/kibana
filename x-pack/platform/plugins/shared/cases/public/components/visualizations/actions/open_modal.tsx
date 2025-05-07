@@ -10,6 +10,7 @@ import { unmountComponentAtNode } from 'react-dom';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { apiPublishesTimeRange, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import { ActionWrapper } from './action_wrapper';
 import type { CasesActionContextProps, Services } from './types';
 import type { CaseUI } from '../../../../common';
@@ -31,7 +32,9 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ lensApi, onClose, onSucc
 
   const timeRange = useStateFromPublishingSubject(lensApi.timeRange$);
   const parentTimeRange = useStateFromPublishingSubject(
-    apiPublishesTimeRange(lensApi.parentApi) ? lensApi.parentApi?.timeRange$ : undefined
+    apiPublishesTimeRange(lensApi.parentApi)
+      ? lensApi.parentApi?.timeRange$
+      : new BehaviorSubject(undefined)
   );
   const absoluteTimeRange = convertToAbsoluteTimeRange(timeRange);
   const absoluteParentTimeRange = convertToAbsoluteTimeRange(parentTimeRange);

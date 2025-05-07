@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TabItem, UnifiedTabs, TabStatus } from '@kbn/unified-tabs';
-import React, { useRef, useState } from 'react';
+import { type TabItem, UnifiedTabs } from '@kbn/unified-tabs';
+import React, { useState } from 'react';
 import { pick } from 'lodash';
-import type { DiscoverSessionViewRef } from '../session_view';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
-  CurrentTabProvider,
   createTabItem,
   internalStateActions,
   selectAllTabs,
@@ -21,45 +19,24 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { usePreviewData } from './use_preview_data';
 
-export const TabsView = ({
-  initialTabId,
-  sessionViewProps,
-}: {
-  initialTabId: string;
-  sessionViewProps: DiscoverSessionViewProps;
-}) => {
+export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const allTabs = useInternalStateSelector(selectAllTabs);
-  const [currentTabId, setCurrentTabId] = useState(initialTabId);
+  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
-  const sessionViewRef = useRef<DiscoverSessionViewRef>(null);
+  const { getPreviewData } = usePreviewData(props.runtimeStateManager);
 
   return (
     <UnifiedTabs
       services={services}
       initialItems={initialItems}
-      onChanged={async (updateState) => {
-        await dispatch(
-          internalStateActions.updateTabs({
-            currentTabId,
-            updateState,
-            stopSyncing: sessionViewRef.current?.stopSyncing,
-          })
-        );
-        setCurrentTabId(updateState.selectedItem?.id ?? currentTabId);
-      }}
+      onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
       createItem={() => createTabItem(allTabs)}
-      getPreviewData={() => ({
-        query: { language: 'kuery', query: 'sample query' },
-        status: TabStatus.SUCCESS,
-      })}
-      renderContent={() => (
-        <CurrentTabProvider currentTabId={currentTabId}>
-          <DiscoverSessionView key={currentTabId} ref={sessionViewRef} {...sessionViewProps} />
-        </CurrentTabProvider>
-      )}
+      getPreviewData={getPreviewData}
+      renderContent={() => <DiscoverSessionView key={currentTabId} {...props} />}
     />
   );
 };

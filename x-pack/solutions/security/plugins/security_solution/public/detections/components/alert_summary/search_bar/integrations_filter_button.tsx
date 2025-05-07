@@ -32,7 +32,7 @@ const INTEGRATIONS_BUTTON = i18n.translate(
   }
 );
 
-export const FILTER_KEY = 'kibana.alert.rule.name';
+export const FILTER_KEY = 'signal.rule.id';
 
 export interface IntegrationFilterButtonProps {
   /**
@@ -75,13 +75,13 @@ export const IntegrationFilterButton = memo(({ integrations }: IntegrationFilter
     ) => {
       setItems(options);
 
-      const ruleName = changedOption.key;
-      if (ruleName) {
+      const ruleId = changedOption.key;
+      if (ruleId) {
         const existingFilters = filterManager.getFilters();
         const newFilters: Filter[] = updateFiltersArray(
           existingFilters,
           FILTER_KEY,
-          ruleName,
+          ruleId,
           changedOption.checked === 'on'
         );
         filterManager.setFilters(newFilters);

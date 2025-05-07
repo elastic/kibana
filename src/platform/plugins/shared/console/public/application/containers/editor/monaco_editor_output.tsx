@@ -193,6 +193,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           wordWrap: readOnlySettings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_OUTPUT_THEME_ID,
           automaticLayout: true,
+          lineHeight: 24,
         }}
       />
     </div>

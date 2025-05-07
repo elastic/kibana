@@ -12,7 +12,11 @@ import { queryKeys } from '../query_keys';
 export const useAgent = ({ agentId }: { agentId: string }) => {
   const { agentService } = useWorkChatServices();
 
-  const { data: agent, isLoading } = useQuery({
+  const {
+    data: agent,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: queryKeys.agents.details(agentId),
     queryFn: async () => {
       return agentService.get(agentId);
@@ -22,5 +26,6 @@ export const useAgent = ({ agentId }: { agentId: string }) => {
   return {
     agent,
     isLoading,
+    refetch,
   };
 };

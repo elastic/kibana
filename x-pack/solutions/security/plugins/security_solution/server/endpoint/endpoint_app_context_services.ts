@@ -161,11 +161,8 @@ export class EndpointAppContextService {
       licenseService,
       telemetryConfigProvider,
       exceptionListsClient,
-      featureUsageService,
-      esClient,
       productFeaturesService,
     } = this.startDependencies;
-    const endpointMetadataService = this.getEndpointMetadataService();
     const soClient = this.savedObjects.createInternalScopedSoClient({ readonly: false });
     const logger = this.createLogger('endpointFleetExtension');
 
@@ -188,7 +185,6 @@ export class EndpointAppContextService {
         this.setupDependencies.securitySolutionRequestContextFactory,
         alerting,
         licenseService,
-        exceptionListsClient,
         this.setupDependencies.cloud,
         productFeaturesService,
         telemetryConfigProvider
@@ -199,15 +195,7 @@ export class EndpointAppContextService {
 
     registerFleetCallback(
       'packagePolicyUpdate',
-      getPackagePolicyUpdateCallback(
-        logger,
-        licenseService,
-        featureUsageService,
-        endpointMetadataService,
-        this.setupDependencies.cloud,
-        esClient,
-        productFeaturesService
-      )
+      getPackagePolicyUpdateCallback(this, this.setupDependencies.cloud, productFeaturesService)
     );
 
     registerFleetCallback('packagePolicyPostUpdate', getPackagePolicyPostUpdateCallback(this));
@@ -381,6 +369,7 @@ export class EndpointAppContextService {
       endpointService: this,
       esClient: this.startDependencies.esClient,
       username,
+      spaceId: DEFAULT_SPACE_ID,
       isAutomated: true,
       connectorActions: new NormalizedExternalConnectorClient(
         this.startDependencies.connectorActions.getUnsecuredActionsClient(),

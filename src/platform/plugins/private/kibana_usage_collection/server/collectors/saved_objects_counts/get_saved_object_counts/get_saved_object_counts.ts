@@ -80,9 +80,10 @@ export async function getSavedObjectsCounts(
   const nonExpectedTypes: string[] = [];
 
   const perType = buckets.map((perTypeEntry) => {
-    if (perTypeEntry.key !== MISSING_TYPE_KEY && !soTypes.includes(perTypeEntry.key)) {
+    const key = perTypeEntry.key as string;
+    if (key !== MISSING_TYPE_KEY && !soTypes.includes(key)) {
       // If the breakdown includes any SO types that are not expected, highlight them in the nonExpectedTypes list.
-      nonExpectedTypes.push(perTypeEntry.key);
+      nonExpectedTypes.push(key);
     }
 
     return { key: perTypeEntry.key, doc_count: perTypeEntry.doc_count };
@@ -90,6 +91,7 @@ export async function getSavedObjectsCounts(
 
   return {
     total: body.total,
+    // @ts-expect-error `FieldValue` types now claim that bucket keys can be `null`
     per_type: perType,
     non_expected_types: nonExpectedTypes,
     others: body.aggregations?.types?.sum_other_doc_count ?? 0,

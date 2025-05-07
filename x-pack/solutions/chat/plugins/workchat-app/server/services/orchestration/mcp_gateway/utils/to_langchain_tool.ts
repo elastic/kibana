@@ -5,22 +5,26 @@
  * 2.0.
  */
 
+import { AnyZodObject } from '@kbn/zod';
 import { StructuredTool, tool as toTool } from '@langchain/core/tools';
 import { Logger } from '@kbn/core/server';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
-import { IntegrationTool } from '../types';
+import { GatewayTool } from '../types';
 import { McpGatewaySession } from '../session';
 
-export async function getLCTools({
+export function toLangchainTool({
+  tool,
   session,
   logger,
 }: {
-  session: McpGatewaySession;
+  tool: GatewayTool;
   logger: Logger;
-}): Promise<StructuredTool[]> {
-  const tools = await session.listTools();
-  return tools.map((tool) =>
-    toLangchainTool(tool, async (input) => {
+  session: McpGatewaySession;
+}): StructuredTool {
+  const schema: AnyZodObject = jsonSchemaToZod(tool.inputSchema);
+
+  return toTool(
+    async (input) => {
       try {
         const result = await session.executeTool(tool.name, input);
         return JSON.stringify(result);
@@ -28,19 +32,11 @@ export async function getLCTools({
         logger.warn(`error calling tool ${tool.name}: ${e.message}`);
         throw e;
       }
-    })
+    },
+    {
+      name: tool.name,
+      description: tool.description,
+      schema,
+    }
   );
-}
-
-function toLangchainTool(
-  integrationTool: IntegrationTool,
-  action: (input: any) => Promise<string>
-): StructuredTool {
-  const schema = jsonSchemaToZod(integrationTool.inputSchema);
-
-  return toTool(action, {
-    name: integrationTool.name,
-    description: integrationTool.description,
-    schema,
-  });
 }

@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const id = Symbol('id');
+import { SerializableField } from '../../../serializable_field';
+import { SerializableType } from '../../../serialize_utils';
+
+/**
+ * Serialized form of {@link @kbn/data-plugin/common.MultiFieldKey}
+ */
+export interface SerializedMultiFieldKey {
+  type: typeof SerializableType.MultiFieldKey;
+  keys: string[];
+}
 
 const isBucketLike = (bucket: unknown): bucket is { key: unknown } => {
   return Boolean(bucket && typeof bucket === 'object' && 'key' in bucket);
@@ -17,31 +26,41 @@ function getKeysFromBucket(bucket: unknown) {
   if (!isBucketLike(bucket)) {
     throw new Error('bucket malformed - no key found');
   }
-  return Array.isArray(bucket.key)
-    ? bucket.key.map((keyPart) => String(keyPart))
-    : [String(bucket.key)];
+  return Array.isArray(bucket.key) ? bucket.key.map(String) : [String(bucket.key)];
 }
 
-export class MultiFieldKey {
-  [id]: string;
-  keys: string[];
-
-  constructor(bucket: unknown) {
-    this.keys = getKeysFromBucket(bucket);
-
-    this[id] = MultiFieldKey.idBucket(bucket);
+export class MultiFieldKey extends SerializableField<SerializedMultiFieldKey> {
+  static isInstance(field: unknown): field is MultiFieldKey {
+    return field instanceof MultiFieldKey;
   }
-  static idBucket(bucket: unknown) {
+
+  static deserialize(value: SerializedMultiFieldKey): MultiFieldKey {
+    return new MultiFieldKey({
+      key: value.keys, // key here is to keep bwc with constructor params
+    });
+  }
+
+  static idBucket(bucket: unknown): string {
     return getKeysFromBucket(bucket).join(',');
   }
 
-  toString() {
-    return this[id];
-  }
-}
+  keys: string[];
 
-export function isMultiFieldKey(field: unknown): field is MultiFieldKey {
-  return field instanceof MultiFieldKey;
+  constructor(bucket: unknown) {
+    super();
+    this.keys = getKeysFromBucket(bucket);
+  }
+
+  toString(): string {
+    return this.keys.join(',');
+  }
+
+  serialize(): SerializedMultiFieldKey {
+    return {
+      type: SerializableType.MultiFieldKey,
+      keys: this.keys,
+    };
+  }
 }
 
 /**

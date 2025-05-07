@@ -1,0 +1,15 @@
+lang: Curl
+# label:
+source: |
+    curl -X POST \
+    http://localhost:5601/api/apm/services/opbeans-java/annotation \
+    -H 'Content-Type: application/json' \
+    -H 'kbn-xsrf: true' \
+    -H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \
+    -d '{
+        "@timestamp": "2020-05-08T10:31:30.452Z",
+        "service": {
+            "version": "1.2"
+        },
+        "message": "Deployment 1.2"
+        }'

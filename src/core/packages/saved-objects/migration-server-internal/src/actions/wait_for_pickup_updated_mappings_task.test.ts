@@ -11,6 +11,8 @@ import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
+import * as Either from 'fp-ts/Either';
+import { TaskCompletedWithRetriableError } from './wait_for_task';
 
 jest.mock('./catch_retryable_es_client_errors', () => {
   const { catchRetryableEsClientErrors: actualImplementation } = jest.requireActual(
@@ -63,5 +65,33 @@ describe('waitForPickupUpdatedMappingsTask', () => {
       timeout: '2m',
     });
     expect(task()).rejects.toThrowError(nonRetryableError);
+  });
+
+  it('returns task_completed_with_retriable_error when the client returns a search_phase_execution_exception', async () => {
+    const client = elasticsearchClientMock.createInternalClient();
+    client.tasks.get.mockResponse({
+      completed: true,
+      task: {
+        action: 'any action',
+        cancellable: false,
+        headers: {},
+        id: 4273,
+        node: 'any node',
+        running_time_in_nanos: 123,
+        start_time_in_millis: 312,
+        type: 'any type',
+      },
+      error: { type: 'search_phase_execution_exception' },
+    });
+
+    const task = waitForPickupUpdatedMappingsTask({ client, taskId: '4273', timeout: '2m' });
+    const result = await task();
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<TaskCompletedWithRetriableError>).left).toMatchInlineSnapshot(`
+      Object {
+        "message": "The task being waited on encountered a search_phase_execution_exception error",
+        "type": "task_completed_with_retriable_error",
+      }
+    `);
   });
 });

@@ -61,6 +61,7 @@ export const ensureArtifactListExists = memoize(
           list_id: ENDPOINT_LIST_ID,
           type: ExceptionListTypeEnum.ENDPOINT,
         };
+        break;
 
       default:
         throw new Error(`Unknown Artifact list: ${artifactType}`);

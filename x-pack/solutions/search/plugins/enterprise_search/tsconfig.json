@@ -66,7 +66,7 @@
     "@kbn/console-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/es-errors",
-    "@kbn/search-connectors-plugin",
+    "@kbn/content-connectors-plugin",
     "@kbn/search-playground",
     "@kbn/utility-types",
     "@kbn/index-management-shared-types",
@@ -89,5 +89,6 @@
     "@kbn/search-shared-ui",
     "@kbn/file-upload-common",
     "@kbn/search-indices",
+    "@kbn/charts-theme",
   ]
 }

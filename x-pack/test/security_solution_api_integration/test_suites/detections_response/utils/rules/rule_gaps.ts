@@ -31,8 +31,12 @@ export const scheduleRuleRun = async (
   const params = ruleIds.map((ruleId) => {
     return {
       rule_id: ruleId,
-      start: timeRange.startDate.toISOString(),
-      end: timeRange.endDate.toISOString(),
+      ranges: [
+        {
+          start: timeRange.startDate.toISOString(),
+          end: timeRange.endDate.toISOString(),
+        },
+      ],
     };
   });
   const response = await supertest

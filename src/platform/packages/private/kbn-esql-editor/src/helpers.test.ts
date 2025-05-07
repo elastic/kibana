@@ -313,8 +313,38 @@ describe('helpers', function () {
           },
         ]),
       };
-      const indices = await getRemoteIndicesList(updatedDataViewsMock);
+      const indices = await getRemoteIndicesList(updatedDataViewsMock, true);
       expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false, type: 'Index' }]);
+    });
+
+    it('should not suggest ccs indices if not allowed', async function () {
+      const dataViewsMock = dataViewPluginMocks.createStartContract();
+      const updatedDataViewsMock = {
+        ...dataViewsMock,
+        getIndices: jest.fn().mockResolvedValue([
+          {
+            name: 'remote: alias1',
+            item: {
+              indices: ['index1'],
+            },
+          },
+          {
+            name: 'remote:.system1',
+            item: {
+              name: 'system',
+            },
+          },
+          {
+            name: 'remote:logs',
+            item: {
+              name: 'logs',
+              timestamp_field: '@timestamp',
+            },
+          },
+        ]),
+      };
+      const indices = await getRemoteIndicesList(updatedDataViewsMock, false);
+      expect(indices).toStrictEqual([]);
     });
   });
 });

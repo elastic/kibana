@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { isMinimalPrivilegeId, getMinimalPrivilegeId, ApiPrivileges } from './src/privileges';
+export { isMinimalPrivilegeId, getMinimalPrivilegeId } from './src/privileges';

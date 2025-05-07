@@ -138,9 +138,6 @@ export const tutorialSchema = schema.object({
   // Elastic stack artifacts produced by product when it is setup and run.
   artifacts: schema.maybe(artifactsSchema),
 
-  // saved objects used by data module.
-  savedObjects: schema.maybe(schema.arrayOf(schema.any())),
-  savedObjectsInstallMsg: schema.maybe(schema.string()),
   customStatusCheckName: schema.maybe(schema.string()),
 
   // Category assignment for the integration browser

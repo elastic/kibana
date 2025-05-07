@@ -76,6 +76,7 @@ import {
   clearExpiredSnoozes,
 } from './lib';
 import { isClusterBlockError } from '../lib/error_with_type';
+import { getTrackedExecutions } from './lib/get_tracked_execution';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -448,6 +449,11 @@ export class TaskRunner<
       alertInstances: alertsToReturn,
       alertRecoveredInstances: recoveredAlertsToReturn,
       summaryActions: actionSchedulerResult.throttledSummaryActions,
+      trackedExecutions: getTrackedExecutions({
+        trackedExecutions: alertsClient.getTrackedExecutions(),
+        currentExecution: this.executionId,
+        limit: flappingSettings.lookBackWindow,
+      }),
     };
   }
 
@@ -587,6 +593,7 @@ export class TaskRunner<
         if (isOk(schedule)) {
           nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
         } else if (taskSchedule) {
+          // rules cannot use rrule for scheduling yet
           nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
         }
 
@@ -822,6 +829,7 @@ export class TaskRunner<
 
     let nextRun: string | null = null;
     if (taskSchedule) {
+      // rules cannot use rrule for scheduling yet
       nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
     }
 

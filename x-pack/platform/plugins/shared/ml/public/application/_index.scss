@@ -1,9 +1,0 @@
-// Protect the rest of Kibana from ML generic namespacing
-// SASSTODO: Prefix ml selectors instead
-.ml-app {
-  // Components
-  @import 'components/anomalies_table/index'; // SASSTODO: This file overwrites EUI directly
-  @import 'components/job_selector/index';
-  @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
-
-}

@@ -23,7 +23,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferre
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import type { SortFunction } from '../../shared/managed_table';
+import type { SortFunction, VisibleItemsStartEnd } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
@@ -115,10 +115,10 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
 
 function useServicesDetailedStatisticsFetcher({
   mainStatisticsFetch,
-  renderedItems,
+  renderedItemIndices,
 }: {
   mainStatisticsFetch: ReturnType<typeof useServicesMainStatisticsFetcher>;
-  renderedItems: ServiceListItem[];
+  renderedItemIndices: VisibleItemsStartEnd;
 }) {
   const {
     query: { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled },
@@ -136,14 +136,21 @@ function useServicesDetailedStatisticsFetcher({
 
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
 
+  const itemsToFetch = useMemo(
+    () =>
+      mainStatisticsData.items
+        .slice(...renderedItemIndices)
+        .map(({ serviceName }) => serviceName)
+        .sort(),
+    [mainStatisticsData.items, renderedItemIndices]
+  );
+
   const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
-      const serviceNames = renderedItems.map(({ serviceName }) => serviceName);
-
       if (
         start &&
         end &&
-        serviceNames.length > 0 &&
+        itemsToFetch.length > 0 &&
         mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
         dataSourceOptions
       ) {
@@ -161,7 +168,7 @@ function useServicesDetailedStatisticsFetcher({
             },
             body: {
               // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
-              serviceNames: JSON.stringify(serviceNames.sort()),
+              serviceNames: JSON.stringify(itemsToFetch),
             },
           },
         });
@@ -170,7 +177,7 @@ function useServicesDetailedStatisticsFetcher({
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatisticsData.requestId, renderedItems, offset, comparisonEnabled],
+    [mainStatisticsData.requestId, itemsToFetch, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 
@@ -180,8 +187,8 @@ function useServicesDetailedStatisticsFetcher({
 export function ServiceInventory() {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced('');
   const { onPageReady } = usePerformanceContext();
-  const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
   const mainStatisticsFetch = useServicesMainStatisticsFetcher(debouncedSearchQuery);
+  const [renderedItemIndices, setRenderedItemIndices] = useState<VisibleItemsStartEnd>([0, 0]);
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
   const {
     query: { rangeFrom, rangeTo },
@@ -205,7 +212,7 @@ export function ServiceInventory() {
 
   const { comparisonFetch } = useServicesDetailedStatisticsFetcher({
     mainStatisticsFetch,
-    renderedItems,
+    renderedItemIndices,
   });
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
@@ -296,7 +303,6 @@ export function ServiceInventory() {
       });
     }
   }, [mainStatisticsStatus, comparisonFetch.status, onPageReady, rangeFrom, rangeTo]);
-
   return (
     <>
       <SearchBar showTimeComparison />
@@ -317,8 +323,8 @@ export function ServiceInventory() {
             initialPageSize={INITIAL_PAGE_SIZE}
             serviceOverflowCount={serviceOverflowCount}
             onChangeSearchQuery={setDebouncedSearchQuery}
+            onChangeItemIndices={setRenderedItemIndices}
             maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
-            onChangeRenderedItems={setRenderedItems}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

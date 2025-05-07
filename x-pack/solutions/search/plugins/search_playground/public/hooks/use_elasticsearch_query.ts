@@ -9,8 +9,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
 import {
   APIRoutes,
-  ChatForm,
-  ChatFormFields,
+  PlaygroundForm,
+  PlaygroundFormFields,
   PlaygroundPageMode,
   QueryTestResponse,
 } from '../types';
@@ -19,29 +19,29 @@ import { elasticsearchQueryString } from '../utils/user_query';
 
 export const useElasticsearchQuery = (pageMode: PlaygroundPageMode) => {
   const { http } = useKibana().services;
-  const { getValues } = useFormContext<ChatForm>();
+  const { getValues } = useFormContext<PlaygroundForm>();
   const executeEsQuery = () => {
     const formValues = getValues();
     const esQuery = elasticsearchQueryString(
-      formValues[ChatFormFields.elasticsearchQuery],
-      formValues[ChatFormFields.userElasticsearchQuery],
-      formValues[ChatFormFields.userElasticsearchQueryValidations]
+      formValues[PlaygroundFormFields.elasticsearchQuery],
+      formValues[PlaygroundFormFields.userElasticsearchQuery],
+      formValues[PlaygroundFormFields.userElasticsearchQueryValidations]
     );
     const body =
       pageMode === PlaygroundPageMode.chat
         ? JSON.stringify({
             elasticsearch_query: esQuery,
-            indices: formValues[ChatFormFields.indices],
-            query: formValues[ChatFormFields.question],
+            indices: formValues[PlaygroundFormFields.indices],
+            query: formValues[PlaygroundFormFields.question],
             chat_context: {
-              source_fields: JSON.stringify(formValues[ChatFormFields.sourceFields]),
-              doc_size: formValues[ChatFormFields.docSize],
+              source_fields: JSON.stringify(formValues[PlaygroundFormFields.sourceFields]),
+              doc_size: formValues[PlaygroundFormFields.docSize],
             },
           })
         : JSON.stringify({
             elasticsearch_query: esQuery,
-            indices: formValues[ChatFormFields.indices],
-            query: formValues[ChatFormFields.searchQuery],
+            indices: formValues[PlaygroundFormFields.indices],
+            query: formValues[PlaygroundFormFields.searchQuery],
           });
 
     return http.post<QueryTestResponse>(APIRoutes.POST_QUERY_TEST, {

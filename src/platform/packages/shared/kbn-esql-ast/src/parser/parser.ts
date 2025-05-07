@@ -149,8 +149,9 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
 
     return { root, ast: commands, errors, tokens: tokens.tokens };
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
+    if (error !== 'Empty Stack')
+      // eslint-disable-next-line no-console
+      console.error(error);
 
     const root = Builder.expression.query();
 

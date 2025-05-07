@@ -18,17 +18,12 @@ import {
   type CustomCellRenderer,
 } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import {
-  type RowControlColumn,
-  SHOW_MULTIFIELDS,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
   type EuiDataGridCellValueElementProps,
   type EuiDataGridStyle,
   EuiProgress,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { type AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -51,6 +46,7 @@ import { useFetchGridData } from '../hooks/use_fetch_grid_data';
 import type { AssetInventoryURLStateResult } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
 
 import {
+  ASSET_FIELDS,
   DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ASSETS_TO_LOAD,
   ASSET_INVENTORY_TABLE_ID,
@@ -71,42 +67,38 @@ const title = i18n.translate('xpack.securitySolution.assetInventory.allAssets.ta
   defaultMessage: 'assets',
 });
 
-const moreActionsLabel = i18n.translate(
-  'xpack.securitySolution.assetInventory.flyout.moreActionsButton',
-  {
-    defaultMessage: 'More actions',
-  }
-);
-
 const columnHeaders: Record<string, string> = {
-  'asset.risk': i18n.translate('xpack.securitySolution.assetInventory.allAssets.risk', {
-    defaultMessage: 'Risk',
-  }),
-  'asset.name': i18n.translate('xpack.securitySolution.assetInventory.allAssets.name', {
-    defaultMessage: 'Name',
-  }),
-  'asset.criticality': i18n.translate(
-    'xpack.securitySolution.assetInventory.allAssets.criticality',
+  [ASSET_FIELDS.ENTITY_NAME]: i18n.translate(
+    'xpack.securitySolution.assetInventory.allAssets.name',
     {
-      defaultMessage: 'Criticality',
+      defaultMessage: 'Name',
     }
   ),
-  'asset.source': i18n.translate('xpack.securitySolution.assetInventory.allAssets.source', {
-    defaultMessage: 'Source',
+  [ASSET_FIELDS.ENTITY_ID]: i18n.translate('xpack.securitySolution.assetInventory.allAssets.id', {
+    defaultMessage: 'ID',
   }),
-  '@timestamp': i18n.translate('xpack.securitySolution.assetInventory.allAssets.lastSeen', {
-    defaultMessage: 'Last Seen',
-  }),
+  [ASSET_FIELDS.ENTITY_TYPE]: i18n.translate(
+    'xpack.securitySolution.assetInventory.allAssets.type',
+    {
+      defaultMessage: 'Type',
+    }
+  ),
+  [ASSET_FIELDS.TIMESTAMP]: i18n.translate(
+    'xpack.securitySolution.assetInventory.allAssets.lastSeen',
+    {
+      defaultMessage: 'Last Seen',
+    }
+  ),
 } as const;
 
 const customCellRenderer = (rows: DataTableRecord[]): CustomCellRenderer => ({
-  'asset.risk': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-    const risk = rows[rowIndex].flattened['asset.risk'] as number;
+  [ASSET_FIELDS.ENTITY_RISK]: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+    const risk = rows[rowIndex].flattened[ASSET_FIELDS.ENTITY_RISK] as number;
     return <RiskBadge risk={risk} />;
   },
-  'asset.criticality': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+  [ASSET_FIELDS.ASSET_CRITICALITY]: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const criticality = rows[rowIndex].flattened[
-      'asset.criticality'
+      ASSET_FIELDS.ASSET_CRITICALITY
     ] as CriticalityLevelWithUnassigned;
     return <AssetCriticalityBadge criticalityLevel={criticality} />;
   },
@@ -118,11 +110,10 @@ interface AssetInventoryDefaultColumn {
 }
 
 const defaultColumns: AssetInventoryDefaultColumn[] = [
-  { id: 'asset.risk', width: 50 },
-  { id: 'asset.name', width: 400 },
-  { id: 'asset.criticality' },
-  { id: 'asset.source' },
-  { id: '@timestamp' },
+  { id: ASSET_FIELDS.ENTITY_NAME, width: 400 },
+  { id: ASSET_FIELDS.ENTITY_ID },
+  { id: ASSET_FIELDS.ENTITY_TYPE },
+  { id: ASSET_FIELDS.TIMESTAMP },
 ];
 
 export interface AssetInventoryDataTableProps {
@@ -162,7 +153,7 @@ export const AssetInventoryDataTable = ({
       setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
       openDynamicFlyout({
         entityDocId: doc.raw._id,
-        entityType: source.entity?.type,
+        entityType: source.entity?.EngineMetadata?.Type,
         entityName: source.entity?.name,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
@@ -177,7 +168,6 @@ export const AssetInventoryDataTable = ({
 
   const {
     data: rowsData,
-    // error: fetchError,
     fetchNextPage: loadMore,
     isFetching: isFetchingGridData,
     isLoading: isLoadingGridData,
@@ -327,7 +317,6 @@ export const AssetInventoryDataTable = ({
   const externalAdditionalControls = (
     <AdditionalControls
       total={totalHits}
-      dataView={dataView}
       title={title}
       columns={currentColumns}
       onAddColumn={onAddColumn}
@@ -336,22 +325,6 @@ export const AssetInventoryDataTable = ({
       groupSelectorComponent={groupSelectorComponent}
     />
   );
-
-  const externalControlColumns: RowControlColumn[] = [
-    {
-      id: 'more-actions',
-      headerAriaLabel: moreActionsLabel,
-      headerCellRender: () => null,
-      renderControl: () => (
-        <EuiButtonIcon
-          aria-label={moreActionsLabel}
-          iconType="boxesHorizontal"
-          color="primary"
-          isLoading={isLoadingGridData}
-        />
-      ),
-    },
-  ];
 
   const loadingState = isLoadingGridData ? DataLoadingState.loading : DataLoadingState.loaded;
 
@@ -367,7 +340,7 @@ export const AssetInventoryDataTable = ({
         <EuiProgress
           size="xs"
           color="accent"
-          style={{ opacity: isFetchingGridData ? 1 : 0 }}
+          css={{ opacity: isFetchingGridData ? 1 : 0 }}
           className={styles.gridProgressBar}
         />
         {dataViewIsLoading ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
@@ -399,7 +372,6 @@ export const AssetInventoryDataTable = ({
             showTimeCol={false}
             settings={settings}
             onFetchMoreRecords={loadMore}
-            rowAdditionalLeadingControls={externalControlColumns}
             externalCustomRenderers={externalCustomRenderers}
             externalAdditionalControls={externalAdditionalControls}
             gridStyleOverride={gridStyle}

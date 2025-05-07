@@ -34,6 +34,7 @@ export const ConfigSchema = schema.object({
         schema.object({
           hidden: schema.maybe(schema.boolean()),
           name: schema.maybe(schema.string({ minLength: 1 })),
+          description: schema.maybe(schema.nullable(schema.string({ minLength: 1 }))),
           category: schema.maybe(
             schema.string({
               validate(categoryName) {

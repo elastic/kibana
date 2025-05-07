@@ -77,6 +77,9 @@ export default function (providerContext: FtrProviderContext) {
     orchestrator: {
       cluster: { id: 'Upper case cluster id' },
     },
+    data_stream: {
+      dataset: 'cloud_security_posture.findings',
+    },
   });
 
   describe('GET /internal/cloud_security_posture/benchmarks', () => {

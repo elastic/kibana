@@ -41,7 +41,6 @@ const indexThresholdRuleType = {
   ruleTaskTimeout: '5m',
   doesSetRecoveryContext: true,
   hasAlertsMappings: true,
-  hasFieldsForAAD: false,
   id: '.index-threshold',
   name: 'Index threshold',
   category: 'management',
@@ -80,7 +79,7 @@ const initialState: RuleFormState = {
   validConsumers: [],
   connectors: [],
   connectorTypes: [],
-  aadTemplateFields: [],
+  alertFields: [],
 };
 
 describe('ruleFormStateReducer', () => {

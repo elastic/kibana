@@ -19,6 +19,7 @@ import {
   setDefaultProfileAdHocDataViews,
   setTabs,
   updateTabs,
+  disconnectTab,
 } from './actions';
 
 export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
@@ -35,6 +36,7 @@ export const internalStateActions = {
   loadDataViewList,
   setTabs,
   updateTabs,
+  disconnectTab,
   setDataView,
   setAdHocDataViews,
   setDefaultProfileAdHocDataViews,
@@ -50,6 +52,7 @@ export {
   CurrentTabProvider,
   useCurrentTabSelector,
   useCurrentTabAction,
+  useCurrentChartPortalNode,
   useDataViewsForPicker,
 } from './hooks';
 

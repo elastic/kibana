@@ -930,26 +930,13 @@
               {
                 "parentPluginId": "@kbn/user-profile-components",
                 "id": "def-common.UserProfilesKibanaDependencies.toMountPoint.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  "{ i18n: ",
-                  "I18nStart",
-                  "; analytics?: Pick<",
-                  "AnalyticsServiceStart",
-                  ", \"reportEvent\"> | undefined; theme: ",
-                  {
-                    "pluginId": "@kbn/react-kibana-context-common",
-                    "scope": "common",
-                    "docId": "kibKbnReactKibanaContextCommonPluginApi",
-                    "section": "def-common.ThemeServiceStart",
-                    "text": "ThemeServiceStart"
-                  },
-                  "; userProfile?: Pick<",
-                  "UserProfileService",
-                  ", \"getUserProfile$\"> | undefined; }"
+                  "RenderingService",
+                  " | ToMountPointParamsDeprecated"
                 ],
                 "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
                 "deprecated": false,

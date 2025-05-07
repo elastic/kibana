@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { getConnectToInternalServer, createMcpServer, type McpProvider } from '@kbn/wci-server';
+import {
+  getConnectToInternalServer,
+  createMcpServer,
+  type McpClientProvider,
+} from '@kbn/wci-server';
 import { baseToolsProviderId } from '../../../../common/constants';
 import { getCalculatorTool } from './calculator';
 
-export const getBaseToolProvider = async (): Promise<McpProvider> => {
+export const getBaseToolProvider = async (): Promise<McpClientProvider> => {
   const tools = [getCalculatorTool()];
 
   const server = createMcpServer({

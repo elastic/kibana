@@ -6,3 +6,4 @@
  */
 
 export { type McpGatewaySession, McpGatewaySessionImpl } from './session';
+export { ToolsProvider } from './tools_provider';

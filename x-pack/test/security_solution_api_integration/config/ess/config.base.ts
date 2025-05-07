@@ -17,8 +17,13 @@ interface CreateTestConfigOptions {
   license: string;
   ssl?: boolean;
   services?: any;
+  // Used to enable searchable snapshots locally which is necessary to run tests on the frozen data tier
+  // see https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/searchable-snapshots
+  esSnapshotStorageConfig?: { size: `${number}GB`; path: string };
+  // How often index lifecycle management checks for indices that meet policy criteria. Defaults to 10m.
+  // See https://www.elastic.co/docs/reference/elasticsearch/configuration-reference/index-lifecycle-management-settings
+  ilmPollInterval?: `${number}${'s' | 'm'}`;
 }
-
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
   '.cases',
@@ -38,7 +43,13 @@ const enabledActionTypes = [
 ];
 
 export function createTestConfig(options: CreateTestConfigOptions, testFiles?: string[]) {
-  const { license = 'trial', ssl = false, services = baseServices } = options;
+  const {
+    license = 'trial',
+    ssl = false,
+    services = baseServices,
+    esSnapshotStorageConfig,
+    ilmPollInterval,
+  } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -64,7 +75,16 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
         ssl,
-        serverArgs: [`xpack.license.self_generated.type=${license}`],
+        serverArgs: [
+          `xpack.license.self_generated.type=${license}`,
+          ...(esSnapshotStorageConfig
+            ? [
+                `path.repo=${esSnapshotStorageConfig.path}`,
+                `xpack.searchable.snapshot.shared_cache.size=${esSnapshotStorageConfig.size}`,
+              ]
+            : []),
+          ...(ilmPollInterval ? [`indices.lifecycle.poll_interval=${ilmPollInterval}`] : []),
+        ],
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
@@ -88,7 +108,6 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
             'previewTelemetryUrlEnabled',
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
-            'alertSuppressionForSequenceEqlRuleEnabled',
           ])}`,
           `--plugin-path=${path.resolve(
             __dirname,

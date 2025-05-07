@@ -62,6 +62,7 @@ import { MsearchError } from './lib/msearch_error';
 import { BulkUpdateError } from './lib/bulk_update_error';
 import { TASK_SO_NAME } from './saved_objects';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
+import { getFirstRunAt } from './lib/get_first_run_at';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -149,6 +150,7 @@ export class TaskStore {
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
   private spaces?: SpacesPluginStart;
+  private logger: Logger;
 
   /**
    * Constructs a new TaskStore.
@@ -183,6 +185,7 @@ export class TaskStore {
     this.security = opts.security;
     this.spaces = opts.spaces;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
+    this.logger = opts.logger;
   }
 
   public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
@@ -313,16 +316,21 @@ export class TaskStore {
       const id = taskInstance.id || v4();
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+
       savedObject = await soClient.create<SerializedConcreteTaskInstance>(
         'task',
         {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(userScope ? { userScope } : {}),
           ...(apiKey ? { apiKey } : {}),
+          runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
         { id, refresh: false }
       );
-      if (get(taskInstance, 'schedule.interval', null) == null) {
+      if (
+        get(taskInstance, 'schedule.interval', null) == null &&
+        get(taskInstance, 'schedule.rrule', null) == null
+      ) {
         this.adHocTaskCounter.increment();
       }
     } catch (e) {
@@ -354,12 +362,14 @@ export class TaskStore {
       this.definitions.ensureHas(taskInstance.taskType);
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+
       return {
         type: 'task',
         attributes: {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(apiKey ? { apiKey } : {}),
           ...(userScope ? { userScope } : {}),
+          runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
         id,
       };
@@ -902,24 +912,24 @@ export class TaskStore {
     { max_docs: max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
+    const { sort, ...rest } = opts;
     try {
-      const // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584 types complain because the body should not be there.
-        // However, we can't use this API without the body because it fails to claim the tasks.
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
-          {
-            index: this.index,
-            ignore_unavailable: true,
-            refresh: true,
-            conflicts: 'proceed',
-            body: {
-              ...opts,
-              max_docs,
-              query,
-            },
-          },
-          { requestTimeout: this.requestTimeouts.update_by_query }
-        );
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
+        {
+          index: this.index,
+          ignore_unavailable: true,
+          refresh: true,
+          conflicts: 'proceed',
+          ...rest,
+          max_docs,
+          query,
+          // @ts-expect-error According to the docs, sort should be a comma-separated list of fields and goes in the querystring.
+          // However, this one is using a "body" format?
+          body: { sort },
+        },
+        { requestTimeout: this.requestTimeouts.update_by_query }
+      );
 
       const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
         updated,

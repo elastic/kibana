@@ -13,7 +13,6 @@ import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
 import { SettingsFlyout } from '.';
 import { ATTACK_DISCOVERY_SETTINGS } from './translations';
 import { getDefaultQuery } from '../helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { useSourcererDataView } from '../../../sourcerer/containers';
@@ -30,10 +29,12 @@ jest.mock('react-router-dom', () => ({
 }));
 
 const defaultProps = {
+  connectorId: undefined,
   end: undefined,
   filters: undefined,
   localStorageAttackDiscoveryMaxAlerts: undefined,
   onClose: jest.fn(),
+  onConnectorIdSelected: jest.fn(),
   query: undefined,
   setEnd: jest.fn(),
   setFilters: jest.fn(),
@@ -41,9 +42,11 @@ const defaultProps = {
   setQuery: jest.fn(),
   setStart: jest.fn(),
   start: undefined,
+  stats: null,
 };
 
 const customProps = {
+  connectorId: undefined,
   end: 'now-15m',
   filters: [
     {
@@ -68,6 +71,7 @@ const customProps = {
   ],
   localStorageAttackDiscoveryMaxAlerts: '123',
   onClose: jest.fn(),
+  onConnectorIdSelected: jest.fn(),
   query: { query: 'user.name : "user1" ', language: 'kuery' },
   setEnd: jest.fn(),
   setFilters: jest.fn(),
@@ -75,21 +79,26 @@ const customProps = {
   setQuery: jest.fn(),
   setStart: jest.fn(),
   start: 'now-45m',
+  stats: null,
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
   typeof useSourcererDataView
 >;
+const getBooleanValueMock = jest.fn();
 
 describe('SettingsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    getBooleanValueMock.mockReturnValue(false);
 
     mockUseKibana.mockReturnValue({
       services: {
+        featureFlags: {
+          getBooleanValue: getBooleanValueMock,
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
@@ -216,9 +225,9 @@ describe('SettingsFlyout', () => {
     });
   });
 
-  describe('when `assistantAttackDiscoverySchedulingEnabled` feature flag is enabled', () => {
+  describe('when `securitySolution.assistantAttackDiscoverySchedulingEnabled` feature flag is enabled', () => {
     beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+      getBooleanValueMock.mockReturnValue(true);
       render(
         <TestProviders>
           <SettingsFlyout {...defaultProps} />

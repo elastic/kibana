@@ -132,6 +132,7 @@ import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrati
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
+import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -211,6 +212,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = config.experimentalFeatures;
 
     initSavedObjects(core.savedObjects);
+
     initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     productFeaturesService.init(plugins.features);
 
@@ -266,6 +268,15 @@ export class Plugin implements ISecuritySolutionPlugin {
         kibanaVersion: pluginContext.env.packageInfo.version,
       });
     }
+
+    registerPrivilegeMonitoringTask({
+      getStartServices: core.getStartServices,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      telemetry: core.analytics,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      experimentalFeatures,
+    });
 
     const requestContextFactory = new RequestContextFactory({
       config,
@@ -336,6 +347,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     ruleDataClient = ruleDataService.initializeIndex(ruleDataServiceOptions);
     const previewIlmPolicy = previewPolicy.policy;
 
+    const isServerless = this.pluginContext.env.packageInfo.buildFlavor === 'serverless';
+
     previewRuleDataClient = ruleDataService.initializeIndex({
       ...ruleDataServiceOptions,
       additionalPrefix: '.preview',
@@ -345,6 +358,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const securityRuleTypeOptions = {
       lists: plugins.lists,
+      docLinks: core.docLinks,
       actions: plugins.actions,
       logger: this.logger,
       config: this.config,
@@ -356,6 +370,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures: config.experimentalFeatures,
       alerting: plugins.alerting,
       analytics: core.analytics,
+      isServerless,
       eventsTelemetry: this.telemetryEventsSender,
       licensing: plugins.licensing,
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
@@ -406,7 +421,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeOptions,
       previewRuleDataClient,
       this.telemetryReceiver,
-      this.pluginContext.env.packageInfo.buildFlavor === 'serverless',
+      isServerless,
       core.docLinks,
       this.endpointContext
     );
@@ -584,8 +599,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-      assistantAttackDiscoverySchedulingEnabled:
-        config.experimentalFeatures.assistantAttackDiscoverySchedulingEnabled,
+      advancedEsqlGeneration: config.experimentalFeatures.advancedEsqlGeneration,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);

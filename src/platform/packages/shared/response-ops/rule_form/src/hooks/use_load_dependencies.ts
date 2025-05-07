@@ -23,10 +23,10 @@ import {
   useLoadConnectorTypes,
   useLoadUiConfig,
   useResolveRule,
+  useLoadRuleTypeAlertFields,
 } from '../common/hooks';
 import type { RuleTypeRegistryContract } from '../common/types';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../constants';
-import { useLoadRuleTypeAadTemplateField } from '../common/hooks/use_load_rule_type_aad_template_fields';
 
 export interface UseLoadDependencies {
   http: HttpStart;
@@ -124,10 +124,10 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
   });
 
   const {
-    data: aadTemplateFields,
-    isLoading: isLoadingAadtemplateFields,
-    isInitialLoading: isInitialLoadingAadTemplateField,
-  } = useLoadRuleTypeAadTemplateField({
+    data: alertFields,
+    isLoading: isLoadingAlertFields,
+    isInitialLoading: isInitialLoadingAlertFields,
+  } = useLoadRuleTypeAlertFields({
     http,
     ruleTypeId: computedRuleTypeId,
     enabled: !!computedRuleTypeId && canReadConnectors,
@@ -159,7 +159,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
         isLoadingFlappingSettings ||
         isLoadingConnectors ||
         isLoadingConnectorTypes ||
-        isLoadingAadtemplateFields
+        isLoadingAlertFields
       );
     }
 
@@ -172,7 +172,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
       isLoadingFlappingSettings ||
       isLoadingConnectors ||
       isLoadingConnectorTypes ||
-      isLoadingAadtemplateFields
+      isLoadingAlertFields
     );
   }, [
     id,
@@ -183,7 +183,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     isLoadingFlappingSettings,
     isLoadingConnectors,
     isLoadingConnectorTypes,
-    isLoadingAadtemplateFields,
+    isLoadingAlertFields,
   ]);
 
   const isInitialLoading = useMemo(() => {
@@ -196,7 +196,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
         isInitialLoadingFlappingSettings ||
         isInitialLoadingConnectors ||
         isInitialLoadingConnectorTypes ||
-        isInitialLoadingAadTemplateField
+        isInitialLoadingAlertFields
       );
     }
 
@@ -209,7 +209,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
       isInitialLoadingFlappingSettings ||
       isInitialLoadingConnectors ||
       isInitialLoadingConnectorTypes ||
-      isInitialLoadingAadTemplateField
+      isInitialLoadingAlertFields
     );
   }, [
     id,
@@ -220,7 +220,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     isInitialLoadingFlappingSettings,
     isInitialLoadingConnectors,
     isInitialLoadingConnectorTypes,
-    isInitialLoadingAadTemplateField,
+    isInitialLoadingAlertFields,
   ]);
 
   return {
@@ -235,6 +235,6 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     flappingSettings,
     connectors,
     connectorTypes,
-    aadTemplateFields,
+    alertFields,
   };
 };

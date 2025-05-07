@@ -6,11 +6,6 @@
  */
 
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import {
-  StreamDefinition,
-  UnwiredStreamDefinition,
-  WiredStreamDefinition,
-} from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
 import {
   IndicesDataStream,
@@ -19,6 +14,7 @@ import {
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
+import { Streams } from '@kbn/streams-schema';
 import { generateLayer } from '../component_templates/generate_layer';
 import { upsertComponent } from '../component_templates/manage_component_templates';
 import { upsertIngestPipeline } from '../ingest_pipelines/manage_ingest_pipelines';
@@ -29,10 +25,7 @@ import {
 import { generateReroutePipeline } from '../ingest_pipelines/generate_reroute_pipeline';
 import { upsertTemplate } from '../index_templates/manage_index_templates';
 import { generateIndexTemplate } from '../index_templates/generate_index_template';
-import {
-  rolloverDataStreamIfNecessary,
-  upsertDataStream,
-} from '../data_streams/manage_data_streams';
+import { updateOrRolloverDataStream, upsertDataStream } from '../data_streams/manage_data_streams';
 import { getUnmanagedElasticsearchAssets } from '../stream_crud';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 
@@ -47,7 +40,7 @@ export async function syncWiredStreamDefinitionObjects({
   logger,
   isServerless,
 }: SyncStreamParamsBase & {
-  definition: WiredStreamDefinition;
+  definition: Streams.WiredStream.Definition;
   isServerless: boolean;
 }) {
   const componentTemplate = generateLayer(definition.name, definition, isServerless);
@@ -84,11 +77,10 @@ export async function syncWiredStreamDefinitionObjects({
     name: definition.name,
   });
 
-  await rolloverDataStreamIfNecessary({
+  await updateOrRolloverDataStream({
     esClient: scopedClusterClient.asCurrentUser,
     name: definition.name,
     logger,
-    mappings: componentTemplate.template.mappings?.properties,
   });
 }
 
@@ -162,7 +154,7 @@ type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer Value> ? Va
 async function ensureStreamManagedPipelineReference(
   scopedClusterClient: IScopedClusterClient,
   pipelineName: string | undefined,
-  definition: StreamDefinition,
+  definition: Streams.all.Definition,
   executionPlan: ExecutionPlanStep[],
   unmanagedAssets: UnwrapPromise<ReturnType<typeof getUnmanagedElasticsearchAssets>>
 ) {
@@ -239,7 +231,7 @@ export async function syncUnwiredStreamDefinitionObjects({
   scopedClusterClient,
 }: SyncStreamParamsBase & {
   dataStream: IndicesDataStream;
-  definition: UnwiredStreamDefinition;
+  definition: Streams.UnwiredStream.Definition;
 }) {
   const unmanagedAssets = await getUnmanagedElasticsearchAssets({
     dataStream,

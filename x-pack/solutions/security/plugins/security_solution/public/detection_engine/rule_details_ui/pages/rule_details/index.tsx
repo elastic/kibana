@@ -39,6 +39,13 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useGroupTakeActionsItems } from '../../../../detections/hooks/alerts_table/use_group_take_action_items';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
+import {
+  defaultGroupStatsAggregations,
+  defaultGroupStatsRenderer,
+  defaultGroupTitleRenderers,
+} from '../../../../detections/components/alerts_table/grouping_settings';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
 import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
@@ -179,6 +186,25 @@ const RuleFieldsSectionWrapper = styled.div`
   overflow-wrap: anywhere;
 `;
 
+const defaultGroupingOptions = [
+  {
+    label: i18n.SOURCE_ADDRESS,
+    key: 'source.address',
+  },
+  {
+    label: i18n.USER_NAME,
+    key: 'user.name',
+  },
+  {
+    label: i18n.HOST_NAME,
+    key: 'host.name',
+  },
+  {
+    label: i18n.DESTINATION_ADDRESS,
+    key: 'destination.address',
+  },
+];
+
 type DetectionEngineComponentProps = PropsFromRedux;
 
 const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
@@ -236,9 +262,17 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
-  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
+    useSourcererDataView(SourcererScopeName.detections);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataViewSpec, status } = useDataViewSpec(SourcererScopeName.detections);
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIsLoadingIndexPattern;
 
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{
@@ -535,6 +569,19 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     confirmManualRuleRun,
   } = useManualRuleRunConfirmation();
 
+  const groupTakeActionItems = useGroupTakeActionsItems({
+    currentStatus: currentAlertStatusFilterValue,
+    showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
+  });
+
+  const accordionExtraActionGroupStats = useMemo(
+    () => ({
+      aggregations: defaultGroupStatsAggregations,
+      renderer: defaultGroupStatsRenderer,
+    }),
+    []
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -762,13 +809,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        currentAlertStatusFilterValue={currentAlertStatusFilterValue}
+                        accordionButtonContent={defaultGroupTitleRenderers}
+                        accordionExtraActionGroupStats={accordionExtraActionGroupStats}
                         defaultFilters={alertMergedFilters}
+                        defaultGroupingOptions={defaultGroupingOptions}
                         from={from}
                         globalFilters={filters}
                         globalQuery={query}
-                        hasIndexMaintenance={hasIndexMaintenance ?? false}
-                        hasIndexWrite={hasIndexWrite ?? false}
+                        groupTakeActionItems={groupTakeActionItems}
                         loading={loading}
                         renderChildComponent={renderGroupedAlertTable}
                         runtimeMappings={sourcererDataView.runtimeFieldMap as RunTimeMappings}

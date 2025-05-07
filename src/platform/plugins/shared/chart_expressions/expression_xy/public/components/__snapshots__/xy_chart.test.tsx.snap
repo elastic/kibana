@@ -277,15 +277,7 @@ exports[`XYChart component it renders area 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "2lyuno",
-        "next": undefined,
-        "styles": "width:100%;height:100%;overflow-x:hidden;position:relative;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -445,6 +437,15 @@ exports[`XYChart component it renders area 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -1109,15 +1110,7 @@ exports[`XYChart component it renders area 1`] = `
           locale="en"
           noResults={
             <EmptyPlaceholder
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "16rwds4",
-                  "next": undefined,
-                  "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
-                  "toString": [Function],
-                }
-              }
+              css="unknown styles"
               icon={[Function]}
               renderComplete={[Function]}
             />
@@ -1549,6 +1542,15 @@ exports[`XYChart component it renders area 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -1833,15 +1835,7 @@ exports[`XYChart component it renders bar 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "2lyuno",
-        "next": undefined,
-        "styles": "width:100%;height:100%;overflow-x:hidden;position:relative;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -2001,6 +1995,15 @@ exports[`XYChart component it renders bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -2665,15 +2668,7 @@ exports[`XYChart component it renders bar 1`] = `
           locale="en"
           noResults={
             <EmptyPlaceholder
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "16rwds4",
-                  "next": undefined,
-                  "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
-                  "toString": [Function],
-                }
-              }
+              css="unknown styles"
               icon={[Function]}
               renderComplete={[Function]}
             />
@@ -3105,6 +3100,15 @@ exports[`XYChart component it renders bar 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -3389,15 +3393,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "2lyuno",
-        "next": undefined,
-        "styles": "width:100%;height:100%;overflow-x:hidden;position:relative;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -3557,6 +3553,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -4221,15 +4226,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           locale="en"
           noResults={
             <EmptyPlaceholder
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "16rwds4",
-                  "next": undefined,
-                  "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
-                  "toString": [Function],
-                }
-              }
+              css="unknown styles"
               icon={[Function]}
               renderComplete={[Function]}
             />
@@ -4661,6 +4658,15 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -4945,15 +4951,7 @@ exports[`XYChart component it renders line 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "2lyuno",
-        "next": undefined,
-        "styles": "width:100%;height:100%;overflow-x:hidden;position:relative;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -5113,6 +5111,15 @@ exports[`XYChart component it renders line 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -5777,15 +5784,7 @@ exports[`XYChart component it renders line 1`] = `
           locale="en"
           noResults={
             <EmptyPlaceholder
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "16rwds4",
-                  "next": undefined,
-                  "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
-                  "toString": [Function],
-                }
-              }
+              css="unknown styles"
               icon={[Function]}
               renderComplete={[Function]}
             />
@@ -6217,6 +6216,15 @@ exports[`XYChart component it renders line 1`] = `
               "first": Object {
                 "formattedColumns": Object {
                   "c": true,
+                },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [
@@ -6501,15 +6509,7 @@ exports[`XYChart component it renders stacked area 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "2lyuno",
-        "next": undefined,
-        "styles": "width:100%;height:100%;overflow-x:hidden;position:relative;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -6669,6 +6669,15 @@ exports[`XYChart component it renders stacked area 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -7333,15 +7342,7 @@ exports[`XYChart component it renders stacked area 1`] = `
           locale="en"
           noResults={
             <EmptyPlaceholder
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "16rwds4",
-                  "next": undefined,
-                  "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
-                  "toString": [Function],
-                }
-              }
+              css="unknown styles"
               icon={[Function]}
               renderComplete={[Function]}
             />
@@ -7774,6 +7775,15 @@ exports[`XYChart component it renders stacked area 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -8057,15 +8067,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "2lyuno",
-        "next": undefined,
-        "styles": "width:100%;height:100%;overflow-x:hidden;position:relative;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -8225,6 +8227,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -8889,15 +8900,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
           locale="en"
           noResults={
             <EmptyPlaceholder
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "16rwds4",
-                  "next": undefined,
-                  "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
-                  "toString": [Function],
-                }
-              }
+              css="unknown styles"
               icon={[Function]}
               renderComplete={[Function]}
             />
@@ -9330,6 +9333,15 @@ exports[`XYChart component it renders stacked bar 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -9613,15 +9625,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
 <Fragment>
   <GlobalXYChartStyles />
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "2lyuno",
-        "next": undefined,
-        "styles": "width:100%;height:100%;overflow-x:hidden;position:relative;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -9781,6 +9785,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "first": Object {
               "formattedColumns": Object {
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {},
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -10445,15 +10458,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           locale="en"
           noResults={
             <EmptyPlaceholder
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "16rwds4",
-                  "next": undefined,
-                  "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
-                  "toString": [Function],
-                }
-              }
+              css="unknown styles"
               icon={[Function]}
               renderComplete={[Function]}
             />
@@ -10886,6 +10891,15 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
                 "formattedColumns": Object {
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {},
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -11169,15 +11183,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
 <Fragment>
   <GlobalXYChartStyles />
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "2lyuno",
-        "next": undefined,
-        "styles": "width:100%;height:100%;overflow-x:hidden;position:relative;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -11363,6 +11369,18 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {
+                  2 => 2,
+                  5 => 5,
+                },
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -12031,15 +12049,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
           locale="en"
           noResults={
             <EmptyPlaceholder
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "16rwds4",
-                  "next": undefined,
-                  "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
-                  "toString": [Function],
-                }
-              }
+              css="unknown styles"
               icon={[Function]}
               renderComplete={[Function]}
             />
@@ -12668,6 +12678,18 @@ exports[`XYChart component split chart should render split chart if both, splitR
                   "b": true,
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {
+                    2 => 2,
+                    5 => 5,
+                  },
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -12969,15 +12991,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
 <Fragment>
   <GlobalXYChartStyles />
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "2lyuno",
-        "next": undefined,
-        "styles": "width:100%;height:100%;overflow-x:hidden;position:relative;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -13159,6 +13173,18 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {
+                  2 => 2,
+                  5 => 5,
+                },
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -13825,15 +13851,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           locale="en"
           noResults={
             <EmptyPlaceholder
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "16rwds4",
-                  "next": undefined,
-                  "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
-                  "toString": [Function],
-                }
-              }
+              css="unknown styles"
               icon={[Function]}
               renderComplete={[Function]}
             />
@@ -14457,6 +14475,18 @@ exports[`XYChart component split chart should render split chart if splitColumnA
                   "b": true,
                   "c": true,
                 },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {
+                    2 => 2,
+                    5 => 5,
+                  },
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
+                },
                 "table": Object {
                   "columns": Array [
                     Object {
@@ -14756,15 +14786,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
 <Fragment>
   <GlobalXYChartStyles />
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "2lyuno",
-        "next": undefined,
-        "styles": "width:100%;height:100%;overflow-x:hidden;position:relative;",
-        "toString": [Function],
-      }
-    }
+    css="unknown styles"
   >
     <ContextProvider
       value={
@@ -14946,6 +14968,18 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "formattedColumns": Object {
                 "b": true,
                 "c": true,
+              },
+              "invertedRawValueMap": Map {
+                "a" => Map {},
+                "b" => Map {
+                  2 => 2,
+                  5 => 5,
+                },
+                "c" => Map {
+                  1652034840000 => 1652034840000,
+                  1652122440000 => 1652122440000,
+                },
+                "d" => Map {},
               },
               "table": Object {
                 "columns": Array [
@@ -15612,15 +15646,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           locale="en"
           noResults={
             <EmptyPlaceholder
-              css={
-                Object {
-                  "map": undefined,
-                  "name": "16rwds4",
-                  "next": undefined,
-                  "styles": "height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;",
-                  "toString": [Function],
-                }
-              }
+              css="unknown styles"
               icon={[Function]}
               renderComplete={[Function]}
             />
@@ -16243,6 +16269,18 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
                 "formattedColumns": Object {
                   "b": true,
                   "c": true,
+                },
+                "invertedRawValueMap": Map {
+                  "a" => Map {},
+                  "b" => Map {
+                    2 => 2,
+                    5 => 5,
+                  },
+                  "c" => Map {
+                    1652034840000 => 1652034840000,
+                    1652122440000 => 1652122440000,
+                  },
+                  "d" => Map {},
                 },
                 "table": Object {
                   "columns": Array [

@@ -10,6 +10,7 @@ import type { EntityAnalyticsPrivileges } from '../entity_analytics';
 import type { InitEntityStoreResponse } from '../entity_analytics/entity_store/enable.gen';
 
 export type AssetInventoryStatus =
+  | 'inactive_feature'
   | 'disabled'
   | 'initializing'
   | 'empty'

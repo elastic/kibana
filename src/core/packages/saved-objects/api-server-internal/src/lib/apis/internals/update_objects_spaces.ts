@@ -9,7 +9,7 @@
 
 import pMap from 'p-map';
 import type { estypes } from '@elastic/elasticsearch';
-import intersection from 'lodash/intersection';
+import { intersection } from 'lodash';
 
 import type { Logger } from '@kbn/logging';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';

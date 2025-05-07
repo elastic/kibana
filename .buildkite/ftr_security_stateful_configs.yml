@@ -4,8 +4,8 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/ess/config.base.basic.ts
   - x-pack/test/security_solution_api_integration/config/ess/config.base.edr_workflows.trial.ts
   - x-pack/test/security_solution_api_integration/config/ess/config.base.edr_workflows.ts
-  - x-pack/test/security_solution_api_integration/config/ess/config.base.basic.ts
   - x-pack/test/security_solution_api_integration/config/ess/config.base.trial.ts
+  - x-pack/test/security_solution_api_integration/config/ess/config.base.frozen.trial.ts
   - x-pack/test/security_solution_endpoint/configs/config.base.ts
   - x-pack/test/security_solution_endpoint/config.base.ts
   - x-pack/test/security_solution_endpoint_api_int/config.base.ts
@@ -25,6 +25,9 @@ disabled:
   # Playwright
   - x-pack/test/security_solution_playwright/playwright.config.ts
 
+  # Gen AI Evals run weekly via their own pipeline
+  - x-pack/test/security_solution_api_integration/test_suites/genai/evaluations/trial_license_complete_tier/configs/ess.config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/actions/trial_license_complete_tier/configs/ess.config.ts
@@ -43,6 +46,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/esql/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/general_logic/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/general_logic/basic_license_essentials_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/frozen_indices_handling/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/indicator_match/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/machine_learning/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/new_terms/trial_license_complete_tier/configs/ess.config.ts
@@ -81,6 +85,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/risk_engine/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/monitoring/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists/lists_items/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/explore/hosts/trial_license_complete_tier/configs/ess.config.ts
@@ -105,6 +110,7 @@ enabled:
   - x-pack/test/security_solution_endpoint/configs/endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/integrations.config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+  - x-pack/test/api_integration/apis/osquery/config.ts
   - x-pack/test/cloud_security_posture_api/config.ts
   - x-pack/test/cloud_security_posture_functional/config.ts
   - x-pack/test/cloud_security_posture_functional/config.agentless.ts

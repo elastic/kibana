@@ -21,14 +21,14 @@ import {
   SiemMigrationStatus,
   RuleTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
-  type RuleMigration,
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
+import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
 export type CreateRuleMigrationInput = Omit<
   RuleMigration,
@@ -318,13 +318,15 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const migrationsAgg = result.aggregations?.migrationIds as AggregationsStringTermsAggregate;
     const buckets = (migrationsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
     return buckets.map((bucket) => ({
-      id: bucket.key,
+      id: `${bucket.key}`,
       rules: {
         total: bucket.doc_count,
-        ...this.statusAggCounts(bucket.status),
+        ...this.statusAggCounts(bucket.status as AggregationsStringTermsAggregate),
       },
-      created_at: bucket.createdAt?.value_as_string,
-      last_updated_at: bucket.lastUpdatedAt?.value_as_string,
+      created_at: (bucket.createdAt as AggregationsMinAggregate | undefined)
+        ?.value_as_string as string,
+      last_updated_at: (bucket.lastUpdatedAt as AggregationsMaxAggregate | undefined)
+        ?.value_as_string as string,
     }));
   }
 
