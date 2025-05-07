@@ -26,6 +26,7 @@ import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
 import { PlaceHolderActionItem } from '../placeholder/placeholder_action_item';
 import { PlaceHolderButton } from '../placeholder/placeholder_button';
+import { PlaceHolder } from '../placeholder/placeholder';
 
 export interface CaseActionBarProps {
   caseData: CaseUI;
@@ -110,6 +111,12 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
             </ActionBarStatusItem>
           </EuiFlexItem>
         ) : null}
+
+        <EuiFlexItem grow={false}>
+          <ActionBarStatusItem title={'Solution title'} dataTestSubj="case-action-bar-status-date">
+            <PlaceHolder height={30} size="xs" />
+          </ActionBarStatusItem>
+        </EuiFlexItem>
 
         {permissions.update && isSyncAlertsEnabled ? (
           <EuiFlexItem grow={false}>
