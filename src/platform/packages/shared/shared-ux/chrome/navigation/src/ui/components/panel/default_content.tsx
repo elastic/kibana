@@ -20,7 +20,7 @@ const panelContentStyles = {
   title: ({ euiTheme }: Theme) => css`
     margin: calc(${euiTheme.size.xs} * 2);
     padding-top: calc(${euiTheme.size.xxs} * 3);
-    padding-left: calc(${euiTheme.size.xxs} * 3);
+    padding-left: calc(${euiTheme.size.xs} * 2);
   `,
   panelNavigation: () => css`
     width: 100%;

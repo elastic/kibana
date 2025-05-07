@@ -33,14 +33,19 @@ const panelOpenerStyles = {
       padding-inline: calc(${euiTheme.size.xs} * 2);
       background-color: inherit;
 
-      &:hover {
+      &:hover:not(:disabled) {
         background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        text-decoration: none;
       }
 
       &.isSelected {
         background-color: ${euiTheme.colors.backgroundLightPrimary};
         &:hover {
           background-color: ${euiTheme.colors.backgroundLightPrimary};
+        }
+
+        * {
+          color: ${euiTheme.colors.textPrimary};
         }
       }
 

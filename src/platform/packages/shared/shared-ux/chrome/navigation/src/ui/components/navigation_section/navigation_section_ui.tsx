@@ -66,16 +66,25 @@ const sectionStyles = {
     }
   `,
   euiCollapsibleNavSubItem: ({ euiTheme }: Theme) => css`
+    .euiAccordion__button {
+      text-decoration: none;
+    }
+
     &.euiLink,
     &.euiCollapsibleNavLink {
       :hover {
         background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        text-decoration: none;
       }
 
       &.isSelected {
         background-color: ${euiTheme.colors.backgroundLightPrimary};
         :hover {
           background-color: ${euiTheme.colors.backgroundLightPrimary};
+        }
+
+        * {
+          color: ${euiTheme.colors.textPrimary};
         }
       }
     }

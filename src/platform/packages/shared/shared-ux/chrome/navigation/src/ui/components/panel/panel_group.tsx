@@ -48,8 +48,18 @@ const styles = {
     gap: 0;
   `,
   listGroupItemButton: ({ euiTheme }: Theme) => css`
-    .euiListGroupItem__button {
+    .euiListGroupItem__button,
+    .euiAccordion__button {
       font-weight: ${euiTheme.font.weight.regular};
+
+      &:focus,
+      &:hover {
+        text-decoration: none;
+      }
+    }
+
+    &.euiAccordion {
+      margin-top: ${euiTheme.size.s};
     }
   `,
 };

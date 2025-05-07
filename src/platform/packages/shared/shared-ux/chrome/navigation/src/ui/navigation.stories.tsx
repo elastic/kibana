@@ -92,7 +92,7 @@ const NavigationWrapper: FC<Props & Omit<Partial<EuiCollapsibleNavBetaProps>, 'c
               <br />
               <p>There should be multiple &quot;selected&quot; nodes in the side nav:</p>
               <ul>
-                <li>* Item 03 &raquo; Item 22</li>
+                <li>* Item 03 &raquo; Item 18</li>
                 <li>* Footer parent 1 &raquo; Item 35</li>
               </ul>
             </>
@@ -617,8 +617,8 @@ export const GeneralLayoutStructure = (args: NavigationServices) => {
       { id: '', path: 'example_project' },
       { id: '', path: 'example_project.root-section1' },
       { id: '', path: 'example_project.root-section1.item03' },
-      { id: '', path: 'example_project.root-section1.item03.child-section4' },
-      { id: '', path: 'example_project.root-section1.item03.child-section4.sub3' },
+      { id: '', path: 'example_project.root-section1.item03.child-section2' },
+      { id: '', path: 'example_project.root-section1.item03.child-section2.sub3' },
     ],
     [
       { id: '', path: 'example_project_footer' },

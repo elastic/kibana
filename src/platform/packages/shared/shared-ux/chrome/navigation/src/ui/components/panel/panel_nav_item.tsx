@@ -38,6 +38,9 @@ const panelNavStyles = ({ euiTheme }: Theme) => css`
     &:hover {
       background-color: ${euiTheme.colors.backgroundLightPrimary};
     }
+    * {
+      color: ${euiTheme.colors.textPrimary};
+    }
   }
 
   & svg[class*='EuiExternalLinkIcon'] {
