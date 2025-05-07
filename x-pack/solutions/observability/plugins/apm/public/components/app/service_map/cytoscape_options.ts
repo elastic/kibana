@@ -81,7 +81,6 @@ const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
 export const getAnimationOptions = (theme: EuiTheme): cytoscape.AnimationOptions => ({
   duration: parseInt(theme.eui.euiAnimSpeedNormal, 10),
-  // @ts-expect-error The cubic-bezier options here are not recognized by the cytoscape types
   easing: theme.eui.euiAnimSlightBounce,
 });
 
@@ -96,12 +95,11 @@ function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.StylesheetJson => {
+const getStyle = (theme: EuiTheme): cytoscape.StylesheetJson => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
     {
       selector: 'core',
-      // @ts-expect-error DefinitelyTyped does not recognize 'active-bg-opacity'
       style: { 'active-bg-opacity': 0 },
     },
     {
@@ -160,8 +158,6 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'target-arrow-shape': isIE11 ? 'none' : 'triangle',
         // The DefinitelyTyped definitions don't specify this property since it's
         // fairly new.
-        //
-        // @ts-expect-error
         'target-distance-from-node': isIE11 ? undefined : theme.eui.euiSizeXS,
         width: 1,
         'source-arrow-shape': 'none',
@@ -192,20 +188,6 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'target-arrow-color': theme.eui.euiColorDarkShade,
       },
     },
-    ...(isTraceExplorerEnabled
-      ? [
-          {
-            selector: 'edge.hover',
-            style: {
-              width: 4,
-              'z-index': zIndexEdgeHover,
-              'line-color': theme.eui.euiColorDarkShade,
-              'source-arrow-color': theme.eui.euiColorDarkShade,
-              'target-arrow-color': theme.eui.euiColorDarkShade,
-            },
-          },
-        ]
-      : []),
     {
       selector: 'node.hover',
       style: {
@@ -248,11 +230,10 @@ ${theme.eui.euiColorLightShade}`,
 });
 
 export const getCytoscapeOptions = (
-  theme: EuiTheme,
-  isTraceExplorerEnabled: boolean
+  theme: EuiTheme
 ): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
-  style: getStyle(theme, isTraceExplorerEnabled),
+  style: getStyle(theme),
 });
