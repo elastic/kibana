@@ -15,7 +15,7 @@ import {
   getProcessorType,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { isEmpty, mapValues } from 'lodash';
+import { countBy, isEmpty, isString, mapValues, orderBy, sortBy } from 'lodash';
 import {
   DissectFormState,
   ProcessorDefinitionWithUIAttributes,
@@ -36,9 +36,47 @@ import {
  */
 export const SPECIALISED_TYPES = ['date', 'dissect', 'grok'];
 
+const PRIORITIZED_CONTENT_FIELDS = [
+  'message',
+  'body.text',
+  'error.message',
+  'event.original',
+  'attributes.exception.message',
+];
+
+const PRIORITIZED_DATE_FIELDS = [
+  'timestamp',
+  'logtime',
+  'initial_date',
+  'date',
+  'event.time.received',
+  'event.ingested',
+];
+
+const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
+  // Count occurrences of well-known text fields in the sample documents
+  const acceptableDefaultFields = sampleDocs.flatMap((doc) =>
+    Object.keys(doc).filter((key) => prioritizedFields.includes(key))
+  );
+  const acceptableFieldsOccurrencies = countBy(acceptableDefaultFields);
+
+  // Sort by count descending first, then by order of field in prioritizedFields
+  const sortedFields = orderBy(
+    Object.entries(acceptableFieldsOccurrencies),
+    [
+      ([_field, occurrencies]) => occurrencies, // Sort entries by occurrencies descending
+      ([field]) => prioritizedFields.indexOf(field), // Sort entries by priority order in well-known fields
+    ],
+    ['desc', 'asc']
+  );
+
+  const mostCommonField = sortedFields[0];
+  return mostCommonField ? mostCommonField[0] : '';
+};
+
 const defaultDateProcessorFormState = (sampleDocs: FlattenRecord[]): DateFormState => ({
   type: 'date',
-  field: getDefaultTextField(sampleDocs),
+  field: getDefaultTextField(sampleDocs, PRIORITIZED_DATE_FIELDS),
   formats: [],
   locale: '',
   target_field: '',
@@ -48,47 +86,9 @@ const defaultDateProcessorFormState = (sampleDocs: FlattenRecord[]): DateFormSta
   if: ALWAYS_CONDITION,
 });
 
-const WELL_KNOWN_TEXT_FIELDS = [
-  'message',
-  'body.text',
-  'error.message',
-  'event.original',
-  'attributes.exception.message',
-];
-
-const getDefaultTextField = (sampleDocs: FlattenRecord[]) => {
-  const stringFieldCounts = sampleDocs
-    .map((doc) =>
-      Object.keys(doc).filter(
-        (key) => doc[key] && typeof doc[key] === 'string' && WELL_KNOWN_TEXT_FIELDS.includes(key)
-      )
-    )
-    .reduce((acc, keys) => {
-      keys.forEach((key) => {
-        acc[key] = (acc[key] || 0) + 1;
-      });
-      return acc;
-    }, {} as Record<string, number>);
-
-  // sort by count descending first, then by order of field in WELL_KNOWN_TEXT_FIELDS
-  const sortedFields = Object.entries(stringFieldCounts).sort(
-    ([fieldA, countA], [fieldB, countB]) => {
-      const countSorting = countB - countA;
-      if (countSorting !== 0) {
-        return countSorting;
-      }
-      const indexA = WELL_KNOWN_TEXT_FIELDS.indexOf(fieldA);
-      const indexB = WELL_KNOWN_TEXT_FIELDS.indexOf(fieldB);
-      return indexA - indexB;
-    }
-  );
-  const mostCommonField = sortedFields[0];
-  return mostCommonField ? mostCommonField[0] : '';
-};
-
 const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectFormState => ({
   type: 'dissect',
-  field: getDefaultTextField(sampleDocs),
+  field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
   pattern: '',
   ignore_failure: true,
   ignore_missing: true,
@@ -97,7 +97,7 @@ const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectF
 
 const defaultGrokProcessorFormState = (sampleDocs: FlattenRecord[]): GrokFormState => ({
   type: 'grok',
-  field: getDefaultTextField(sampleDocs),
+  field: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
   patterns: [{ value: '' }],
   pattern_definitions: {},
   ignore_failure: true,

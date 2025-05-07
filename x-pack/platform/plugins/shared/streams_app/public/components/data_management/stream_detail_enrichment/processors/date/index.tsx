@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { isEmpty, uniq } from 'lodash';
 import { useFormContext } from 'react-hook-form';
@@ -43,17 +43,11 @@ export const DateProcessorForm = () => {
     selectPreviewDocuments(snapshot.context)
   );
 
-  const applySuggestions = async ({
-    fieldName,
-    canSuggest = false,
-  }: {
-    fieldName: string;
-    canSuggest: boolean;
-  }) => {
+  const applySuggestions = async ({ fieldName }: { fieldName: string }) => {
     const dates = previewDocuments.map((doc) => doc[fieldName]).filter(Boolean);
 
     // Short-circuit if the formats is touched by the user, formats are already set, or no date samples are available
-    if (!canSuggest || isEmpty(dates)) return;
+    if (isEmpty(dates)) return;
 
     try {
       const suggestions = await streamsRepositoryClient.fetch(
@@ -88,18 +82,29 @@ export const DateProcessorForm = () => {
     }
   };
 
+  useEffect(() => {
+    const { field: fieldName, formats } = form.getValues();
+    const isTouched = form.formState.touchedFields.formats;
+    if (fieldName && isEmpty(formats) && !isTouched) {
+      applySuggestions({ fieldName });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleProcessorFieldChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
     const fieldName = event.target.value;
     const prevFormats = form.getValues('formats');
     const hasFormats = !isEmpty(prevFormats);
     const isTouched = form.formState.touchedFields.formats;
-    applySuggestions({ fieldName, canSuggest: !hasFormats || !isTouched });
+    if (!hasFormats || !isTouched) {
+      applySuggestions({ fieldName });
+    }
   };
 
   const handleGenerateSuggestionClick = definition.privileges.text_structure
     ? () => {
         const fieldName = form.getValues('field');
-        applySuggestions({ fieldName, canSuggest: true });
+        applySuggestions({ fieldName });
       }
     : undefined;
 
