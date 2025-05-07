@@ -13,6 +13,7 @@ export interface AlertingUsage {
   count_disabled_total: number;
   count_by_type: Record<string, number>;
   count_active_by_type: Record<string, number>;
+  count_inactive_by_type: Record<string, number>;
   count_rules_namespaces: number;
   count_rules_executions_per_day: number;
   count_rules_executions_by_type_per_day: Record<string, number>;
@@ -101,4 +102,6 @@ export interface AlertingUsage {
   };
   count_alerts_total: number;
   count_alerts_by_rule_type: Record<string, number>;
+  count_rules_snoozed_by_type: Record<string, number>;
+  count_rules_muted_by_type: Record<string, number>;
 }
