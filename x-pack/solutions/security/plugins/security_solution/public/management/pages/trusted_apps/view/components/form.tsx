@@ -195,12 +195,16 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
           type: entry.type as EntryTypes,
         })
       ) {
-        addResultToValidation(
-          validation,
-          'entries',
-          'warnings',
-          INPUT_ERRORS.wildcardPathWarning(index)
-        );
+        if (entry.type === 'wildcard') {
+          addResultToValidation(
+            validation,
+            'entries',
+            'warnings',
+            INPUT_ERRORS.wildcardPathWarning(index)
+          );
+        } else {
+          addResultToValidation(validation, 'entries', 'warnings', INPUT_ERRORS.pathWarning(index));
+        }
       }
     });
   }

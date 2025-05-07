@@ -15,14 +15,12 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
-import { isAgentVersionLessThanLatest } from '../../common/services';
-
 import { agentPolicyService, appContextService } from '../services';
 
 import type { Agent, AgentPolicy } from '../types';
 
 import { AGENTS_PREFIX } from '../constants';
-import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../services/agents';
+import { getAgentsByKuery } from '../services/agents';
 import { agentlessAgentService } from '../services/agents/agentless_agent';
 
 export const UPGRADE_AGENTLESS_DEPLOYMENTS_TASK_TYPE = 'fleet:upgrade-agentless-deployments-task';
@@ -212,50 +210,28 @@ export class UpgradeAgentlessDeploymentsTask {
   };
 
   private upgradeAgentlessDeployments = async (agentPolicy: AgentPolicy, agent: Agent) => {
-    this.logger.info(`${agentPolicy.id} agentless policy id`);
-
-    let latestAgentVersion;
-    const currentAgentVersion = agent.agent?.version;
-    // Get latest available agent version
-    try {
-      this.logger.info(`${LOGGER_SUBJECT} getting latest available agent version in ess`);
-      latestAgentVersion = await getLatestAvailableAgentVersion();
-      this.logger.info(
-        `${LOGGER_SUBJECT} latest version ${latestAgentVersion} and current agent version ${currentAgentVersion}`
-      );
-    } catch (e) {
-      this.logger.error(`${LOGGER_SUBJECT} Failed to get latest version error: ${e}`);
-      throw e;
-    }
+    this.logger.info(`Validating if agentless policy ${agentPolicy.id} needs to be upgraded`);
 
     // Compare the current agent version with the latest agent version And upgrade if necessary
-    if (
-      agent.status === 'online' &&
-      latestAgentVersion &&
-      currentAgentVersion &&
-      isAgentVersionLessThanLatest(currentAgentVersion, latestAgentVersion)
-    ) {
-      this.logger.info(
-        `${LOGGER_SUBJECT} Upgrade Available to ${latestAgentVersion} for agentless policy ${agentPolicy.id} current version ${currentAgentVersion}`
-      );
+    if (agent.status === 'online') {
       try {
         this.logger.info(
-          `${LOGGER_SUBJECT} upgrading agentless policy ${agentPolicy.id} current agent version ${currentAgentVersion} to version ${latestAgentVersion}`
+          `${LOGGER_SUBJECT} Requesting to check version and update agentless deployment for policy ${agentPolicy.id}`
         );
-        await agentlessAgentService.upgradeAgentlessDeployment(agentPolicy.id, latestAgentVersion);
+        await agentlessAgentService.upgradeAgentlessDeployment(agentPolicy.id);
 
         this.logger.info(
-          `${LOGGER_SUBJECT} Successfully upgraded agentless deployment to ${latestAgentVersion} for ${agentPolicy.id}`
+          `${LOGGER_SUBJECT} Successfully sent the upgrade deployment request for ${agentPolicy.id}`
         );
       } catch (e) {
         this.logger.error(
-          `${LOGGER_SUBJECT} Failed to upgrade agentless deployment to ${latestAgentVersion} for ${agentPolicy.id} error: ${e}`
+          `${LOGGER_SUBJECT} Failed to request an agentless deployment upgrade for ${agentPolicy.id} error: ${e}`
         );
         throw e;
       }
     } else {
       this.logger.info(
-        `${LOGGER_SUBJECT} No upgrade available for agentless policy ${agentPolicy.id} current agent version ${currentAgentVersion} and latest version ${latestAgentVersion}`
+        `${LOGGER_SUBJECT} No upgrade request sent for agentless policy ${agentPolicy.id} because the agent status is ${agent.status}`
       );
     }
   };

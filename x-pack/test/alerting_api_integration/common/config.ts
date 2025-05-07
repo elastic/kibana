@@ -35,6 +35,7 @@ interface CreateTestConfigOptions {
   enableFooterInEmail?: boolean;
   maxScheduledPerMinute?: number;
   experimentalFeatures?: ExperimentalConfigKeys;
+  disabledRuleTypes?: string[];
 }
 
 // test.not-enabled is specifically not enabled
@@ -171,6 +172,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ? [`--xpack.alerting.rules.maxScheduledPerMinute=${maxScheduledPerMinute}`]
         : [];
 
+    const disabledRuleTypesSetting =
+      options.disabledRuleTypes == null
+        ? []
+        : [`--xpack.alerting.disabledRuleTypes=${JSON.stringify(options.disabledRuleTypes)}`];
+
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
@@ -220,6 +226,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...customHostSettings,
           ...emailSettings,
           ...maxScheduledPerMinuteSettings,
+          ...disabledRuleTypesSetting,
           '--xpack.eventLog.logEntries=true',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',

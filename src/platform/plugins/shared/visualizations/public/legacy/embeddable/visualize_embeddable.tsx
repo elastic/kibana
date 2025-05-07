@@ -27,6 +27,7 @@ import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   ExpressionAstExpression,
   ExpressionLoader,
+  ExpressionRendererEvent,
   ExpressionRenderError,
   IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
@@ -452,12 +453,27 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       this.domNode
     );
 
+    const hasCompatibleActions = async (event: ExpressionRendererEvent) => {
+      const uiActions = getUiActions();
+      if (!uiActions?.getTriggerCompatibleActions) {
+        return false;
+      }
+      const eventName = get(VIS_EVENT_TO_TRIGGER, event.name, event.name);
+      const actions = await uiActions.getTriggerCompatibleActions(eventName, {
+        data: event.data,
+        embeddable: this,
+      });
+
+      return actions.length > 0;
+    };
+
     const expressions = getExpressions();
     this.handler = await expressions.loader(this.domNode, undefined, {
       renderMode: this.input.renderMode || 'view',
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },
+      hasCompatibleActions,
       executionContext: this.getExecutionContext(),
     });
 

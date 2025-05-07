@@ -47,6 +47,18 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await installTinyElser({ ml, es, log });
       await setupKnowledgeBase(supertest, log);
+      await es.ingest.putPipeline({
+        id: 'set-timestamp-pipeline',
+        description: 'Sets @timestamp field to current ingestion time',
+        processors: [
+          {
+            set: {
+              field: '@timestamp',
+              value: '{{_ingest.timestamp}}',
+            },
+          },
+        ],
+      });
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
       );
@@ -73,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
         evaluatorConnectorId: 'gpt-4o',
         alertsIndexPattern: '.alerts-security.alerts-default',
         replacements: {},
-        size: 10,
+        size: 100,
         langSmithApiKey: loadLangSmithKeyFromEnvVar(),
       };
 

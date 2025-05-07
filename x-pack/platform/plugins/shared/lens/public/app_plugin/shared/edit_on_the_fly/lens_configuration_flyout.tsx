@@ -32,7 +32,7 @@ import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
-import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
+import { MAX_NUM_OF_COLUMNS } from '../../../datasources/form_based/esql_layer/utils';
 import {
   useLensSelector,
   selectFramePublicAPI,

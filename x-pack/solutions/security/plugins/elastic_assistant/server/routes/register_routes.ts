@@ -46,11 +46,11 @@ import type { ConfigSchema } from '../config_schema';
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  config?: ConfigSchema
+  config: ConfigSchema
 ) => {
   /** PUBLIC */
   // Chat
-  chatCompleteRoute(router);
+  chatCompleteRoute(router, config);
 
   /** INTERNAL */
   // Capabilities
@@ -83,7 +83,7 @@ export const registerRoutes = (
   bulkActionKnowledgeBaseEntriesRoute(router);
 
   // Actions Connector Execute (LLM Wrapper)
-  postActionsConnectorExecuteRoute(router);
+  postActionsConnectorExecuteRoute(router, config);
 
   // Evaluate
   getEvaluateRoute(router);

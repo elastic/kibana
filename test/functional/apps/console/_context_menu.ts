@@ -18,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/143229
-  describe.skip('console context menu', function testContextMenu() {
+  describe('console context menu', function testContextMenu() {
     before(async () => {
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
@@ -164,7 +163,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Retry until the documentation is loaded
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
-        expect(url).to.contain('search-search.html');
+        // The url that is open is https://www.elastic.co/guide/en/elasticsearch/reference/master/search-search.html
+        // but in v9.0+ it redirects to https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search
+        expect(url).to.contain('operation-search');
       });
 
       // Close the documentation tab
