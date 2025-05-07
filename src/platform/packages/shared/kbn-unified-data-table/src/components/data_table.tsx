@@ -50,7 +50,6 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
-import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -518,7 +517,6 @@ export const UnifiedDataTable = ({
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
-  const darkMode = useKibanaIsDarkMode();
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
@@ -684,7 +682,6 @@ export const UnifiedDataTable = ({
       getRowByIndex: (index: number) => displayedRows[index],
       onFilter,
       dataView,
-      isDarkMode: darkMode,
       selectedDocsState,
       valueToStringConverter,
       componentsTourSteps,
@@ -694,7 +691,6 @@ export const UnifiedDataTable = ({
     }),
     [
       componentsTourSteps,
-      darkMode,
       dataView,
       isPlainRecord,
       isPaginationEnabled,
