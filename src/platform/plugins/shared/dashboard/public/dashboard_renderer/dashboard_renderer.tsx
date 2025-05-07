@@ -114,7 +114,7 @@ export function DashboardRenderer({
           iconColor="danger"
           title={
             <h2>
-              {i18n.translate('dashboard.loadSavedObject.error', {
+              {i18n.translate('dashboard.dashboardRenderer.loadDashboardErrorTitle', {
                 defaultMessage: 'Unable to load dashboard',
               })}
             </h2>
