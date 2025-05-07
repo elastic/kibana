@@ -15,12 +15,18 @@ import { GetRemoteSyncedIntegrationsStatusResponseSchema } from '../../types/mod
 
 import { GetRemoteSyncedIntegrationsInfoRequestSchema } from '../../types';
 
+import { appContextService } from '../../services';
+
 import {
   getRemoteSyncedIntegrationsStatusHandler,
   getRemoteSyncedIntegrationsInfoHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
+  const isServerless = appContextService.getCloud()?.isServerlessEnabled;
+  if (isServerless) {
+    return;
+  }
   router.versioned
     .get({
       path: REMOTE_SYNCED_INTEGRATIONS_API_ROUTES.STATUS_PATTERN,

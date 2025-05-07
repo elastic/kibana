@@ -65,6 +65,10 @@ export const FLEET_SYNCED_INTEGRATIONS_INDEX_CONFIG = {
 };
 
 export async function createOrUpdateFleetSyncedIntegrationsIndex(esClient: ElasticsearchClient) {
+  const isServerless = appContextService.getCloud()?.isServerlessEnabled;
+  if (isServerless) {
+    return;
+  }
   const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
 
   if (!enableSyncIntegrationsOnRemote) {
@@ -133,6 +137,10 @@ export async function createCCSIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsImporter: ISavedObjectsImporter
 ) {
+  const isServerless = appContextService.getCloud()?.isServerlessEnabled;
+  if (isServerless) {
+    return;
+  }
   const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
 
   if (!enableSyncIntegrationsOnRemote) {

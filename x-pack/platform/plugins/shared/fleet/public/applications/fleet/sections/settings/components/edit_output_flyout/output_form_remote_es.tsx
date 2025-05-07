@@ -46,7 +46,7 @@ export interface IsConvertedToSecret {
 }
 
 export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props) => {
-  const { docLinks } = useStartServices();
+  const { docLinks, cloud } = useStartServices();
   const { inputs, useSecretsStorage, onToggleSecretStorage } = props;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState<IsConvertedToSecret>({
     serviceToken: false,
@@ -208,7 +208,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         onToggleSecretAndClearValue={onToggleSecretAndClearValue}
       />
       <EuiSpacer size="m" />
-      {enableSyncIntegrationsOnRemote ? (
+      {enableSyncIntegrationsOnRemote && !cloud?.isServerlessEnabled ? (
         <>
           <EuiFormRow
             fullWidth

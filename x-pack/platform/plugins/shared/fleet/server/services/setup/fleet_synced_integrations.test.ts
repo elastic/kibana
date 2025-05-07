@@ -19,6 +19,9 @@ jest.mock('../app_context', () => ({
     getConfig: jest.fn().mockReturnValue({
       enableManagedLogsAndMetricsDataviews: true,
     }),
+    getCloud: jest.fn().mockReturnValue({
+      isServerlessEnabled: false,
+    }),
   },
 }));
 

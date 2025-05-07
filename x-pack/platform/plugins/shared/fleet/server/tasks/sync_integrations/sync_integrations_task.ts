@@ -119,15 +119,20 @@ export class SyncIntegrationsTask {
 
     this.logger.info(`[runTask()] started`);
 
-    const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const isServerless = appContextService.getCloud()?.isServerlessEnabled;
+    if (isServerless) {
+      return;
+    }
 
     const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
 
     if (!enableSyncIntegrationsOnRemote) {
       return;
     }
+
+    const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
       // write integrations on main cluster

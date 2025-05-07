@@ -24,6 +24,7 @@ jest.mock('../../services', () => ({
   appContextService: {
     getExperimentalFeatures: jest.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
     start: jest.fn(),
+    getCloud: jest.fn().mockReturnValue({ isServerlessEnabled: false }),
   },
   outputService: {
     list: jest.fn(),
