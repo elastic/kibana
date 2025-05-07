@@ -12,12 +12,13 @@ import './_dashboard_container.scss';
 import classNames from 'classnames';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
+import { i18n } from '@kbn/i18n';
 import type { DashboardLocatorParams } from '../../common';
 import { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
 import { coreServices, screenshotModeService } from '../services/kibana_services';
@@ -108,7 +109,18 @@ export function DashboardRenderer({
       return error instanceof SavedObjectNotFound ? (
         <Dashboard404Page dashboardRedirect={dashboardRedirect} />
       ) : (
-        error.message
+        <EuiEmptyPrompt
+          iconType="error"
+          iconColor="danger"
+          title={
+            <h2>
+              {i18n.translate('dashboard.loadSavedObject.error', {
+                defaultMessage: 'Unable to load dashboard',
+              })}
+            </h2>
+          }
+          body={<p>{error.message}</p>}
+        />
       );
     }
 

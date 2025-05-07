@@ -84,8 +84,7 @@
     "@kbn/ui-actions-browser",
     "@kbn/esql-types",
     "@kbn/saved-objects-tagging-plugin",
-    "@kbn/std",
-    "@kbn/core-http-browser"
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }
