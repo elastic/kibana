@@ -690,18 +690,34 @@ export function XYChart({
     visible: xAxisConfig?.showGridLines,
     strokeWidth: 1,
   };
-  const xAxisStyle: RecursivePartial<AxisStyle> = {
-    tickLabel: {
-      visible: Boolean(xAxisConfig?.showLabels),
-      fill: xAxisConfig?.labelColor,
-    },
-    tickLine: {
-      visible: Boolean(xAxisConfig?.showLabels),
-    },
-    axisTitle: {
-      visible: xAxisConfig?.showTitle,
-    },
-  };
+  const xAxisStyle: RecursivePartial<AxisStyle> = isHorizontalTimeAxis
+    ? {
+        tickLabel: {
+          visible: Boolean(xAxisConfig?.showLabels),
+          fill: xAxisConfig?.labelColor,
+        },
+        tickLine: {
+          visible: Boolean(xAxisConfig?.showLabels),
+        },
+        axisTitle: {
+          visible: xAxisConfig?.showTitle,
+        },
+      }
+    : {
+        tickLabel: {
+          visible: xAxisConfig?.showLabels,
+          rotation: xAxisConfig?.labelsOrientation,
+          padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
+          fill: xAxisConfig?.labelColor,
+        },
+        axisTitle: {
+          visible: xAxisConfig?.showTitle,
+          padding:
+            !xAxisConfig?.showLabels && linesPaddings.bottom != null
+              ? { inner: linesPaddings.bottom }
+              : undefined,
+        },
+      };
   const isSplitChart = splitColumnAccessor || splitRowAccessor;
   const splitTable = isSplitChart ? dataLayers[0].table : undefined;
   const splitColumnId =
