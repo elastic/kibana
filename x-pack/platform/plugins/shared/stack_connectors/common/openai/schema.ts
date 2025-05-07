@@ -52,6 +52,13 @@ export const ConfigSchema = schema.oneOf([
         { defaultValue: 'full' }
       )
     ),
+    caFile: schema.maybe(
+      schema.oneOf([
+        schema.string({ minLength: 1 }),
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+      ])
+    ),
+    caData: schema.maybe(schema.string({ minLength: 1 })),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     __internal__: schema.maybe(
       schema.object({
