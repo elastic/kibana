@@ -101,6 +101,7 @@ Promise<ResolvedSanitizedRule<Params>> {
       // without fixing all of other solution types
     } as ResolvedSanitizedRule;
   }
+
   return {
     ...rule,
     ...resolveResponse,
