@@ -19,6 +19,7 @@ interface ValidationErrors {
 export function getConnectorType(): XSOARConnector {
   return {
     id: XSOAR_CONNECTOR_ID,
+    hideInUi: true,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.SELECT_MESSAGE,
     actionTypeTitle: XSOAR_TITLE,

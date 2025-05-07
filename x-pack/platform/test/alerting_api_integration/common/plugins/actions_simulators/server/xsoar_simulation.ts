@@ -392,6 +392,7 @@ export function initPlugin(router: IRouter, path: string) {
         authRequired: false,
       },
       validate: {},
+      security: { authz: { enabled: false, reason: 'This route is opted out from authorization' } },
     },
     async function (
       context: RequestHandlerContext,
@@ -409,6 +410,7 @@ export function initPlugin(router: IRouter, path: string) {
         authRequired: false,
       },
       validate: {},
+      security: { authz: { enabled: false, reason: 'This route is opted out from authorization' } },
     },
     async function (
       context: RequestHandlerContext,
