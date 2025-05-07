@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import { errors } from '@elastic/elasticsearch';
-import type { TaskEither } from 'fp-ts/lib/TaskEither';
+import type { TaskEither } from 'fp-ts/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type {
   ElasticsearchClient,
@@ -75,12 +75,15 @@ export const runActionTestSuite = ({
   };
 
   beforeAll(async () => {
+    // start ES and get capabilities
     const { esServer: _esServer, client: _client } = await startEs();
     esServer = _esServer;
     client = _client;
     esCapabilities = await getCapabilitiesFromClient(client);
+  });
 
-    // Create test fixture data:
+  beforeAll(async () => {
+    // Create small size test fixture data
     await createIndex({
       client,
       indexName: 'existing_index_with_docs',
@@ -101,11 +104,11 @@ export const runActionTestSuite = ({
       },
     })();
     const docs = [
-      { _source: { title: 'doc 1' } },
-      { _source: { title: 'doc 2' } },
-      { _source: { title: 'doc 3' } },
-      { _source: { title: 'saved object 4', type: 'another_unused_type' } },
-      { _source: { title: 'f-agent-event 5', type: 'f_agent_event' } },
+      { _source: { title: 'doc 1', order: 1 } },
+      { _source: { title: 'doc 2', order: 2 } },
+      { _source: { title: 'doc 3', order: 3 } },
+      { _source: { title: 'saved object 4', type: 'another_unused_type', order: 4 } },
+      { _source: { title: 'f-agent-event 5', type: 'f_agent_event', order: 5 } },
       {
         _source: { title: new Array(1000).fill('a').join(), type: 'large' },
       }, // "large" saved objects
@@ -117,29 +120,6 @@ export const runActionTestSuite = ({
       refresh: 'wait_for',
     })();
 
-    await createIndex({
-      client,
-      indexName: 'existing_index_with_100k_docs',
-      aliases: ['existing_index_with_100k_docs_alias'],
-      esCapabilities,
-      mappings: {
-        dynamic: true,
-        properties: {},
-      },
-    })();
-    const docs10k = new Array(10000).fill({
-      _source: { title: new Array(1000).fill('a').join(), type: 'large' },
-    }) as unknown as SavedObjectsRawDoc[]; // 10k "large" saved objects
-    const operations = docs10k.map((doc) => createBulkIndexOperationTuple(doc));
-
-    for (let i = 0; i < 10; i++) {
-      await bulkOverwriteTransformedDocuments({
-        client,
-        index: 'existing_index_with_100k_docs',
-        operations,
-        refresh: 'wait_for',
-      })();
-    }
     await createIndex({
       client,
       indexName: 'existing_index_2',
@@ -165,6 +145,33 @@ export const runActionTestSuite = ({
     })();
   });
 
+  beforeAll(async () => {
+    // Create large test fixture data (added dynamically to always stay at latest)
+    await createIndex({
+      client,
+      indexName: 'existing_index_with_100k_docs',
+      aliases: ['existing_index_with_100k_docs_alias'],
+      esCapabilities,
+      mappings: {
+        dynamic: true,
+        properties: {},
+      },
+    })();
+    const docs10k = new Array(10000).fill({
+      _source: { title: new Array(1000).fill('a').join(), type: 'large' },
+    }) as unknown as SavedObjectsRawDoc[]; // 10k "large" saved objects
+    const operations = docs10k.map((doc) => createBulkIndexOperationTuple(doc));
+
+    for (let i = 0; i < 10; i++) {
+      await bulkOverwriteTransformedDocuments({
+        client,
+        index: 'existing_index_with_100k_docs',
+        operations,
+        refresh: i === 10 ? 'wait_for' : false,
+      })();
+    }
+  });
+
   afterAll(async () => {
     await client.indices.delete({ index: 'existing_index_with_docs' }).catch(() => ({}));
     await client.indices.delete({ index: 'existing_index_2' }).catch(() => ({}));
@@ -176,11 +183,9 @@ export const runActionTestSuite = ({
   describe('fetchIndices', () => {
     afterAll(async () => {
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Reset persistent test settings
-            cluster: { routing: { allocation: { enable: null } } },
-          },
+        persistent: {
+          // Reset persistent test settings
+          cluster: { routing: { allocation: { enable: null } } },
         },
       });
     });
@@ -247,11 +252,9 @@ export const runActionTestSuite = ({
     it('resolves left when cluster.routing.allocation.enabled is incompatible', async () => {
       expect.assertions(3);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Disable all routing allocation
-            cluster: { routing: { allocation: { enable: 'none' } } },
-          },
+        persistent: {
+          // Disable all routing allocation
+          cluster: { routing: { allocation: { enable: 'none' } } },
         },
       });
       const task = checkClusterRoutingAllocationEnabled(client);
@@ -264,11 +267,9 @@ export const runActionTestSuite = ({
         }
       `);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Allow routing to existing primaries only
-            cluster: { routing: { allocation: { enable: 'primaries' } } },
-          },
+        persistent: {
+          // Allow routing to existing primaries only
+          cluster: { routing: { allocation: { enable: 'primaries' } } },
         },
       });
       const task2 = checkClusterRoutingAllocationEnabled(client);
@@ -281,11 +282,9 @@ export const runActionTestSuite = ({
         }
       `);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            // Allow routing to new primaries only
-            cluster: { routing: { allocation: { enable: 'new_primaries' } } },
-          },
+        persistent: {
+          // Allow routing to new primaries only
+          cluster: { routing: { allocation: { enable: 'new_primaries' } } },
         },
       });
       const task3 = checkClusterRoutingAllocationEnabled(client);
@@ -301,10 +300,8 @@ export const runActionTestSuite = ({
     it('resolves right when cluster.routing.allocation.enabled=all', async () => {
       expect.assertions(1);
       await client.cluster.putSettings({
-        body: {
-          persistent: {
-            cluster: { routing: { allocation: { enable: 'all' } } },
-          },
+        persistent: {
+          cluster: { routing: { allocation: { enable: 'all' } } },
         },
       });
       const task = checkClusterRoutingAllocationEnabled(client);
@@ -436,14 +433,12 @@ export const runActionTestSuite = ({
           {
             index: 'red_then_yellow_index',
             timeout: '5s',
-            body: {
-              mappings: { properties: {} },
-              settings: {
-                // Allocate 1 replica so that this index stays yellow
-                number_of_replicas: '1',
-                // Disable all shard allocation so that the index status is red
-                routing: { allocation: { enable: 'none' } },
-              },
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status is red
+              routing: { allocation: { enable: 'none' } },
             },
           },
           { maxRetries: 0 /** handle retry ourselves for now */ }
@@ -461,7 +456,7 @@ export const runActionTestSuite = ({
 
         void client.indices.putSettings({
           index: 'red_then_yellow_index',
-          body: {
+          settings: {
             // Enable all shard allocation so that the index status turns yellow
             routing: { allocation: { enable: 'all' } },
           },
@@ -483,14 +478,12 @@ export const runActionTestSuite = ({
         .create({
           index: 'red_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate no replicas so that this index stays red
-              number_of_replicas: '0',
-              // Disable all shard allocation so that the index status is red
-              index: { routing: { allocation: { enable: 'none' } } },
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate no replicas so that this index stays red
+            number_of_replicas: '0',
+            // Disable all shard allocation so that the index status is red
+            index: { routing: { allocation: { enable: 'none' } } },
           },
         })
         .catch((e) => {});
@@ -518,12 +511,10 @@ export const runActionTestSuite = ({
         .create({
           index: 'yellow_index',
           timeout: '5s',
-          body: {
-            mappings: { properties: {} },
-            settings: {
-              // Allocate no replicas so that this index stays yellow
-              number_of_replicas: '0',
-            },
+          mappings: { properties: {} },
+          settings: {
+            // Allocate no replicas so that this index stays yellow
+            number_of_replicas: '0',
           },
         })
         .catch((e) => {});
@@ -569,19 +560,18 @@ export const runActionTestSuite = ({
         });
         expect.assertions(3);
         await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": Object {
-            "acknowledged": true,
-            "shardsAcknowledged": true,
-          },
-        }
-      `);
+          Object {
+            "_tag": "Right",
+            "right": Object {
+              "acknowledged": true,
+              "shardsAcknowledged": true,
+            },
+          }
+        `);
         const { clone_target_1: cloneTarget1 } = await client.indices.getSettings({
           index: 'clone_target_1',
         });
-        // @ts-expect-error https://github.com/elastic/elasticsearch/issues/89381
-        expect(cloneTarget1.settings?.index.mapping?.total_fields.limit).toBe('1500');
+        expect(cloneTarget1.settings?.index?.mapping?.total_fields?.limit).toBe('1500');
         expect(cloneTarget1.settings?.blocks?.write).toBeUndefined();
       });
       it('resolves right if clone target already existed after waiting for index status to be green ', async () => {
@@ -592,14 +582,12 @@ export const runActionTestSuite = ({
           .create({
             index: 'clone_red_then_green_index',
             timeout: '5s',
-            body: {
-              mappings: { properties: {} },
-              settings: {
-                // Allocate 1 replica so that this index can go to green
-                number_of_replicas: '0',
-                // Disable all shard allocation so that the index status is red
-                index: { routing: { allocation: { enable: 'none' } } },
-              },
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index can go to green
+              number_of_replicas: '0',
+              // Disable all shard allocation so that the index status is red
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           })
           .catch((e) => {});
@@ -616,7 +604,7 @@ export const runActionTestSuite = ({
         setTimeout(() => {
           void client.indices.putSettings({
             index: 'clone_red_then_green_index',
-            body: {
+            settings: {
               // Enable all shard allocation so that the index status goes green
               routing: { allocation: { enable: 'all' } },
             },
@@ -628,14 +616,14 @@ export const runActionTestSuite = ({
           // Assert that the promise didn't resolve before the index became green
           expect(indexGreen).toBe(true);
           expect(res).toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Right",
-            "right": Object {
-              "acknowledged": true,
-              "shardsAcknowledged": true,
-            },
-          }
-        `);
+            Object {
+              "_tag": "Right",
+              "right": Object {
+                "acknowledged": true,
+                "shardsAcknowledged": true,
+              },
+            }
+          `);
         });
       });
       it('resolves left with a index_not_green_timeout if clone target already exists but takes longer than the specified timeout before turning green', async () => {
@@ -644,14 +632,12 @@ export const runActionTestSuite = ({
           .create({
             index: 'clone_red_index',
             timeout: '5s',
-            body: {
-              mappings: { properties: {} },
-              settings: {
-                // Allocate 1 replica so that this index stays yellow
-                number_of_replicas: '1',
-                // Disable all shard allocation so that the index status is red
-                index: { routing: { allocation: { enable: 'none' } } },
-              },
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status is red
+              index: { routing: { allocation: { enable: 'none' } } },
             },
           })
           .catch((e) => {});
@@ -666,20 +652,20 @@ export const runActionTestSuite = ({
         })();
 
         await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "message": "[index_not_green_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'green'",
-            "type": "index_not_green_timeout",
-          },
-        }
-      `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "message": "[index_not_green_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'green'",
+              "type": "index_not_green_timeout",
+            },
+          }
+        `);
 
         // Now make the index yellow and repeat
 
         await client.indices.putSettings({
           index: 'clone_red_index',
-          body: {
+          settings: {
             // Enable all shard allocation so that the index status goes yellow
             routing: { allocation: { enable: 'all' } },
           },
@@ -695,20 +681,20 @@ export const runActionTestSuite = ({
         })();
 
         await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "message": "[index_not_green_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'green'",
-            "type": "index_not_green_timeout",
-          },
-        }
-      `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "message": "[index_not_green_timeout] Timeout waiting for the status of the [clone_red_index] index to become 'green'",
+              "type": "index_not_green_timeout",
+            },
+          }
+        `);
 
         // Now make the index green and it should succeed
 
         await client.indices.putSettings({
           index: 'clone_red_index',
-          body: {
+          settings: {
             // Set zero replicas so status goes green
             number_of_replicas: 0,
           },
@@ -724,14 +710,14 @@ export const runActionTestSuite = ({
         })();
 
         await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Right",
-          "right": Object {
-            "acknowledged": true,
-            "shardsAcknowledged": true,
-          },
-        }
-      `);
+          Object {
+            "_tag": "Right",
+            "right": Object {
+              "acknowledged": true,
+              "shardsAcknowledged": true,
+            },
+          }
+        `);
       });
       it('resolves left index_not_found_exception if the source index does not exist', async () => {
         expect.assertions(1);
@@ -742,14 +728,14 @@ export const runActionTestSuite = ({
           esCapabilities,
         });
         await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "index": "no_such_index",
-            "type": "index_not_found_exception",
-          },
-        }
-      `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "index": "no_such_index",
+              "type": "index_not_found_exception",
+            },
+          }
+        `);
       });
       it('resolves left cluster_shard_limit_exceeded when the action would exceed the maximum normal open shards', async () => {
         // Set the max shards per node really low so that any new index that's created would exceed the maximum open shards for this cluster
@@ -761,22 +747,19 @@ export const runActionTestSuite = ({
           esCapabilities,
         })();
         await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "cluster_shard_limit_exceeded",
-          },
-        }
-      `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "type": "cluster_shard_limit_exceeded",
+            },
+          }
+        `);
       });
     });
   });
 
-  // Reindex doesn't return any errors on its own, so we have to test
   // together with waitForReindexTask
-  // Flaky: https://github.com/elastic/kibana/issues/166190
-  // Reported here: https://github.com/elastic/kibana/issues/167273
-  describe.skip('reindex & waitForReindexTask', () => {
+  describe('reindex & waitForReindexTask', () => {
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex({
         client,
@@ -928,7 +911,7 @@ export const runActionTestSuite = ({
       `);
     });
     it('resolves right and proceeds to add missing documents if there are some existing docs conflicts', async () => {
-      expect.assertions(2);
+      expect.assertions(4);
       // Simulate a reindex that only adds some of the documents from the
       // source index into the target index
       await createIndex({
@@ -937,13 +920,20 @@ export const runActionTestSuite = ({
         mappings: { properties: {} },
         esCapabilities,
       })();
-      const response = await client.search({ index: 'existing_index_with_docs', size: 1000 });
-      const sourceDocs = (response.hits?.hits as SavedObjectsRawDoc[])
-        .slice(0, 2)
-        .map(({ _id, _source }) => ({
-          _id,
-          _source,
-        }));
+
+      const response = await client.search({
+        index: 'existing_index_with_docs',
+        size: 2,
+        sort: 'order',
+      });
+
+      const sourceDocs = (response.hits?.hits as SavedObjectsRawDoc[]).map(({ _id, _source }) => ({
+        _id,
+        _source,
+      }));
+      expect(sourceDocs[0]._source.title).toEqual('doc 1');
+      expect(sourceDocs[1]._source.title).toEqual('doc 2');
+
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'reindex_target_4',
@@ -1178,11 +1168,7 @@ export const runActionTestSuite = ({
 
       expect(pitResponse.right.pitId).toEqual(expect.any(String));
 
-      const searchResponse = await client.search({
-        body: {
-          pit: { id: pitResponse.right.pitId },
-        },
-      });
+      const searchResponse = await client.search({ pit: { id: pitResponse.right.pitId } });
 
       await expect(searchResponse.hits.hits.length).toBeGreaterThan(0);
     });
@@ -1398,11 +1384,7 @@ export const runActionTestSuite = ({
       const pitId = pitResponse.right.pitId;
       await closePit({ client, pitId })();
 
-      const searchTask = client.search({
-        body: {
-          pit: { id: pitId },
-        },
-      });
+      const searchTask = client.search({ pit: { id: pitId } });
 
       await expect(searchTask).rejects.toThrow('search_phase_execution_exception');
     });
@@ -1867,14 +1849,12 @@ export const runActionTestSuite = ({
             {
               index: 'red_then_yellow_index',
               timeout: '5s',
-              body: {
-                mappings: { properties: {} },
-                settings: {
-                  // Allocate 1 replica so that this index stays yellow
-                  number_of_replicas: '1',
-                  // Disable all shard allocation so that the index status starts as red
-                  index: { routing: { allocation: { enable: 'none' } } },
-                },
+              mappings: { properties: {} },
+              settings: {
+                // Allocate 1 replica so that this index stays yellow
+                number_of_replicas: '1',
+                // Disable all shard allocation so that the index status starts as red
+                index: { routing: { allocation: { enable: 'none' } } },
               },
             },
             { maxRetries: 0 /** handle retry ourselves for now */ }
@@ -1895,7 +1875,7 @@ export const runActionTestSuite = ({
         setTimeout(() => {
           void client.indices.putSettings({
             index: 'red_then_yellow_index',
-            body: {
+            settings: {
               // Renable allocation so that the status becomes yellow
               routing: { allocation: { enable: 'all' } },
             },
@@ -1907,14 +1887,14 @@ export const runActionTestSuite = ({
           // Assert that the promise didn't resolve before the index became yellow
           expect(indexYellow).toBe(true);
           expect(err).toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Left",
-            "left": Object {
-              "message": "[index_not_green_timeout] Timeout waiting for the status of the [red_then_yellow_index] index to become 'green'",
-              "type": "index_not_green_timeout",
-            },
-          }
-        `);
+            Object {
+              "_tag": "Left",
+              "left": Object {
+                "message": "[index_not_green_timeout] Timeout waiting for the status of the [red_then_yellow_index] index to become 'green'",
+                "type": "index_not_green_timeout",
+              },
+            }
+          `);
         });
       });
       it('resolves right after waiting for an existing index status to become green', async () => {
@@ -1924,12 +1904,10 @@ export const runActionTestSuite = ({
           .create({
             index: 'yellow_then_green_index',
             timeout: '5s',
-            body: {
-              mappings: { properties: {} },
-              settings: {
-                // Allocate 1 replica so that this index stays yellow
-                number_of_replicas: '1',
-              },
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
             },
           })
           .catch((e) => {
@@ -1948,7 +1926,7 @@ export const runActionTestSuite = ({
         setTimeout(() => {
           void client.indices.putSettings({
             index: 'yellow_then_green_index',
-            body: {
+            settings: {
               // Set 0 replican so that this index becomes green
               number_of_replicas: '0',
             },
@@ -1960,11 +1938,11 @@ export const runActionTestSuite = ({
           // Assert that the promise didn't resolve before the index became green
           expect(indexGreen).toBe(true);
           expect(res).toMatchInlineSnapshot(`
-          Object {
-            "_tag": "Right",
-            "right": "index_already_exists",
-          }
-        `);
+            Object {
+              "_tag": "Right",
+              "right": "index_already_exists",
+            }
+          `);
         });
       });
     });

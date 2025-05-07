@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ConnectorResponseV1 } from '../../../../../common/routes/connector/response';
-import { Connector } from '../../../../application/connector/types';
+import type { ConnectorResponseV1 } from '../../../../../common/routes/connector/response';
+import type { Connector } from '../../../../application/connector/types';
 
 export const transformConnectorResponse = ({
   actionTypeId,

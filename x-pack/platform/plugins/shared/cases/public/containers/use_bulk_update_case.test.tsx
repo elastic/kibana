@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useUpdateCases } from './use_bulk_update_case';
 import { allCases } from './mock';
 import { useToasts } from '../common/lib/kibana';
 import * as api from './api';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import { casesQueriesKeys } from './constants';
+import { TestProviders, createTestQueryClient } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -23,17 +23,14 @@ describe('useUpdateCases', () => {
 
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'updateCases');
     const { result } = renderHook(() => useUpdateCases(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -44,9 +41,10 @@ describe('useUpdateCases', () => {
   });
 
   it('invalidates the queries correctly', async () => {
-    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+    const queryClient = createTestQueryClient();
+    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
     const { result } = renderHook(() => useUpdateCases(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
 
     act(() => {
@@ -55,14 +53,15 @@ describe('useUpdateCases', () => {
 
     await waitFor(() => {
       expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
-      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
-      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
     });
+
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
   });
 
   it('shows a success toaster', async () => {
     const { result } = renderHook(() => useUpdateCases(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {
@@ -81,7 +80,7 @@ describe('useUpdateCases', () => {
     jest.spyOn(api, 'updateCases').mockRejectedValue(new Error('useUpdateCases: Test error'));
 
     const { result } = renderHook(() => useUpdateCases(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     act(() => {

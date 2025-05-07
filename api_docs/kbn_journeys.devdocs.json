@@ -35,7 +35,7 @@
           },
           "<CtxExt>"
         ],
-        "path": "packages/kbn-journeys/journey/journey.ts",
+        "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -64,7 +64,7 @@
                 "text": "FtrConfigProvider"
               }
             ],
-            "path": "packages/kbn-journeys/journey/journey.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -85,7 +85,7 @@
                   },
                   "<any>"
                 ],
-                "path": "packages/kbn-journeys/journey/journey.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -113,7 +113,7 @@
               },
               "<any>>"
             ],
-            "path": "packages/kbn-journeys/journey/journey.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -127,7 +127,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-journeys/journey/journey.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -152,7 +152,7 @@
               },
               "<CtxExt>[]"
             ],
-            "path": "packages/kbn-journeys/journey/journey.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -173,7 +173,7 @@
               },
               "<CtxExt>"
             ],
-            "path": "packages/kbn-journeys/journey/journey.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -189,7 +189,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-journeys/journey/journey.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -204,7 +204,7 @@
                   "JourneyConfigOptions",
                   "<CtxExt> | undefined"
                 ],
-                "path": "packages/kbn-journeys/journey/journey.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -226,7 +226,7 @@
               "BaseStepCtx",
               " & CtxExt) => Promise<void>) => this"
             ],
-            "path": "packages/kbn-journeys/journey/journey.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -240,7 +240,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-journeys/journey/journey.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -257,7 +257,7 @@
                   "BaseStepCtx",
                   " & CtxExt) => Promise<void>"
                 ],
-                "path": "packages/kbn-journeys/journey/journey.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -279,7 +279,7 @@
               "FtrProviderContext",
               ") => void"
             ],
-            "path": "packages/kbn-journeys/journey/journey.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -293,7 +293,7 @@
                 "signature": [
                   "FtrProviderContext"
                 ],
-                "path": "packages/kbn-journeys/journey/journey.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -321,7 +321,7 @@
           },
           "<CtxExt>"
         ],
-        "path": "packages/kbn-journeys/journey/journey_config.ts",
+        "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -336,7 +336,7 @@
               "JourneyConfigOptions",
               "<CtxExt>"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -347,7 +347,7 @@
             "tags": [],
             "label": "#path",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -358,7 +358,7 @@
             "tags": [],
             "label": "#name",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -372,7 +372,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -386,7 +386,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_config.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -402,7 +402,7 @@
                   "JourneyConfigOptions",
                   "<CtxExt>"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_config.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -420,7 +420,7 @@
             "signature": [
               "() => string | undefined"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -436,7 +436,7 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -452,7 +452,7 @@
             "signature": [
               "() => string[]"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -468,7 +468,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -484,7 +484,7 @@
             "signature": [
               "() => { [x: string]: string; }"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -500,7 +500,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -516,7 +516,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -532,7 +532,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -548,7 +548,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -564,7 +564,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -588,7 +588,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -608,7 +608,7 @@
               "BaseStepCtx",
               " & CtxExt"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -622,7 +622,7 @@
                 "signature": [
                   "BaseStepCtx"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_config.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -642,7 +642,7 @@
               "BaseStepCtx",
               " & CtxExt) => Promise<void>"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -657,7 +657,7 @@
                   "BaseStepCtx",
                   " & CtxExt"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_config.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -675,7 +675,7 @@
             "signature": [
               "() => JourneySynthtrace<CtxExt, any> | undefined"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -691,7 +691,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -707,7 +707,7 @@
         "tags": [],
         "label": "JourneyScreenshots",
         "description": [],
-        "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+        "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -729,7 +729,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -743,7 +743,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -758,7 +758,7 @@
             "tags": [],
             "label": "#dir",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -769,7 +769,7 @@
             "tags": [],
             "label": "#manifestPath",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -780,7 +780,7 @@
             "tags": [],
             "label": "#manifest",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -794,7 +794,7 @@
                 "signature": [
                   "never[]"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -810,7 +810,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -824,7 +824,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -843,7 +843,7 @@
               "BehaviorSubject",
               "<boolean>"
             ],
-            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -857,7 +857,7 @@
             "signature": [
               "(fn: () => Promise<void>) => Promise<void>"
             ],
-            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -871,7 +871,7 @@
                 "signature": [
                   "() => Promise<void>"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -891,7 +891,7 @@
               "AnyStep",
               ", screenshot: Buffer, fullscreenScreenshot: Buffer) => Promise<void>"
             ],
-            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -905,7 +905,7 @@
                 "signature": [
                   "AnyStep"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -920,7 +920,7 @@
                 "signature": [
                   "Buffer"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -935,7 +935,7 @@
                 "signature": [
                   "Buffer"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -955,7 +955,7 @@
               "AnyStep",
               ", screenshot: Buffer, fullscreenScreenshot: Buffer) => Promise<void>"
             ],
-            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -969,7 +969,7 @@
                 "signature": [
                   "AnyStep"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -984,7 +984,7 @@
                 "signature": [
                   "Buffer"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -999,7 +999,7 @@
                 "signature": [
                   "Buffer"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1017,7 +1017,7 @@
             "signature": [
               "() => { path: string; fullscreenPath: string; type: \"success\" | \"failure\"; title: string; filename: string; fullscreenFilename: string; }[]"
             ],
-            "path": "packages/kbn-journeys/journey/journey_screenshots.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_screenshots.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1036,7 +1036,7 @@
         "tags": [],
         "label": "ScalabilitySetup",
         "description": [],
-        "path": "packages/kbn-journeys/journey/journey_config.ts",
+        "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1049,7 +1049,7 @@
             "description": [
               "\nDuration strings must be formatted as string that starts with an integer and\nends with either \"m\" or \"s\" for minutes and seconds, respectively\n\neg: \"1m\" or \"30s\""
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1070,7 +1070,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1084,7 +1084,7 @@
             "signature": [
               "{ threshold1: number; threshold2: number; threshold3: number; } | undefined"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1105,7 +1105,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1126,7 +1126,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-journeys/journey/journey_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1150,7 +1150,7 @@
           },
           "<CtxExt>"
         ],
-        "path": "packages/kbn-journeys/journey/journey.ts",
+        "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1161,7 +1161,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1172,7 +1172,7 @@
             "tags": [],
             "label": "index",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1188,7 +1188,7 @@
               "BaseStepCtx",
               " & CtxExt) => Promise<void>"
             ],
-            "path": "packages/kbn-journeys/journey/journey.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1203,7 +1203,7 @@
                   "BaseStepCtx",
                   " & CtxExt"
                 ],
-                "path": "packages/kbn-journeys/journey/journey.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1227,7 +1227,7 @@
         "signature": [
           "\"min\" | \"max\" | \"25%\" | \"50%\" | \"75%\" | \"80%\" | \"85%\" | \"90%\" | \"95%\" | \"99%\""
         ],
-        "path": "packages/kbn-journeys/journey/journey_config.ts",
+        "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1244,7 +1244,7 @@
           " | ",
           "ConstantConcurrentUsersAction"
         ],
-        "path": "packages/kbn-journeys/journey/journey_config.ts",
+        "path": "src/platform/packages/private/kbn-journeys/journey/journey_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1258,7 +1258,7 @@
         "tags": [],
         "label": "JOURNEY_APM_CONFIG",
         "description": [],
-        "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+        "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1269,7 +1269,7 @@
             "tags": [],
             "label": "serverUrl",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1280,7 +1280,7 @@
             "tags": [],
             "label": "secretToken",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1291,7 +1291,7 @@
             "tags": [],
             "label": "active",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1302,7 +1302,7 @@
             "tags": [],
             "label": "contextPropagationOnly",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1313,7 +1313,7 @@
             "tags": [],
             "label": "environment",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1324,7 +1324,7 @@
             "tags": [],
             "label": "transactionSampleRate",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1337,7 +1337,7 @@
             "description": [
               "// capture request body for both errors and request transactions\n// https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#capture-body"
             ],
-            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1350,7 +1350,7 @@
             "description": [
               "// capture request headers\n// https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#capture-headers"
             ],
-            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1363,7 +1363,7 @@
             "description": [
               "// request body with bigger size will be trimmed.\n// 300_000 is the default of the APM server.\n// for a body with larger size, we might need to reconfigure the APM server to increase the limit.\n// https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#long-field-max-length"
             ],
-            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1374,7 +1374,7 @@
             "tags": [],
             "label": "globalLabels",
             "description": [],
-            "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+            "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1388,7 +1388,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1402,7 +1402,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1416,7 +1416,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1430,7 +1430,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-journeys/journey/journey_apm_config.ts",
+                "path": "src/platform/packages/private/kbn-journeys/journey/journey_apm_config.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

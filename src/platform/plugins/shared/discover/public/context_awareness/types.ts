@@ -12,6 +12,7 @@ import type {
   CustomCellRenderer,
   DataGridDensity,
   UnifiedDataTableProps,
+  DataGridPaginationMode,
 } from '@kbn/unified-data-table';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { AppMenuRegistry, DataTableRecord } from '@kbn/discover-utils';
@@ -36,6 +37,17 @@ export interface AppMenuExtension {
    * @returns The updated app menu registry
    */
   appMenuRegistry: (prevRegistry: AppMenuRegistry) => AppMenuRegistry;
+}
+
+/**
+ * Supports extending the Pagination Config in Discover
+ */
+export interface PaginationConfigExtension {
+  /**
+   * Supports customizing the pagination mode in Discover
+   * @returns paginationMode - which mode to use for loading Pagination toolbar
+   */
+  paginationMode: DataGridPaginationMode;
 }
 
 /**
@@ -169,6 +181,12 @@ export interface RowControlsExtensionParams {
    * The current query
    */
   query?: DiscoverAppState['query'];
+  /**
+   * Function to set the expanded document, which is displayed in a flyout
+   * @param record - The record to display in the flyout
+   * @param options.initialTabId - The tabId to display in the flyout
+   */
+  setExpandedDoc?: (record?: DataTableRecord, options?: { initialTabId?: string }) => void;
 }
 
 /**
@@ -320,6 +338,14 @@ export interface Profile {
    * @returns The additional cell actions to show in the data grid
    */
   getAdditionalCellActions: () => AdditionalCellAction[];
+
+  /**
+   * Allows setting the pagination mode and its configuration
+   * The `getPaginationConfig` extension point currently gives `paginationMode` which can be set to 'multiPage' | 'singlePage' | 'infinite';
+   * Note: This extension point currently only returns `paginationMode` but can be extended to return `pageSize` etc as well.
+   * @returns The pagination mode extension
+   */
+  getPaginationConfig: () => PaginationConfigExtension;
 
   /**
    * Document viewer flyout

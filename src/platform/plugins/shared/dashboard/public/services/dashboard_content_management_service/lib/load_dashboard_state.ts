@@ -16,7 +16,8 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
 import { getDashboardContentManagementCache } from '..';
-import { convertPanelsArrayToPanelMap, injectReferences } from '../../../../common';
+import { convertPanelsArrayToPanelMap } from '../../../../common/lib/dashboard_panel_converters';
+import { injectReferences } from '../../../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
@@ -144,7 +145,7 @@ export const loadDashboardState = async ({
     }
     try {
       searchSourceValues = injectSearchSourceReferences(
-        searchSourceValues as any,
+        searchSourceValues,
         references
       ) as DashboardSearchSource;
       return await dataSearchService.searchSource.create(searchSourceValues);

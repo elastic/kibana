@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-internal';
 
@@ -21,6 +21,20 @@ export const catchRetryableEsClientErrors = (
   e: EsErrors.ElasticsearchClientError
 ): Either.Either<RetryableEsClientError, never> => {
   if (isRetryableEsClientError(e)) {
+    return Either.left({
+      type: 'retryable_es_client_error' as const,
+      message: e?.message,
+      error: e,
+    });
+  } else {
+    throw e;
+  }
+};
+
+export const catchRetryableSearchPhaseExecutionException = (
+  e: EsErrors.ResponseError
+): Either.Either<RetryableEsClientError, never> => {
+  if (e?.body?.error?.type === 'search_phase_execution_exception') {
     return Either.left({
       type: 'retryable_es_client_error' as const,
       message: e?.message,

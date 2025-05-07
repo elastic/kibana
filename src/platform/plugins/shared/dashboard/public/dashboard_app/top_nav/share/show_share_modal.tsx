@@ -7,26 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
-import moment from 'moment';
-import React, { ReactElement, useState } from 'react';
-
 import { EuiCallOut, EuiCheckboxGroup } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
 import { QueryState } from '@kbn/data-plugin/common';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
-import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
-
 import { FormattedMessage } from '@kbn/i18n-react';
-import { convertPanelMapToPanelsArray, DashboardPanelMap } from '../../../../common';
-import { DashboardLocatorParams } from '../../../dashboard_container/types';
-import {
-  getDashboardBackupService,
-  PANELS_CONTROL_GROUP_KEY,
-} from '../../../services/dashboard_backup_service';
+import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import { omit } from 'lodash';
+import moment from 'moment';
+import React, { ReactElement, useState } from 'react';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { DashboardLocatorParams } from '../../../../common';
+import { convertPanelMapToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
+import { SharedDashboardState } from '../../../../common/types';
+import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { coreServices, dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
+import { DASHBOARD_STATE_STORAGE_KEY } from '../../../utils/urls';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
 
@@ -37,7 +35,6 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
-  getPanelsState: () => DashboardPanelMap;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -53,7 +50,6 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
-  getPanelsState,
 }: ShowShareModalProps) {
   if (!shareService) return;
 
@@ -114,62 +110,19 @@ export function ShowShareModal({
     );
   };
 
-  let unsavedStateForLocator: DashboardLocatorParams = {};
-
-  const { dashboardState: unsavedDashboardState, panels: panelModifications } =
+  const { panels: allUnsavedPanelsMap, ...unsavedDashboardState } =
     getDashboardBackupService().getState(savedObjectId) ?? {};
 
-  const allUnsavedPanels = (() => {
-    if (
-      Object.keys(unsavedDashboardState?.panels ?? {}).length === 0 &&
-      Object.keys(omit(panelModifications ?? {}, PANELS_CONTROL_GROUP_KEY)).length === 0
-    ) {
-      // if this dashboard has no modifications or unsaved panels return early. No overrides needed.
-      return;
-    }
+  const hasPanelChanges = allUnsavedPanelsMap !== undefined;
 
-    const latestPanels = getPanelsState();
-    // apply modifications to panels.
-    const modifiedPanels = panelModifications
-      ? Object.entries(panelModifications).reduce((acc, [panelId, unsavedPanel]) => {
-          if (unsavedPanel && latestPanels?.[panelId]) {
-            acc[panelId] = {
-              ...latestPanels[panelId],
-              explicitInput: {
-                ...latestPanels?.[panelId].explicitInput,
-                ...unsavedPanel,
-                id: panelId,
-              },
-            };
-          }
-          return acc;
-        }, {} as DashboardPanelMap)
-      : {};
-
-    // The latest state of panels to share. This will overwrite panels from the saved object on Dashboard load.
-    const allUnsavedPanelsMap = {
-      ...latestPanels,
-      ...modifiedPanels,
-    };
-    return convertPanelMapToPanelsArray(allUnsavedPanelsMap);
-  })();
-
-  if (unsavedDashboardState) {
-    unsavedStateForLocator = {
-      query: unsavedDashboardState.query,
-      filters: unsavedDashboardState.filters,
-      controlGroupState: panelModifications?.[
-        PANELS_CONTROL_GROUP_KEY
-      ] as DashboardLocatorParams['controlGroupState'],
-      panels: allUnsavedPanels as DashboardLocatorParams['panels'],
-
-      // options
-      useMargins: unsavedDashboardState?.useMargins,
-      syncColors: unsavedDashboardState?.syncColors,
-      syncCursor: unsavedDashboardState?.syncCursor,
-      syncTooltips: unsavedDashboardState?.syncTooltips,
-      hidePanelTitles: unsavedDashboardState?.hidePanelTitles,
-    };
+  const unsavedDashboardStateForLocator: SharedDashboardState = {
+    ...unsavedDashboardState,
+    controlGroupInput:
+      unsavedDashboardState.controlGroupInput as SharedDashboardState['controlGroupInput'],
+    references: unsavedDashboardState.references as SharedDashboardState['references'],
+  };
+  if (allUnsavedPanelsMap) {
+    unsavedDashboardStateForLocator.panels = convertPanelMapToPanelsArray(allUnsavedPanelsMap);
   }
 
   const locatorParams: DashboardLocatorParams = {
@@ -179,7 +132,7 @@ export function ShowShareModal({
     viewMode: 'view', // For share locators we always load the dashboard in view mode
     useHash: false,
     timeRange: dataService.query.timefilter.timefilter.getTime(),
-    ...unsavedStateForLocator,
+    ...unsavedDashboardStateForLocator,
   };
 
   let _g = getStateFromKbnUrl<QueryState>('_g', window.location.href);
@@ -189,8 +142,8 @@ export function ShowShareModal({
   const baseUrl = setStateToKbnUrl('_g', _g, undefined, window.location.href);
 
   const shareableUrl = setStateToKbnUrl(
-    '_a',
-    unsavedStateForLocator,
+    DASHBOARD_STATE_STORAGE_KEY,
+    unsavedDashboardStateForLocator,
     { useHash: false, storeInHashQuery: true },
     unhashUrl(baseUrl)
   );
@@ -200,7 +153,6 @@ export function ShowShareModal({
   shareService.toggleShareContextMenu({
     isDirty,
     anchorElement,
-    allowEmbed: true,
     allowShortUrl,
     shareableUrl,
     objectId: savedObjectId,
@@ -222,8 +174,10 @@ export function ShowShareModal({
                 />
               }
             >
-              {Boolean(unsavedDashboardState?.panels)
-                ? shareModalStrings.getDraftSharePanelChangesWarning()
+              {hasPanelChanges
+                ? allowShortUrl
+                  ? shareModalStrings.getDraftSharePanelChangesWarning()
+                  : shareModalStrings.getSnapshotShareWarning()
                 : shareModalStrings.getDraftShareWarning('link')}
             </EuiCallOut>
           ),
@@ -240,11 +194,17 @@ export function ShowShareModal({
                 />
               }
             >
-              {Boolean(unsavedDashboardState?.panels)
+              {hasPanelChanges
                 ? shareModalStrings.getEmbedSharePanelChangesWarning()
                 : shareModalStrings.getDraftShareWarning('embed')}
             </EuiCallOut>
           ),
+          embedUrlParamExtensions: [
+            {
+              paramName: 'embed',
+              component: EmbedUrlParamExtension,
+            },
+          ],
           computeAnonymousCapabilities: showPublicUrlSwitch,
         },
       },
@@ -261,15 +221,12 @@ export function ShowShareModal({
         params: locatorParams,
       },
     },
-    embedUrlParamExtensions: [
-      {
-        paramName: 'embed',
-        component: EmbedUrlParamExtension,
-      },
-    ],
-    snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
-      ? shareModalStrings.getSnapshotShareWarning()
-      : undefined,
     toasts: coreServices.notifications.toasts,
+    shareableUrlLocatorParams: {
+      locator: shareService.url.locators.get(
+        DASHBOARD_APP_LOCATOR
+      ) as LocatorPublic<DashboardLocatorParams>,
+      params: locatorParams,
+    },
   });
 }

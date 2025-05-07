@@ -43,7 +43,7 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 import deepEqual from 'fast-deep-equal';
 import { Alert } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
-import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/constants';
+import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
 import { ErrorFallback } from './error_fallback';
 import { defaultAlertsTableColumns } from '../configuration';
 import { Storage } from '../utils/storage';
@@ -170,6 +170,8 @@ const AlertsTableContent = typedForwardRef(
       ruleTypeIds,
       consumers,
       query,
+      minScore,
+      trackScores = false,
       initialSort = DEFAULT_SORT,
       initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
       leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
@@ -277,6 +279,8 @@ const AlertsTableContent = typedForwardRef(
       runtimeMappings,
       pageIndex: 0,
       pageSize: initialPageSize,
+      minScore,
+      trackScores,
     });
 
     useEffect(() => {
@@ -287,6 +291,8 @@ const AlertsTableContent = typedForwardRef(
         query,
         sort,
         runtimeMappings,
+        minScore,
+        trackScores,
         // Go back to the first page if the query changes
         pageIndex: !deepEqual(prevQueryParams, {
           ruleTypeIds,
@@ -300,7 +306,7 @@ const AlertsTableContent = typedForwardRef(
           : oldPageIndex,
         pageSize: oldPageSize,
       }));
-    }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers]);
+    }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers, minScore, trackScores]);
 
     const {
       data: alertsData,
@@ -357,7 +363,7 @@ const AlertsTableContent = typedForwardRef(
         refetchAlerts();
       }
       queryClient.invalidateQueries(queryKeys.casesBulkGet(caseIds));
-      queryClient.invalidateQueries(alertsQueryKeys.mutedAlerts(ruleIds));
+      queryClient.invalidateQueries(alertsQueryKeys.getMutedAlerts(ruleIds));
       queryClient.invalidateQueries(queryKeys.maintenanceWindowsBulkGet(maintenanceWindowIds));
     }, [caseIds, maintenanceWindowIds, queryClient, queryParams.pageIndex, refetchAlerts, ruleIds]);
 

@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import * as Either from 'fp-ts/Either';
+import * as errorHandlers from './catch_retryable_es_client_errors';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { checkForUnknownDocs } from './check_for_unknown_docs';
 import { createAggregateTypesSearchResponse } from './check_for_unknown_docs.mocks';
-
-jest.mock('./catch_retryable_es_client_errors');
 
 describe('checkForUnknownDocs', () => {
   const excludeOnUpgradeQuery: QueryDslQueryContainer = {
@@ -39,18 +37,94 @@ describe('checkForUnknownDocs', () => {
       elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
     );
 
+    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = jest.spyOn(
+      errorHandlers,
+      'catchRetryableSearchPhaseExecutionException'
+    );
+
     const task = checkForUnknownDocs({
       client,
       indexName: '.kibana_8.0.0',
       knownTypes,
       excludeOnUpgradeQuery,
     });
-    try {
-      await task();
-    } catch (e) {
-      /** ignore */
-    }
-    expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+
+    const result = await task();
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<any>).left).toEqual(
+      expect.objectContaining({
+        type: 'retryable_es_client_error',
+      })
+    );
+    expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
+    expect(catchClientErrorsSpy).toHaveBeenCalledWith(retryableError);
+  });
+
+  it('calls catchRetryableSearchPhaseExecutionException when the promise rejects', async () => {
+    // Create a mock client that rejects all methods with a search_phase_execution_exception response.
+    const retryableError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        body: { error: { type: 'search_phase_execution_exception' } },
+      })
+    );
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+    );
+
+    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = jest.spyOn(
+      errorHandlers,
+      'catchRetryableSearchPhaseExecutionException'
+    );
+
+    const task = checkForUnknownDocs({
+      client,
+      indexName: '.kibana_8.0.0',
+      knownTypes,
+      excludeOnUpgradeQuery,
+    });
+
+    const result = await task();
+    expect(Either.isLeft(result)).toBe(true);
+    expect((result as Either.Left<any>).left).toEqual(
+      expect.objectContaining({
+        type: 'retryable_es_client_error',
+      })
+    );
+    expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
+    // the second handler shouldn't be called since the first one is not throwing
+    expect(catchClientErrorsSpy).not.toHaveBeenCalled();
+  });
+
+  it('should throw because neither handler can retry', async () => {
+    // Create a mock client that rejects all methods with a 502 status code response.
+    const retryableError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 502,
+        body: { error: { type: 'es_type', reason: 'es_reason' } },
+      })
+    );
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+    );
+
+    const catchClientErrorsSpy = jest.spyOn(errorHandlers, 'catchRetryableEsClientErrors');
+    const catchSearchPhaseExceptionSpy = jest.spyOn(
+      errorHandlers,
+      'catchRetryableSearchPhaseExecutionException'
+    );
+
+    const task = checkForUnknownDocs({
+      client,
+      indexName: '.kibana_8.0.0',
+      knownTypes,
+      excludeOnUpgradeQuery,
+    });
+
+    await expect(task()).rejects.toThrow();
+    expect(catchSearchPhaseExceptionSpy).toHaveBeenCalledWith(retryableError);
+    expect(catchClientErrorsSpy).toHaveBeenCalledWith(retryableError);
   });
 
   it('calls `client.search` with the correct parameters', async () => {

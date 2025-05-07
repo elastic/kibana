@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
 import { FramePublicAPI, VisualizationDimensionEditorProps } from '../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { MetricDimensionEditor } from './dimension_editor';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ColorMode } from '@kbn/charts-plugin/public';
@@ -25,6 +24,7 @@ import { PalettePanelContainer } from '../../shared_components';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LegacyMetricState } from '../../../common/types';
 import { DatasourcePublicAPI } from '../..';
+import { mountWithProviders } from '../../test_utils/test_utils';
 
 function paletteParamsContaining(paramsToCheck: PaletteOutput<CustomPaletteParams>['params']) {
   return expect.objectContaining({
@@ -90,7 +90,7 @@ describe('metric dimension editor', () => {
   });
 
   it('should not show the dynamic coloring option for non numeric columns', () => {
-    const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
+    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
     expect(
       instance.find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]').exists()
     ).toBe(false);
@@ -99,7 +99,7 @@ describe('metric dimension editor', () => {
 
   it('should set the dynamic coloring default to "none"', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
-    const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
+    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
     expect(
       instance
         .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]')
@@ -113,7 +113,7 @@ describe('metric dimension editor', () => {
   it('should show the dynamic palette display ony when colorMode is different from "none"', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     state.colorMode = ColorMode.Labels;
-    const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
+    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
     expect(
       instance
         .find('[data-test-subj="lnsLegacyMetric_dynamicColoring_groups"]')
@@ -126,7 +126,7 @@ describe('metric dimension editor', () => {
 
   it('should prefill the palette stops with some colors when enabling coloring', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
-    const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
+    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
 
     act(() => {
       instance
@@ -146,7 +146,7 @@ describe('metric dimension editor', () => {
   it('should open the palette panel when "Settings" link is clicked in the palette input', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     state.colorMode = ColorMode.Background;
-    const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
+    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
 
     act(() => {
       instance.find('[data-test-subj="lns_colorEditing_trigger"]').first().simulate('click');
@@ -160,7 +160,7 @@ describe('metric dimension editor', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     frame.activeData!.first.rows[0].foo = 0;
     state.colorMode = ColorMode.Background;
-    const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
+    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
 
     act(() => {
       instance.find('[data-test-subj="lns_colorEditing_trigger"]').first().simulate('click');
@@ -174,7 +174,7 @@ describe('metric dimension editor', () => {
     frame.activeData!.first.columns[0].meta.type = 'number';
     frame.activeData!.first.rows[0].foo = -1;
     state.colorMode = ColorMode.Background;
-    const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
+    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
 
     act(() => {
       instance.find('[data-test-subj="lns_colorEditing_trigger"]').first().simulate('click');
@@ -189,7 +189,7 @@ describe('metric dimension editor', () => {
     frame.activeData!.first.rows[0].foo = 5;
     state.colorMode = ColorMode.None;
     state.palette = undefined;
-    const instance = mountWithIntl(<MetricDimensionEditor {...props} />);
+    const instance = mountWithProviders(<MetricDimensionEditor {...props} />);
 
     act(() => {
       instance

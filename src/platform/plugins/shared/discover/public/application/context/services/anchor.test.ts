@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { createSearchSourceStub } from './_stubs';
 import { fetchAnchor, updateSearchSource } from './anchor';

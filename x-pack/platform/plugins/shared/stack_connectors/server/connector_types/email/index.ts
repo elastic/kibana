@@ -7,10 +7,11 @@
 
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
 import nodemailerGetService from 'nodemailer/lib/well-known';
-import SMTPConnection from 'nodemailer/lib/smtp-connection';
+import type SMTPConnection from 'nodemailer/lib/smtp-connection';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -30,7 +31,8 @@ import {
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { AdditionalEmailServices } from '../../../common';
-import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
+import type { SendEmailOptions, Transport } from './send_email';
+import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
 import { portSchema } from '../lib/schemas';
 
 export type EmailConnectorType = ConnectorType<
@@ -82,7 +84,7 @@ function validateConfig(
 
   const emails = [config.from];
   const invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);
-  if (!!invalidEmailsMessage) {
+  if (invalidEmailsMessage) {
     throw new Error(`[from]: ${invalidEmailsMessage}`);
   }
 
@@ -151,6 +153,15 @@ const SecretsSchema = schema.object(SecretsSchemaProps);
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
+const AttachmentSchemaProps = {
+  content: schema.string(),
+  contentType: schema.maybe(schema.string()),
+  filename: schema.string(),
+  encoding: schema.maybe(schema.string()),
+};
+export const AttachmentSchema = schema.object(AttachmentSchemaProps);
+export type Attachment = TypeOf<typeof AttachmentSchema>;
+
 const ParamsSchemaProps = {
   to: schema.arrayOf(schema.string(), { defaultValue: [] }),
   cc: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -168,6 +179,7 @@ const ParamsSchemaProps = {
       }),
     }),
   }),
+  attachments: schema.maybe(schema.arrayOf(AttachmentSchema)),
 };
 
 export const ParamsSchema = schema.object(ParamsSchemaProps);
@@ -307,6 +319,16 @@ async function executor(
     }
   }
 
+  if (params.attachments != null) {
+    if (execOptions.source?.type !== ActionExecutionSourceType.NOTIFICATION) {
+      return {
+        status: 'error',
+        actionId,
+        message: `Email attachments can only be sent via notifications`,
+      };
+    }
+  }
+
   const transport: Transport = {};
 
   if (secrets.user != null) {
@@ -369,6 +391,7 @@ async function executor(
     },
     hasAuth: config.hasAuth,
     configurationUtilities,
+    attachments: params.attachments,
   };
 
   let result;

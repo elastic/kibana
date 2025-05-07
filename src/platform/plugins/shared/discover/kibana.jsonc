@@ -30,7 +30,6 @@
       "expressions",
       "unifiedDocViewer",
       "unifiedSearch",
-      "unifiedHistogram",
       "contentManagement",
       "discoverShared"
     ],
@@ -48,7 +47,9 @@
       "observabilityAIAssistant",
       "aiops",
       "fieldsMetadata",
-      "logsDataAccess"
+      "logsDataAccess",
+      "embeddableEnhanced",
+      "apmSourcesAccess"
     ],
     "requiredBundles": [
       "kibanaUtils",

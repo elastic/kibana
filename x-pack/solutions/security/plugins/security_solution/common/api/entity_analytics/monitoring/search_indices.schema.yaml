@@ -1,0 +1,28 @@
+openapi: 3.0.0
+
+info:
+  title: Search indices for Privileges Monitoring import
+  version: '2023-10-31'
+paths:
+  /api/entity_analytics/monitoring/privileges/indices:
+    get:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: SearchPrivilegesIndices
+      summary: Search Indices for Privileges Monitoring import
+      parameters:
+        - name: searchQuery
+          in: query
+          schema:
+            type: string
+            description: The search query to filter the indices
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string

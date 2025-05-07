@@ -8,15 +8,11 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
-import { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
-import {
-  getTestRuleData,
-  getUrlPrefix,
-  ObjectRemover,
-  TaskManagerDoc,
-} from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { TaskManagerDoc } from '../../../../../common/lib';
+import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function deleteBackfillTests({ getService }: FtrProviderContext) {
@@ -85,8 +81,8 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
             .set('kbn-xsrf', 'foo')
             // set a long time range so the backfill doesn't finish running and get deleted
             .send([
-              { rule_id: ruleId1, start, end },
-              { rule_id: ruleId2, start, end },
+              { rule_id: ruleId1, ranges: [{ start, end }] },
+              { rule_id: ruleId2, ranges: [{ start, end }] },
             ]);
 
           const scheduleResult = scheduleResponse.body;
@@ -266,7 +262,7 @@ export default function deleteBackfillTests({ getService }: FtrProviderContext) 
           const scheduleResponse = await supertest
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
             .set('kbn-xsrf', 'foo')
-            .send([{ rule_id: ruleId, start, end }]);
+            .send([{ rule_id: ruleId, ranges: [{ start, end }] }]);
 
           const scheduleResult = scheduleResponse.body;
           expect(scheduleResult.length).to.eql(1);

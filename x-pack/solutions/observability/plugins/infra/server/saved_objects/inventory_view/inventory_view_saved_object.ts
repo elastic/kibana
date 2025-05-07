@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
 import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { inventoryViewSavedObjectRT } from './types';
 
@@ -59,9 +59,9 @@ export const inventoryViewSavedObjectType: SavedObjectsType = {
         {
           type: 'unsafe_transform',
           transformFn: (document) => {
-            if (document.attributes.legend.steps > 18) {
+            if (document.attributes.legend?.steps > 18) {
               document.attributes.legend.steps = 18;
-            } else if (document.attributes.legend.steps < 2) {
+            } else if (document.attributes.legend?.steps < 2) {
               document.attributes.legend.steps = 2;
             }
             return { document };

@@ -6,8 +6,9 @@
  */
 
 import { get } from 'lodash';
-import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema, TaskManagerConfig, MAX_WORKERS_LIMIT } from './config';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { TaskManagerConfig } from './config';
+import { configSchema, MAX_WORKERS_LIMIT } from './config';
 
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { TaskManagerPlugin } = await import('./plugin');
@@ -21,6 +22,8 @@ export type {
   RunContext,
   IntervalSchedule,
 } from './task';
+
+export { Frequency, Weekday } from '@kbn/rrule';
 
 export { TaskStatus, TaskPriority, TaskCost } from './task';
 

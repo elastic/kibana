@@ -15,13 +15,16 @@ const createAlertsClientMock = () => {
       getMaintenanceWindowScopedQueryAlerts: jest.fn(),
       getTrackedAlerts: jest.fn(),
       getProcessedAlerts: jest.fn(),
-      getAlertsToSerialize: jest.fn(),
+      getRawAlertInstancesForState: jest.fn(),
       hasReachedAlertLimit: jest.fn(),
       checkLimitUsage: jest.fn(),
       persistAlerts: jest.fn(),
       getSummarizedAlerts: jest.fn(),
       factory: jest.fn(),
       client: jest.fn(),
+      determineDelayedAlerts: jest.fn(),
+      determineFlappingAlerts: jest.fn(),
+      getTrackedExecutions: jest.fn(),
     };
   });
 };

@@ -14,6 +14,7 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
   DEFAULT_APP_REFRESH_INTERVAL,
@@ -58,6 +59,8 @@ import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
 import { createTelemetryServiceMock } from '../telemetry/telemetry_service.mock';
+import { createSiemMigrationsMock } from '../../mock/mock_siem_migrations_service';
+import { KibanaServices } from './services';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -128,6 +131,7 @@ export const createStartServicesMock = (
   const mockSetHeaderActionMenu = jest.fn();
   const timelineDataService = dataPluginMock.createStartContract();
   const alerting = alertingPluginMock.createStartContract();
+  const siemMigrations = createSiemMigrationsMock();
 
   /*
    * Below mocks are needed by unified field list
@@ -213,6 +217,13 @@ export const createStartServicesMock = (
           showQueries: true,
           saveQuery: true,
         },
+        maintenanceWindow: {
+          show: true,
+          save: true,
+        },
+        actions: {
+          show: true,
+        },
       },
     },
     security,
@@ -258,6 +269,13 @@ export const createStartServicesMock = (
     upselling: new UpsellingService(),
     timelineDataService,
     alerting,
+    siemMigrations,
+    sessionStorage: new Storage({
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+    }),
   } as unknown as StartServices;
 };
 
@@ -272,6 +290,14 @@ export const createWithKibanaMock = () => {
 
 export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
+
+  KibanaServices.init({
+    ...services,
+    kibanaBranch: 'test',
+    kibanaVersion: 'test',
+    buildFlavor: 'test',
+    prebuiltRulesPackageVersion: 'test',
+  });
 
   // eslint-disable-next-line react/display-name
   return ({

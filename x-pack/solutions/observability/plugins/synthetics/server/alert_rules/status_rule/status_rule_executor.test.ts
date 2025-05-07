@@ -12,7 +12,6 @@ import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import { SyntheticsServerSetup } from '../../types';
@@ -82,10 +81,11 @@ describe('StatusRuleExecutor', () => {
       name: 'test',
     },
   } as any);
+  const configRepo = statusRule.monitorConfigRepository;
 
   describe('DefaultRule', () => {
     it('should only query enabled monitors', async () => {
-      const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
+      const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
       const { downConfigs, staleDownConfigs } = await statusRule.getDownChecks({});
 
@@ -94,12 +94,11 @@ describe('StatusRuleExecutor', () => {
 
       expect(spy).toHaveBeenCalledWith({
         filter: 'synthetics-monitor.attributes.alert.status.enabled: true',
-        soClient,
       });
     });
 
     it('marks deleted configs as expected', async () => {
-      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue(testMonitors);
+      jest.spyOn(configRepo, 'getAll').mockResolvedValue(testMonitors);
 
       const { downConfigs } = await statusRule.getDownChecks({});
 
@@ -175,7 +174,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     it('does not mark deleted config when monitor does not contain location label', async () => {
-      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([
+      jest.spyOn(configRepo, 'getAll').mockResolvedValue([
         {
           ...testMonitors[0],
           attributes: {
@@ -360,7 +359,7 @@ describe('StatusRuleExecutor', () => {
       expect(spy).toHaveBeenCalledTimes(0);
     });
 
-    it('should send 2 alerts', async () => {
+    it('should send 2 alerts for grouped by location', async () => {
       statusRule.params = {
         condition: {
           window: {
@@ -481,6 +480,49 @@ describe('StatusRuleExecutor', () => {
         },
         useLatestChecks: true,
       });
+    });
+
+    it('should send 2 alerts for un-grouped with 2 different monitors', async () => {
+      statusRule.params = {
+        condition: {
+          groupBy: 'none',
+          window: {
+            numberOfChecks: 1,
+          },
+          downThreshold: 1,
+          locationsThreshold: 1,
+        },
+      };
+      const spy = jest.spyOn(statusRule, 'scheduleAlert');
+      statusRule.handleDownMonitorThresholdAlert({
+        downConfigs: {
+          'id1-us_central_qa': {
+            locationId: 'us_central_qa',
+            configId: 'id1',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            ping: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
+          'id2-us_central_dev': {
+            locationId: 'us_central_dev',
+            configId: 'id2',
+            status: 'down',
+            timestamp: '2021-06-01T00:00:00.000Z',
+            monitorQueryId: 'test',
+            ping: testPing,
+            checks: {
+              downWithinXChecks: 1,
+              down: 1,
+            },
+          },
+        },
+      });
+      expect(spy).toHaveBeenCalledTimes(2);
     });
   });
 });

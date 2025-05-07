@@ -42,7 +42,7 @@ else
     --docker-push \
     --skip-docker-ubi \
     --skip-docker-fips \
-    --skip-docker-ubuntu \
+    --skip-docker-cloud-fips \
     --skip-docker-wolfi \
     --skip-docker-serverless \
     --skip-docker-contexts

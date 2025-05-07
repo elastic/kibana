@@ -8,7 +8,7 @@
  */
 
 import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 
 export const controlGroupFilterOutputMock$ = new BehaviorSubject<Filter[] | undefined>([]);
@@ -25,6 +25,6 @@ export const getControlGroupMock = () => {
     openAddDataControlFlyout: jest.fn(),
     filters$: controlGroupFilterOutputMock$,
     setChainingSystem: jest.fn(),
-    snapshotRuntimeState: jest.fn(),
+    getInput: jest.fn(),
   };
 };

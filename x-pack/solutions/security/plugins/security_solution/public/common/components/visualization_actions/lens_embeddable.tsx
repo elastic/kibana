@@ -9,7 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';
 import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
@@ -70,6 +69,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   withActions = DEFAULT_ACTIONS,
   disableOnClickFilter = false,
   casesAttachmentMetadata,
+  esql,
 }) => {
   const styles = useMemo(
     () => getStyles(wrapperWidth, wrapperHeight),
@@ -92,7 +92,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     },
   } = useKibana().services;
   const dispatch = useDispatch();
-  const { searchSessionId } = useVisualizationResponse({ visualizationId: id });
+  const { loading, searchSessionId, tables } = useVisualizationResponse({ visualizationId: id });
   const attributes = useLensAttributes({
     applyGlobalQueriesAndFilters,
     applyPageAndTabsFilters,
@@ -102,6 +102,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     scopeId,
     stackByField,
     title: '',
+    esql,
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
 
@@ -115,7 +116,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [enableLegendActions]
   );
   const { setInspectData } = useEmbeddableInspect(onLoad);
-  const { responses, loading } = useVisualizationResponse({ visualizationId: id });
 
   const {
     additionalRequests,
@@ -129,7 +129,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   } = useInspect({
     inputId: inputsModelId,
     isDisabled: loading,
-    multiple: responses != null && responses.length > 1,
+    multiple: tables != null && Object.keys(tables.tables).length > 1,
     queryId: id,
   });
 
@@ -209,7 +209,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     return null;
   }
 
-  if (!attributes || (responses != null && responses.length === 0)) {
+  if (!attributes) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
@@ -262,7 +262,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             syncCursor={false}
             syncTooltips={false}
             timeRange={timerange}
-            viewMode={ViewMode.VIEW}
+            viewMode={'view'}
             withDefaultActions={false}
           />
         </div>

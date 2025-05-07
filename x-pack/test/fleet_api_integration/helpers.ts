@@ -100,6 +100,13 @@ export async function generateAgent(
         unenrollment_started_at: '2017-06-07T18:59:04.498Z',
       };
       break;
+    case 'uninstalled':
+      data = {
+        audit_unenrolled_reason: 'uninstall',
+        policy_revision_idx: 1,
+        last_checkin: new Date().toISOString(),
+      };
+      break;
     default:
       data = { policy_revision_idx: 1, last_checkin: new Date().toISOString() };
   }
@@ -107,13 +114,16 @@ export async function generateAgent(
   await es.index({
     index: '.fleet-agents',
     id,
-    body: {
+    document: {
       id,
+      type: 'PERMANENT',
       active: true,
+      enrolled_at: new Date().toISOString(),
       last_checkin: new Date().toISOString(),
       policy_id: policyId,
       policy_revision: 1,
       agent: {
+        id,
         version,
       },
       local_metadata: {

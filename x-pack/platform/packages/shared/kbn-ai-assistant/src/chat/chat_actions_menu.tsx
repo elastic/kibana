@@ -22,14 +22,10 @@ import { useKnowledgeBase } from '../hooks';
 
 export function ChatActionsMenu({
   connectors,
-  conversationId,
   disabled,
-  onCopyConversationClick,
 }: {
   connectors: UseGenAIConnectorsResult;
-  conversationId?: string;
   disabled: boolean;
-  onCopyConversationClick: () => void;
 }) {
   const { application, http } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
@@ -72,7 +68,7 @@ export function ChatActionsMenu({
           <EuiButtonIcon
             data-test-subj="observabilityAiAssistantChatActionsMenuButtonIcon"
             disabled={disabled}
-            iconType="boxesVertical"
+            iconType="controlsHorizontal"
             onClick={toggleActionsMenu}
             aria-label={i18n.translate(
               'xpack.aiAssistant.chatActionsMenu.euiButtonIcon.menuLabel',
@@ -130,16 +126,6 @@ export function ChatActionsMenu({
                   </div>
                 ),
                 panel: 1,
-              },
-              {
-                name: i18n.translate('xpack.aiAssistant.chatHeader.actions.copyConversation', {
-                  defaultMessage: 'Copy conversation',
-                }),
-                disabled: !conversationId,
-                onClick: () => {
-                  toggleActionsMenu();
-                  onCopyConversationClick();
-                },
               },
             ],
           },

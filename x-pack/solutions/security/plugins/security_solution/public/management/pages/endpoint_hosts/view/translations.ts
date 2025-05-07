@@ -13,7 +13,7 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.o
 
 export const WORKFLOW_INSIGHTS = {
   title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.sectionTitle', {
-    defaultMessage: 'Endpoint Insights',
+    defaultMessage: 'Automatic Troubleshooting',
   }),
   titleRight: i18n.translate(
     'xpack.securitySolution.endpointDetails.workflowInsights.extraAction',
@@ -23,7 +23,7 @@ export const WORKFLOW_INSIGHTS = {
   ),
   scan: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.title', {
-      defaultMessage: 'Endpoint Insights scan',
+      defaultMessage: 'Automatic Troubleshooting',
     }),
     button: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.button', {
       defaultMessage: 'Scan',
@@ -45,6 +45,20 @@ export const WORKFLOW_INSIGHTS = {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {
       defaultMessage: 'Insights',
     }),
+    survey: {
+      description: i18n.translate(
+        'xpack.securitySolution.endpointDetails.workflowInsights.survey.text',
+        {
+          defaultMessage: 'How is Automatic Troubleshooting working for you? ',
+        }
+      ),
+      callToAction: i18n.translate(
+        'xpack.securitySolution.endpointDetails.workflowInsights.survey.callToAction',
+        {
+          defaultMessage: 'Provide feedback',
+        }
+      ),
+    },
     emptyResults: i18n.translate(
       'xpack.securitySolution.endpointDetails.workflowInsights.issues.emptyResults',
       {

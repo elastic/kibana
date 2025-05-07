@@ -1551,15 +1551,7 @@
           "\nA function which will get the view mode from the API or the parent API. if this api has a view mode AND its\nparent has a view mode, we consider the APIs version the source of truth."
         ],
         "signature": [
-          "(api?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.CanAccessViewMode",
-            "text": "CanAccessViewMode"
-          },
-          " | undefined) => ",
+          "(api?: unknown) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1576,24 +1568,17 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.getInheritedViewMode.$1",
-            "type": "CompoundType",
+            "type": "Unknown",
             "tags": [],
             "label": "api",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.CanAccessViewMode",
-                "text": "CanAccessViewMode"
-              },
-              " | undefined"
+              "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1746,15 +1731,7 @@
         "label": "getViewModeSubject",
         "description": [],
         "signature": [
-          "(api?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.CanAccessViewMode",
-            "text": "CanAccessViewMode"
-          },
-          " | undefined) => ",
+          "(api?: unknown) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1779,24 +1756,17 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.getViewModeSubject.$1",
-            "type": "CompoundType",
+            "type": "Unknown",
             "tags": [],
             "label": "api",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.CanAccessViewMode",
-                "text": "CanAccessViewMode"
-              },
-              " | undefined"
+              "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1869,6 +1839,48 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.hasReadOnlyCapabilities",
+        "type": "Function",
+        "tags": [],
+        "label": "hasReadOnlyCapabilities",
+        "description": [
+          "\nA type guard which determines whether or not a given API is editable."
+        ],
+        "signature": [
+          "(root: unknown) => root is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasReadOnlyCapabilities",
+            "text": "HasReadOnlyCapabilities"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_read_only_capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.hasReadOnlyCapabilities.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "root",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_read_only_capabilities.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2250,7 +2262,7 @@
         "tags": [],
         "label": "useBatchedPublishingSubjects",
         "description": [
-          "\nBatches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.\nUse when `subjects` are static and do not change over the lifetime of the component.\n"
+          "\nBatches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.\nUse when `subjects` are static and do not change over the lifetime of the component.\n\nDo not use when value is used as an input value to avoid debouncing user interactions\n"
         ],
         "signature": [
           "<SubjectsType extends ",
@@ -2325,65 +2337,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-public.useInheritedViewMode",
-        "type": "Function",
-        "tags": [],
-        "label": "useInheritedViewMode",
-        "description": [
-          "\nA hook that gets a view mode from this API or its parent as a reactive variable which will cause re-renders on change.\nif this api has a view mode AND its parent has a view mode, we consider the APIs version the source of truth."
-        ],
-        "signature": [
-          "<ApiType extends ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.CanAccessViewMode",
-            "text": "CanAccessViewMode"
-          },
-          " = ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.CanAccessViewMode",
-            "text": "CanAccessViewMode"
-          },
-          ">(api: ApiType | undefined) => ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined"
-        ],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.useInheritedViewMode.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "ApiType | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2626,15 +2579,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<any> | undefined = ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
-          },
-          "<any> | undefined>(subject: SubjectType) => ",
+          "<any>>(subject: SubjectType) => ",
           "ValueFromPublishingSubject",
           "<SubjectType>"
         ],
@@ -2649,7 +2594,7 @@
             "tags": [],
             "label": "subject",
             "description": [
-              "Publishing subject.\nWhen 'subject' is expected to change, 'subject' must be part of component react state."
+              "Publishing subject."
             ],
             "signature": [
               "SubjectType"
@@ -3517,6 +3462,71 @@
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_parent_api.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.HasReadOnlyCapabilities",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasReadOnlyCapabilities",
+        "description": [
+          "\nAn interface which determines whether or not a given API offers to show the config for read only permissions.\nIn order to be read only, the api requires a show config function to execute the action\na getTypeDisplayName function to display to the user which type of chart is being\nshown, and an isReadOnlyEnabled function."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasReadOnlyCapabilities",
+            "text": "HasReadOnlyCapabilities"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.HasTypeDisplayName",
+            "text": "HasTypeDisplayName"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_read_only_capabilities.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.HasReadOnlyCapabilities.onShowConfig",
+            "type": "Function",
+            "tags": [],
+            "label": "onShowConfig",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_read_only_capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.HasReadOnlyCapabilities.isReadOnlyEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isReadOnlyEnabled",
+            "description": [],
+            "signature": [
+              "() => { read: boolean; write: boolean; }"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_read_only_capabilities.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

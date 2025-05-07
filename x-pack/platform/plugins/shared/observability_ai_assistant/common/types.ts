@@ -45,12 +45,6 @@ export interface Message {
   };
 }
 
-export interface TokenCount {
-  prompt: number;
-  completion: number;
-  total: number;
-}
-
 export interface Conversation {
   '@timestamp': string;
   user?: {
@@ -61,7 +55,6 @@ export interface Conversation {
     id: string;
     title: string;
     last_updated: string;
-    token_count?: TokenCount;
   };
   systemMessage?: string;
   messages: Message[];
@@ -69,10 +62,11 @@ export interface Conversation {
   numeric_labels: Record<string, number>;
   namespace: string;
   public: boolean;
+  archived?: boolean;
 }
 
-export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
-  conversation: { title: string; token_count?: TokenCount; id?: string };
+type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
+  conversation: { title: string; id?: string };
 };
 
 export type ConversationCreateRequest = ConversationRequestBase;
@@ -101,20 +95,21 @@ export interface Instruction {
   text: string;
 }
 
-export interface AdHocInstruction {
-  id?: string;
-  text: string;
-  instruction_type: 'user_instruction' | 'application_instruction';
-}
-
-export type InstructionOrPlainText = string | Instruction;
-
 export enum KnowledgeBaseType {
   // user instructions are included in the system prompt regardless of the user's input
   UserInstruction = 'user_instruction',
 
   // contextual entries are only included in the system prompt if the user's input matches the context
   Contextual = 'contextual',
+}
+
+export enum KnowledgeBaseState {
+  NOT_INSTALLED = 'NOT_INSTALLED',
+  MODEL_PENDING_DEPLOYMENT = 'MODEL_PENDING_DEPLOYMENT',
+  DEPLOYING_MODEL = 'DEPLOYING_MODEL',
+  MODEL_PENDING_ALLOCATION = 'MODEL_PENDING_ALLOCATION',
+  READY = 'READY',
+  ERROR = 'ERROR',
 }
 
 export interface ObservabilityAIAssistantScreenContextRequest {
@@ -159,4 +154,9 @@ export interface ObservabilityAIAssistantScreenContext {
   }>;
   actions?: Array<ScreenContextActionDefinition<any>>;
   starterPrompts?: StarterPrompt[];
+}
+
+export enum ConversationAccess {
+  SHARED = 'shared',
+  PRIVATE = 'private',
 }

@@ -10,6 +10,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
+import { isLockAcquisitionError } from '@kbn/lock-manager';
 import { resourceNames } from '..';
 import {
   Instruction,
@@ -19,20 +20,20 @@ import {
 } from '../../../common/types';
 import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
+import { getSpaceQuery } from '../util/get_space_query';
 import {
-  createInferenceEndpoint,
-  deleteInferenceEndpoint,
-  getElserModelStatus,
+  getInferenceEndpointsForEmbedding,
+  getKbModelStatus,
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
-import {
-  isKnowledgeBaseIndexWriteBlocked,
-  isSemanticTextUnsupportedError,
-} from './reindex_knowledge_base';
-import { scheduleKbSemanticTextMigrationTask } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+import { hasKbWriteIndex } from './has_kb_index';
+import { getInferenceIdFromWriteIndex } from './get_inference_id_from_write_index';
+import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
+import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
+import { isKnowledgeBaseIndexWriteBlocked } from './index_write_block_utils';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -45,40 +46,19 @@ interface Dependencies {
 
 export interface RecalledEntry {
   id: string;
+  title?: string;
   text: string;
-  score: number | null;
+  esScore: number | null;
   is_correction?: boolean;
   labels?: Record<string, string>;
 }
 
-function throwKnowledgeBaseNotReady(body: any) {
-  throw serverUnavailable(`Knowledge base is not ready yet`, body);
+function throwKnowledgeBaseNotReady(error: Error) {
+  throw serverUnavailable(`Knowledge base is not ready yet: ${error.message}`);
 }
 
 export class KnowledgeBaseService {
   constructor(private readonly dependencies: Dependencies) {}
-
-  async setup(
-    esClient: {
-      asCurrentUser: ElasticsearchClient;
-      asInternalUser: ElasticsearchClient;
-    },
-    modelId: string
-  ) {
-    await deleteInferenceEndpoint({ esClient }).catch((e) => {}); // ensure existing inference endpoint is deleted
-    return createInferenceEndpoint({ esClient, logger: this.dependencies.logger, modelId });
-  }
-
-  async reset(esClient: { asCurrentUser: ElasticsearchClient }) {
-    try {
-      await deleteInferenceEndpoint({ esClient });
-    } catch (error) {
-      if (isInferenceEndpointMissingOrUnavailable(error)) {
-        return;
-      }
-      throw error;
-    }
-  }
 
   private async recallFromKnowledgeBase({
     queries,
@@ -94,7 +74,7 @@ export class KnowledgeBaseService {
     const response = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels' | 'title'> & { doc_id?: string }
     >({
-      index: [resourceNames.aliases.kb],
+      index: [resourceNames.writeIndexAlias.kb],
       query: {
         bool: {
           should: queries.map(({ text, boost = 1 }) => ({
@@ -127,7 +107,7 @@ export class KnowledgeBaseService {
       is_correction: hit._source?.is_correction,
       labels: hit._source?.labels,
       title: hit._source?.title ?? hit._source?.doc_id, // use `doc_id` as fallback title for backwards compatibility
-      score: hit._score!,
+      esScore: hit._score!,
       id: hit._id!,
     }));
   }
@@ -165,7 +145,7 @@ export class KnowledgeBaseService {
         namespace,
       }).catch((error) => {
         if (isInferenceEndpointMissingOrUnavailable(error)) {
-          throwKnowledgeBaseNotReady(error.body);
+          throwKnowledgeBaseNotReady(error);
         }
         throw error;
       }),
@@ -176,7 +156,7 @@ export class KnowledgeBaseService {
         core: this.dependencies.core,
         logger: this.dependencies.logger,
       }).catch((error) => {
-        this.dependencies.logger.debug('Error getting data from search indices');
+        this.dependencies.logger.error('Error getting data from search indices');
         this.dependencies.logger.debug(error);
         return [];
       }),
@@ -191,7 +171,7 @@ export class KnowledgeBaseService {
 
     const sortedEntries = orderBy(
       documentsFromKb.concat(documentsFromConnectors),
-      'score',
+      'esScore',
       'desc'
     ).slice(0, limit.size ?? 20);
 
@@ -224,9 +204,16 @@ export class KnowledgeBaseService {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return [];
     }
+
+    const doesKbIndexExist = await hasKbWriteIndex({ esClient: this.dependencies.esClient });
+
+    if (!doesKbIndexExist) {
+      return [];
+    }
+
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-        index: resourceNames.aliases.kb,
+        index: resourceNames.writeIndexAlias.kb,
         query: {
           bool: {
             filter: [
@@ -259,19 +246,22 @@ export class KnowledgeBaseService {
     query,
     sortBy,
     sortDirection,
+    namespace,
   }: {
     query?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
+    namespace: string;
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return { entries: [] };
     }
+
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<
         KnowledgeBaseEntry & { doc_id?: string }
       >({
-        index: resourceNames.aliases.kb,
+        index: resourceNames.writeIndexAlias.kb,
         query: {
           bool: {
             filter: [
@@ -281,17 +271,18 @@ export class KnowledgeBaseService {
                 : []),
               {
                 // exclude user instructions
-                bool: { must_not: { term: { type: KnowledgeBaseType.UserInstruction } } },
+                bool: {
+                  must_not: { term: { type: KnowledgeBaseType.UserInstruction } },
+                },
               },
+              // filter by space
+              ...getSpaceQuery({ namespace }),
             ],
           },
         },
         sort:
           sortBy === 'title'
-            ? [
-                { ['title.keyword']: { order: sortDirection } },
-                { doc_id: { order: sortDirection } }, // sort by doc_id for backwards compatibility
-              ]
+            ? [{ ['title.keyword']: { order: sortDirection } }]
             : [{ [String(sortBy)]: { order: sortDirection } }],
         size: 500,
         _source: {
@@ -322,10 +313,26 @@ export class KnowledgeBaseService {
       };
     } catch (error) {
       if (isInferenceEndpointMissingOrUnavailable(error)) {
-        throwKnowledgeBaseNotReady(error.body);
+        throwKnowledgeBaseNotReady(error);
       }
       throw error;
     }
+  };
+
+  hasEntries = async () => {
+    const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
+      index: resourceNames.writeIndexAlias.kb,
+      size: 0,
+      track_total_hits: 1,
+      terminate_after: 1,
+    });
+
+    const hitCount =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+
+    return hitCount > 0;
   };
 
   getPersonalUserInstructionId = async ({
@@ -341,7 +348,7 @@ export class KnowledgeBaseService {
       return null;
     }
     const res = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
-      index: resourceNames.aliases.kb,
+      index: resourceNames.writeIndexAlias.kb,
       query: {
         bool: {
           filter: [
@@ -389,7 +396,7 @@ export class KnowledgeBaseService {
 
     const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
       size: 1,
-      index: resourceNames.aliases.kb,
+      index: resourceNames.writeIndexAlias.kb,
       query,
       _source: false,
     });
@@ -414,7 +421,7 @@ export class KnowledgeBaseService {
       await this.dependencies.esClient.asInternalUser.index<
         Omit<KnowledgeBaseEntry, 'id'> & { namespace: string }
       >({
-        index: resourceNames.aliases.kb,
+        index: resourceNames.writeIndexAlias.kb,
         id,
         document: {
           '@timestamp': new Date().toISOString(),
@@ -425,31 +432,32 @@ export class KnowledgeBaseService {
         },
         refresh: 'wait_for',
       });
+
       this.dependencies.logger.debug(`Entry added to knowledge base`);
     } catch (error) {
-      this.dependencies.logger.debug(`Failed to add entry to knowledge base ${error}`);
+      this.dependencies.logger.error(`Failed to add entry to knowledge base ${error}`);
       if (isInferenceEndpointMissingOrUnavailable(error)) {
-        throwKnowledgeBaseNotReady(error.body);
+        throwKnowledgeBaseNotReady(error);
       }
 
       if (isSemanticTextUnsupportedError(error)) {
-        this.dependencies.core
-          .getStartServices()
-          .then(([_, pluginsStart]) => {
-            return scheduleKbSemanticTextMigrationTask({
-              taskManager: pluginsStart.taskManager,
-              logger: this.dependencies.logger,
-              runSoon: true,
-            });
-          })
-          .catch((e) => {
-            this.dependencies.logger.error(
-              `Failed to schedule knowledge base semantic text migration task: ${e}`
-            );
-          });
+        const inferenceId = await getInferenceIdFromWriteIndex(this.dependencies.esClient);
+
+        reIndexKnowledgeBaseWithLock({
+          core: this.dependencies.core,
+          logger: this.dependencies.logger,
+          esClient: this.dependencies.esClient,
+          inferenceId,
+        }).catch((e) => {
+          if (isLockAcquisitionError(e)) {
+            this.dependencies.logger.info(`Re-indexing operation is already in progress`);
+            return;
+          }
+          this.dependencies.logger.error(`Failed to re-index knowledge base: ${e.message}`);
+        });
 
         throw serverUnavailable(
-          'The knowledge base is currently being re-indexed. Please try again later'
+          `The index "${resourceNames.writeIndexAlias.kb}" does not support semantic text and must be reindexed. This re-index operation has been scheduled and will be started automatically. Please try again later.`
         );
       }
 
@@ -466,7 +474,7 @@ export class KnowledgeBaseService {
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {
     try {
       await this.dependencies.esClient.asInternalUser.delete({
-        index: resourceNames.aliases.kb,
+        index: resourceNames.writeIndexAlias.kb,
         id,
         refresh: 'wait_for',
       });
@@ -474,17 +482,27 @@ export class KnowledgeBaseService {
       return Promise.resolve();
     } catch (error) {
       if (isInferenceEndpointMissingOrUnavailable(error)) {
-        throwKnowledgeBaseNotReady(error.body);
+        throwKnowledgeBaseNotReady(error);
       }
       throw error;
     }
   };
 
-  getStatus = async () => {
-    return getElserModelStatus({
+  getModelStatus = async () => {
+    return getKbModelStatus({
+      core: this.dependencies.core,
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
+  };
+
+  getInferenceEndpointsForEmbedding = async () => {
+    const { inferenceEndpoints } = await getInferenceEndpointsForEmbedding({
+      esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+    });
+
+    return inferenceEndpoints;
   };
 }

@@ -178,8 +178,9 @@ export function deleteTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
     // are updated to remove it, and of those, any that don't exist in any space are deleted.
     const multiNamespaceResponse = await es.search<Record<string, any>>({
       index: ALL_SAVED_OBJECT_INDICES,
+      ignore_unavailable: true,
       size: 100,
-      body: { query: { terms: { type: ['index-pattern'] } } },
+      query: { terms: { type: ['index-pattern'] } },
     });
     const docs = multiNamespaceResponse.hits.hits;
     // Just 21 results, since spaces_2_only, conflict_1a_space_2, conflict_1b_space_2, conflict_1c_space_2, and conflict_2_space_2 got deleted.

@@ -7,11 +7,12 @@
 
 import {
   FilterCondition,
+  isAlwaysCondition,
   Condition,
   isFilterCondition,
   isAndCondition,
   isOrCondition,
-} from '../models';
+} from '../conditions';
 
 function conditionToClause(condition: FilterCondition) {
   switch (condition.operator) {
@@ -61,6 +62,9 @@ export function conditionToQueryDsl(condition: Condition): any {
         should: or,
       },
     };
+  }
+  if (isAlwaysCondition(condition)) {
+    return { match_all: {} };
   }
   return {
     match_none: {},

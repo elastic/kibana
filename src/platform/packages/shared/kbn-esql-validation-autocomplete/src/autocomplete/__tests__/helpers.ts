@@ -8,18 +8,22 @@
  */
 
 import { camelCase } from 'lodash';
-import { parse } from '@kbn/esql-ast';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
-import { builtinFunctions } from '../../definitions/builtin';
+import { operatorsDefinitions } from '../../definitions/all_operators';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
-import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
+import { aggFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
+import {
+  FunctionDefinitionTypes,
+  Location,
+  getLocationFromCommandOrOptionName,
+} from '../../definitions/types';
 import { groupingFunctionDefinitions } from '../../definitions/generated/grouping_functions';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { ESQLRealField } from '../../validation/types';
+import { ESQLFieldWithMetadata } from '../../validation/types';
 import {
   FieldType,
   fieldTypes,
@@ -48,7 +52,7 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
-export type TestField = ESQLRealField & { suggestedAs?: string };
+export type TestField = ESQLFieldWithMetadata & { suggestedAs?: string };
 
 export const fields: TestField[] = [
   ...fieldTypes.map((type) => ({
@@ -131,13 +135,13 @@ export const policies = [
  * @returns
  */
 export function getFunctionSignaturesByReturnType(
-  command: string | string[],
+  location: Location | Location[],
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
     grouping,
     scalar,
-    builtin,
+    operators,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
@@ -145,7 +149,7 @@ export function getFunctionSignaturesByReturnType(
     agg?: boolean;
     grouping?: boolean;
     scalar?: boolean;
-    builtin?: boolean;
+    operators?: boolean;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
@@ -158,7 +162,7 @@ export function getFunctionSignaturesByReturnType(
 
   const list = [];
   if (agg) {
-    list.push(...aggregationFunctionDefinitions);
+    list.push(...aggFunctionDefinitions);
   }
   if (grouping) {
     list.push(...groupingFunctionDefinitions);
@@ -167,21 +171,23 @@ export function getFunctionSignaturesByReturnType(
   if (scalar) {
     list.push(...scalarFunctionDefinitions);
   }
-  if (builtin) {
-    list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
+  if (operators) {
+    list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
   }
 
   const deduped = Array.from(new Set(list));
 
-  const commands = Array.isArray(command) ? command : [command];
+  const locations = Array.isArray(location) ? location : [location];
+
   return deduped
-    .filter(({ signatures, ignoreAsSuggestion, supportedCommands, supportedOptions, name }) => {
+    .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
       if (ignoreAsSuggestion) {
         return false;
       }
       if (
-        !commands.some((c) => supportedCommands.includes(c)) &&
-        !supportedOptions?.includes(option || '')
+        !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
+          (loc) => locationsAvailable.includes(loc)
+        )
       ) {
         return false;
       }
@@ -215,9 +221,9 @@ export function getFunctionSignaturesByReturnType(
     })
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .map<PartialSuggestionWithText>((definition) => {
-      const { type, name, signatures } = definition;
+      const { type, name, signatures, customParametersSnippet } = definition;
 
-      if (type === 'builtin') {
+      if (type === FunctionDefinitionTypes.OPERATOR) {
         return {
           text: signatures.some(({ params }) => params.length > 1)
             ? `${name.toUpperCase()} $0`
@@ -226,7 +232,9 @@ export function getFunctionSignaturesByReturnType(
         };
       }
       return {
-        text: `${name.toUpperCase()}($0)`,
+        text: customParametersSnippet
+          ? `${name.toUpperCase()}(${customParametersSnippet})`
+          : `${name.toUpperCase()}($0)`,
         label: name.toUpperCase(),
       };
     });
@@ -270,7 +278,7 @@ export function createCustomCallbackMocks(
    * `FROM index | EVAL foo = 1 | LIMIT 0` will be used to fetch columns. The response
    * will include "foo" as a column.
    */
-  customColumnsSinceLastCommand?: ESQLRealField[],
+  customColumnsSinceLastCommand?: ESQLFieldWithMetadata[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;
@@ -318,6 +326,17 @@ export interface SuggestOptions {
   callbacks?: ESQLCallbacks;
 }
 
+export type AssertSuggestionsFn = (
+  query: string,
+  expected: Array<string | PartialSuggestionWithText>,
+  opts?: SuggestOptions
+) => Promise<void>;
+
+export type SuggestFn = (
+  query: string,
+  opts?: SuggestOptions
+) => Promise<SuggestionRawDefinition[]>;
+
 export const setup = async (caret = '/') => {
   if (caret.length !== 1) {
     throw new Error('Caret must be a single character');
@@ -325,7 +344,7 @@ export const setup = async (caret = '/') => {
 
   const callbacks = createCustomCallbackMocks();
 
-  const suggest = async (query: string, opts: SuggestOptions = {}) => {
+  const suggest: SuggestFn = async (query, opts = {}) => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
@@ -333,20 +352,10 @@ export const setup = async (caret = '/') => {
       ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
       : { triggerKind: 0 };
 
-    return await autocomplete.suggest(
-      querySansCaret,
-      pos,
-      ctx,
-      (_query: string | undefined) => parse(_query, { withFormatting: true }),
-      opts.callbacks ?? callbacks
-    );
+    return await autocomplete.suggest(querySansCaret, pos, ctx, opts.callbacks ?? callbacks);
   };
 
-  const assertSuggestions = async (
-    query: string,
-    expected: Array<string | PartialSuggestionWithText>,
-    opts?: SuggestOptions
-  ) => {
+  const assertSuggestions: AssertSuggestionsFn = async (query, expected, opts) => {
     try {
       const result = await suggest(query, opts);
       const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();

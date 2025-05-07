@@ -130,6 +130,7 @@ export const SETTINGS_OUTPUTS = {
   ADD_HOST_ROW_BTN: 'fleetServerHosts.multiRowInput.addRowButton',
   WARNING_ELASTICSEARCH_CALLOUT: 'settingsOutputsFlyout.elasticsearchOutputTypeCallout',
   PRESET_INPUT: 'settingsOutputsFlyout.presetInput',
+  SSL_BUTTON: 'advancedSSLOptionsButton',
 };
 
 export const getSpecificSelectorId = (selector: string, id: number) => {

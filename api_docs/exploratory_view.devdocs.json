@@ -855,46 +855,18 @@
           {
             "parentPluginId": "exploratoryView",
             "id": "def-public.ExploratoryViewPublicPluginsSetup.share",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "share",
             "description": [],
             "signature": [
-              "{ register: (shareMenuProvider: ",
               {
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.ShareMenuProvider",
-                "text": "ShareMenuProvider"
-              },
-              ") => void; } & { url: ",
-              {
-                "pluginId": "share",
-                "scope": "public",
-                "docId": "kibSharePluginApi",
-                "section": "def-public.BrowserUrlService",
-                "text": "BrowserUrlService"
-              },
-              "; navigate(options: ",
-              "RedirectOptions",
-              "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "common",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-common.SerializableRecord",
-                "text": "SerializableRecord"
-              },
-              ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
-              {
-                "pluginId": "share",
-                "scope": "common",
-                "docId": "kibSharePluginApi",
-                "section": "def-common.AnonymousAccessServiceContract",
-                "text": "AnonymousAccessServiceContract"
-              },
-              ") => void; }"
+                "section": "def-public.SharePublicSetup",
+                "text": "SharePublicSetup"
+              }
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
             "deprecated": false,
@@ -1452,7 +1424,7 @@
             "label": "defaultSeriesType",
             "description": [],
             "signature": [
-              "\"area\" | \"line\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
+              "\"line\" | \"area\" | \"bar\" | \"bar_stacked\" | \"area_stacked\" | \"bar_horizontal\" | \"bar_percentage_stacked\" | \"bar_horizontal_stacked\" | \"area_percentage_stacked\" | \"bar_horizontal_percentage_stacked\""
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,

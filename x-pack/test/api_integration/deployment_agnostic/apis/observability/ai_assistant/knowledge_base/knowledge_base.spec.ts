@@ -7,33 +7,52 @@
 
 import expect from '@kbn/expect';
 import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
+import { orderBy, size, toPairs } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { clearKnowledgeBase, getKnowledgeBaseEntriesFromEs } from '../utils/knowledge_base';
 import {
-  clearKnowledgeBase,
-  importTinyElserModel,
-  deleteInferenceEndpoint,
-  deleteKnowledgeBaseModel,
-  setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
-} from './helpers';
+  teardownTinyElserModelAndInferenceEndpoint,
+  deployTinyElserAndSetupKb,
+} from '../utils/model_and_inference';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const ml = getService('ml');
   const es = getService('es');
-  const log = getService('log');
-  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
+  async function getEntries({
+    query = '',
+    sortBy = 'title',
+    sortDirection = 'asc',
+    spaceId,
+    user = 'editor',
+  }: {
+    query?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
+    spaceId?: string;
+    user?: 'admin' | 'editor' | 'viewer';
+  } = {}): Promise<KnowledgeBaseEntry[]> {
+    const res = await observabilityAIAssistantAPIClient[user]({
+      endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+      params: {
+        query: { query, sortBy, sortDirection },
+      },
+      spaceId,
+    });
+    expect(res.status).to.be(200);
+
+    return res.body.entries;
+  }
+
   describe('Knowledge base', function () {
+    // see details: https://github.com/elastic/kibana/issues/220248
+    this.tags(['failsOnMKI']);
     before(async () => {
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await deployTinyElserAndSetupKb(getService);
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
     });
 
@@ -43,48 +62,42 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         title: 'My title',
         text: 'My content',
       };
-      it('returns 200 on create', async () => {
+
+      before(async () => {
         const { status } = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
           params: { body: knowledgeBaseEntry },
         });
         expect(status).to.be(200);
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-          params: {
-            query: {
-              query: '',
-              sortBy: 'title',
-              sortDirection: 'asc',
-            },
-          },
-        });
-        const entry = res.body.entries[0];
+      });
+
+      it('can retrieve the entry', async () => {
+        const entries = await getEntries();
+        const entry = entries[0];
         expect(entry.id).to.equal(knowledgeBaseEntry.id);
         expect(entry.title).to.equal(knowledgeBaseEntry.title);
         expect(entry.text).to.equal(knowledgeBaseEntry.text);
       });
 
-      it('returns 200 on get entries and entry exists', async () => {
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-          params: {
-            query: {
-              query: '',
-              sortBy: 'title',
-              sortDirection: 'asc',
-            },
-          },
-        });
+      it('generates sparse embeddings', async () => {
+        const hits = await getKnowledgeBaseEntriesFromEs(es);
+        const embeddings =
+          hits[0]._source?._inference_fields?.semantic_text?.inference.chunks.semantic_text[0]
+            .embeddings;
 
-        expect(res.status).to.be(200);
-        const entry = res.body.entries[0];
-        expect(entry.id).to.equal(knowledgeBaseEntry.id);
-        expect(entry.title).to.equal(knowledgeBaseEntry.title);
-        expect(entry.text).to.equal(knowledgeBaseEntry.text);
+        const sorted = orderBy(toPairs(embeddings), [1], ['desc']).slice(0, 5);
+
+        expect(size(embeddings)).to.be.greaterThan(10);
+        expect(sorted).to.eql([
+          ['temperature', 0.07421875],
+          ['used', 0.068359375],
+          ['definition', 0.03955078],
+          ['only', 0.038208008],
+          ['what', 0.028930664],
+        ]);
       });
 
-      it('returns 200 on delete', async () => {
+      it('can delete the entry', async () => {
         const entryId = 'my-doc-id-1';
         const { status } = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'DELETE /internal/observability_ai_assistant/kb/entries/{entryId}',
@@ -94,21 +107,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
         expect(status).to.be(200);
 
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-          params: {
-            query: {
-              query: '',
-              sortBy: 'title',
-              sortDirection: 'asc',
-            },
-          },
-        });
-
-        expect(res.status).to.be(200);
-        expect(res.body.entries.filter((entry) => entry.id.startsWith('my-doc-id')).length).to.eql(
-          0
-        );
+        const entries = await getEntries();
+        expect(entries.length).to.eql(0);
       });
 
       it('returns 500 on delete not found', async () => {
@@ -124,22 +124,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when managing multiple entries', () => {
-      async function getEntries({
-        query = '',
-        sortBy = 'title',
-        sortDirection = 'asc',
-      }: { query?: string; sortBy?: string; sortDirection?: 'asc' | 'desc' } = {}) {
-        const res = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-          params: {
-            query: { query, sortBy, sortDirection },
-          },
-        });
-        expect(res.status).to.be(200);
-
-        return omitCategories(res.body.entries);
-      }
-
       beforeEach(async () => {
         await clearKnowledgeBase(es);
 
@@ -174,22 +158,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await clearKnowledgeBase(es);
       });
 
-      it('returns 200 on create', async () => {
+      it('creates multiple entries', async () => {
         const entries = await getEntries();
-        expect(omitCategories(entries).length).to.eql(3);
+        expect(entries.length).to.eql(3);
       });
 
       describe('when sorting ', () => {
-        const ascendingOrder = ['my_doc_a', 'my_doc_b', 'my_doc_c'];
-
         it('allows sorting ascending', async () => {
           const entries = await getEntries({ sortBy: 'title', sortDirection: 'asc' });
-          expect(entries.map(({ id }) => id)).to.eql(ascendingOrder);
+          expect(entries.map(({ id }) => id)).to.eql(['my_doc_a', 'my_doc_b', 'my_doc_c']);
         });
 
         it('allows sorting descending', async () => {
           const entries = await getEntries({ sortBy: 'title', sortDirection: 'desc' });
-          expect(entries.map(({ id }) => id)).to.eql([...ascendingOrder].reverse());
+          expect(entries.map(({ id }) => id)).to.eql(['my_doc_c', 'my_doc_b', 'my_doc_a']);
         });
       });
 
@@ -197,6 +179,119 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const entries = await getEntries({ query: 'b' });
         expect(entries.length).to.eql(1);
         expect(entries[0].title).to.eql('My title b');
+      });
+    });
+
+    describe('when managing multiple entries across spaces', () => {
+      const SPACE_A_ID = 'space_a';
+      const SPACE_B_ID = 'space_b';
+
+      before(async () => {
+        await clearKnowledgeBase(es);
+
+        const { status: importStatusForSpaceA } = await observabilityAIAssistantAPIClient.admin({
+          endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+          params: {
+            body: {
+              entries: [
+                {
+                  id: 'my-doc-1',
+                  title: `Entry in Space A by Admin 1`,
+                  text: `This is a public entry in Space A created by Admin`,
+                  public: true,
+                },
+                {
+                  id: 'my-doc-2',
+                  title: `Entry in Space A by Admin 2`,
+                  text: `This is a private entry in Space A created by Admin`,
+                  public: false,
+                },
+              ],
+            },
+          },
+          spaceId: SPACE_A_ID,
+        });
+        expect(importStatusForSpaceA).to.be(200);
+
+        const { status: importStatusForSpaceB } = await observabilityAIAssistantAPIClient.admin({
+          endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
+          params: {
+            body: {
+              entries: [
+                {
+                  id: 'my-doc-3',
+                  title: `Entry in Space B by Admin 3`,
+                  text: `This is a public entry in Space B created by Admin`,
+                  public: true,
+                },
+                {
+                  id: 'my-doc-4',
+                  title: `Entry in Space B by Admin 4`,
+                  text: `This is a private entry in Space B created by Admin`,
+                  public: false,
+                },
+              ],
+            },
+          },
+          spaceId: SPACE_B_ID,
+        });
+        expect(importStatusForSpaceB).to.be(200);
+      });
+
+      after(async () => {
+        await clearKnowledgeBase(es);
+      });
+
+      it('ensures users can only access entries relevant to their namespace', async () => {
+        // User (admin) in space A should only see entries in space A
+        const spaceAEntries = await getEntries({
+          user: 'admin',
+          spaceId: SPACE_A_ID,
+        });
+
+        expect(spaceAEntries.length).to.be(2);
+
+        expect(spaceAEntries[0].id).to.equal('my-doc-1');
+        expect(spaceAEntries[0].public).to.be(true);
+        expect(spaceAEntries[0].title).to.equal('Entry in Space A by Admin 1');
+
+        expect(spaceAEntries[1].id).to.equal('my-doc-2');
+        expect(spaceAEntries[1].public).to.be(false);
+        expect(spaceAEntries[1].title).to.equal('Entry in Space A by Admin 2');
+
+        // User (admin) in space B should only see entries in space B
+        const spaceBEntries = await getEntries({
+          user: 'admin',
+          spaceId: SPACE_B_ID,
+        });
+
+        expect(spaceBEntries.length).to.be(2);
+
+        expect(spaceBEntries[0].id).to.equal('my-doc-3');
+        expect(spaceBEntries[0].public).to.be(true);
+        expect(spaceBEntries[0].title).to.equal('Entry in Space B by Admin 3');
+
+        expect(spaceBEntries[1].id).to.equal('my-doc-4');
+        expect(spaceBEntries[1].public).to.be(false);
+        expect(spaceBEntries[1].title).to.equal('Entry in Space B by Admin 4');
+      });
+
+      it('should allow a user who is not the owner of the entries to access entries relevant to their namespace', async () => {
+        // User (editor) in space B should only see entries in space B
+        const spaceBEntries = await getEntries({
+          user: 'editor',
+          spaceId: SPACE_B_ID,
+        });
+
+        expect(spaceBEntries.length).to.be(2);
+
+        expect(spaceBEntries[0].id).to.equal('my-doc-3');
+        expect(spaceBEntries[0].public).to.be(true);
+        expect(spaceBEntries[0].title).to.equal('Entry in Space B by Admin 3');
+
+        expect(spaceBEntries[1].id).to.equal('my-doc-4');
+        expect(spaceBEntries[1].public).to.be(false);
+        expect(spaceBEntries[1].title).to.equal('Entry in Space B by Admin 4');
       });
     });
 
@@ -238,8 +333,4 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
   });
-}
-
-function omitCategories(entries: KnowledgeBaseEntry[]) {
-  return entries.filter((entry) => entry.labels?.category === undefined);
 }

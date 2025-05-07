@@ -9,6 +9,7 @@ exports[`SessionUserHostWorkingDir rendering it renders the default SessionUserH
     eventId="eventid-123"
     hostName="hostname-123"
     primary="primary-123"
+    scopeId="some_scope"
     secondary="secondary-123"
     session="session-123"
     userName="username-123"

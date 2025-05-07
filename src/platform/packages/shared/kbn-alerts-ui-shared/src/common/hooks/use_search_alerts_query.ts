@@ -9,7 +9,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import { SetOptional } from 'type-fest';
+import type { SetOptional } from 'type-fest';
 import { searchAlerts, type SearchAlertsParams } from '../apis/search_alerts/search_alerts';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '../constants';
 import { AlertsQueryContext } from '../contexts/alerts_query_context';
@@ -43,6 +43,8 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
     runtimeMappings,
     pageIndex = 0,
     pageSize = DEFAULT_ALERTS_PAGE_SIZE,
+    minScore,
+    trackScores,
   } = params;
   return useQuery({
     queryKey: queryKeyPrefix.concat(JSON.stringify(params)),
@@ -58,6 +60,8 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
         runtimeMappings,
         pageIndex,
         pageSize,
+        minScore,
+        trackScores,
       }),
     refetchOnWindowFocus: false,
     context: AlertsQueryContext,

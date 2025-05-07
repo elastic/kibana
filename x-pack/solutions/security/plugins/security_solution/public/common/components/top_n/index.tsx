@@ -82,7 +82,6 @@ export interface OwnProps {
   toggleTopN: () => void;
   onFilterAdded?: () => void;
   paddingSize?: 's' | 'm' | 'l' | 'none';
-  showLegend?: boolean;
   globalFilters?: Filter[];
 }
 type PropsFromRedux = ConnectedProps<typeof connector>;
@@ -97,18 +96,17 @@ const StatefulTopNComponent: React.FC<Props> = ({
   browserFields,
   dataProviders,
   field,
-  dataViewSpec: indexPattern,
+  dataViewSpec,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,
   onFilterAdded,
   paddingSize,
-  showLegend,
   scopeId,
   toggleTopN,
 }) => {
   const { uiSettings } = useKibana().services;
-  const { from, deleteQuery, setQuery, to } = useGlobalTime();
+  const { from, deleteQuery, to } = useGlobalTime();
 
   const options = getOptions(isActiveTimeline(scopeId ?? '') ? activeTimelineEventType : undefined);
   const applyGlobalQueriesAndFilters = !isActiveTimeline(scopeId ?? '');
@@ -121,7 +119,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
             config: getEsQueryConfig(uiSettings),
             dataProviders,
             filters: activeTimelineFilters,
-            indexPattern,
+            dataViewSpec,
             kqlMode,
             kqlQuery: {
               language: 'kuery',
@@ -135,7 +133,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       uiSettings,
       dataProviders,
       activeTimelineFilters,
-      indexPattern,
+      dataViewSpec,
       kqlMode,
       activeTimelineKqlQueryExpression,
     ]
@@ -149,20 +147,18 @@ const StatefulTopNComponent: React.FC<Props> = ({
   return (
     <TopN
       filterQuery={combinedQueries?.filterQuery}
-      data-test-subj="top-n"
       defaultView={defaultView}
       deleteQuery={isActiveTimeline(scopeId ?? '') ? undefined : deleteQuery}
       field={field as AlertsStackByField}
       filters={isActiveTimeline(scopeId ?? '') ? EMPTY_FILTERS : globalFilters}
       from={isActiveTimeline(scopeId ?? '') ? activeTimelineFrom : from}
-      indexPattern={indexPattern}
+      dataViewSpec={dataViewSpec}
       options={options}
       paddingSize={paddingSize}
       query={isActiveTimeline(scopeId ?? '') ? EMPTY_QUERY : globalQuery}
       setAbsoluteRangeDatePickerTarget={
         isActiveTimeline(scopeId ?? '') ? InputsModelId.timeline : InputsModelId.global
       }
-      setQuery={setQuery}
       scopeId={scopeId}
       to={isActiveTimeline(scopeId ?? '') ? activeTimelineTo : to}
       toggleTopN={toggleTopN}

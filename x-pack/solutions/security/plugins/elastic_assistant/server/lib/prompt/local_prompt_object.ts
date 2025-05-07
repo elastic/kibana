@@ -20,18 +20,26 @@ import {
   DEFAULT_SYSTEM_PROMPT,
   GEMINI_SYSTEM_PROMPT,
   GEMINI_USER_PROMPT,
-  STRUCTURED_SYSTEM_PROMPT,
   BEDROCK_CHAT_TITLE,
   GEMINI_CHAT_TITLE,
   DEFAULT_CHAT_TITLE,
+  DEFEND_INSIGHTS,
+  ALERT_SUMMARY_500,
+  ALERT_SUMMARY_SYSTEM_PROMPT,
 } from './prompts';
 
 export const promptGroupId = {
   attackDiscovery: 'attackDiscovery',
   aiAssistant: 'aiAssistant',
+  defendInsights: {
+    incompatibleAntivirus: 'defendInsights-incompatibleAntivirus',
+  },
+  aiForSoc: 'aiForSoc',
 };
 
 export const promptDictionary = {
+  alertSummary: `alertSummary`,
+  alertSummarySystemPrompt: `alertSummarySystemPrompt`,
   systemPrompt: `systemPrompt`,
   userPrompt: `userPrompt`,
   chatTitle: `chatTitle`,
@@ -44,6 +52,15 @@ export const promptDictionary = {
   attackDiscoverySummaryMarkdown: `summaryMarkdown`,
   attackDiscoveryGenerationTitle: `generationTitle`,
   attackDiscoveryGenerationInsights: `generationInsights`,
+  defendInsightsIncompatibleAntivirusDefault: `defendInsights-incompatibleAntivirusDefault`,
+  defendInsightsIncompatibleAntivirusRefine: `defendInsights-incompatibleAntivirusRefine`,
+  defendInsightsIncompatibleAntivirusContinue: `defendInsights-incompatibleAntivirusContinue`,
+  defendInsightsIncompatibleAntivirusGroup: 'defendInsights-incompatibleAntivirusGroup',
+  defendInsightsIncompatibleAntivirusEvents: 'defendInsights-incompatibleAntivirusEvents',
+  defendInsightsIncompatibleAntivirusEventsId: 'defendInsights-incompatibleAntivirusEventsId',
+  defendInsightsIncompatibleAntivirusEventsEndpointId:
+    'defendInsights-incompatibleAntivirusEventsEndpointId',
+  defendInsightsIncompatibleAntivirusEventsValue: 'defendInsights-incompatibleAntivirusEventsValue',
 };
 
 export const localPrompts: Prompt[] = [
@@ -76,15 +93,6 @@ export const localPrompts: Prompt[] = [
     provider: 'gemini',
     prompt: {
       default: GEMINI_SYSTEM_PROMPT,
-    },
-  },
-  {
-    promptId: promptDictionary.systemPrompt,
-    promptGroupId: promptGroupId.aiAssistant,
-    provider: 'openai',
-    model: 'oss',
-    prompt: {
-      default: STRUCTURED_SYSTEM_PROMPT,
     },
   },
   {
@@ -179,6 +187,76 @@ export const localPrompts: Prompt[] = [
     provider: 'gemini',
     prompt: {
       default: GEMINI_CHAT_TITLE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusDefault,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.DEFAULT,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusRefine,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.REFINE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusContinue,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusGroup,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.GROUP,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusEvents,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusEventsId,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_ID,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusEventsEndpointId,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_ENDPOINT_ID,
+    },
+  },
+  {
+    promptId: promptDictionary.defendInsightsIncompatibleAntivirusEventsValue,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    prompt: {
+      default: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_VALUE,
+    },
+  },
+  {
+    promptId: promptDictionary.alertSummary,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: ALERT_SUMMARY_500,
+    },
+  },
+  {
+    promptId: promptDictionary.alertSummarySystemPrompt,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: ALERT_SUMMARY_SYSTEM_PROMPT,
     },
   },
 ];

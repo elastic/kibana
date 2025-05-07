@@ -8,14 +8,14 @@
 import Boom from '@hapi/boom';
 
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
-import { RulesClientContext } from '../../../../rules_client';
+import type { RulesClientContext } from '../../../../rules_client';
 
 import { findGapsById } from '../../../../lib/rule_gaps/find_gaps_by_id';
-import { FillGapByIdParams } from './types';
+import type { FillGapByIdParams } from './types';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRule } from '../get/get_rule';
-import { SanitizedRuleWithLegacyId } from '../../../../types';
+import type { SanitizedRuleWithLegacyId } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 export async function fillGapById(context: RulesClientContext, params: FillGapByIdParams) {
@@ -63,14 +63,15 @@ export async function fillGapById(context: RulesClientContext, params: FillGapBy
 
     const gapState = gap.getState();
 
-    const allGapsToSchedule =
-      gapState.unfilledIntervals.map((interval) => ({
-        ruleId: params.ruleId,
+    const allGapsToSchedule = {
+      ruleId: params.ruleId,
+      ranges: gapState.unfilledIntervals.map((interval) => ({
         start: interval.gte,
         end: interval.lte,
-      })) ?? [];
+      })),
+    };
 
-    if (allGapsToSchedule.length === 0) {
+    if (allGapsToSchedule.ranges.length === 0) {
       throw Boom.badRequest(`No unfilled intervals found for ruleId ${params.ruleId}`);
     }
 
@@ -81,7 +82,7 @@ export async function fillGapById(context: RulesClientContext, params: FillGapBy
       })
     );
 
-    const scheduleBackfillResponse = await scheduleBackfill(context, allGapsToSchedule);
+    const scheduleBackfillResponse = await scheduleBackfill(context, [allGapsToSchedule]);
 
     await eventLogClient.refreshIndex();
 

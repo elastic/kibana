@@ -27,11 +27,10 @@ exports[`ManageData render 1`] = `
       size="m"
     />
     <EuiFlexGroup
-      className="kbnOverviewDataManage__content"
       wrap={true}
     >
       <EuiFlexItem
-        className="kbnOverviewDataManage__item"
+        css="unknown styles"
         key="security"
       >
         <RedirectAppLinks
@@ -45,7 +44,6 @@ exports[`ManageData render 1`] = `
             description="Control who has access and what tasks they can perform."
             iconType="securityApp"
             id="security"
-            isBeta={false}
             onClick={[Function]}
             title="Protect your data"
             url="path-to-security-roles"
@@ -54,7 +52,7 @@ exports[`ManageData render 1`] = `
         </RedirectAppLinks>
       </EuiFlexItem>
       <EuiFlexItem
-        className="kbnOverviewDataManage__item"
+        css="unknown styles"
         key="monitoring"
       >
         <RedirectAppLinks
@@ -68,7 +66,6 @@ exports[`ManageData render 1`] = `
             description="Track the real-time health and performance of your deployment."
             iconType="monitoringApp"
             id="monitoring"
-            isBeta={false}
             onClick={[Function]}
             title="Monitor the stack"
             url="path-to-monitoring"
@@ -77,7 +74,7 @@ exports[`ManageData render 1`] = `
         </RedirectAppLinks>
       </EuiFlexItem>
       <EuiFlexItem
-        className="kbnOverviewDataManage__item"
+        css="unknown styles"
         key="snapshot_restore"
       >
         <RedirectAppLinks
@@ -91,7 +88,6 @@ exports[`ManageData render 1`] = `
             description="Save snapshots to a backup repository, and restore to recover index and cluster state."
             iconType="storage"
             id="snapshot_restore"
-            isBeta={false}
             onClick={[Function]}
             title="Store & recover backups"
             url="path-to-snapshot-restore"
@@ -100,7 +96,7 @@ exports[`ManageData render 1`] = `
         </RedirectAppLinks>
       </EuiFlexItem>
       <EuiFlexItem
-        className="kbnOverviewDataManage__item"
+        css="unknown styles"
         key="index_lifecycle_management"
       >
         <RedirectAppLinks
@@ -114,7 +110,6 @@ exports[`ManageData render 1`] = `
             description="Define lifecycle policies to automatically perform operations as an index ages."
             iconType="indexSettings"
             id="index_lifecycle_management"
-            isBeta={false}
             onClick={[Function]}
             title="Manage index lifecycles"
             url="path-to-index-lifecycle-management"

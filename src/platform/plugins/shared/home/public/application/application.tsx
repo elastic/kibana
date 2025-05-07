@@ -12,16 +12,10 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { ScopedHistory, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-
 import { SampleDataTabKibanaProvider } from '@kbn/home-sample-data-tab';
-
-// @ts-ignore
 import { HomeApp } from './components/home_app';
 import { getServices } from './kibana_services';
-
-import './index.scss';
 
 export const renderApp = async (
   element: HTMLElement,

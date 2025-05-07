@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { RootCauseAnalysisStepItem } from '.';
@@ -17,7 +17,7 @@ const stories: Meta<{}> = {
 
 export default stories;
 
-export const Default: Story<{}> = () => {
+export const Default: StoryFn<{}> = () => {
   return (
     <RootCauseAnalysisStepItem
       label={
@@ -30,7 +30,7 @@ export const Default: Story<{}> = () => {
   );
 };
 
-export const Loading: Story<{}> = () => {
+export const Loading: StoryFn<{}> = () => {
   return (
     <RootCauseAnalysisStepItem
       loading
@@ -44,7 +44,7 @@ export const Loading: Story<{}> = () => {
   );
 };
 
-export const WithColor: Story<{}> = () => {
+export const WithColor: StoryFn<{}> = () => {
   return (
     <RootCauseAnalysisStepItem
       loading

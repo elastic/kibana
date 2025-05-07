@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLVariableType } from '../shared/types';
+import type { ESQLVariableType } from '@kbn/esql-types';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
@@ -63,6 +63,11 @@ export interface SuggestionRawDefinition {
   };
   /**
    * The range that should be replaced when the suggestion is applied
+   *
+   * IMPORTANT NOTE!!!
+   *
+   * This range is ZERO-based and NOT end-inclusive — [start, end)
+   * Also, do NOT try to account for newline characters. This is taken care of later.
    */
   rangeToReplace?: {
     start: number;

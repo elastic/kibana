@@ -76,133 +76,131 @@ const getRecentMonitoringDocuments = async (
     size: 0,
     ignore_unavailable: true,
     filter_path: ['aggregations.indices.buckets'],
-    body: {
-      query: {
-        bool: {
-          filter: filters,
-          ...nodesClause,
-        },
+    query: {
+      bool: {
+        filter: filters,
+        ...nodesClause,
       },
-      aggs: {
-        indices: {
-          terms: {
-            field: '_index',
-            size: 50,
+    },
+    aggs: {
+      indices: {
+        terms: {
+          field: '_index',
+          size: 50,
+        },
+        aggs: {
+          es_uuids: {
+            terms: {
+              field: 'node_stats.node_id',
+              size,
+            },
+            aggs: {
+              single_type: {
+                filter: {
+                  bool: {
+                    should: [
+                      { term: { type: 'node_stats' } },
+                      { term: { 'metricset.name': 'node_stats' } },
+                    ],
+                  },
+                },
+                aggs: {
+                  by_timestamp: {
+                    max: {
+                      field: 'timestamp',
+                    },
+                  },
+                },
+              },
+            },
           },
-          aggs: {
-            es_uuids: {
-              terms: {
-                field: 'node_stats.node_id',
-                size,
-              },
-              aggs: {
-                single_type: {
-                  filter: {
-                    bool: {
-                      should: [
-                        { term: { type: 'node_stats' } },
-                        { term: { 'metricset.name': 'node_stats' } },
-                      ],
-                    },
+          kibana_uuids: {
+            terms: {
+              field: 'kibana_stats.kibana.uuid',
+              size,
+            },
+            aggs: {
+              single_type: {
+                filter: {
+                  bool: {
+                    should: [
+                      { term: { type: 'kibana_stats' } },
+                      { term: { 'metricset.name': 'stats' } },
+                    ],
                   },
-                  aggs: {
-                    by_timestamp: {
-                      max: {
-                        field: 'timestamp',
-                      },
+                },
+                aggs: {
+                  by_timestamp: {
+                    max: {
+                      field: 'timestamp',
                     },
                   },
                 },
               },
             },
-            kibana_uuids: {
-              terms: {
-                field: 'kibana_stats.kibana.uuid',
-                size,
-              },
-              aggs: {
-                single_type: {
-                  filter: {
-                    bool: {
-                      should: [
-                        { term: { type: 'kibana_stats' } },
-                        { term: { 'metricset.name': 'stats' } },
-                      ],
+          },
+          beats_uuids: {
+            terms: {
+              field: 'beats_stats.beat.uuid',
+              size,
+            },
+            aggs: {
+              single_type: {
+                filter: {
+                  bool: {
+                    should: [
+                      { term: { type: 'beats_stats' } },
+                      { term: { 'metricset.name': 'beats_stats' } },
+                    ],
+                  },
+                },
+                aggs: {
+                  by_timestamp: {
+                    max: {
+                      field: 'timestamp',
                     },
                   },
-                  aggs: {
-                    by_timestamp: {
-                      max: {
-                        field: 'timestamp',
-                      },
+                  beat_type: {
+                    terms: {
+                      field: 'beats_stats.beat.type',
+                      size,
+                    },
+                  },
+                  cluster_uuid: {
+                    terms: {
+                      field: 'cluster_uuid',
+                      size,
                     },
                   },
                 },
               },
             },
-            beats_uuids: {
-              terms: {
-                field: 'beats_stats.beat.uuid',
-                size,
-              },
-              aggs: {
-                single_type: {
-                  filter: {
-                    bool: {
-                      should: [
-                        { term: { type: 'beats_stats' } },
-                        { term: { 'metricset.name': 'beats_stats' } },
-                      ],
-                    },
-                  },
-                  aggs: {
-                    by_timestamp: {
-                      max: {
-                        field: 'timestamp',
-                      },
-                    },
-                    beat_type: {
-                      terms: {
-                        field: 'beats_stats.beat.type',
-                        size,
-                      },
-                    },
-                    cluster_uuid: {
-                      terms: {
-                        field: 'cluster_uuid',
-                        size,
-                      },
-                    },
+          },
+          logstash_uuids: {
+            terms: {
+              field: 'logstash_stats.logstash.uuid',
+              size,
+            },
+            aggs: {
+              single_type: {
+                filter: {
+                  bool: {
+                    should: [
+                      { term: { type: 'logstash_stats' } },
+                      { term: { 'metricset.name': 'stats' } },
+                    ],
                   },
                 },
-              },
-            },
-            logstash_uuids: {
-              terms: {
-                field: 'logstash_stats.logstash.uuid',
-                size,
-              },
-              aggs: {
-                single_type: {
-                  filter: {
-                    bool: {
-                      should: [
-                        { term: { type: 'logstash_stats' } },
-                        { term: { 'metricset.name': 'stats' } },
-                      ],
+                aggs: {
+                  by_timestamp: {
+                    max: {
+                      field: 'timestamp',
                     },
                   },
-                  aggs: {
-                    by_timestamp: {
-                      max: {
-                        field: 'timestamp',
-                      },
-                    },
-                    cluster_uuid: {
-                      terms: {
-                        field: 'cluster_uuid',
-                        size,
-                      },
+                  cluster_uuid: {
+                    terms: {
+                      field: 'cluster_uuid',
+                      size,
                     },
                   },
                 },

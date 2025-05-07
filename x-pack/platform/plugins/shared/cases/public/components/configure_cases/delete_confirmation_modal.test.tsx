@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import { DeleteConfirmationModal } from './delete_confirmation_modal';
 
 describe('DeleteConfirmationModal', () => {
-  let appMock: AppMockRenderer;
   const props = {
     title: 'My custom field',
     message: 'This is a sample message',
@@ -21,32 +21,31 @@ describe('DeleteConfirmationModal', () => {
   };
 
   beforeEach(() => {
-    appMock = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
-    const result = appMock.render(<DeleteConfirmationModal {...props} />);
+    renderWithTestingProviders(<DeleteConfirmationModal {...props} />);
 
-    expect(result.getByTestId('confirm-delete-modal')).toBeInTheDocument();
-    expect(result.getByText('Delete')).toBeInTheDocument();
-    expect(result.getByText('Cancel')).toBeInTheDocument();
+    expect(screen.getByTestId('confirm-delete-modal')).toBeInTheDocument();
+    expect(screen.getByText('Delete')).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
   });
 
   it('calls onConfirm', async () => {
-    const result = appMock.render(<DeleteConfirmationModal {...props} />);
+    renderWithTestingProviders(<DeleteConfirmationModal {...props} />);
 
-    expect(result.getByText('Delete')).toBeInTheDocument();
-    await userEvent.click(result.getByText('Delete'));
+    expect(screen.getByText('Delete')).toBeInTheDocument();
+    await userEvent.click(screen.getByText('Delete'));
 
     expect(props.onConfirm).toHaveBeenCalled();
   });
 
   it('calls onCancel', async () => {
-    const result = appMock.render(<DeleteConfirmationModal {...props} />);
+    renderWithTestingProviders(<DeleteConfirmationModal {...props} />);
 
-    expect(result.getByText('Cancel')).toBeInTheDocument();
-    await userEvent.click(result.getByText('Cancel'));
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+    await userEvent.click(screen.getByText('Cancel'));
 
     expect(props.onCancel).toHaveBeenCalled();
   });

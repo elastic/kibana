@@ -8,12 +8,15 @@
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { PassThrough } from 'stream';
+import { times } from 'lodash';
 import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+
+const SYSTEM_MESSAGE = `this is a system message`;
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -31,7 +34,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('/internal/observability_ai_assistant/chat', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let proxy: LlmProxy;
 
     let connectorId: string;
@@ -56,7 +59,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         params: {
           body: {
             name: 'my_api_call',
-            systemMessage: 'You are a helpful assistant',
+            systemMessage: SYSTEM_MESSAGE,
             messages,
             connectorId: 'does not exist',
             functions: [],
@@ -66,6 +69,49 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
       expect(status).to.be(404);
     });
+
+    // Fails on ECH: https://github.com/elastic/kibana/issues/219203
+    it('returns a 200 if the connector exists', async () => {
+      void proxy.interceptWithResponse('Hello from LLM Proxy');
+      const { status } = await observabilityAIAssistantAPIClient.editor({
+        endpoint: 'POST /internal/observability_ai_assistant/chat',
+        params: {
+          body: {
+            name: 'my_api_call',
+            systemMessage: '',
+            messages,
+            connectorId,
+            functions: [],
+            scopes: ['all'],
+          },
+        },
+      });
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
+      expect(status).to.be(200);
+    });
+
+    // Fails on ECH: https://github.com/elastic/kibana/issues/219203
+    it('should forward the system message to the LLM', async () => {
+      const simulatorPromise = proxy.interceptWithResponse('Hello from LLM Proxy');
+      await observabilityAIAssistantAPIClient.editor({
+        endpoint: 'POST /internal/observability_ai_assistant/chat',
+        params: {
+          body: {
+            name: 'my_api_call',
+            systemMessage: SYSTEM_MESSAGE,
+            messages,
+            connectorId,
+            functions: [],
+            scopes: ['all'],
+          },
+        },
+      });
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
+      const simulator = await simulatorPromise;
+      const requestData = simulator.requestBody; // This is the request sent to the LLM
+      expect(requestData.messages[0].content).to.eql(SYSTEM_MESSAGE);
+    });
+
     it('returns a streaming response from the server', async () => {
       const NUM_RESPONSES = 5;
       const roleScopedSupertest = getService('roleScopedSupertest');
@@ -83,7 +129,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         }),
         new Promise<void>((resolve, reject) => {
           async function runTest() {
-            const interceptor = proxy.intercept('conversation', () => true);
+            const chunks = times(NUM_RESPONSES).map((i) => `Part: ${i}\n`);
+            void proxy.interceptWithResponse(chunks);
+
             const receivedChunks: Array<Record<string, any>> = [];
 
             const passThrough = new PassThrough();
@@ -92,7 +140,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               .on('error', reject)
               .send({
                 name: 'my_api_call',
-                systemMessage: 'You are a helpful assistant',
+                systemMessage: SYSTEM_MESSAGE,
                 messages,
                 connectorId,
                 functions: [],
@@ -100,19 +148,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               })
               .pipe(passThrough);
 
-            const simulator = await interceptor.waitForIntercept();
-
             passThrough.on('data', (chunk) => {
               receivedChunks.push(JSON.parse(chunk.toString()));
             });
-
-            for (let i = 0; i < NUM_RESPONSES; i++) {
-              await simulator.next(`Part: ${i}\n`);
-            }
-
-            await simulator.tokenCount({ completion: 20, prompt: 33, total: 53 });
-
-            await simulator.complete();
 
             await new Promise<void>((innerResolve) => passThrough.on('end', () => innerResolve()));
 
@@ -127,15 +165,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                 2
               )}`
             );
-
-            const tokenCountChunk = receivedChunks.find((chunk) => chunk.type === 'tokenCount');
-            expect(tokenCountChunk).to.eql(
-              {
-                type: 'tokenCount',
-                tokens: { completion: 20, prompt: 33, total: 53 },
-              },
-              `received token count chunk did not match expected`
-            );
           }
 
           runTest().then(resolve, reject);
@@ -149,7 +178,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             body: {
               name: 'my_api_call',
-              systemMessage: 'You are a helpful assistant',
+              systemMessage: SYSTEM_MESSAGE,
               messages,
               connectorId,
               functions: [],

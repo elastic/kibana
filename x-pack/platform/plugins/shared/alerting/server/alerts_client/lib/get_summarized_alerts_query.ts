@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   QueryDslQueryContainer,
   SearchRequest,
   SearchTotalHits,
   AggregationsAggregationContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { BoolQuery } from '@kbn/es-query';
+} from '@elastic/elasticsearch/lib/api/types';
+import type { BoolQuery } from '@kbn/es-query';
 import {
   ALERT_END,
   ALERT_INSTANCE_ID,
@@ -23,9 +23,10 @@ import {
   EVENT_ACTION,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { Alert } from '@kbn/alerts-as-data-utils';
-import { AlertsFilter, ISO_WEEKDAYS, RuleAlertData } from '../../../common';
-import {
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { AlertsFilter, RuleAlertData } from '../../../common';
+import { ISO_WEEKDAYS } from '../../../common';
+import type {
   GetLifecycleAlertsQueryByExecutionUuidParams,
   GetLifecycleAlertsQueryByTimeRangeParams,
   GetAlertsQueryParams,
@@ -36,8 +37,8 @@ import {
   ScopedQueryAggregationResult,
   SearchResult,
 } from '../types';
-import { SummarizedAlertsChunk, ScopedQueryAlerts } from '../..';
-import { FormatAlert } from '../../types';
+import type { SummarizedAlertsChunk, ScopedQueryAlerts } from '../..';
+import type { FormatAlert } from '../../types';
 import { expandFlattenedAlert } from './format_alert';
 import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
 
@@ -53,7 +54,7 @@ const getLifecycleAlertsQueryByExecutionUuid = ({
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetLifecycleAlertsQueryByExecutionUuidParams): Array<SearchRequest['body']> => {
+}: GetLifecycleAlertsQueryByExecutionUuidParams): SearchRequest[] => {
   // lifecycle alerts assign a different action to an alert depending
   // on whether it is new/ongoing/recovered. query for each action in order
   // to get the count of each action type as well as up to the maximum number
@@ -93,7 +94,7 @@ const getLifecycleAlertsQueryByTimeRange = ({
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetLifecycleAlertsQueryByTimeRangeParams): Array<SearchRequest['body']> => {
+}: GetLifecycleAlertsQueryByTimeRangeParams): SearchRequest[] => {
   return [
     getQueryByTimeRange({
       start,
@@ -132,7 +133,7 @@ const getQueryByExecutionUuid = ({
   action,
   alertsFilter,
   maxAlertLimit,
-}: GetQueryByExecutionUuidParams): SearchRequest['body'] => {
+}: GetQueryByExecutionUuidParams): SearchRequest => {
   const filter: QueryDslQueryContainer[] = [
     {
       term: {
@@ -196,7 +197,7 @@ const getQueryByTimeRange = ({
   type,
   alertsFilter,
   maxAlertLimit,
-}: GetQueryByTimeRangeParams<AlertTypes>): SearchRequest['body'] => {
+}: GetQueryByTimeRangeParams<AlertTypes>): SearchRequest => {
   // base query filters the alert documents for a rule by the given time range
   let filter: QueryDslQueryContainer[] = [
     {
@@ -292,7 +293,7 @@ export const getQueryByScopedQueries = ({
   action,
   maintenanceWindows,
   maxAlertLimit,
-}: GetQueryByScopedQueriesParams): SearchRequest['body'] => {
+}: GetQueryByScopedQueriesParams): SearchRequest => {
   const filters: QueryDslQueryContainer[] = [
     {
       term: {
@@ -340,7 +341,7 @@ export const getQueryByScopedQueries = ({
       aggs: {
         alertId: {
           top_hits: {
-            size: maxAlertLimit,
+            size: 100,
             _source: {
               includes: [ALERT_UUID],
             },
@@ -471,9 +472,9 @@ const getLifecycleAlertsQueries = ({
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetAlertsQueryParams): Array<SearchRequest['body']> => {
+}: GetAlertsQueryParams): SearchRequest[] => {
   let queryBodies;
-  if (!!executionUuid) {
+  if (executionUuid) {
     queryBodies = getLifecycleAlertsQueryByExecutionUuid({
       executionUuid: executionUuid!,
       ruleId,
@@ -503,9 +504,9 @@ const getContinualAlertsQuery = ({
   excludedAlertInstanceIds,
   alertsFilter,
   maxAlertLimit,
-}: GetAlertsQueryParams): SearchRequest['body'] => {
+}: GetAlertsQueryParams): SearchRequest => {
   let queryBody;
-  if (!!executionUuid) {
+  if (executionUuid) {
     queryBody = getQueryByExecutionUuid({
       executionUuid,
       ruleId,
@@ -533,7 +534,7 @@ const getMaintenanceWindowAlertsQuery = ({
   action,
   maintenanceWindows,
   maxAlertLimit,
-}: GetMaintenanceWindowAlertsQueryParams): SearchRequest['body'] => {
+}: GetMaintenanceWindowAlertsQueryParams): SearchRequest => {
   return getQueryByScopedQueries({
     executionUuid,
     ruleId,

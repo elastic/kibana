@@ -37,9 +37,11 @@ interface AccordionWaterfallProps {
   waterfallItemId?: string;
   waterfall: IWaterfall;
   timelineMargins: Margins;
-  onClickWaterfallItem: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
+  onClickWaterfallItem?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
   showCriticalPath: boolean;
   maxLevelOpen: number;
+  displayLimit?: number;
+  isEmbeddable?: boolean;
 }
 
 type WaterfallProps = Omit<
@@ -58,6 +60,7 @@ export function AccordionWaterfall({
   showCriticalPath,
   waterfall,
   isOpen,
+  isEmbeddable = false,
   ...props
 }: AccordionWaterfallProps) {
   return (
@@ -66,6 +69,7 @@ export function AccordionWaterfall({
       showCriticalPath={showCriticalPath}
       waterfall={waterfall}
       isOpen={isOpen}
+      isEmbeddable={isEmbeddable}
     >
       <Waterfall {...props} />
     </WaterfallContextProvider>
@@ -76,6 +80,7 @@ function Waterfall(props: WaterfallProps) {
   const listRef = useRef<List>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
   const { traceList } = useWaterfallContext();
+  const visibleTraceList = props.displayLimit ? traceList.slice(0, props.displayLimit) : traceList;
 
   const onRowLoad = (index: number, size: number) => {
     rowSizeMapRef.current.set(index, size);
@@ -100,11 +105,11 @@ function Waterfall(props: WaterfallProps) {
               <List
                 ref={listRef}
                 style={{ height: '100%' }}
-                itemCount={traceList.length}
+                itemCount={visibleTraceList.length}
                 itemSize={getRowSize}
                 height={window.innerHeight}
                 width={width}
-                itemData={{ ...props, traceList, onLoad: onRowLoad }}
+                itemData={{ ...props, traceList: visibleTraceList, onLoad: onRowLoad }}
               >
                 {VirtualRow}
               </List>
@@ -146,8 +151,13 @@ const VirtualRow = React.memo(
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   const { euiTheme } = useEuiTheme();
   const { duration, waterfallItemId, onClickWaterfallItem, timelineMargins, node } = props;
-  const { criticalPathSegmentsById, getErrorCount, updateTreeNode, showCriticalPath } =
-    useWaterfallContext();
+  const {
+    criticalPathSegmentsById,
+    getErrorCount,
+    updateTreeNode,
+    showCriticalPath,
+    isEmbeddable,
+  } = useWaterfallContext();
 
   const displayedColor = showCriticalPath ? transparentize(0.5, node.item.color) : node.item.color;
   const marginLeftLevel = 8 * node.level;
@@ -167,9 +177,11 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
     updateTreeNode({ ...node, expanded: !node.expanded });
   };
 
-  const onWaterfallItemClick = (flyoutDetailTab: string) => {
-    onClickWaterfallItem(node.item, flyoutDetailTab);
-  };
+  const onWaterfallItemClick = onClickWaterfallItem
+    ? (flyoutDetailTab: string) => {
+        onClickWaterfallItem(node.item, flyoutDetailTab);
+      }
+    : undefined;
 
   const hasError = node.item.doc.event?.outcome === 'failure';
 
@@ -203,6 +215,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
               marginLeftLevel={marginLeftLevel}
               onClick={onWaterfallItemClick}
               segments={segments}
+              isEmbeddable={isEmbeddable}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -267,7 +280,7 @@ function ToggleAccordionButton({
             <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
           </div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ position: 'relative' }}>
+        <EuiFlexItem grow={false} css={{ position: 'relative' }}>
           <div
             style={{
               position: 'absolute',

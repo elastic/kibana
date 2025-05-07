@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { createIsNarrowSchema } from '../../../helpers';
+import { createIsNarrowSchema } from '../../../shared/type_guards';
 
 export interface IngestStreamLifecycleDSL {
   dsl: {
@@ -66,7 +66,7 @@ export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.un
 ]);
 
 export const unwiredIngestStreamEffectiveLifecycleSchema: z.Schema<UnwiredIngestStreamEffectiveLifecycle> =
-  z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema]);
+  z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema, errorLifecycleSchema]);
 
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
   ingestStreamLifecycleSchema.and(z.object({ from: NonEmptyString }));
@@ -98,3 +98,35 @@ export const isDisabledLifecycle = createIsNarrowSchema(
   ingestStreamEffectiveLifecycleSchema,
   disabledLifecycleSchema
 );
+
+export type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
+
+export interface IlmPolicyPhase {
+  name: PhaseName;
+  size_in_bytes: number;
+  min_age?: string;
+}
+
+export interface IlmPolicyHotPhase extends IlmPolicyPhase {
+  name: 'hot';
+  rollover: {
+    max_size?: number | string;
+    max_primary_shard_size?: number | string;
+    max_age?: string;
+    max_docs?: number;
+    max_primary_shard_docs?: number;
+  };
+}
+
+export interface IlmPolicyDeletePhase {
+  name: 'delete';
+  min_age: string;
+}
+
+export interface IlmPolicyPhases {
+  hot?: IlmPolicyHotPhase;
+  warm?: IlmPolicyPhase;
+  cold?: IlmPolicyPhase;
+  frozen?: IlmPolicyPhase;
+  delete?: IlmPolicyDeletePhase;
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IClusterClientAdapter } from './cluster_client_adapter';
+import type { IClusterClientAdapter } from './cluster_client_adapter';
 
 const createClusterClientMock = () => {
   const mock: jest.Mocked<IClusterClientAdapter> = {
@@ -30,6 +30,8 @@ const createClusterClientMock = () => {
     shutdown: jest.fn(),
     updateDocuments: jest.fn(),
     queryEventsByDocumentIds: jest.fn(),
+    queryEventsBySavedObjectsSearchAfter: jest.fn(),
+    closePointInTime: jest.fn(),
     refreshIndex: jest.fn(),
   };
   return mock;

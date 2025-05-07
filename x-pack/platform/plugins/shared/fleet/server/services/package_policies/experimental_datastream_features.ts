@@ -75,11 +75,11 @@ export async function handleExperimentalDatastreamFeatureOptIn({
         );
       return prepareTemplate({
         packageInstallContext: {
-          assetsMap,
           archiveIterator: createArchiveIteratorFromMap(assetsMap),
           packageInfo,
           paths,
         },
+        fieldAssetsMap: assetsMap,
         dataStream,
         experimentalDataStreamFeature,
       });
@@ -192,7 +192,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
       await esClient.cluster.putComponentTemplate({
         name: componentTemplateName,
-        body,
+        ...body,
         _meta: {
           has_experimental_data_stream_indexing_features: hasExperimentalDataStreamIndexingFeatures,
         },
@@ -210,7 +210,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
           settings: {
             ...(indexTemplate.template?.settings ?? {}),
             index: {
-              mode: featureMapEntry.features.tsdb ? 'time_series' : null,
+              mode: featureMapEntry.features.tsdb ? 'time_series' : undefined,
             },
           },
         },
@@ -220,11 +220,14 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
       await esClient.indices.putIndexTemplate({
         name: featureMapEntry.data_stream,
-        // @ts-expect-error
-        body: indexTemplateBody,
+        ...indexTemplateBody,
         _meta: {
           has_experimental_data_stream_indexing_features: featureMapEntry.features.tsdb,
         },
+        // GET brings string | string[] | undefined but this PUT expects string[]
+        ignore_missing_component_templates: indexTemplateBody.ignore_missing_component_templates
+          ? [indexTemplateBody.ignore_missing_component_templates].flat()
+          : undefined,
       });
     }
 

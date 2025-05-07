@@ -17,13 +17,16 @@ import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { merge } from 'lodash';
-import type * as esTypes from '@elastic/elasticsearch/lib/api/types';
-import type { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult, estypes } from '@elastic/elasticsearch';
 import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
-import type { ResponseActionsClient } from '../..';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getPackagePolicyInfoFromFleetKuery } from '../../../mocks/utils.mock';
+import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { FleetAgentGenerator } from '../../../../../common/endpoint/data_generators/fleet_agent_generator';
+import type { ResponseActionsClient, ResponseActionsClientMethods } from '../..';
 import { NormalizedExternalConnectorClient } from '../..';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
 import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
@@ -53,6 +56,9 @@ import type {
   ScanActionRequestBody,
   RunScriptActionRequestBody,
 } from '../../../../../common/api/endpoint';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
+import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 
 export interface ResponseActionsClientOptionsMock extends ResponseActionsClientOptions {
   esClient: ElasticsearchClientMock;
@@ -83,7 +89,10 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
 const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMock> => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
   const casesClient = createCasesClientMock();
+
+  // TODO:PT refactor mock to instead use Mocked endpoint context and not the real class with mocked dependencies
   const endpointService = new EndpointAppContextService();
+  const endpointServiceStartContract = createMockEndpointAppContextServiceStartContract();
 
   esClient.index.mockImplementation((async (payload) => {
     switch (payload.index) {
@@ -112,9 +121,46 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     (async () => {}) as unknown as jest.Mocked<AttachmentsSubClient>['bulkCreate']
   );
 
+  // Mock some Fleet apis in order to support the `fetchFleetInfoForAgents()` method
+  const fleetStartServices = endpointServiceStartContract.fleetStartServices;
+  const packagePolicy = new FleetPackagePolicyGenerator('seed').generate();
+
+  fleetStartServices.agentService.asInternalUser.getByIds.mockImplementation(async (agentIds) => {
+    return agentIds?.map((id) =>
+      new FleetAgentGenerator('seed').generate({ id, policy_id: packagePolicy.policy_ids[0] })
+    );
+  });
+  fleetStartServices.packagePolicyService.list.mockImplementation(async (_, options) => {
+    const kueryInfo = await getPackagePolicyInfoFromFleetKuery(options.kuery ?? '');
+
+    const packagePolicyOverrides: Parameters<FleetPackagePolicyGenerator['generate']>[0] = {
+      id: packagePolicy.id,
+    };
+
+    if (kueryInfo.packageNames.length > 0) {
+      packagePolicyOverrides.package = {
+        name: kueryInfo.packageNames[0],
+        version: '1.0.0',
+        title: kueryInfo.packageNames[0],
+      };
+    }
+
+    if (kueryInfo.agentPolicyIds) {
+      packagePolicyOverrides.policy_ids = [kueryInfo.agentPolicyIds[0]];
+    }
+
+    return {
+      items: [new FleetPackagePolicyGenerator('seed').generate(packagePolicyOverrides)],
+      size: 1,
+      page: 1,
+      perPage: 20,
+      total: 1,
+    };
+  });
+
   endpointService.setup(createMockEndpointAppContextServiceSetupContract());
   endpointService.start({
-    ...createMockEndpointAppContextServiceStartContract(),
+    ...endpointServiceStartContract,
     esClient,
   });
 
@@ -122,15 +168,16 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     esClient,
     casesClient,
     endpointService,
+    spaceId: DEFAULT_SPACE_ID,
     username: 'foo',
     isAutomated: false,
   };
 };
 
 const createEsIndexTransportResponseMock = (
-  overrides: DeepPartial<TransportResult<esTypes.IndexResponse, unknown>> = {}
-): TransportResult<esTypes.IndexResponse, unknown> => {
-  const responseDoc: TransportResult<esTypes.IndexResponse, unknown> = {
+  overrides: DeepPartial<TransportResult<estypes.IndexResponse, unknown>> = {}
+): TransportResult<estypes.IndexResponse, unknown> => {
+  const responseDoc: TransportResult<estypes.IndexResponse, unknown> = {
     body: {
       _id: 'indexed-1-2-3',
       _index: 'some-index',
@@ -354,9 +401,84 @@ const setConnectorActionsClientExecuteResponseMock = (
   });
 };
 
+const getClientSupportedResponseActionMethodNames = (
+  agentType: ResponseActionAgentType
+): ResponseActionsClientMethods[] => {
+  const methods: ResponseActionsClientMethods[] = [];
+
+  for (const responseActionApiName of RESPONSE_ACTION_API_COMMANDS_NAMES) {
+    if (isActionSupportedByAgentType(agentType, responseActionApiName, 'manual')) {
+      // Map (if necessary) the response action name to the method name that is defined in the
+      // Response Actions client class
+      switch (responseActionApiName) {
+        case 'unisolate':
+          methods.push('release');
+          break;
+
+        case 'running-processes':
+          methods.push('runningProcesses');
+          break;
+
+        case 'get-file':
+          methods.push('getFile');
+          break;
+
+        case 'kill-process':
+          methods.push('killProcess');
+          break;
+
+        case 'suspend-process':
+          methods.push('suspendProcess');
+          break;
+
+        default:
+          methods.push(responseActionApiName);
+      }
+    }
+  }
+
+  return methods;
+};
+
+const getOptionsForResponseActionMethod = (method: ResponseActionsClientMethods) => {
+  switch (method) {
+    case 'isolate':
+    case 'release':
+      return createNoParamsResponseActionOptionsMock();
+
+    case 'scan':
+      return createScanOptionsMock();
+
+    case 'upload':
+      return createUploadOptionsMock();
+
+    case 'execute':
+      return createExecuteOptionsMock();
+
+    case 'runscript':
+      return createRunScriptOptionsMock();
+
+    case 'killProcess':
+    case 'suspendProcess':
+      return createKillOrSuspendProcessOptionsMock();
+
+    case 'runningProcesses':
+      return createRunningProcessesOptionsMock();
+
+    case 'getFile':
+      return createGetFileOptionsMock();
+
+    default:
+      throw new Error(`Mock options are not defined for response action method [${method}]`);
+  }
+};
+
 export const responseActionsClientMock = Object.freeze({
   create: createResponseActionClientMock,
   createConstructorOptions: createConstructorOptionsMock,
+
+  getClientSupportedResponseActionMethodNames,
+  getOptionsForResponseActionMethod,
 
   createIsolateOptions: createNoParamsResponseActionOptionsMock,
   createReleaseOptions: createNoParamsResponseActionOptionsMock,

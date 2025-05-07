@@ -24,7 +24,7 @@ import {
 import { getOriginalId } from '@kbn/transpose-utils';
 import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { KbnPalettes } from '@kbn/palettes';
-import { DataType } from '../../types';
+import { DataType, DatasourcePublicAPI } from '../../types';
 
 /**
  * Returns array of colors for provided palette or colorMapping
@@ -46,7 +46,32 @@ export function getPaletteDisplayColors(
 }
 
 /**
+ * Analyze the column from the datasource prospective (formal check)
+ * to know whether it's a numeric type or not
+ * Note: to be used for Lens UI only
+ */
+export function getAccessorType(
+  datasource: Pick<DatasourcePublicAPI, 'getOperationForColumnId'> | undefined,
+  accessor: string | undefined
+) {
+  // No accessor means it's not a numeric type by default
+  if (!accessor || !datasource) {
+    return { isNumeric: false, isCategory: false };
+  }
+  const operation = datasource.getOperationForColumnId(accessor);
+  const isNumericTypeFromOperation = Boolean(
+    !operation?.isBucketed && operation?.dataType === 'number' && !operation.hasArraySupport
+  );
+  const isBucketableTypeFromOperationType = Boolean(
+    operation?.isBucketed ||
+      (!['number', 'date'].includes(operation?.dataType || '') && !operation?.hasArraySupport)
+  );
+  return { isNumeric: isNumericTypeFromOperation, isCategory: isBucketableTypeFromOperationType };
+}
+
+/**
  * Bucketed numerical columns should be treated as categorical
+ * Note: to be used within expression renderer scope only
  */
 export function shouldColorByTerms(
   dataType?: DataType | DatatableColumnType,

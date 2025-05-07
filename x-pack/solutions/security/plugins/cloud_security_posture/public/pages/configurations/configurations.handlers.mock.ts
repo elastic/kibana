@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { isArray } from 'lodash';
 import { http, HttpResponse } from 'msw';
@@ -221,12 +221,14 @@ export const searchFindingsHandler = (findings: CspFinding[]) =>
     const hasRuleSectionQuerySearchTerm =
       isArray(filter) &&
       isArray(filter[0]?.bool?.should) &&
+      // @ts-expect-error FieldValue is now very broad (can be anything)
       filter[0]?.bool?.should?.[0]?.term?.['rule.section']?.value !== undefined;
 
     if (hasRuleSectionQuerySearchTerm) {
       const filteredFindings = findings.filter((finding) => {
         const termValue = (filter[0].bool?.should as estypes.QueryDslQueryContainer[])?.[0]?.term?.[
           'rule.section'
+          // @ts-expect-error FieldValue is now very broad (can be anything)
         ]?.value;
         return finding.rule.section === termValue;
       });

@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
+
 export const host1Name = 'nice-host';
 export const host2Name = 'cool-host';
 
@@ -48,9 +49,6 @@ export const mockGroupingProps = {
               },
             ],
           },
-          countSeveritySubAggregation: {
-            value: 1,
-          },
           usersCountAggregation: {
             value: 1,
           },
@@ -80,9 +78,6 @@ export const mockGroupingProps = {
                 doc_count: 1,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 1,
           },
           usersCountAggregation: {
             value: 1,
@@ -114,9 +109,6 @@ export const mockGroupingProps = {
                 doc_count: 11,
               },
             ],
-          },
-          countSeveritySubAggregation: {
-            value: 11,
           },
           usersCountAggregation: {
             value: 11,

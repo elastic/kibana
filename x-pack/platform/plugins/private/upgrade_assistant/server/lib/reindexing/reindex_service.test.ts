@@ -101,20 +101,18 @@ describe('reindexService', () => {
       const hasRequired = await service.hasRequiredPrivileges('anIndex');
       expect(hasRequired).toBe(true);
       expect(clusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-        body: {
-          cluster: ['manage'],
-          index: [
-            {
-              names: ['anIndex', `reindexed-v${currentMajor}-anIndex`],
-              allow_restricted_indices: true,
-              privileges: ['all'],
-            },
-            {
-              names: ['.tasks'],
-              privileges: ['read'],
-            },
-          ],
-        },
+        cluster: ['manage'],
+        index: [
+          {
+            names: ['anIndex', `reindexed-v${currentMajor}-anIndex`],
+            allow_restricted_indices: true,
+            privileges: ['all'],
+          },
+          {
+            names: ['.tasks'],
+            privileges: ['read'],
+          },
+        ],
       });
     });
 
@@ -127,24 +125,22 @@ describe('reindexService', () => {
       const hasRequired = await service.hasRequiredPrivileges(`reindexed-v${prevMajor}-anIndex`);
       expect(hasRequired).toBe(true);
       expect(clusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-        body: {
-          cluster: ['manage'],
-          index: [
-            {
-              names: [
-                `reindexed-v${prevMajor}-anIndex`,
-                `reindexed-v${currentMajor}-anIndex`,
-                'anIndex',
-              ],
-              allow_restricted_indices: true,
-              privileges: ['all'],
-            },
-            {
-              names: ['.tasks'],
-              privileges: ['read'],
-            },
-          ],
-        },
+        cluster: ['manage'],
+        index: [
+          {
+            names: [
+              `reindexed-v${prevMajor}-anIndex`,
+              `reindexed-v${currentMajor}-anIndex`,
+              'anIndex',
+            ],
+            allow_restricted_indices: true,
+            privileges: ['all'],
+          },
+          {
+            names: ['.tasks'],
+            privileges: ['read'],
+          },
+        ],
       });
     });
   });
@@ -164,6 +160,11 @@ describe('reindexService', () => {
       const reindexWarnings = await service.detectReindexWarnings(indexName);
       expect(reindexWarnings).toEqual([
         {
+          flow: 'readonly',
+          warningType: 'makeIndexReadonly',
+        },
+        {
+          flow: 'reindex',
           warningType: 'replaceIndexWithAlias',
         },
       ]);
@@ -728,11 +729,20 @@ describe('reindexService', () => {
       } as ReindexSavedObject;
 
       it('restores the settings (both to null), and updates lastCompletedStep', async () => {
+        // Setup empty flatSettings with no warnings
+        actions.getFlatSettings.mockResolvedValueOnce({
+          settings: {
+            'index.provided_name': 'myIndex',
+          },
+          mappings: {},
+        });
+
         clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: true });
         const updatedOp = await service.processNextStep(reindexOp);
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.indexSettingsRestored);
         expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
           index: reindexOp.attributes.newIndexName,
+          reopen: true,
           settings: {
             'index.number_of_replicas': null,
             'index.refresh_interval': null,
@@ -741,6 +751,14 @@ describe('reindexService', () => {
       });
 
       it('restores the original settings, and updates lastCompletedStep', async () => {
+        // Setup empty flatSettings with no warnings
+        actions.getFlatSettings.mockResolvedValueOnce({
+          settings: {
+            'index.provided_name': 'myIndex',
+          },
+          mappings: {},
+        });
+
         clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: true });
         const reindexOpWithBackupSettings = {
           ...reindexOp,
@@ -756,11 +774,47 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.indexSettingsRestored);
         expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith({
           index: reindexOp.attributes.newIndexName,
+          reopen: true,
           settings: {
             'index.number_of_replicas': 7,
             'index.refresh_interval': 1,
           },
         });
+      });
+
+      it('removes deprecated settings during restoration', async () => {
+        // Setup flatSettings to include a deprecated setting warning
+        actions.getFlatSettings.mockResolvedValueOnce({
+          settings: {
+            'index.provided_name': 'myIndex',
+            'index.force_memory_term_dictionary': 'true',
+            'index.soft_deletes.enabled': 'true',
+          },
+          mappings: {},
+        });
+
+        clusterClient.asCurrentUser.indices.putSettings.mockResponseOnce({ acknowledged: true });
+
+        const updatedOp = await service.processNextStep(reindexOp);
+        expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.indexSettingsRestored);
+
+        // Check that deprecated settings are removed (set to null)
+        expect(clusterClient.asCurrentUser.indices.putSettings).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: reindexOp.attributes.newIndexName,
+            settings: expect.objectContaining({
+              'index.number_of_replicas': null,
+              'index.refresh_interval': null,
+              'index.force_memory_term_dictionary': null,
+              'index.soft_deletes.enabled': null,
+            }),
+          })
+        );
+
+        // Check that a log was created about removing the settings
+        expect(log.info).toHaveBeenCalledWith(
+          expect.stringContaining('Removing deprecated settings')
+        );
       });
 
       it('fails if the request is not acknowledged', async () => {
@@ -829,7 +883,7 @@ describe('reindexService', () => {
       );
 
       it('moves existing aliases over to new index', async () => {
-        clusterClient.asCurrentUser.indices.getAlias.mockResponseOnce({
+        clusterClient.asCurrentUser.indices.get.mockResponseOnce({
           myIndex: {
             aliases: {
               myAlias: {},

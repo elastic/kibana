@@ -9,19 +9,21 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, merge } from 'rxjs';
 import { css } from '@emotion/react';
 import { EuiComboBox } from '@elastic/eui';
-import { apiPublishesESQLVariables } from '@kbn/esql-variables-types';
+import { apiPublishesESQLVariables, type ESQLControlState } from '@kbn/esql-types';
 import { useBatchedPublishingSubjects, apiHasParentApi } from '@kbn/presentation-publishing';
-import { tracksOverlays } from '@kbn/presentation-containers';
-import type { ESQLControlState } from '@kbn/esql/public';
+import { initializeUnsavedChanges, tracksOverlays } from '@kbn/presentation-containers';
 import { ESQL_CONTROL } from '../../../common';
 import type { ESQLControlApi } from './types';
 import { ControlFactory } from '../types';
 import { uiActionsService } from '../../services/kibana_services';
-import { initializeDefaultControlApi } from '../initialize_default_control_api';
-import { initializeESQLControlSelections } from './esql_control_selections';
+import {
+  defaultControlComparators,
+  initializeDefaultControlApi,
+} from '../initialize_default_control_api';
+import { initializeESQLControlSelections, selectionComparators } from './esql_control_selections';
 
 const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
   defaultMessage: 'Static values list',
@@ -33,7 +35,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
     order: 3,
     getIconType: () => 'editorChecklist',
     getDisplayName: () => displayName,
-    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
       const defaultControl = initializeDefaultControlApi(initialState);
       const selections = initializeESQLControlSelections(initialState);
 
@@ -45,66 +47,73 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
       const onSaveControl = (updatedState: ESQLControlState) => {
         controlGroupApi?.replacePanel(uuid, {
           panelType: 'esqlControl',
-          initialState: updatedState,
+          serializedState: {
+            rawState: updatedState,
+          },
         });
         closeOverlay();
       };
 
-      const api = buildApi(
-        {
-          ...defaultControl.api,
-          ...selections.api,
-          defaultTitle$: new BehaviorSubject<string | undefined>(initialState.title),
-          isEditingEnabled: () => true,
-          getTypeDisplayName: () => displayName,
-          onEdit: async () => {
-            const state = {
-              ...initialState,
-              ...defaultControl.serialize().rawState,
-            };
-            const variablesInParent = apiPublishesESQLVariables(api.parentApi)
-              ? api.parentApi.esqlVariables$.value
-              : [];
-            try {
-              await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-                queryString: initialState.esqlQuery,
-                variableType: initialState.variableType,
-                controlType: initialState.controlType,
-                esqlVariables: variablesInParent,
-                onSaveControl,
-                onCancelControl: closeOverlay,
-                initialState: state,
-              });
-            } catch (e) {
-              // eslint-disable-next-line no-console
-              console.error('Error getting ESQL control trigger', e);
-            }
+      function serializeState() {
+        const { rawState: defaultControlState } = defaultControl.getLatestState();
+        return {
+          rawState: {
+            ...defaultControlState,
+            ...selections.getLatestState(),
           },
-          serializeState: () => {
-            const { rawState: defaultControlState } = defaultControl.serialize();
-            return {
-              rawState: {
-                ...defaultControlState,
-                selectedOptions: selections.selectedOptions$.getValue(),
-                availableOptions: selections.availableOptions$.getValue(),
-                variableName: selections.variableName$.getValue(),
-                variableType: selections.variableType$.getValue(),
-                controlType: selections.controlType$.getValue(),
-                esqlQuery: selections.esqlQuery$.getValue(),
-                title: selections.title$.getValue(),
-              },
-              references: [],
-            };
-          },
-          clearSelections: () => {
-            // do nothing, not allowed for now;
-          },
+          references: [],
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<ESQLControlState>({
+        uuid,
+        parentApi: controlGroupApi,
+        serializeState,
+        anyStateChange$: merge(defaultControl.anyStateChange$, selections.anyStateChange$),
+        getComparators: () => {
+          return {
+            ...defaultControlComparators,
+            ...selectionComparators,
+          };
         },
-        {
-          ...defaultControl.comparators,
-          ...selections.comparators,
-        }
-      );
+        onReset: (lastSaved) => {
+          defaultControl.reinitializeState(lastSaved?.rawState);
+          selections.reinitializeState(lastSaved?.rawState);
+        },
+      });
+
+      const api = finalizeApi({
+        ...unsavedChangesApi,
+        ...defaultControl.api,
+        ...selections.api,
+        defaultTitle$: new BehaviorSubject<string | undefined>(initialState.title),
+        isEditingEnabled: () => true,
+        getTypeDisplayName: () => displayName,
+        onEdit: async () => {
+          const state = {
+            ...initialState,
+            ...defaultControl.getLatestState().rawState,
+          };
+          const variablesInParent = apiPublishesESQLVariables(api.parentApi)
+            ? api.parentApi.esqlVariables$.value
+            : [];
+          try {
+            await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+              queryString: initialState.esqlQuery,
+              variableType: initialState.variableType,
+              controlType: initialState.controlType,
+              esqlVariables: variablesInParent,
+              onSaveControl,
+              onCancelControl: closeOverlay,
+              initialState: state,
+            });
+          } catch (e) {
+            // eslint-disable-next-line no-console
+            console.error('Error getting ESQL control trigger', e);
+          }
+        },
+        serializeState,
+      });
 
       const inputCss = css`
         .euiComboBox__inputWrap {
@@ -115,8 +124,8 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         api,
         Component: ({ className: controlPanelClassName }) => {
           const [availableOptions, selectedOptions] = useBatchedPublishingSubjects(
-            selections.availableOptions$,
-            selections.selectedOptions$
+            selections.internalApi.availableOptions$,
+            selections.internalApi.selectedOptions$
           );
 
           return (
@@ -144,7 +153,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 isClearable={false}
                 onChange={(options) => {
                   const selectedValues = options.map((option) => option.label);
-                  selections.setSelectedOptions(selectedValues);
+                  selections.internalApi.setSelectedOptions(selectedValues);
                 }}
               />
             </div>

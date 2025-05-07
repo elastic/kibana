@@ -11,6 +11,8 @@ import { EuiButtonEmpty, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Workspace, WorkspaceNode } from '../../types';
 import { IconRenderer } from '../icon_renderer';
+import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
+import { gphFormGroupSmallStyles } from './control_plane.styles';
 
 interface SelectedNodeEditorProps {
   workspace: Workspace;
@@ -40,8 +42,8 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
   };
 
   return (
-    <div className="gphSidebar__panel">
-      <div className="gphSidebar__header">
+    <div css={gphSidebarPanelStyles}>
+      <div css={gphSidebarHeaderStyles}>
         <IconRenderer icon={selectedNode.icon} color={euiTheme.colors.darkShade} />{' '}
         {selectedNode.data.field} {selectedNode.data.term}
       </div>
@@ -67,7 +69,7 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
       )}
 
       <form className="form-horizontal">
-        <div className="form-group form-group-sm gphFormGroup--small">
+        <div className="form-group form-group-sm" css={gphFormGroupSmallStyles}>
           <label htmlFor="labelEdit" className="col-sm-3 control-label">
             {i18n.translate('xpack.graph.sidebar.displayLabelLabel', {
               defaultMessage: 'Display label',

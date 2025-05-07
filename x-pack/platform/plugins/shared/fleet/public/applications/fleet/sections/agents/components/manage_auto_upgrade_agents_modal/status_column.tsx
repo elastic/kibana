@@ -6,12 +6,18 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useGetAutoUpgradeAgentsStatusQuery, useLink } from '../../../../../../hooks';
-
 export const StatusColumn: React.FunctionComponent<{
   agentPolicyId: string;
   version: string;
@@ -19,7 +25,6 @@ export const StatusColumn: React.FunctionComponent<{
 }> = ({ agentPolicyId, version, percentage }) => {
   const { getHref } = useLink();
   const { data: autoUpgradeAgentsStatus } = useGetAutoUpgradeAgentsStatusQuery(agentPolicyId);
-
   const getAgentsHref = useCallback(
     (failed?: boolean): string => {
       const kuery = failed
@@ -34,7 +39,7 @@ export const StatusColumn: React.FunctionComponent<{
 
   const calcPercentage = useCallback(
     (agents: number): number =>
-      autoUpgradeAgentsStatus
+      autoUpgradeAgentsStatus && autoUpgradeAgentsStatus.totalAgents > 0
         ? Math.round((agents / autoUpgradeAgentsStatus.totalAgents) * 100)
         : 0,
     [autoUpgradeAgentsStatus]
@@ -57,7 +62,8 @@ export const StatusColumn: React.FunctionComponent<{
 
   const currentStatus = useMemo(() => {
     const inProgressStatus = (
-      <EuiButtonEmpty size="s" iconType="clock" href={getAgentsHref(false)}>
+      <EuiButtonEmpty size="s" href={getAgentsHref(false)} color="text">
+        <EuiIcon type="clock" />{' '}
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.inProgressText"
           defaultMessage="In progress"
@@ -65,7 +71,8 @@ export const StatusColumn: React.FunctionComponent<{
       </EuiButtonEmpty>
     );
     const failedStatus = (
-      <EuiButtonEmpty size="s" iconType="errorFilled" color="danger" href={getAgentsHref(true)}>
+      <EuiButtonEmpty size="s" href={getAgentsHref(true)} color="text">
+        <EuiIcon type="errorFilled" color="danger" />{' '}
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.failedText"
           defaultMessage="Upgrade failed"
@@ -73,12 +80,8 @@ export const StatusColumn: React.FunctionComponent<{
       </EuiButtonEmpty>
     );
     const completedStatus = (
-      <EuiButtonEmpty
-        size="s"
-        iconType="checkInCircleFilled"
-        color="success"
-        href={getAgentsHref(false)}
-      >
+      <EuiButtonEmpty size="s" href={getAgentsHref(false)} color="text">
+        <EuiIcon type="checkInCircleFilled" color="success" />{' '}
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.completedText"
           defaultMessage="Completed"
@@ -86,7 +89,8 @@ export const StatusColumn: React.FunctionComponent<{
       </EuiButtonEmpty>
     );
     const notStartedStatus = (
-      <EuiButtonEmpty size="s" iconType="minusInCircle" color="text">
+      <EuiButtonEmpty size="s" color="text">
+        <EuiIcon type="minusInCircle" color="text" />{' '}
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.notStartedText"
           defaultMessage="Not started"
@@ -114,7 +118,7 @@ export const StatusColumn: React.FunctionComponent<{
           agentVersionCounts.agents > 0 ? (
             <FormattedMessage
               id="xpack.fleet.manageAutoUpgradeAgents.currentStatusTooltip"
-              defaultMessage="{agents} agents on target version"
+              defaultMessage="{agents, plural, one {# agent} other {# agents}} on target version"
               values={{
                 agents: agentVersionCounts.agents,
               }}
@@ -136,11 +140,13 @@ export const StatusColumn: React.FunctionComponent<{
   }, [agentVersionCounts, percentage, calcPercentage, getAgentsHref]);
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexStart">
+      <EuiFlexItem grow={1}>
         <EuiText size="s">{currentPercentage}</EuiText>
       </EuiFlexItem>
-      <EuiFlexItem component="span">{currentStatus}</EuiFlexItem>
+      <EuiFlexItem component="span" grow={4}>
+        {currentStatus}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

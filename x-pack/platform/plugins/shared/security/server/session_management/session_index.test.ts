@@ -1578,9 +1578,9 @@ describe('Session index', () => {
         {
           id: sid,
           index: aliasName,
-          body: sessionValue,
+          document: sessionValue,
           refresh: false,
-          require_alias: true,
+          querystring: { require_alias: true },
         },
         { ignore: [404], meta: true }
       );
@@ -1589,9 +1589,9 @@ describe('Session index', () => {
         {
           id: sid,
           index: aliasName,
-          body: sessionValue,
+          document: sessionValue,
           refresh: false,
-          require_alias: true,
+          querystring: { require_alias: true },
         },
         { ignore: [], meta: true }
       );
@@ -1633,9 +1633,9 @@ describe('Session index', () => {
         {
           id: sid,
           index: aliasName,
-          body: sessionValue,
+          document: sessionValue,
           refresh: false,
-          require_alias: true,
+          querystring: { require_alias: true },
         },
         { meta: true, ignore: [404] }
       );
@@ -1867,7 +1867,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
         refresh: false,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
     });
 
@@ -1891,7 +1891,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
         refresh: false,
-        body: { query: { bool: { must: [{ term: { 'provider.type': 'basic' } }] } } },
+        query: { bool: { must: [{ term: { 'provider.type': 'basic' } }] } },
       });
     });
 
@@ -1907,14 +1907,9 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
         refresh: false,
-        body: {
-          query: {
-            bool: {
-              must: [
-                { term: { 'provider.type': 'basic' } },
-                { term: { 'provider.name': 'basic1' } },
-              ],
-            },
+        query: {
+          bool: {
+            must: [{ term: { 'provider.type': 'basic' } }, { term: { 'provider.name': 'basic1' } }],
           },
         },
       });
@@ -1932,14 +1927,9 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
         refresh: false,
-        body: {
-          query: {
-            bool: {
-              must: [
-                { term: { 'provider.type': 'basic' } },
-                { term: { usernameHash: 'some-hash' } },
-              ],
-            },
+        query: {
+          bool: {
+            must: [{ term: { 'provider.type': 'basic' } }, { term: { usernameHash: 'some-hash' } }],
           },
         },
       });
@@ -1957,15 +1947,13 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith({
         index: aliasName,
         refresh: false,
-        body: {
-          query: {
-            bool: {
-              must: [
-                { term: { 'provider.type': 'basic' } },
-                { term: { 'provider.name': 'basic1' } },
-                { term: { usernameHash: 'some-hash' } },
-              ],
-            },
+        query: {
+          bool: {
+            must: [
+              { term: { 'provider.type': 'basic' } },
+              { term: { 'provider.name': 'basic1' } },
+              { term: { usernameHash: 'some-hash' } },
+            ],
           },
         },
       });

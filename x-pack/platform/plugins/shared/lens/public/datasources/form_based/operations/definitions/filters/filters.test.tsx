@@ -13,12 +13,13 @@ import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import type { FiltersIndexPatternColumn } from '.';
 import { filtersOperation } from '..';
 import type { FormBasedLayer } from '../../../types';
 import { createMockedIndexPattern } from '../../../mocks';
 import userEvent from '@testing-library/user-event';
+import { renderWithProviders } from '../../../../../test_utils/test_utils';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 
@@ -304,7 +305,7 @@ describe('filters', () => {
       // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       const updateLayerSpy = jest.fn();
-      render(
+      renderWithProviders(
         <InlineOptions
           {...defaultProps}
           layer={layer}
@@ -346,7 +347,7 @@ describe('filters', () => {
     describe('Modify filters', () => {
       it('should correctly show existing filters ', () => {
         const updateLayerSpy = jest.fn();
-        render(
+        renderWithProviders(
           <InlineOptions
             {...defaultProps}
             layer={layer}
@@ -366,7 +367,7 @@ describe('filters', () => {
         const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
         jest.useFakeTimers();
         const updateLayerSpy = jest.fn();
-        render(
+        renderWithProviders(
           <InlineOptions
             {...defaultProps}
             layer={layer}

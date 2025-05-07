@@ -40,15 +40,12 @@ export interface UsageStats {
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableServiceGroups': boolean;
-  'observability:apmEnableServiceMetrics': boolean;
-  'observability:apmEnableContinuousRollups': boolean;
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureProfilingIntegration': boolean;
-  'observability:enableInfrastructureAssetCustomDashboards': boolean;
-  'observability:apmAgentExplorerView': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
+  'observability:apmEnableServiceMapApiV2': boolean;
   'observability:logSources': string[];
   'observability:newLogsOverview': boolean;
   'observability:aiAssistantSimulatedFunctionCalling': boolean;
@@ -73,6 +70,7 @@ export interface UsageStats {
   'securitySolution:enableCcsWarning': boolean;
   'securitySolution:enableVisualizationsInFlyout': boolean;
   'securitySolution:enableGraphVisualization': boolean;
+  'securitySolution:enableAssetInventory': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;
@@ -138,6 +136,7 @@ export interface UsageStats {
   dateFormat: string;
   'banners:placement': string;
   'banners:textColor': string;
+  'banners:linkColor': string;
   'banners:backgroundColor': string;
   'labs:canvas:enable_ui': boolean;
   'labs:canvas:byValueEmbeddable': boolean;
@@ -151,12 +150,8 @@ export interface UsageStats {
   'observability:syntheticsThrottlingEnabled': boolean;
   'observability:enableLegacyUptimeApp': boolean;
   'observability:apmLabsButton': boolean;
-  'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
-  'observability:apmServiceInventoryOptimizedSorting': boolean;
-  'observability:apmTraceExplorerTab': boolean;
-  'observability:apmEnableCriticalPath': boolean;
   'observability:apmEnableProfilingIntegration': boolean;
   'observability:entityCentricExperience': boolean;
   'observability:profilingShowErrorFrames': boolean;
@@ -174,7 +169,6 @@ export interface UsageStats {
   'observability:apmEnableTransactionProfiling': boolean;
   'devTools:enablePersistentConsole': boolean;
   'aiAssistant:preferredAIAssistantType': string;
-  'observability:profilingFetchTopNFunctionsFromStacktraces': boolean;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];

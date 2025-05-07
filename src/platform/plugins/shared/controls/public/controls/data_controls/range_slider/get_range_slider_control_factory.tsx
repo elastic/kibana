@@ -8,15 +8,16 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, map, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, merge, skip } from 'rxjs';
 
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import { Filter, RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';
 import { RANGE_SLIDER_CONTROL } from '../../../../common';
-import { initializeDataControl } from '../initialize_data_control';
+import { defaultDataControlComparators, initializeDataControl } from '../initialize_data_control';
 import type { DataControlFactory } from '../types';
 import { RangeSliderControl } from './components/range_slider_control';
 import { hasNoResults$ } from './has_no_results';
@@ -59,7 +60,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         </>
       );
     },
-    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
       const controlFetch$ = controlGroupApi.controlFetch$(uuid);
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
@@ -82,37 +83,50 @@ export const getRangesliderControlFactory = (): DataControlFactory<
         dataControl.setters.onSelectionChange
       );
 
-      const api = buildApi(
-        {
-          ...dataControl.api,
-          dataLoading$,
-          getTypeDisplayName: RangeSliderStrings.control.getDisplayName,
-          serializeState: () => {
-            const { rawState: dataControlState, references } = dataControl.serialize();
-            return {
-              rawState: {
-                ...dataControlState,
-                step: step$.getValue(),
-                value: selections.value$.getValue(),
-              },
-              references, // does not have any references other than those provided by the data control serializer
-            };
+      function serializeState() {
+        const { rawState: dataControlState, references } = dataControl.getLatestState();
+        return {
+          rawState: {
+            ...dataControlState,
+            step: step$.getValue(),
+            value: selections.value$.getValue(),
           },
-          clearSelections: () => {
-            selections.setValue(undefined);
-          },
-          hasSelections$: selections.hasRangeSelection$,
+          references, // does not have any references other than those provided by the data control serializer
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<RangesliderControlState>({
+        uuid,
+        parentApi: controlGroupApi,
+        serializeState,
+        anyStateChange$: merge(dataControl.anyStateChange$, selections.value$, step$).pipe(
+          map(() => undefined)
+        ),
+        getComparators: () => {
+          return {
+            ...defaultDataControlComparators,
+            value: 'referenceEquality',
+            step: (a, b) => (a ?? 1) === (b ?? 1),
+          };
         },
-        {
-          ...dataControl.comparators,
-          ...selections.comparators,
-          step: [
-            step$,
-            (nextStep: number | undefined) => step$.next(nextStep),
-            (a, b) => (a ?? 1) === (b ?? 1),
-          ],
-        }
-      );
+        onReset: (lastSaved) => {
+          dataControl.reinitializeState(lastSaved?.rawState);
+          selections.setValue(lastSaved?.rawState.value);
+          step$.next(lastSaved?.rawState.step ?? 1);
+        },
+      });
+
+      const api = finalizeApi({
+        ...unsavedChangesApi,
+        ...dataControl.api,
+        dataLoading$,
+        getTypeDisplayName: RangeSliderStrings.control.getDisplayName,
+        serializeState,
+        clearSelections: () => {
+          selections.setValue(undefined);
+        },
+        hasSelections$: selections.hasRangeSelection$,
+      });
 
       const dataLoadingSubscription = combineLatest([
         loadingMinMax$,
@@ -218,7 +232,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
-          const [dataLoading, fieldFormatter, max, min, selectionHasNotResults, step, value] =
+          const [dataLoading, fieldFormatter, max, min, selectionHasNoResults, step, value] =
             useBatchedPublishingSubjects(
               dataLoading$,
               dataControl.api.fieldFormatter,
@@ -243,7 +257,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
             <RangeSliderControl
               controlPanelClassName={controlPanelClassName}
               fieldFormatter={fieldFormatter}
-              isInvalid={selectionHasNotResults}
+              isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
               max={max}
               min={min}

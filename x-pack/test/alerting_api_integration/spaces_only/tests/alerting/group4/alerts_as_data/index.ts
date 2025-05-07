@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertsAsDataTests({ loadTestFile }: FtrProviderContext) {
@@ -15,5 +15,6 @@ export default function alertsAsDataTests({ loadTestFile }: FtrProviderContext) 
     loadTestFile(require.resolve('./alerts_as_data_flapping'));
     loadTestFile(require.resolve('./alerts_as_data_conflicts'));
     loadTestFile(require.resolve('./alerts_as_data_alert_delay'));
+    loadTestFile(require.resolve('./alerts_as_data_dynamic_templates.ts'));
   });
 }

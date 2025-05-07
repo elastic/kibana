@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { StreamUpsertRequest } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import expect from '@kbn/expect';
 import { StreamsSupertestRepositoryClient } from './repository_client';
 
-type StreamPutItem = Omit<StreamUpsertRequest, 'dashboards'> & { name: string };
+type StreamPutItem = Omit<Streams.WiredStream.UpsertRequest, 'dashboards' | 'queries'> & {
+  name: string;
+};
 
 const streams: StreamPutItem[] = [
   {
     name: 'logs',
     stream: {
+      description: '',
       ingest: {
         lifecycle: { dsl: {} },
         processing: [],
@@ -33,47 +36,48 @@ const streams: StreamPutItem[] = [
               type: 'keyword',
             },
             'stream.name': {
-              type: 'keyword',
+              type: 'system',
             },
           },
+          routing: [
+            {
+              destination: 'logs.test',
+              if: {
+                and: [
+                  {
+                    field: 'numberfield',
+                    operator: 'gt',
+                    value: 15,
+                  },
+                ],
+              },
+            },
+            {
+              destination: 'logs.test2',
+              if: {
+                and: [
+                  {
+                    field: 'field2',
+                    operator: 'eq',
+                    value: 'abc',
+                  },
+                ],
+              },
+            },
+          ],
         },
-        routing: [
-          {
-            destination: 'logs.test',
-            if: {
-              and: [
-                {
-                  field: 'numberfield',
-                  operator: 'gt',
-                  value: 15,
-                },
-              ],
-            },
-          },
-          {
-            destination: 'logs.test2',
-            if: {
-              and: [
-                {
-                  field: 'field2',
-                  operator: 'eq',
-                  value: 'abc',
-                },
-              ],
-            },
-          },
-        ],
       },
     },
   },
   {
     name: 'logs.test',
     stream: {
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        routing: [],
         processing: [],
         wired: {
+          routing: [],
           fields: {
             numberfield: {
               type: 'long',
@@ -86,6 +90,7 @@ const streams: StreamPutItem[] = [
   {
     name: 'logs.test2',
     stream: {
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [
@@ -103,14 +108,15 @@ const streams: StreamPutItem[] = [
               type: 'keyword',
             },
           },
+          routing: [],
         },
-        routing: [],
       },
     },
   },
   {
     name: 'logs.deeply.nested.streamname',
     stream: {
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
@@ -120,8 +126,8 @@ const streams: StreamPutItem[] = [
               type: 'keyword',
             },
           },
+          routing: [],
         },
-        routing: [],
       },
     },
   },
@@ -130,12 +136,13 @@ const streams: StreamPutItem[] = [
 export async function createStreams(apiClient: StreamsSupertestRepositoryClient) {
   for (const { name, ...stream } of streams) {
     await apiClient
-      .fetch('PUT /api/streams/{name}', {
+      .fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
           body: {
             ...stream,
             dashboards: [],
-          } as StreamUpsertRequest,
+            queries: [],
+          },
           path: { name },
         },
       })

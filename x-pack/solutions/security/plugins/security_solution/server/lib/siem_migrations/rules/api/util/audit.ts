@@ -106,7 +106,7 @@ export class SiemMigrationAuditLogger {
     }
   }
 
-  public async logCreateMigration(params: { migrationId: string; error?: Error }): Promise<void> {
+  public async logCreateMigration(params: { migrationId?: string; error?: Error }): Promise<void> {
     const { migrationId, error } = params;
     const message = `User created a new SIEM migration with [id=${migrationId}]`;
     return this.log({

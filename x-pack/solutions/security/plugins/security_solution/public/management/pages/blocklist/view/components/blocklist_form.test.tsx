@@ -22,10 +22,10 @@ import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
 import { ERRORS } from '../../translations';
 import { licenseService } from '../../../../../common/hooks/use_license';
-import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import type { IHttpFetchError } from '@kbn/core/public';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -127,8 +127,6 @@ describe('blocklist form', () => {
   ): ArtifactFormComponentProps {
     const defaults: ArtifactFormComponentProps = {
       item: createItem(),
-      policies: [],
-      policiesIsLoading: false,
       onChange: onChangeSpy,
       mode: 'create' as ArtifactFormComponentProps['mode'],
       disabled: false,
@@ -491,57 +489,6 @@ describe('blocklist form', () => {
     expect(screen.getByTestId('blocklist-form-effectedPolicies-global')).toBeEnabled();
   });
 
-  it('should correctly edit policies', async () => {
-    const policies: PolicyData[] = [
-      {
-        id: 'policy-id-123',
-        name: 'some-policy-123',
-      },
-      {
-        id: 'policy-id-456',
-        name: 'some-policy-456',
-      },
-    ] as PolicyData[];
-    render(createProps({ policies }));
-    const byPolicyButton = screen.getByTestId('blocklist-form-effectedPolicies-perPolicy');
-    await user.click(byPolicyButton);
-    expect(byPolicyButton).toBeEnabled();
-
-    await user.click(screen.getByText(policies[1].name));
-    const expected = createOnChangeArgs({
-      item: createItem({
-        tags: [`policy:${policies[1].id}`],
-      }),
-    });
-    expect(onChangeSpy).toHaveBeenCalledWith(expected);
-  });
-
-  it('should correctly retain selected policies when toggling between global/by policy', async () => {
-    const policies: PolicyData[] = [
-      {
-        id: 'policy-id-123',
-        name: 'some-policy-123',
-      },
-      {
-        id: 'policy-id-456',
-        name: 'some-policy-456',
-      },
-    ] as PolicyData[];
-    render(createProps({ policies, item: createItem({ tags: [`policy:${policies[1].id}`] }) }));
-    expect(screen.getByTestId('blocklist-form-effectedPolicies-global')).toBeEnabled();
-
-    const byPolicyButton = screen.getByTestId('blocklist-form-effectedPolicies-perPolicy');
-    await user.click(byPolicyButton);
-    expect(byPolicyButton).toBeEnabled();
-    await user.click(screen.getByText(policies[0].name));
-    const expected = createOnChangeArgs({
-      item: createItem({
-        tags: policies.map((policy) => `policy:${policy.id}`),
-      }),
-    });
-    expect(onChangeSpy).toHaveBeenCalledWith(expected);
-  });
-
   it('should be valid if all required inputs complete', async () => {
     const validItem: ArtifactFormComponentProps['item'] = {
       list_id: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
@@ -566,5 +513,12 @@ describe('blocklist form', () => {
       item: { ...validItem, name: 'test namez' },
     });
     expect(onChangeSpy).toHaveBeenCalledWith(expected);
+  });
+
+  it('should display submit errors', async () => {
+    const message = 'foo - something went wrong';
+    const { getByTestId } = render(createProps({ error: new Error(message) as IHttpFetchError }));
+
+    expect(getByTestId('blocklist-form-submitError').textContent).toMatch(message);
   });
 });

@@ -6,11 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { APMTracer } from '@kbn/langchain/server/tracers/apm';
-import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { Callbacks } from '@langchain/core/callbacks/manager';
-import type { LangSmithOptions } from '../../../../../common/siem_migrations/model/common.gen';
 import { SIEM_RULE_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/constants';
 import {
   StartRuleMigrationRequestBody,
@@ -22,6 +18,7 @@ import { SiemMigrationAuditLogger } from './util/audit';
 import { authz } from './util/authz';
 import { getRetryFilter } from './util/retry';
 import { withLicense } from './util/with_license';
+import { createTracersCallbacks } from './util/tracing';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
@@ -73,7 +70,7 @@ export const registerSiemRuleMigrationsStartRoute = (
               }
             }
 
-            const callbacks = createInvocationCallbacks(langsmithOptions, logger);
+            const callbacks = createTracersCallbacks(langsmithOptions, logger);
 
             const { exists, started } = await ruleMigrationsClient.task.start({
               migrationId,
@@ -82,7 +79,7 @@ export const registerSiemRuleMigrationsStartRoute = (
             });
 
             if (!exists) {
-              return res.noContent();
+              return res.notFound();
             }
 
             await siemMigrationAuditLogger.logStart({ migrationId });
@@ -97,15 +94,3 @@ export const registerSiemRuleMigrationsStartRoute = (
       )
     );
 };
-
-function createInvocationCallbacks(
-  langsmithOptions: LangSmithOptions | undefined,
-  logger: Logger
-): Callbacks {
-  const { api_key: apiKey, project_name: projectName = 'default' } = langsmithOptions ?? {};
-  const callbacks: Callbacks = [new APMTracer({ projectName }, logger)];
-  if (langsmithOptions) {
-    callbacks.push(...getLangSmithTracer({ apiKey, projectName, logger }));
-  }
-  return callbacks;
-}

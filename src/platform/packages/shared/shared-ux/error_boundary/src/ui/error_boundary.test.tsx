@@ -96,7 +96,7 @@ describe('<KibanaErrorBoundary>', () => {
     expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
     expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
       component_name: 'BadComponent',
-      error_message: 'FatalReactError: This is an error to show the test user!',
+      error_message: 'Error: This is an error to show the test user!',
     });
   });
 
@@ -133,15 +133,8 @@ describe('<KibanaErrorBoundary>', () => {
 
     expect(apm.captureError).toHaveBeenCalledTimes(1);
     expect(apm.captureError).toHaveBeenCalledWith(
-      new Error('This is an error to show the test user!')
-    );
-    expect(Object.keys((apm.captureError as jest.Mock).mock.calls[0][0])).toEqual([
-      'react_error_type',
-      'original_name',
-      'name',
-    ]);
-    expect((apm.captureError as jest.Mock).mock.calls[0][0].react_error_type).toEqual(
-      'fatal-error-react'
+      new Error('This is an error to show the test user!'),
+      { labels: { errorType: 'PageFatalReactError' } }
     );
   });
 });

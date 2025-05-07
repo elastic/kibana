@@ -877,7 +877,7 @@ describe('create_query', () => {
   });
 
   describe('getDefaultSourceFields', () => {
-    it('should return default source fields', () => {
+    it('should return source fields', () => {
       const fieldDescriptors: IndicesQuerySourceFields = {
         'search-search-labs': {
           elser_query_fields: [],
@@ -922,7 +922,23 @@ describe('create_query', () => {
       };
 
       expect(getDefaultSourceFields(fieldDescriptors)).toEqual({
-        'search-search-labs': ['body_content'],
+        'search-search-labs': [
+          'additional_urls',
+          'title',
+          'links',
+          'id',
+          'url_host',
+          'url_path',
+          'url_path_dir3',
+          'body_content',
+          'domains',
+          'url',
+          'url_scheme',
+          'meta_description',
+          'headings',
+          'url_path_dir2',
+          'url_path_dir1',
+        ],
       });
     });
 
@@ -942,23 +958,6 @@ describe('create_query', () => {
 
       expect(defaultSourceFields).toEqual({
         'search-search-labs': [undefined],
-      });
-    });
-
-    it('should return the first single field when no source fields', () => {
-      const fieldDescriptors: IndicesQuerySourceFields = {
-        'search-search-labs': {
-          elser_query_fields: [],
-          semantic_fields: [],
-          dense_vector_query_fields: [],
-          bm25_query_fields: [],
-          source_fields: ['non_suggested_field'],
-          skipped_fields: 0,
-        },
-      };
-
-      expect(getDefaultSourceFields(fieldDescriptors)).toEqual({
-        'search-search-labs': ['non_suggested_field'],
       });
     });
   });
@@ -983,7 +982,7 @@ describe('create_query', () => {
           semantic_fields: [],
         },
       };
-      expect(getIndicesWithNoSourceFields(fieldDescriptors)).toBe('empty_index');
+      expect(getIndicesWithNoSourceFields(fieldDescriptors)).toEqual(['empty_index']);
     });
   });
 });

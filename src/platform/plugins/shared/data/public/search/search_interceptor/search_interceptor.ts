@@ -31,7 +31,12 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type {
+  AsyncSearchGetResponse,
+  ErrorResponseBase,
+  SqlGetAsyncResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
@@ -60,10 +65,10 @@ import type {
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
 import {
-  AsyncSearchGetResponse,
-  ErrorResponseBase,
-  SqlGetAsyncResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+  EVENT_TYPE_DATA_SEARCH_TIMEOUT,
+  EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
+  EVENT_PROPERTY_EXECUTION_CONTEXT,
+} from '../constants';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
@@ -398,6 +403,10 @@ export class SearchInterceptor {
       catchError((e: Error) => {
         // If we aborted (search:timeout advanced setting) and there was a partial response, return it instead of just erroring out
         if (searchAbortController.isTimeout()) {
+          this.startRenderServices.analytics.reportEvent(EVENT_TYPE_DATA_SEARCH_TIMEOUT, {
+            [EVENT_PROPERTY_SEARCH_TIMEOUT_MS]: this.searchTimeout,
+            [EVENT_PROPERTY_EXECUTION_CONTEXT]: options.executionContext,
+          });
           return from(
             this.runSearch({ id, ...request }, { ...options, retrieveResults: true })
           ).pipe(
@@ -443,7 +452,7 @@ export class SearchInterceptor {
         {
           version: '1',
           signal: abortSignal,
-          context: executionContext,
+          context: this.deps.executionContext.withGlobalContext(executionContext),
           body: JSON.stringify({
             ...request,
             ...searchOptions,

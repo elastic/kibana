@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
-import { RuleCustomizationEnum } from '../../../../rule_management/logic';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { toggleSelectedGroup } from '../../../../../common/components/ml_popover/jobs_table/filters/toggle_selected_group';
+import React, { useMemo, useState } from 'react';
+import { RuleCustomizationStatus } from '../../../../../../common/api/detection_engine';
+import * as i18n from '../../../../common/translations';
 
 interface RuleCustomizationFilterPopoverProps {
-  selectedRuleSource: RuleCustomizationEnum[];
-  onSelectedRuleSourceChanged: (newRuleSource: RuleCustomizationEnum[]) => void;
+  customizationStatus: RuleCustomizationStatus | undefined;
+  onCustomizationStatusChanged: (newRuleSource: RuleCustomizationStatus | undefined) => void;
 }
 
 const RULE_CUSTOMIZATION_POPOVER_WIDTH = 200;
 
 const RuleCustomizationFilterPopoverComponent = ({
-  selectedRuleSource,
-  onSelectedRuleSourceChanged,
+  customizationStatus,
+  onCustomizationStatusChanged,
 }: RuleCustomizationFilterPopoverProps) => {
   const [isRuleCustomizationPopoverOpen, setIsRuleCustomizationPopoverOpen] = useState(false);
 
@@ -29,18 +28,16 @@ const RuleCustomizationFilterPopoverComponent = ({
     () => [
       {
         label: i18n.MODIFIED_LABEL,
-        key: RuleCustomizationEnum.customized,
-        checked: selectedRuleSource.includes(RuleCustomizationEnum.customized) ? 'on' : undefined,
+        key: RuleCustomizationStatus.CUSTOMIZED,
+        checked: customizationStatus === RuleCustomizationStatus.CUSTOMIZED ? 'on' : undefined,
       },
       {
         label: i18n.UNMODIFIED_LABEL,
-        key: RuleCustomizationEnum.not_customized,
-        checked: selectedRuleSource.includes(RuleCustomizationEnum.not_customized)
-          ? 'on'
-          : undefined,
+        key: RuleCustomizationStatus.NOT_CUSTOMIZED,
+        checked: customizationStatus === RuleCustomizationStatus.NOT_CUSTOMIZED ? 'on' : undefined,
       },
     ],
-    [selectedRuleSource]
+    [customizationStatus]
   );
 
   const handleSelectableOptionsChange = (
@@ -48,10 +45,8 @@ const RuleCustomizationFilterPopoverComponent = ({
     _: unknown,
     changedOption: EuiSelectableOption
   ) => {
-    toggleSelectedGroup(
-      changedOption.key ?? '',
-      selectedRuleSource,
-      onSelectedRuleSourceChanged as (args: string[]) => void
+    onCustomizationStatusChanged(
+      changedOption.checked === 'on' ? (changedOption.key as RuleCustomizationStatus) : undefined
     );
   };
 
@@ -62,8 +57,8 @@ const RuleCustomizationFilterPopoverComponent = ({
       onClick={() => setIsRuleCustomizationPopoverOpen(!isRuleCustomizationPopoverOpen)}
       numFilters={selectableOptions.length}
       isSelected={isRuleCustomizationPopoverOpen}
-      hasActiveFilters={selectedRuleSource.length > 0}
-      numActiveFilters={selectedRuleSource.length}
+      hasActiveFilters={customizationStatus != null}
+      numActiveFilters={customizationStatus != null ? 1 : 0}
       data-test-subj="rule-customization-filter-popover-button"
     >
       {i18n.RULE_SOURCE}

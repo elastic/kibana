@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 export const logEsqlRequest = (
   requestBody: {
@@ -24,5 +24,9 @@ export const logEsqlRequest = (
     }, [])
     .join('&');
 
-  return `POST _query${urlParams ? `?${urlParams}` : ''}\n${JSON.stringify(requestBody, null, 2)}`;
+  return `POST _query/async${urlParams ? `?${urlParams}` : ''}\n${JSON.stringify(
+    requestBody,
+    null,
+    2
+  )}`;
 };

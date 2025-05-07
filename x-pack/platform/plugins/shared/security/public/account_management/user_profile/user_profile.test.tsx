@@ -76,6 +76,7 @@ describe('useUserProfileForm', () => {
             "initials": "fn",
           },
           "userSettings": Object {
+            "contrastMode": "system",
             "darkMode": "space_default",
           },
         },
@@ -384,6 +385,34 @@ describe('useUserProfileForm', () => {
         const menuItemEl = (option.getDOMNode() as unknown as Element[])[1];
         expect(menuItemEl.className).toContain('disabled');
       });
+    });
+  });
+
+  describe('Contrast Mode Form', () => {
+    it('should add special toast after submitting form successfully since contrast mode change requires a refresh', async () => {
+      const data: UserProfileData = {};
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
+        1,
+        { title: 'Profile updated' },
+        {}
+      );
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.contrastMode', 'high'); // default value is 'system'
+        await result.current.submitForm();
+      });
+
+      expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ title: 'Profile updated' }),
+        expect.objectContaining({ toastLifeTimeMs: 300000 })
+      );
     });
   });
 

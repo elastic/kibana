@@ -142,7 +142,11 @@ describe('getRefineNode', () => {
 ${ATTACK_DISCOVERY_REFINE}
 
 \"\"\"
-${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
+\`\`\`json
+{
+  "insights": ${JSON.stringify(initialGraphState.unrefinedResults, null, 2)}
+}
+\`\`\`
 \"\"\"
 
 `,

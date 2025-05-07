@@ -11,11 +11,12 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
+import { EuiThemeProvider } from '@elastic/eui';
 import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ContextApp } from './context_app';
-import { DiscoverServices } from '../../build_services';
+import type { DiscoverServices } from '../../build_services';
 import { dataViewsMock } from '../../__mocks__/data_views';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
@@ -96,7 +97,9 @@ describe('ContextApp test', () => {
   const mountComponent = () => {
     return mountWithIntl(
       <KibanaContextProvider services={services}>
-        <ContextApp {...defaultProps} />
+        <EuiThemeProvider>
+          <ContextApp {...defaultProps} />
+        </EuiThemeProvider>
       </KibanaContextProvider>
     );
   };

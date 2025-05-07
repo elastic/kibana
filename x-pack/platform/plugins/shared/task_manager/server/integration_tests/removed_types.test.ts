@@ -6,12 +6,14 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '../plugin';
+import { TaskManagerPlugin } from '../plugin';
 import { injectTask, retry, setupTestServers } from './lib';
-import { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ConcreteTaskInstance, TaskStatus } from '../task';
-import { CreateWorkloadAggregatorOpts } from '../monitoring/workload_statistics';
+import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { ConcreteTaskInstance } from '../task';
+import { TaskStatus } from '../task';
+import type { CreateWorkloadAggregatorOpts } from '../monitoring/workload_statistics';
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 
@@ -28,7 +30,8 @@ jest.mock('../monitoring/workload_statistics', () => {
   };
 });
 
-describe('unrecognized task types', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/208459
+describe.skip('unrecognized task types', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
   let taskManagerPlugin: TaskManagerStartContract;
@@ -150,17 +153,15 @@ describe('unrecognized task types', () => {
 async function getTask(esClient: ElasticsearchClient) {
   const response = await esClient.search<{ task: ConcreteTaskInstance }>({
     index: '.kibana_task_manager',
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'task.taskType': 'sampleTaskRemovedType',
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'task.taskType': 'sampleTaskRemovedType',
             },
-          ],
-        },
+          },
+        ],
       },
     },
   });

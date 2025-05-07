@@ -60,41 +60,6 @@
       },
       {
         "parentPluginId": "@kbn/zod-helpers",
-        "id": "def-common.assertAllParsableSchemas",
-        "type": "Function",
-        "tags": [],
-        "label": "assertAllParsableSchemas",
-        "description": [
-          "\nAsserts that the schema is recursively parsable (ie, it is\ncomposed entirely of parsable schemas)"
-        ],
-        "signature": [
-          "(outerSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>) => Set<{ key: string; schema: DangerousParsableSchema; }>"
-        ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/deep_strict.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/zod-helpers",
-            "id": "def-common.assertAllParsableSchemas.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "outerSchema",
-            "description": [],
-            "signature": [
-              "Zod.ZodType<any, Zod.ZodTypeDef, any>"
-            ],
-            "path": "src/platform/packages/shared/kbn-zod-helpers/src/deep_strict.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.buildRouteValidationWithZod",
         "type": "Function",
         "tags": [],
@@ -138,7 +103,7 @@
         "label": "DeepStrict",
         "description": [],
         "signature": [
-          "(schema: TSchema) => Zod.ZodEffects<TSchema, TSchema[\"_output\"], unknown>"
+          "(schema: TSchema) => TSchema"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/deep_strict.ts",
         "deprecated": false,
@@ -231,6 +196,39 @@
       },
       {
         "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.isBooleanFromString",
+        "type": "Function",
+        "tags": [],
+        "label": "isBooleanFromString",
+        "description": [],
+        "signature": [
+          "(val: unknown) => val is KbnZodBooleanFromString"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isBooleanFromString.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "val",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.isNonEmptyString",
         "type": "Function",
         "tags": [],
@@ -269,6 +267,39 @@
               "Zod.RefinementCtx"
             ],
             "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.isPassThroughAny",
+        "type": "Function",
+        "tags": [],
+        "label": "isPassThroughAny",
+        "description": [],
+        "signature": [
+          "(val: unknown) => val is KbnPassThroughAny"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.isPassThroughAny.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "val",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -492,13 +523,11 @@
         "type": "Object",
         "tags": [],
         "label": "BooleanFromString",
-        "description": [
-          "\nThis is a helper schema to convert a boolean string (\"true\" or \"false\") to a\nboolean. Useful for processing query params.\n\nAccepts \"true\" or \"false\" as strings, or a boolean."
-        ],
+        "description": [],
         "signature": [
-          "Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">"
+          "KbnZodBooleanFromString"
         ],
-        "path": "src/platform/packages/shared/kbn-zod-helpers/src/boolean_from_string.ts",
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/boolean_from_string.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -514,6 +543,21 @@
           "Zod.ZodEffects<Zod.ZodString, string, string>"
         ],
         "path": "src/platform/packages/shared/kbn-zod-helpers/src/non_empty_string.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.PassThroughAny",
+        "type": "Object",
+        "tags": [],
+        "label": "PassThroughAny",
+        "description": [],
+        "signature": [
+          "KbnPassThroughAny"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/kbn_zod_types/pass_through_any.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

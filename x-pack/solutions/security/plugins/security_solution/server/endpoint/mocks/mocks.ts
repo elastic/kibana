@@ -38,7 +38,6 @@ import {
   createFleetStartContractMock,
   createFleetToHostFilesClientMock,
   createMessageSigningServiceMock,
-  createPackagePolicyServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
 import type { RequestFixtureOptions, RouterMock } from '@kbn/core-http-router-server-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -150,7 +149,12 @@ export const createMockEndpointAppContextService = (
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
     isServerless: jest.fn().mockReturnValue(false),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
-    getActiveSpace: jest.fn(async () => DEFAULT_SPACE_ID),
+    getActiveSpace: jest.fn(async () => ({
+      id: DEFAULT_SPACE_ID,
+      name: 'default',
+      disabledFeatures: [],
+    })),
+    getSpaceId: jest.fn().mockReturnValue('default'),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -182,9 +186,17 @@ export const createMockEndpointAppContextServiceStartContract =
     const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
     const security =
       securityServiceMock.createStart() as unknown as DeeplyMockedKeys<SecurityServiceStart>;
-    const packagePolicyService = createPackagePolicyServiceMock();
+    const fleetStartServices = createFleetStartContractMock();
 
-    packagePolicyService.list.mockImplementation(async (_, options) => {
+    // Ensure the agent service always returns the same agent service instance
+    fleetStartServices.agentService.asInternalScopedUser.mockReturnValue(
+      fleetStartServices.agentService.asInternalUser
+    );
+    fleetStartServices.agentService.asScoped.mockReturnValue(
+      fleetStartServices.agentService.asInternalUser
+    );
+
+    fleetStartServices.packagePolicyService.list.mockImplementation(async (_, options) => {
       return {
         items: [],
         total: 0,
@@ -208,7 +220,7 @@ export const createMockEndpointAppContextServiceStartContract =
         logger
       ) as DeeplyMockedKeys<ProductFeaturesService>,
       experimentalFeatures: config.experimentalFeatures,
-      fleetStartServices: createFleetStartContractMock(),
+      fleetStartServices,
       cases: casesPluginMock.createStartContract(),
       manifestManager: getManifestManagerMock() as DeeplyMockedKeys<ManifestManager>,
       alerting: alertsMock.createStart(),
@@ -230,7 +242,10 @@ export const createMockEndpointAppContextServiceStartContract =
 export function createRouteHandlerContext(
   dataClient: ScopedClusterClientMock,
   savedObjectsClient: jest.Mocked<SavedObjectsClientContract>,
-  overrides: { endpointAuthz?: Partial<EndpointAuthz> } = {}
+  overrides: {
+    endpointAuthz?: Partial<EndpointAuthz>;
+    endpointAppServices?: EndpointAppContextService;
+  } = {}
 ): SecuritySolutionRequestHandlerContextMock {
   const context = requestContextMock.create(createMockClients(), overrides);
 
@@ -276,10 +291,22 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
   const routerMock = httpServiceMock.createRouter();
   const endpointAppContextMock = createMockEndpointAppContext();
   const scopedEsClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
-  const savedObjectClientMock = savedObjectsClientMock.create();
+  const savedObjectClientMock =
+    endpointAppContextMock.service.savedObjects.createInternalScopedSoClient() as jest.Mocked<SavedObjectsClientContract>;
   const endpointAuthz = getEndpointAuthzInitialStateMock();
+
+  (endpointAppContextMock.service.getEndpointAuthz as jest.Mock).mockImplementation(async () => {
+    return endpointAuthz;
+  });
+
+  scopedEsClusterClientMock.asInternalUser =
+    endpointAppContextMock.service.getInternalEsClient() as ElasticsearchClientMock;
+
   const httpHandlerContextMock = requestContextMock.convertContext(
-    createRouteHandlerContext(scopedEsClusterClientMock, savedObjectClientMock, { endpointAuthz })
+    createRouteHandlerContext(scopedEsClusterClientMock, savedObjectClientMock, {
+      endpointAuthz,
+      endpointAppServices: endpointAppContextMock.service,
+    })
   );
   const httpResponseMock = httpServerMock.createResponseFactory();
   const getRegisteredRouteHandler: HttpApiTestSetupMock['getRegisteredRouteHandler'] = (
@@ -315,8 +342,6 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
   const setEndpointAuthz = (overrides: Partial<EndpointAuthz>) => {
     Object.assign(endpointAuthz, overrides);
   };
-
-  (endpointAppContextMock.service.getEndpointAuthz as jest.Mock).mockResolvedValue(endpointAuthz);
 
   return {
     routerMock,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import { initializeTitleManager, PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
@@ -19,7 +19,7 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ReactExpressionRendererProps } from '@kbn/expressions-plugin/public';
-import { ReactEmbeddableDynamicActionsApi } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import {
@@ -72,9 +72,7 @@ function getDefaultLensApiMock() {
     canUnlinkFromLibrary: jest.fn(async () => false),
     checkForDuplicateTitle: jest.fn(),
     /** New embeddable api inherited methods */
-    resetUnsavedChanges: jest.fn(),
     serializeState: jest.fn(),
-    snapshotRuntimeState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
     onEdit: jest.fn(),
     isEditingEnabled: jest.fn(() => true),
@@ -86,7 +84,6 @@ function getDefaultLensApiMock() {
       status: 'rendered',
       timeToEvent: 1000,
     }),
-    unsavedChanges$: new BehaviorSubject<object | undefined>(undefined),
     dataViews$: new BehaviorSubject<DataView[] | undefined>(undefined),
     savedObjectId$: new BehaviorSubject<string | undefined>(undefined),
     adapters$: new BehaviorSubject<Adapters>({}),
@@ -192,18 +189,22 @@ export function makeEmbeddableServices(
       getTrigger: jest.fn().mockImplementation(() => ({ exec: jest.fn() })),
     },
     embeddableEnhanced: {
-      initializeReactEmbeddableDynamicActions: jest.fn(
+      initializeEmbeddableDynamicActions: jest.fn(
         () =>
           ({
-            dynamicActionsApi: {
+            api: {
               enhancements: { dynamicActions: {} },
               setDynamicActions: jest.fn(),
               dynamicActionsState$: {},
+            } as unknown as EmbeddableDynamicActionsManager['api'],
+            anyStateChange$: of(undefined),
+            comparators: {
+              enhancements: jest.fn(),
             },
-            dynamicActionsComparator: jest.fn(),
-            serializeDynamicActions: jest.fn(),
+            getLatestState: jest.fn(),
+            reinitializeState: jest.fn(),
             startDynamicActions: jest.fn(),
-          } as unknown as ReactEmbeddableDynamicActionsApi)
+          } as EmbeddableDynamicActionsManager)
       ),
     },
   };

@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
+import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
 
 import { packagePolicyService } from '../..';
 import { auditLoggingService } from '../../audit_logging';
 
-import { removeInstallation } from './remove';
+import { deleteESAsset, removeInstallation } from './remove';
 
 jest.mock('../..', () => {
   return {
@@ -49,6 +50,7 @@ describe('removeInstallation', () => {
   beforeEach(() => {
     soClientMock = {
       get: jest.fn().mockResolvedValue({ attributes: { installed_kibana: [], installed_es: [] } }),
+      update: jest.fn(),
       delete: jest.fn(),
       find: jest.fn().mockResolvedValue({ saved_objects: [] }),
       bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
@@ -80,7 +82,7 @@ describe('removeInstallation', () => {
         force: false,
       })
     ).rejects.toThrowError(
-      `Unable to remove package with existing package policy(s) in use by agent(s)`
+      `Unable to remove package system:1.0.0 with existing package policy(s) in use by agent(s)`
     );
   });
 
@@ -107,7 +109,39 @@ describe('removeInstallation', () => {
     expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
       action: 'delete',
       id: 'system',
+      name: 'system',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
+  });
+});
+
+describe('deleteESAsset', () => {
+  it('should not delete @custom components template', async () => {
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    await deleteESAsset(
+      {
+        id: 'logs@custom',
+        type: ElasticsearchAssetType.componentTemplate,
+      },
+      esClient
+    );
+
+    expect(esClient.cluster.deleteComponentTemplate).not.toBeCalled();
+  });
+
+  it('should delete @package components template', async () => {
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    await deleteESAsset(
+      {
+        id: 'logs-nginx.access@package',
+        type: ElasticsearchAssetType.componentTemplate,
+      },
+      esClient
+    );
+
+    expect(esClient.cluster.deleteComponentTemplate).toBeCalledWith(
+      { name: 'logs-nginx.access@package' },
+      expect.anything()
+    );
   });
 });

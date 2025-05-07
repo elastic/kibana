@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as Option from 'fp-ts/lib/Option';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import { pipe } from 'fp-ts/pipeable';
+import * as Option from 'fp-ts/Option';
+import * as TaskEither from 'fp-ts/TaskEither';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-base-server-internal';
 import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
@@ -58,7 +59,6 @@ import type {
 import { createDelayFn } from './common/utils';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
-import { REMOVED_TYPES } from './core';
 
 type ActionMap = ReturnType<typeof nextActionMap>;
 

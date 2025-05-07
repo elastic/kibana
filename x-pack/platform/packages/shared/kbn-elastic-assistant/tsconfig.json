@@ -42,5 +42,8 @@
     "@kbn/spaces-plugin",
     "@kbn/shared-ux-router",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/datemath",
+    "@kbn/alerts-ui-shared",
+    "@kbn/deeplinks-security"
   ]
 }

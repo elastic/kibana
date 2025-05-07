@@ -119,47 +119,51 @@ describe('ruleTypeDiffAlgorithm', () => {
   });
 
   describe('if base_version is missing', () => {
-    it('returns current_version as merged output if current_version and target_version are the same - scenario -AA', () => {
-      const mockVersions: ThreeVersionsOf<DiffableRuleTypes> = {
-        base_version: MissingVersion,
-        current_version: 'query',
-        target_version: 'query',
-      };
+    describe('if current_version and target_version are the same - scenario -AA', () => {
+      it('returns NONE conflict', () => {
+        const mockVersions: ThreeVersionsOf<DiffableRuleTypes> = {
+          base_version: MissingVersion,
+          current_version: 'query',
+          target_version: 'query',
+        };
 
-      const result = ruleTypeDiffAlgorithm(mockVersions);
+        const result = ruleTypeDiffAlgorithm(mockVersions);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          has_base_version: false,
-          base_version: undefined,
-          merged_version: mockVersions.target_version,
-          diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflict.NONE,
-        })
-      );
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
     });
 
-    it('returns target_version as merged output if current_version and target_version are different - scenario -AB', () => {
-      // User can change rule type field between `query` and `saved_query` in the UI, no other rule types
-      const mockVersions: ThreeVersionsOf<DiffableRuleTypes> = {
-        base_version: MissingVersion,
-        current_version: 'query',
-        target_version: 'saved_query',
-      };
+    describe('returns target_version as merged output if current_version and target_version are different - scenario -AB', () => {
+      it('returns NON_SOLVABLE conflict', () => {
+        // User can change rule type field between `query` and `saved_query` in the UI, no other rule types
+        const mockVersions: ThreeVersionsOf<DiffableRuleTypes> = {
+          base_version: MissingVersion,
+          current_version: 'query',
+          target_version: 'saved_query',
+        };
 
-      const result = ruleTypeDiffAlgorithm(mockVersions);
+        const result = ruleTypeDiffAlgorithm(mockVersions);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          has_base_version: false,
-          base_version: undefined,
-          merged_version: mockVersions.target_version,
-          diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflict.NON_SOLVABLE,
-        })
-      );
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NON_SOLVABLE,
+          })
+        );
+      });
     });
   });
 });

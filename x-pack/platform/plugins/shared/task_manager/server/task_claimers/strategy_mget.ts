@@ -13,27 +13,24 @@
 // - from the non-stale search results, return as many as we can run based on available
 //   capacity and the cost of each task type to run
 
-import apm, { Logger } from 'elastic-apm-node';
-import { Subject } from 'rxjs';
+import type { Logger } from 'elastic-apm-node';
+import apm from 'elastic-apm-node';
+import type { Subject } from 'rxjs';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
-import { TaskTypeDictionary } from '../task_type_dictionary';
-import {
-  TaskClaimerOpts,
-  ClaimOwnershipResult,
-  getEmptyClaimOwnershipResult,
-  getExcludedTaskTypes,
-} from '.';
-import {
+import { sharedConcurrencyTaskTypes, type TaskTypeDictionary } from '../task_type_dictionary';
+import type { TaskClaimerOpts, ClaimOwnershipResult } from '.';
+import { getEmptyClaimOwnershipResult, getExcludedTaskTypes } from '.';
+import type {
   ConcreteTaskInstance,
-  TaskStatus,
   ConcreteTaskInstanceVersion,
-  TaskCost,
   PartialConcreteTaskInstance,
 } from '../task';
+import { TaskStatus, TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
-import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
+import type { TaskClaim } from '../task_events';
+import { asTaskClaimEvent, startTaskTimer } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
 
 import {
@@ -47,10 +44,10 @@ import {
   tasksWithPartitions,
 } from '../queries/mark_available_tasks_as_claimed';
 
-import { TaskStore, SearchOpts } from '../task_store';
+import type { TaskStore, SearchOpts } from '../task_store';
 import { isOk, asOk } from '../lib/result_type';
 import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
-import { TaskPartitioner } from '../lib/task_partitioner';
+import type { TaskPartitioner } from '../lib/task_partitioner';
 import { getRetryAt } from '../lib/get_retry_at';
 
 interface OwnershipClaimingOpts {
@@ -147,7 +144,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   }
 
   // apply limited concurrency limits (TODO: can currently starve other tasks)
-  const candidateTasks = selectTasksByCapacity(currentTasks, batches);
+  const candidateTasks = selectTasksByCapacity({ definitions, tasks: currentTasks, batches });
 
   // apply capacity constraint to candidate tasks
   const tasksToRun: ConcreteTaskInstance[] = [];
@@ -328,12 +325,12 @@ async function searchAvailableTasks({
   }
 
   // add searches for limited types
-  for (const [type, capacity] of claimPartitions.limitedTypes) {
+  for (const [types, capacity] of claimPartitions.limitedTypes) {
     const queryForLimitedTasks = mustBeAllOf(
       // Task must be enabled
       EnabledTask,
       // Specific task type
-      OneOfTaskTypes('task.taskType', [type]),
+      OneOfTaskTypes('task.taskType', types.split(',')),
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
@@ -359,6 +356,14 @@ async function searchAvailableTasks({
 
 interface ClaimPartitions {
   unlimitedTypes: string[];
+  // Map where key is a limited concurrency task type and value is the current capacity
+  // Key can also be a comma-delimited list of limited concurrency task types that share the same concurrency.
+  //   In this case, the value is the minimum available capacity across all shared concurrency task types.
+  //   For example, if taskTypeA and taskTypeB share concurrency and taskTypeA has a capacity of 2 while taskTypeB
+  //     has a capacity of 4, the Map value will be
+  //     Map {
+  //       'taskTypeA,taskTypeB' => 2
+  //     }
   limitedTypes: Map<string, number>;
 }
 
@@ -387,9 +392,30 @@ function buildClaimPartitions(opts: BuildClaimPartitionsOpts): ClaimPartitions {
       continue;
     }
 
-    const capacity = getCapacity(definition.type) / definition.cost;
-    if (capacity !== 0) {
-      result.limitedTypes.set(definition.type, capacity);
+    // task type has maxConcurrency defined
+
+    const isSharingConcurrency = sharedConcurrencyTaskTypes(type);
+    if (isSharingConcurrency) {
+      let minCapacity = null;
+      for (const sharedType of isSharingConcurrency) {
+        const def = definitions.get(sharedType);
+        if (def) {
+          const capacity = getCapacity(def.type) / def.cost;
+          if (minCapacity == null) {
+            minCapacity = capacity;
+          } else if (capacity < minCapacity) {
+            minCapacity = capacity;
+          }
+        }
+      }
+      if (minCapacity) {
+        result.limitedTypes.set(isSharingConcurrency.join(','), minCapacity);
+      }
+    } else {
+      const capacity = getCapacity(definition.type) / definition.cost;
+      if (capacity !== 0) {
+        result.limitedTypes.set(definition.type, capacity);
+      }
     }
   }
 

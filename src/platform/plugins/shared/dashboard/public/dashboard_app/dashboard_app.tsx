@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import { ViewMode } from '@kbn/presentation-publishing';
 import { History } from 'history';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { ViewMode } from '@kbn/presentation-publishing';
+import { SharedDashboardState } from '../../common/types';
 import { DashboardApi, DashboardCreationOptions } from '..';
-import { DASHBOARD_APP_ID } from '../plugin_constants';
-import { DashboardRedirect } from '../dashboard_container/types';
+import { DASHBOARD_APP_ID } from '../../common/constants';
+import { loadDashboardHistoryLocationState } from '../../common/locator/load_dashboard_history_location_state';
+import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import {
   coreServices,
@@ -28,29 +29,23 @@ import {
   screenshotModeService,
   shareService,
 } from '../services/kibana_services';
+import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
-import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
 } from './no_data/dashboard_app_no_data';
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
-import { type DashboardEmbedSettings } from './types';
+import { DashboardRedirect, type DashboardEmbedSettings } from './types';
 import {
   createSessionRestorationDataProvider,
   getSearchSessionIdFromURL,
   getSessionURLObservable,
   removeSearchSessionIdFromURL,
 } from './url/search_sessions_integration';
-import {
-  loadAndRemoveDashboardState,
-  startSyncingExpandedPanelState,
-  type SharedDashboardState,
-} from './url/url_utils';
-import { DashboardRenderer } from '../dashboard_container/external_api/dashboard_renderer';
-import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
+import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
 
 export interface DashboardAppProps {
   history: History;

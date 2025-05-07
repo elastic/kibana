@@ -11,18 +11,19 @@ import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/anal
 import { pick } from 'lodash';
 import { parse as parseCookie } from 'tough-cookie';
 import { kbnTestConfig } from '@kbn/test';
+import { systemMessageSorted } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/conversation';
 import {
   createLlmProxy,
-  isFunctionTitleRequest,
   LlmProxy,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { interceptRequest } from '../../common/intercept_request';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { editor } from '../../../observability_ai_assistant_api_integration/common/users/users';
+import { deleteConnectors } from '../../common/connectors';
+import { deleteConversations } from '../../common/conversations';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
@@ -31,13 +32,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const retry = getService('retry');
   const log = getService('log');
   const telemetry = getService('kibana_ebt_ui');
-
-  const driver = getService('__webdriver__');
-
   const toasts = getService('toasts');
-
   const { header } = getPageObjects(['header', 'security']);
-
   const flyoutService = getService('flyout');
 
   async function login(username: string, password: string | undefined) {
@@ -52,36 +48,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       })
       .expect(200);
     return parseCookie(response.headers['set-cookie'][0])!;
-  }
-
-  async function deleteConversations() {
-    const response = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/conversations',
-    });
-
-    for (const conversation of response.body.conversations) {
-      await observabilityAIAssistantAPIClient.editor({
-        endpoint: `DELETE /internal/observability_ai_assistant/conversation/{conversationId}`,
-        params: {
-          path: {
-            conversationId: conversation.conversation.id,
-          },
-        },
-      });
-    }
-  }
-
-  async function deleteConnectors() {
-    const response = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'GET /internal/observability_ai_assistant/connectors',
-    });
-
-    for (const connector of response.body) {
-      await supertest
-        .delete(`/api/actions/connector/${connector.id}`)
-        .set('kbn-xsrf', 'foo')
-        .expect(204);
-    }
   }
 
   async function createOldConversation() {
@@ -137,11 +103,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           ],
           conversation: {
             title: 'My old conversation',
-            token_count: {
-              completion: 1,
-              prompt: 1,
-              total: 2,
-            },
           },
           '@timestamp': '2024-04-18T14:29:22.948',
           public: false,
@@ -160,8 +121,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   describe('Conversations', () => {
     let proxy: LlmProxy;
     before(async () => {
-      await deleteConnectors();
-      await deleteConversations();
+      await deleteConnectors(supertest);
+      await deleteConversations(getService);
 
       await createOldConversation();
 
@@ -199,18 +160,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             );
             await testSubjects.setValue(ui.pages.createConnectorFlyout.apiKeyInput, 'myApiKey');
 
-            // intercept the request to set up the knowledge base,
-            // so we don't have to wait until it's fully downloaded
-            await interceptRequest(
-              driver.driver,
-              '*kb\\/setup*',
-              (responseFactory) => {
-                return responseFactory.fail();
-              },
-              async () => {
-                await testSubjects.clickWhenNotDisabled(ui.pages.createConnectorFlyout.saveButton);
-              }
-            );
+            await testSubjects.clickWhenNotDisabled(ui.pages.createConnectorFlyout.saveButton);
 
             await retry.waitFor('Connector created toast', async () => {
               const count = await toasts.getCount();
@@ -234,7 +184,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             });
 
             it('shows a setup kb button', async () => {
-              await testSubjects.existOrFail(ui.pages.conversations.retryButton);
+              await testSubjects.existOrFail(ui.pages.conversations.installKnowledgeBaseButton);
             });
 
             it('has an input field enabled', async () => {
@@ -243,51 +193,17 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             });
 
             describe('and sending over some text', () => {
-              before(async () => {
-                const titleInterceptor = proxy.intercept('title', (body) =>
-                  isFunctionTitleRequest(body)
-                );
+              const expectedTitle = 'My title';
+              const expectedResponse = 'My response';
 
-                const conversationInterceptor = proxy.intercept(
-                  'conversation',
-                  (body) =>
-                    body.tools?.find((fn) => fn.function.name === 'title_conversation') ===
-                    undefined
-                );
+              before(async () => {
+                void proxy.interceptTitle(expectedTitle);
+                void proxy.interceptWithResponse(expectedResponse);
 
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
-
                 await testSubjects.pressEnter(ui.pages.conversations.chatInput);
 
-                const [titleSimulator, conversationSimulator] = await Promise.all([
-                  titleInterceptor.waitForIntercept(),
-                  conversationInterceptor.waitForIntercept(),
-                ]);
-
-                await titleSimulator.next({
-                  content: '',
-                  tool_calls: [
-                    {
-                      id: 'id',
-                      index: 0,
-                      function: {
-                        name: 'title_conversation',
-                        arguments: JSON.stringify({ title: 'My title' }),
-                      },
-                    },
-                  ],
-                });
-
-                await titleSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
-
-                await titleSimulator.complete();
-
-                await conversationSimulator.next('My response');
-
-                await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
-
-                await conversationSimulator.complete();
-
+                await proxy.waitForAllInterceptorsToHaveBeenCalled();
                 await header.waitUntilLoadingHasFinished();
               });
 
@@ -296,9 +212,20 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   endpoint: 'POST /internal/observability_ai_assistant/conversations',
                 });
 
+                const functionResponse = await observabilityAIAssistantAPIClient.editor({
+                  endpoint: 'GET /internal/observability_ai_assistant/functions',
+                  params: {
+                    query: {
+                      scopes: ['observability'],
+                    },
+                  },
+                });
+
+                const primarySystemMessage = functionResponse.body.systemMessage;
+
                 expect(response.body.conversations.length).to.eql(2);
 
-                expect(response.body.conversations[0].conversation.title).to.be('My title');
+                expect(response.body.conversations[0].conversation.title).to.be(expectedTitle);
 
                 const { messages, systemMessage } = response.body.conversations[0];
 
@@ -307,10 +234,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 const [firstUserMessage, contextRequest, contextResponse, assistantResponse] =
                   messages.map((msg) => msg.message);
 
-                const systemMessageContent =
-                  'You are a helpful assistant for Elastic Observability. Your goal is to help the Elastic Observability users to quickly assess what is happening in their observed systems. You can help them visualise and analyze data, investigate their systems, perform root cause analysis or identify optimisation opportunities.\n\n    It\'s very important to not assume what the user is meaning. Ask them for clarification if needed.\n\n    If you are unsure about which function should be used and with what arguments, ask the user for clarification or confirmation.\n\n    In KQL ("kqlFilter")) escaping happens with double quotes, not single quotes. Some characters that need escaping are: \':()\\    /". Always put a field value in double quotes. Best: service.name:"opbeans-go". Wrong: service.name:opbeans-go. This is very important!\n\n    You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.\n\n    Note that ES|QL (the Elasticsearch Query Language which is a new piped language) is the preferred query language.\n\n    If you want to call a function or tool, only call it a single time per message. Wait until the function has been executed and its results\n    returned to you, before executing the same tool or another tool again if needed.\n\n    DO NOT UNDER ANY CIRCUMSTANCES USE ES|QL syntax (`service.name == "foo"`) with "kqlFilter" (`service.name:"foo"`).\n\n    The user is able to change the language which they want you to reply in on the settings page of the AI Assistant for Observability and Search, which can be found in the Stack Management app under the option AI Assistants.\n    If the user asks how to change the language, reply in the same language the user asked in.\n\nYou MUST use the "query" function when the user wants to:\n  - visualize data\n  - run any arbitrary query\n  - breakdown or filter ES|QL queries that are displayed on the current page\n  - convert queries from another language to ES|QL\n  - asks general questions about ES|QL\n\n  DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.\n  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.\n\n  If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.\n\n  Even if the "query" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,\n  even if it has been called before.\n\n  When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.\n  If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.\n\nYou MUST use the "get_dataset_info"  function before calling the "query" or the "changes" functions.\n\nIf a function requires an index, you MUST use the results from the dataset info functions.\n\nYou do not have a working memory. If the user expects you to remember the previous conversations, tell them they can set up the knowledge base.\n\nWhen asked questions about the Elastic stack or products, You should use the retrieve_elastic_doc function before answering,\n      to retrieve documentation related to the question. Consider that the documentation returned by the function\n      is always more up to date and accurate than any own internal knowledge you might have.';
+                expect(systemMessage).to.contain(
+                  'You are a helpful assistant for Elastic Observability. Your goal is '
+                );
 
-                expect(systemMessage).to.eql(systemMessageContent);
+                expect(systemMessageSorted(systemMessage!)).to.eql(
+                  systemMessageSorted(primarySystemMessage)
+                );
 
                 expect(firstUserMessage.content).to.eql('hello');
 
@@ -326,7 +256,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                 expect(pick(assistantResponse, 'role', 'content')).to.eql({
                   role: 'assistant',
-                  content: 'My response',
+                  content: expectedResponse,
                 });
               });
 
@@ -335,25 +265,17 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 expect(links.length).to.eql(2);
 
                 const title = await links[0].getVisibleText();
-                expect(title).to.eql('My title');
+                expect(title).to.eql(expectedTitle);
               });
 
               describe('and adding another prompt', () => {
                 before(async () => {
-                  const conversationInterceptor = proxy.intercept('conversation', () => true);
+                  void proxy.interceptWithResponse('My second response');
 
                   await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
-
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
 
-                  const conversationSimulator = await conversationInterceptor.waitForIntercept();
-
-                  await conversationSimulator.next('My second response');
-
-                  await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
-
-                  await conversationSimulator.complete();
-
+                  await proxy.waitForAllInterceptorsToHaveBeenCalled();
                   await header.waitUntilLoadingHasFinished();
                 });
 
@@ -426,12 +348,15 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                 const conversations = await testSubjects.findAll(
                   ui.pages.conversations.conversationLink
                 );
-                await conversations[1].click();
+
+                await conversations[0].click();
               });
 
               describe('and sending another prompt', () => {
                 before(async () => {
-                  const conversationInterceptor = proxy.intercept('conversation', () => true);
+                  void proxy.interceptWithResponse(
+                    'Service Level Indicators (SLIs) are quantifiable defined metrics that measure the performance and availability of a service or distributed system.'
+                  );
 
                   await testSubjects.setValue(
                     ui.pages.conversations.chatInput,
@@ -439,25 +364,18 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   );
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
 
-                  const conversationSimulator = await conversationInterceptor.waitForIntercept();
-
-                  await conversationSimulator.next(
-                    'Service Level Indicators (SLIs) are quantifiable defined metrics that measure the performance and availability of a service or distributed system.'
-                  );
-
-                  await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
-
-                  await conversationSimulator.complete();
-
+                  await proxy.waitForAllInterceptorsToHaveBeenCalled();
                   await header.waitUntilLoadingHasFinished();
                 });
 
                 describe('and choosing to send feedback', () => {
                   before(async () => {
                     await telemetry.setOptIn(true);
+
                     const feedbackButtons = await testSubjects.findAll(
                       ui.pages.conversations.positiveFeedbackButton
                     );
+
                     await feedbackButtons[feedbackButtons.length - 1].click();
                   });
 
@@ -492,8 +410,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     });
 
     after(async () => {
-      await deleteConnectors();
-      await deleteConversations();
+      await deleteConnectors(supertest);
+      await deleteConversations(getService);
 
       await ui.auth.logout();
       proxy.close();

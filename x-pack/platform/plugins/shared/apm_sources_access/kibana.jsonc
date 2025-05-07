@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/apm-sources-access-plugin",
+  "owner": [
+    "@elastic/obs-ux-infra_services-team"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "apmSourcesAccess",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "apm_sources_access"
+    ],
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

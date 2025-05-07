@@ -75,5 +75,39 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(toastTitle).to.eql(`Updated maintenance window 'Test Maintenance Window updated'`);
       });
     });
+
+    it('should show callout when update a maintenance window with old chosen solutions', async () => {
+      const createdMaintenanceWindow = await createMaintenanceWindow({
+        name: 'Test Maintenance Window',
+        getService,
+        overwrite: {
+          r_rule: {
+            dtstart: new Date().toISOString(),
+            tzid: 'UTC',
+            freq: 3,
+            interval: 12,
+            count: 5,
+          },
+          category_ids: ['observability', 'securitySolution'],
+        },
+      });
+
+      objectRemover.add(createdMaintenanceWindow.id, 'rules/maintenance_window', 'alerting', true);
+
+      await browser.refresh();
+
+      await pageObjects.maintenanceWindows.searchMaintenanceWindows('Test Maintenance Window 2');
+
+      await testSubjects.click('table-actions-popover');
+      await testSubjects.click('table-actions-edit');
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('createMaintenanceWindowForm');
+      });
+
+      expect(
+        await testSubjects.getVisibleText('maintenanceWindowMultipleSolutionsWarning')
+      ).to.contain('Support for multiple solution categories is removed.');
+    });
   });
 };

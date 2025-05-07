@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   AggregationsStringTermsBucket,
   AggregationsStringTermsBucketKeys,
   AggregationsTermsAggregateBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Observable, Subject } from 'rxjs';
-import { TaskStore } from '../task_store';
+} from '@elastic/elasticsearch/lib/api/types';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+import type { TaskStore } from '../task_store';
 import {
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
   OneOfTaskTypes,
 } from '../queries/mark_available_tasks_as_claimed';
-import { ITaskEventEmitter, TaskLifecycleEvent } from '../polling_lifecycle';
+import type { ITaskEventEmitter, TaskLifecycleEvent } from '../polling_lifecycle';
 import { asTaskManagerMetricEvent } from '../task_events';
 import { asOk } from '../lib/result_type';
 
@@ -156,6 +157,7 @@ export class TaskManagerMetricsCollector implements ITaskEventEmitter<TaskLifecy
         }) ?? {};
       const byTaskType = ((aggregations.byTaskType.buckets as OverdueTaskAggBucket[]) ?? []).reduce(
         (acc: Record<string, number>, bucket: OverdueTaskAggBucket) => {
+          // @ts-expect-error there's no way that buckets (array) matches `number`
           acc[bucket.key] = bucket?.overdueByHistogram?.buckets ?? [];
           return acc;
         },

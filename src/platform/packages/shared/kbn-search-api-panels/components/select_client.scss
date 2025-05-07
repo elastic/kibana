@@ -1,6 +1,6 @@
-.serverlessSearchSelectClientPanelSelectedBorder {
+.serverlessSearchSelectClientPanelSelectedBorder::before {
   border: 1px solid $euiColorPrimary;
 }
-.serverlessSearchSelectClientPanelBorder {
+.serverlessSearchSelectClientPanelBorder::before {
   border: 1px solid $euiColorLightShade;
 }

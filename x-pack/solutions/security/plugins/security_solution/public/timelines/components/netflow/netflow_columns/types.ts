@@ -7,6 +7,7 @@
 
 export interface NetflowColumnsProps {
   contextId: string;
+  scopeId: string;
   destinationBytes?: string[] | null;
   destinationGeoContinentName?: string[] | null;
   destinationGeoCountryName?: string[] | null;

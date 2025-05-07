@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { resetSLOResponseSchema } from '@kbn/slo-schema';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SLO_MODEL_VERSION,
   SUMMARY_DESTINATION_INDEX_PATTERN,
   SUMMARY_TEMP_INDEX_NAME,
-  getSLOPipelineId,
-  getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getWildcardPipelineId,
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
@@ -27,7 +26,6 @@ import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_exp
 
 export class ResetSLO {
   constructor(
-    private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
     private repository: SLORepository,
     private transformManager: TransformManager,
@@ -40,14 +38,12 @@ export class ResetSLO {
   public async execute(sloId: string) {
     const slo = await this.repository.findById(sloId);
 
-    await assertExpectedIndicatorSourceIndexPrivileges(slo, this.esClient);
+    await assertExpectedIndicatorSourceIndexPrivileges(slo, this.scopedClusterClient.asCurrentUser);
 
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
-    await this.summaryTransformManager.stop(summaryTransformId);
     await this.summaryTransformManager.uninstall(summaryTransformId);
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
-    await this.transformManager.stop(rollupTransformId);
     await this.transformManager.uninstall(rollupTransformId);
 
     await Promise.all([this.deleteRollupData(slo.id), this.deleteSummaryData(slo.id)]);
@@ -56,7 +52,7 @@ export class ResetSLO {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-            getSLIPipelineTemplate(slo)
+            getSLIPipelineTemplate(slo, this.spaceId)
           ),
         { logger: this.logger }
       );
@@ -77,7 +73,7 @@ export class ResetSLO {
 
       await retryTransientEsErrors(
         () =>
-          this.esClient.index({
+          this.scopedClusterClient.asCurrentUser.index({
             index: SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${slo.id}`,
             document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
@@ -86,21 +82,14 @@ export class ResetSLO {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(
+      this.logger.debug(
         `Cannot reset the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
       );
 
-      await this.summaryTransformManager.stop(summaryTransformId);
       await this.summaryTransformManager.uninstall(summaryTransformId);
-      await this.transformManager.stop(rollupTransformId);
       await this.transformManager.uninstall(rollupTransformId);
       await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
-        { ignore: [404] }
-      );
-
-      await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOPipelineId(slo.id, slo.revision) },
+        { id: getWildcardPipelineId(slo.id, slo.revision) },
         { ignore: [404] }
       );
 
@@ -123,9 +112,11 @@ export class ResetSLO {
    * @param sloId
    */
   private async deleteRollupData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       refresh: true,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           filter: [{ term: { 'slo.id': sloId } }],
@@ -141,9 +132,11 @@ export class ResetSLO {
    * @param sloId
    */
   private async deleteSummaryData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           filter: [{ term: { 'slo.id': sloId } }],

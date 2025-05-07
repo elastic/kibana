@@ -6,10 +6,18 @@
  */
 
 import { ReactElement } from 'react';
-import { ToastsStart } from '@kbn/core-notifications-browser';
-import { type SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
+import { type FilterControlConfig, FilterGroupHandler } from '@kbn/alerts-ui-shared';
+import type { HttpStart } from '@kbn/core-http-browser';
+import { type NotificationsStart, ToastsStart } from '@kbn/core-notifications-browser';
+import {
+  DataPublicPluginStart,
+  type SavedQuery,
+  TimefilterContract,
+} from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
-import { BoolQuery, Filter, Query } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { AlertStatus } from '../../../common/typings';
 export interface AlertStatusFilterProps {
@@ -20,6 +28,7 @@ export interface AlertStatusFilterProps {
 export interface AlertSearchBarWithUrlSyncProps extends CommonAlertSearchBarProps {
   urlStorageKey: string;
   defaultState?: AlertSearchBarContainerState;
+  disableLocalStorageSync?: boolean;
 }
 
 export interface Dependencies {
@@ -37,6 +46,11 @@ export interface Dependencies {
 export interface Services {
   timeFilterService: TimefilterContract;
   AlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
+  http: HttpStart;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  notifications: NotificationsStart;
+  spaces?: SpacesPluginStart;
   useToasts: () => ToastsStart;
   uiSettings: IUiSettingsClient;
 }
@@ -45,31 +59,40 @@ export interface ObservabilityAlertSearchBarProps
   extends AlertSearchBarContainerState,
     AlertSearchBarStateTransitions,
     CommonAlertSearchBarProps {
-  showFilterBar?: boolean;
-  savedQuery?: SavedQuery;
   services: Services;
+  filterControls?: Filter[];
+  onFilterControlsChange: (filterControls: Filter[]) => void;
+  savedQuery?: SavedQuery;
+  showFilterBar?: boolean;
+  disableLocalStorageSync?: boolean;
 }
 
 export interface AlertSearchBarContainerState {
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
-  status: AlertStatus;
+  status?: AlertStatus;
   filters?: Filter[];
   savedQueryId?: string;
+  controlConfigs?: FilterControlConfig[];
+  groupings?: string[];
 }
 
 interface AlertSearchBarStateTransitions {
   onRangeFromChange: (rangeFrom: string) => void;
   onRangeToChange: (rangeTo: string) => void;
   onKueryChange: (kuery: string) => void;
-  onStatusChange: (status: AlertStatus) => void;
+  onStatusChange?: (status: AlertStatus) => void;
   onFiltersChange?: (filters: Filter[]) => void;
   setSavedQuery?: (savedQueryId?: SavedQuery) => void;
+  onControlConfigsChange?: (controlConfigs: FilterControlConfig[]) => void;
 }
 
 interface CommonAlertSearchBarProps {
   appName: string;
   onEsQueryChange: (query: { bool: BoolQuery }) => void;
-  defaultSearchQueries?: Query[];
+  defaultFilters?: Filter[];
+  filterControls?: Filter[];
+  onFilterControlsChange: (filterControls: Filter[]) => void;
+  onControlApiAvailable?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
 }

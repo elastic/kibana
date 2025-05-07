@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createRule,
   createAction,
@@ -17,6 +17,7 @@ import {
   getRuleEvents,
   expectNoActionsFired,
   runSoon,
+  expectActionsFired,
 } from './test_helpers';
 
 // eslint-disable-next-line import/no-default-export
@@ -214,7 +215,7 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
       });
     });
 
-    it('alerts triggered within a MW should not fire actions if active or recovered outside a MW', async () => {
+    it('alerts triggered within a MW should fire actions if still active or recoveres after the MW expired', async () => {
       const pattern = {
         instance: [true, true, false, true],
       };
@@ -278,10 +279,11 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
         getService,
       });
 
-      await expectNoActionsFired({
+      await expectActionsFired({
         id: rule.id,
         supertest,
         retry,
+        expectedNumberOfActions: 1,
       });
 
       // Run again - recovered
@@ -298,10 +300,11 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
         getService,
       });
 
-      await expectNoActionsFired({
+      await expectActionsFired({
         id: rule.id,
         supertest,
         retry,
+        expectedNumberOfActions: 2,
       });
 
       // Run again - active again, this time fire the action since its a new alert instance
@@ -312,7 +315,7 @@ export default function maintenanceWindowFlowsTests({ getService }: FtrProviderC
       });
       await getRuleEvents({
         id: rule.id,
-        action: 1,
+        action: 3,
         activeInstance: 3,
         recoveredInstance: 1,
         retry,

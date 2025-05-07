@@ -36,6 +36,10 @@
     "@kbn/es-types",
     "@kbn/field-types",
     "@kbn/expressions-plugin",
-    "@kbn/inference-langchain"
+    "@kbn/inference-langchain",
+    "@kbn/sse-utils-server",
+    "@kbn/tracing",
+    "@kbn/safer-lodash-set",
+    "@kbn/std"
   ]
 }

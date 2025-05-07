@@ -22,18 +22,20 @@ const args: Args = {
   width: 250,
 };
 
-export const Requirements = ({ width }: Args) => {
-  return (
-    <div style={{ width }}>
-      <Component
-        requirements={{
-          kibana: {
-            version: '1.2.3',
-          },
-        }}
-      />
-    </div>
-  );
-};
+export const Requirements = {
+  render: ({ width }: Args) => {
+    return (
+      <div style={{ width }}>
+        <Component
+          requirements={{
+            kibana: {
+              version: '1.2.3',
+            },
+          }}
+        />
+      </div>
+    );
+  },
 
-Requirements.args = args;
+  args,
+};

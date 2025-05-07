@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import {
   BehaviorSubject,
@@ -16,13 +15,15 @@ import {
   distinctUntilChanged,
   filter,
   map,
+  merge,
   skip,
   Subject,
 } from 'rxjs';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
-import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { PublishingSubject } from '@kbn/presentation-publishing';
 
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { OPTIONS_LIST_CONTROL } from '../../../../common';
 import type {
   OptionsListControlState,
@@ -33,7 +34,7 @@ import type {
   OptionsListSuggestions,
 } from '../../../../common/options_list';
 import { getSelectionAsFieldType, isValidSearch } from '../../../../common/options_list';
-import { initializeDataControl } from '../initialize_data_control';
+import { defaultDataControlComparators, initializeDataControl } from '../initialize_data_control';
 import type { DataControlFactory } from '../types';
 import { OptionsListControl } from './components/options_list_control';
 import { OptionsListEditorOptions } from './components/options_list_editor_options';
@@ -44,7 +45,10 @@ import {
 } from './constants';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';
-import { initializeOptionsListSelections } from './options_list_control_selections';
+import {
+  initializeOptionsListSelections,
+  selectionComparators,
+} from './options_list_control_selections';
 import { OptionsListStrings } from './options_list_strings';
 import type { OptionsListControlApi } from './types';
 
@@ -65,7 +69,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       );
     },
     CustomOptionsComponent: OptionsListEditorOptions,
-    buildControl: async (initialState, buildApi, uuid, controlGroupApi) => {
+    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
       /** Serializable state - i.e. the state that is saved with the control */
       const searchTechnique$ = new BehaviorSubject<OptionsListSearchTechnique | undefined>(
         initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
@@ -76,12 +80,11 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         initialState.sort ?? OPTIONS_LIST_DEFAULT_SORT
       );
 
-      /** Creation options state - cannot currently be changed after creation, but need subjects for comparators */
-      const placeholder$ = new BehaviorSubject<string | undefined>(initialState.placeholder);
-      const hideActionBar$ = new BehaviorSubject<boolean | undefined>(initialState.hideActionBar);
-      const hideExclude$ = new BehaviorSubject<boolean | undefined>(initialState.hideExclude);
-      const hideExists$ = new BehaviorSubject<boolean | undefined>(initialState.hideExists);
-      const hideSort$ = new BehaviorSubject<boolean | undefined>(initialState.hideSort);
+      const placeholder = initialState.placeholder;
+      const hideActionBar = initialState.hideActionBar;
+      const hideExclude = initialState.hideExclude;
+      const hideExists = initialState.hideExists;
+      const hideSort = initialState.hideSort;
 
       /** Runtime / component state - none of this is serialized */
       const searchString$ = new BehaviorSubject<string>('');
@@ -115,10 +118,8 @@ export const getOptionsListControlFactory = (): DataControlFactory<
 
       const stateManager = {
         ...dataControl.stateManager,
-        exclude: selections.exclude$,
-        existsSelected: selections.existsSelected$,
+        ...selections.stateManager,
         searchTechnique: searchTechnique$,
-        selectedOptions: selections.selectedOptions$,
         singleSelect: singleSelect$,
         sort: sort$,
         searchString: searchString$,
@@ -169,9 +170,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         )
         .subscribe(() => {
           searchString$.next('');
-          selections.setSelectedOptions(undefined);
-          selections.setExistsSelected(false);
-          selections.setExclude(false);
+          selections.internalApi.setSelectedOptions(undefined);
+          selections.internalApi.setExistsSelected(false);
+          selections.internalApi.setExclude(false);
           requestSize$.next(MIN_OPTIONS_LIST_REQUEST_SIZE);
           sort$.next(OPTIONS_LIST_DEFAULT_SORT);
         });
@@ -185,9 +186,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           loadingSuggestions$,
           debouncedSearchString,
           parentApi: controlGroupApi,
-          controlFetch$: controlGroupApi.controlFetch$(uuid),
         },
         stateManager,
+        controlFetch$: (onReload: () => void) => controlGroupApi.controlFetch$(uuid, onReload),
       }).subscribe((result) => {
         // if there was an error during fetch, set blocking error and return early
         if (Object.hasOwn(result, 'error')) {
@@ -214,16 +215,17 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       const singleSelectSubscription = singleSelect$
         .pipe(filter((singleSelect) => Boolean(singleSelect)))
         .subscribe(() => {
-          const currentSelections = selections.selectedOptions$.getValue() ?? [];
-          if (currentSelections.length > 1) selections.setSelectedOptions([currentSelections[0]]);
+          const currentSelections = stateManager.selectedOptions.getValue() ?? [];
+          if (currentSelections.length > 1)
+            selections.internalApi.setSelectedOptions([currentSelections[0]]);
         });
 
       const hasSelections$ = new BehaviorSubject<boolean>(
         Boolean(initialState.selectedOptions?.length || initialState.existsSelected)
       );
       const hasSelectionsSubscription = combineLatest([
-        selections.selectedOptions$,
-        selections.existsSelected$,
+        stateManager.selectedOptions,
+        stateManager.existsSelected,
       ])
         .pipe(
           map(([selectedOptions, existsSelected]) => {
@@ -238,9 +240,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       const outputFilterSubscription = combineLatest([
         dataControl.api.dataViews$,
         dataControl.stateManager.fieldName,
-        selections.selectedOptions$,
-        selections.existsSelected$,
-        selections.exclude$,
+        stateManager.selectedOptions,
+        stateManager.existsSelected,
+        stateManager.exclude,
       ])
         .pipe(debounceTime(0))
         .subscribe(([dataViews, fieldName, selectedOptions, existsSelected, exclude]) => {
@@ -265,65 +267,91 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           dataControl.setters.setOutputFilter(newFilter);
         });
 
-      const api = buildApi(
-        {
-          ...dataControl.api,
-          dataLoading$,
-          getTypeDisplayName: OptionsListStrings.control.getDisplayName,
-          serializeState: () => {
-            const { rawState: dataControlState, references } = dataControl.serialize();
-            return {
-              rawState: {
-                ...dataControlState,
-                searchTechnique: searchTechnique$.getValue(),
-                runPastTimeout: runPastTimeout$.getValue(),
-                singleSelect: singleSelect$.getValue(),
-                selectedOptions: selections.selectedOptions$.getValue(),
-                sort: sort$.getValue(),
-                existsSelected: selections.existsSelected$.getValue(),
-                exclude: selections.exclude$.getValue(),
+      function serializeState() {
+        const { rawState: dataControlState, references } = dataControl.getLatestState();
+        return {
+          rawState: {
+            ...dataControlState,
+            ...selections.getLatestState(),
+            searchTechnique: searchTechnique$.getValue(),
+            runPastTimeout: runPastTimeout$.getValue(),
+            singleSelect: singleSelect$.getValue(),
+            sort: sort$.getValue(),
+            exclude: stateManager.exclude.getValue(),
 
-                // serialize state that cannot be changed to keep it consistent
-                placeholder: placeholder$.getValue(),
-                hideActionBar: hideActionBar$.getValue(),
-                hideExclude: hideExclude$.getValue(),
-                hideExists: hideExists$.getValue(),
-                hideSort: hideSort$.getValue(),
-              },
-              references, // does not have any references other than those provided by the data control serializer
-            };
+            // serialize state that cannot be changed to keep it consistent
+            placeholder,
+            hideActionBar,
+            hideExclude,
+            hideExists,
+            hideSort,
           },
-          clearSelections: () => {
-            if (selections.selectedOptions$.getValue()?.length) selections.setSelectedOptions([]);
-            if (selections.existsSelected$.getValue()) selections.setExistsSelected(false);
-            if (invalidSelections$.getValue().size) invalidSelections$.next(new Set([]));
-          },
-          hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
+          references, // does not have any references other than those provided by the data control serializer
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
+        uuid,
+        parentApi: controlGroupApi,
+        serializeState,
+        anyStateChange$: merge(
+          dataControl.anyStateChange$,
+          selections.anyStateChange$,
+          runPastTimeout$,
+          searchTechnique$,
+          singleSelect$,
+          sort$
+        ).pipe(map(() => undefined)),
+        getComparators: () => {
+          return {
+            ...defaultDataControlComparators,
+            ...selectionComparators,
+            runPastTimeout: 'referenceEquality',
+            searchTechnique: 'referenceEquality',
+            singleSelect: 'referenceEquality',
+            sort: 'deepEquality',
+            // This state cannot currently be changed after the control is created
+            placeholder: 'skip',
+            hideActionBar: 'skip',
+            hideExclude: 'skip',
+            hideExists: 'skip',
+            hideSort: 'skip',
+          };
         },
-        {
-          ...dataControl.comparators,
-          ...selections.comparators,
-          runPastTimeout: [runPastTimeout$, (runPast) => runPastTimeout$.next(runPast)],
-          searchTechnique: [
-            searchTechnique$,
-            (technique) => searchTechnique$.next(technique),
-            (a, b) => (a ?? DEFAULT_SEARCH_TECHNIQUE) === (b ?? DEFAULT_SEARCH_TECHNIQUE),
-          ],
-          singleSelect: [singleSelect$, (selected) => singleSelect$.next(selected)],
-          sort: [
-            sort$,
-            (sort) => sort$.next(sort),
-            (a, b) => fastIsEqual(a ?? OPTIONS_LIST_DEFAULT_SORT, b ?? OPTIONS_LIST_DEFAULT_SORT),
-          ],
+        defaultState: {
+          searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
+          sort: OPTIONS_LIST_DEFAULT_SORT,
+          exclude: false,
+          existsSelected: false,
+        },
+        onReset: (lastSaved) => {
+          dataControl.reinitializeState(lastSaved?.rawState);
+          selections.reinitializeState(lastSaved?.rawState);
+          runPastTimeout$.next(lastSaved?.rawState.runPastTimeout);
+          searchTechnique$.next(lastSaved?.rawState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE);
+          singleSelect$.next(lastSaved?.rawState.singleSelect);
+          sort$.next(lastSaved?.rawState.sort ?? OPTIONS_LIST_DEFAULT_SORT);
+        },
+      });
 
-          /** This state cannot currently be changed after the control is created */
-          placeholder: [placeholder$, (placeholder) => placeholder$.next(placeholder)],
-          hideActionBar: [hideActionBar$, (hideActionBar) => hideActionBar$.next(hideActionBar)],
-          hideExclude: [hideExclude$, (hideExclude) => hideExclude$.next(hideExclude)],
-          hideExists: [hideExists$, (hideExists) => hideExists$.next(hideExists)],
-          hideSort: [hideSort$, (hideSort) => hideSort$.next(hideSort)],
-        }
-      );
+      const api = finalizeApi({
+        ...unsavedChangesApi,
+        ...dataControl.api,
+        dataLoading$,
+        getTypeDisplayName: OptionsListStrings.control.getDisplayName,
+        serializeState,
+        clearSelections: () => {
+          if (stateManager.selectedOptions.getValue()?.length)
+            selections.internalApi.setSelectedOptions([]);
+          if (stateManager.existsSelected.getValue())
+            selections.internalApi.setExistsSelected(false);
+          if (invalidSelections$.getValue().size) invalidSelections$.next(new Set([]));
+        },
+        hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
+        setSelectedOptions: (options: OptionsListSelection[] | undefined) => {
+          selections.internalApi.setSelectedOptions(options);
+        },
+      });
 
       const componentApi = {
         ...api,
@@ -331,7 +359,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         totalCardinality$,
         availableOptions$,
         invalidSelections$,
-        setExclude: selections.setExclude,
+        setExclude: selections.internalApi.setExclude,
         deselectOption: (key: string | undefined) => {
           const field = api.field$.getValue();
           if (!key || !field) {
@@ -344,12 +372,12 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           const keyAsType = getSelectionAsFieldType(field, key);
 
           // delete from selections
-          const selectedOptions = selections.selectedOptions$.getValue() ?? [];
-          const itemIndex = (selections.selectedOptions$.getValue() ?? []).indexOf(keyAsType);
+          const selectedOptions = stateManager.selectedOptions.getValue() ?? [];
+          const itemIndex = (stateManager.selectedOptions.getValue() ?? []).indexOf(keyAsType);
           if (itemIndex !== -1) {
             const newSelections = [...selectedOptions];
             newSelections.splice(itemIndex, 1);
-            selections.setSelectedOptions(newSelections);
+            selections.internalApi.setSelectedOptions(newSelections);
           }
           // delete from invalid selections
           const currentInvalid = invalidSelections$.getValue();
@@ -367,36 +395,36 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             return;
           }
 
-          const existsSelected = Boolean(selections.existsSelected$.getValue());
-          const selectedOptions = selections.selectedOptions$.getValue() ?? [];
+          const existsSelected = Boolean(stateManager.existsSelected.getValue());
+          const selectedOptions = stateManager.selectedOptions.getValue() ?? [];
           const singleSelect = singleSelect$.getValue();
 
           // the order of these checks matters, so be careful if rearranging them
           const keyAsType = getSelectionAsFieldType(field, key);
           if (key === 'exists-option') {
             // if selecting exists, then deselect everything else
-            selections.setExistsSelected(!existsSelected);
+            selections.internalApi.setExistsSelected(!existsSelected);
             if (!existsSelected) {
-              selections.setSelectedOptions([]);
+              selections.internalApi.setSelectedOptions([]);
               invalidSelections$.next(new Set([]));
             }
           } else if (showOnlySelected || selectedOptions.includes(keyAsType)) {
             componentApi.deselectOption(key);
           } else if (singleSelect) {
             // replace selection
-            selections.setSelectedOptions([keyAsType]);
-            if (existsSelected) selections.setExistsSelected(false);
+            selections.internalApi.setSelectedOptions([keyAsType]);
+            if (existsSelected) selections.internalApi.setExistsSelected(false);
           } else {
             // select option
-            if (existsSelected) selections.setExistsSelected(false);
-            selections.setSelectedOptions(
+            if (existsSelected) selections.internalApi.setExistsSelected(false);
+            selections.internalApi.setSelectedOptions(
               selectedOptions ? [...selectedOptions, keyAsType] : [keyAsType]
             );
           }
         },
       };
 
-      if (selections.hasInitialSelections) {
+      if (selections.internalApi.hasInitialSelections) {
         await dataControl.api.untilFiltersReady();
       }
 
@@ -415,16 +443,6 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               hasSelectionsSubscription.unsubscribe();
             };
           }, []);
-
-          /** Get display settings - if these are ever made editable, should be part of stateManager instead */
-          const [placeholder, hideActionBar, hideExclude, hideExists, hideSort] =
-            useBatchedPublishingSubjects(
-              placeholder$,
-              hideActionBar$,
-              hideExclude$,
-              hideExists$,
-              hideSort$
-            );
 
           return (
             <OptionsListControlContext.Provider

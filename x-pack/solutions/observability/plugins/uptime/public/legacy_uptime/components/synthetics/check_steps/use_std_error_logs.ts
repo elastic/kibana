@@ -21,36 +21,34 @@ export const useStdErrorLogs = ({
   const { data, loading } = useEsSearch(
     createEsParams({
       index: !monitorId && !checkGroup ? '' : settings?.heartbeatIndices,
-      body: {
-        size: 1000,
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'synthetics.type': 'stderr',
-                },
+      size: 1000,
+      query: {
+        bool: {
+          filter: [
+            {
+              term: {
+                'synthetics.type': 'stderr',
               },
-              ...(monitorId
-                ? [
-                    {
-                      term: {
-                        'monitor.id': monitorId,
-                      },
+            },
+            ...(monitorId
+              ? [
+                  {
+                    term: {
+                      'monitor.id': monitorId,
                     },
-                  ]
-                : []),
-              ...(checkGroup
-                ? [
-                    {
-                      term: {
-                        'monitor.check_group': checkGroup,
-                      },
+                  },
+                ]
+              : []),
+            ...(checkGroup
+              ? [
+                  {
+                    term: {
+                      'monitor.check_group': checkGroup,
                     },
-                  ]
-                : []),
-            ],
-          },
+                  },
+                ]
+              : []),
+          ],
         },
       },
     }),

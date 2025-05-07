@@ -1,0 +1,115 @@
+{
+  "id": "@kbn/apm-ui-shared",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.Duration",
+        "type": "Function",
+        "tags": [],
+        "label": "Duration",
+        "description": [],
+        "signature": [
+          "({ duration, parent }: ",
+          {
+            "pluginId": "@kbn/apm-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnApmUiSharedPluginApi",
+            "section": "def-public.DurationProps",
+            "text": "DurationProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.Duration.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ duration, parent }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnApmUiSharedPluginApi",
+                "section": "def-public.DurationProps",
+                "text": "DurationProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/apm-ui-shared",
+        "id": "def-public.DurationProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DurationProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.DurationProps.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-ui-shared",
+            "id": "def-public.DurationProps.parent",
+            "type": "Object",
+            "tags": [],
+            "label": "parent",
+            "description": [],
+            "signature": [
+              "{ duration?: number | undefined; type: \"transaction\" | \"trace\"; loading: boolean; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

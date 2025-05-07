@@ -909,6 +909,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.ransomware.dump_process',
+    first_supported_version: '8.11',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.dump_process',
+      {
+        defaultMessage:
+          "A value of 'false' disables the generation of a memory dump of the Ransomware process. This is ignored if the canary protection is off. Default: true.",
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.memory_protection.shellcode',
     first_supported_version: '7.15',
     documentation: i18n.translate(
@@ -2060,10 +2071,10 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
-    key: 'windows.advanced.events.registry.enforce_registry_filters',
+    key: 'windows.advanced.events.enforce_registry_filters',
     first_supported_version: '8.15',
     documentation: i18n.translate(
-      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.registry.enforce_registry_filters',
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.enforce_registry_filters',
       {
         defaultMessage:
           'Reduce data volume by filtering out registry events which are not relevant to behavioral protections.  Default: true',
@@ -2110,7 +2121,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. Default is true.',
+          'Reduce event volume by merging related process events into fewer aggregate events. <=8.17 default: false, >=8.18 default: true',
       }
     ),
   },
@@ -2121,7 +2132,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. Default is true.',
+          'Reduce event volume by merging related process events into fewer aggregate events. <=8.17 default: false, >=8.18 default: true',
       }
     ),
   },
@@ -2132,7 +2143,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.aggregate_process',
       {
         defaultMessage:
-          'Reduce event volume by merging related process events into fewer aggregate events. Default is true.',
+          'Reduce event volume by merging related process events into fewer aggregate events. <=8.17 default: false, >=8.18 default: true',
       }
     ),
   },
@@ -2176,7 +2187,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: false',
+          'Compute and include MD5 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2187,7 +2198,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: false',
+          'Compute and include SHA-1 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2198,7 +2209,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: false',
+          'Compute and include MD5 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2209,7 +2220,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: false',
+          'Compute and include SHA-1 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2220,7 +2231,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.hash.sha256',
       {
         defaultMessage:
-          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include SHA-256 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2231,7 +2242,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: false',
+          'Compute and include MD5 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2242,7 +2253,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: false',
+          'Compute and include SHA-1 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2253,7 +2264,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: false',
+          'Compute and include MD5 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2264,7 +2275,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: false',
+          'Compute and include SHA-1 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2275,7 +2286,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.hash.sha256',
       {
         defaultMessage:
-          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include SHA-256 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2286,7 +2297,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: false',
+          'Compute and include MD5 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2297,7 +2308,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes in alerts?  This will increase CPU usage and alert sizes.  If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type.  Default: false',
+          'Compute and include SHA-1 hashes for processes and libraries in alerts? This will increase CPU usage and alert sizes. If any user exceptionlist, trustlist, or blocklists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2308,7 +2319,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.md5',
       {
         defaultMessage:
-          'Compute and include MD5 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: false',
+          'Compute and include MD5 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2319,7 +2330,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha1',
       {
         defaultMessage:
-          'Compute and include SHA-1 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: false',
+          'Compute and include SHA-1 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2330,7 +2341,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.hash.sha256',
       {
         defaultMessage:
-          'Compute and include SHA-256 hashes for processes and libraries in events?  This will increase CPU usage and event sizes.  Default: true',
+          'Compute and include SHA-256 hashes for processes and libraries in events? This will increase CPU usage and event sizes. If any user event filter or trustlists reference this hash type, Endpoint will ignore this setting and automatically enable this hash type. Default: true',
       }
     ),
   },
@@ -2341,7 +2352,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.set_extended_host_information',
       {
         defaultMessage:
-          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: false',
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2352,7 +2363,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.set_extended_host_information',
       {
         defaultMessage:
-          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: false',
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size. <=8.17 default: true, >=8.18 default: false',
       }
     ),
   },
@@ -2363,7 +2374,62 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.set_extended_host_information',
       {
         defaultMessage:
-          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size.  Default: false',
+          'Include more details about hosts in events? Set to false to receive only id, name and os. Setting to true will increase event size. <=8.17 default: true, >=8.18 default: false',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.scan_on_network_event',
+    first_supported_version: '8.17.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.scan_on_network_event',
+      {
+        defaultMessage:
+          'Allow Memory Protection to perform memory scans in response to network activity. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.memory_protection.scan_on_network_event',
+    first_supported_version: '8.17.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.scan_on_network_event',
+      {
+        defaultMessage:
+          'Allow Memory Protection to perform memory scans in response to network activity. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.scan_on_network_event',
+    first_supported_version: '8.17.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_network_event',
+      {
+        defaultMessage:
+          'Allow Memory Protection to perform memory scans in response to network activity. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.scan_on_api_event',
+    first_supported_version: '8.17.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_api_event',
+      {
+        defaultMessage:
+          'Allow Memory Protection to perform memory scans in response to API events. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.scan_on_image_load_event',
+    first_supported_version: '8.17.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_image_load_event',
+      {
+        defaultMessage:
+          'Allow Memory Protection to perform memory scans in response to image loads. Default: true',
       }
     ),
   },

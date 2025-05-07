@@ -293,10 +293,16 @@ export function getWebpackConfig(
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
-        'react-dom$':
-          worker.reactVersion === '18' ? 'react-dom-18/profiling' : 'react-dom/profiling',
+        'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
-        react: worker.reactVersion === '18' ? 'react-18' : 'react',
+        buffer: [
+          Path.resolve(worker.repoRoot, 'node_modules/node-stdlib-browser/node_modules/buffer'),
+          require.resolve('buffer'),
+        ],
+        punycode: [
+          Path.resolve(worker.repoRoot, 'node_modules/node-stdlib-browser/node_modules/punycode'),
+          require.resolve('punycode'),
+        ],
       },
     },
 

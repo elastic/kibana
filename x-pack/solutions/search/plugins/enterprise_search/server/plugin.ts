@@ -18,8 +18,8 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 import {
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_HOME_PLUGIN,
+  ENTERPRISE_SEARCH_DATA_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
@@ -100,15 +100,15 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       licensing,
       guidedOnboarding,
       cloud,
-      searchConnectors,
+      contentConnectors,
     }: PluginsSetup
   ) {
     this.globalConfigService.setup(elasticsearch.legacy.config$, cloud);
     const config = this.config;
     const log = this.logger;
     const PLUGIN_IDS = [
-      ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-      ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
+      ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
       SEARCH_EXPERIENCES_PLUGIN.ID,
       VECTOR_SEARCH_PLUGIN.ID,
@@ -149,10 +149,12 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
           ui: [],
         },
         read: {
-          disabled: true,
+          app: ['kibana', ...PLUGIN_IDS],
+          api: [],
+          catalogue: PLUGIN_IDS,
           savedObject: {
             all: [],
-            read: [],
+            read: [ES_TELEMETRY_NAME, AS_TELEMETRY_NAME, WS_TELEMETRY_NAME],
           },
           ui: [],
         },
@@ -197,6 +199,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       app: ['kibana', ANALYTICS_PLUGIN.ID],
       catalogue: [ANALYTICS_PLUGIN.ID],
+
       privileges: {
         all: {
           app: ['kibana', ANALYTICS_PLUGIN.ID],
@@ -314,7 +317,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
 
     if (globalSearch) {
       globalSearch.registerResultProvider(
-        getSearchResultProvider(config, searchConnectors?.getConnectorTypes() || [])
+        getSearchResultProvider(config, contentConnectors?.getConnectorTypes() || [])
       );
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));

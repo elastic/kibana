@@ -28,10 +28,11 @@ SHARED_DEPS = [
   "//src/platform/packages/shared/kbn-ui-theme",
   "//src/platform/packages/shared/kbn-esql-validation-autocomplete",
   "//src/platform/packages/shared/kbn-esql-ast",
-  "//packages/kbn-node-libs-browser-webpack-plugin",
+  "//src/platform/packages/private/kbn-node-libs-browser-webpack-plugin",
   "@npm//antlr4",
   "@npm//monaco-editor",
   "@npm//monaco-yaml",
+  "@npm//@elastic/monaco-esql",
 ]
 
 webpack_cli(

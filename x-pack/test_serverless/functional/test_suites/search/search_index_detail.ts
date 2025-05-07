@@ -102,12 +102,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchIndexDetailPage.expectQuickStatsAIMappings();
           await es.indices.putMapping({
             index: indexName,
-            body: {
-              properties: {
-                my_field: {
-                  type: 'dense_vector',
-                  dims: 3,
-                },
+            properties: {
+              my_field: {
+                type: 'dense_vector',
+                dims: 3,
               },
             },
           });
@@ -120,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             indexName
           );
           await pageObjects.svlSearchIndexDetailPage.clickOnIndexManagementBreadcrumb();
-          await pageObjects.indexManagement.expectToBeOnIndicesManagement();
+          await pageObjects.indexManagement.expectToBeOnIndexManagement();
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         });
 

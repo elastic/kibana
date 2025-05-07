@@ -162,10 +162,11 @@ export const createFilterESQL = async (
     filters.push(
       buildSimpleNumberRangeFilter(
         sourceField,
+        operationType === 'date_histogram' ? 'date' : 'number',
         {
           gte: value,
-          lt: value + (interval || 0),
-          ...(operationType === 'date_hisotgram' ? { format: 'strict_date_optional_time' } : {}),
+          lt: value + (interval ?? 0),
+          ...(operationType === 'date_histogram' ? { format: 'strict_date_optional_time' } : {}),
         },
         value,
         indexPattern
@@ -185,25 +186,22 @@ export const createFiltersFromValueClickAction = async ({
 }: ValueClickDataContext) => {
   const filters: Filter[] = [];
 
-  await Promise.all(
-    data
-      .filter((point) => point)
-      .map(async (val) => {
-        const { table, column, row } = val;
-        const filter =
-          table.meta?.type === 'es_ql'
-            ? await createFilterESQL(table, column, row)
-            : (await createFilter(table, column, row)) || [];
-        if (filter) {
-          filter.forEach((f) => {
-            if (negate) {
-              f = toggleFilterNegated(f);
-            }
-            filters.push(f);
-          });
-        }
-      })
-  );
+  for (const value of data) {
+    if (!value) {
+      continue;
+    }
+    const { table, column, row } = value;
+    const filter =
+      table.meta?.type === 'es_ql'
+        ? await createFilterESQL(table, column, row)
+        : (await createFilter(table, column, row)) ?? [];
+    filter.forEach((f) => {
+      if (negate) {
+        f = toggleFilterNegated(f);
+      }
+      filters.push(f);
+    });
+  }
 
   return _.uniqWith(mapAndFlattenFilters(filters), (a, b) =>
     compareFilters(a, b, COMPARE_ALL_OPTIONS)
@@ -228,20 +226,32 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
   if (!dataPoints.length) {
     return;
   }
-  const { table, column: columnIndex, row: rowIndex } = dataPoints[dataPoints.length - 1];
 
-  if (table?.columns?.[columnIndex]) {
-    const column = table.columns[columnIndex];
-    const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-    if (value == null) {
-      return;
+  let queryString = query.esql;
+  for (const point in dataPoints) {
+    if (dataPoints[point]) {
+      const { table, column: columnIndex, row: rowIndex } = dataPoints[point];
+
+      if (table?.columns?.[columnIndex]) {
+        const column = table.columns[columnIndex];
+        const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+        if (value == null) {
+          return;
+        }
+        const queryWithWhere = appendWhereClauseToESQLQuery(
+          queryString,
+          column.name,
+          value,
+          negate ? '-' : '+',
+          column.meta?.type
+        );
+
+        if (queryWithWhere) {
+          queryString = queryWithWhere;
+        }
+      }
     }
-    return appendWhereClauseToESQLQuery(
-      query.esql,
-      column.name,
-      value,
-      negate ? '-' : '+',
-      column.meta?.type
-    );
   }
+
+  return queryString;
 };

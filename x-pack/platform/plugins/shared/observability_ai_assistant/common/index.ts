@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-export type { Message, Conversation, KnowledgeBaseEntry } from './types';
-export type { ConversationCreateRequest } from './types';
-export { KnowledgeBaseEntryRole, MessageRole } from './types';
+export type { Message, Conversation, KnowledgeBaseEntry, ConversationCreateRequest } from './types';
+export {
+  KnowledgeBaseEntryRole,
+  MessageRole,
+  ConversationAccess,
+  KnowledgeBaseType,
+  KnowledgeBaseState,
+} from './types';
 export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types';
 export { FunctionVisibility } from './functions/function_visibility';
 export {
@@ -18,7 +23,6 @@ export {
 export type {
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
-  TokenCountEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
   MessageAddEvent,
@@ -48,5 +52,3 @@ export {
 export { concatenateChatCompletionChunks } from './utils/concatenate_chat_completion_chunks';
 
 export { ShortIdTable } from './utils/short_id_table';
-
-export { KnowledgeBaseType } from './types';

@@ -6,4 +6,3 @@
  */
 
 export { useSubAction } from './use_sub_action';
-export { useLoadRuleTypesQuery } from './use_load_rule_types_query';

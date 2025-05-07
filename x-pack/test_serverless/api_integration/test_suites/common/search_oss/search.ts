@@ -34,10 +34,14 @@ export default function ({ getService }: FtrProviderContext) {
       // "index_not_found_exception: no such index [.kibana_ingest]",
       // so it was switched to `savedObjects.cleanStandardList()`
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     describe('post', () => {

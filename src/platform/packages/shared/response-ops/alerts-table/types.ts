@@ -20,7 +20,7 @@ import type {
   RefAttributes,
   SetStateAction,
 } from 'react';
-import {
+import type {
   AlertConsumers,
   ALERT_CASE_IDS,
   ALERT_STATUS,
@@ -372,6 +372,8 @@ export interface PublicAlertsDataGridProps
     | 'columns'
   > {
   ruleTypeIds: string[];
+  minScore?: number;
+  trackScores?: boolean;
   consumers?: string[];
   /**
    * If true, shows a button in the table toolbar to inspect the search alerts request
@@ -391,13 +393,9 @@ export interface PublicAlertsDataGridProps
    */
   hideBulkActions?: boolean;
   /**
-   * A getter to customize the bulk actions menu items
-   * based on the current alerts search query used
+   * An array of bulk actions to be displayed in the table
    */
-  getBulkActions?: (
-    query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>,
-    refresh: () => void
-  ) => BulkActionsPanelConfig[];
+  additionalBulkActions?: BulkActionsPanelConfig[];
   /**
    * Width of the actions column
    */

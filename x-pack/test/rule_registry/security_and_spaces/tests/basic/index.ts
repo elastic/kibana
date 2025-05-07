@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { createSpacesAndUsers, deleteSpacesAndUsers } from '../../../common/lib/authentication';
 
 // eslint-disable-next-line import/no-default-export
@@ -30,6 +30,5 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./search_strategy'));
     loadTestFile(require.resolve('./get_browser_fields_by_rule_type_ids'));
     loadTestFile(require.resolve('./get_alert_summary'));
-    loadTestFile(require.resolve('./get_aad_fields_by_rule_type'));
   });
 };

@@ -21,7 +21,7 @@ import {
   type Edge as xyEdge,
 } from '@xyflow/react';
 import { isEmpty, isEqual, pick, size, xorWith } from 'lodash';
-import { Story } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import { DefaultEdge } from '.';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { LabelNode } from '../node';
@@ -30,22 +30,6 @@ import { SvgDefsMarker } from './markers';
 
 import '@xyflow/react/dist/style.css';
 import { HandleStyleOverride } from '../node/styles';
-
-export default {
-  title: 'Components/Graph Components',
-  description: 'CDR - Graph visualization',
-  argTypes: {
-    color: {
-      options: ['primary', 'danger', 'warning'],
-      control: { type: 'radio' },
-    },
-    type: {
-      options: ['solid', 'dashed'],
-      control: { type: 'radio' },
-    },
-  },
-  decorators: [GlobalStylesStorybookDecorator],
-};
 
 const nodeTypes = {
   // eslint-disable-next-line react/display-name
@@ -77,7 +61,10 @@ const edgeTypes = {
   default: DefaultEdge,
 };
 
-const Template: Story<EdgeViewModel> = (args: EdgeViewModel) => {
+const Template = (args: EdgeViewModel) => {
+  const isArrayOfObjectsEqual = (x: object[], y: object[]) =>
+    size(x) === size(y) && isEmpty(xorWith(x, y, isEqual));
+
   const nodes = useMemo(
     () => [
       {
@@ -180,15 +167,28 @@ const Template: Story<EdgeViewModel> = (args: EdgeViewModel) => {
   );
 };
 
-export const Edge = Template.bind({});
+export default {
+  title: 'Components/Graph Components',
+  render: Template,
+  argTypes: {
+    color: {
+      options: ['primary', 'danger', 'warning'],
+      control: { type: 'radio' },
+    },
+    type: {
+      options: ['solid', 'dashed'],
+      control: { type: 'radio' },
+    },
+  },
+  decorators: [GlobalStylesStorybookDecorator],
+} satisfies Meta<EdgeViewModel>;
 
-Edge.args = {
-  id: 'siem-windows',
-  label: 'User login to OKTA',
-  color: 'primary',
-  interactive: true,
-  type: 'solid',
+export const Edge: StoryObj<EdgeViewModel> = {
+  args: {
+    id: 'siem-windows',
+    label: 'User login to OKTA',
+    color: 'primary',
+    interactive: true,
+    type: 'solid',
+  },
 };
-
-const isArrayOfObjectsEqual = (x: object[], y: object[]) =>
-  size(x) === size(y) && isEmpty(xorWith(x, y, isEqual));
