@@ -20,7 +20,7 @@ jest.mock('../hooks', () => ({
   useRuleFormDispatch: jest.fn(),
 }));
 
-jest.mock('./dashboard_service', () => ({
+jest.mock('../common/services/dashboard_service', () => ({
   dashboardServiceProvider: jest.fn().mockReturnValue({
     fetchDashboard: jest.fn().mockImplementation(async (id: string) => {
       return {
@@ -41,8 +41,9 @@ jest.mock('./dashboard_service', () => ({
 }));
 
 const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
-const { dashboardServiceProvider: mockDashboardServiceProvider } =
-  jest.requireMock('./dashboard_service');
+const { dashboardServiceProvider: mockDashboardServiceProvider } = jest.requireMock(
+  '../common/services/dashboard_service'
+);
 
 describe('RuleDashboards', () => {
   const plugins = {
