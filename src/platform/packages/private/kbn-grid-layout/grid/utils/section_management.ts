@@ -33,13 +33,48 @@ export const combinePanels = (
 };
 
 /**
- * Deletes an entire row from the layout, including all of its panels
+ * Deletes an entire section from the layout, including all of its panels
  * @param layout Starting layout
- * @param rowIndex The row to be deleted
- * @returns Updated layout with the row at `rowIndex` deleted
+ * @param sectionId The section to be deleted
+ * @returns Updated layout with the section at `sectionId` deleted and orders adjusted
  */
 export const deleteRow = (layout: OrderedLayout, sectionId: string) => {
   const newLayout = cloneDeep(layout);
   delete newLayout[sectionId];
-  return newLayout;
+  return resolveSections(newLayout);
+};
+
+/**
+ * Combine sequential main layouts and redefine section orders to keep layout consistent + valid
+ * @param layout Starting layout
+ * @returns Updated layout with `main` sections combined + section orders resolved
+ */
+export const resolveSections = (layout: OrderedLayout) => {
+  const sortedSections = Object.values(layout).sort(
+    (sectionA, sectionB) => sectionA.order - sectionB.order
+  );
+  const resolvedLayout: OrderedLayout = {};
+  let mainSectionCount = 0;
+  for (let i = 0; i < sortedSections.length; i++) {
+    const firstSection = sortedSections[i];
+    if (firstSection.isMainSection) {
+      let combinedPanels: GridSectionData['panels'] = { ...firstSection.panels };
+      while (i + 1 < sortedSections.length) {
+        const secondSection = sortedSections[i + 1];
+        if (!secondSection.isMainSection) break;
+        combinedPanels = combinePanels(secondSection.panels, combinedPanels);
+        i++;
+      }
+      resolvedLayout[`main-${mainSectionCount}`] = {
+        ...firstSection,
+        order: i,
+        panels: combinedPanels,
+        id: `main-${mainSectionCount}`,
+      };
+      mainSectionCount++;
+    } else {
+      resolvedLayout[firstSection.id] = { ...firstSection, order: i };
+    }
+  }
+  return resolvedLayout;
 };

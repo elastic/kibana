@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { cloneDeep } from 'lodash';
 import React from 'react';
 
 import {
@@ -20,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { deleteRow, movePanelsToSection } from '../utils/section_management';
+import { combinePanels, deleteRow } from '../utils/section_management';
 
 export const DeleteGridSectionModal = ({
   sectionId,
@@ -64,9 +65,26 @@ export const DeleteGridSectionModal = ({
           onClick={() => {
             setDeleteModalVisible(false);
             const layout = gridLayoutStateManager.gridLayout$.getValue();
-            const firstSectionId = Object.values(layout).find(({ order }) => order === 0)?.id;
-            if (!firstSectionId) return;
-            let newLayout = movePanelsToSection(layout, sectionId, firstSectionId);
+            const firstSectionId = `main-0`;
+            let newLayout = cloneDeep(layout);
+
+            if (!newLayout[firstSectionId]) {
+              // push other sections down
+              Object.values(newLayout).forEach((section) => section.order++);
+              // create new "first" section
+              newLayout[firstSectionId] = {
+                id: firstSectionId,
+                order: 0,
+                isMainSection: true,
+                panels: {},
+              };
+            }
+
+            const newPanels = combinePanels(
+              newLayout[sectionId].panels,
+              newLayout[firstSectionId].panels
+            );
+            newLayout[firstSectionId].panels = newPanels;
             newLayout = deleteRow(newLayout, sectionId);
             gridLayoutStateManager.gridLayout$.next(newLayout);
           }}

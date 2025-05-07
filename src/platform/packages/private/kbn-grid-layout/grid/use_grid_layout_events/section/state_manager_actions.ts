@@ -12,7 +12,7 @@ import { pick } from 'lodash';
 
 import { GridLayoutStateManager, GridSectionData, OrderedLayout } from '../../types';
 import { getPanelKeysInOrder } from '../../utils/resolve_grid_section';
-import { combinePanels } from '../../utils/section_management';
+import { resolveSections } from '../../utils/section_management';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 
@@ -198,34 +198,7 @@ export const moveAction = (
         if (section.isMainSection) mainSectionCount++;
       });
 
-    // combine sequential main layouts to keep layout consistent + valid
-    const sortedSections = Object.values(anotherLayout).sort(
-      ({ order: orderA, order: orderB }) => orderA - orderB
-    );
-    const finalLayout: OrderedLayout = {};
-    mainSectionCount = 0;
-    for (let i = 0; i < sortedSections.length; i++) {
-      const firstSection = sortedSections[i];
-      if (firstSection.isMainSection) {
-        let combinedPanels: GridSectionData['panels'] = { ...firstSection.panels };
-        while (i + 1 < sortedSections.length) {
-          const secondSection = sortedSections[i + 1];
-          if (!secondSection.isMainSection) break;
-          combinedPanels = combinePanels(secondSection.panels, combinedPanels);
-          i++;
-        }
-        finalLayout[`main-${mainSectionCount}`] = {
-          ...firstSection,
-          order: i,
-          panels: combinedPanels,
-          id: `main-${mainSectionCount}`,
-        };
-        mainSectionCount++;
-      } else {
-        finalLayout[firstSection.id] = { ...firstSection, order: i };
-      }
-    }
-
+    const finalLayout = resolveSections(anotherLayout);
     if (!deepEqual(currentLayout, finalLayout))
       gridLayoutStateManager.gridLayout$.next(finalLayout);
   }
