@@ -201,7 +201,7 @@ export class PrivilegeMonitoringDataClient {
   ): Promise<CreatePrivMonUserResponse> {
     const doc = merge(user, {
       labels: {
-        monitoring: { privileged_users: 'monitored' },
+        monitoring: { privileged_users: 'privileged_user_monitored' },
         sources: [source],
       },
     });
@@ -251,6 +251,7 @@ export class PrivilegeMonitoringDataClient {
   public async listUsers(kuery?: string): Promise<MonitoredUserDoc[]> {
     const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
     const response = await this.esClient.search({
+      size: 10000,
       index: this.getIndex(),
       query,
     });
@@ -270,32 +271,28 @@ export class PrivilegeMonitoringDataClient {
       skipEmptyLines: true,
     });
 
-    return (
-      Readable.from(stream.pipe(csvStream))
-        .map(parseMonitoredPrivilegedUserCsvRow)
-        // .map(buildStats)
-
-        .pipe(batchPartitions(100)) // we cant use .map() because we need to hook into the stream flush to finish the last batch
-
-        .map(queryExistingUsers(this.esClient, this.getIndex()))
-        .map(bulkBatchUpsertFromCSV(this.esClient, this.getIndex(), { flushBytes, retries }))
-        .map(softDeleteOmittedUsers(this.esClient, this.getIndex(), { flushBytes, retries }))
-        .reduce(
-          (
-            { errors, stats }: PrivmonBulkUploadUsersCSVResponse,
-            batch: SoftDeletionResults
-          ): PrivmonBulkUploadUsersCSVResponse => {
-            return {
-              errors: errors.concat(batch.updated.errors),
-              stats: {
-                failed: stats.failed + batch.updated.failed,
-                successful: stats.successful + batch.updated.successful,
-                total: stats.total + batch.updated.failed + batch.updated.successful,
-              },
-            };
-          }
-        )
-    );
+    return Readable.from(stream.pipe(csvStream))
+      .map(parseMonitoredPrivilegedUserCsvRow)
+      .pipe(batchPartitions(100)) // we cant use .map() because we need to hook into the stream flush to finish the last batch
+      .map(queryExistingUsers(this.esClient, this.getIndex()))
+      .map(bulkBatchUpsertFromCSV(this.esClient, this.getIndex(), { flushBytes, retries }))
+      .map(softDeleteOmittedUsers(this.esClient, this.getIndex(), { flushBytes, retries }))
+      .reduce(
+        (
+          { errors, stats }: PrivmonBulkUploadUsersCSVResponse,
+          batch: SoftDeletionResults
+        ): PrivmonBulkUploadUsersCSVResponse => {
+          return {
+            errors: errors.concat(batch.updated.errors),
+            stats: {
+              failed: stats.failed + batch.updated.failed,
+              successful: stats.successful + batch.updated.successful,
+              total: stats.total + batch.updated.failed + batch.updated.successful,
+            },
+          };
+        },
+        { errors: [], stats: { failed: 0, successful: 0, total: 0 } }
+      );
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {
