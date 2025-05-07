@@ -37,6 +37,12 @@ Array [
         },
       },
       Object {
+        "set": Object {
+          "field": "spaceId",
+          "value": "some-space",
+        },
+      },
+      Object {
         "date_index_name": Object {
           "date_formats": Array [
             "UNIX_MS",

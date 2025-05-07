@@ -21,8 +21,10 @@ const KEY_FIELDS: Array<keyof ApmOtelFields> = [
 
   'resource.attributes.agent.name',
   'resource.attributes.deployment.environment',
-  'attributes.service.namespace',
-  'attributes.service.name',
+  'resource.attributes.service.namespace',
+  'resource.attributes.service.name',
+  'resource.attributes.telemetry.sdk.name',
+  'resource.attributes.telemetry.sdk.language',
   'resource.attributes.service.instance.id',
   'resource.attributes.process.runtime.name',
   'resource.attributes.process.runtime.version',
@@ -31,13 +33,9 @@ const KEY_FIELDS: Array<keyof ApmOtelFields> = [
   'resource.attributes.telemetry.sdk.version',
 
   'resource.attributes.host.name',
-  'resource.attributes.container.id',
-  'resource.attributes.kubernetes.pod.name',
-
-  'resource.attributes.host.name',
   'resource.attributes.os.type',
   'resource.attributes.container.id',
-  'resource.attributes.kubernetes.pod.name',
+  'resource.attributes.k8s.pod.name',
 
   'resource.attributes.cloud.provider',
   'resource.attributes.cloud.region',
@@ -54,6 +52,8 @@ const KEY_FIELDS: Array<keyof ApmOtelFields> = [
   'resource.attributes.faas.trigger.type',
   'resource.attributes.faas.name',
   'resource.attributes.faas.version',
+
+  'scope.attributes.service.framework.name',
 ];
 
 const METRICSET_NAME = 'transaction';

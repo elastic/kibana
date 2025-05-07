@@ -372,6 +372,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           apiKeyOwner: null,
           artifacts: {
             dashboards: [],
+            investigation_guide: { blob: '' },
           },
           apiKeyCreatedByUser: null,
           scheduledTaskId: match.scheduledTaskId,
@@ -396,10 +397,10 @@ export default function createFindTests({ getService }: FtrProviderContext) {
       it('does not return artifacts when present', async () => {
         const expectedArtifacts = {
           artifacts: {
+            investigation_guide: { blob: 'Sample investigation guide' },
             dashboards: [{ id: 'dashboard-1' }],
           },
         };
-
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')

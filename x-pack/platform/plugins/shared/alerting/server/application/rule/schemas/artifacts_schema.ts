@@ -7,6 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
+export const investigationGuideSchema = schema.object({
+  blob: schema.string(),
+});
+
 export const dashboardsSchema = schema.arrayOf(
   schema.object({
     id: schema.string(),
@@ -15,4 +19,5 @@ export const dashboardsSchema = schema.arrayOf(
 
 export const artifactsSchema = schema.object({
   dashboards: schema.maybe(dashboardsSchema),
+  investigation_guide: schema.maybe(investigationGuideSchema),
 });

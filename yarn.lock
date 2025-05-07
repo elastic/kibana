@@ -2166,10 +2166,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@102.0.0-amsterdam.0":
-  version "102.0.0-amsterdam.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.0.0-amsterdam.0.tgz#9fc738d18a4b148e97ac1b4d7ddfb311314d1b97"
-  integrity sha512-C6ZS83SyQ83d5sSqaZYf+nrJeRIU5WPoAWAAr5UIqloJGBk1nuMNY8wH12PT9GiqdXFUdf6ezSsQvYCqHrWWWw==
+"@elastic/eui@102.1.0-amsterdam.0":
+  version "102.1.0-amsterdam.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-102.1.0-amsterdam.0.tgz#87382f568b2a1d0042c6b0464bc3e80947946f2b"
+  integrity sha512-I8K9gMeNImkPavKJV/RdgwFN2mBBupOeNN1uYDiMI9479pfX3U+7bwDas9HX/XNQlnS74JMhNCMXHMPo7HK4gg==
   dependencies:
     "@elastic/eui-theme-common" "1.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
@@ -7579,6 +7579,10 @@
   uid ""
 
 "@kbn/test-suites-xpack-performance@link:x-pack/performance":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack-platform@link:x-pack/platform/test":
   version "0.0.0"
   uid ""
 
@@ -14489,10 +14493,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^134.0.0:
-  version "134.0.2"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-134.0.2.tgz#a9ccfbb4e1f3398c3289e755ddec657ed8158ccf"
-  integrity sha512-r1yIHP0Lo61CdFGjZXITSY2ZGYBS5B/qwOs8NMm0r31qnyS4MAuSmMiIiZKhu+ThxfcT8zPrGPGT6RmM0LWljQ==
+chromedriver@^136.0.0:
+  version "136.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-136.0.0.tgz#b777a33ea50b8c775b522317175379d8c79e84ab"
+  integrity sha512-21LxtGIqRLkafi0aOLKxIyQ3uRklgdmhuihzAkoL3Er5QtC74UDuu2OeTDdh58LM7WDbiuTXjdoIQARUekL8DA==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
