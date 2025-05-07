@@ -197,7 +197,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }
 
   protected getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
+    // handle known Azure error from early release, we can probably get rid of this eventually
     if (error.message === '404 Unrecognized request argument supplied: functions') {
+      // add information for known Azure error
       return `API Error: ${error.message}
         \n\nFunction support with Azure OpenAI API was added in 2023-07-01-preview. Update the API version of the Azure OpenAI connector in use
       `;
@@ -205,12 +207,17 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     if (!error.response?.status) {
       return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
     }
+    // LM Studio returns error.response?.data?.error as string
     const errorMessage = error.response?.data?.error?.message ?? error.response?.data?.error;
     if (error.response.status === 401) {
       return `Unauthorized API Error${errorMessage ? ` - ${errorMessage}` : ''}`;
     }
     return `API Error: ${error.response?.statusText}${errorMessage ? ` - ${errorMessage}` : ''}`;
   }
+  /**
+   * responsible for making a POST request to the external API endpoint and returning the response data
+   * @param body The stringified request body to be sent in the POST request.
+   */
 
   public async runApi(
     { body, signal, timeout }: RunActionParams,
