@@ -78,6 +78,7 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
           set: [
             { path: 'telemetry.optIn', value: false },
             { path: 'telemetry.allowChangingOptInStatus', value: false },
+            { path: 'telemetry.tracing.enabled', value: false },
           ],
           unset: [{ path: 'telemetry.enabled' }],
         };
