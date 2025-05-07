@@ -159,15 +159,20 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   const showToggleLegendElement = props.uiState !== undefined;
   const [chartIsLoaded, setChartIsLoaded] = useState<boolean>(false);
+  const [containerDimensions, setContainerDimensions] = useState<
+    undefined | PieContainerDimensions
+  >();
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const containerDimensions = useMemo<PieContainerDimensions | undefined>(() => {
+  useEffect(() => {
+    // chart should be loaded to compute the dimensions
+    // otherwise the height is set to 0
     if (parentRef && parentRef.current && chartIsLoaded) {
       const parentHeight = parentRef.current!.getBoundingClientRect().height;
       const parentWidth = parentRef.current!.getBoundingClientRect().width;
-      return { width: parentWidth, height: parentHeight };
+      setContainerDimensions({ width: parentWidth, height: parentHeight });
     }
-  }, [chartIsLoaded]);
+  }, [chartIsLoaded, parentRef]);
 
   useEffect(() => {
     const legendShow = showLegendDefault();

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -298,12 +298,11 @@ export const MetricVis = ({
 
   const minHeight = chartBaseTheme.metric.minHeight;
 
-  const scrollChildHeight = useMemo<string>(() => {
-    const minimumRequiredVerticalSpace = minHeight * numRows;
-    return (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
+  const minimumRequiredVerticalSpace = minHeight * numRows;
+  const scrollChildHeight =
+    (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
       ? '100%'
       : `${minimumRequiredVerticalSpace}px`;
-  }, [minHeight, numRows, scrollDimensions.height]);
 
   const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
     overrides,

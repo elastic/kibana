@@ -345,10 +345,8 @@ export const LensTopNavMenu = ({
   );
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
-  const isOnTextBasedMode = useMemo(
-    () => query != null && typeof query === 'object' && isOfAggregateQueryType(query),
-    [query]
-  );
+  const isOnTextBasedMode =
+    query != null && typeof query === 'object' && isOfAggregateQueryType(query);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
 
   const dispatchChangeIndexPattern = React.useCallback(

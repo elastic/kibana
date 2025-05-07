@@ -137,7 +137,6 @@ export function App({
   // Used to show a popover that guides the user towards changing the date range when no data is available.
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const lastKnownDoc = useMemo(() => currentDoc, [currentDoc]);
   const [initialDocFromContext, setInitialDocFromContext] = useState<LensDocument | undefined>(
     undefined
   );
@@ -181,14 +180,14 @@ export function App({
     (refDoc: LensDocument | undefined) => {
       return isLensEqual(
         refDoc,
-        lastKnownDoc,
+        currentDoc,
         data.query.filterManager.inject.bind(data.query.filterManager),
         datasourceMap,
         visualizationMap,
         annotationGroups
       );
     },
-    [annotationGroups, data.query.filterManager, datasourceMap, lastKnownDoc, visualizationMap]
+    [annotationGroups, data.query.filterManager, datasourceMap, currentDoc, visualizationMap]
   );
 
   useEffect(() => {
@@ -217,7 +216,7 @@ export function App({
     });
   }, [
     onAppLeave,
-    lastKnownDoc,
+    currentDoc,
     isSaveable,
     persistedDoc,
     application.capabilities.visualize_v2.save,
@@ -302,7 +301,7 @@ export function App({
       try {
         const newState = await runSaveLensVisualization(
           {
-            lastKnownDoc,
+            lastKnownDoc: currentDoc,
             savedObjectsTagging,
             initialInput,
             redirectToOrigin,
@@ -332,7 +331,7 @@ export function App({
       visualization.state,
       activeVisualization,
       dispatch,
-      lastKnownDoc,
+      currentDoc,
       savedObjectsTagging,
       initialInput,
       redirectToOrigin,
@@ -349,10 +348,10 @@ export function App({
 
   // keeping the initial doc state created by the context
   useEffect(() => {
-    if (lastKnownDoc && !initialDocFromContext) {
-      setInitialDocFromContext(lastKnownDoc);
+    if (currentDoc && !initialDocFromContext) {
+      setInitialDocFromContext(currentDoc);
     }
-  }, [lastKnownDoc, initialDocFromContext]);
+  }, [currentDoc, initialDocFromContext]);
 
   const {
     shouldShowGoBackToVizEditorModal,
@@ -493,7 +492,7 @@ export function App({
             setIsSaveModalVisible(false);
           }}
           getAppNameFromId={() => getOriginatingAppName()}
-          lastKnownDoc={lastKnownDoc}
+          lastKnownDoc={currentDoc}
           onAppLeave={onAppLeave}
           persistedDoc={persistedDoc}
           initialInput={initialInput}
