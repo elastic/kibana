@@ -313,7 +313,7 @@ $$$observability-apm-labs$$$`observability:apmLabsButton`
 :   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
 
 $$$observability-enable-progressive-loading$$$`observability:apmProgressiveLoading`
-:   When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
+:   [preview] When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
 
 $$$observability-apm-max-groups$$$`observability:apmServiceGroupMaxNumberOfServices`
 :   Limit the number of services in a given service group.
@@ -348,14 +348,8 @@ $$$observability-enable-inspect-es-queries$$$`observability:enableInspectEsQueri
 $$$observability-apm-enable-service-groups$$$`observability:enableServiceGroups`
 :   [preview] When enabled, allows users to create Service Groups from the APM Service Inventory page.
 
-$$$observability-apm-trace-explorer-tab$$$`observability:apmTraceExplorerTab`
-:   [preview] Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL.
-
 $$$observability-infrastructure-profiling-integration$$$`observability:enableInfrastructureProfilingIntegration`
 :   [preview] Enables the Profiling view in Host details within Infrastructure.
-
-$$$observability-infrastructure-asset-custom-dashboard$$$`observability:enableInfrastructureAssetCustomDashboards`
-:   [preview] Enables option to link custom dashboards in the Asset Details view.
 
 $$$observability-profiling-per-vcpu-watt-x86$$$`observability:profilingPervCPUWattX86`
 :   The average amortized per-core power consumption (based on 100% CPU utilization) for x86 architecture.

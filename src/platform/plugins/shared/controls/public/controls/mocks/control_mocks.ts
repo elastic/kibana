@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
-import { StateComparators } from '@kbn/presentation-publishing';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 
 import { CONTROL_GROUP_TYPE } from '../../../common';
 import type { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';
 import type { ControlGroupApi } from '../../control_group/types';
-import type { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
+import { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
+
+export type MockedControlGroupApi = ControlGroupApi & {
+  setLastSavedStateForChild: (uuid: string, state: object) => void;
+};
 
 export const getMockedControlGroupApi = (
   dashboardApi?: unknown,
   overwriteApi?: Partial<ControlGroupApi>
 ) => {
+  const controlStateMap: Record<string, BehaviorSubject<SerializedPanelState<object>>> = {};
   return {
     type: CONTROL_GROUP_TYPE,
     parentApi: dashboardApi,
@@ -27,25 +32,35 @@ export const getMockedControlGroupApi = (
     ignoreParentSettings$: new BehaviorSubject(undefined),
     controlFetch$: () => new BehaviorSubject<ControlFetchContext>({}),
     allowExpensiveQueries$: new BehaviorSubject(true),
+    lastSavedStateForChild$: (childId: string) => controlStateMap[childId] ?? of(undefined),
+    getLastSavedStateForChild: (childId: string) => {
+      return controlStateMap[childId]?.value ?? { rawState: {} };
+    },
+    setLastSavedStateForChild: (
+      childId: string,
+      serializePanelState: SerializedPanelState<object>
+    ) => {
+      if (!controlStateMap[childId]) {
+        controlStateMap[childId] = new BehaviorSubject(serializePanelState);
+        return;
+      }
+      controlStateMap[childId].next(serializePanelState);
+    },
     ...overwriteApi,
-  } as unknown as ControlGroupApi;
+  } as unknown as MockedControlGroupApi;
 };
 
-export const getMockedBuildApi =
+export const getMockedFinalizeApi =
   <StateType extends object = object, ApiType extends DefaultControlApi = DefaultControlApi>(
     uuid: string,
     factory: ControlFactory<StateType, ApiType>,
     controlGroupApi?: ControlGroupApi
   ) =>
-  (api: ControlApiRegistration<ApiType>, nextComparators: StateComparators<StateType>) => {
+  (api: ControlApiRegistration<ApiType>) => {
     return {
       ...api,
       uuid,
       parentApi: controlGroupApi ?? getMockedControlGroupApi(),
-      unsavedChanges$: new BehaviorSubject<Partial<StateType> | undefined>(undefined),
-      resetUnsavedChanges: () => {
-        return true;
-      },
       type: factory.type,
     };
   };

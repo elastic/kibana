@@ -43,7 +43,6 @@ export interface UsageStats {
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureProfilingIntegration': boolean;
-  'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:apmEnableServiceMapApiV2': boolean;
@@ -153,7 +152,6 @@ export interface UsageStats {
   'observability:apmLabsButton': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
-  'observability:apmTraceExplorerTab': boolean;
   'observability:apmEnableProfilingIntegration': boolean;
   'observability:entityCentricExperience': boolean;
   'observability:profilingShowErrorFrames': boolean;
