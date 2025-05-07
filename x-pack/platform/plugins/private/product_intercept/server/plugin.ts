@@ -43,10 +43,9 @@ export class ProductInterceptServerPlugin
   }
 
   start(core: CoreStart, { intercepts }: ProductInterceptServerPluginStart) {
-    // register the kibana trigger definition
     void intercepts.registerTriggerDefinition?.(TRIGGER_DEF_ID, () => {
       this.logger.debug('Registering kibana product trigger definition');
-      return this.config.interval;
+      return { triggerAfter: this.config.interval };
     });
 
     return {};

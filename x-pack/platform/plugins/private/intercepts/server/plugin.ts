@@ -12,17 +12,10 @@ import {
   type PluginInitializerContext,
   type Logger,
 } from '@kbn/core/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { InterceptsTriggerCore } from './core';
 import type { ServerConfigSchema } from '../common/config';
 
-interface InterceptServerPluginSetupDeps {
-  cloud: CloudSetup;
-}
-
-export class InterceptsServerPlugin
-  implements Plugin<object, object, InterceptServerPluginSetupDeps, never>
-{
+export class InterceptsServerPlugin implements Plugin<object, object, object, never> {
   private readonly logger: Logger;
   private readonly config: ServerConfigSchema;
   private readonly interceptsCore?: InterceptsTriggerCore;
@@ -36,11 +29,9 @@ export class InterceptsServerPlugin
     }
   }
 
-  public setup(core: CoreSetup, { cloud }: InterceptServerPluginSetupDeps) {
+  public setup(core: CoreSetup) {
     this.interceptsCore?.setup(core, this.logger, {
-      isServerless: false,
       kibanaVersion: this.initContext.env.packageInfo.version,
-      isCloudDeployment: cloud.isCloudEnabled,
     });
 
     return {};

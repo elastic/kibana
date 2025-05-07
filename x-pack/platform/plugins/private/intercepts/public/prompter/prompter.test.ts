@@ -13,6 +13,7 @@ import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { InterceptDialogService } from './service';
 import { InterceptPrompter } from './prompter';
 import { TRIGGER_INFO_API_ROUTE } from '../../common/constants';
+import type { TriggerInfo } from '../../common/types';
 
 describe('ProductInterceptPrompter', () => {
   it('defines a setup method', () => {
@@ -152,11 +153,12 @@ describe('ProductInterceptPrompter', () => {
       });
 
       it('adds an intercept if the user has not already encountered the next scheduled run', async () => {
-        const triggerInfo = {
+        const triggerInfo: TriggerInfo = {
           registeredAt: new Date(
             '26 March 2025 19:08 GMT+0100 (Central European Standard Time)'
           ).toISOString(),
           triggerIntervalInMs: 30000,
+          recurrent: true,
         };
 
         const triggerRuns = 30;
@@ -202,11 +204,12 @@ describe('ProductInterceptPrompter', () => {
       });
 
       it('does not add an intercept if the user has already encountered the currently scheduled run', async () => {
-        const triggerInfo = {
+        const triggerInfo: TriggerInfo = {
           registeredAt: new Date(
             '26 March 2025 19:08 GMT+0100 (Central European Standard Time)'
           ).toISOString(),
           triggerIntervalInMs: 30000,
+          recurrent: true,
         };
 
         const triggerRuns = 30;
@@ -246,12 +249,62 @@ describe('ProductInterceptPrompter', () => {
         subscription.unsubscribe();
       });
 
+      it('does not add an intercept if the trigger is expected to be shown only once and the user already encountered that single run of the intercept', async () => {
+        const triggerInfo = {
+          registeredAt: new Date(
+            '26 March 2025 19:08 GMT+0100 (Central European Standard Time)'
+          ).toISOString(),
+          triggerIntervalInMs: 30000,
+          recurrent: false,
+        };
+
+        const triggerRuns = 30;
+        const timeInMsTillNextRun = triggerInfo.triggerIntervalInMs / 3;
+
+        // return the configured trigger info
+        jest.spyOn(http, 'post').mockResolvedValue(triggerInfo);
+        // configure a user that encountered the intercept on the 30th run
+        jest.spyOn(http, 'get').mockResolvedValue({ lastInteractedInterceptId: triggerRuns });
+
+        // set system time to time in the future, where there would have been 30 runs of the received trigger,
+        // with just about 1/3 of the time before the next trigger
+        jest.setSystemTime(
+          new Date(
+            Date.parse(triggerInfo.registeredAt) +
+              triggerInfo.triggerIntervalInMs * triggerRuns +
+              triggerInfo.triggerIntervalInMs -
+              timeInMsTillNextRun
+          )
+        );
+
+        const subscriptionHandler = jest.fn();
+
+        const intercept$ = registerIntercept(intercept);
+
+        const subscription = intercept$.subscribe(subscriptionHandler);
+
+        await jest.runOnlyPendingTimersAsync();
+
+        expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
+          body: JSON.stringify({ triggerId: intercept.id }),
+        });
+
+        jest.advanceTimersByTime(timeInMsTillNextRun);
+
+        // we should not queue the intercept,
+        // because the user already encountered it especially that it's a one off
+        expect(mockQueueInterceptFn).not.toHaveBeenCalled();
+
+        subscription.unsubscribe();
+      });
+
       it('queue another intercept automatically after the configured trigger interval when the time for displaying the intercept for the initial run has elapsed', async () => {
         const triggerInfo = {
           registeredAt: new Date(
             '26 March 2025 19:08 GMT+0100 (Central European Standard Time)'
           ).toISOString(),
           triggerIntervalInMs: 30000,
+          recurrent: true,
         };
 
         const triggerRuns = 30;

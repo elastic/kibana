@@ -5,17 +5,36 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { ObjectType, Type, schema } from '@kbn/config-schema';
 import { SavedObjectsType, SavedObjectsFieldMapping } from '@kbn/core/server';
 
-export interface InterceptTriggerRecord {
-  firstRegisteredAt: string;
+type InferObjectSchema<S> = {
+  [Property in keyof (S extends ObjectType<infer O> ? O : never)]: (S extends ObjectType<infer O>
+    ? O
+    : never)[Property] extends Type<infer T>
+    ? T extends ObjectType
+      ? InferObjectSchema<T>
+      : T
+    : never;
+};
+
+const interceptTriggerV1 = schema.object({
+  firstRegisteredAt: schema.string(),
   /**
    * The interval at which the intercept should be displayed to the user.
    */
-  triggerInterval: string;
-  installedOn: string;
-}
+  triggerAfter: schema.string(),
+  /**
+   * The version of kibana where this intercept trigger was installed.
+   */
+  installedOn: schema.string(),
+  /**
+   * Flag to denote if the trigger should run in perpetuity or not. set to false for a trigger that should run only once.
+   */
+  recurrent: schema.boolean(),
+});
+
+export type InterceptTriggerRecord = InferObjectSchema<typeof interceptTriggerV1>;
 
 type InterceptTriggerSavedObjectProperties = Record<
   keyof InterceptTriggerRecord,
@@ -26,19 +45,16 @@ const interceptTriggerProperties: InterceptTriggerSavedObjectProperties = {
   firstRegisteredAt: {
     type: 'date',
   },
-  triggerInterval: {
+  triggerAfter: {
     type: 'text',
   },
   installedOn: {
     type: 'keyword',
   },
+  recurrent: {
+    type: 'boolean',
+  },
 };
-
-const interceptTriggerV1 = schema.object({
-  firstRegisteredAt: schema.string(),
-  triggerInterval: schema.string(),
-  installedOn: schema.string(),
-});
 
 export const interceptTriggerRecordSavedObject: SavedObjectsType<InterceptTriggerRecord> = {
   name: 'intercept_trigger_record',

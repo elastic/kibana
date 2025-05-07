@@ -11,6 +11,7 @@ import { InterceptDialogService, InterceptServiceStartDeps } from './service';
 import { UserInterceptRunPersistenceService } from './service/user_intercept_run_persistence_service';
 import { Intercept } from './service';
 import { TRIGGER_INFO_API_ROUTE } from '../../common/constants';
+import { TriggerInfo } from '../../common/types';
 
 type ProductInterceptPrompterSetupDeps = Pick<CoreSetup, 'analytics' | 'notifications'>;
 type ProductInterceptPrompterStartDeps = Omit<
@@ -41,6 +42,11 @@ export class InterceptPrompter {
     }));
 
     return {
+      /**
+       * Configures the intercept journey that will be shown to the user, and returns an observable
+       * that manages displaying the intercept at the appropriate time based on the interval that's been pre-configured for the
+       * trigger ID matching the ID of this particular journey being configured.
+       */
       registerIntercept: this.registerIntercept.bind(this, http, getUserTriggerData$),
     };
   }
@@ -55,10 +61,7 @@ export class InterceptPrompter {
     let nextRunId: number;
 
     return Rx.from(
-      http.post<{
-        triggerIntervalInMs: number;
-        registeredAt: ReturnType<Date['toISOString']>;
-      }>(TRIGGER_INFO_API_ROUTE, {
+      http.post<NonNullable<TriggerInfo>>(TRIGGER_INFO_API_ROUTE, {
         body: JSON.stringify({
           triggerId: intercept.id,
         }),
@@ -82,8 +85,13 @@ export class InterceptPrompter {
 
           return Rx.timer(nextRun, response.triggerIntervalInMs).pipe(
             Rx.switchMap(() => getUserTriggerData$(intercept.id)),
-            Rx.take(1), // Ensure the timer emits only once
-            Rx.repeat({ delay: response.triggerIntervalInMs }) // Requeue after the interval
+            Rx.takeWhile((triggerData) => {
+              // Stop the timer if lastInteractedInterceptId is defined and matches nextRunId
+              if (!response.recurrent && triggerData.lastInteractedInterceptId) {
+                return false;
+              }
+              return true;
+            })
           );
         })
       )

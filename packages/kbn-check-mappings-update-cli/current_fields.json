@@ -751,15 +751,11 @@
     "triggerId",
     "userId"
   ],
-  "intercept_trigger": [
-    "firstRegisteredAt",
-    "installedOn",
-    "triggerInterval"
-  ],
   "intercept_trigger_record": [
     "firstRegisteredAt",
     "installedOn",
-    "triggerInterval"
+    "recurrent",
+    "triggerAfter"
   ],
   "inventory-view": [],
   "kql-telemetry": [],

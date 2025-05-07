@@ -49,6 +49,9 @@ interface InterceptDismissalEvent {
  * @internal
  */
 export interface Intercept {
+  /**
+   * Unique identifier for the intercept, value provided must match the Id used when registering the trigger condition for said intercept.
+   */
   id: string;
   runId: number;
   steps: [StartingInterceptStep, ...InterceptSteps[], CompletionInterceptStep];

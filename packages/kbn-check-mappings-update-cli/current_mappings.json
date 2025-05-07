@@ -2508,7 +2508,10 @@
       "installedOn": {
         "type": "keyword"
       },
-      "triggerInterval": {
+      "recurrent": {
+        "type": "boolean"
+      },
+      "triggerAfter": {
         "type": "text"
       }
     }

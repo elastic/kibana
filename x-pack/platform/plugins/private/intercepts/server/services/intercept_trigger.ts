@@ -10,33 +10,23 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import { interceptTriggerRecordSavedObject, type InterceptTriggerRecord } from '../saved_objects';
 
 interface InterceptTriggerServiceSetupDeps {
-  isCloudDeployment: boolean;
-  isServerless: boolean;
   kibanaVersion: string;
 }
 
-export interface InterceptRegistrationCallbackArgs extends InterceptTriggerServiceSetupDeps {
+export interface InterceptRegistrationCallbackArgs {
   existingTriggerDefinition?: InterceptTriggerRecord | null;
 }
 
 export class InterceptTriggerService {
   private logger?: Logger;
   private savedObjectsClient?: ISavedObjectsRepository;
-  private isCloudDeployment?: boolean;
-  private isServerlessDeployment?: boolean;
   private kibanaVersion?: string;
 
   private savedObjectRef = interceptTriggerRecordSavedObject;
 
-  setup(
-    core: CoreSetup,
-    logger: Logger,
-    { isCloudDeployment, isServerless, kibanaVersion }: InterceptTriggerServiceSetupDeps
-  ) {
+  setup(core: CoreSetup, logger: Logger, { kibanaVersion }: InterceptTriggerServiceSetupDeps) {
     this.logger = logger;
     this.kibanaVersion = kibanaVersion;
-    this.isCloudDeployment = isCloudDeployment;
-    this.isServerlessDeployment = isServerless;
 
     core.savedObjects.registerType(this.savedObjectRef);
 
@@ -72,18 +62,18 @@ export class InterceptTriggerService {
 
   private async registerTriggerDefinition(
     triggerId: string,
-    cb: (args: InterceptRegistrationCallbackArgs) => string | null
+    cb: (args: InterceptRegistrationCallbackArgs) => {
+      triggerAfter: string | null;
+      isRecurrent?: boolean;
+    }
   ) {
     const existingTriggerDefinition = await this.fetchRegisteredTask(triggerId);
 
-    const triggerInterval = cb({
-      isCloudDeployment: this.isCloudDeployment!,
-      isServerless: this.isServerlessDeployment!,
-      kibanaVersion: this.kibanaVersion!,
+    const { triggerAfter, isRecurrent } = cb({
       existingTriggerDefinition,
     });
 
-    if (!triggerInterval) {
+    if (!triggerAfter) {
       this.logger?.error('Trigger interval is not defined');
       return;
     }
@@ -94,27 +84,29 @@ export class InterceptTriggerService {
           this.savedObjectRef.name,
           {
             firstRegisteredAt: new Date().toISOString(),
-            triggerInterval,
+            triggerAfter,
             installedOn: this.kibanaVersion!,
+            recurrent: isRecurrent ?? true,
           },
           { id: triggerId }
         )
         .catch((err) => {
           // TODO: handle error properly
-          this.logger?.error(err);
+          this.logger?.error(err.message);
         });
       return;
     } else if (
+      // only support updating the trigger interval for existing trigger definitions
       existingTriggerDefinition &&
-      existingTriggerDefinition.triggerInterval !== triggerInterval
+      existingTriggerDefinition.triggerAfter !== triggerAfter
     ) {
       await this.savedObjectsClient
         ?.update<InterceptTriggerRecord>(this.savedObjectRef.name, triggerId, {
-          triggerInterval,
+          triggerAfter,
         })
         .catch((err) => {
           // TODO: handle error properly
-          this.logger?.error(err);
+          this.logger?.error(err.message);
         });
       return;
     }

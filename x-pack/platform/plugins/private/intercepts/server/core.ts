@@ -19,17 +19,13 @@ import { parseIntervalAsMillisecond } from '@kbn/task-manager-plugin/server/lib/
 import { InterceptTriggerService } from './services/intercept_trigger';
 import { InterceptUserInteractionService } from './services/intercept_user_interaction';
 import { TRIGGER_INFO_API_ROUTE } from '../common/constants';
+import type { TriggerInfo } from '../common/types';
 
 interface InterceptTriggerRouteContext extends RequestHandlerContext {
-  triggerInfo: Promise<{
-    registeredAt: ReturnType<Date['toISOString']>;
-    triggerIntervalInMs: number;
-  } | null>;
+  triggerInfo: Promise<TriggerInfo>;
 }
 
 interface InterceptTriggerCoreSetup {
-  isServerless: boolean;
-  isCloudDeployment: boolean;
   kibanaVersion: string;
 }
 
@@ -38,16 +34,10 @@ export class InterceptsTriggerCore {
   private interceptTriggerService = new InterceptTriggerService();
   private interceptUserInteractionService = new InterceptUserInteractionService();
 
-  setup(
-    core: CoreSetup,
-    logger: Logger,
-    { kibanaVersion, isCloudDeployment, isServerless }: InterceptTriggerCoreSetup
-  ) {
+  setup(core: CoreSetup, logger: Logger, { kibanaVersion }: InterceptTriggerCoreSetup) {
     this.logger = logger;
 
     const { fetchRegisteredTask } = this.interceptTriggerService.setup(core, this.logger, {
-      isServerless,
-      isCloudDeployment,
       kibanaVersion,
     });
 
@@ -98,9 +88,8 @@ export class InterceptsTriggerCore {
     if ((registeredTriggerDefinition = await fetchRegisteredTask(triggerId))) {
       triggerInfo = {
         registeredAt: registeredTriggerDefinition.firstRegisteredAt,
-        triggerIntervalInMs: parseIntervalAsMillisecond(
-          registeredTriggerDefinition.triggerInterval
-        ),
+        triggerIntervalInMs: parseIntervalAsMillisecond(registeredTriggerDefinition.triggerAfter),
+        recurrent: registeredTriggerDefinition.recurrent,
       };
     }
 
@@ -119,8 +108,7 @@ export class InterceptsTriggerCore {
         security: {
           authz: {
             enabled: false,
-            reason:
-              'route is public and provides information about the next product intercept trigger',
+            reason: 'route is public and provides information about the intercept trigger',
           },
         },
       },
