@@ -114,7 +114,10 @@ export const RemoveIndexSettingsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge level={deprecation.level as WarningLevels} isResolved={statusType === 'complete'} />
+        <DeprecationBadge
+          level={deprecation.level as WarningLevels}
+          isResolved={statusType === 'complete'}
+        />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="indexSettingsDetailsFlyoutTitle">{message}</h2>
