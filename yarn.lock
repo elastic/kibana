@@ -17447,10 +17447,53 @@ ejs@^3.1.10:
   dependencies:
     jake "^10.8.5"
 
-elastic-apm-node@^4.10.0, elastic-apm-node@^4.12.0:
+elastic-apm-node@^4.10.0:
   version "4.12.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.12.0.tgz#af30ac6f6baebebed2ed11a9365ecd77d3395ba3"
   integrity sha512-vyQ3cPrJ+4wxrKb3iKd99yH/57AQq+QxJpsv1QSiwygmebOSyWTEStXs+eg5aPEMJIOrZZlZG7mSM5Dh2D/eJw==
+  dependencies:
+    "@elastic/ecs-pino-format" "^1.5.0"
+    "@opentelemetry/api" "^1.4.1"
+    "@opentelemetry/core" "^1.11.0"
+    "@opentelemetry/sdk-metrics" "^1.12.0"
+    after-all-results "^2.0.0"
+    agentkeepalive "^4.2.1"
+    async-value-promise "^1.1.1"
+    basic-auth "^2.0.1"
+    breadth-filter "^2.0.0"
+    cookie "^0.7.1"
+    core-util-is "^1.0.2"
+    end-of-stream "^1.4.4"
+    error-callsites "^2.0.4"
+    error-stack-parser "^2.0.6"
+    escape-string-regexp "^4.0.0"
+    fast-safe-stringify "^2.0.7"
+    fast-stream-to-buffer "^1.0.0"
+    http-headers "^3.0.2"
+    import-in-the-middle "1.13.1"
+    json-bigint "^1.0.0"
+    lru-cache "10.2.0"
+    measured-reporting "^1.51.1"
+    module-details-from-path "^1.0.3"
+    monitor-event-loop-delay "^1.0.0"
+    object-filter-sequence "^1.0.0"
+    object-identity-map "^1.0.2"
+    original-url "^1.2.3"
+    pino "^8.15.0"
+    readable-stream "^3.6.2"
+    relative-microtime "^2.0.0"
+    require-in-the-middle "^7.1.1"
+    semver "^7.5.4"
+    shallow-clone-shim "^2.0.0"
+    source-map "^0.8.0-beta.0"
+    sql-summary "^1.0.1"
+    stream-chopper "^3.0.1"
+    unicode-byte-truncate "^1.0.0"
+
+elastic-apm-node@^4.13.0:
+  version "4.13.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.13.0.tgz#dda70902ac03f455dddfbd9dd2f81b8dfaa57f06"
+  integrity sha512-zb0u1uSDEJCU9IRTzfz7BAz5bgMAJb8iTxGhqiF/x/JEdd4qn53ddIrq0bMPm/eIMA37rIjuaUurZpcbXy6Rvw==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
