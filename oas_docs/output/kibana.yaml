@@ -452,6 +452,7 @@ paths:
                     - $ref: '#/components/schemas/gemini_secrets'
                     - $ref: '#/components/schemas/resilient_secrets'
                     - $ref: '#/components/schemas/jira_secrets'
+                    - $ref: '#/components/schemas/defender_secrets'
                     - $ref: '#/components/schemas/teams_secrets'
                     - $ref: '#/components/schemas/genai_secrets'
                     - $ref: '#/components/schemas/opsgenie_secrets'
@@ -569,6 +570,7 @@ paths:
                     - $ref: '#/components/schemas/resilient_config'
                     - $ref: '#/components/schemas/index_config'
                     - $ref: '#/components/schemas/jira_config'
+                    - $ref: '#/components/schemas/defender_config'
                     - $ref: '#/components/schemas/genai_azure_config'
                     - $ref: '#/components/schemas/genai_openai_config'
                     - $ref: '#/components/schemas/opsgenie_config'
@@ -79400,6 +79402,30 @@ components:
         projectKey:
           description: The Jira project key.
           type: string
+    defender_config:
+      title: Connector request properties for a Microsoft Defender for Endpoint connector
+      required:
+        - apiUrl
+        - projectKey
+      description: Defines properties for connectors when type is `.microsoft_defender_endpoint`.
+      type: object
+      properties:
+        apiUrl:
+          type: string
+          description: |
+            The URL of the Microsoft Defender for Endpoint API. If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname is added to the allowed hosts.
+        clientId:
+          type: string
+          description: The application (client) identifier for your app in the Azure portal.
+        oAuthScope:
+          type: string
+          description: The OAuth scopes or permission sets for the Microsoft Defender for Endpoint API.
+        oAuthServerUrl:
+          type: string
+          description: The OAuth server URL where authentication is sent and received for the Microsoft Defender for Endpoint API.
+        tenantId:
+          description: The tenant identifier for your app in the Azure portal.
+          type: string
     genai_azure_config:
       title: Connector request properties for an OpenAI connector that uses Azure OpenAI
       description: |
@@ -80231,6 +80257,16 @@ components:
         user:
           description: |
             A password for HTTP basic authentication. It is applicable only when `usesBasic` is `true`.
+          type: string
+    defender_secrets:
+      title: Connector secrets properties for a Microsoft Defender for Endpoint connector
+      required:
+        - clientSecret
+      description: Defines secrets for connectors when type is `..microsoft_defender_endpoint`.
+      type: object
+      properties:
+        clientSecret:
+          description: The client secret for your app in the Azure portal.
           type: string
     run_acknowledge_resolve_pagerduty:
       title: PagerDuty connector parameters
