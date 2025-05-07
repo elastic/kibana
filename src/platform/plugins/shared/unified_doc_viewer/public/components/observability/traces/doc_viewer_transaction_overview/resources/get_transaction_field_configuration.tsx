@@ -11,26 +11,35 @@ import {
   USER_AGENT_NAME_FIELD,
   TraceDocumentOverview,
   USER_AGENT_VERSION_FIELD,
+  DataTableRecord,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiText } from '@elastic/eui';
 import {
   FieldConfiguration,
   getCommonFieldConfiguration,
 } from '../../resources/get_field_configuration';
+import { HighlightField } from '../../components/highlight_field.tsx';
+import { getTraceDocValue } from '../../resources/get_field_value';
 
-export const getTransactionFieldConfiguration = (
-  attributes: TraceDocumentOverview
-): Record<string, FieldConfiguration> => {
+export const getTransactionFieldConfiguration = ({
+  attributes,
+  flattenedDoc,
+}: {
+  attributes: TraceDocumentOverview;
+  flattenedDoc: DataTableRecord['flattened'];
+}): Record<string, FieldConfiguration> => {
   return {
-    ...getCommonFieldConfiguration(attributes),
+    ...getCommonFieldConfiguration({ attributes, flattenedDoc }),
     [USER_AGENT_NAME_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.userAgent.title', {
         defaultMessage: 'User agent',
       }),
-      content: (value) => <EuiText size="xs">{value}</EuiText>,
-      value: attributes[USER_AGENT_NAME_FIELD],
+      content: (value, formattedValue) => (
+        <HighlightField value={value} formattedValue={formattedValue} />
+      ),
+      value: getTraceDocValue(USER_AGENT_NAME_FIELD, flattenedDoc),
+      formattedValue: attributes[USER_AGENT_NAME_FIELD],
     },
     [USER_AGENT_VERSION_FIELD]: {
       title: i18n.translate(
@@ -39,8 +48,11 @@ export const getTransactionFieldConfiguration = (
           defaultMessage: 'User agent version',
         }
       ),
-      content: (value) => <EuiText size="xs">{value}</EuiText>,
-      value: attributes[USER_AGENT_VERSION_FIELD],
+      content: (value, formattedValue) => (
+        <HighlightField value={value} formattedValue={formattedValue} />
+      ),
+      value: getTraceDocValue(USER_AGENT_VERSION_FIELD, flattenedDoc),
+      formattedValue: attributes[USER_AGENT_VERSION_FIELD],
     },
   };
 };

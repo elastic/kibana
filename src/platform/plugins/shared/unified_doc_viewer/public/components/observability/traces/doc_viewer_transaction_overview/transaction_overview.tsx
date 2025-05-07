@@ -27,6 +27,8 @@ import { RootTransactionProvider } from './hooks/use_root_transaction';
 import { Trace } from '../components/trace';
 
 import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { getTraceDocValue } from '../resources/get_field_value';
 export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
 };
@@ -38,15 +40,20 @@ export function TransactionOverview({
   onAddColumn,
   onRemoveColumn,
   tracesIndexPattern,
+  dataView,
 }: TransactionOverviewProps) {
-  const parsedDoc = useMemo(() => getTraceDocumentOverview(hit), [hit]);
-  const transactionDuration = parsedDoc[TRANSACTION_DURATION_FIELD];
-  const traceId = parsedDoc[TRACE_ID_FIELD];
-  const fieldConfigurations = useMemo(
-    () => getTransactionFieldConfiguration(parsedDoc),
-    [parsedDoc]
+  const { fieldFormats } = getUnifiedDocViewerServices();
+  const parsedDoc = useMemo(
+    () => getTraceDocumentOverview(hit, { dataView, fieldFormats }),
+    [dataView, fieldFormats, hit]
   );
-  const transactionId = parsedDoc[TRANSACTION_ID_FIELD];
+  const transactionDuration = getTraceDocValue(TRANSACTION_DURATION_FIELD, hit.flattened);
+  const fieldConfigurations = useMemo(
+    () => getTransactionFieldConfiguration({ attributes: parsedDoc, flattenedDoc: hit.flattened }),
+    [hit.flattened, parsedDoc]
+  );
+  const traceId = getTraceDocValue(TRACE_ID_FIELD, hit.flattened);
+  const transactionId = getTraceDocValue(TRANSACTION_ID_FIELD, hit.flattened);
 
   return (
     <RootTransactionProvider traceId={traceId} indexPattern={tracesIndexPattern}>
@@ -59,9 +66,11 @@ export function TransactionOverview({
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
           <TransactionSummaryTitle
-            serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+            serviceName={getTraceDocValue(SERVICE_NAME_FIELD, hit.flattened)}
             id={transactionId}
-            name={parsedDoc[TRANSACTION_NAME_FIELD]!}
+            formattedId={parsedDoc[TRANSACTION_ID_FIELD]}
+            transactionName={getTraceDocValue(TRANSACTION_NAME_FIELD, hit.flattened)}
+            formattedTransactionName={parsedDoc[TRANSACTION_NAME_FIELD]}
           />
           <EuiSpacer size="m" />
           {transactionFields.map((fieldId) => (

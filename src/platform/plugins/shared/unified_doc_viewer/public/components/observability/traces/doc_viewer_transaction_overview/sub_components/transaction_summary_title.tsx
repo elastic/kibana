@@ -7,32 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiText, EuiTitle } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { HighlightField } from '../../components/highlight_field.tsx';
 import { TransactionNameLink } from '../../components/transaction_name_link';
 
 export interface TransactionSummaryTitleProps {
   serviceName: string;
-  name?: string;
+  transactionName?: string;
+  formattedTransactionName?: string;
   id?: string;
+  formattedId?: string;
 }
-
-const renderTransactionTitle = (transactionName: string) => <strong>{transactionName}</strong>;
 
 export const TransactionSummaryTitle = ({
   serviceName,
-  name,
+  transactionName,
   id,
+  formattedId,
+  formattedTransactionName,
 }: TransactionSummaryTitleProps) => {
   return (
     <>
       <EuiTitle size="xs">
         <h2>
-          {name ? (
+          {transactionName ? (
             <TransactionNameLink
               serviceName={serviceName}
-              transactionName={name}
-              renderContent={renderTransactionTitle}
+              transactionName={transactionName}
+              renderContent={() => {
+                return formattedTransactionName ? (
+                  // Value returned from formatFieldValue is always sanitized
+                  // eslint-disable-next-line react/no-danger
+                  <strong dangerouslySetInnerHTML={{ __html: formattedTransactionName }} />
+                ) : (
+                  <strong>{transactionName}</strong>
+                );
+              }}
             />
           ) : (
             serviceName
@@ -40,11 +51,7 @@ export const TransactionSummaryTitle = ({
         </h2>
       </EuiTitle>
 
-      {id && (
-        <EuiText size="xs" color="subdued">
-          {id}
-        </EuiText>
-      )}
+      {id && <HighlightField value={id} formattedValue={formattedId} textSize="xs" />}
     </>
   );
 };

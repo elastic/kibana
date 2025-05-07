@@ -7,12 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { castArray } from 'lodash';
-import { DataTableRecord, TraceDocumentOverview, fieldConstants } from '../..';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataTableRecord, TraceDocumentOverview, fieldConstants, formatFieldValue } from '../..';
 
-export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOverview {
-  const formatField = <T extends keyof TraceDocumentOverview>(field: T) =>
-    castArray(doc.flattened[field])[0] as TraceDocumentOverview[T];
+export function getTraceDocumentOverview(
+  doc: DataTableRecord,
+  { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
+): TraceDocumentOverview {
+  const formatField = <T extends keyof TraceDocumentOverview>(field: T) => {
+    return formatFieldValue(
+      doc.flattened[field],
+      doc.raw,
+      fieldFormats,
+      dataView,
+      dataView.fields.getByName(field)
+    );
+  };
 
   const fields: Array<keyof TraceDocumentOverview> = [
     fieldConstants.TIMESTAMP_FIELD,
@@ -37,8 +48,8 @@ export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOve
     fieldConstants.PROCESSOR_EVENT_FIELD,
   ];
 
-  return fields.reduce((acc, field) => {
+  return fields.reduce<{ [key in keyof TraceDocumentOverview]?: string | number }>((acc, field) => {
     acc[field] = formatField(field);
     return acc;
-  }, {} as { [key in keyof TraceDocumentOverview]?: string | number }) as TraceDocumentOverview;
+  }, {}) as TraceDocumentOverview;
 }
