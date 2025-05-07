@@ -128,7 +128,6 @@ export const reportingCsvExportProvider = ({
       exportType: reportType,
       label: 'CSV',
       generateAssetExport: generateReportingJobCSV,
-      generateAssetURIValue: () => absoluteUrl,
       helpText: (
         <FormattedMessage
           id="reporting.share.csv.reporting.helpTextCSV"
@@ -136,14 +135,14 @@ export const reportingCsvExportProvider = ({
           values={{ objectType }}
         />
       ),
-      generateExportButton: (
+      generateExportButtonLabel: (
         <FormattedMessage
           id="reporting.share.generateButtonLabelCSV"
           data-test-subj="generateReportButton"
           defaultMessage="Generate CSV"
         />
       ),
-      copyURIConfig: {
+      copyAssetURIConfig: {
         headingText: i18n.translate('reporting.export.csv.exportFlyout.csvExportCopyUriHeading', {
           defaultMessage: 'Post URL',
         }),
@@ -152,6 +151,7 @@ export const reportingCsvExportProvider = ({
             'Allows to generate selected file format programmatically outside Kibana or in Watcher.',
         }),
         contentType: 'text',
+        generateAssetURIValue: () => absoluteUrl,
       },
     };
   };

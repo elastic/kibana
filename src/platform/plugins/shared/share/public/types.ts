@@ -140,7 +140,7 @@ export interface ExportShare
        */
       disabled?: boolean;
       helpText?: ReactNode;
-      generateExportButton?: ReactNode;
+      generateExportButtonLabel?: ReactNode;
       generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
       renderCopyURIButton?: boolean;
       warnings?: Array<{ title: string; message: string }>;
@@ -158,6 +158,10 @@ export interface ExportShare
           };
         }
       | { generateAssetComponent: ReactNode; copyAssetURIConfig?: never }
+      | {
+          generateAssetComponent?: never;
+          copyAssetURIConfig?: never;
+        }
     )
   > {
   groupId: 'export';
@@ -257,6 +261,10 @@ export interface ShareContext {
    * The type of the object to share. for example lens, dashboard, etc.
    */
   objectType: string;
+  /**
+   * An alias of type of the object to share, that's more human friendly.
+   */
+  objectTypeAlias?: string;
   /**
    * Allows for passing contextual information that each consumer can provide to customize the share menu
    */

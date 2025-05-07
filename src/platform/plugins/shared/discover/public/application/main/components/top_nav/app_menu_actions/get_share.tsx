@@ -96,6 +96,9 @@ export const getShareAppMenuItem = ({
       shareableUrlLocatorParams: { locator, params },
       objectId: savedSearch.id,
       objectType: 'search',
+      objectTypeAlias: i18n.translate('discover.share.objectTypeAlias', {
+        defaultMessage: 'Discover session',
+      }),
       objectTypeMeta: {
         title: i18n.translate('discover.share.shareModal.title', {
           defaultMessage: 'Share this Discover session',

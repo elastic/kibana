@@ -142,7 +142,6 @@ export const downloadCsvLensShareProvider = ({
         supportedLayoutOptions: ['print'],
         requiresSavedState: false,
         generateAssetExport: downloadCSVHandler,
-        generateAssetURIValue: () => '',
         warnings: getWarnings(datatables),
         ...(atLeastGold()
           ? {
@@ -157,7 +156,7 @@ export const downloadCsvLensShareProvider = ({
                   defaultMessage="Download the data displayed in the visualization."
                 />
               ),
-              generateExportButton: (
+              generateExportButtonLabel: (
                 <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
               ),
             }),

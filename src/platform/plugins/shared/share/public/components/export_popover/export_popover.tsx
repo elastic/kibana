@@ -103,8 +103,15 @@ function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOption
 }
 
 function ExportMenuPopover({ intl }: ExportMenuProps) {
-  const { onClose, anchorElement, shareMenuItems, isDirty, publicAPIEnabled, objectType } =
-    useShareTabsContext('integration', 'export');
+  const {
+    onClose,
+    anchorElement,
+    shareMenuItems,
+    isDirty,
+    publicAPIEnabled,
+    objectType,
+    objectTypeAlias,
+  } = useShareTabsContext('integration', 'export');
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [selectedMenuItemId, setSelectedMenuItemId] = useState<string>();
@@ -189,7 +196,10 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                 <FormattedMessage
                   id="share.export.flyoutTitle"
                   defaultMessage="Export {objectType} as {type}"
-                  values={{ objectType, type: selectedMenuItem?.config.label }}
+                  values={{
+                    objectType: (objectTypeAlias ?? objectType).toLocaleLowerCase(),
+                    type: selectedMenuItem?.config.label,
+                  }}
                 />
               </h2>
             </EuiTitle>
@@ -282,22 +292,20 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <Fragment>
-                  {selectedMenuItem?.config.generateExportButton ?? (
-                    <EuiButton
-                      fill
-                      onClick={getReport}
-                      data-test-subj="generateReportButton"
-                      isLoading={isCreatingExport}
-                    >
-                      <FormattedMessage
-                        id="share.export.generateButtonLabel"
-                        defaultMessage="Export {type}"
-                        values={{ type: selectedMenuItem?.config.label }}
-                      />
-                    </EuiButton>
+                <EuiButton
+                  fill
+                  onClick={getReport}
+                  data-test-subj="generateReportButton"
+                  isLoading={isCreatingExport}
+                >
+                  {selectedMenuItem?.config.generateExportButtonLabel ?? (
+                    <FormattedMessage
+                      id="share.export.generateButtonLabel"
+                      defaultMessage="Export {type}"
+                      values={{ type: selectedMenuItem?.config.label }}
+                    />
                   )}
-                </Fragment>
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlyoutFooter>
