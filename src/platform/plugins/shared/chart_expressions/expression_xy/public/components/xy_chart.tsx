@@ -128,6 +128,8 @@ declare global {
   }
 }
 
+const MULTILAYER_TIME_AXIS_TICKLINE_PADDING = 4;
+
 export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
@@ -1027,7 +1029,7 @@ export function XYChart({
                   rangeAnnotations.length && shouldHideDetails
                     ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
                     : isHorizontalTimeAxis
-                    ? chartBaseTheme.axes.tickLine.size + chartBaseTheme.axes.tickLabel.fontSize
+                    ? MULTILAYER_TIME_AXIS_TICKLINE_PADDING + chartBaseTheme.axes.tickLabel.fontSize
                     : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
                 }
               />
