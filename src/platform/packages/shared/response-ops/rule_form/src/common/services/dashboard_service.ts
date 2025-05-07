@@ -22,6 +22,8 @@ export function dashboardServiceProvider(dashboardService: DashboardStart) {
   return {
     /**
      * Fetch dashboards
+     * @param query - The query to search for dashboards
+     * @returns - The dashboards that match the query
      */
     async fetchDashboards(query?: string): Promise<DashboardItem[]> {
       const findDashboardsService = await dashboardService.findDashboardsService();
@@ -33,16 +35,10 @@ export function dashboardServiceProvider(dashboardService: DashboardStart) {
       return responses.hits;
     },
     /**
-     * Fetch dashboards by id
-     */
-    async fetchDashboardsById(ids: string[]) {
-      const findDashboardsService = await dashboardService.findDashboardsService();
-      const responses = await findDashboardsService.findByIds(ids);
-      const existingDashboards = responses.filter(({ status }) => status === 'success');
-      return existingDashboards;
-    },
-    /**
      * Fetch dashboard by id
+     * @param id - The id of the dashboard to fetch
+     * @returns - The dashboard with the given id
+     * @throws - An error if the dashboard does not exist
      */
     async fetchDashboard(id: string) {
       const findDashboardsService = await dashboardService.findDashboardsService();
@@ -51,6 +47,17 @@ export function dashboardServiceProvider(dashboardService: DashboardStart) {
         throw new Error(response.error.message);
       }
       return response;
+    },
+    /**
+     * Fetch only the dashboards that still exist
+     * @param ids - The ids of the dashboards to fetch
+     * @returns - The dashboards that exist
+     */
+    async fetchValidDashboards(ids: string[]) {
+      const findDashboardsService = await dashboardService.findDashboardsService();
+      const responses = await findDashboardsService.findByIds(ids);
+      const existingDashboards = responses.filter(({ status }) => status === 'success');
+      return existingDashboards;
     },
   };
 }

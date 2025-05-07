@@ -16,7 +16,7 @@ import {
   EuiTitle,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { dashboardServiceProvider, type DashboardItem } from './dashboard_service';
+import { dashboardServiceProvider, type DashboardItem } from '../common/services/dashboard_service';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { ALERT_LINK_DASHBOARDS_TITLE } from '../translations';
 import { type RuleDashboardsPlugins } from '../types';
@@ -38,7 +38,6 @@ export const RuleDashboards = ({ plugins }: RuleDashboardsPluginsProps) => {
     () => formData.artifacts?.dashboards ?? [],
     [formData.artifacts]
   );
-  // const dashboardsFormData = formData.dashboards;
 
   const [dashboardList, setDashboardList] = useState<DashboardOption[] | undefined>();
 

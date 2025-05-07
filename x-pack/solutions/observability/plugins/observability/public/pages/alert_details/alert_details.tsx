@@ -34,6 +34,7 @@ import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
 import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
+import { dashboardServiceProvider } from '@kbn/response-ops-rule-form/src/common';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { BetaBadge } from '../../components/experimental_badge';
@@ -199,10 +200,8 @@ export function AlertDetails() {
   useEffect(() => {
     const fetchValidDashboards = async () => {
       const dashboardIds = linkedDashboards.map((dashboard: { id: string }) => dashboard.id);
-
-      const findDashboardsService = await dashboardService.findDashboardsService();
-      const responses = await findDashboardsService.findByIds(dashboardIds);
-      const existingDashboards = responses.filter(({ status }) => status === 'success');
+      const findDashboardsService = await dashboardServiceProvider(dashboardService);
+      const existingDashboards = await findDashboardsService.fetchValidDashboards(dashboardIds);
 
       setValidDashboards(existingDashboards.length ? existingDashboards : []);
     };
@@ -297,7 +296,7 @@ export function AlertDetails() {
   );
 
   const relatedDashboardsTab = alertDetail ? (
-    <RelatedDashboards relatedDashboards={linkedDashboards || []} alert={alertDetail.formatted} />
+    <RelatedDashboards relatedDashboards={validDashboards || []} alert={alertDetail.formatted} />
   ) : (
     <EuiLoadingSpinner />
   );
