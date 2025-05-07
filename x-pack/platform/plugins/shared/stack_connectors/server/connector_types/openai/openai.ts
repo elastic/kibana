@@ -226,20 +226,30 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     if (this.provider === OpenAiProviderType.Other && this.hasPKI) {
       try {
         const sanitizedBody = JSON.parse(body);
-        const response = await this.openAI.chat.completions.create(
+        const axiosOptions = getAxiosOptions(this.provider, this.key, false);
+        const response = await this.request(
           {
-            ...sanitizedBody,
-            model:
-              sanitizedBody.model ??
-              ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
-          },
-          {
+            url: this.url,
+            method: 'post',
+            responseSchema: RunActionResponseSchema,
+            data: {
+              ...sanitizedBody,
+              model:
+                sanitizedBody.model ??
+                ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+            },
             signal,
             timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-          }
+            ...axiosOptions,
+            headers: {
+              ...this.headers,
+              ...axiosOptions.headers,
+            },
+          },
+          connectorUsageCollector
         );
         this.logger.debug(`PKI OpenAI Response (runApi): ${JSON.stringify(response)}`);
-        return response as RunActionResponse;
+        return response.data;
       } catch (error) {
         this.logger.error(`OpenAI API Error: ${error.message}`);
         this.logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
@@ -285,23 +295,31 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     if (this.provider === OpenAiProviderType.Other && this.hasPKI) {
       try {
         const sanitizedBody = JSON.parse(body);
-        const response = await this.openAI.chat.completions.create(
+        const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
+        const response = await this.request(
           {
-            ...sanitizedBody,
-            model:
-              sanitizedBody.model ??
-              ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
-            stream,
-          },
-          {
+            url: this.url,
+            method: 'post',
+            responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
+            data: {
+              ...sanitizedBody,
+              model:
+                sanitizedBody.model ??
+                ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+              stream,
+            },
             signal,
             timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-          }
+            ...axiosOptions,
+            headers: {
+              ...this.headers,
+              ...axiosOptions.headers,
+            },
+          },
+          connectorUsageCollector
         );
         this.logger.debug(`PKI OpenAI Streaming Response (streamApi): ${JSON.stringify(response)}`);
-        return stream
-          ? (response as unknown as RunActionResponse)
-          : (response as RunActionResponse);
+        return stream ? pipeStreamingResponse(response) : response.data;
       } catch (error) {
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
           throw new Error(
