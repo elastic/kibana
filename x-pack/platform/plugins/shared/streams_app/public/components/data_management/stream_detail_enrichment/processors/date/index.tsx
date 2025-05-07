@@ -10,6 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { isEmpty, uniq } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { getFormattedError } from '../../../../../util/errors';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { ProcessorFieldSelector } from '../processor_field_selector';
 import { OptionalFieldsAccordion } from '../optional_fields_accordion';
@@ -37,9 +38,7 @@ export const DateProcessorForm = () => {
 
   const form = useFormContext<DateFormState>();
 
-  const definitionName = useStreamsEnrichmentSelector(
-    (snapshot) => snapshot.context.definition.stream.name
-  );
+  const definition = useStreamsEnrichmentSelector((snapshot) => snapshot.context.definition);
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
   );
@@ -63,7 +62,7 @@ export const DateProcessorForm = () => {
           signal: null,
           params: {
             path: {
-              name: definitionName,
+              name: definition.stream.name,
             },
             body: {
               dates: dates as [string, ...string[]], // At least one sample is required by the API
@@ -78,11 +77,13 @@ export const DateProcessorForm = () => {
         form.clearErrors();
       }
     } catch (error) {
-      toasts.addError(new Error(error.body.message), {
+      const formattedError = getFormattedError(error);
+      toasts.addError(formattedError, {
         title: i18n.translate('xpack.streams.enrichment.simulation.dateSuggestionsError', {
           defaultMessage: 'An error occurred while fetching date formats suggestions.',
         }),
-        toastMessage: error.body.message,
+        toastMessage: formattedError.message,
+        toastLifeTimeMs: 5000,
       });
     }
   };
@@ -95,10 +96,12 @@ export const DateProcessorForm = () => {
     applySuggestions({ fieldName, canSuggest: !hasFormats || !isTouched });
   };
 
-  const handleGenerateSuggestionClick = () => {
-    const fieldName = form.getValues('field');
-    applySuggestions({ fieldName, canSuggest: true });
-  };
+  const handleGenerateSuggestionClick = definition.privileges.text_structure
+    ? () => {
+        const fieldName = form.getValues('field');
+        applySuggestions({ fieldName, canSuggest: true });
+      }
+    : undefined;
 
   return (
     <>

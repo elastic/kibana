@@ -419,14 +419,16 @@ export class StreamsClient {
    * include the dashboard links.
    */
   async getPrivileges(name: string) {
+    const REQUIRED_MANAGE_PRIVILEGES = [
+      'manage_index_templates',
+      'manage_ingest_pipelines',
+      'manage_pipeline',
+      'read_pipeline',
+    ];
+
     const privileges =
       await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
-        cluster: [
-          'manage_index_templates',
-          'manage_ingest_pipelines',
-          'manage_pipeline',
-          'read_pipeline',
-        ],
+        cluster: [...REQUIRED_MANAGE_PRIVILEGES, 'monitor_text_structure'],
         index: [
           {
             names: [name],
@@ -445,12 +447,13 @@ export class StreamsClient {
 
     return {
       manage:
-        Object.values(privileges.cluster).every((privilege) => privilege === true) &&
+        REQUIRED_MANAGE_PRIVILEGES.every((privilege) => privileges.cluster[privilege] === true) &&
         Object.values(privileges.index[name]).every((privilege) => privilege === true),
       monitor: privileges.index[name].monitor,
       lifecycle:
         privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
       simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
+      text_structure: privileges.cluster.monitor_text_structure,
     };
   }
 

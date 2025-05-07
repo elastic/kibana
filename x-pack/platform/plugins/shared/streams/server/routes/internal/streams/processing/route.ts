@@ -109,11 +109,16 @@ export const processingDateSuggestionsRoute = createServerRoute({
   },
   params: processingDateSuggestionsSchema,
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { name } = params.path;
 
-    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    const { read } = await checkAccess({ name, scopedClusterClient });
     if (!read) {
-      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
+      throw new SecurityError(`Cannot read stream ${name}, insufficient privileges`);
+    }
+    const { text_structure: hasTextStructurePrivileges } = await streamsClient.getPrivileges(name);
+    if (!hasTextStructurePrivileges) {
+      throw new SecurityError(`Cannot access text structure capabilities, insufficient privileges`);
     }
 
     return handleProcessingDateSuggestions({ params, scopedClusterClient });
