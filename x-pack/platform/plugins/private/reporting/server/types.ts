@@ -12,7 +12,7 @@ import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
+import type { ReportSource, UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
@@ -24,14 +24,20 @@ import type {
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
+  RruleSchedule,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  RawNotification,
+  RawScheduledReport,
+} from './saved_objects/scheduled_report/schemas/latest';
 
 /**
  * Plugin Setup Contract
@@ -49,6 +55,7 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
 export interface ReportingSetupDeps {
+  actions: ActionsPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
@@ -89,6 +96,28 @@ export interface ReportingJobResponse {
    */
   job: ReportApiJSON;
 }
+
+export type ScheduledReportApiJSON = Omit<
+  ReportSource,
+  'payload' | 'output' | 'attempts' | 'status'
+> & {
+  id: string;
+  schedule: RruleSchedule;
+  notification?: RawNotification;
+  payload: Omit<ReportSource['payload'], 'headers'>;
+};
+
+export interface ScheduledReportingJobResponse {
+  /**
+   * Details of a new report job that was requested
+   * @public
+   */
+  job: ScheduledReportApiJSON;
+}
+
+export type ScheduledReportType = Omit<RawScheduledReport, 'schedule'> & {
+  schedule: RruleSchedule;
+};
 
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];

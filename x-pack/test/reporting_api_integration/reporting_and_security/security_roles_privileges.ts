@@ -162,6 +162,161 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('Dashboard: Schedule PDF report', () => {
+      it('does not allow user that does not have the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.DATA_ANALYST_USERNAME,
+          reportingAPI.DATA_ANALYST_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF disallowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'dashboard',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(403);
+      });
+
+      it('does allow user with the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF allowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'dashboard',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(200);
+
+        const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
+        expect(soResult.status).to.eql(200);
+        expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+      });
+    });
+
+    describe('Visualize: Schedule PDF report', () => {
+      it('does not allow user that does not have the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.DATA_ANALYST_USERNAME,
+          reportingAPI.DATA_ANALYST_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF disallowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'visualization',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(403);
+      });
+
+      it('does allow user with the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF allowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'visualization',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(200);
+
+        const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
+        expect(soResult.status).to.eql(200);
+        expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+      });
+    });
+
+    describe('Canvas: Schedule PDF report', () => {
+      it('does not allow user that does not have the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.DATA_ANALYST_USERNAME,
+          reportingAPI.DATA_ANALYST_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF disallowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'canvas',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(403);
+      });
+
+      it('does allow user with the role-based privilege', async () => {
+        const res = await reportingAPI.schedulePdf(
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD,
+          {
+            browserTimezone: 'UTC',
+            title: 'test PDF allowed',
+            layout: { id: 'preserve_layout' },
+            locatorParams: [{ id: 'canvas', version: '7.14.0', params: {} }],
+            objectType: 'canvas',
+            version: '7.14.0',
+          }
+        );
+        expect(res.status).to.eql(200);
+
+        const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
+        expect(soResult.status).to.eql(200);
+        expect(soResult.body._source.scheduled_report.title).to.eql('test PDF allowed');
+      });
+    });
+
+    describe('Discover: Schedule CSV report', () => {
+      it('does not allow user that does not have the role-based privilege', async () => {
+        const res = await reportingAPI.scheduleCsv(
+          {
+            browserTimezone: 'UTC',
+            searchSource: {} as SerializedSearchSourceFields,
+            objectType: 'search',
+            title: 'test disallowed',
+            version: '7.14.0',
+          },
+          reportingAPI.DATA_ANALYST_USERNAME,
+          reportingAPI.DATA_ANALYST_PASSWORD
+        );
+        expect(res.status).to.eql(403);
+      });
+
+      it('does allow user with the role-based privilege', async () => {
+        const res = await reportingAPI.scheduleCsv(
+          {
+            browserTimezone: 'UTC',
+            title: 'allowed search',
+            objectType: 'search',
+            searchSource: {
+              version: true,
+              fields: [{ field: '*', include_unmapped: true }],
+              index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            } as unknown as SerializedSearchSourceFields,
+            columns: [],
+            version: '7.13.0',
+          },
+          reportingAPI.REPORTING_USER_USERNAME,
+          reportingAPI.REPORTING_USER_PASSWORD
+        );
+        expect(res.status).to.eql(200);
+
+        const soResult = await reportingAPI.getScheduledReportSO(res.body.job.id);
+        expect(soResult.status).to.eql(200);
+        expect(soResult.body._source.scheduled_report.title).to.eql('allowed search');
+      });
+    });
+
     // This tests the same API as x-pack/test/api_integration/apis/security/privileges.ts, but it uses the non-deprecated config
     it('should register reporting privileges with the security privileges API', async () => {
       await supertest
