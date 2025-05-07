@@ -6,7 +6,13 @@
  */
 
 export type { Message, Conversation, KnowledgeBaseEntry, ConversationCreateRequest } from './types';
-export { KnowledgeBaseEntryRole, MessageRole, ConversationAccess } from './types';
+export {
+  KnowledgeBaseEntryRole,
+  MessageRole,
+  ConversationAccess,
+  KnowledgeBaseType,
+  KnowledgeBaseState,
+} from './types';
 export type { FunctionDefinition, CompatibleJSONSchema } from './functions/types';
 export { FunctionVisibility } from './functions/function_visibility';
 export {
@@ -46,5 +52,3 @@ export {
 export { concatenateChatCompletionChunks } from './utils/concatenate_chat_completion_chunks';
 
 export { ShortIdTable } from './utils/short_id_table';
-
-export { KnowledgeBaseType } from './types';

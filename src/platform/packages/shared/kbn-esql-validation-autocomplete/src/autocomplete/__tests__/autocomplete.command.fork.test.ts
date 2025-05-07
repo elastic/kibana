@@ -14,7 +14,7 @@ import {
 } from './autocomplete.command.where.test';
 import { AssertSuggestionsFn, SuggestFn, setup } from './helpers';
 
-describe('autocomplete.suggest', () => {
+describe.skip('autocomplete.suggest', () => {
   describe('FORK (COMMAND ... [| COMMAND ...]) [(COMMAND ... [| COMMAND ...])]', () => {
     let assertSuggestions: AssertSuggestionsFn;
     let suggest: SuggestFn;

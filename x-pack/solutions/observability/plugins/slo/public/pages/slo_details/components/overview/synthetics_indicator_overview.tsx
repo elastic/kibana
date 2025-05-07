@@ -11,7 +11,7 @@ import { syntheticsAvailabilityIndicatorSchema, SLOWithSummaryResponse } from '@
 import React from 'react';
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { OverviewItem } from './overview_item';
+import { DefinitionItem } from './definition_item';
 
 interface Props {
   slo: SLOWithSummaryResponse;
@@ -35,14 +35,14 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
   }
 
   const onMonitorClick = () => locator?.navigate({ configId, locationId });
-  const showOverviewItem = name || location;
+  const showDefinitionItem = name || location;
 
-  if (!showOverviewItem) {
+  if (!showDefinitionItem) {
     return null;
   }
 
   return (
-    <OverviewItem
+    <DefinitionItem
       title={MONITOR_LABEL}
       subtitle={
         <EuiFlexGroup direction="row" alignItems="flexStart" gutterSize="s" responsive={false} wrap>

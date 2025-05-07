@@ -450,6 +450,14 @@ export const TELEMETRY_INDEX_SETTINGS_EVENT: EventTypeOpts<IndicesSettings> = {
             type: 'keyword',
             _meta: { description: 'The name of the index.' },
           },
+          index_mode: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Index mode.' },
+          },
+          source_mode: {
+            type: 'keyword',
+            _meta: { optional: true, description: 'Source mode.' },
+          },
           default_pipeline: {
             type: 'keyword',
             _meta: {

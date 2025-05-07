@@ -117,16 +117,3 @@ export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
  */
 export const ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX =
   `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-ad-hoc` as const;
-
-/**
- * The server timeout is set to 4 minutes to allow for long-running requests.
- * The allows slower LLMs (like Llama 3.1 70B) and complex tasks such as ESQL generation to complete
- * without being interrupted.
- */
-export const INVOKE_LLM_SERVER_TIMEOUT = 4 * 60 * 1000; // 4 minutes
-/**
- * The client timeout is set to 3 seconds less than the server timeout to prevent
- * the `core-http-browser` from retrying the request.
- *
- */
-export const INVOKE_LL_CLIENT_TIMEOUT = INVOKE_LLM_SERVER_TIMEOUT - 3000; // 4 minutes - 3 second

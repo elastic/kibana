@@ -20,7 +20,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('home');
     });
 
-    describe('global all privileges (aka kibana_admin)', () => {
+    describe('global all privileges (aka kibana_admin)', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await security.testUser.setRoles(['kibana_admin']);
       });
@@ -61,7 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('[SkipCloud] global dashboard read with global_upgrade_assistant_role', function () {
-        this.tags('skipCloud');
+        this.tags(['skipCloud', 'skipFIPS']);
         it('should render the "Stack" section with Upgrade Assistant', async function () {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();

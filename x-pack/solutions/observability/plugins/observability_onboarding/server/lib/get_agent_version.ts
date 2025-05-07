@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import semver from 'semver';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { ElasticAgentVersionInfo } from '../../common/types';
 
 export async function getAgentVersionInfo(
   fleetStart: FleetStartContract,
-  kibanaVersion: string
+  kibanaVersion: string,
+  versionPattern?: string
 ): Promise<ElasticAgentVersionInfo> {
   // If undefined, we will follow fleet's strategy to select latest available version:
   // for serverless we will use the latest published version, for statefull we will use
@@ -24,9 +26,29 @@ export async function getAgentVersionInfo(
     agentClient.getLatestAgentAvailableBaseVersion(includeCurrentVersion),
     agentClient.getLatestAgentAvailableDockerImageVersion(includeCurrentVersion),
   ]);
+  const agentTargetVersion = versionPattern
+    ? getLatestAgentVersionForPattern(
+        await agentClient.getAvailableVersions(),
+        kibanaVersion,
+        versionPattern
+      )
+    : undefined;
   return {
     agentVersion,
     agentBaseVersion,
     agentDockerImageVersion,
+    agentTargetVersion,
   };
+}
+
+export function getLatestAgentVersionForPattern(
+  agentVersionList: string[],
+  kibanaVersion: string,
+  versionPattern: string
+): string {
+  return (
+    agentVersionList.find((version) => {
+      return semver.satisfies(version, versionPattern);
+    }) ?? kibanaVersion
+  );
 }

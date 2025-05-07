@@ -12,7 +12,6 @@ import * as Fs from 'fs';
 import * as globby from 'globby';
 import minimatch from 'minimatch';
 
-// eslint-disable-next-line @kbn/eslint/no_unsafe_js_yaml
 import { load as loadYaml } from 'js-yaml';
 
 import { BuildkiteClient, BuildkiteStep } from '../buildkite';
@@ -488,7 +487,7 @@ export async function pickTestGroupRunOrder() {
             key: 'jest',
             agents: {
               ...expandAgentQueue('n2-4-spot'),
-              diskSizeGb: 75,
+              diskSizeGb: 80,
             },
             retry: {
               automatic: [
