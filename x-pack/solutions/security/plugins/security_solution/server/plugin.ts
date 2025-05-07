@@ -39,7 +39,7 @@ import {
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
 import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
-import { ManifestTask } from './endpoint/lib/artifacts';
+import { ManifestConstants, ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
@@ -133,6 +133,7 @@ import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_ser
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
+import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -574,7 +575,12 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.start(core, plugins);
 
-    const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const savedObjectsClient = new SavedObjectsClient(
+      core.savedObjects.createInternalRepository([
+        ManifestConstants.SAVED_OBJECT_TYPE,
+        ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
+      ])
+    );
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const exceptionListClient = this.lists!.getExceptionListClient(
@@ -603,6 +609,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
+
+    const internalUnScoppedSoClient = new SavedObjectsClientFactory(
+      core.savedObjects,
+      core.http
+    ).createInternalUnscopedSoClient(false);
 
     const manifestManager = new ManifestManager({
       savedObjectsClient,

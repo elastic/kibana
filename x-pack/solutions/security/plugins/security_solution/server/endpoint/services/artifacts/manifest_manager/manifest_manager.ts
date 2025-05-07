@@ -16,6 +16,7 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { asyncForEach } from '@kbn/std';
+import { endpointServices } from '../../../endpoint_app_context_services';
 import { UnifiedManifestClient } from '../unified_manifest_client';
 import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
@@ -780,8 +781,11 @@ export class ManifestManager {
   }
 
   private async listEndpointPolicyIds(): Promise<string[]> {
+    // FIXME:PT DEV TEST CODE
+    const unscopedSoClient = endpointServices.savedObjects.createInternalUnscopedSoClient(false);
+
     const allPolicyIds: string[] = [];
-    const idFetcher = await this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
+    const idFetcher = await this.packagePolicyService.fetchAllItemIds(unscopedSoClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
     });
 

@@ -93,6 +93,10 @@ export interface EndpointAppContextServiceStartContract {
   spacesService: SpacesServiceStart | undefined;
 }
 
+// FIXME:PT DO NOT COMMIT... DEV TEST ONLY
+export let endpointServices: EndpointAppContextService;
+// -----------------------------------------
+
 /**
  * A singleton that holds shared services that are initialized during the start up phase
  * of the plugin lifecycle. And stop during the stop phase, if needed.
@@ -107,6 +111,8 @@ export class EndpointAppContextService {
 
   public setup(dependencies: EndpointAppContextServiceSetupContract) {
     this.setupDependencies = dependencies;
+
+    endpointServices = this;
   }
 
   public start(dependencies: EndpointAppContextServiceStartContract) {

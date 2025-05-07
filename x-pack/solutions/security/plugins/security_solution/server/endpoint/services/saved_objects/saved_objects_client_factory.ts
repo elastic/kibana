@@ -13,6 +13,7 @@ import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { ManifestConstants } from '../../lib/artifacts';
 import { EndpointError } from '../../../../common/endpoint/errors';
 
 type SavedObjectsClientContractKeys = keyof SavedObjectsClientContract;
@@ -99,8 +100,23 @@ export class SavedObjectsClientFactory {
    * **WARNING:** Use with care!
    */
   createInternalUnscopedSoClient(readonly: boolean = true): SavedObjectsClientContract {
-    const soClient = this.savedObjectsServiceStart.getScopedClient(this.createFakeHttpRequest(), {
+    const fakeRequest = {
+      headers: {},
+      getBasePath: () => '',
+      path: '/',
+      route: { settings: {} },
+      url: { href: {} },
+      raw: { req: { url: '/' } },
+      isFakeRequest: true,
+    } as unknown as KibanaRequest;
+
+    const soClient = this.savedObjectsServiceStart.getScopedClient(fakeRequest, {
       excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
+      // Internal/hidden SO types that we want to give access to
+      includedHiddenTypes: [
+        ManifestConstants.SAVED_OBJECT_TYPE,
+        ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
+      ],
     });
 
     if (readonly) {

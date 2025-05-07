@@ -2112,8 +2112,27 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // TODO:PT Question for fleet team: do I need to `auditLoggingService.writeCustomSoAuditLog()` here? Its only IDs
     const savedObjectType = await getPackagePolicySavedObjectType();
 
+    const fleetInternalSOClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+    console.log(`
+
+
+    packagePolicy.fetchAllItemIds(): using fleet internal SO client.
+
+     QUICK TEST TO SEE IF DIRECT FIND WORKS:
+
+    ${JSON.stringify(
+      await fleetInternalSOClient.find({
+        type: savedObjectType,
+        perPage: 1000,
+      }),
+      null,
+      2
+    )}
+    `);
+
     return createSoFindIterable<{}>({
-      soClient,
+      soClient: fleetInternalSOClient,
       findRequest: {
         type: savedObjectType,
         perPage,
