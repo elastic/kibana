@@ -676,7 +676,8 @@ export class TaskManagerRunner implements TaskRunner {
                   startedAt: this.instance.task.startedAt,
                   schedule: updatedTaskSchedule,
                 },
-                this.getPollInterval()
+                this.getPollInterval(),
+                this.logger
               ),
             state,
             schedule: updatedTaskSchedule,
