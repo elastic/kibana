@@ -127,9 +127,15 @@ export class AlertRuleFromVisAction implements Action<Context> {
       v: string | number | null | undefined
     ) => {
       try {
-        // If the value is a string, first attempt to parse it as a JSON-formatted array
-        if (typeof v === 'string') {
-          const parsed = JSON.parse(v);
+        // If the value is a string containing a comma, first attempt to parse it as a JSON-formatted array
+        if (typeof v === 'string' && v.includes(',')) {
+          const stringToParse = v.startsWith('[')
+            ? v
+            : `[${v
+                .split(',')
+                .map((item) => `"${item}"`)
+                .join()}]`;
+          const parsed = JSON.parse(stringToParse);
           if (Array.isArray(parsed)) {
             return parsed
               .map(

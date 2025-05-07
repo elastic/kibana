@@ -164,7 +164,7 @@ describe('AlertRuleFromVisAction', () => {
       data: {
         query: 'FROM index | KEEP tags, something.else',
         thresholdValues: [{ values: { 'something.else': 3087 }, yField: 'something.else' }],
-        xValues: { tags: '["shibbity", "beep", "bop", "doowop"]' },
+        xValues: { tags: 'shibbity,bee,bop,doowop' },
       },
     });
     expect(getCreateAlertRuleLastCalledInitialValues()).toMatchInlineSnapshot(`
@@ -174,7 +174,7 @@ describe('AlertRuleFromVisAction', () => {
             "esql": "// Original ES|QL query derived from the visualization:
       FROM index | KEEP tags, something.else
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE MATCH(tags, \\"shibbity\\") AND MATCH(tags, \\"beep\\") AND MATCH(tags, \\"bop\\") AND MATCH(tags, \\"doowop\\") AND something.else >= 3087",
+      | WHERE MATCH(tags, \\"shibbity\\") AND MATCH(tags, \\"bee\\") AND MATCH(tags, \\"bop\\") AND MATCH(tags, \\"doowop\\") AND something.else >= 3087",
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
@@ -187,10 +187,13 @@ describe('AlertRuleFromVisAction', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
-        query: 'FROM index | KEEP tags, something.else',
+        query: 'FROM index | KEEP something.else, @tags.keyword',
         thresholdValues: [
           {
-            values: { 'something.else': 3087, tags: '["shibbity", "beep", "bop", "doowop"]' },
+            values: {
+              'something.else': 3087,
+              '@tags.keyword': 'login,warning',
+            },
             yField: 'something.else',
           },
         ],
@@ -202,9 +205,9 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM index | KEEP tags, something.else
+      FROM index | KEEP something.else, @tags.keyword
       // Threshold automatically generated from the selected value on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE MATCH(tags, \\"shibbity\\") AND MATCH(tags, \\"beep\\") AND MATCH(tags, \\"bop\\") AND MATCH(tags, \\"doowop\\") AND something.else >= 3087",
+      | WHERE MATCH(@tags.keyword, \\"login\\") AND MATCH(@tags.keyword, \\"warning\\") AND something.else >= 3087",
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",
