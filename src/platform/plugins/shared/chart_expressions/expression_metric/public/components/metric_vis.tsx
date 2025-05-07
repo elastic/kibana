@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -179,7 +179,6 @@ export const MetricVis = ({
     fireEvent(event);
   }, [fireEvent, grid]);
 
-  const [scrollChildHeight, setScrollChildHeight] = useState<string>('100%');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollDimensions = useResizeObserver(scrollContainerRef.current);
   const chartBaseTheme = getThemeService().useChartsBaseTheme();
@@ -299,14 +298,12 @@ export const MetricVis = ({
 
   const minHeight = chartBaseTheme.metric.minHeight;
 
-  useEffect(() => {
+  const scrollChildHeight = useMemo<string>(() => {
     const minimumRequiredVerticalSpace = minHeight * numRows;
-    setScrollChildHeight(
-      (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
-        ? '100%'
-        : `${minimumRequiredVerticalSpace}px`
-    );
-  }, [numRows, minHeight, scrollDimensions.height]);
+    return (scrollDimensions.height ?? -Infinity) > minimumRequiredVerticalSpace
+      ? '100%'
+      : `${minimumRequiredVerticalSpace}px`;
+  }, [minHeight, numRows, scrollDimensions.height]);
 
   const { theme: settingsThemeOverrides = {}, ...settingsOverrides } = getOverridesFor(
     overrides,
