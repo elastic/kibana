@@ -28,11 +28,7 @@ export interface TraceProps {
 export const Trace = ({ traceId, fields, displayType, docId }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
 
-  const {
-    timeState: {
-      asAbsoluteTimeRange: { from: rangeFrom, to: rangeTo },
-    },
-  } = data.query.timefilter.timefilter.useTimefilter();
+  const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
   const getParentApi = useCallback(
     () => ({
