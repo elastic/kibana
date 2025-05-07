@@ -675,6 +675,13 @@ export function XYChart({
     floatingColumns: legend?.floatingColumns ?? 1,
   };
 
+  const isHistogramModeEnabled = dataLayers.some(
+    ({ isHistogram, seriesType, isStacked }) =>
+      isHistogram && (isStacked || seriesType !== SeriesTypes.BAR || !chartHasMoreThanOneBarSeries)
+  );
+
+  const isHorizontalTimeAxis = isTimeViz && isHistogramModeEnabled && !shouldRotate;
+
   const defaultXAxisPosition = shouldRotate ? Position.Left : Position.Bottom;
 
   const gridLineStyle = {
@@ -1019,6 +1026,8 @@ export function XYChart({
                 outsideDimension={
                   rangeAnnotations.length && shouldHideDetails
                     ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
+                    : isHorizontalTimeAxis
+                    ? chartBaseTheme.axes.tickLine.size + chartBaseTheme.axes.tickLabel.fontSize
                     : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
                 }
               />

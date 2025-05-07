@@ -82,7 +82,7 @@ Array [
     id="range_annotation"
     key="range_annotation"
     outside={false}
-    outsideDimension={NaN}
+    outsideDimension={20}
     style={
       Object {
         "fill": "#F04E981A",
