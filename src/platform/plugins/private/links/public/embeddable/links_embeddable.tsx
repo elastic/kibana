@@ -18,7 +18,7 @@ import {
   SerializedTitles,
   initializeTitleManager,
   SerializedPanelState,
-  useBatchedOptionalPublishingSubjects,
+  useBatchedPublishingSubjects,
   initializeStateManager,
   titleComparators,
 } from '@kbn/presentation-publishing';
@@ -257,7 +257,7 @@ export const getLinksEmbeddableFactory = () => {
       });
 
       const Component = () => {
-        const [links, layout] = useBatchedOptionalPublishingSubjects(
+        const [links, layout] = useBatchedPublishingSubjects(
           stateManager.api.links$,
           stateManager.api.layout$
         );
