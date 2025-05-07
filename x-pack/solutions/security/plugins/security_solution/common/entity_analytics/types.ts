@@ -23,7 +23,6 @@ export enum EntityIdentifierFields {
   userName = 'user.name',
   serviceName = 'service.name',
   generic = 'entity.id',
-  related = 'related.entity',
 }
 
 export const EntityTypeToIdentifierField: Record<EntityType, EntityIdentifierFields> = {

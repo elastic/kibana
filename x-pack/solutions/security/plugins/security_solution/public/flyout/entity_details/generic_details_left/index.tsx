@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { type FlyoutPanelProps, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 import {
   LeftPanelHeader,
@@ -88,7 +87,7 @@ export const GenericEntityDetailsPanel = (params: GenericEntityDetailsPanelProps
         ? [
             getInsightsInputTab({
               name: value,
-              fieldName: field as EntityIdentifierFields.generic,
+              fieldName: field as 'related.entity',
               scopeId,
             }),
           ]

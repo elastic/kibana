@@ -9,30 +9,29 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
-import type { CloudPostureEntityIdentifier } from '../../../../cloud_security_posture/components/entity_insight';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { GenericEntityDetailsPanelKey } from '../../generic_details_left';
 
 export const useOpenGenericEntityDetailsLeftPanel = ({
-  field,
-  value,
+  insightsField,
+  insightsValue,
   entityDocId,
   scopeId,
 }: {
-  field: CloudPostureEntityIdentifier;
-  value: string;
+  insightsField: string;
+  insightsValue: string;
   entityDocId: string;
   scopeId: string;
 }) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(field, value);
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, value);
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(insightsField, insightsValue);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(insightsField, insightsValue);
   const { to, from } = useGlobalTime();
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field,
-    value,
+    field: insightsField as 'related.entity',
+    value: insightsValue,
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-generic-entity-alerts`,
@@ -43,8 +42,8 @@ export const useOpenGenericEntityDetailsLeftPanel = ({
       id: GenericEntityDetailsPanelKey,
       params: {
         entityDocId,
-        field,
-        value,
+        field: insightsField,
+        value: insightsValue,
         scopeId,
         isRiskScoreExist: false,
         hasMisconfigurationFindings,
