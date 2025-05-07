@@ -107,6 +107,42 @@ export class SampleTaskManagerFixturePlugin
           },
         },
       },
+      sampleRecurringTask: {
+        timeout: '1m',
+        title: 'Sample Recurring Task',
+        description: 'A sample recurring task for testing the task_manager.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => ({ count: state.count }),
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { params, state, schedule } = taskInstance;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'task',
+                taskId: taskInstance.id,
+                params: JSON.stringify(params),
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: {},
+              schedule,
+            };
+          },
+        }),
+      },
       singleAttemptSampleTask: {
         ...defaultSampleTaskConfig,
         title: 'Failing Sample Task',
