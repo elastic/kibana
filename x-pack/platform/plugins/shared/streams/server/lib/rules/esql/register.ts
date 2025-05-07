@@ -11,10 +11,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { PersistenceAlertType } from '@kbn/rule-registry-plugin/server';
-import {
-  STREAMS_FEATURE_ID,
-  STREAMS_RULE_REGISTRATION_CONTEXT,
-} from '../../../../common/constants';
+import { STREAMS_PRODUCER, STREAMS_RULE_REGISTRATION_CONTEXT } from '../../../../common/constants';
 import { getRuleExecutor } from './executor';
 import { EsqlRuleParams, esqlRuleParams } from './types';
 
@@ -46,7 +43,7 @@ export function esqlRuleType(): PersistenceAlertType<
     ],
     minimumLicenseRequired: 'enterprise' as LicenseType,
     category: DEFAULT_APP_CATEGORIES.observability.id,
-    producer: STREAMS_FEATURE_ID,
+    producer: STREAMS_PRODUCER,
     solution: 'observability',
     isExportable: false,
     actionVariables: {},
