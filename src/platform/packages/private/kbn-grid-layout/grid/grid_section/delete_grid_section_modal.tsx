@@ -20,8 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { CollapsibleSection, MainSection } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { combinePanels, deleteRow } from '../utils/section_management';
+import { deleteRow, resolveSections } from '../utils/section_management';
 
 export const DeleteGridSectionModal = ({
   sectionId,
@@ -65,28 +66,17 @@ export const DeleteGridSectionModal = ({
           onClick={() => {
             setDeleteModalVisible(false);
             const layout = gridLayoutStateManager.gridLayout$.getValue();
-            const firstSectionId = `main-0`;
-            let newLayout = cloneDeep(layout);
+            if (layout[sectionId].isMainSection) return; // main sections are not user deletable
 
-            if (!newLayout[firstSectionId]) {
-              // push other sections down
-              Object.values(newLayout).forEach((section) => section.order++);
-              // create new "first" section
-              newLayout[firstSectionId] = {
-                id: firstSectionId,
-                order: 0,
-                isMainSection: true,
-                panels: {},
-              };
-            }
+            // convert collapsible section to main section so that panels remain in place
+            const newLayout = cloneDeep(layout);
+            const { title, isCollapsed, ...sectionAsMain } = {
+              ...(newLayout[sectionId] as CollapsibleSection),
+              isMainSection: true,
+            };
+            newLayout[sectionId] = sectionAsMain as MainSection;
 
-            const newPanels = combinePanels(
-              newLayout[sectionId].panels,
-              newLayout[firstSectionId].panels
-            );
-            newLayout[firstSectionId].panels = newPanels;
-            newLayout = deleteRow(newLayout, sectionId);
-            gridLayoutStateManager.gridLayout$.next(newLayout);
+            gridLayoutStateManager.gridLayout$.next(resolveSections(newLayout));
           }}
           color="danger"
         >
