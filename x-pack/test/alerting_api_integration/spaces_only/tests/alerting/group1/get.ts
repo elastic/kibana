@@ -55,6 +55,7 @@ const getTestUtils = (
             ? {
                 artifacts: {
                   dashboards: [],
+                  investigation_guide: { blob: '' },
                 },
               }
             : {}),
@@ -139,6 +140,9 @@ const getTestUtils = (
                         id: 'dashboard-2',
                       },
                     ],
+                    investigation_guide: {
+                      blob: '# Summary',
+                    },
                   },
                 }
               : {}),
@@ -166,6 +170,9 @@ const getTestUtils = (
               id: 'dashboard-2',
             },
           ],
+          investigation_guide: {
+            blob: '# Summary',
+          },
         });
       }
     });
@@ -214,6 +221,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           apiKeyOwner: null,
           artifacts: {
             dashboards: [],
+            investigation_guide: { blob: '' },
           },
           apiKeyCreatedByUser: null,
           throttle: '1m',

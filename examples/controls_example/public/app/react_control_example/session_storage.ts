@@ -15,80 +15,84 @@ import {
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-plugin/common';
 
-const SERIALIZED_STATE_SESSION_STORAGE_KEY =
-  'kibana.examples.controls.reactControlExample.controlGroupSerializedState';
+const SAVED_STATE_SESSION_STORAGE_KEY =
+  'kibana.examples.controls.reactControlExample.controlGroupSavedState';
+const UNSAVED_STATE_SESSION_STORAGE_KEY =
+  'kibana.examples.controls.reactControlExample.controlGroupUnsavedSavedState';
 export const WEB_LOGS_DATA_VIEW_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
 
-export function clearControlGroupSerializedState() {
-  sessionStorage.removeItem(SERIALIZED_STATE_SESSION_STORAGE_KEY);
-}
+export const savedStateManager = {
+  clear: () => sessionStorage.removeItem(SAVED_STATE_SESSION_STORAGE_KEY),
+  set: (serializedState: SerializedPanelState<ControlGroupSerializedState>) =>
+    sessionStorage.setItem(SAVED_STATE_SESSION_STORAGE_KEY, JSON.stringify(serializedState)),
+  get: () => {
+    const serializedStateJSON = sessionStorage.getItem(SAVED_STATE_SESSION_STORAGE_KEY);
+    return serializedStateJSON
+      ? JSON.parse(serializedStateJSON)
+      : initialSerializedControlGroupState;
+  },
+};
 
-export function getControlGroupSerializedState(): SerializedPanelState<ControlGroupSerializedState> {
-  const serializedStateJSON = sessionStorage.getItem(SERIALIZED_STATE_SESSION_STORAGE_KEY);
-  return serializedStateJSON ? JSON.parse(serializedStateJSON) : initialSerializedControlGroupState;
-}
-
-export function setControlGroupSerializedState(
-  serializedState: SerializedPanelState<ControlGroupSerializedState>
-) {
-  sessionStorage.setItem(SERIALIZED_STATE_SESSION_STORAGE_KEY, JSON.stringify(serializedState));
-}
+export const unsavedStateManager = {
+  clear: () => sessionStorage.removeItem(UNSAVED_STATE_SESSION_STORAGE_KEY),
+  set: (serializedState: SerializedPanelState<ControlGroupSerializedState>) =>
+    sessionStorage.setItem(UNSAVED_STATE_SESSION_STORAGE_KEY, JSON.stringify(serializedState)),
+  get: () => {
+    const serializedStateJSON = sessionStorage.getItem(UNSAVED_STATE_SESSION_STORAGE_KEY);
+    return serializedStateJSON ? JSON.parse(serializedStateJSON) : undefined;
+  },
+};
 
 const optionsListId = 'optionsList1';
-const searchControlId = 'searchControl1';
 const rangeSliderControlId = 'rangeSliderControl1';
 const timesliderControlId = 'timesliderControl1';
-const controlGroupPanels = {
-  [rangeSliderControlId]: {
+const controls = [
+  {
+    id: rangeSliderControlId,
     type: RANGE_SLIDER_CONTROL,
     order: 1,
     grow: true,
     width: 'medium',
-    explicitInput: {
-      id: rangeSliderControlId,
+    controlConfig: {
       fieldName: 'bytes',
       title: 'Bytes',
-      grow: true,
-      width: 'medium',
       enhancements: {},
     },
   },
-  [timesliderControlId]: {
+  {
+    id: timesliderControlId,
     type: TIME_SLIDER_CONTROL,
     order: 4,
     grow: true,
     width: 'medium',
-    explicitInput: {
-      id: timesliderControlId,
-      title: 'Time slider',
-      enhancements: {},
-    },
+    controlConfig: {},
   },
-  [optionsListId]: {
+  {
+    id: optionsListId,
     type: OPTIONS_LIST_CONTROL,
     order: 2,
     grow: true,
     width: 'medium',
-    explicitInput: {
-      id: searchControlId,
+    controlConfig: {
       fieldName: 'agent.keyword',
       title: 'Agent',
-      grow: true,
-      width: 'medium',
-      enhancements: {},
     },
   },
-};
+];
 
 const initialSerializedControlGroupState = {
   rawState: {
-    controlStyle: 'oneLine',
+    labelPosition: 'oneLine',
     chainingSystem: 'HIERARCHICAL',
-    showApplySelections: false,
-    panelsJSON: JSON.stringify(controlGroupPanels),
-    ignoreParentSettingsJSON:
-      '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-  } as object,
+    autoApplySelections: true,
+    controls,
+    ignoreParentSettings: {
+      ignoreFilters: false,
+      ignoreQuery: false,
+      ignoreTimerange: false,
+      ignoreValidations: false,
+    },
+  } as ControlGroupSerializedState,
   references: [
     {
       name: `controlGroup_${rangeSliderControlId}:rangeSliderDataView`,
