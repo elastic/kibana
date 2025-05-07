@@ -49,7 +49,7 @@ const getFirstCollision = (
   return undefined;
 };
 
-export const getMainLayoutInOrder = (
+export const getLayoutInOrder = (
   layout: GridLayoutData,
   draggedId?: string
 ): Array<{ type: 'panel' | 'section'; id: string }> => {

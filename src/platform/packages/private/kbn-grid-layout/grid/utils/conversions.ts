@@ -10,7 +10,7 @@
 import { cloneDeep } from 'lodash';
 
 import { GridLayoutData, GridPanelData, GridSectionData, OrderedLayout } from '../types';
-import { getMainLayoutInOrder } from './resolve_grid_section';
+import { getLayoutInOrder } from './resolve_grid_section';
 
 export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
   let gridLayout: GridLayoutData = {};
@@ -49,7 +49,7 @@ export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
 };
 
 export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
-  const widgets = getMainLayoutInOrder(layout);
+  const widgets = getLayoutInOrder(layout);
   const orderedLayout: OrderedLayout = {};
 
   let order = 0;
