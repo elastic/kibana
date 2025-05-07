@@ -18,6 +18,7 @@ import { isValidNumericType } from './ecs_types_validators/is_valid_numeric_type
 import { isValidBooleanType } from './ecs_types_validators/is_valid_boolean_type';
 import { isValidLongType } from './ecs_types_validators/is_valid_long_type';
 import {
+  ALERT_ORIGINAL_DATA_STREAM,
   ALERT_ORIGINAL_EVENT,
   ALERT_THRESHOLD_RESULT,
 } from '../../../../../../common/field_maps/field_names';
@@ -313,10 +314,11 @@ const getTopLevelPath = (fullPath: string): string => fullPath.split('.')[0];
  * A map of ECS namespaces to their additional alerting namespaces. In cases
  * where the alert metadata may overwrite this source data, or where there is
  * not an appropriate mapping in ECS, we copy those fields to these additional
- * locations so as to preserve them.
+ * locations so as to preserve them and (with mappings) make them search/filterable.
  */
 const alertingNamespaceCopyMap = {
   event: ALERT_ORIGINAL_EVENT,
+  data_stream: ALERT_ORIGINAL_DATA_STREAM,
 };
 
 /**
