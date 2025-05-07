@@ -44,6 +44,7 @@ describe('WarningFlyoutStep', () => {
       isFrozen: false,
       isReadonly: false,
       isInDataStream: false,
+      isFollowerIndex: false,
     },
   };
 
