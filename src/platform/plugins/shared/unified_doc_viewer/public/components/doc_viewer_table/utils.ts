@@ -18,7 +18,7 @@ export function getCellPositionAfterPinToggle({
   pinnedRows: FieldRow[];
   restRows: FieldRow[];
 }) {
-  const allPinnedFields = [...pinnedRows.map((row) => row.name)];
+  const allPinnedFields = pinnedRows.map((row) => row.name);
 
   if (!allPinnedFields.includes(field)) {
     const newPinnedSorted = [...allPinnedFields, field].sort((a, b) => a.localeCompare(b));
