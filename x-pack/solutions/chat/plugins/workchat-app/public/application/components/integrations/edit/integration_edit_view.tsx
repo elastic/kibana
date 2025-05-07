@@ -161,27 +161,37 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                 title={<h3>Base configuration</h3>}
                 description="Configure your tool"
               >
-                <EuiFormRow label="Name">
+                <EuiFormRow 
+                  label="Name"
+                  isInvalid={!!formMethods.formState.errors.name}
+                  error={formMethods.formState.errors.name ? "Name is required" : undefined}
+                >
                   <Controller
-                    rules={{ required: true }}
+                    rules={{ required: "Name is required" }}
                     name="name"
                     control={control}
                     render={({ field }) => (
                       <EuiFieldText
                         data-test-subj="workchatAppIntegrationEditViewFieldText"
+                        isInvalid={!!formMethods.formState.errors.name}
                         {...field}
                       />
                     )}
                   />
                 </EuiFormRow>
-                <EuiFormRow label="Description">
+                <EuiFormRow 
+                  label="Description"
+                  isInvalid={!!formMethods.formState.errors.description}
+                  error={formMethods.formState.errors.description ? "Description is required" : undefined}
+                >
                   <Controller
-                    rules={{ required: true }}
+                    rules={{ required: "Description is required" }}
                     name="description"
                     control={control}
                     render={({ field }) => (
                       <EuiFieldText
                         data-test-subj="workchatAppIntegrationEditViewFieldText"
+                        isInvalid={!!formMethods.formState.errors.description}
                         {...field}
                       />
                     )}
