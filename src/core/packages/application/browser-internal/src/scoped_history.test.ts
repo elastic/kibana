@@ -186,19 +186,26 @@ describe('ScopedHistory', () => {
   });
 
   describe('teardown behavior', () => {
-    it('throws exceptions after falling out of scope', () => {
+    it('throws exceptions after falling out of scope - only for action methods', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
       expect(gh.length).toBe(2);
       const h = new ScopedHistory(gh, '/app/wow');
       gh.push('/app/other');
-      expect(() => h.location).toThrowErrorMatchingInlineSnapshot(
+      expect(() => h.location).not.toThrow();
+      expect(() => h.length).not.toThrow();
+      expect(() => h.action).not.toThrow();
+
+      expect(() => h.push('/new-page')).toThrowErrorMatchingInlineSnapshot(
         `"ScopedHistory instance has fell out of navigation scope for basePath: /app/wow"`
       );
-      expect(() => h.push('/new-page')).toThrow();
       expect(() => h.replace('/new-page')).toThrow();
+      expect(() => h.go()).toThrow();
       expect(() => h.goBack()).toThrow();
       expect(() => h.goForward()).toThrow();
+      expect(() => h.block()).toThrow();
+      expect(() => h.listen()).toThrow();
+      expect(() => h.createHref()).toThrow();
     });
   });
 
