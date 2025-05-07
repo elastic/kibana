@@ -65,7 +65,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private openAI: OpenAI;
   private headers: Record<string, string>;
   private hasPKI: boolean;
-  private httpsAgent?: https.Agent;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -109,12 +108,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           logger: this.logger,
         });
 
-        this.httpsAgent = new https.Agent({
+        const httpsAgent = new https.Agent({
           cert,
           key,
-          rejectUnauthorized: this.config.verificationMode !== 'none',
+          rejectUnauthorized: this.config.verificationMode === 'none',
           checkServerIdentity:
-            this.config.verificationMode === 'certificate' || this.config.verificationMode === 'none'
+            this.config.verificationMode === 'certificate' ||
+            this.config.verificationMode === 'none'
               ? () => undefined
               : undefined,
         });
@@ -124,7 +124,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           apiKey: this.key,
           baseURL: removeEndpointFromUrl(this.url),
           defaultHeaders: this.headers,
-          httpAgent: this.httpsAgent,
+          httpAgent: httpsAgent,
         });
       } else {
         this.openAI =
@@ -226,8 +226,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     if (this.provider === OpenAiProviderType.Other && this.hasPKI) {
       try {
         const sanitizedBody = JSON.parse(body);
-        const axiosOptions = getAxiosOptions(this.provider, this.key, false, this.config, this.httpsAgent);
-
+        const axiosOptions = getAxiosOptions(this.provider, this.key, false);
         const response = await this.request(
           {
             url: this.url,
@@ -296,8 +295,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     if (this.provider === OpenAiProviderType.Other && this.hasPKI) {
       try {
         const sanitizedBody = JSON.parse(body);
-        const axiosOptions = getAxiosOptions(this.provider, this.key, stream, this.config, this.httpsAgent);
-
+        const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
         const response = await this.request(
           {
             url: this.url,
