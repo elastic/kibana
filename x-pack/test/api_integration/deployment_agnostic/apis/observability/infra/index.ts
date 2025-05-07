@@ -20,7 +20,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./infra'));
     loadTestFile(require.resolve('./inventory_threshold_alert'));
     loadTestFile(require.resolve('./services'));
-    loadTestFile(require.resolve('./infra_custom_dashboards'));
     loadTestFile(require.resolve('./infra_asset_count'));
   });
 }
