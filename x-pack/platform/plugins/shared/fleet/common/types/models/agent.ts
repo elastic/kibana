@@ -34,6 +34,7 @@ export type SimplifiedAgentStatus =
 export type AgentActionType =
   | 'UNENROLL'
   | 'UPGRADE'
+  | 'MIGRATE'
   | 'SETTINGS'
   | 'POLICY_REASSIGN'
   | 'CANCEL'
@@ -61,7 +62,9 @@ export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTup
 export interface NewAgentAction {
   type: AgentActionType;
   data?: any;
-  additionalProperties?: any;
+  enrollment_token?: string;
+  target_uri?: string;
+  additionalSettings?: string;
   ack_data?: any;
   sent_at?: string;
   agents: string[];

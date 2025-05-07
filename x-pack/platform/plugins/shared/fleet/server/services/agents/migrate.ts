@@ -11,7 +11,10 @@ export async function migrateSingleAgent(esClient: any, agentId: string, options
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'MIGRATE',
-    additionalProperties: options,
+    policyId: options.policyId,
+    enrollment_token: options.enrollment_token,
+    target_uri: options.uri,
+    additionalSettings: options.settings,
   });
   return { actionId: response.id };
 }

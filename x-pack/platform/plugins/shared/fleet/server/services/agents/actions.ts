@@ -60,6 +60,7 @@ export async function createAgentAction(
     agents: newAgentAction.agents,
     namespaces: newAgentAction.namespaces,
     action_id: actionId,
+    id: actionId,
     data: newAgentAction.data,
     type: newAgentAction.type,
     start_time: newAgentAction.start_time,
@@ -69,14 +70,12 @@ export async function createAgentAction(
     traceparent: apm.currentTraceparent,
     is_automatic: newAgentAction.is_automatic,
     policyId: newAgentAction.policyId,
-    properties: {
-      id: actionId,
-      type: newAgentAction.type,
-      policy_id: newAgentAction.additionalProperties.policyId,
-      target_uri: newAgentAction.additionalProperties.uri,
-      enrollment_token: newAgentAction.additionalProperties.enrollment_token,
-      settings: { description: newAgentAction.additionalProperties?.settings || {} },
-    },
+    policy_id: newAgentAction.policyId,
+    enrollment_token: newAgentAction.enrollment_token,
+    target_uri: newAgentAction.target_uri,
+    settings: newAgentAction.additionalSettings
+      ? JSON.stringify(newAgentAction.additionalSettings)
+      : undefined,
   };
 
   const messageSigningService = appContextService.getMessageSigningService();

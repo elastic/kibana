@@ -684,6 +684,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('UPDATE_TAGS'),
         schema.literal('POLICY_CHANGE'),
         schema.literal('INPUT_ACTION'),
+        schema.literal('MIGRATE'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {

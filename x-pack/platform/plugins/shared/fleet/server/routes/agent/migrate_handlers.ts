@@ -33,7 +33,6 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
     if (agentPolicy?.is_protected || agent.components?.some((c) => c.type === 'fleet-server')) {
       throw new Error(`Agent is protected and cannot be migrated`);
     }
-
     const body = await AgentService.migrateSingleAgent(esClient, request.params.agentId, {
       ...options,
       policyId: agentPolicy?.id,
