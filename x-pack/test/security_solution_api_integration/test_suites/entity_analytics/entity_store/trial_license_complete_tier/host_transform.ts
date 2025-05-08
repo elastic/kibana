@@ -98,37 +98,12 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Should successfully trigger a host transform', async () => {
         const HOST_NAME: string = 'host-transform-test-ip';
-        const IPs: string[] = ['1.1.1.1', '2.2.2.2'];
-        const { count, transforms } = await es.transform.getTransformStats({
-          transform_id: HOST_TRANSFORM_ID,
-        });
-        expect(count).to.eql(1);
-        let transform = transforms[0];
-        expect(transform.id).to.eql(HOST_TRANSFORM_ID);
-        const triggerCount: number = transform.stats.trigger_count;
-        const docsProcessed: number = transform.stats.documents_processed;
+        const testDocs: hostTransformTestDocuments = {
+          name: HOST_NAME,
+          ip: ['1.1.1.1', '2.2.2.2'],
+        };
 
-        // Create two documents with the same host.name, different IPs
-        for (const ip of IPs) {
-          const { result } = await es.index(buildHostTransformDocument(HOST_NAME, { ip }));
-          expect(result).to.eql('created');
-        }
-
-        // Trigger the transform manually
-        const { acknowledged } = await es.transform.scheduleNowTransform({
-          transform_id: HOST_TRANSFORM_ID,
-        });
-        expect(acknowledged).to.be(true);
-
-        await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
-          const response = await es.transform.getTransformStats({
-            transform_id: HOST_TRANSFORM_ID,
-          });
-          transform = response.transforms[0];
-          expect(transform.stats.trigger_count).to.greaterThan(triggerCount);
-          expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
-          return true;
-        });
+        await createDocumentsAndTriggerTransform(providerContext, testDocs, 2);
 
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
@@ -146,8 +121,8 @@ export default function (providerContext: FtrProviderContext) {
             expect(total.value).to.eql(1);
             const hit = result.hits.hits[0] as SearchHit<Ecs>;
             expect(hit._source).ok();
-            expect(hit._source?.host?.name).to.eql(HOST_NAME);
-            expect(hit._source?.host?.ip).to.eql(IPs);
+            expect(hit._source?.host?.name).to.eql(testDocs.name);
+            expect(hit._source?.host?.ip).to.eql(testDocs.ip);
 
             return true;
           }
@@ -268,3 +243,65 @@ function buildHostTransformDocument(name: string, host: EcsHost): IndexRequest {
   };
   return document;
 }
+
+async function createDocumentsAndTriggerTransform(providerContext: FtrProviderContext, docs: hostTransformTestDocuments, docCount: number): Promise<void>{
+  const retry = providerContext.getService('retry');
+  const es = providerContext.getService('es');
+
+  const { count, transforms } = await es.transform.getTransformStats({
+    transform_id: HOST_TRANSFORM_ID,
+  });
+  expect(count).to.eql(1);
+  let transform = transforms[0];
+  expect(transform.id).to.eql(HOST_TRANSFORM_ID);
+  const triggerCount: number = transform.stats.trigger_count;
+  const docsProcessed: number = transform.stats.documents_processed;
+
+  for (let i = 0; i < docCount; i++) {
+    const { result } = await es.index(
+      buildHostTransformDocument(docs.name, {
+        domain: docs.domain?.[i] ? docs.domain[i] : '',
+        hostname: docs.hostHostname?.[i] ? docs.hostHostname[i] : '',
+        id: docs.id?.[i] ? docs.id[i] : '',
+        os: {
+          name: docs.osName?.[i] ? docs.osName[i] : '',
+          type: docs.osType?.[i] ? docs.osType[i] : '',
+        },
+        mac: docs.mac?.[i] ? docs.mac[i] : '',
+        architecture: docs.arch?.[i] ? docs.arch[i] : '',
+        ip: docs.ip?.[i] ? docs.ip[i] : '',
+      }),
+    );
+    expect(result).to.eql('created');
+  }
+
+  // Trigger the transform manually
+  const { acknowledged } = await es.transform.scheduleNowTransform({
+    transform_id: HOST_TRANSFORM_ID,
+  });
+  expect(acknowledged).to.be(true);
+
+  await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
+    const response = await es.transform.getTransformStats({
+      transform_id: HOST_TRANSFORM_ID,
+    });
+    transform = response.transforms[0];
+    expect(transform.stats.trigger_count).to.greaterThan(triggerCount);
+    expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
+    return true;
+  });
+  // await Promise.resolve();
+};
+
+type hostTransformTestDocuments = {
+  name: string; // required
+
+  domain: string[];
+  hostHostname: string[];
+  id: string[];
+  osName: string[];
+  osType: string[];
+  mac: string[];
+  arch: string[];
+  ip: string[];
+};
