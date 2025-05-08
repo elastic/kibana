@@ -26,8 +26,8 @@ export interface ContentPack extends ContentPackManifest {
   entries: ContentPackEntry[];
 }
 
-type ContentPackDashboard = SavedObject<DashboardAttributes>;
-type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs>;
+export type ContentPackDashboard = SavedObject<DashboardAttributes>;
+export type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs>;
 export type ContentPackSavedObject = ContentPackDashboard | ContentPackDataView;
 
 export type ContentPackEntry = ContentPackSavedObject;
