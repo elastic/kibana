@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return res.body.entries;
   }
 
-  describe('Knowledge base', function () {
+  describe('Knowledge base: Basic operations', function () {
     before(async () => {
       await deployTinyElserAndSetupKb(getService);
     });
