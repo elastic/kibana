@@ -395,7 +395,7 @@ export class ModelsProvider {
   ): Promise<TrainedModelUIItem[]> {
     const { trainedModelsSpaces } = checksFactory(this._client, mlSavedObjectService);
 
-    const rawModels = await this._client.asInternalUser.ml.getTrainedModels({
+    const rawModels = await this._client.asCurrentUser.ml.getTrainedModels({
       size: 1000,
     });
 
