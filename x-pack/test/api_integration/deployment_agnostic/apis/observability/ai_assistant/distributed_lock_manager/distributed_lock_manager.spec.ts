@@ -236,15 +236,41 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(lock?.metadata).to.eql({ attempt: 'one' });
         });
 
-        it('allows re-acquisition after expiration', async () => {
-          // Acquire with a very short TTL.
-          const acquired = await manager1.acquire({ ttl: 500, metadata: { attempt: 'one' } });
-          expect(acquired).to.be(true);
+        describe('when a lock by "manager1" expires, and is attempted re-acquired by "manager2"', () => {
+          let expiredLock: LockDocument | undefined;
+          let reacquireResult: boolean;
+          beforeEach(async () => {
+            // Acquire with a very short TTL.
+            const acquired = await manager1.acquire({ ttl: 500, metadata: { attempt: 'one' } });
+            expect(acquired).to.be(true);
+            await sleep(1000); // wait for lock to expire
+            expiredLock = await getLockById(es, LOCK_ID);
+            reacquireResult = await manager2.acquire({ metadata: { attempt: 'two' } });
+          });
 
-          await sleep(1000); // wait for lock to expire
+          it('can be re-acquired', async () => {
+            expect(reacquireResult).to.be(true);
+          });
 
-          const reacquired = await manager2.acquire({ metadata: { attempt: 'two' } });
-          expect(reacquired).to.be(true);
+          it('updates the token when re-acquired', async () => {
+            const reacquiredLock = await getLockById(es, LOCK_ID);
+            expect(expiredLock?.token).not.to.be(reacquiredLock?.token);
+          });
+
+          it('updates the metadata when re-acquired', async () => {
+            const reacquiredLock = await getLockById(es, LOCK_ID);
+            expect(reacquiredLock?.metadata).to.eql({ attempt: 'two' });
+          });
+
+          it('cannot be released by "manager1"', async () => {
+            const res = await manager1.release();
+            expect(res).to.be(false);
+          });
+
+          it('can be released by "manager2"', async () => {
+            const res = await manager2.release();
+            expect(res).to.be(true);
+          });
         });
       });
 
