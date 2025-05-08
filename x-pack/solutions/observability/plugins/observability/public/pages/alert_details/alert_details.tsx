@@ -200,7 +200,7 @@ export function AlertDetails() {
   useEffect(() => {
     const fetchValidDashboards = async () => {
       const dashboardIds = linkedDashboards.map((dashboard: { id: string }) => dashboard.id);
-      const findDashboardsService = await dashboardServiceProvider(dashboardService);
+      const findDashboardsService = dashboardServiceProvider(dashboardService);
       const existingDashboards = await findDashboardsService.fetchValidDashboards(dashboardIds);
 
       setValidDashboards(existingDashboards.length ? existingDashboards : []);
