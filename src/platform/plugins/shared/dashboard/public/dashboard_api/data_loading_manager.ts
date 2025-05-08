@@ -14,9 +14,10 @@ import {
   apiPublishesDataLoading,
 } from '@kbn/presentation-publishing';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 
 export function initializeDataLoadingManager(
-  children$: PublishingSubject<{ [key: string]: unknown }>
+  children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
 ) {
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
