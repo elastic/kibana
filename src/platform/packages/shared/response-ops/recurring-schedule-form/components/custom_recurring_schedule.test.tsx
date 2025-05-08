@@ -12,7 +12,7 @@ import { fireEvent, render, waitFor, within, screen } from '@testing-library/rea
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Frequency } from '@kbn/rrule';
 import type { RecurringSchedule } from '../types';
-import { formSchema } from '../schemas/form_schema';
+import { getFormSchema } from '../schemas/form_schema';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
 import { RecurrenceEnd } from '../constants';
 
@@ -28,7 +28,7 @@ const TestComponent = ({
   const { form } = useForm<RecurringSchedule>({
     defaultValue: iv,
     options: { stripEmptyFields: false },
-    schema: formSchema,
+    schema: getFormSchema(),
   });
 
   return <Form form={form}>{children}</Form>;

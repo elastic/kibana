@@ -36,6 +36,7 @@ import {
   DEFAULT_PRESETS,
   RecurrenceEnd,
   RECURRENCE_END_OPTIONS,
+  RECURRENCE_END_NEVER,
 } from '../constants';
 import { CustomRecurringSchedule } from './custom_recurring_schedule';
 import { recurringSummary } from '../utils/recurring_summary';
@@ -54,7 +55,7 @@ import {
   RECURRING_SCHEDULE_FORM_COUNT_OCCURRENCE,
   RECURRING_SCHEDULE_FORM_RECURRING_SUMMARY_PREFIX,
 } from '../translations';
-import { formSchema } from '../schemas/form_schema';
+import { getFormSchema } from '../schemas/form_schema';
 
 /**
  * Using EuiForm in `div` mode since this is meant to be integrated in a larger form
@@ -71,6 +72,7 @@ export interface RecurringScheduleFormProps {
   startDate?: string;
   endDate?: string;
   timezone?: string[];
+  allowInfiniteRecurrence?: boolean;
 }
 
 export const RecurringScheduleForm = memo(
@@ -81,11 +83,12 @@ export const RecurringScheduleForm = memo(
     startDate,
     endDate,
     timezone,
+    allowInfiniteRecurrence = true,
   }: RecurringScheduleFormProps) => {
     const { form } = useForm<RecurringSchedule>({
       defaultValue: recurringSchedule,
       options: { stripEmptyFields: true },
-      schema: formSchema,
+      schema: getFormSchema(allowInfiniteRecurrence),
     });
 
     const [formData] = useFormData<RecurringSchedule>({
@@ -176,7 +179,9 @@ export const RecurringScheduleForm = memo(
                 'data-test-subj': 'ends-field',
                 euiFieldProps: {
                   legend: 'Recurrence ends',
-                  options: RECURRENCE_END_OPTIONS,
+                  options: allowInfiniteRecurrence
+                    ? [RECURRENCE_END_NEVER, ...RECURRENCE_END_OPTIONS]
+                    : RECURRENCE_END_OPTIONS,
                 },
               }}
             />

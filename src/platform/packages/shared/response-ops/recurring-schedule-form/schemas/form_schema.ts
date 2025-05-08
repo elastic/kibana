@@ -21,7 +21,7 @@ import { RecurrenceEnd } from '../constants';
 
 const { emptyField } = fieldValidators;
 
-export const formSchema: FormSchema<RecurringSchedule> = {
+export const getFormSchema = (allowInfiniteRecurrence = true): FormSchema<RecurringSchedule> => ({
   frequency: {
     type: FIELD_TYPES.SELECT,
     label: RECURRING_SCHEDULE_FORM_REPEAT,
@@ -40,7 +40,7 @@ export const formSchema: FormSchema<RecurringSchedule> = {
   ends: {
     type: FIELD_TYPES.BUTTON_GROUP,
     label: RECURRING_SCHEDULE_FORM_ENDS,
-    defaultValue: RecurrenceEnd.NEVER,
+    defaultValue: allowInfiniteRecurrence ? RecurrenceEnd.NEVER : RecurrenceEnd.ON_DATE,
     validations: [],
   },
   until: {},
@@ -61,4 +61,4 @@ export const formSchema: FormSchema<RecurringSchedule> = {
   },
   byweekday: {},
   bymonth: { type: FIELD_TYPES.BUTTON_GROUP, label: '', validations: [], defaultValue: 'day' },
-};
+});

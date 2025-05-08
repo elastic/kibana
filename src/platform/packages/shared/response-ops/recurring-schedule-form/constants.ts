@@ -71,12 +71,13 @@ export enum RecurrenceEnd {
   AFTER_X = 'afterx',
 }
 
+export const RECURRENCE_END_NEVER = {
+  id: 'never',
+  label: RECURRING_SCHEDULE_FORM_ENDS_NEVER,
+  'data-test-subj': 'recurrenceEndOptionNever',
+};
+
 export const RECURRENCE_END_OPTIONS = [
-  {
-    id: 'never',
-    label: RECURRING_SCHEDULE_FORM_ENDS_NEVER,
-    'data-test-subj': 'recurrenceEndOptionNever',
-  },
   {
     id: 'ondate',
     label: RECURRING_SCHEDULE_FORM_ENDS_ON_DATE,
