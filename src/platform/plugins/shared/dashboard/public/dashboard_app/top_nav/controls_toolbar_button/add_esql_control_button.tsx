@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
@@ -28,9 +27,10 @@ export const AddESQLControlButton = ({ closePopover, controlGroupApi, ...rest }:
   const onSaveControl = (controlState: Record<string, unknown>) => {
     controlGroupApi?.addNewPanel({
       panelType: 'esqlControl',
-      initialState: {
-        ...controlState,
-        id: uuidv4(),
+      serializedState: {
+        rawState: {
+          ...controlState,
+        },
       },
     });
     dashboardApi.scrollToTop();
