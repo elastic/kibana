@@ -86,13 +86,14 @@ export interface ESQLEditorProps {
   esqlVariables?: ESQLControlVariable[];
 }
 
-export interface JoinIndicesAutocompleteResult {
-  indices: JoinIndexAutocompleteItem[];
+// ToDo: move this to the esql-types package
+export interface IndicesAutocompleteResult {
+  indices: IndexAutocompleteItem[];
 }
-
-export interface JoinIndexAutocompleteItem {
+// ToDo: move this to the esql-types package
+export interface IndexAutocompleteItem {
   name: string;
-  mode: 'lookup' | string;
+  mode: 'lookup' | 'time_series' | string;
   aliases: string[];
 }
 
@@ -106,7 +107,8 @@ interface ESQLVariableService {
 }
 
 export interface EsqlPluginStartBase {
-  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
 }

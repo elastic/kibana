@@ -8,7 +8,7 @@
  */
 
 import { camelCase } from 'lodash';
-import { ESQLFieldWithMetadata, JoinIndexAutocompleteItem } from '../validation/types';
+import { ESQLFieldWithMetadata, IndexAutocompleteItem } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
 
@@ -53,7 +53,7 @@ export const policies = [
   },
 ];
 
-export const joinIndices: JoinIndexAutocompleteItem[] = [
+export const joinIndices: IndexAutocompleteItem[] = [
   {
     name: 'join_index',
     mode: 'lookup',

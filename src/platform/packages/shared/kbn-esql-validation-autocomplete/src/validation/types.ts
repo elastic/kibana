@@ -43,12 +43,12 @@ export interface ReferenceMaps {
   fields: Map<string, ESQLFieldWithMetadata>;
   policies: Map<string, ESQLPolicy>;
   query: string;
-  joinIndices: JoinIndexAutocompleteItem[];
+  joinIndices: IndexAutocompleteItem[];
 }
 
-export interface JoinIndexAutocompleteItem {
+export interface IndexAutocompleteItem {
   name: string;
-  mode: 'lookup' | string;
+  mode: 'lookup' | 'time_series' | string;
   aliases: string[];
 }
 
