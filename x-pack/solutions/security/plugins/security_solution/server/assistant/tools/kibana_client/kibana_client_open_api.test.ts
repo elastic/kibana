@@ -12,7 +12,8 @@ import {
 } from './kibana_client_open_api';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import type { Operation } from '../../../utils/open_api_tool/utils';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Command } from '@langchain/langgraph';
 import { ToolMessage } from '@langchain/core/messages';
 import zodToJsonSchema from 'zod-to-json-schema';
@@ -39,7 +40,7 @@ jest.mock('axios', () => {
   return {
     ...jest.requireActual('axios'),
     __esModule: true,
-    default: jest.fn().mockImplementation(() => 'mocked default')
+    default: jest.fn().mockImplementation(() => 'mocked default'),
   };
 });
 const mockedAxios = axios as jest.MockedFunction<typeof axios>;
@@ -68,11 +69,11 @@ const mockPostOperation = {
       schema: {
         type: 'object',
         properties: {
-          "kbn-xsrf": {
+          'kbn-xsrf': {
             type: 'string',
             $schema: 'http://json-schema.org/draft-04/schema#',
             description: 'kbn-xsrf header',
-          }
+          },
         },
         required: ['kbn-xsrf'],
       },
@@ -190,7 +191,7 @@ describe('kibana_client_open_api', () => {
 
       await expect(promise).rejects.toThrow();
     });
-  })
+  });
 
   describe('getToolForOperation constructs tool correctly ', () => {
     it('generates correct schema', async () => {
@@ -206,69 +207,63 @@ describe('kibana_client_open_api', () => {
       });
 
       expect(zodToJsonSchema(toolForOperation.schema)).toEqual({
-        "type": "object",
-        "properties": {
-          "body": {
-            "type": "object",
-            "properties": {
-              "test": {
-                "type": "string",
-                "description": "A test query param"
-              }
-            },
-            "required": [
-              "test"
-            ],
-            "additionalProperties": false
-          },
-          "query": {
-            "type": "object",
-            "properties": {
-              "test-query-param": {
-                "type": "string",
-                "description": "A test query param"
-              }
-            },
-            "required": [
-              "test-query-param"
-            ],
-            "additionalProperties": false
-          },
-          "path": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "An identifier for the connector."
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "additionalProperties": false
-          },
-          "headers": {
-            "type": "object",
-            "properties": {
-              "kbn-xsrf": {
-                "type": "string",
-                "description": "kbn-xsrf header"
+        type: 'object',
+        properties: {
+          body: {
+            type: 'object',
+            properties: {
+              test: {
+                type: 'string',
+                description: 'A test query param',
               },
             },
-            "additionalProperties": false
+            required: ['test'],
+            additionalProperties: false,
+          },
+          query: {
+            type: 'object',
+            properties: {
+              'test-query-param': {
+                type: 'string',
+                description: 'A test query param',
+              },
+            },
+            required: ['test-query-param'],
+            additionalProperties: false,
+          },
+          path: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                description: 'An identifier for the connector.',
+              },
+            },
+            required: ['id'],
+            additionalProperties: false,
+          },
+          headers: {
+            type: 'object',
+            properties: {
+              'kbn-xsrf': {
+                type: 'string',
+                description: 'kbn-xsrf header',
+              },
+            },
+            additionalProperties: false,
             // since the kbn-xsrf header is made optional in the tool, we don't need to include it in the required list
-          }
+          },
         },
-        "required": [
-          "body",
-          "query",
-          "path",
+        required: [
+          'body',
+          'query',
+          'path',
           // since there are no required headers in the operation, we don't need to include it in the required list
         ],
-        "additionalProperties": false,
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        additionalProperties: false,
+        $schema: 'http://json-schema.org/draft-07/schema#',
       });
-    })
+    });
 
     it('generates correct required header properties when only kbn-xsrf exists', async () => {
       const kibanaClientTool = await TestableKibanaClientTool.create();
@@ -280,43 +275,45 @@ describe('kibana_client_open_api', () => {
       const toolForOperation = await kibanaClientTool.callGetToolForOperation({
         assistantToolParams,
         operation: {
-          ...mockPostOperation, getParametersAsJSONSchema: () => [
+          ...mockPostOperation,
+          getParametersAsJSONSchema: () => [
             {
               type: 'headers',
               label: 'headers',
               schema: {
                 type: 'object',
                 properties: {
-                  "kbn-xsrf": {
+                  'kbn-xsrf': {
                     type: 'string',
                     $schema: 'http://json-schema.org/draft-04/schema#',
                     description: 'kbn-xsrf header',
-                  }
+                  },
                 },
                 required: ['kbn-xsrf'],
               },
-            }]
+            },
+          ],
         } as unknown as Operation,
       });
 
       expect(zodToJsonSchema(toolForOperation.schema)).toEqual({
-        "type": "object",
-        "properties": {
-          "headers": {
-            "type": "object",
-            "properties": {
-              "kbn-xsrf": {
-                "type": "string",
-                "description": "kbn-xsrf header"
+        type: 'object',
+        properties: {
+          headers: {
+            type: 'object',
+            properties: {
+              'kbn-xsrf': {
+                type: 'string',
+                description: 'kbn-xsrf header',
               },
             },
-            "additionalProperties": false
-          }
+            additionalProperties: false,
+          },
         },
-        "additionalProperties": false,
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        additionalProperties: false,
+        $schema: 'http://json-schema.org/draft-07/schema#',
       });
-    })
+    });
 
     it('generates correct required header properties when required headers exist', async () => {
       const kibanaClientTool = await TestableKibanaClientTool.create();
@@ -328,58 +325,56 @@ describe('kibana_client_open_api', () => {
       const toolForOperation = await kibanaClientTool.callGetToolForOperation({
         assistantToolParams,
         operation: {
-          ...mockPostOperation, getParametersAsJSONSchema: () => [
+          ...mockPostOperation,
+          getParametersAsJSONSchema: () => [
             {
               type: 'headers',
               label: 'headers',
               schema: {
                 type: 'object',
                 properties: {
-                  "kbn-xsrf": {
+                  'kbn-xsrf': {
                     type: 'string',
                     $schema: 'http://json-schema.org/draft-04/schema#',
                     description: 'kbn-xsrf header',
                   },
-                  "other": {
+                  other: {
                     type: 'string',
                     $schema: 'http://json-schema.org/draft-04/schema#',
                     description: 'other header',
-                  }
+                  },
                 },
                 required: ['kbn-xsrf', 'other'],
               },
-            }]
+            },
+          ],
         } as unknown as Operation,
       });
 
       expect(zodToJsonSchema(toolForOperation.schema)).toEqual({
-        "type": "object",
-        "properties": {
-          "headers": {
-            "type": "object",
-            "properties": {
-              "kbn-xsrf": {
-                "type": "string",
-                "description": "kbn-xsrf header"
+        type: 'object',
+        properties: {
+          headers: {
+            type: 'object',
+            properties: {
+              'kbn-xsrf': {
+                type: 'string',
+                description: 'kbn-xsrf header',
               },
-              "other": {
-                "type": "string",
-                "description": "other header"
+              other: {
+                type: 'string',
+                description: 'other header',
               },
             },
-            required: [
-              "other"
-            ],
-            "additionalProperties": false
-          }
+            required: ['other'],
+            additionalProperties: false,
+          },
         },
-        required: [
-          "headers"
-        ],
-        "additionalProperties": false,
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        required: ['headers'],
+        additionalProperties: false,
+        $schema: 'http://json-schema.org/draft-07/schema#',
       });
-    })
+    });
 
     it('generates correct required header properties when optional headers exist', async () => {
       const kibanaClientTool = await TestableKibanaClientTool.create();
@@ -391,52 +386,54 @@ describe('kibana_client_open_api', () => {
       const toolForOperation = await kibanaClientTool.callGetToolForOperation({
         assistantToolParams,
         operation: {
-          ...mockPostOperation, getParametersAsJSONSchema: () => [
+          ...mockPostOperation,
+          getParametersAsJSONSchema: () => [
             {
               type: 'headers',
               label: 'headers',
               schema: {
                 type: 'object',
                 properties: {
-                  "kbn-xsrf": {
+                  'kbn-xsrf': {
                     type: 'string',
                     $schema: 'http://json-schema.org/draft-04/schema#',
                     description: 'kbn-xsrf header',
                   },
-                  "other": {
+                  other: {
                     type: 'string',
                     $schema: 'http://json-schema.org/draft-04/schema#',
                     description: 'other header',
-                  }
+                  },
                 },
                 required: ['kbn-xsrf'],
               },
-            }]
+            },
+          ],
         } as unknown as Operation,
       });
 
       expect(zodToJsonSchema(toolForOperation.schema)).toEqual({
-        "type": "object",
-        "properties": {
-          "headers": {
-            "type": "object",
-            "properties": {
-              "kbn-xsrf": {
-                "type": "string",
-                "description": "kbn-xsrf header"
+        type: 'object',
+        properties: {
+          headers: {
+            type: 'object',
+            properties: {
+              'kbn-xsrf': {
+                type: 'string',
+                description: 'kbn-xsrf header',
               },
-              "other": {
-                "type": "string",
-                "description": "other header"
+              other: {
+                type: 'string',
+                description: 'other header',
               },
             },
-            "additionalProperties": false
-          }
+            additionalProperties: false,
+          },
         },
-        "additionalProperties": false,
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        additionalProperties: false,
+        $schema: 'http://json-schema.org/draft-07/schema#',
       });
-    })
+    });
 
     it('calls the correct endpoints and returns success message', async () => {
       const kibanaClientTool = await TestableKibanaClientTool.create();
@@ -474,7 +471,7 @@ describe('kibana_client_open_api', () => {
           url: 'http://localhost:5601/basepath/api/actions/connector/123?test-query-param=test',
           headers: expect.objectContaining({
             'kbn-version': '8.0.0',
-            'kbn-xsrf': 'mock-kbn-xsrf'
+            'kbn-xsrf': 'mock-kbn-xsrf',
           }),
           data: JSON.stringify({
             test: 'test',
@@ -488,17 +485,19 @@ describe('kibana_client_open_api', () => {
             messages: [
               new ToolMessage({
                 content: '"mockResult"',
-                tool_call_id: "123",
+                tool_call_id: '123',
               }),
             ],
           },
         })
-      )
+      );
     });
 
     it('calls the correct endpoints and returns error message', async () => {
       const kibanaClientTool = await TestableKibanaClientTool.create();
-      mockedAxios.mockRejectedValue(new AxiosError('mock error', '400', undefined, undefined, { status: 400 } as AxiosResponse));
+      mockedAxios.mockRejectedValue(
+        new AxiosError('mock error', '400', undefined, undefined, { status: 400 } as AxiosResponse)
+      );
 
       if (!(kibanaClientTool instanceof TestableKibanaClientTool)) {
         throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
@@ -532,7 +531,7 @@ describe('kibana_client_open_api', () => {
           url: 'http://localhost:5601/basepath/api/actions/connector/123?test-query-param=test',
           headers: expect.objectContaining({
             'kbn-version': '8.0.0',
-            'kbn-xsrf': 'mock-kbn-xsrf'
+            'kbn-xsrf': 'mock-kbn-xsrf',
           }),
           data: JSON.stringify({
             test: 'test',
@@ -546,12 +545,12 @@ describe('kibana_client_open_api', () => {
             messages: [
               new ToolMessage({
                 content: 'Client error: 400 - mock error',
-                tool_call_id: "123",
+                tool_call_id: '123',
               }),
             ],
           },
         })
-      )
+      );
     });
 
     it('can not invoke tool with invalid input schema (missing body)', async () => {
@@ -578,6 +577,5 @@ describe('kibana_client_open_api', () => {
         })
       ).rejects.toThrow();
     });
-
-  })
+  });
 });

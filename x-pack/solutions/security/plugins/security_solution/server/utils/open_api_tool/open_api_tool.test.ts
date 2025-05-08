@@ -116,7 +116,7 @@ const mockPostOperation = {
               },
             },
             required: ['id'],
-          }
+          },
         },
         required: ['objectWithRequired'],
       },
@@ -254,17 +254,15 @@ describe('OpenApiTool', () => {
                 exclusiveMinimum: 0,
                 type: 'integer',
               },
-              "objectWithRequired": {
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "type": "string",
+              objectWithRequired: {
+                additionalProperties: false,
+                properties: {
+                  id: {
+                    type: 'string',
                   },
                 },
-                "required": [
-                  "id",
-                ],
-                "type": "object",
+                required: ['id'],
+                type: 'object',
               },
               oneOf: {},
               singleEnum: {
@@ -339,17 +337,15 @@ describe('OpenApiTool', () => {
               exclusiveNumber: {
                 type: 'integer',
               },
-              "objectWithRequired": {
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "type": "string",
+              objectWithRequired: {
+                additionalProperties: false,
+                properties: {
+                  id: {
+                    type: 'string',
                   },
                 },
-                "required": [
-                  "id",
-                ],
-                "type": "object",
+                required: ['id'],
+                type: 'object',
               },
               oneOf: {},
               singleEnum: {
