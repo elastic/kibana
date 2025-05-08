@@ -20,11 +20,9 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
-import {
-  useBatchedOptionalPublishingSubjects,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { BehaviorSubject } from 'rxjs';
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
@@ -52,6 +50,7 @@ export const OptionsListControl = ({
     loading,
     panelTitle,
     fieldFormatter,
+    defaultPanelTitle,
   ] = useBatchedPublishingSubjects(
     stateManager.exclude,
     stateManager.existsSelected,
@@ -60,10 +59,9 @@ export const OptionsListControl = ({
     api.field$,
     api.dataLoading$,
     api.title$,
-    api.fieldFormatter
+    api.fieldFormatter,
+    api.defaultTitle$ ?? new BehaviorSubject(undefined)
   );
-
-  const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(api.defaultTitle$);
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
 

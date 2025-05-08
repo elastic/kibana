@@ -24,7 +24,7 @@ info:
     GET kbn:/api/data_views
     ```
 
-    For more information about the console, refer to [Run API requests](https://www.elastic.co/guide/en/kibana/current/console-kibana.html).
+    For more information about the console, refer to [Run API requests](https://www.elastic.co/docs/explore-analyze/query-filter/tools/console).
 
     NOTE: Access to internal Kibana API endpoints will be restricted in Kibana version 9.0. Please move any integrations to publicly documented APIs.
 
@@ -125,7 +125,7 @@ tags:
     description: Manage the roles that grant Elasticsearch and Kibana privileges.
     externalDocs:
       description: Kibana role management
-      url: https://www.elastic.co/guide/en/kibana/master/kibana-role-management.html
+      url: https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/defining-roles
   - name: saved objects
     x-displayName: Saved objects
     description: |
@@ -135,8 +135,8 @@ tags:
       For example, use:
 
       * [Data views](../group/endpoint-data-views)
-      * [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)
-      * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
+      * [Spaces](../group/endpoint-spaces)
+      * [Short URLs](../group/endpoint-short-url)
 
       Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions
   - description: Manage and interact with Security Assistant resources.
@@ -248,7 +248,7 @@ tags:
     x-displayName: Spaces
     description: Manage your Kibana spaces.
     externalDocs:
-      url: https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html
+      url: https://www.elastic.co/docs/deploy-manage/manage-spaces
       description: Space overview
   - name: streams
     description: |
@@ -258,7 +258,7 @@ tags:
     x-displayName: Synthetics
     externalDocs:
       description: Synthetic monitoring
-      url: https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html
+      url: https://www.elastic.co/docs/solutions/observability/synthetics
   - name: system
     x-displayName: System
     description: |
@@ -452,6 +452,7 @@ paths:
                     - $ref: '#/components/schemas/gemini_secrets'
                     - $ref: '#/components/schemas/resilient_secrets'
                     - $ref: '#/components/schemas/jira_secrets'
+                    - $ref: '#/components/schemas/defender_secrets'
                     - $ref: '#/components/schemas/teams_secrets'
                     - $ref: '#/components/schemas/genai_secrets'
                     - $ref: '#/components/schemas/opsgenie_secrets'
@@ -569,6 +570,7 @@ paths:
                     - $ref: '#/components/schemas/resilient_config'
                     - $ref: '#/components/schemas/index_config'
                     - $ref: '#/components/schemas/jira_config'
+                    - $ref: '#/components/schemas/defender_config'
                     - $ref: '#/components/schemas/genai_azure_config'
                     - $ref: '#/components/schemas/genai_openai_config'
                     - $ref: '#/components/schemas/opsgenie_config'
@@ -696,6 +698,8 @@ paths:
                     - $ref: '#/components/schemas/run_closeincident'
                     - $ref: '#/components/schemas/run_createalert'
                     - $ref: '#/components/schemas/run_fieldsbyissuetype'
+                    - $ref: '#/components/schemas/run_getagentdetails'
+                    - $ref: '#/components/schemas/run_getagents'
                     - $ref: '#/components/schemas/run_getchoices'
                     - $ref: '#/components/schemas/run_getfields'
                     - $ref: '#/components/schemas/run_getincident'
@@ -15569,6 +15573,173 @@ paths:
                     type: boolean
           description: Successful response
       summary: Health check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users:
+    post:
+      operationId: CreatePrivMonUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_UserName'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
+          description: User created successfully
+      summary: Create a new monitored user
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users/_csv:
+    post:
+      operationId: BulkUploadUsersCSV
+      requestBody:
+        content:
+          text/csv:
+            schema:
+              type: string
+        description: CSV file containing users to upsert
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  upserted_count:
+                    type: integer
+          description: Successful response
+      summary: Upsert multiple monitored users via CSV upload
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users/_json:
+    post:
+      operationId: BulkUploadUsersJSON
+      requestBody:
+        content:
+          text/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  items:
+                    type: object
+                    properties:
+                      is_monitored:
+                        type: boolean
+                      user_name:
+                        type: string
+                  type: array
+        description: JSON file containing users to upsert
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  upserted_count:
+                    type: integer
+          description: Successful response
+      summary: Upsert multiple monitored users via JSON upload
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users/{id}:
+    delete:
+      operationId: DeletePrivMonUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  aknowledged:
+                    description: Indicates if the deletion was successful
+                    type: boolean
+                  message:
+                    description: A message providing additional information about the deletion status
+                    type: string
+                required:
+                  - success
+          description: User deleted successfully
+      summary: Delete a monitored user
+      tags:
+        - Security Entity Analytics API
+    get:
+      operationId: GetPrivMonUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
+          description: User details retrieved
+      summary: Retrieve a monitored user by ID
+      tags:
+        - Security Entity Analytics API
+    put:
+      operationId: UpdatePrivMonUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
+          description: User updated successfully
+      summary: Update a monitored user
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/users/list:
+    get:
+      operationId: ListPrivMonUsers
+      parameters:
+        - description: KQL query to filter the list of monitored users
+          in: query
+          name: kql
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoredUserDoc'
+                type: array
+          description: List of monitored users
+      summary: List all monitored users
       tags:
         - Security Entity Analytics API
   /api/entity_store/enable:
@@ -74838,6 +75009,65 @@ components:
       type: string
     Security_Entity_Analytics_API_Metadata:
       $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
+    Security_Entity_Analytics_API_MonitoredUserDoc:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        entity_analytics_monitoring:
+          type: object
+          properties:
+            labels:
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  source:
+                    type: string
+                  value:
+                    type: string
+              type: array
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
+        id:
+          type: string
+        labels:
+          type: object
+          properties:
+            monitoring:
+              type: object
+              properties:
+                privileged_users:
+                  enum:
+                    - monitored
+                    - deleted
+                  type: string
+            source_indices:
+              items:
+                type: string
+              type: array
+            source_integrations:
+              items:
+                type: string
+              type: array
+            sources:
+              items:
+                enum:
+                  - csv
+                  - index_sync
+                  - api
+              type: array
+        user:
+          type: object
+          properties:
+            name:
+              type: string
     Security_Entity_Analytics_API_MonitoringEngineDescriptor:
       type: object
       properties:
@@ -75088,6 +75318,15 @@ components:
       required:
         - user
         - entity
+    Security_Entity_Analytics_API_UserName:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            name:
+              description: The name of the user.
+              type: string
     Security_Exceptions_API_CreateExceptionListItemComment:
       type: object
       properties:
@@ -79255,7 +79494,7 @@ components:
           type: string
           description: |
             The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.
-          default: anthropic.claude-3-5-sonnet-20240620-v1:0
+          default: us.anthropic.claude-3-7-sonnet-20250219-v1:0
     crowdstrike_config:
       title: Connector request config properties for a Crowdstrike connector
       required:
@@ -79399,6 +79638,30 @@ components:
           type: string
         projectKey:
           description: The Jira project key.
+          type: string
+    defender_config:
+      title: Connector request properties for a Microsoft Defender for Endpoint connector
+      required:
+        - apiUrl
+        - projectKey
+      description: Defines properties for connectors when type is `.microsoft_defender_endpoint`.
+      type: object
+      properties:
+        apiUrl:
+          type: string
+          description: |
+            The URL of the Microsoft Defender for Endpoint API. If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname is added to the allowed hosts.
+        clientId:
+          type: string
+          description: The application (client) identifier for your app in the Azure portal.
+        oAuthScope:
+          type: string
+          description: The OAuth scopes or permission sets for the Microsoft Defender for Endpoint API.
+        oAuthServerUrl:
+          type: string
+          description: The OAuth server URL where authentication is sent and received for the Microsoft Defender for Endpoint API.
+        tenantId:
+          description: The tenant identifier for your app in the Azure portal.
           type: string
     genai_azure_config:
       title: Connector request properties for an OpenAI connector that uses Azure OpenAI
@@ -80232,6 +80495,16 @@ components:
           description: |
             A password for HTTP basic authentication. It is applicable only when `usesBasic` is `true`.
           type: string
+    defender_secrets:
+      title: Connector secrets properties for a Microsoft Defender for Endpoint connector
+      required:
+        - clientSecret
+      description: Defines secrets for connectors when type is `..microsoft_defender_endpoint`.
+      type: object
+      properties:
+        clientSecret:
+          description: The client secret for your app in the Azure portal.
+          type: string
     run_acknowledge_resolve_pagerduty:
       title: PagerDuty connector parameters
       description: Test an action that acknowledges or resolves a PagerDuty alert.
@@ -80668,6 +80941,42 @@ components:
               type: string
               description: The Jira issue type identifier.
               example: 10024
+    run_getagentdetails:
+      title: The getAgentDetails subaction
+      type: object
+      required:
+        - subAction
+        - subActionParams
+      description: The `getAgentDetails` subaction for CrowdStrike connectors.
+      properties:
+        subAction:
+          type: string
+          description: The action to test.
+          enum:
+            - getAgentDetails
+        subActionParams:
+          type: object
+          description: The set of configuration properties for the action.
+          required:
+            - ids
+          properties:
+            ids:
+              type: array
+              description: An array of CrowdStrike agent identifiers.
+              items:
+                type: string
+    run_getagents:
+      title: The getAgents subaction
+      type: object
+      required:
+        - subAction
+      description: The `getAgents` subaction for SentinelOne connectors.
+      properties:
+        subAction:
+          type: string
+          description: The action to test.
+          enum:
+            - getAgents
     run_getchoices:
       title: The getChoices subaction
       type: object
@@ -82118,4 +82427,4 @@ x-topics:
 
       If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
 
-      To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html).
+      To learn more, check out [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces).
