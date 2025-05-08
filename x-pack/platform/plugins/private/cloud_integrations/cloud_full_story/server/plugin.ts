@@ -5,26 +5,10 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
-
-import { registerFullStoryRoute } from './routes';
-
-interface CloudFullStorySetupDeps {
-  cloud: CloudSetup;
-}
+import type { Plugin } from '@kbn/core/server';
 
 export class CloudFullStoryPlugin implements Plugin {
-  constructor(private readonly initializerContext: PluginInitializerContext) {}
-
-  public setup(core: CoreSetup, { cloud }: CloudFullStorySetupDeps) {
-    if (cloud.isCloudEnabled) {
-      registerFullStoryRoute({
-        httpResources: core.http.resources,
-        packageInfo: this.initializerContext.env.packageInfo,
-      });
-    }
-  }
+  public setup() {}
 
   public start() {}
 
