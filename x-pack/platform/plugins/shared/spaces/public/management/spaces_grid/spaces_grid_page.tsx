@@ -169,6 +169,7 @@ export class SpacesGridPage extends Component<Props, State> {
           search={{
             onChange: this.debouncedOnQueryChange,
             box: {
+              incremental: true,
               placeholder: i18n.translate(
                 'xpack.spaces.management.spacesGridPage.searchPlaceholder',
                 { defaultMessage: 'Search' }
