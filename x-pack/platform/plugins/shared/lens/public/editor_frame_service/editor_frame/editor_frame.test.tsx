@@ -18,7 +18,6 @@ import {
   Visualization,
   VisualizationMap,
 } from '../../types';
-import { act } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   createMockVisualization,
