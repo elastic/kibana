@@ -193,7 +193,6 @@ export async function queryMonitorStatusAlert({
   monitorQueryIds: string[];
   numberOfChecks: number;
   includeRetests?: boolean;
-  waitSecondsBeforeIsPending?: number;
   monitorsData: Record<string, { scheduleInMs: number; locations: string[] }>;
   monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>;
   logger: Logger;
@@ -203,12 +202,15 @@ export async function queryMonitorStatusAlert({
   const upConfigs: AlertStatusConfigs = {};
   const downConfigs: AlertStatusConfigs = {};
 
-  monitorQueryIds.forEach((monitorQueryId) => {
+  for (let i = monitorQueryIds.length - 1; i >= 0; i--) {
+    const monitorQueryId = monitorQueryIds[i];
     if (monitorsData[monitorQueryId] === undefined) {
-      // Here we need to make sure that the monitorQueryId is in the monitorsData, how should we handle this?
-      throw new Error(`Monitor ${monitorQueryId} not found in monitorsData`);
+      logger.error(
+        `Monitor ${monitorQueryId} not found in monitorsData, removing from query. This should never happen.`
+      );
+      monitorQueryIds.splice(i, 1);
     }
-  });
+  }
 
   await pMap(
     times(pageCount),

@@ -206,7 +206,10 @@ export const getUngroupedReasonMessage = ({
           defaultMessage:
             '{downCount} {downCount, plural, one {time} other {times}} from {locName}',
           values: {
-            locName: c.ping?.observer.geo?.name || c.locationId,
+            locName:
+              c.ping?.observer.geo?.name ||
+              ('monitorInfo' in c && c.monitorInfo.observer.geo.name) ||
+              c.locationId,
             downCount,
           },
         }
