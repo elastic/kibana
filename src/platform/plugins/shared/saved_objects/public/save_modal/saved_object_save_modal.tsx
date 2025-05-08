@@ -110,7 +110,7 @@ class SavedObjectSaveModalComponent extends React.Component<
     const { theme } = this.props;
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
     const duplicateWarningId = generateId();
-
+    const modalTitleId = generateId('saveModal');
     const hasColumns = !!this.props.rightOptions;
 
     const titleInputValid =
@@ -163,10 +163,16 @@ class SavedObjectSaveModalComponent extends React.Component<
         ? mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 20)
         : mathWithUnits(theme.euiTheme.size.xxl, (x) => x * 15),
     });
+
     return (
-      <EuiModal data-test-subj="savedObjectSaveModal" onClose={this.props.onClose} css={styles}>
+      <EuiModal
+        data-test-subj="savedObjectSaveModal"
+        onClose={this.props.onClose}
+        css={styles}
+        aria-labelledby={modalTitleId}
+      >
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             {this.props.customModalTitle ? (
               this.props.customModalTitle
             ) : (
