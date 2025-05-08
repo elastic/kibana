@@ -95,6 +95,10 @@ const solutionNodesFormatter = (
     const appLink = normalizedLinks[node.id as SecurityPageName];
     if (appLink) {
       const deepLink = formatDeepLink(appLink);
+      if (appLink.unavailable || appLink.unauthorized) {
+        // Remove visibility in the UI, but register them to maintain navigation functionality to show fallback pages (upselling, no privileges, etc.)
+        deepLink.visibleIn = [];
+      }
       if (node.children) {
         const childrenLinks = solutionNodesFormatter(node.children, normalizedLinks);
         if (childrenLinks.length > 0) {

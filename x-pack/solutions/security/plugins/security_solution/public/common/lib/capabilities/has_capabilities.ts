@@ -31,13 +31,32 @@ export const hasCapabilities = (
   if (!isArray(requiredCapabilities)) {
     return !!get(capabilities, requiredCapabilities, false);
   } else {
-    return requiredCapabilities.some((linkCapabilityKeyOr) => {
-      if (isArray(linkCapabilityKeyOr)) {
-        return linkCapabilityKeyOr.every((linkCapabilityKeyAnd) =>
-          get(capabilities, linkCapabilityKeyAnd, false)
+    return requiredCapabilities.some((requiredCapsOr) => {
+      if (isArray(requiredCapsOr)) {
+        return requiredCapsOr.every((requiredCapsAnd) => get(capabilities, requiredCapsAnd, false));
+      }
+      return get(capabilities, requiredCapsOr, false);
+    });
+  }
+};
+
+export const existCapabilities = (
+  capabilities: Capabilities,
+  requiredCapabilities?: RequiredCapabilities
+): boolean => {
+  if (!requiredCapabilities) {
+    return true;
+  }
+  if (!isArray(requiredCapabilities)) {
+    return !!get(capabilities, requiredCapabilities) != null;
+  } else {
+    return requiredCapabilities.some((requiredCapsOr) => {
+      if (isArray(requiredCapsOr)) {
+        return requiredCapsOr.every(
+          (requiredCapsAnd) => get(capabilities, requiredCapsAnd) != null
         );
       }
-      return get(capabilities, linkCapabilityKeyOr, false);
+      return get(capabilities, requiredCapsOr) != null;
     });
   }
 };

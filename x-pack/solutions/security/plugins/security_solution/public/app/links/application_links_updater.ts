@@ -13,7 +13,7 @@ import type { UpsellingService } from '@kbn/security-solution-upselling/service'
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures } from '../../../common';
 import type { AppLinkItems, LinkItem, NormalizedLinks } from '../../common/links/types';
-import { hasCapabilities } from '../../common/lib/capabilities';
+import { hasCapabilities, existCapabilities } from '../../common/lib/capabilities';
 
 /**
  * Dependencies to update the application links
@@ -92,7 +92,11 @@ class ApplicationLinksUpdater {
   /**
    * Filters the app links based on the links configuration
    */
-  private filterAppLinks(appLinks: AppLinkItems, params: ApplicationLinksUpdateParams): LinkItem[] {
+  private filterAppLinks(
+    appLinks: AppLinkItems,
+    params: ApplicationLinksUpdateParams,
+    inheritedProps: Partial<LinkItem> = {}
+  ): LinkItem[] {
     const { experimentalFeatures, uiSettingsClient, capabilities, license, upselling } = params;
 
     return appLinks.reduce<LinkItem[]>((acc, { links, ...appLinkInfo }) => {
@@ -103,19 +107,24 @@ class ApplicationLinksUpdater {
         return acc;
       }
 
+      // props to be assigned to the current link and its children
+      const extraProps: Partial<LinkItem> = { ...inheritedProps };
+
       if (
-        !hasCapabilities(capabilities, appLinkInfo.capabilities) ||
+        !existCapabilities(capabilities, appLinkInfo.capabilities) ||
         !this.isLinkLicenseAllowed(appLinkInfo, license)
       ) {
-        if (upselling.isPageUpsellable(appLinkInfo.id)) {
-          acc.push({ ...appLinkInfo, unauthorized: true });
+        if (!upselling.isPageUpsellable(appLinkInfo.id)) {
+          return acc; // no upselling registered for this link, just exclude it
         }
-        return acc; // not adding sub-links for links that are not authorized
+        extraProps.unavailable = true;
+      } else if (!hasCapabilities(capabilities, appLinkInfo.capabilities)) {
+        extraProps.unauthorized = true;
       }
 
-      const resultAppLink: LinkItem = appLinkInfo;
+      const resultAppLink: LinkItem = { ...appLinkInfo, ...extraProps };
       if (links) {
-        const childrenLinks = this.filterAppLinks(links, params);
+        const childrenLinks = this.filterAppLinks(links, params, extraProps);
         if (childrenLinks.length > 0) {
           resultAppLink.links = childrenLinks;
         }
