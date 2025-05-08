@@ -311,7 +311,7 @@ xpack.actions.preconfigured:
     config:
       apiUrl: https://api.openai.com/v1/chat/completions <1>
       apiProvider: 'OpenAI' <2>
-      defaultModel: gpt-4o <3>
+      defaultModel: gpt-4.1 <3>
     secrets:
       apiKey: superlongapikey <4>
 ```

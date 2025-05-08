@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { registerFullStoryRoute } from './fullstory';
+import { EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
+import React from 'react';
+
+export const JobWizardStepAction = (props: EuiFlexItemProps) => (
+  <EuiFlexItem grow={false} css={{ alignItems: 'flex-end' }} {...props} />
+);

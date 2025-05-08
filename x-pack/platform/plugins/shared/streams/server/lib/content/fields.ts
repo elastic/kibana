@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export const registerFullStoryRouteMock = jest.fn();
-
-jest.doMock('./routes', () => ({
-  registerFullStoryRoute: registerFullStoryRouteMock,
-}));
+export const STREAM_NAME = 'stream.name';
+export const CONTENT_NAME = 'content.name';
