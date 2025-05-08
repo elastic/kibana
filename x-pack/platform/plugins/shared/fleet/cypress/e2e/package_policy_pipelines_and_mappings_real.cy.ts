@@ -117,6 +117,8 @@ describe('Input package with custom data stream type', () => {
   const agentPolicyId = 'test-input-package-policy';
   const agentPolicyName = 'Test input package policy';
   const packagePolicyName = 'input-package-policy';
+  const packagePolicyNamespace = 'generic';
+  const dataStreamType = 'metrics';
 
   before(() => {
     cy.task('installTestPackage', INPUT_TEST_PACKAGE);
@@ -157,7 +159,7 @@ describe('Input package with custom data stream type', () => {
 
     // Select metrics data stream type.
     cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
-    cy.get('[data-test-subj="packagePolicyDataStreamType"').find('label[for="metrics"]').click();
+    cy.get('[data-test-subj="packagePolicyDataStreamType"').find(`label[for="${dataStreamType}"]`).click();
 
     cy.getBySel(EXISTING_HOSTS_TAB).click();
 
@@ -173,6 +175,18 @@ describe('Input package with custom data stream type', () => {
     cy.getBySel(CONFIRM_MODAL.CANCEL_BUTTON).click();
   });
 
+  it(`${dataStreamType} checkbox should be checked`, () => {
+    cy.visit(`/app/integrations/detail/${INPUT_TEST_PACKAGE}/policies`);
+
+    cy.getBySel(INTEGRATION_NAME_LINK).contains(packagePolicyName).click();
+
+    cy.get('button').contains('Change defaults').click();
+    cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
+    cy.get('[data-test-subj="packagePolicyDataStreamType"')
+      .find(`input#${dataStreamType}`)
+      .should('be.checked');
+  });
+
   it('should not allow to edit data stream type', () => {
     cy.visit(`/app/integrations/detail/${INPUT_TEST_PACKAGE}/policies`);
 
@@ -183,7 +197,14 @@ describe('Input package with custom data stream type', () => {
     cy.get('[data-test-subj="packagePolicyDataStreamType"')
       .find('input')
       .should('have.length', 3)
-      .each(($el) => cy.wrap($el).should('be.disabled'));
+      .each(($el) => cy.wrap($el).should('be.disabled'))
+  });
+
+  it('has an index template', () => {
+    cy.visit(`app/management/data/index_management/templates/${dataStreamType}-${packagePolicyNamespace}`);
+
+    // Check that the index pattern appears in the view.
+    cy.contains("Index pattern").parent().contains(`${dataStreamType}-${packagePolicyNamespace}-*`);
   });
 });
 
