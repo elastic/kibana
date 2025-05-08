@@ -98,6 +98,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           type: 'rolling',
         },
         version: 2,
+        isTemplate: false,
       });
       expect(definitions.results[0].createdBy).eql(definitions.results[0].updatedBy);
 
