@@ -28,6 +28,7 @@ import {
   useChangePointDetectionContext,
 } from './change_point_detection_context';
 import { ChartComponent } from './chart_component';
+import { hasRealChangePoints } from './types';
 
 const CHARTS_PER_PAGE = 6;
 
@@ -68,6 +69,8 @@ export const ChartsGrid: FC<{
     [onRenderComplete]
   );
 
+  const containsChangePoints = useMemo(() => hasRealChangePoints(changePoints), [changePoints]);
+
   return (
     <EuiFlexGrid
       columns={changePoints.length >= 2 ? 2 : 1}
@@ -91,8 +94,16 @@ export const ChartsGrid: FC<{
                     />
                   ) : null}
 
-                  {v.reason ? (
-                    <EuiToolTip position="top" content={v.reason}>
+                  {!containsChangePoints ? (
+                    <EuiToolTip
+                      position="top"
+                      content={i18n.translate(
+                        'xpack.aiops.changePointDetection.noChangePointsWarning',
+                        {
+                          defaultMessage: 'No change points detected - showing sample metric data',
+                        }
+                      )}
+                    >
                       <EuiIcon
                         tabIndex={0}
                         color={'warning'}

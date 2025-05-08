@@ -11,6 +11,6 @@ export function isRealChangePoint(annotation: ChangePointAnnotation): annotation
   return annotation.kind === 'changePoint';
 }
 
-export const hasChangePoints = (annotations: ChangePointAnnotation[]): boolean => {
+export const hasRealChangePoints = (annotations: ChangePointAnnotation[]): boolean => {
   return annotations.some((annotation) => isRealChangePoint(annotation));
 };

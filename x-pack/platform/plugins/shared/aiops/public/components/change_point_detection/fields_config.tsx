@@ -58,7 +58,7 @@ import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
-import { hasChangePoints } from './types';
+import { hasRealChangePoints } from './types';
 import { getDataviewReferences } from '../../embeddables/get_dataview_references';
 
 const selectControlCss = { width: '350px' };
@@ -737,7 +737,7 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
   const cardinalityExceeded =
     splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
 
-  const containsChangePoints = useMemo(() => hasChangePoints(annotations), [annotations]);
+  const containsChangePoints = useMemo(() => hasRealChangePoints(annotations), [annotations]);
 
   return (
     <>
