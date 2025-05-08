@@ -70,7 +70,7 @@ function ofName(
       (locale, opts) =>
         new Intl.PluralRules(locale, {
           ...opts,
-          maximumFractionDigits: ALLOWED_DECIMAL_DIGITS,
+          maximumFractionDigits: ALLOWED_DECIMAL_DIGITS, // ensures the correct ordinal suffix is selected based on the matching number of decimal digits used in the number formatter
         })
     ),
   };
