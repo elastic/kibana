@@ -35,7 +35,7 @@ const DetectionsRedirects = ({ location }: RouteComponentProps) =>
 export const routes: RouteProps[] = [
   {
     path: DETECTIONS_PATH,
-    render: withSecurityRoutePageWrapper(DetectionsRedirects, SecurityPageName.detections),
+    component: withSecurityRoutePageWrapper(DetectionsRedirects, SecurityPageName.detections),
   },
   {
     path: ALERTS_PATH,
