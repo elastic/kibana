@@ -30,6 +30,7 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useProfilingPluginSetting } from '../../../../hooks/use_profiling_integration_setting';
 
 const LazyFieldRow = React.lazy(async () => ({
   default: (await import('@kbn/management-settings-components-field-row')).FieldRow,
@@ -48,8 +49,15 @@ const SETTINGS_KEYS = [
   apmEnableTableSearchBar,
   apmEnableServiceInventoryTableSearchBar,
   apmEnableServiceMapApiV2,
-  apmEnableTransactionProfiling,
 ];
+
+function getApmSettingsKeys(isProfilingPluginEnabled: boolean) {
+  if (isProfilingPluginEnabled) {
+    SETTINGS_KEYS.push(...[apmEnableTransactionProfiling]);
+  }
+
+  return SETTINGS_KEYS;
+}
 
 export function GeneralSettings() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
@@ -58,9 +66,10 @@ export function GeneralSettings() {
   const canSave =
     application.capabilities.advancedSettings.save &&
     (application.capabilities.apm['settings:save'] as boolean);
-
+  const isProfilingPluginEnabled = useProfilingPluginSetting();
+  const apmSettingsKeys = getApmSettingsKeys(isProfilingPluginEnabled);
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings(SETTINGS_KEYS);
+    useEditableSettings(apmSettingsKeys);
 
   async function handleSave() {
     try {
@@ -88,7 +97,7 @@ export function GeneralSettings() {
   return (
     <>
       <EuiSpacer />
-      {SETTINGS_KEYS.map((settingKey) => {
+      {apmSettingsKeys.map((settingKey) => {
         const field = fields[settingKey];
         return (
           <FieldRowProvider

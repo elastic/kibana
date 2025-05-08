@@ -8,10 +8,17 @@
 import { apmEnableTransactionProfiling } from '@kbn/observability-plugin/common';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
+export function useProfilingPluginSetting() {
+  const { core } = useApmPluginContext();
+
+  return core.application.capabilities.profiling?.show;
+}
+
 export function useTransactionProfilingSetting() {
   const { core } = useApmPluginContext();
+  const isProfilingPluginEnabled = useProfilingPluginSetting();
 
   const isTransactionProfilingEnabled = core.uiSettings.get<boolean>(apmEnableTransactionProfiling);
 
-  return isTransactionProfilingEnabled;
+  return isProfilingPluginEnabled && isTransactionProfilingEnabled;
 }

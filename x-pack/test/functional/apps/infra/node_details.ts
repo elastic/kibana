@@ -131,6 +131,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await browser.refresh();
   };
 
+  const setInfrastructureProfilingIntegrationUiSetting = async (value: boolean = true) => {
+    await kibanaServer.application.capabilities.profiling.update({ ['show']: value });
+    await browser.refresh();
+    await pageObjects.header.waitUntilLoadingHasFinished();
+  };
+
   describe('Node Details', () => {
     let synthEsClient: InfraSynthtraceEsClient;
     before(async () => {
@@ -283,7 +289,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('shows the CPU Profiling prompt if UI setting for Profiling integration is enabled', async () => {
+          await setInfrastructureProfilingIntegrationUiSetting(true);
           await pageObjects.assetDetails.cpuProfilingPromptExists();
+        });
+
+        it('hides the CPU Profiling prompt if UI setting for Profiling integration is disabled', async () => {
+          await setInfrastructureProfilingIntegrationUiSetting(false);
+          await pageObjects.assetDetails.cpuProfilingPromptMissing();
         });
 
         describe('Alerts Section with alerts', () => {
@@ -581,6 +593,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it('shows the Profiling tab if Profiling integration UI setting is enabled', async () => {
           await setInfrastructureProfilingIntegrationUiSetting(true);
           await pageObjects.assetDetails.profilingTabExists();
+        });
+
+        it('hides the Profiling tab if Profiling integration UI setting is disabled', async () => {
+          await setInfrastructureProfilingIntegrationUiSetting(false);
+          await pageObjects.assetDetails.profilingTabMissing();
         });
       });
 

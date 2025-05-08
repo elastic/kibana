@@ -7,15 +7,17 @@
 
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { isPending, useFetcher } from './use_fetcher';
+import { useProfilingPluginSetting } from './use_profiling_integration_setting';
 
 export function useProfilingPlugin() {
   const { plugins } = useApmPluginContext();
+  const isProfilingPluginEnabled = useProfilingPluginSetting();
 
   const { data, status } = useFetcher((callApmApi) => {
     return callApmApi('GET /internal/apm/profiling/status');
   }, []);
 
-  const isProfilingAvailable = data?.initialized;
+  const isProfilingAvailable = isProfilingPluginEnabled && data?.initialized;
 
   return {
     profilingLocators: isProfilingAvailable
