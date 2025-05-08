@@ -99,6 +99,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
 
   const {
     application: { capabilities },
+    notifications,
     isServerless,
     http,
   } = useKibana().services;
@@ -259,7 +260,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
           <>
             <EuiSpacer />
             <AlertDeleteDescriptiveFormGroup
-              services={{ http }}
+              services={{ http, notifications }}
               categoryIds={props.alertDeleteCategoryIds}
               isDisabled={!writeAlertDeleteSettingsUI}
             />

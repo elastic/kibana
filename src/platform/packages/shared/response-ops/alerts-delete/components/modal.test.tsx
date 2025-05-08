@@ -11,14 +11,18 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AlertDeleteModal } from './modal';
 import * as i18n from '../translations';
-import { httpServiceMock } from '@kbn/core/public/mocks';
+import { httpServiceMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 
 const http = httpServiceMock.createStartContract();
+const notifications = notificationServiceMock.createStartContract();
 
 describe('AlertDelete Modal', () => {
   const closeModalMock = jest.fn();
+  const servicesMock = { http, notifications };
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -46,7 +50,7 @@ describe('AlertDelete Modal', () => {
       <AlertDeleteModal
         onCloseModal={closeModalMock}
         isVisible
-        services={{ http }}
+        services={servicesMock}
         categoryIds={['management']}
       />,
       { wrapper }
@@ -70,7 +74,7 @@ describe('AlertDelete Modal', () => {
       <AlertDeleteModal
         onCloseModal={closeModalMock}
         isVisible
-        services={{ http }}
+        services={servicesMock}
         categoryIds={['management']}
       />,
       { wrapper }
@@ -89,7 +93,7 @@ describe('AlertDelete Modal', () => {
       <AlertDeleteModal
         onCloseModal={closeModalMock}
         isVisible
-        services={{ http }}
+        services={servicesMock}
         categoryIds={['management']}
       />,
       { wrapper }
@@ -114,7 +118,7 @@ describe('AlertDelete Modal', () => {
         onCloseModal={closeModalMock}
         isVisible
         categoryIds={['management']}
-        services={{ http }}
+        services={servicesMock}
       />,
       { wrapper }
     );
@@ -143,7 +147,7 @@ describe('AlertDelete Modal', () => {
       <AlertDeleteModal
         onCloseModal={closeModalMock}
         isVisible
-        services={{ http }}
+        services={servicesMock}
         categoryIds={['management']}
       />,
       { wrapper }
@@ -165,7 +169,7 @@ describe('AlertDelete Modal', () => {
       <AlertDeleteModal
         onCloseModal={closeModalMock}
         isVisible
-        services={{ http }}
+        services={servicesMock}
         categoryIds={['management']}
       />,
       { wrapper }
@@ -193,7 +197,7 @@ describe('AlertDelete Modal', () => {
       <AlertDeleteModal
         onCloseModal={closeModalMock}
         isVisible
-        services={{ http }}
+        services={servicesMock}
         categoryIds={['management']}
       />,
       { wrapper }
@@ -211,5 +215,151 @@ describe('AlertDelete Modal', () => {
       )
     );
     expect(submitButton).toBeDisabled();
+  });
+
+  it('shows a success toast and closes the modal on successful schedule submission', async () => {
+    http.get.mockResolvedValueOnce({ affected_alert_count: 100 });
+    http.post.mockResolvedValueOnce(null);
+
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={servicesMock}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
+
+    const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
+    fireEvent.click(activeCheckbox);
+
+    const deleteInput = screen.getByTestId('alert-delete-delete-confirmation');
+    fireEvent.change(deleteInput, { target: { value: i18n.DELETE_PASSKEY } });
+
+    const submitButton = screen.getByTestId('alert-delete-submit');
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled();
+    });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith(i18n.ALERT_DELETE_SUCCESS);
+      expect(closeModalMock).toHaveBeenCalledTimes(1);
+    });
+  });
+});
+
+describe('AlertDelete Modal Error Handling', () => {
+  const closeModalMock = jest.fn();
+  const servicesMock = { http, notifications };
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        cacheTime: 0,
+      },
+    },
+    logger: {
+      // eslint-disable-next-line no-console
+      log: console.log,
+      // eslint-disable-next-line no-console
+      warn: console.warn,
+      error: () => {},
+    },
+  });
+
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <IntlProvider locale="en">
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </IntlProvider>
+  );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    closeModalMock.mockClear();
+  });
+
+  it('shows an error toast on schedule submission failure', async () => {
+    http.get.mockResolvedValueOnce({ affected_alert_count: 100 });
+    const mockError: IHttpFetchError<ResponseErrorBody> = {
+      body: {
+        message: 'Request failed',
+        statusCode: 500,
+      },
+      name: 'Error',
+      request: {} as unknown as Request,
+      message: 'Internal Server Error',
+    };
+    http.post.mockRejectedValueOnce(mockError);
+
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={servicesMock}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
+
+    const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
+    fireEvent.click(activeCheckbox);
+
+    const deleteInput = screen.getByTestId('alert-delete-delete-confirmation');
+    fireEvent.change(deleteInput, { target: { value: i18n.DELETE_PASSKEY } });
+
+    const submitButton = screen.getByTestId('alert-delete-submit');
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled();
+    });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(notifications.toasts.addDanger).toHaveBeenCalled();
+    });
+    expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
+      title: i18n.ALERT_DELETE_FAILURE,
+      text: 'Request failed',
+    });
+    expect(closeModalMock).toHaveBeenCalledTimes(0);
+  });
+
+  it('shows a generic error toast if the error response does not have a message', async () => {
+    http.get.mockResolvedValueOnce({ affected_alert_count: 100 });
+    const errorResponse = {};
+    http.post.mockRejectedValueOnce(errorResponse);
+
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={servicesMock}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
+
+    const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
+    fireEvent.click(activeCheckbox);
+
+    const deleteInput = screen.getByTestId('alert-delete-delete-confirmation');
+    fireEvent.change(deleteInput, { target: { value: i18n.DELETE_PASSKEY } });
+
+    const submitButton = screen.getByTestId('alert-delete-submit');
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled();
+    });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: i18n.ALERT_DELETE_FAILURE,
+        text: 'Unknown error',
+      });
+    });
   });
 });

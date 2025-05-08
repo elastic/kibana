@@ -11,6 +11,7 @@ import type {
   CustomRequestHandlerContext,
   SavedObjectReference,
   IUiSettingsClient,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type { z } from '@kbn/zod';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
@@ -62,6 +63,13 @@ export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'param
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
 export type { Artifacts };
+
+export interface HasRequiredPrivilegeGrantedInAllSpaces {
+  spaceIds: string[];
+  requiredPrivilege: string;
+  request: KibanaRequest;
+}
+
 /**
  * @public
  */

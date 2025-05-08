@@ -11,33 +11,28 @@ import React, { useState } from 'react';
 import type { StoryObj } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
-import { HttpStart } from '@kbn/core/public';
+import { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { AlertDeleteDescriptiveFormGroup } from './components/descriptive_form_group';
 import { AlertDeleteModal } from './components/modal';
 
 const http = {
-  get: async (path: string, { query }: { query?: Record<string, string> }) => {
+  get: (path: string, { query }: { query?: Record<string, string> }) => {
     if (path.includes('_alert_delete_preview')) {
-      if (
-        !query ||
-        (Boolean(query?.is_active_alert_delete_enabled) === true &&
-          parseInt(query?.active_alert_delete_threshold, 10) === 30)
-      ) {
-        return {
-          affected_alert_count: 0,
-        };
+      if (query && parseInt(query.active_alert_delete_threshold, 10) > 30) {
+        return Promise.resolve({
+          affected_alert_count: Math.floor(parseInt(query.active_alert_delete_threshold, 10)),
+        });
       }
-      if (parseInt(query.active_alert_delete_threshold, 10) > 30) {
-        return {
-          affected_alert_count:
-            Math.floor(parseInt(query.active_alert_delete_threshold, 10) / 30) - 1,
-        };
-      }
-      return {
-        affected_alert_count: Math.floor(Math.random() * 100),
-      };
+      return Promise.resolve({
+        affected_alert_count: 0,
+      });
     }
     throw new Error('Not implemented');
+  },
+  post: (path: string, { body }: { body?: Record<string, unknown> }) => {
+    if (path.includes('_alert_delete')) {
+      return Promise.resolve();
+    }
   },
 } as unknown as HttpStart;
 
@@ -46,6 +41,17 @@ const meta = {
 };
 
 export default meta;
+
+const notifications = {
+  toasts: {
+    addSuccess: (...params: unknown[]) => {
+      alert(`Success: ${JSON.stringify(params)}`);
+    },
+    addDanger: (...params: unknown[]) => {
+      alert(`Danger: ${JSON.stringify(params)}`);
+    },
+  },
+} as unknown as NotificationsStart;
 
 const DefaultStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(true);
@@ -56,20 +62,14 @@ const DefaultStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
     <EuiFlyout type="push" onClose={closeFlyout} maxWidth={440}>
       <EuiFlyoutBody>
         <AlertDeleteDescriptiveFormGroup
-          services={{ http }}
+          services={{ http, notifications }}
           isDisabled={isDisabled}
           categoryIds={['management']}
         />
       </EuiFlyoutBody>
     </EuiFlyout>
   ) : (
-    <>
-      <EuiButton onClick={showFlyout}>Click Me!</EuiButton>
-      <p style={{ marginTop: '20px' }}>
-        <strong>Warning:</strong> The preview API is mocked. It will return the number of months
-        chosen in active alerts threshold - 1
-      </p>
-    </>
+    <EuiButton onClick={showFlyout}>Click Me!</EuiButton>
   );
 };
 
@@ -93,20 +93,14 @@ const ModalOnlyStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
 
   return isModalVisible ? (
     <AlertDeleteModal
-      services={{ http }}
+      services={{ http, notifications }}
       isVisible={isModalVisible}
       onCloseModal={hideModal}
       isDisabled={isDisabled}
       categoryIds={['observability']}
     />
   ) : (
-    <>
-      <EuiButton onClick={showModal}>Open Modal</EuiButton>
-      <p style={{ marginTop: '20px' }}>
-        <strong>Warning:</strong> The preview API is mocked. It will return the number of months
-        chosen in active alerts threshold - 1
-      </p>
-    </>
+    <EuiButton onClick={showModal}>Open Modal</EuiButton>
   );
 };
 

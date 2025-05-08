@@ -232,7 +232,7 @@ export const Space1: Space = {
   disabledFeatures: [],
 };
 
-const Space2: Space = {
+export const Space2: Space = {
   id: 'space2',
   name: 'Space 2',
   disabledFeatures: [],

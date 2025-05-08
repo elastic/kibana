@@ -436,6 +436,7 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       docLinks: core.docLinks,
       alertingConfig: this.config,
+      core,
     });
 
     return {

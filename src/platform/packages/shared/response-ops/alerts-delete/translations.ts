@@ -95,3 +95,15 @@ export const RULE_SETTINGS_DESCRIPTION = i18n.translate(
 export const RUN_CLEANUP_TASK = i18n.translate('responseOpsAlertDelete.ruleSettingsCleanUp', {
   defaultMessage: 'Clean up',
 });
+
+export const ALERT_DELETE_SUCCESS = i18n.translate('responseOpsAlertDelete.alertDeleteSuccess', {
+  defaultMessage: 'Clean up task started successfully',
+});
+
+export const ALERT_DELETE_FAILURE = i18n.translate('responseOpsAlertDelete.alertDeleteFailure', {
+  defaultMessage: 'Failed to start clean up task',
+});
+
+export const UNKNOWN_ERROR = i18n.translate('responseOpsAlertDelete.unknownError', {
+  defaultMessage: 'Unknown error',
+});

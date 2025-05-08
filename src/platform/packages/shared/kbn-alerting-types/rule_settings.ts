@@ -41,6 +41,7 @@ export interface RulesSettingsAlertDeleteProperties {
   activeAlertDeleteThreshold: number;
   inactiveAlertDeleteThreshold: number;
   categoryIds?: Array<'securitySolution' | 'observability' | 'management'>;
+  spaceIds?: string[];
 }
 
 export interface RulesSettingsProperties {
