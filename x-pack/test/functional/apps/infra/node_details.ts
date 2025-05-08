@@ -132,7 +132,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   const setInfrastructureProfilingIntegrationUiSetting = async (value: boolean = true) => {
-    await kibanaServer.application.capabilities.profiling.update({ ['show']: value });
+    // await kibanaServer.application.capabilities.profiling.update({ ['show']: value });
     await browser.refresh();
     await pageObjects.header.waitUntilLoadingHasFinished();
   };

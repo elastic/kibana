@@ -289,7 +289,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (boolean?)',
         'xpack.infra.featureFlags.logsUIEnabled (boolean?)',
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (boolean?)',
-        'xpack.infra.featureFlags.profilingEnabled (boolean?)',
 
         'xpack.index_management.enableIndexActions (boolean?|never)',
         'xpack.index_management.enableLegacyTemplates (boolean?|never)',
