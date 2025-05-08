@@ -96,7 +96,7 @@ export class ConsoleUIPlugin
             application,
             ...startServices
           } = core;
-          const { dataViews } = deps;
+          const { dataViews, licensing } = deps;
 
           const { renderApp } = await import('./application');
 
@@ -107,6 +107,7 @@ export class ConsoleUIPlugin
             docLinks: links,
             application,
             dataViews,
+            licensing,
             notifications,
             usageCollection,
             element,
@@ -155,6 +156,7 @@ export class ConsoleUIPlugin
         return EmbeddableConsole({
           core,
           dataViews: deps.dataViews,
+          licensing: deps.licensing,
           usageCollection: deps.usageCollection,
           setDispatch: (d) => {
             this._embeddableConsole.setDispatch(d);

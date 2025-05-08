@@ -13,6 +13,7 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ApplicationStart } from '@kbn/core/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { AutocompleteInfo, History, Settings, Storage } from '../../services';
 import { ObjectStorageClient } from '../../../common/types';
 import { ConsoleStartServices, MetricsTracker } from '../../types';
@@ -30,6 +31,7 @@ interface ContextServices {
   http: HttpSetup;
   autocompleteInfo: AutocompleteInfo;
   dataViews: DataViewsPublicPluginStart;
+  licensing: LicensingPluginStart;
   application: ApplicationStart;
 }
 

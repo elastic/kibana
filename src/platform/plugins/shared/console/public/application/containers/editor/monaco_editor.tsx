@@ -14,6 +14,8 @@ import { CodeEditor } from '@kbn/code-editor';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ESQLCallbacks, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { getESQLSources } from '@kbn/esql-editor/src/helpers';
+import { isEqual } from 'lodash';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';
@@ -48,6 +50,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       settings: settingsService,
       autocompleteInfo,
       dataViews,
+      licensing,
       application,
     },
     docLinkVersion,
@@ -62,6 +65,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const [editorInstance, setEditorInstace] = useState<
     monaco.editor.IStandaloneCodeEditor | undefined
   >();
+  const [license, setLicense] = useState<ILicense | undefined>(undefined);
 
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
@@ -107,6 +111,20 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   );
 
   useEffect(() => {
+    async function fetchLicense() {
+      try {
+        const ls = await licensing.getLicense();
+        if (!isEqual(license, ls)) {
+          setLicense(ls);
+        }
+      } catch (error) {
+        // failed to fetch
+      }
+    }
+    fetchLicense();
+  }, [licensing, license]);
+
+  useEffect(() => {
     if (settings.isKeyboardShortcutsEnabled && editorInstance) {
       registerKeyboardCommands({
         editor: editorInstance,
@@ -138,16 +156,13 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        // TODO: Add logic for correct check for remote indices
-        const areRemoteIndicesAvailable = false;
+        const ccrFeature = license?.getFeature('ccr');
+        const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
         return await getESQLSources(dataViews, { application, http }, areRemoteIndicesAvailable);
-      },
-      getPolicies: () => {
-        return [];
       },
     };
     return callbacks;
-  }, [application, http, dataViews]);
+  }, [license, dataViews, application, http]);
 
   const suggestionProvider = useMemo(() => {
     return getSuggestionProvider(actionsProvider, esqlCallbacks);

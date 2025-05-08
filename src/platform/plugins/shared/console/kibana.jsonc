@@ -17,6 +17,7 @@
       "devTools",
       "share",
       "dataViews",
+      "licensing",
     ],
     "optionalPlugins": [
       "usageCollection",
