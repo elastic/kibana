@@ -106,6 +106,7 @@ describe('FindSLO', () => {
             groupings: {},
             instanceId: ALL_VALUE,
             version: SLO_MODEL_VERSION,
+            isTemplate: false,
           },
         ],
       });

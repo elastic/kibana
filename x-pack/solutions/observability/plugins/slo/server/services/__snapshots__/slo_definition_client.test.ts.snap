@@ -25,6 +25,7 @@ Object {
       },
       "type": "sli.apm.transactionDuration",
     },
+    "isTemplate": false,
     "name": "irrelevant",
     "objective": Object {
       "target": 0.999,

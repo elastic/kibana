@@ -18,6 +18,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "isTemplate": false,
   "name": "irrelevant",
   "objective": Object {
     "target": 0.9999,
@@ -73,6 +74,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "isTemplate": false,
   "name": "irrelevant",
   "objective": Object {
     "target": 0.9999,
@@ -125,6 +127,7 @@ Object {
     },
     "type": "sli.kql.custom",
   },
+  "isTemplate": false,
   "name": "irrelevant",
   "objective": Object {
     "target": 0.9999,
