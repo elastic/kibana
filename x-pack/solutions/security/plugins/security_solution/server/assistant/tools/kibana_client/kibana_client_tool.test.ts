@@ -42,18 +42,24 @@ describe('Kibana client tool', () => {
     });
 
     it('isSupported feature flag off', async () => {
-      (assistantToolParams.assistantContext?.getRegisteredFeatures as jest.Mock).mockReturnValueOnce({
+      (
+        assistantToolParams.assistantContext?.getRegisteredFeatures as jest.Mock
+      ).mockReturnValueOnce({
         kibanaClientToolEnabled: false,
-      })
+      });
       expect(KIBANA_CLIENT_TOOL.isSupported(assistantToolParams)).toBe(false);
     });
 
     it('isSupported missing createLlmInstance', async () => {
-      expect(KIBANA_CLIENT_TOOL.isSupported({...assistantToolParams, createLlmInstance: undefined})).toBe(false);
+      expect(
+        KIBANA_CLIENT_TOOL.isSupported({ ...assistantToolParams, createLlmInstance: undefined })
+      ).toBe(false);
     });
 
     it('isSupported missing assistantContext', async () => {
-      expect(KIBANA_CLIENT_TOOL.isSupported({...assistantToolParams, assistantContext: undefined})).toBe(false);
+      expect(
+        KIBANA_CLIENT_TOOL.isSupported({ ...assistantToolParams, assistantContext: undefined })
+      ).toBe(false);
     });
 
     it('gets tool returns tool', async () => {

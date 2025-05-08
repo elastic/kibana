@@ -116,7 +116,7 @@ const mockPostOperation = {
               },
             },
             required: ['id'],
-          }
+          },
         },
         required: ['objectWithRequired'],
       },
@@ -254,17 +254,15 @@ describe('OpenApiTool', () => {
                 exclusiveMinimum: 0,
                 type: 'integer',
               },
-              "objectWithRequired": {
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "type": "string",
+              objectWithRequired: {
+                additionalProperties: false,
+                properties: {
+                  id: {
+                    type: 'string',
                   },
                 },
-                "required": [
-                  "id",
-                ],
-                "type": "object",
+                required: ['id'],
+                type: 'object',
               },
               oneOfExample: {
                 description: 'One of (oneOf) the following schemas:\n[{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"},{\"type\":\"number\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"}]',
@@ -341,17 +339,15 @@ describe('OpenApiTool', () => {
               exclusiveNumber: {
                 type: 'integer',
               },
-              "objectWithRequired": {
-                "additionalProperties": false,
-                "properties": {
-                  "id": {
-                    "type": "string",
+              objectWithRequired: {
+                additionalProperties: false,
+                properties: {
+                  id: {
+                    type: 'string',
                   },
                 },
-                "required": [
-                  "id",
-                ],
-                "type": "object",
+                required: ['id'],
+                type: 'object',
               },
               oneOfExample: {
                 description: 'One of (oneOf) the following schemas:\n[{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"},{\"type\":\"number\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"}]',

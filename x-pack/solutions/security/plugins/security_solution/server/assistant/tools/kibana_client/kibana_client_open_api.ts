@@ -33,7 +33,7 @@ export const kibanaServerlessOpenApiSpec = path.resolve(
 );
 export const kibanaOpenApiSpec = path.resolve(REPO_ROOT, './oas_docs/output/kibana.yaml');
 
-const routeRegex = /\/internal\/elastic_assistant\/actions\/connector\/[^/]+\/_execute/
+const routeRegex = /\/internal\/elastic_assistant\/actions\/connector\/[^/]+\/_execute/;
 
 const defaultOptions: Options = {
   apiSpecPath: kibanaOpenApiSpec,
@@ -48,7 +48,6 @@ interface Options {
 interface RuntimeOptions {
   assistantToolParams: KibanaClientToolParams;
 }
-
 
 export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
   private copiedHeaderNames = [
@@ -123,13 +122,8 @@ as much information as possible in the input. Do not call this function in paral
     operation,
     assistantToolParams,
   }: RuntimeOptions & { operation: Operation }) {
-
     const { request } = assistantToolParams;
-    const {
-      protocol,
-      host,
-      pathname: pathnameFromRequest,
-    } = request.rewrittenUrl || request.url;
+    const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
 
     if (pathnameFromRequest.match(routeRegex) === null) {
       throw new Error(
@@ -139,7 +133,6 @@ as much information as possible in the input. Do not call this function in paral
 
     return tool(
       async (input, config) => {
-
         const origin = first(castArray(request.headers.origin));
 
         const pathname = StdUriTemplate.expand(operation.path, input.path);
@@ -148,10 +141,7 @@ as much information as possible in the input. Do not call this function in paral
           host,
           protocol,
           ...(origin ? pick(new URL(origin), 'host', 'protocol') : {}),
-          pathname: pathnameFromRequest.replace(
-            routeRegex,
-            pathname
-          ),
+          pathname: pathnameFromRequest.replace(routeRegex, pathname),
           query: input.query ? (input.query as Record<string, string>) : undefined,
         };
 
@@ -180,7 +170,6 @@ as much information as possible in the input. Do not call this function in paral
               ],
             },
           });
-
         } catch (error) {
           if (isAxiosError(error)) {
             const status = error.response?.status;

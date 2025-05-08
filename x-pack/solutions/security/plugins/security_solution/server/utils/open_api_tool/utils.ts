@@ -18,5 +18,8 @@ export const isOperation = (operation: OperationOrWebhook): operation is Operati
  * Formats the tool name to be a valid identifier.
  */
 export const formatToolName = (toolName: string) => {
-  return toolName.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase().replace(/[^a-zA-Z0-9_.]/g, '_');
+  return toolName
+    .replace(/([a-z])([A-Z])/g, '$1_$2')
+    .toLowerCase()
+    .replace(/[^a-zA-Z0-9_.]/g, '_');
 };
