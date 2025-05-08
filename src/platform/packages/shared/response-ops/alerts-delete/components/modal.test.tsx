@@ -19,10 +19,23 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 
+const lastRunDate = '2025-10-01T02:10:23.000Z';
+const mockHttpGet = ({ lastRun = lastRunDate, affectedAlertCount = 0 }) => {
+  http.get.mockClear();
+  http.get.mockImplementation(async (path: any) => {
+    if (path.includes('_last_run')) {
+      return { last_run: lastRun };
+    }
+    if (path.includes('_preview')) {
+      return { affected_alert_count: affectedAlertCount };
+    }
+    throw new Error(`No mock implementation for path: ${path}`);
+  });
+};
+
 describe('AlertDelete Modal', () => {
   const closeModalMock = jest.fn();
   const servicesMock = { http, notifications };
-  const lastRunDate = '2025-10-01T02:10:23.000Z';
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -40,19 +53,6 @@ describe('AlertDelete Modal', () => {
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </IntlProvider>
   );
-
-  const mockHttpGet = ({ lastRun = lastRunDate, affectedAlertCount = 0 }) => {
-    http.get.mockClear();
-    http.get.mockImplementation(async (path: any) => {
-      if (path.includes('_last_run')) {
-        return { last_run: lastRun };
-      }
-      if (path.includes('_preview')) {
-        return { affected_alert_count: affectedAlertCount };
-      }
-      throw new Error(`No mock implementation for path: ${path}`);
-    });
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
