@@ -9610,10 +9610,10 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.34.2":
-  version "1.34.2"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.34.2.tgz#e67ea4be0a4663ff1ee063cbcacf937ce97d2586"
-  integrity sha512-XnKG7yrr0GUZ7MyqHk9hRt//HGUSnLDwwEXI8HDQdyDFp+YFbddqcQPOWc/sDeDBTEiBXqwPOb3/VKA+8NtSMw==
+"@redocly/cli@^1.34.3":
+  version "1.34.3"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.34.3.tgz#afd5171ed9b89d64ec9e828d5d6112c25f70f711"
+  integrity sha512-GJNBTMfm5wTCtH6K+RtPQZuGbqflMclXqAZ5My12tfux6xFDMW1l0MNd5RMpnIS1aeFcDX++P1gnnROWlesj4w==
   dependencies:
     "@opentelemetry/api" "1.9.0"
     "@opentelemetry/exporter-trace-otlp-http" "0.53.0"
@@ -9621,8 +9621,8 @@
     "@opentelemetry/sdk-trace-node" "1.26.0"
     "@opentelemetry/semantic-conventions" "1.27.0"
     "@redocly/config" "^0.22.0"
-    "@redocly/openapi-core" "1.34.2"
-    "@redocly/respect-core" "1.34.2"
+    "@redocly/openapi-core" "1.34.3"
+    "@redocly/respect-core" "1.34.3"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -9636,7 +9636,7 @@
     pluralize "^8.0.0"
     react "^17.0.0 || ^18.2.0 || ^19.0.0"
     react-dom "^17.0.0 || ^18.2.0 || ^19.0.0"
-    redoc "2.4.0"
+    redoc "2.5.0"
     semver "^7.5.2"
     simple-websocket "^9.0.0"
     styled-components "^6.0.7"
@@ -9647,10 +9647,10 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.22.1.tgz#e14461c009ac53b74f82c9788f9c43fc2c718f24"
   integrity sha512-1CqQfiG456v9ZgYBG9xRQHnpXjt8WoSnDwdkX6gxktuK69v2037hTAR1eh0DGIqpZ1p4k82cGH8yTNwt7/pI9g==
 
-"@redocly/openapi-core@1.34.2", "@redocly/openapi-core@^1.4.0":
-  version "1.34.2"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.34.2.tgz#859de74a3261fb09a3dc695be4a8d9b1f2059d75"
-  integrity sha512-glfkQFJizLdq2fBkNvc2FJW0sxDb5exd0wIXhFk+WHaFLMREBC3CxRo2Zq7uJIdfV9U3YTceMbXJklpDfmmwFQ==
+"@redocly/openapi-core@1.34.3", "@redocly/openapi-core@^1.4.0":
+  version "1.34.3"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.34.3.tgz#0e72750bc8cc784d3e19679d0742299a17a8c435"
+  integrity sha512-3arRdUp1fNx55itnjKiUhO6t4Mf91TsrTIYINDNLAZPS0TPd5YpiXRctwjel0qqWoOOhjA34cZ3m4dksLDFUYg==
   dependencies:
     "@redocly/ajv" "^8.11.2"
     "@redocly/config" "^0.22.0"
@@ -9662,14 +9662,14 @@
     pluralize "^8.0.0"
     yaml-ast-parser "0.0.43"
 
-"@redocly/respect-core@1.34.2":
-  version "1.34.2"
-  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-1.34.2.tgz#6d83359dceceb39ae2403c90f8cfcc3505931b95"
-  integrity sha512-X6VR9bbHXrI01Wh5t6TIHxFCVHcP4Iy42micKLIk/Cg6EmHVbaSDGOD6mxChXtEIrwnY+bqyUbjlXr9+YM7B9A==
+"@redocly/respect-core@1.34.3":
+  version "1.34.3"
+  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-1.34.3.tgz#d9d6de8584e437100011b6e1fcdd4df975d40cfd"
+  integrity sha512-vo/gu7dRGwTVsRueVSjVk04jOQuL0w22RBJRdRUWkfyse791tYXgMCOx35ijKekL83Q/7Okxf/YX6UY1v5CAug==
   dependencies:
     "@faker-js/faker" "^7.6.0"
     "@redocly/ajv" "8.11.2"
-    "@redocly/openapi-core" "1.34.2"
+    "@redocly/openapi-core" "1.34.3"
     better-ajv-errors "^1.2.0"
     colorette "^2.0.20"
     concat-stream "^2.0.0"
@@ -17310,7 +17310,7 @@ domhandler@^5.0.1, domhandler@^5.0.2, domhandler@^5.0.3:
   dependencies:
     domelementtype "^2.3.0"
 
-dompurify@^3.0.6:
+dompurify@^3.2.4:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-3.2.4.tgz#af5a5a11407524431456cf18836c55d13441cd8e"
   integrity sha512-ysFSFEDVduQpyhzAob/kkuJjf5zWkZD8/A9ywSp1byueyuCfHamrCBa14/Oc2iiB0e51B+NpxSl5gmzn+Ms/mg==
@@ -27467,15 +27467,15 @@ redent@^3.0.0:
     indent-string "^4.0.0"
     strip-indent "^3.0.0"
 
-redoc@2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.4.0.tgz#4a978c91bfec426038001b8b6c26d1ebb7c60bb4"
-  integrity sha512-rFlfzFVWS9XJ6aYAs/bHnLhHP5FQEhwAHDBVgwb9L2FqDQ8Hu8rQ1G84iwaWXxZfPP9UWn7JdWkxI6MXr2ZDjw==
+redoc@2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/redoc/-/redoc-2.5.0.tgz#6b44c55f705e13a57272c5a227cc3fd0d1a06495"
+  integrity sha512-NpYsOZ1PD9qFdjbLVBZJWptqE+4Y6TkUuvEOqPUmoH7AKOmPcE+hYjotLxQNTqVoWL4z0T2uxILmcc8JGDci+Q==
   dependencies:
     "@redocly/openapi-core" "^1.4.0"
     classnames "^2.3.2"
     decko "^1.2.0"
-    dompurify "^3.0.6"
+    dompurify "^3.2.4"
     eventemitter3 "^5.0.1"
     json-pointer "^0.6.2"
     lunr "^2.3.9"
