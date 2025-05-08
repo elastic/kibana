@@ -41,7 +41,7 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
 
   return (
     <EuiFlexItem
-      className={classnames('projectListItem', {
+      className={classnames({
         'projectListItem--isOverridden': isOverride,
         'projectListItem--isOverriddenEnabled': isOverride && isEnabled,
       })}
@@ -127,25 +127,12 @@ const useStyles = () => {
     return {
       projectListItemStyles: css({
         position: 'relative',
-        background: euiTheme.colors.emptyShade,
-        padding: euiTheme.size.l,
-        minWidth: '500px',
-        '+ .projectListItem:after': {
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          left: 0,
-          height: '1px',
-          background: euiTheme.colors.lightShade,
-          content: '""',
-        },
-
         '&.projectListItem--isOverridden:before': {
           position: 'absolute',
-          top: euiTheme.size.l,
-          left: '4px',
-          bottom: euiTheme.size.l,
-          width: '4px',
+          top: euiTheme.size.m,
+          left: euiTheme.size.xs,
+          bottom: 0,
+          width: euiTheme.size.xs,
           background: euiTheme.colors.success,
           content: '""',
         },
@@ -153,13 +140,8 @@ const useStyles = () => {
           width: '100%',
         },
         '.euiFlyout &': {
-          padding: `${euiTheme.size.l} ${euiTheme.size.xs}`,
-
-          '&:first-child': {
-            paddingTop: 0,
-          },
           '&.projectListItem--isOverridden:before': {
-            left: `-${euiTheme.size.s}`,
+            left: `-${euiTheme.size.m}`,
           },
           '&.projectListItem--isOverridden:first-child:before': {
             top: 0,

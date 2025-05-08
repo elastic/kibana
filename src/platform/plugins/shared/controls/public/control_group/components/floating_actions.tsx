@@ -161,7 +161,7 @@ const useStyles = () => {
         opacity: 0,
         visibility: 'hidden',
         // slower transition on hover leave in case the user accidentally stops hover
-        transition: `visibility ${euiTheme.animation.slow}, opacity ${euiTheme.animation.slow}`,
+        transition: `opacity ${euiTheme.animation.slow}`,
         position: 'absolute',
         right: euiTheme.size.xs,
         top: `-${euiTheme.size.l}`,
