@@ -177,6 +177,7 @@
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
     "@kbn/test-suites-xpack-observability",
-    "@kbn/test-suites-xpack-platform"
+    "@kbn/test-suites-xpack-platform",
+    "@kbn/core-chrome-browser"
   ]
 }

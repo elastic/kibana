@@ -195,6 +195,7 @@ export const SearchApplicationsList: React.FC<ListProps> = ({
         }}
         pageViewTelemetry="Search Applications"
         isLoading={isLoading && !isGated}
+        data-test-subj="searchApplicationsListPage"
       >
         {isGated && (
           <EuiFlexItem>
