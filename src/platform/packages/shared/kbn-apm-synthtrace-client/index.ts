@@ -39,11 +39,13 @@ export type { Timerange } from './src/lib/timerange';
 export { dedot } from './src/lib/utils/dedot';
 export { generateLongId, generateShortId } from './src/lib/utils/generate_id';
 export { appendHash, hashKeysOf } from './src/lib/utils/hash';
-export type {
-  ESDocumentWithOperation,
-  SynthtraceESAction,
-  SynthtraceGenerator,
-  SynthtraceDynamicTemplate,
+export {
+  type ESDocumentWithOperation,
+  type SynthtraceESAction,
+  type SynthtraceGenerator,
+  type SynthtraceDynamicTemplate,
+  type ApmSynthtracePipelines,
+  ApmSynthtracePipelineSchema,
 } from './src/types';
 export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
 export { otelLog, type OtelLogDocument } from './src/lib/otel_logs';

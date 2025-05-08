@@ -21,6 +21,7 @@ export function EmbeddableFunctionsGrid({ data, totalSeconds, showFullScreenSele
   const [sortField, setSortField] = useState(TopNFunctionSortField.Rank);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [pageIndex, setPageIndex] = useState(0);
+  const [searchFunctionName, setSearchFunctionName] = useState('');
 
   return (
     <TopNFunctionsGrid
@@ -37,6 +38,8 @@ export function EmbeddableFunctionsGrid({ data, totalSeconds, showFullScreenSele
       }}
       isEmbedded
       showFullScreenSelector={showFullScreenSelector}
+      onSearchFunctionNameChange={setSearchFunctionName}
+      searchFunctionName={searchFunctionName}
     />
   );
 }
