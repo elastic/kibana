@@ -303,9 +303,11 @@ describe('saved search embeddable', () => {
       await waitOneTick();
       expect(api.dataLoading$.getValue()).toBe(false);
 
-      const discoverGridComponent = discoverComponent.queryByTestId('discoverDocTable');
-      expect(discoverGridComponent).toBeInTheDocument();
-      expect(discoverComponent.queryByText('data-source-profile')).toBeInTheDocument();
+      await waitFor(() => {
+        const discoverGridComponent = discoverComponent.queryByTestId('discoverDocTable');
+        expect(discoverGridComponent).toBeInTheDocument();
+        expect(discoverComponent.queryByText('data-source-profile')).toBeInTheDocument();
+      });
     });
   });
 });
