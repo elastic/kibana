@@ -35,25 +35,25 @@ export interface BaseFields8190 extends BaseFields8180 {
   [ALERT_ORIGINAL_DATA_STREAM_TYPE]: string | undefined;
 }
 
-export interface WrappedFields8190<T extends BaseFields8180> {
+export interface WrappedFields8190<T extends BaseFields8190> {
   _id: string;
   _index: string;
   _source: T;
 }
 
-export type GenericAlert8190 = AlertWithCommonFields800<BaseFields8180>;
+export type GenericAlert8190 = AlertWithCommonFields800<BaseFields8190>;
 
-export type EqlShellFields8190 = EqlShellFields8180 & BaseFields8180;
+export type EqlShellFields8190 = EqlShellFields8180 & BaseFields8190;
 
-export type EqlBuildingBlockFields8190 = EqlBuildingBlockFields8180 & BaseFields8180;
+export type EqlBuildingBlockFields8190 = EqlBuildingBlockFields8180 & BaseFields8190;
 
-export type NewTermsFields8190 = NewTermsFields8180 & BaseFields8180;
+export type NewTermsFields8190 = NewTermsFields8180 & BaseFields8190;
 
-export type NewTermsAlert8190 = NewTermsFields8180 & BaseFields8180;
+export type NewTermsAlert8190 = NewTermsFields8180 & BaseFields8190;
 
-export type EqlBuildingBlockAlert8190 = AlertWithCommonFields800<EqlBuildingBlockFields8180>;
+export type EqlBuildingBlockAlert8190 = AlertWithCommonFields800<EqlBuildingBlockFields8190>;
 
-export type EqlShellAlert8190 = AlertWithCommonFields800<EqlShellFields8180>;
+export type EqlShellAlert8190 = AlertWithCommonFields800<EqlShellFields8190>;
 
 export type DetectionAlert8190 =
   | GenericAlert8190
