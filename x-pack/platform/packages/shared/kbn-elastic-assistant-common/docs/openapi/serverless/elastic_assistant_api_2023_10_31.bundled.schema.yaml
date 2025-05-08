@@ -2704,11 +2704,9 @@ components:
       properties:
         err_code:
           description: A code representing the error type.
-          example: CONTENT_TOO_LONG
           type: string
         message:
           description: A message describing the error encountered.
-          example: Prompt content exceeds allowed length.
           type: string
         prompts:
           description: List of prompts that encountered errors.
@@ -2717,7 +2715,6 @@ components:
           type: array
         status_code:
           description: The HTTP status code associated with the error.
-          example: 422
           type: integer
       required:
         - message
@@ -2794,11 +2791,9 @@ components:
       properties:
         id:
           description: The ID of the prompt that encountered an error.
-          example: promptError123
           type: string
         name:
           description: The name of the prompt that encountered an error.
-          example: Invalid Prompt
           type: string
       required:
         - id
@@ -2807,63 +2802,48 @@ components:
       properties:
         categories:
           description: Categories associated with the prompt.
-          example:
-            - security
-            - audit
           items:
             type: string
           type: array
         color:
           description: The color associated with the prompt.
-          example: yellow
           type: string
         consumer:
           description: The consumer that the prompt is associated with.
-          example: admin
           type: string
         content:
           description: The content of the prompt.
-          example: Is the firewall enabled?
           type: string
         createdAt:
           description: The timestamp of when the prompt was created.
-          example: '2023-12-01T09:00:00Z'
           type: string
         createdBy:
           description: The user who created the prompt.
-          example: user123
           type: string
         id:
           $ref: '#/components/schemas/NonEmptyString'
         isDefault:
           description: Whether this prompt is the default.
-          example: true
           type: boolean
         isNewConversationDefault:
           description: Whether this prompt is the default for new conversations.
-          example: false
           type: boolean
         name:
           description: The name of the prompt.
-          example: Security Check Prompt
           type: string
         namespace:
           description: Kibana space where the prompt is located.
-          example: default
           type: string
         promptType:
           $ref: '#/components/schemas/PromptType'
           description: The type of the prompt.
-          example: quick
         timestamp:
           $ref: '#/components/schemas/NonEmptyTimestamp'
         updatedAt:
           description: The timestamp of when the prompt was last updated.
-          example: '2024-05-08T12:00:00Z'
           type: string
         updatedBy:
           description: The user who last updated the prompt.
-          example: user456
           type: string
         users:
           description: List of users associated with the prompt.
@@ -2879,18 +2859,15 @@ components:
       description: Reason why a prompt was skipped during the bulk action.
       enum:
         - PROMPT_FIELD_NOT_MODIFIED
-      example: PROMPT_FIELD_NOT_MODIFIED
       type: string
     PromptsBulkActionSkipResult:
       type: object
       properties:
         id:
           description: The ID of the prompt that was skipped.
-          example: prompt789
           type: string
         name:
           description: The name of the prompt that was skipped.
-          example: Legacy Prompt
           type: string
         skip_reason:
           $ref: '#/components/schemas/PromptsBulkActionSkipReason'
@@ -2943,9 +2920,6 @@ components:
           type: array
         deleted:
           description: List of IDs of prompts that were deleted.
-          example:
-            - prompt12
-            - prompt34
           items:
             type: string
           type: array
@@ -2969,7 +2943,6 @@ components:
       enum:
         - system
         - quick
-      example: system
       type: string
     PromptUpdateProps:
       type: object
