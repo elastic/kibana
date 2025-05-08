@@ -35,8 +35,8 @@ URL:: The SentinelOne tenant URL. If you are using the <<action-settings,`xpack.
 [[sentinelone-action-parameters]]
 === Test connectors
 
-You can test connectors as you're creating or editing the connector in {{kib}}.
+You can test connectors as you're creating or editing the connector in {kib}.
 For example:
 
 [role="screenshot"]
-image::management/connectors/imagessentinelone-connector-test.png[SentinelOne connector test]
+image::management/connectors/images/sentinelone-connector-test.png[SentinelOne connector test]

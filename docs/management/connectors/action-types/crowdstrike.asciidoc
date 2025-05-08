@@ -35,11 +35,11 @@ Client secret::  The CrowdStrike API client secret to authenticate the client ID
 [[crowdstrike-action-parameters]]
 === Test connectors
 
-You can test connectors as you're creating or editing the connector in {{kib}}. For example:
+You can test connectors as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/crowdstrike-connector-test.png[CrowdStrike connector test]
 
 The CrowdStrike action has the following configuration properties:
 
-Agent IDs::   Get details about one or more CrowdStrike agent IDs.
+Agent IDs:: Get details about one or more CrowdStrike agent IDs.
