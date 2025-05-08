@@ -26,7 +26,7 @@ export const INTERNAL_ROUTES = {
   },
   SCHEDULED: {
     LIST: prefixInternalPath + '/scheduled/list',
-    DISABLE_PREFIX: prefixInternalPath + '/scheduled/disable', // docId is added to the final path
+    BULK_DISABLE: prefixInternalPath + '/scheduled/bulk_disable',
   },
   HEALTH: prefixInternalPath + '/_health',
   GENERATE_PREFIX: prefixInternalPath + '/generate', // exportTypeId is added to the final path

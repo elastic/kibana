@@ -411,8 +411,7 @@ export class TaskManagerPlugin
     scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
 
     return {
-      fetch: (opts: SearchOpts, limitResponse?: boolean): Promise<FetchResult> =>
-        taskStore.fetch(opts, limitResponse),
+      fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>
         taskStore.aggregate(opts),
       get: (id: string) => taskStore.get(id),

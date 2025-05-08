@@ -11,7 +11,10 @@ import { ReportingCore } from '../../..';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 import { handleUnavailable } from '../../common/request_handler';
 import { scheduledQueryFactory } from '../../common/scheduled';
-import { DEFAULT_SCHEDULED_REPORT_LIST_SIZE, MAX_SCHEDULED_REPORT_LIST_SIZE } from '../../common/scheduled/scheduled_query';
+import {
+  DEFAULT_SCHEDULED_REPORT_LIST_SIZE,
+  MAX_SCHEDULED_REPORT_LIST_SIZE,
+} from '../../common/scheduled/scheduled_query';
 
 const { SCHEDULED } = INTERNAL_ROUTES;
 
@@ -35,16 +38,19 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore) {
         validate: {
           query: schema.object({
             page: schema.string({ defaultValue: '1' }),
-            size: schema.string({ defaultValue: `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}`, validate: (value: string) => {
-              try {
-                const size = parseInt(value, 10);
-                if (size < 1 || size > MAX_SCHEDULED_REPORT_LIST_SIZE) {
-                  return `size must be between 1 and ${MAX_SCHEDULED_REPORT_LIST_SIZE}: size: ${value}`;
+            size: schema.string({
+              defaultValue: `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}`,
+              validate: (value: string) => {
+                try {
+                  const size = parseInt(value, 10);
+                  if (size < 1 || size > MAX_SCHEDULED_REPORT_LIST_SIZE) {
+                    return `size must be between 1 and ${MAX_SCHEDULED_REPORT_LIST_SIZE}: size: ${value}`;
+                  }
+                } catch (e) {
+                  return `size must be an integer: size: ${value}`;
                 }
-              } catch (e) {
-                return `size must be an integer: size: ${value}`;
-              }
-            }}),
+              },
+            }),
           }),
         },
         options: { access: 'internal' },
@@ -57,9 +63,13 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore) {
           return handleUnavailable(res);
         }
 
-        const { page: queryPage = '1', size: querySize = `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}` } = req.query;
+        const { page: queryPage = '1', size: querySize = `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}` } =
+          req.query;
         const page = parseInt(queryPage, 10) || 1;
-        const size = Math.min(MAX_SCHEDULED_REPORT_LIST_SIZE, parseInt(querySize, 10) || DEFAULT_SCHEDULED_REPORT_LIST_SIZE);
+        const size = Math.min(
+          MAX_SCHEDULED_REPORT_LIST_SIZE,
+          parseInt(querySize, 10) || DEFAULT_SCHEDULED_REPORT_LIST_SIZE
+        );
         const results = await scheduledQuery.list(req, user, page, size);
 
         counters.usageCounter();
@@ -74,31 +84,45 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore) {
     );
   };
 
-  // // use common route handlers that are shared for public and internal routes
-  // const jobHandlers = commonJobsRouteHandlerFactory(reporting, { isInternal: true });
+  const registerInternalPatchBulkDisable = () => {
+    // allow scheduled reports to be disabled
+    const path = SCHEDULED.BULK_DISABLE;
 
-  // const registerInternalDisableScheduledReport = () => {
-  //   // allow a scheduled report to be disabled
-  //   const path = `${SCHEDULED.DISABLE_PREFIX}/{docId}`;
+    router.patch(
+      {
+        path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          body: schema.object({
+            ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 }),
+          }),
+        },
+        options: { access: 'internal' },
+      },
+      authorizedUserPreRouting(reporting, async (user, context, req, res) => {
+        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
-  //   router.get(
-  //     {
-  //       path,
-  //       security: {
-  //         authz: {
-  //           enabled: false,
-  //           reason: 'This route is opted out from authorization',
-  //         },
-  //       },
-  //       validate: jobHandlers.validate,
-  //       options: { access: 'internal' },
-  //     },
-  //     authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-  //       return jobHandlers.handleDeleteReport({ path, user, context, req, res });
-  //     })
-  //   );
-  // };
+        // ensure the async dependencies are loaded
+        if (!context.reporting) {
+          return handleUnavailable(res);
+        }
+
+        const { ids } = req.body;
+
+        await scheduledQuery.bulkDisable(req, ids, user);
+
+        counters.usageCounter();
+
+        return res.noContent();
+      })
+    );
+  };
 
   registerInternalGetList();
-  // registerInternalDisableScheduledReport();
+  registerInternalPatchBulkDisable();
 }

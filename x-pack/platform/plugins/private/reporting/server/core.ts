@@ -434,6 +434,11 @@ export class ReportingCore {
     return savedObjects.createInternalRepository([SCHEDULED_REPORT_SAVED_OBJECT_TYPE]);
   }
 
+  public async getTaskManager() {
+    const { taskManager } = await this.getPluginStartDeps();
+    return taskManager;
+  }
+
   public async getDataService() {
     const startDeps = await this.getPluginStartDeps();
     return startDeps.data;
