@@ -11,6 +11,8 @@ export default function aiAssistantApiIntegrationTests({
   loadTestFile,
 }: DeploymentAgnosticFtrProviderContext) {
   describe('observability AI Assistant', function () {
+    // see details: https://github.com/elastic/kibana/issues/220513
+    this.tags(['failsOnMKI']);
     // Functions
     loadTestFile(require.resolve('./complete/functions/alerts.spec.ts'));
     loadTestFile(require.resolve('./complete/functions/context.spec.ts'));
