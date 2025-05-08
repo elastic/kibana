@@ -44,21 +44,36 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const log = getService('log');
 
-  // SKIP: test suite needs to wait for the Endpoint package policy to be updated with new mappings before these tests can run
-  describe.skip('@ess @skipInServerless, @skipInServerlessMKI Response actions space awareness support', () => {
+  describe('@ess @skipInServerless, @skipInServerlessMKI Response actions space awareness support', () => {
     const afterEachDataCleanup: Array<{ cleanup: () => Promise<void> }> = [];
-    const spaceOneId = 'space_one';
-    const spaceTwoId = 'space_two';
+    let counter = 1;
+    let spaceOneId = '';
+    let spaceTwoId = '';
     let adminSupertest: TestAgent;
     let testData: PromiseResolvedValue<ReturnType<typeof setupData>>;
 
     before(async () => {
       adminSupertest = await utils.createSuperTest();
+    });
+
+    beforeEach(async () => {
+      spaceOneId = `space_one_${counter++}`;
+      spaceTwoId = `space_two_${counter++}`;
 
       await Promise.all([
         ensureSpaceIdExists(kbnServer, spaceOneId, { log }),
         ensureSpaceIdExists(kbnServer, spaceTwoId, { log }),
       ]);
+
+      testData = await setupData();
+      afterEachDataCleanup.push(testData);
+    });
+
+    afterEach(async () => {
+      if (afterEachDataCleanup.length > 0) {
+        await Promise.all(afterEachDataCleanup.map((data) => data.cleanup()));
+        afterEachDataCleanup.length = 0;
+      }
     });
 
     const setupData = async (): Promise<{
@@ -232,21 +247,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
     };
 
-    afterEach(async () => {
-      if (afterEachDataCleanup.length > 0) {
-        await Promise.all(afterEachDataCleanup.map((data) => data.cleanup()));
-        afterEachDataCleanup.length = 0;
-      }
-    });
-
     describe('when creating actions', () => {
-      beforeEach(async () => {
-        testData = await setupData();
-        afterEachDataCleanup.push(testData);
-
-        log.verbose(`\n\nTest data loaded:\n${JSON.stringify(testData, null, 2)}\n\n`);
-      });
-
       it('should create action if all agent ids are accessible in active space', async () => {
         await adminSupertest
           .post(addSpaceIdToPath('/', spaceOneId, ISOLATE_HOST_ROUTE_V2))
@@ -292,17 +293,8 @@ export default function ({ getService }: FtrProviderContext) {
       //    - one from space two that is part of a policy only accessible in space two
       let spaceTwoAction: ActionDetails;
 
-      before(async () => {
-        testData = await setupData();
+      beforeEach(async () => {
         ({ spaceOneAction, spaceTwoAction } = await setupResponseActions());
-      });
-
-      after(async () => {
-        if (testData) {
-          await testData.cleanup();
-          // @ts-expect-error
-          testData = undefined;
-        }
       });
 
       describe('when fetching list of actions', () => {
@@ -406,11 +398,8 @@ export default function ({ getService }: FtrProviderContext) {
       //    - one from space two that is part of a policy only accessible in space two
       let spaceTwoAction: ActionDetails;
 
-      before(async () => {
-        testData = await setupData();
+      beforeEach(async () => {
         ({ spaceOneAction, spaceTwoAction } = await setupResponseActions());
-
-        await setupResponseActions();
 
         // Move the Space Two **shared** host/agent to the policy that is ONLY accessible in Space two
         await assignFleetAgentToNewPolicy({
@@ -421,16 +410,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      after(async () => {
-        if (testData) {
-          await testData.cleanup();
-          // @ts-expect-error
-          testData = undefined;
-        }
-      });
-
       it('should return previously sent response action that included agent from space one on action list api response', async () => {
-        // From space two
+        // From space two:
+        // Both actions should still be visible - one was sent to two agents, and one of them was previously attached
+        // to a shared policy from space one.
         const { body: spaceTwoActionListResponse } = await adminSupertest
           .get(addSpaceIdToPath('/', spaceTwoId, BASE_ENDPOINT_ACTION_ROUTE))
           .set('elastic-api-version', '2023-10-31')
@@ -439,6 +422,10 @@ export default function ({ getService }: FtrProviderContext) {
           .on('error', createSupertestErrorLogger(log))
           .send()
           .expect(200);
+
+        log.verbose(
+          `List response from space two:\n${JSON.stringify(spaceTwoActionListResponse, null, 2)}`
+        );
 
         expect((spaceTwoActionListResponse as ActionListApiResponse).total).to.equal(1);
         expect((spaceTwoActionListResponse as ActionListApiResponse).data[0].id).to.equal(
@@ -457,12 +444,16 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
+        log.verbose(
+          `List response from space one:\n${JSON.stringify(spaceOneActionListResponse, null, 2)}`
+        );
+
         expect((spaceOneActionListResponse as ActionListApiResponse).total).to.equal(2);
         expect((spaceOneActionListResponse as ActionListApiResponse).data[0].id).to.equal(
-          spaceOneAction.id
+          spaceTwoAction.id
         );
         expect((spaceOneActionListResponse as ActionListApiResponse).data[1].id).to.equal(
-          spaceTwoAction.id
+          spaceOneAction.id
         );
       });
 
