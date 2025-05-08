@@ -213,6 +213,8 @@ actions:
                     # Index (.index) N/A
                     # Jira (.jira)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/jira_secrets.yaml'
+                    # Microsoft Defender for Endpoint (.microsoft_defender_endpoint)
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/defender_secrets.yaml'
                     # Microsoft Teams (.teams)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/teams_secrets.yaml'
                     # Observability AI Assistant (.observability-ai-assistant) TBD
@@ -275,6 +277,8 @@ actions:
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/index_config.yaml'
                     # Jira (.jira)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/jira_config.yaml'
+                    # Microsoft Defender for Endpoint (.microsoft_defender_endpoint)
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/defender_config.yaml'
                     # Microsoft Teams (.teams) N/A
                     # Observability AI Assistant (.observability-ai-assistant) TBD
                     # Azue OpenAI (.gen-ai)

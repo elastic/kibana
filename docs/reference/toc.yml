@@ -37,6 +37,7 @@ toc:
       - file: connectors-kibana/resilient-action-type.md
       - file: connectors-kibana/index-action-type.md
       - file: connectors-kibana/jira-action-type.md
+      - file: connectors-kibana/defender-action-type.md
       - file: connectors-kibana/teams-action-type.md
       - file: connectors-kibana/obs-ai-assistant-action-type.md
       - file: connectors-kibana/openai-action-type.md
