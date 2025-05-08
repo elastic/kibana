@@ -81,6 +81,9 @@ import {
   ALERT_SERVICE_CRITICALITY,
   ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL,
   ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM,
+  ALERT_ORIGINAL_DATA_STREAM_DATASET,
+  ALERT_ORIGINAL_DATA_STREAM_NAMESPACE,
+  ALERT_ORIGINAL_DATA_STREAM_TYPE,
 } from '../../../../../../../common/field_maps/field_names';
 
 export const createAlert = (
@@ -215,6 +218,10 @@ export const createAlert = (
     [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
     [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: undefined,
     [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
+    // TODO these fields are currently marked as required in the 8.19.0 alert model schema
+    [ALERT_ORIGINAL_DATA_STREAM_DATASET]: undefined,
+    [ALERT_ORIGINAL_DATA_STREAM_NAMESPACE]: undefined,
+    [ALERT_ORIGINAL_DATA_STREAM_TYPE]: undefined,
     [ALERT_INTENDED_TIMESTAMP]: '2020-04-20T21:27:45+0000',
     [ALERT_RULE_EXECUTION_TYPE]: 'scheduled',
     [ALERT_SERVICE_CRITICALITY]: undefined,
