@@ -509,8 +509,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         defaultMessage: 'Configure integration',
       }),
       'data-test-subj': 'dataCollectionSetupStep',
-      children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
+      children: !pkgName ? null : replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
       headingElement: 'h2',
+      status: !pkgName ? 'disabled' : undefined,
     },
     ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS && !addIntegrationFlyoutProps
       ? [

@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
@@ -16,6 +17,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormRow,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
@@ -72,16 +75,29 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
     }),
     'data-test-subj': 'selectIntegrationStep',
     children: (
-      <>
-        <EuiComboBox
-          aria-label="Accessible screen reader label"
-          placeholder="Select a single option"
-          singleSelection={{ asPlainText: true }}
-          options={options}
-          selectedOptions={selectedOptions}
-          onChange={onChange}
-        />
-      </>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          <EuiText size="m" color="subdued">
+            <FormattedMessage
+              id="xpack.fleet.addIntegrationFlyout.selectIntegrationDescription"
+              defaultMessage="Search in our observability integrations collection."
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow fullWidth>
+            <EuiComboBox
+              fullWidth
+              aria-label="Select integration"
+              placeholder="Select integrations..."
+              singleSelection={{ asPlainText: true }}
+              options={options}
+              selectedOptions={selectedOptions}
+              onChange={onChange}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
     headingElement: 'h2',
   };
@@ -96,14 +112,33 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
       <EuiErrorBoundary>
         <EuiFlyout onClose={onClose} data-test-subj="addIntegrationFlyout">
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle>
-              <h2>
-                <FormattedMessage
-                  id="xpack.fleet.addIntegrationFlyout.flyoutTitle"
-                  defaultMessage="Add integration to policy"
-                />
-              </h2>
-            </EuiTitle>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <EuiFlexGroup alignItems="baseline" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle>
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.fleet.addIntegrationFlyout.flyoutHeaderTitle"
+                          defaultMessage="Add integration to policy"
+                        />
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="subdued">{agentPolicy.name}</EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="m" color="subdued">
+                  <FormattedMessage
+                    id="xpack.fleet.addIntegrationFlyout.flyoutHeaderDescription"
+                    defaultMessage="You are adding an integration to the selected policy."
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <CreatePackagePolicySinglePage
@@ -137,7 +172,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
-                  disabled={isSubmitted}
+                  disabled={isSubmitted || selectedOptions.length === 0}
                   isLoading={isSubmitted}
                   onClick={() => {
                     setIsSubmitted(true);
