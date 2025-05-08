@@ -13,10 +13,9 @@ import { z } from '@kbn/zod';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import { groupBy, isEmpty, memoize } from 'lodash';
 import type { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
+import zodToJsonSchema from 'zod-to-json-schema';
 import { formatToolName, isOperation } from './utils';
 import type { Operation } from './utils';
-import zodToJsonSchema from 'zod-to-json-schema';
-import _ from 'lodash';
 
 export abstract class OpenApiTool<T> {
   protected dereferencedOas: Oas;
@@ -59,8 +58,14 @@ export abstract class OpenApiTool<T> {
     }
     if (schema.oneOf !== undefined && Array.isArray(schema.oneOf)) {
       // Several providers do not support oneOf
-      const minifiedJsonSchema = schema.oneOf.map(s => zodToJsonSchema(jsonSchemaToZod(s)))
-      return z.any().describe(`${schema.description?`${schema.description}\n\n`:''}One of (oneOf) the following schemas:\n${JSON.stringify(minifiedJsonSchema)}`); // Fallback to providing the schema as a description
+      const minifiedJsonSchema = schema.oneOf.map((s) => zodToJsonSchema(jsonSchemaToZod(s)));
+      return z
+        .any()
+        .describe(
+          `${
+            schema.description ? `${schema.description}\n\n` : ''
+          }One of (oneOf) the following schemas:\n${JSON.stringify(minifiedJsonSchema)}`
+        ); // Fallback to providing the schema as a description
     }
     let modified = false;
     if (
@@ -88,8 +93,14 @@ export abstract class OpenApiTool<T> {
       schema.anyOf.length > 1
     ) {
       // Gemini does not support types with multiple values so we use any
-      const minifiedJsonSchema = schema.anyOf.map(s => zodToJsonSchema(jsonSchemaToZod(s)))
-      return z.any().describe(`${schema.description?`${schema.description}\n\n`:''}Any of (anyOf) the following schemas:\n${JSON.stringify(minifiedJsonSchema)}`); // Fallback to providing the schema as a description
+      const minifiedJsonSchema = schema.anyOf.map((s) => zodToJsonSchema(jsonSchemaToZod(s)));
+      return z
+        .any()
+        .describe(
+          `${
+            schema.description ? `${schema.description}\n\n` : ''
+          }Any of (anyOf) the following schemas:\n${JSON.stringify(minifiedJsonSchema)}`
+        ); // Fallback to providing the schema as a description
     }
     if (this.llmType === 'gemini' && Array.isArray(schema.type)) {
       schema.type = schema.type[0]; // Gemini does not support multiple types so we use the first one
@@ -149,7 +160,6 @@ export abstract class OpenApiTool<T> {
 
     return z.object(schemaTypeToZod);
   }
-
 
   private zodHasRequiredProperties(schema: z.ZodTypeAny): boolean {
     if (schema instanceof z.ZodObject) {

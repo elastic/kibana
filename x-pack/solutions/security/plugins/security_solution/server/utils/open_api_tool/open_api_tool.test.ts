@@ -265,7 +265,8 @@ describe('OpenApiTool', () => {
                 type: 'object',
               },
               oneOfExample: {
-                description: 'One of (oneOf) the following schemas:\n[{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"},{\"type\":\"number\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"}]',
+                description:
+                  'One of (oneOf) the following schemas:\n[{"type":"string","$schema":"http://json-schema.org/draft-07/schema#"},{"type":"number","$schema":"http://json-schema.org/draft-07/schema#"}]',
               },
               singleEnum: {
                 enum: ['active'],
@@ -295,7 +296,8 @@ describe('OpenApiTool', () => {
             additionalProperties: false,
             properties: {
               anyOf: {
-                description: 'Any of (anyOf) the following schemas:\n[{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"},{\"type\":\"number\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"}]',
+                description:
+                  'Any of (anyOf) the following schemas:\n[{"type":"string","$schema":"http://json-schema.org/draft-07/schema#"},{"type":"number","$schema":"http://json-schema.org/draft-07/schema#"}]',
               },
               arrayType: {
                 type: 'string',
@@ -350,7 +352,8 @@ describe('OpenApiTool', () => {
                 type: 'object',
               },
               oneOfExample: {
-                description: 'One of (oneOf) the following schemas:\n[{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"},{\"type\":\"number\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"}]',
+                description:
+                  'One of (oneOf) the following schemas:\n[{"type":"string","$schema":"http://json-schema.org/draft-07/schema#"},{"type":"number","$schema":"http://json-schema.org/draft-07/schema#"}]',
               },
               singleEnum: {
                 enum: ['active'],

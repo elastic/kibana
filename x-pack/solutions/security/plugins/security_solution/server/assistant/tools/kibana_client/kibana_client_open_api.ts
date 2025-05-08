@@ -114,7 +114,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
         'This function interacts with the Kibana API. It takes a natural language input, \
 finds out the correct endpoint to call and returns the result of the API call. This function \
 should be used when the USER requests information, configurations or changes in Kibana. Provide \
-as much information as possible in the input. Do not call this function in parallel.'
+as much information as possible in the input. Do not call this function in parallel.',
     };
   }
 
@@ -178,8 +178,9 @@ as much information as possible in the input. Do not call this function in paral
                 update: {
                   messages: [
                     new ToolMessage({
-                      content: `Client error: ${status} - ${error.response?.data?.message || error.message
-                        }`,
+                      content: `Client error: ${status} - ${
+                        error.response?.data?.message || error.message
+                      }`,
                       tool_call_id: config.toolCall.id,
                     }),
                   ],
@@ -240,7 +241,7 @@ You are assisting a security analyst helping them complete various tasks. Act wi
 7. If there is no suitable function for the task or step, state in your response that you were unable to complete the task with a one line description of that task.\n\
 8. NEVER refer to tool names when speaking to the USER. Explain what you did in a human readable way.\n\
 9. In your response, summarize the function results.\n\
-</tool_calling>\n'
+</tool_calling>\n',
             }),
             new HumanMessage({ content: input }),
           ],
