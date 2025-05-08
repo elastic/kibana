@@ -12,7 +12,6 @@ import { cloneDeep, pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import {
   BehaviorSubject,
-  Subject,
   combineLatest,
   debounceTime,
   distinctUntilChanged,
@@ -111,6 +110,22 @@ export const useGridLayoutState = ({
     const activePanelEvent$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);
 
+    const panelDropped$ = merge(activePanelEvent$, activeRowEvent$).pipe(
+      pairwise(),
+      map(([hasEventBefore, hasEventAfter]) => {
+        return Boolean(hasEventBefore) && !Boolean(hasEventAfter);
+      }),
+      filter((eventEnded) => eventEnded)
+    );
+    const layoutUpdated$ = panelDropped$.pipe(
+      startWith(true),
+      withLatestFrom(gridLayout$),
+      distinctUntilChanged(([, before], [, after]) => {
+        return isOrderedLayoutEqual(before, after);
+      }),
+      map(([, updatedLayout]) => getGridLayout(updatedLayout))
+    );
+
     return {
       layoutRef,
       sectionRefs,
@@ -128,8 +143,7 @@ export const useGridLayoutState = ({
         shouldShowMobileView(accessMode, euiTheme.breakpoint.m)
       ),
 
-      layoutUpdated$: new Subject<OrderedLayout>(),
-      rerender$: new Subject<void>(),
+      layoutUpdated$,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

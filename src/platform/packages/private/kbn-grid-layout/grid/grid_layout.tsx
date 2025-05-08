@@ -26,7 +26,7 @@ import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } fro
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { getPanelKeysInOrder, resolveGridSection } from './utils/resolve_grid_section';
-import { getGridLayout, getOrderedLayout } from './utils/conversions';
+import { getOrderedLayout } from './utils/conversions';
 import { isOrderedLayoutEqual } from './utils/equality_checks';
 
 export type GridLayoutProps = {
@@ -61,7 +61,6 @@ export const GridLayout = ({
     expandedPanelId,
     accessMode,
   });
-  const proposedElementsInOrder = useRef<GridLayoutElementsInOrder>([]);
   const [elementsInOrder, setElementsInOrder] = useState<GridLayoutElementsInOrder>([]);
 
   /**
@@ -88,11 +87,11 @@ export const GridLayout = ({
      * This subscription calls the passed `onLayoutChange` callback when the layout changes;
      * if the row IDs have changed, it also sets `sectionIdsInOrder` to trigger a re-render
      */
-    const onLayoutChangeSubscription = gridLayoutStateManager.layoutUpdated$.subscribe(() => {
-      const newLayout = gridLayoutStateManager.gridLayout$.getValue();
-      onLayoutChange(getGridLayout(newLayout));
-      gridLayoutStateManager.rerender$.next();
-    });
+    const onLayoutChangeSubscription = gridLayoutStateManager.layoutUpdated$.subscribe(
+      (newLayout) => {
+        onLayoutChange(newLayout);
+      }
+    );
     return () => {
       onLayoutChangeSubscription.unsubscribe();
     };
@@ -148,15 +147,9 @@ export const GridLayout = ({
           }
         });
 
-      if (proposedElementsInOrder.current.length === 0) setElementsInOrder(currentElementsInOrder);
-      proposedElementsInOrder.current = currentElementsInOrder;
+      setElementsInOrder(currentElementsInOrder);
       gridTemplateString = gridTemplateString.replaceAll('] [', ' ');
       if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridTemplateString;
-    });
-
-    const reorderDOMSubscription = gridLayoutStateManager.rerender$.subscribe(() => {
-      console.log('RERENDER!!!');
-      setElementsInOrder(proposedElementsInOrder.current);
     });
 
     /**
@@ -184,7 +177,6 @@ export const GridLayout = ({
 
     return () => {
       renderSubscription.unsubscribe();
-      reorderDOMSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
