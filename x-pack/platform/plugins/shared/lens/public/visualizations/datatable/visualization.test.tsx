@@ -29,6 +29,7 @@ import {
 } from '../../../common/expressions';
 import { getPaletteDisplayColors } from '../../shared_components/coloring';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { DataGridDensity } from '@kbn/unified-data-table';
 
 jest.mock('../../shared_components/coloring', () => {
   return {
@@ -923,6 +924,33 @@ describe('Datatable Visualization', () => {
           alignment: [],
         })
       );
+    });
+
+    it('sets density based on state', () => {
+      expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).density).toEqual([
+        DataGridDensity.NORMAL,
+      ]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          density: DataGridDensity.NORMAL,
+        }).density
+      ).toEqual([DataGridDensity.NORMAL]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          density: DataGridDensity.COMPACT,
+        }).density
+      ).toEqual([DataGridDensity.COMPACT]);
+
+      expect(
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          density: DataGridDensity.EXPANDED,
+        }).density
+      ).toEqual([DataGridDensity.EXPANDED]);
     });
 
     describe('palette/colorMapping/colorMode', () => {
