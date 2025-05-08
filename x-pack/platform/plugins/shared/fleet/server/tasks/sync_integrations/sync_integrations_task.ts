@@ -28,7 +28,7 @@ import { getCustomAssets } from './custom_assets';
 import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.3';
+export const VERSION = '1.0.4';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '5m';
@@ -262,6 +262,7 @@ export class SyncIntegrationsTask {
     try {
       const customAssets = await getCustomAssets(
         esClient,
+        soClient,
         newDoc.integrations,
         this.abortController,
         previousSyncIntegrationsData

@@ -87,7 +87,6 @@ const DraggableLegendItemComponent: React.FC<{
                 content
               ) : (
                 <DefaultDraggable
-                  data-test-subj={`legend-item-${dataProviderId}`}
                   field={field}
                   hideTopN={true}
                   id={dataProviderId}

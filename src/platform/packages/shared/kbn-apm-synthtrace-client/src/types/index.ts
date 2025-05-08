@@ -25,3 +25,8 @@ export type SynthtraceGenerator<TFields extends Fields> = Generator<Serializable
 export type SynthtraceProcessor<TFields extends Fields> = (
   fields: ESDocumentWithOperation<TFields>
 ) => ESDocumentWithOperation<TFields>;
+
+export {
+  ApmSynthtracePipelineSchema,
+  type ApmSynthtracePipelines,
+} from './apm_synthtrace_pipelines';

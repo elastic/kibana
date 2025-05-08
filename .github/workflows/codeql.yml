@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'javascript' ]
-        branch: [ 'main', '7.17', '8.x' ]
+        branch: [ 'main', '8.19' ]
 
     steps:
     - name: Checkout repository
@@ -60,15 +60,6 @@ jobs:
         category: "/language:${{matrix.language}}"
         ref: ${{ env.CHECKOUT_REF }}
         sha: ${{ env.CHECKOUT_SHA }}
-    - name: Notify to slack on failure
-      if: ${{ failure() }}
-      uses: slackapi/slack-github-action@v2.0.0
-      with:
-        method: chat.postMessage
-        token: ${{ secrets.CODE_SCANNING_SLACK_TOKEN }}
-        payload: |
-          channel: ${{ secrets.CODE_SCANNING_SLACK_CHANNEL_ID }}
-          text: ":broken_heart: CodeQL analysis failed for ${{ github.repository }} on ${{ env.CHECKOUT_SHA }}."
   alert:
     name: Alert
     runs-on: ubuntu-latest
@@ -88,9 +79,46 @@ jobs:
       env:
         GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
         SLACK_TOKEN: ${{secrets.CODE_SCANNING_SLACK_TOKEN}}
+        SLACK_CHANNEL: ${{secrets.CODE_SCANNING_SLACK_CHANNEL_ID}}
         CODE_SCANNING_ES_HOST: ${{secrets.CODE_SCANNING_ES_HOST}}
         CODE_SCANNING_ES_API_KEY: ${{secrets.CODE_SCANNING_ES_API_KEY}}
-        CODE_SCANNING_BRANCHES: 7.17,8.x,main
+        CODE_SCANNING_BRANCHES: main,8.19
       run: |
         npm ci --omit=dev
         node codeql-alert
+  notify_on_failure:
+    name: Failure notification
+    runs-on: ubuntu-latest
+    needs: analyze
+    if: failure()
+    steps:
+      - name: Send notification to slack
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.CODE_SCANNING_SLACK_TOKEN }}
+          payload: |
+            channel: ${{ secrets.CODE_SCANNING_SLACK_CHANNEL_ID }}
+            "blocks": [
+            	{
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":broken_heart: CodeQL analysis failed for ${{ github.repository }}."
+                }
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View Workflow Run"
+                    },
+                    "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              }
+            ]
+

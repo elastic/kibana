@@ -30,7 +30,7 @@ exports[`ManageData hide dev tools and stack management links if unavailable 1`]
   <EuiSpacer />
   <EuiFlexGroup>
     <EuiFlexItem
-      css={[Function]}
+      css="unknown styles"
       key="security"
     >
       <Synopsis
@@ -43,7 +43,7 @@ exports[`ManageData hide dev tools and stack management links if unavailable 1`]
       />
     </EuiFlexItem>
     <EuiFlexItem
-      css={[Function]}
+      css="unknown styles"
       key="monitoring"
     >
       <Synopsis
@@ -56,7 +56,7 @@ exports[`ManageData hide dev tools and stack management links if unavailable 1`]
       />
     </EuiFlexItem>
     <EuiFlexItem
-      css={[Function]}
+      css="unknown styles"
       key="snapshot_restore"
     >
       <Synopsis
@@ -69,7 +69,7 @@ exports[`ManageData hide dev tools and stack management links if unavailable 1`]
       />
     </EuiFlexItem>
     <EuiFlexItem
-      css={[Function]}
+      css="unknown styles"
       key="index_lifecycle_management"
     >
       <Synopsis
@@ -185,7 +185,7 @@ exports[`ManageData render 1`] = `
   <EuiSpacer />
   <EuiFlexGroup>
     <EuiFlexItem
-      css={[Function]}
+      css="unknown styles"
       key="security"
     >
       <Synopsis
@@ -198,7 +198,7 @@ exports[`ManageData render 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      css={[Function]}
+      css="unknown styles"
       key="monitoring"
     >
       <Synopsis
@@ -211,7 +211,7 @@ exports[`ManageData render 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      css={[Function]}
+      css="unknown styles"
       key="snapshot_restore"
     >
       <Synopsis
@@ -224,7 +224,7 @@ exports[`ManageData render 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem
-      css={[Function]}
+      css="unknown styles"
       key="index_lifecycle_management"
     >
       <Synopsis

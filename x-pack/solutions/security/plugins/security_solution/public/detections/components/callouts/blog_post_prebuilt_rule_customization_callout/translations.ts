@@ -18,7 +18,7 @@ export const CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.blogPostPrebuiltRuleCustomizationCallout.calloutDescription',
   {
     defaultMessage:
-      'Learn how to customize prebuilt rules and update them with the latest improvements.',
+      'Learn how to customize prebuilt rules and update them to get the latest improvements.',
   }
 );
 

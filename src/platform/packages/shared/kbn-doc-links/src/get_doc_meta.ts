@@ -25,5 +25,6 @@ export const getDocLinksMeta = ({
     elasticGithubUrl: 'https://github.com/elastic/',
     docsWebsiteUrl: 'https://www.elastic.co/docs/',
     searchLabsUrl: 'https://search-labs.elastic.co/',
+    apiDocsUrl: 'https://www.elastic.co/docs/api/',
   };
 };

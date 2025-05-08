@@ -16,9 +16,14 @@ import { getUnifiedDocViewerServices } from '../../../../plugin';
 interface TransactionNameLinkProps {
   serviceName: string;
   transactionName: string;
+  renderContent?: (name: string) => React.ReactNode;
 }
 
-export function TransactionNameLink({ transactionName, serviceName }: TransactionNameLinkProps) {
+export function TransactionNameLink({
+  transactionName,
+  serviceName,
+  renderContent,
+}: TransactionNameLinkProps) {
   const {
     share: { url: urlService },
     core,
@@ -46,7 +51,6 @@ export function TransactionNameLink({ transactionName, serviceName }: Transactio
     ? getRouterLinkProps({
         href,
         onClick: () => {
-          // TODO add telemetry (https://github.com/elastic/kibana/issues/208919)
           apmLinkToTransactionByNameLocator?.navigate({
             serviceName,
             transactionName,
@@ -57,7 +61,9 @@ export function TransactionNameLink({ transactionName, serviceName }: Transactio
       })
     : undefined;
 
-  const content = <EuiText size="xs">{transactionName}</EuiText>;
+  const content = renderContent?.(transactionName) ?? (
+    <EuiText size="xs">{transactionName}</EuiText>
+  );
 
   return (
     <>

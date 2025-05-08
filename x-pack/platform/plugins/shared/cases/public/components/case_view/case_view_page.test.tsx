@@ -22,49 +22,43 @@ jest.mock('../../common/hooks');
 jest.mock('../../common/lib/kibana');
 
 jest.mock('../header_page', () => ({
-  HeaderPage: jest
-    .fn()
-    .mockReturnValue(<div data-test-subj="test-case-view-header">{'Case view header'}</div>),
+  HeaderPage: jest.fn(() => <div data-test-subj="test-case-view-header">{'Case view header'}</div>),
 }));
 
 jest.mock('./metrics', () => ({
-  CaseViewMetrics: jest
-    .fn()
-    .mockReturnValue(<div data-test-subj="test-case-view-metrics">{'Case view metrics'}</div>),
+  CaseViewMetrics: jest.fn(() => (
+    <div data-test-subj="test-case-view-metrics">{'Case view metrics'}</div>
+  )),
 }));
 
 jest.mock('./components/case_view_activity', () => ({
-  CaseViewActivity: jest
-    .fn()
-    .mockReturnValue(<div data-test-subj="test-case-view-activity">{'Case view activity'}</div>),
+  CaseViewActivity: jest.fn(() => (
+    <div data-test-subj="test-case-view-activity">{'Case view activity'}</div>
+  )),
 }));
 
 jest.mock('./components/case_view_alerts', () => ({
-  CaseViewAlerts: jest
-    .fn()
-    .mockReturnValue(<div data-test-subj="test-case-view-alerts">{'Case view alerts'}</div>),
+  CaseViewAlerts: jest.fn(() => (
+    <div data-test-subj="test-case-view-alerts">{'Case view alerts'}</div>
+  )),
 }));
 
 jest.mock('./components/case_view_files', () => ({
-  CaseViewFiles: jest
-    .fn()
-    .mockReturnValue(<div data-test-subj="test-case-view-files">{'Case view files'}</div>),
+  CaseViewFiles: jest.fn(() => (
+    <div data-test-subj="test-case-view-files">{'Case view files'}</div>
+  )),
 }));
 
 jest.mock('./components/case_view_observables', () => ({
-  CaseViewObservables: jest
-    .fn()
-    .mockReturnValue(
-      <div data-test-subj="test-case-view-observables">{'Case view observables'}</div>
-    ),
+  CaseViewObservables: jest.fn(() => (
+    <div data-test-subj="test-case-view-observables">{'Case view observables'}</div>
+  )),
 }));
 
 jest.mock('./components/case_view_similar_cases', () => ({
-  CaseViewSimilarCases: jest
-    .fn()
-    .mockReturnValue(
-      <div data-test-subj="test-case-view-similar-cases">{'Case view similar cases'}</div>
-    ),
+  CaseViewSimilarCases: jest.fn(() => (
+    <div data-test-subj="test-case-view-similar-cases">{'Case view similar cases'}</div>
+  )),
 }));
 
 const useUrlParamsMock = useUrlParams as jest.Mock;

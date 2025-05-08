@@ -70,7 +70,6 @@ function MapsListViewComp({ history }: Props) {
   });
 
   const isReadOnly = !getMapsCapabilities().save;
-  const listingLimit = getUiSettings().get(SAVED_OBJECTS_LIMIT_SETTING);
   const initialPageSize = getUiSettings().get(SAVED_OBJECTS_PER_PAGE_SETTING);
 
   // TLDR; render should be side effect free
@@ -129,7 +128,6 @@ function MapsListViewComp({ history }: Props) {
       createItem={isReadOnly ? undefined : navigateToNewMap}
       findItems={findMaps}
       deleteItems={isReadOnly ? undefined : deleteMaps}
-      listingLimit={listingLimit}
       initialFilter={''}
       initialPageSize={initialPageSize}
       entityName={i18n.translate('xpack.maps.mapListing.entityName', {

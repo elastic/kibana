@@ -8,6 +8,7 @@
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
@@ -49,6 +50,10 @@ export const Flyout = ({
       onClose={handleOnClose}
       data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
       data-asset-type={asset.type}
+      aria-labelledby={i18n.translate('xpack.infra.assetDetails.flyout.ariaLabel', {
+        defaultMessage: '{name} details',
+        values: { name: asset.name },
+      })}
     >
       <>
         <EuiFlyoutHeader hasBorder>

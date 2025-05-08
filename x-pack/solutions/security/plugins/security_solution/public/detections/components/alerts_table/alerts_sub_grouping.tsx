@@ -15,11 +15,12 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import type { GroupTakeActionItems } from './types';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
-import type { Status } from '../../../../common/api/detection_engine';
 import { InspectButton } from '../../../common/components/inspect';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
@@ -31,13 +32,14 @@ import { buildTimeRangeFilter } from './helpers';
 import * as i18n from './translations';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
-import { getAlertsGroupingQuery, useGroupTakeActionsItems } from './grouping_settings';
+import { getAlertsGroupingQuery } from './grouping_settings';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 const DEFAULT_FILTERS: Filter[] = [];
 
 interface OwnProps {
-  currentAlertStatusFilterValue?: Status[];
   defaultFilters?: Filter[];
   from: string;
   getGrouping: (
@@ -51,8 +53,11 @@ interface OwnProps {
    * This is then used to render values in the EuiAccordion `extraAction` section.
    */
   groupStatsAggregations: (field: string) => NamedAggregation[];
-  hasIndexMaintenance: boolean;
-  hasIndexWrite: boolean;
+  /**
+   * Allows to customize the content of the Take actions button rendered at the group level.
+   * If no value is provided, the Take actins button is not displayed.
+   */
+  groupTakeActionItems?: GroupTakeActionItems;
   loading: boolean;
   onGroupClose: () => void;
   pageIndex: number;
@@ -71,7 +76,6 @@ interface OwnProps {
 export type AlertsTableComponentProps = OwnProps;
 
 export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
-  currentAlertStatusFilterValue,
   defaultFilters = DEFAULT_FILTERS,
   from,
   getGrouping,
@@ -79,8 +83,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   globalQuery,
   groupingLevel,
   groupStatsAggregations,
-  hasIndexMaintenance,
-  hasIndexWrite,
+  groupTakeActionItems,
   loading,
   onGroupClose,
   pageIndex,
@@ -98,7 +101,16 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  const { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
+    useSourcererDataView(SourcererScopeName.detections);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
+  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.detections);
+
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
@@ -109,7 +121,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
           dataViewSpec: sourcererDataView,
           browserFields,
           filters: [
-            ...(defaultFilters ?? []),
+            ...defaultFilters,
             ...globalFilters,
             ...customFilters,
             ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
@@ -243,20 +255,18 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     [uniqueQueryId]
   );
 
-  const takeActionItems = useGroupTakeActionsItems({
-    currentStatus: currentAlertStatusFilterValue,
-    showAlertStatusActions: hasIndexWrite && hasIndexMaintenance,
-  });
-
   const getTakeActionItems = useCallback(
-    (groupFilters: Filter[], groupNumber: number) =>
-      takeActionItems({
+    (groupFilters: Filter[], groupNumber: number) => {
+      const takeActionParams = {
         groupNumber,
         query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
         selectedGroup,
         tableId,
-      }),
-    [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
+      };
+
+      return groupTakeActionItems?.(takeActionParams) ?? [];
+    },
+    [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId]
   );
 
   const onChangeGroupsItemsPerPage = useCallback(
@@ -280,13 +290,14 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         onGroupClose,
         renderChildComponent,
         selectedGroup,
-        takeActionItems: getTakeActionItems,
+        ...(groupTakeActionItems && { takeActionItems: getTakeActionItems }),
       }),
     [
       aggs,
       getGrouping,
       getTakeActionItems,
       groupingLevel,
+      groupTakeActionItems,
       inspect,
       isLoadingGroups,
       loading,

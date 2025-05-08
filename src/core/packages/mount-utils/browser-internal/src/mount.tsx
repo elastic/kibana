@@ -14,7 +14,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 const defaultWrapperClass = 'kbnMountWrapper';
 
-interface MountWrapperComponentProps {
+export interface MountWrapperComponentProps {
   mount: MountPoint;
   className?: string;
 }

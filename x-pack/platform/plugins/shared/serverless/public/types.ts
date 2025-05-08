@@ -14,7 +14,6 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { Observable } from 'rxjs';
-import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -29,10 +28,7 @@ export interface ServerlessPluginStart {
   initNavigation(
     id: SolutionId,
     navigationTree$: Observable<NavigationTreeDefinition>,
-    config?: {
-      dataTestSubj?: string;
-      panelContentProvider?: PanelContentProvider;
-    }
+    config?: { dataTestSubj?: string }
   ): void;
   /**
    * @deprecated Use {@link ServerlessPluginStart.initNavigation} instead.

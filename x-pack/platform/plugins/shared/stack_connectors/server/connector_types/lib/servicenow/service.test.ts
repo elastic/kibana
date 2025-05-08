@@ -530,6 +530,12 @@ describe('ServiceNow service', () => {
         'There is an issue with your Service Now Instance. Please check Developer instance.'
       );
     });
+
+    test('it should throw an error when incident id is empty', async () => {
+      await expect(service.getIncident('')).rejects.toThrow(
+        '[Action][ServiceNow]: Unable to get incident with id . Error: Incident id is empty. Reason: unknown: errorResponse was null'
+      );
+    });
   });
 
   describe('getIncidentByCorrelationId', () => {
@@ -605,13 +611,19 @@ describe('ServiceNow service', () => {
       );
     });
 
+    test('it should throw an error when correlation id is empty', async () => {
+      await expect(service.getIncidentByCorrelationId('')).rejects.toThrow(
+        '[Action][ServiceNow]: Unable to get incident by correlation ID . Error: Correlation ID is empty. Reason: unknown: errorResponse was null'
+      );
+    });
+
     test('it should throw an error when instance is not alive', async () => {
       requestMock.mockImplementationOnce(() => ({
         status: 200,
         data: {},
         request: { connection: { servername: 'Developer instance' } },
       }));
-      await expect(service.getIncident('1')).rejects.toThrow(
+      await expect(service.getIncidentByCorrelationId('custom_correlation_id')).rejects.toThrow(
         'There is an issue with your Service Now Instance. Please check Developer instance.'
       );
     });
@@ -715,7 +727,10 @@ describe('ServiceNow service', () => {
         requestMock.mockImplementation(() => ({ data: getImportSetAPIError() }));
         await expect(
           service.createIncident({
-            incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+            incident: {
+              short_description: 'title',
+              description: 'desc',
+            } as ServiceNowITSMIncident,
           })
         ).rejects.toThrow(
           '[Action][ServiceNow]: Unable to create incident. Error: An error has occurred while importing the incident Reason: unknown'
@@ -1187,6 +1202,22 @@ describe('ServiceNow service', () => {
         );
       });
 
+      test('it should throw an error when correlationId is empty', async () => {
+        await expect(
+          service.closeIncident({ incidentId: null, correlationId: ' ' })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to get incident by correlation ID  . Error: Correlation ID is empty. Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
+        );
+      });
+
+      test('it should throw an error when incidentId is empty', async () => {
+        await expect(
+          service.closeIncident({ incidentId: ' ', correlationId: null })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to get incident with id  . Error: Incident id is empty. Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
+        );
+      });
+
       test('it should throw an error when the no incidents found with given incidentId ', async () => {
         const axiosError = {
           message: 'Request failed with status code 404',
@@ -1378,6 +1409,30 @@ describe('ServiceNow service', () => {
         });
 
         expect(res?.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
+      });
+
+      test('it should throw an error when the incidentId and correlationId are null', async () => {
+        await expect(
+          service.closeIncident({ incidentId: null, correlationId: null })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to close incident. Error: No correlationId or incidentId found. Reason: unknown: errorResponse was null'
+        );
+      });
+
+      test('it should throw an error when correlationId is empty', async () => {
+        await expect(
+          service.closeIncident({ incidentId: null, correlationId: ' ' })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to get incident by correlation ID  . Error: Correlation ID is empty. Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
+        );
+      });
+
+      test('it should throw an error when incidentId is empty', async () => {
+        await expect(
+          service.closeIncident({ incidentId: ' ', correlationId: null })
+        ).rejects.toThrow(
+          '[Action][ServiceNow]: Unable to close incident. Error: [Action][ServiceNow]: Unable to get incident with id  . Error: Incident id is empty. Reason: unknown: errorResponse was null Reason: unknown: errorResponse was null'
+        );
       });
     });
   });

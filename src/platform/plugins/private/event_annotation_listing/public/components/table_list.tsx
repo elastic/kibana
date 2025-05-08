@@ -198,7 +198,6 @@ export const EventAnnotationGroupTableList = ({
             : undefined
         }
         editItem={editItem}
-        listingLimit={listingLimit}
         initialPageSize={initialPageSize}
         initialFilter={''}
         customTableColumn={getCustomColumn(dataViews)}

@@ -20,8 +20,15 @@ import {
   type AssetsBaseURLQuery,
   type URLQuery,
 } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
+import { useSpaceId } from '../../common/hooks/use_space_id';
+import { useDataView } from '../hooks/use_data_view';
+import { DataViewContext } from '../hooks/data_view_context';
 
-import { LOCAL_STORAGE_COLUMNS_KEY, LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../constants';
+import {
+  ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
+  LOCAL_STORAGE_COLUMNS_KEY,
+  LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
+} from '../constants';
 import { OnboardingSuccessCallout } from '../components/onboarding/onboarding_success_callout';
 
 const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
@@ -31,6 +38,30 @@ const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
 });
 
 export const AllAssets = () => {
+  const spaceId = useSpaceId();
+
+  const dataViewQuery = useDataView(
+    spaceId ? `${ASSET_INVENTORY_DATA_VIEW_ID_PREFIX}-${spaceId}` : undefined
+  );
+
+  if (!dataViewQuery.data) {
+    return null;
+  }
+  const dataViewContextValue = {
+    dataView: dataViewQuery.data,
+    dataViewRefetch: dataViewQuery.refetch,
+    dataViewIsLoading: dataViewQuery.isLoading,
+    dataViewIsRefetching: dataViewQuery.isRefetching,
+  };
+
+  return (
+    <DataViewContext.Provider value={dataViewContextValue}>
+      <AllAssetsComponent />
+    </DataViewContext.Provider>
+  );
+};
+
+const AllAssetsComponent = () => {
   const state = useAssetInventoryURLState({
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
     columnsLocalStorageKey: LOCAL_STORAGE_COLUMNS_KEY,

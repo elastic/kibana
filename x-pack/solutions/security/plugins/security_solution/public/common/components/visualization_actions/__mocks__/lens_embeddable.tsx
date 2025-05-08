@@ -6,4 +6,4 @@
  */
 import React from 'react';
 
-export const LensEmbeddable = jest.fn().mockReturnValue(<div data-test-subj="lens-embeddable" />);
+export const LensEmbeddable = jest.fn(() => <div data-test-subj="lens-embeddable" />);

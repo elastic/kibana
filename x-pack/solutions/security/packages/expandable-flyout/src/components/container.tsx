@@ -191,6 +191,16 @@ export const Container: React.FC<ContainerProps> = memo(
       [dispatch, showCollapsed, showExpanded]
     );
 
+    const onClose = useCallback(
+      (e: MouseEvent | TouchEvent | KeyboardEvent) => {
+        closeFlyout();
+        if (flyoutProps.onClose) {
+          flyoutProps.onClose(e);
+        }
+      },
+      [closeFlyout, flyoutProps]
+    );
+
     // don't need to render if the windowWidth is 0 or if nothing needs to be rendered
     if (!showExpanded && !showCollapsed && !showPreview) {
       return null;
@@ -204,12 +214,7 @@ export const Container: React.FC<ContainerProps> = memo(
         type={flyoutType}
         size={flyoutWidth}
         ownFocus={false}
-        onClose={(e) => {
-          closeFlyout();
-          if (flyoutProps.onClose) {
-            flyoutProps.onClose(e);
-          }
-        }}
+        onClose={onClose}
         css={customStyles}
         onResize={onResize}
         minWidth={minFlyoutWidth}

@@ -7,108 +7,110 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { ALERTS_SUMMARY_PROMPT, GET_STARTED_PAGE } from '../constants';
-import { ALERT_SUMMARY_URL, ALERTS_URL, RULES_LANDING_URL } from '../../../urls/navigation';
+import { ALERTS_SUMMARY_PROMPT, GET_STARTED_PAGE } from '../../../screens/ai_soc';
+import {
+  ALERT_SUMMARY_URL,
+  ALERTS_URL,
+  MAINTENANCE_WINDOW_URL,
+  RULES_URL,
+  STACK_RULES_URL,
+} from '../../../urls/navigation';
 
-const testPageAccess = () => {
-  it('should show page or redirect depending on capabilities', () => {
-    visit(ALERT_SUMMARY_URL);
-    cy.get(ALERTS_SUMMARY_PROMPT).should('exist');
-
-    // should redirect out from alerts to get started page
-    visit(ALERTS_URL);
-    cy.get(GET_STARTED_PAGE).should('exist');
-
-    // should redirect out from rules to get started page
-    visit(RULES_LANDING_URL);
-    cy.get(GET_STARTED_PAGE).should('exist');
-  });
-};
+const MANAGEMENT_PAGE_DESCRIPTION =
+  'Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location.';
 
 describe('Capabilities', { tags: '@serverless' }, () => {
-  describe('Admin user capabilities', () => {
-    beforeEach(() => {
-      login('admin');
-    });
-
-    testPageAccess();
-  });
-
-  describe('User with siem v1 role', () => {
-    const roleDescriptor = {
-      elasticsearch: {
-        indices: [
-          {
-            names: ['*'],
-            privileges: ['all'],
+  const userRoles = [
+    {
+      name: 'Admin user',
+      loginAs: 'admin',
+      setup: () => {}, // No additional setup needed
+      teardown: () => {}, // No teardown needed
+    },
+    {
+      name: 'User with siem v1 role',
+      loginAs: 'siemv1',
+      setup: () => {
+        cy.task('createServerlessCustomRole', {
+          roleDescriptor: {
+            elasticsearch: {
+              indices: [{ names: ['*'], privileges: ['all'] }],
+            },
+            kibana: [
+              {
+                feature: { siem: ['all'], fleet: ['all'] },
+                spaces: ['*'],
+              },
+            ],
           },
-        ],
+          roleName: 'siemv1',
+        });
       },
-      kibana: [
-        {
-          feature: {
-            siem: ['all'],
-            fleet: ['all'],
+      teardown: () => {
+        cy.task('deleteServerlessCustomRole', 'siemv1');
+      },
+    },
+    {
+      name: 'User with siem v2 role',
+      loginAs: 'siemV2',
+      setup: () => {
+        cy.task('createServerlessCustomRole', {
+          roleDescriptor: {
+            elasticsearch: {
+              indices: [{ names: ['*'], privileges: ['all'] }],
+            },
+            kibana: [
+              {
+                feature: { siemV2: ['all'], fleet: ['all'] },
+                spaces: ['*'],
+              },
+            ],
           },
-          spaces: ['*'],
-        },
-      ],
-    };
+          roleName: 'siemV2',
+        });
+      },
+      teardown: () => {
+        cy.task('deleteServerlessCustomRole', 'siemV2');
+      },
+    },
+  ];
 
-    before(() => {
-      cy.task('createServerlessCustomRole', {
-        roleDescriptor,
-        roleName: 'siemv1',
+  // Iterate through each user role
+  userRoles.forEach((role) => {
+    describe(`${role.name} capabilities`, () => {
+      before(() => role.setup());
+
+      beforeEach(() => {
+        login(role.loginAs);
+      });
+
+      after(() => role.teardown());
+
+      // Individual test cases with clear descriptions
+      it('should show alert summary prompt when visiting alert summary page', () => {
+        visit(ALERT_SUMMARY_URL);
+        cy.get(ALERTS_SUMMARY_PROMPT).should('exist');
+      });
+
+      it('should redirect from alerts to get started page', () => {
+        visit(ALERTS_URL);
+        cy.get(GET_STARTED_PAGE).should('exist');
+      });
+
+      it('should redirect from rules to get started page', () => {
+        visit(RULES_URL);
+        cy.get(GET_STARTED_PAGE).should('exist');
+      });
+
+      it('should redirect from stack rules to main management page', () => {
+        visit(STACK_RULES_URL);
+        cy.contains(MANAGEMENT_PAGE_DESCRIPTION).should('exist');
+      });
+
+      it('should redirect from maintenance window to main management page', () => {
+        visit(MAINTENANCE_WINDOW_URL);
+        cy.contains(MANAGEMENT_PAGE_DESCRIPTION).should('exist');
       });
     });
-
-    beforeEach(() => {
-      login('siemv1');
-    });
-
-    after(() => {
-      cy.task('deleteServerlessCustomRole', 'siemv1');
-    });
-
-    testPageAccess();
-  });
-
-  describe('User with siem v2 role', () => {
-    const roleDescriptor = {
-      elasticsearch: {
-        indices: [
-          {
-            names: ['*'],
-            privileges: ['all'],
-          },
-        ],
-      },
-      kibana: [
-        {
-          feature: {
-            siemV2: ['all'],
-            fleet: ['all'],
-          },
-          spaces: ['*'],
-        },
-      ],
-    };
-
-    before(() => {
-      cy.task('createServerlessCustomRole', {
-        roleDescriptor,
-        roleName: 'siemV2',
-      });
-    });
-
-    beforeEach(() => {
-      login('siemV2');
-    });
-
-    after(() => {
-      cy.task('deleteServerlessCustomRole', 'siemV2');
-    });
-
-    testPageAccess();
   });
 });

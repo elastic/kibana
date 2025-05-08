@@ -16,9 +16,7 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from '@xstate5/react';
 import { isEmpty, isEqual } from 'lodash';
-import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../../asset_image';
 import {
@@ -31,6 +29,7 @@ import {
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
@@ -75,23 +74,6 @@ const OutcomeControls = () => {
   const simulationParsedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
   );
-
-  const dateRangeRef = useSimulatorSelector((state) => state.context.dateRangeRef);
-  const timeRange = useSelector(dateRangeRef, (state) => state.context.timeRange);
-  const handleRefresh = () => dateRangeRef.send({ type: 'dateRange.refresh' });
-
-  const handleQuerySubmit: StreamsAppSearchBarProps['onQuerySubmit'] = (
-    { dateRange },
-    isUpdate
-  ) => {
-    if (!isUpdate) {
-      return handleRefresh();
-    }
-
-    if (dateRange) {
-      dateRangeRef.send({ type: 'dateRange.update', range: dateRange });
-    }
-  };
 
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     hasActiveFilters: previewDocsFilter === filter,
@@ -144,12 +126,7 @@ const OutcomeControls = () => {
           {previewDocsFilterOptions.outcome_filter_failed.label}
         </EuiFilterButton>
       </EuiFilterGroup>
-      <StreamsAppSearchBar
-        onQuerySubmit={handleQuerySubmit}
-        onRefresh={handleRefresh}
-        dateRangeFrom={timeRange?.from}
-        dateRangeTo={timeRange?.to}
-      />
+      <StreamsAppSearchBar showDatePicker />
     </EuiFlexGroup>
   );
 };

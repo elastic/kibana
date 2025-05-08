@@ -7,50 +7,58 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const integrationLabels = {
+export const toolLabels = {
   breadcrumb: {
-    integrationsPill: i18n.translate('workchatApp.integrations.breadcrumb.integrations', {
-      defaultMessage: 'Integrations',
+    toolsPill: i18n.translate('workchatApp.integrations.breadcrumb.tools', {
+      defaultMessage: 'Tools',
     }),
-    editIntegrationPill: i18n.translate('workchatApp.integrations.breadcrumb.editIntegration', {
-      defaultMessage: 'Edit integration',
+    editToolPill: i18n.translate('workchatApp.integrations.breadcrumb.editTool', {
+      defaultMessage: 'Edit tool',
     }),
-    createIntegrationPill: i18n.translate('workchatApp.integrations.breadcrumb.createIntegration', {
-      defaultMessage: 'Create integration',
+    createToolPill: i18n.translate('workchatApp.integrations.breadcrumb.createTool', {
+      defaultMessage: 'Create tool',
     }),
   },
   notifications: {
-    integrationCreatedToastText: i18n.translate(
-      'workchatApp.integrations.notifications.integrationCreatedToastText',
+    toolCreatedToastText: i18n.translate(
+      'workchatApp.integrations.notifications.toolCreatedToastText',
       {
-        defaultMessage: 'Integration created',
+        defaultMessage: 'Tool created',
       }
     ),
-    integrationUpdatedToastText: i18n.translate(
-      'workchatApp.integrations.notifications.integrationUpdatedToastText',
+    toolUpdatedToastText: i18n.translate(
+      'workchatApp.integrations.notifications.toolUpdatedToastText',
       {
-        defaultMessage: 'Integration updated',
+        defaultMessage: 'Tool updated',
       }
     ),
-    integrationDeletedToastText: i18n.translate(
-      'workchatApp.integrations.notifications.integrationDeletedToastText',
+    toolDeletedToastText: i18n.translate(
+      'workchatApp.integrations.notifications.toolDeletedToastText',
       {
-        defaultMessage: 'Integration successfully deleted',
+        defaultMessage: 'Tool successfully deleted',
       }
     ),
   },
   editView: {
-    createIntegrationTitle: i18n.translate('workchatApp.integrations.editView.createTitle', {
-      defaultMessage: 'Create a new integration',
+    createToolTitle: i18n.translate('workchatApp.integrations.editView.createTitle', {
+      defaultMessage: 'Create a new tool',
     }),
-    editIntegrationTitle: i18n.translate('workchatApp.integrations.editView.editTitle', {
-      defaultMessage: 'Edit integration',
+    editToolTitle: i18n.translate('workchatApp.integrations.editView.editTitle', {
+      defaultMessage: 'Edit tool',
     }),
     cancelButtonLabel: i18n.translate('workchatApp.integrations.editView.cancelButtonLabel', {
       defaultMessage: 'Cancel',
     }),
     saveButtonLabel: i18n.translate('workchatApp.integrations.editView.saveButtonLabel', {
       defaultMessage: 'Save',
+    }),
+  },
+  listView: {
+    addToolLabel: i18n.translate('workchatApp.integrations.listView.addTool', {
+      defaultMessage: 'Add tool',
+    }),
+    browseToolLabel: i18n.translate('workchatApp.integrations.listView.browseTool', {
+      defaultMessage: 'Browse tools',
     }),
   },
 };

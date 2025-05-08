@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Option from 'fp-ts/lib/Option';
+import * as Option from 'fp-ts/Option';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DocLinks } from '@kbn/doc-links';
 import type {

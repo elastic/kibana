@@ -6,7 +6,7 @@
  */
 
 import { getBytesRt } from './bytes_rt';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 
 describe('bytesRt', () => {

@@ -11,10 +11,15 @@
     "id": "elasticAssistant",
     "browser": false,
     "server": true,
+    "configPath": [
+      "xpack",
+      "elasticAssistant"
+    ],
     "requiredPlugins": [
       "actions",
       "alerting",
       "data",
+      "eventLog",
       "ml",
       "taskManager",
       "licensing",

@@ -46,9 +46,9 @@ describe('useAnomaliesColumns', () => {
     });
 
     expect(renderedComponent).toMatchInlineSnapshot(`
-      <Styled(span)>
+      <DarkShadeText>
         test-job-name
-      </Styled(span)>
+      </DarkShadeText>
     `);
   });
 });

@@ -35,7 +35,11 @@ export const findAnonymizationFieldsRoute = (
       path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
       security: {
         authz: {
-          requiredPrivileges: ['elasticAssistant'],
+          requiredPrivileges: [
+            {
+              anyRequired: ['elasticAssistant', 'securitySolution-readWorkflowInsights'],
+            },
+          ],
         },
       },
     })

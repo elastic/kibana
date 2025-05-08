@@ -12,6 +12,7 @@ import type {
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { updateIndexTemplateFieldsLimit } from './update_index_template_fields_limit';
 
 interface CreateOrUpdateComponentTemplateOpts {
   logger: Logger;
@@ -48,21 +49,10 @@ const getIndexTemplatesUsingComponentTemplate = async (
     async (template: IndicesGetIndexTemplateIndexTemplateItem) => {
       await retryTransientEsErrors(
         () =>
-          esClient.indices.putIndexTemplate({
-            name: template.name,
-            ...template.index_template,
-            template: {
-              ...template.index_template.template,
-              settings: {
-                ...template.index_template.template?.settings,
-                'index.mapping.total_fields.limit': totalFieldsLimit,
-              },
-            },
-            // GET brings string | string[] | undefined but this PUT expects string[]
-            ignore_missing_component_templates: template.index_template
-              .ignore_missing_component_templates
-              ? [template.index_template.ignore_missing_component_templates].flat()
-              : undefined,
+          updateIndexTemplateFieldsLimit({
+            esClient,
+            template,
+            limit: totalFieldsLimit,
           }),
         { logger }
       );
@@ -81,6 +71,11 @@ const createOrUpdateComponentTemplateHelper = async (
   } catch (error) {
     const reason = error?.meta?.body?.error?.caused_by?.caused_by?.caused_by?.reason;
     if (reason && reason.match(/Limit of total fields \[\d+\] has been exceeded/) != null) {
+      if (reason === `Limit of total fields [${totalFieldsLimit}] has been exceeded`) {
+        logger.info(
+          `The total number of fields defined by the templates cannot exceed the limit [${totalFieldsLimit}]. if you want to add more fields, please increase the limit`
+        );
+      }
       // This error message occurs when there is an index template using this component template
       // that contains a field limit setting that using this component template exceeds
       // Specifically, this can happen for the ECS component template when we add new fields

@@ -4,7 +4,7 @@ exports[`EndzoneTooltipHeader should render endzone tooltip with value, if it is
 <Fragment>
   <EuiFlexGroup
     alignItems="center"
-    css={[Function]}
+    css="unknown styles"
     gutterSize="xs"
     responsive={false}
   >
@@ -32,7 +32,7 @@ exports[`EndzoneTooltipHeader should render endzone tooltip without value, if it
 <Fragment>
   <EuiFlexGroup
     alignItems="center"
-    css={[Function]}
+    css="unknown styles"
     gutterSize="xs"
     responsive={false}
   >

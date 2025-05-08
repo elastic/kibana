@@ -67,7 +67,7 @@ export const GroupOfNodes = React.memo<Props>(
           options={options}
           nodeType={nodeType}
         />
-        <Nodes>
+        <Nodes role="list">
           {group.width ? (
             group.nodes.map((node) => (
               <Node

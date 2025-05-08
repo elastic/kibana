@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { FormAction } from '../tasks/perform_user_actions';
 
@@ -36,7 +37,7 @@ export interface ArtifactsFixtureType {
   };
 
   createRequestBody: {
-    list_id: string;
+    list_id: (typeof ENDPOINT_ARTIFACT_LIST_IDS)[number];
     entries: object[];
     os_types: string[];
   };

@@ -99,11 +99,11 @@ export const validationTimeseriesCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('ts a_index | STATS avg(doubleField) by 1', []);
             await expectErrors('ts a_index | STATS count(`doubleField`)', []);
             await expectErrors('ts a_index | STATS count(*)', []);
-            await expectErrors('ts index | STATS var0 = count(*)', []);
-            await expectErrors('ts a_index | STATS var0 = count()', []);
-            await expectErrors('ts a_index | STATS var0 = avg(doubleField), count(*)', []);
+            await expectErrors('ts index | STATS col0 = count(*)', []);
+            await expectErrors('ts a_index | STATS col0 = count()', []);
+            await expectErrors('ts a_index | STATS col0 = avg(doubleField), count(*)', []);
             await expectErrors(`ts a_index | STATS sum(case(false, 0, 1))`, []);
-            await expectErrors(`ts a_index | STATS var0 = sum( case(false, 0, 1))`, []);
+            await expectErrors(`ts a_index | STATS col0 = sum( case(false, 0, 1))`, []);
             await expectErrors('ts a_index | STATS count(textField == "a" or null)', []);
             await expectErrors('ts other_index | STATS max(doubleField) by textField', []);
           });
@@ -119,8 +119,8 @@ export const validationTimeseriesCommandTestSuite = (setup: helpers.Setup) => {
           test('errors on unknown function', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors('ts a_index var0 = avg(fn(number)), count(*)', [
-              "SyntaxError: mismatched input 'var0' expecting <EOF>",
+            await expectErrors('ts a_index col0 = avg(fn(number)), count(*)', [
+              "SyntaxError: mismatched input 'col0' expecting <EOF>",
             ]);
           });
 
@@ -205,7 +205,7 @@ export const validationTimeseriesCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('TS a_index | stats avg(doubleField) by wrongField + 1', [
               'Unknown column [wrongField]',
             ]);
-            await expectErrors('TS a_index | stats avg(doubleField) by var0 = wrongField + 1', [
+            await expectErrors('TS a_index | stats avg(doubleField) by col0 = wrongField + 1', [
               'Unknown column [wrongField]',
             ]);
           });
