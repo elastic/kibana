@@ -13,7 +13,7 @@ import { getServices } from '../../kibana_services';
 const TEMPLATE_TAGS = ['{', '}'];
 
 // replace template strings without the default mustache escaping
-export function replaceTemplateStrings(text) {
+export function replaceTemplateStrings(text, params = {}) {
   const { tutorialService, kibanaVersion, docLinks } = getServices();
 
   const variables = {
