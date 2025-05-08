@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import dedent from 'dedent';
 import { getGroupingQuery, MAX_RUNTIME_FIELD_SIZE, parseGroupingQuery } from '.';
 import { getEmptyValue } from './helpers';
 import type { GroupingAggregation } from '../../..';
@@ -93,13 +94,16 @@ describe('group selector', () => {
 
     it('groupByField script should contain logic which gets all values of groupByField', () => {
       const scriptResponse = {
-        source: `def groupValues = [];
-if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
-  groupValues = doc[params['selectedGroup']];
-}  
-int count = groupValues.size();
-if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
-else { emit(groupValues.join(params['uniqueValue']))}`,
+        source: dedent(`
+          def groupValues = [];
+          if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
+            groupValues = doc[params['selectedGroup']];
+          }  
+          int count = groupValues.size();
+          if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
+          else {
+            emit(groupValues.join(params['uniqueValue']));
+          }`),
         params: {
           selectedGroup: 'resource.name',
           uniqueValue: 'whatAGreatAndUniqueValue',
@@ -118,13 +122,16 @@ else { emit(groupValues.join(params['uniqueValue']))}`,
       const countByKeyForMultiValueFields = 'event.id';
 
       const scriptResponse = {
-        source: `def groupValues = [];
-if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
-  groupValues = doc[params['selectedGroup']];
-}  
-int count = groupValues.size();
-if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
-else { for (int i = 0; i < count && i < ${MAX_RUNTIME_FIELD_SIZE}; i++) { emit(groupValues[i]); } }`,
+        source: dedent(`
+          def groupValues = [];
+          if (doc.containsKey(params['selectedGroup']) && !doc[params['selectedGroup']].empty) {
+            groupValues = doc[params['selectedGroup']];
+          }  
+          int count = groupValues.size();
+          if (count == 0 || count > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']); }
+          else {
+            for (int i = 0; i < count && i < ${MAX_RUNTIME_FIELD_SIZE}; i++) { emit(groupValues[i]); }
+          }`),
         params: {
           selectedGroup: groupByField,
           uniqueValue: 'whatAGreatAndUniqueValue',
