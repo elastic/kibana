@@ -21,7 +21,6 @@ import {
   PublishesTitle,
   PublishesUnsavedChanges,
   PublishingSubject,
-  StateComparators,
 } from '@kbn/presentation-publishing';
 
 import { ControlWidth, DefaultControlState } from '../../common/types';
@@ -49,7 +48,7 @@ export type DefaultControlApi = PublishesDataLoading &
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,
-  'uuid' | 'parentApi' | 'type' | 'unsavedChanges$' | 'resetUnsavedChanges'
+  'uuid' | 'parentApi' | 'type'
 >;
 
 export type ControlApiInitialization<ControlApi extends DefaultControlApi = DefaultControlApi> =
@@ -66,17 +65,20 @@ export interface ControlFactory<
   order?: number;
   getIconType: () => string;
   getDisplayName: () => string;
-  buildControl: (
-    initialState: State,
-    buildApi: (
-      apiRegistration: ControlApiRegistration<ControlApi>,
-      comparators: StateComparators<State>
-    ) => ControlApi,
-    uuid: string,
-    parentApi: ControlGroupApi
-  ) => Promise<{ api: ControlApi; Component: React.FC<{ className: string }> }>;
+  buildControl: ({
+    initialState,
+    finalizeApi,
+    uuid,
+    controlGroupApi,
+  }: {
+    initialState: State;
+    finalizeApi: (apiRegistration: ControlApiRegistration<ControlApi>) => ControlApi;
+    uuid: string;
+    controlGroupApi: ControlGroupApi;
+  }) => Promise<{ api: ControlApi; Component: React.FC<{ className: string }> }>;
 }
 
+// TODO replace with StateManager from @kbn/presentation-publishing
 export type ControlStateManager<State extends object = object> = {
   [key in keyof Required<State>]: BehaviorSubject<State[key]>;
 };
