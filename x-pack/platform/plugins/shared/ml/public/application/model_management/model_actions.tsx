@@ -62,7 +62,7 @@ export function useModelActions({
       application: { navigateToUrl },
       overlays,
       docLinks,
-      mlServices: { mlApi, httpService, trainedModelsService },
+      mlServices: { mlApi, httpService, trainedModelsService, mlCapabilities },
       ...startServices
     },
   } = useMlKibana();
@@ -128,7 +128,8 @@ export function useModelActions({
         showNodeInfo,
         nlpSettings,
         httpService,
-        trainedModelsService
+        trainedModelsService,
+        mlCapabilities
       ),
     [
       overlays,
@@ -139,6 +140,7 @@ export function useModelActions({
       nlpSettings,
       httpService,
       trainedModelsService,
+      mlCapabilities,
     ]
   );
 
