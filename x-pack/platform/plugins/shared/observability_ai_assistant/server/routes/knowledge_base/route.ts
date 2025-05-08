@@ -93,21 +93,15 @@ const warmupModelKnowledgeBase = createObservabilityAIAssistantServerRoute({
 
 const reIndexKnowledgeBase = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
-  params: t.type({
-    query: t.type({
-      inference_id: t.string,
-    }),
-  }),
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async (resources): Promise<{ result: boolean }> => {
+  handler: async (resources): Promise<{ success: boolean }> => {
     const client = await resources.service.getClient({ request: resources.request });
-    const { inference_id: inferenceId } = resources.params.query;
-    const result = await client.reIndexKnowledgeBaseWithLock(inferenceId);
-    return { result };
+    await client.reIndexKnowledgeBaseWithLock();
+    return { success: true };
   },
 });
 
@@ -183,7 +177,7 @@ const saveKnowledgeBaseUserInstruction = createObservabilityAIAssistantServerRou
 
     const { id, text, public: isPublic } = resources.params.body;
     return client.addUserInstruction({
-      entry: { id, text, public: isPublic },
+      entry: { id, text, public: isPublic, title: `User instruction` },
     });
   },
 });
