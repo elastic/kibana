@@ -7,7 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { RoutingDefinitionWithUIAttributes } from '../../types';
 
@@ -20,18 +20,18 @@ export interface StreamRoutingServiceDependencies {
 }
 
 export interface StreamRoutingInput {
-  definition: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
 }
 
 export interface StreamRoutingContext {
   currentRuleId: string | null;
-  definition: WiredStreamGetResponse;
+  definition: Streams.WiredStream.GetResponse;
   initialRouting: RoutingDefinitionWithUIAttributes[];
   routing: RoutingDefinitionWithUIAttributes[];
 }
 
 export type StreamRoutingEvent =
-  | { type: 'stream.received'; definition: WiredStreamGetResponse }
+  | { type: 'stream.received'; definition: Streams.WiredStream.GetResponse }
   | { type: 'routingRule.cancel' }
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
   | { type: 'routingRule.create' }

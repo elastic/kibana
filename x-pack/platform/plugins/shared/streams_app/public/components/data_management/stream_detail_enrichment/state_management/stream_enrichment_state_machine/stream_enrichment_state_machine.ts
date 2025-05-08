@@ -17,11 +17,7 @@ import {
   raise,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import {
-  IngestStreamGetResponse,
-  isRootStreamDefinition,
-  isWiredStreamGetResponse,
-} from '@kbn/streams-schema';
+import { isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import {
   StreamEnrichmentContextType,
@@ -74,27 +70,29 @@ export const streamEnrichmentMachine = setup({
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
     refreshDefinition: () => {},
-    storeDefinition: assign((_, params: { definition: IngestStreamGetResponse }) => ({
+    storeDefinition: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => ({
       definition: params.definition,
     })),
     stopProcessors: ({ context }) => context.processorsRefs.forEach(stopChild),
-    setupProcessors: assign(({ self, spawn }, params: { definition: IngestStreamGetResponse }) => {
-      const processorsRefs = params.definition.stream.ingest.processing.map((proc) => {
-        const processor = processorConverter.toUIDefinition(proc);
-        return spawn('processorMachine', {
-          id: processor.id,
-          input: {
-            parentRef: self,
-            processor,
-          },
+    setupProcessors: assign(
+      ({ self, spawn }, params: { definition: Streams.ingest.all.GetResponse }) => {
+        const processorsRefs = params.definition.stream.ingest.processing.map((proc) => {
+          const processor = processorConverter.toUIDefinition(proc);
+          return spawn('processorMachine', {
+            id: processor.id,
+            input: {
+              parentRef: self,
+              processor,
+            },
+          });
         });
-      });
 
-      return {
-        initialProcessorsRefs: processorsRefs,
-        processorsRefs,
-      };
-    }),
+        return {
+          initialProcessorsRefs: processorsRefs,
+          processorsRefs,
+        };
+      }
+    ),
     addProcessor: assign(
       (
         { context, spawn, self },
@@ -163,7 +161,7 @@ export const streamEnrichmentMachine = setup({
       return processorRef.getSnapshot().context.isNew;
     },
     isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
-    isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
+    isWiredStream: ({ context }) => Streams.WiredStream.GetResponse.is(context.definition),
   },
 }).createMachine({
   /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAtAA4ATAE4K3AGzdlizQBYAjPoCsi7voA0IAJ4KAzIoomT3cwHYdixfferFAL4B1qiYuITE5FQ0dIwsbFyG-EggImJ0ktJyCErGzpqGqoaa7u7KmkWG1nYIyiYUytwmFX7mjZqK+kEh6Nj4RKSUkRA27LADUcRYYBgAbpA8yUKi4pkp2fJ13BSObib6Ksr6+o3u1QrHFO6Kqi6q+h0PBcrd4L3hE0OkIxTjkZQYCAMMBjT4UYiwMAERbSNKrKTrRDKPL6biqVTKTE6AyKExnWyIQz2PImZH7Y76Rz2VSvUJ9CKDcHfGy-MGA4Gg-4UACugggJAIYBhKThGQRoA23mUV3cRJMGMaWiK5wQxl0FBOJnsakMWmJD1p736XOGLL+jN5-LoKA4EEkYGis2EAGsHbzIWgCAzyABBLAEYRoYXLdIScWyBQuexXezcNyqdz6VSaeymFVE1TR-RlZSy3GGYp4w1hY2M02srmWgUJMBoNCBiiCBgCgBmgco7trXs+foDQb4sJWYqyDgLFEzufs2k0zWuePTqM044O2nMqh01y6wTeJe9XxIPzpuDIqAIFAgGFgTZINjYAAV69NYLBA7B2IJH3AX2hYBQDxBg1SIcwxHHJOm2bhSn2TxjmUex7BMFUp3cDVzCnApiR8SCTGLekwXLI8cBPFAzwvK9m1vG0H2EJ9vzfD8aK-V8mUDCBa0A0UQMRHJjiXLUmmpA5KQqQx8RqMwnG4QozDjbUzGKXCPhNZkKEI4jSMva9KKgajaNfd9P2fBs2OBQUOOAtYJQcfYdmg1wkzjbhqSQmzZOudxmiaAxDBw7dCL3JkDxZNTT3PTSKPvQy6IMxijLQVkSBgczQ0siMcmubZ-F8DzikaSlFBVeVo2gjpCk8dzAj8o0AoIo11LC8ibzYPAMDIblmzFGK9J-CgACpkvhUDUSueUigqfY0SkzQVXRPjvFlPF-BMYwtx6Xd8JUkKSIarTmta9rq0kLqmPi-qBxFCzw2yYaPPRYpblRdciRVTpoxW1c-EMNQ0UU0tJk2urQrI3abRatqOrDChZgwMAAHcABEBRIB8wGhuGxn2iHJChmGEahMB-UgAAxGGGAgWABuHbj5BcaVdSwtFTHKE4ZtuVDdQQ5oVFXX6aoBkt6uBiLQcxw6UBxuHEYIZHiDR2GMfBsWKFwEgbTAFG5fhmjYBJhhBX7JYgJSq6FB8fQKG8WNCng65iXsF6imcXMikcUlmkKXmNqC1TAe2oWmpFxWxQlvHBUJiASbAMm3zEIPIc1pGNdxymuKsnJ9mlMabj8eD7hudMtEMHZ3G1ODY2ze5fO3FBhDY+AUn8z5B2N0D5F1NQrgqOCvrlRRjBVNvtQaG5mljdcEPsT2uWocQ4lYG1m8G6n-CL9wu+JZEEL7+2CR47ZzDcRmNzqeDfLWvDlKCxeqbT+QEycS2pMzXwfGe3fdSXNyXALOpF0nqr1qXx+Oacg19U5pTvrGGUcoFRxhEumOCKEEylGxK0MwU8ywqRAQCIEYAwGpQ2JoOC44iGzTRCoL6Vh35yQ1KUdyGdFDuAwf9b22CeR8mrAvC6LdqYGHULKDyWoDCOFzAVd+Lh6hJlRFJbMahkyrR3BfTB3stoEHwSbHImZ95YWti-O2Kpyh8ScmvNe64mb-3PkpZRh5fYaUatpXSJ164hiXrfAokibglGTGibUjDCo6AtlzLQTkfK3DPooqxLCbECyBuFAOUAwYHRvkbVxECpQWx0c-W2b8ageRQhuPwiYiidANAApRUTgq2J2sLBJotg4J2lknOG6jW6lCXPBFa2ZZIVGmrvdEHiOYuA6OUNwzD9zRL6ILOJ2lElY3FprfG4dI7RxadTTE5tn5FUMHoTEahWYDKckM7mWgxlMhfAweYEAABKwhhDdn+KstxRxaGlFEo8PQLNd7yBOBoVwfh3ZTgsH4IIQQgA */

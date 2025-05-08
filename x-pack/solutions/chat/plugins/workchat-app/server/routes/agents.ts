@@ -11,6 +11,8 @@ import type {
   ListAgentResponse,
   CreateAgentResponse,
   CreateAgentPayload,
+  UpdateAgentResponse,
+  DeleteAgentResponse,
 } from '../../common/http_api/agents';
 import { apiCapabilities } from '../../common/features';
 import type { RouteDependencies } from './types';
@@ -131,10 +133,39 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
 
       const agent = await client.update(agentId, payload);
 
-      return res.ok<CreateAgentResponse>({
+      return res.ok<UpdateAgentResponse>({
         body: {
           success: true,
           agent,
+        },
+      });
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/workchat/agents/{agentId}',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.manageWorkchat],
+        },
+      },
+      validate: {
+        params: schema.object({
+          agentId: schema.string(),
+        }),
+      },
+    },
+    wrapHandler(async (ctx, request, res) => {
+      const { agentId } = request.params;
+      const { agentService } = getServices();
+      const client = await agentService.getScopedClient({ request });
+
+      const didDelete = await client.delete(agentId);
+
+      return res.ok<DeleteAgentResponse>({
+        body: {
+          success: didDelete,
         },
       });
     })

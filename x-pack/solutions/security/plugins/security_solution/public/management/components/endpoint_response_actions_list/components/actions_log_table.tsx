@@ -159,30 +159,13 @@ const getResponseActionListTableColumns = ({
       width: '20%',
       truncateText: true,
       render: (_hosts: ActionListApiResponse['data'][number]['hosts']) => {
-        const hosts = _hosts && Object.values(_hosts);
-        // join hostnames if the action is for multiple agents
-        // and skip empty strings for names if any
-        const _hostnames = hosts
-          .reduce<string[]>((acc, host) => {
-            if (host.name.trim()) {
-              acc.push(host.name);
-            }
+        const hostnames = Object.entries(_hosts)
+          .reduce<string[]>((acc, [agentId, { name: hostName }]) => {
+            acc.push(hostName || `${agentId} (${UX_MESSAGES.unenrolled.host})`);
             return acc;
           }, [])
           .join(', ');
 
-        let hostnames = _hostnames;
-
-        if (!_hostnames) {
-          if (hosts.length > 1) {
-            // when action was for a single agent and no host name
-            hostnames = UX_MESSAGES.unenrolled.hosts;
-          } else if (hosts.length === 1) {
-            // when action was for a multiple agents
-            // and none of them have a host name
-            hostnames = UX_MESSAGES.unenrolled.host;
-          }
-        }
         return (
           <EuiToolTip content={hostnames} anchorClassName="eui-textTruncate">
             <EuiText

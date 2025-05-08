@@ -491,8 +491,8 @@
                 "pluginId": "@kbn/esql-validation-autocomplete",
                 "scope": "common",
                 "docId": "kibKbnEsqlValidationAutocompletePluginApi",
-                "section": "def-common.ESQLRealField",
-                "text": "ESQLRealField"
+                "section": "def-common.ESQLFieldWithMetadata",
+                "text": "ESQLFieldWithMetadata"
               },
               "> | undefined"
             ],
@@ -2159,7 +2159,7 @@
                   "UseEuiTheme",
                   "<{}>"
                 ],
-                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/esql_theme.ts",
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/theme.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
