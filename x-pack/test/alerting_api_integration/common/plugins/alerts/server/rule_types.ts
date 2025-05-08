@@ -808,6 +808,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
     isExportable: true,
     ruleTaskTimeout: '3s',
     cancelAlertsOnRuleTimeout,
+    autoRecoverAlerts: false,
     alerts: {
       context: 'test.patternfiring',
       shouldWrite: true,
