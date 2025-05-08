@@ -105,6 +105,9 @@ describe('getModelOptionsForInferenceEndpoints', () => {
       endpoints,
     });
 
-    expect(options.map((o) => o.key)).toEqual([ELSER_ON_ML_NODE_INFERENCE_ID, E5_SMALL_INFERENCE_ID]);
+    expect(options.map((o) => o.key)).toEqual([
+      ELSER_ON_ML_NODE_INFERENCE_ID,
+      E5_SMALL_INFERENCE_ID,
+    ]);
   });
 });
