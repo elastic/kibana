@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { asUnwiredStreamGetResponse, isUnwiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -48,6 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(classicStream).to.eql({
         name: TEST_STREAM_NAME,
+        description: '',
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
@@ -66,6 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             queries: [],
             stream: {
+              description: '',
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [
@@ -96,7 +98,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(getResponse.status).to.eql(200);
 
-      const body = asUnwiredStreamGetResponse(getResponse.body);
+      const body = getResponse.body;
+      Streams.UnwiredStream.GetResponse.asserts(body);
 
       const {
         dashboards,
@@ -111,6 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(stream).to.eql({
         name: TEST_STREAM_NAME,
+        description: '',
         ingest: {
           lifecycle: { inherit: {} },
           processing: [
@@ -166,6 +170,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             queries: [],
             dashboards: [],
             stream: {
+              description: '',
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
@@ -251,6 +256,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [
@@ -294,6 +300,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [
@@ -415,6 +422,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               queries: [],
               dashboards: [],
               stream: {
+                description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: [
@@ -479,6 +487,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               dashboards: [],
               queries: [],
               stream: {
+                description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: [],
@@ -571,7 +580,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const classicStream = getResponse.body.streams.find(
           (stream) => stream.name === ORPHANED_STREAM_NAME
         );
-        expect(isUnwiredStreamDefinition(classicStream!)).to.be(true);
+        expect(Streams.UnwiredStream.Definition.is(classicStream!)).to.be(true);
       });
 
       it('should still return the stream on internal listing API', async () => {
@@ -580,7 +589,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const classicStream = getResponse.body.streams.find(
           (stream) => stream.stream.name === ORPHANED_STREAM_NAME
         );
-        expect(isUnwiredStreamDefinition(classicStream!.stream)).to.be(true);
+        expect(Streams.UnwiredStream.Definition.is(classicStream!.stream)).to.be(true);
       });
 
       it('should allow deleting', async () => {

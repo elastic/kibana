@@ -66,8 +66,7 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
     return 'expression_after_assignment';
   }
 
-  const previousWord = findPreviousWord(innerText);
-  if (getLastNonWhitespaceChar(innerText) === ',' || noCaseCompare(previousWord, 'stats')) {
+  if (getLastNonWhitespaceChar(innerText) === ',' || /stats\s+\S*$/i.test(innerText)) {
     return 'expression_without_assignment';
   }
 

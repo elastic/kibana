@@ -7,7 +7,6 @@
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-
 import { NotFoundPage } from '../app/404';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import {

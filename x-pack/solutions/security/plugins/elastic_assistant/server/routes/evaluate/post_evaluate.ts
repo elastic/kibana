@@ -52,15 +52,19 @@ import {
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
-import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { agentRunnableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
 import { PrepareIndicesForAssistantGraphEvaluations } from './prepare_indices_for_evaluations/graph_type/assistant';
+import { ConfigSchema } from '../../config_schema';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
-const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
-const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
-export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
+export const postEvaluateRoute = (
+  router: IRouter<ElasticAssistantRequestHandlerContext>,
+  config?: ConfigSchema
+) => {
+  const RESPONSE_TIMEOUT = config?.responseTimeout ?? ROUTE_HANDLER_TIMEOUT;
+
   router.versioned
     .post({
       access: INTERNAL_API_ACCESS,
@@ -216,7 +220,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                 actionsClient,
                 defendInsightsGraphs,
                 connectors: connectorsWithPrompts,
-                connectorTimeout: CONNECTOR_TIMEOUT,
+                connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
                 evaluationId,
@@ -260,7 +264,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                 alertsIndexPattern,
                 attackDiscoveryGraphs,
                 connectors: connectorsWithPrompts,
-                connectorTimeout: CONNECTOR_TIMEOUT,
+                connectorTimeout: ROUTE_HANDLER_TIMEOUT,
                 datasetName,
                 esClient,
                 evaluationId,
@@ -299,6 +303,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                   connectorId: connector.id,
                   llmType,
                   logger,
+                  model: connector.config?.defaultModel,
                   temperature: getDefaultArguments(llmType).temperature,
                   signal: abortSignal,
                   streaming: false,
@@ -307,6 +312,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                   telemetryMetadata: {
                     pluginId: 'security_ai_assistant',
                   },
+                  timeout: ROUTE_HANDLER_TIMEOUT,
                 });
 
               const llm = createLlmInstance();
@@ -411,11 +417,9 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
 
               const chatPromptTemplate = formatPrompt({
                 prompt: defaultSystemPrompt,
-                llmType,
-                isOpenAI,
               });
 
-              const agentRunnable = await agentRunableFactory({
+              const agentRunnable = await agentRunnableFactory({
                 llm: createLlmInstance(),
                 isOpenAI,
                 llmType,
@@ -434,6 +438,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                 llmType,
                 isOssModel,
                 graph: getDefaultAssistantGraph({
+                  contentReferencesStore,
                   agentRunnable,
                   dataClients,
                   createLlmInstance,

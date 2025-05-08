@@ -50,7 +50,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('/internal/observability_ai_assistant/chat/complete', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let proxy: LlmProxy;
     let connectorId: string;
 
@@ -102,7 +102,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             withInternalHeaders: true,
           });
 
-        proxy.interceptConversation('Hello!').catch((e) => {
+        proxy.interceptWithResponse('Hello!').catch((e) => {
           log.error(`Failed to intercept conversation ${e}`);
         });
 
@@ -223,7 +223,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('forwards the system message as the first message in the request to the LLM with message role "system"', async () => {
-        const simulatorPromise = proxy.interceptConversation('Hello from LLM Proxy');
+        const simulatorPromise = proxy.interceptWithResponse('Hello from LLM Proxy');
         await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
           params: {
@@ -251,7 +251,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         void proxy.interceptTitle('Title for a new conversation');
-        void proxy.interceptConversation('Hello again');
+        void proxy.interceptWithResponse('Hello again');
 
         const allEvents = await getEvents({});
         events = allEvents.filter(
@@ -387,7 +387,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           throw new Error('Failed to intercept conversation title', e);
         });
 
-        proxy.interceptConversation('Good night, sir!').catch((e) => {
+        proxy.interceptWithResponse('Good night, sir!').catch((e) => {
           throw new Error('Failed to intercept conversation ', e);
         });
 
@@ -420,7 +420,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        proxy.interceptConversation('Good night, sir!').catch((e) => {
+        proxy.interceptWithResponse('Good night, sir!').catch((e) => {
           log.error(`Failed to intercept conversation ${e}`);
         });
 

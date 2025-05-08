@@ -11,9 +11,12 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment';
 
 import { Separator } from '../separator';
-import { ALERTS, DISCOVERIES, LAST_GENERATED } from './translations';
+import { ALERTS, PLUS_ALERTS, DISCOVERIES, LAST_GENERATED } from './translations';
 
 export const EMPTY_LAST_UPDATED_DATE = '--';
+
+/** We don't know the exact count above this threshold */
+const EXACT_COUNT_THRESHOLD = 1000;
 
 interface Props {
   alertsCount: number;
@@ -60,7 +63,7 @@ const SummaryCountComponent: React.FC<Props> = ({
         <Separator />
 
         <EuiFlexItem data-test-subj="alertsCount" grow={false}>
-          {ALERTS(alertsCount)}
+          {alertsCount >= EXACT_COUNT_THRESHOLD ? PLUS_ALERTS(alertsCount) : ALERTS(alertsCount)}
         </EuiFlexItem>
 
         {lastUpdated != null && (

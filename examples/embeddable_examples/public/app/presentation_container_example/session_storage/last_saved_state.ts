@@ -12,22 +12,26 @@ import {
   EmbeddableContentManagementDefinition,
   SavedObjectAttributesWithReferences,
 } from '@kbn/embeddable-plugin/common/types';
-import { LastSavedState } from '../types';
 import { versionSessionStorage } from './version';
+import { PageState } from '../types';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.embeddables.presentationContainerExample.savedState';
 
-export const DEFAULT_STATE: LastSavedState = {
+export const DEFAULT_STATE: PageState = {
   timeRange: {
     from: 'now-15m',
     to: 'now',
   },
-  panelsState: [],
+  panels: [],
 };
 
-const isByValue = (rawState: object): rawState is SavedObjectAttributesWithReferences<any> =>
-  'attributes' in rawState;
+const isByValue = (
+  serializedState: unknown
+): serializedState is SavedObjectAttributesWithReferences<any> =>
+  typeof serializedState === 'object' &&
+  serializedState !== null &&
+  'attributes' in serializedState;
 
 const getVersionOfDefinition = (
   version: string,
@@ -43,14 +47,14 @@ export const lastSavedStateSessionStorage = {
   clear: () => {
     sessionStorage.removeItem(SAVED_STATE_SESSION_STORAGE_KEY);
   },
-  load: (embeddable: EmbeddableStart): LastSavedState => {
+  load: (embeddable: EmbeddableStart): PageState => {
     const savedState = sessionStorage.getItem(SAVED_STATE_SESSION_STORAGE_KEY);
-    const { timeRange, panelsState } = savedState
-      ? (JSON.parse(savedState) as LastSavedState)
+    const { timeRange, panels } = savedState
+      ? (JSON.parse(savedState) as PageState)
       : { ...DEFAULT_STATE };
-    const transformedPanels = panelsState.map((panel) => {
-      const { rawState } = panel.panelState;
-      if (!isByValue(rawState)) return panel;
+    const transformedPanels = panels.map((panel) => {
+      const { serializedState } = panel;
+      if (!isByValue(serializedState)) return panel;
 
       // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
       const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
@@ -61,7 +65,7 @@ export const lastSavedStateSessionStorage = {
         embeddableCmDefinitions
       );
       if (!savedObjectToItem) return panel;
-      const newState = savedObjectToItem(rawState);
+      const newState = savedObjectToItem(serializedState);
       return {
         ...panel,
         panelState: {
@@ -69,12 +73,12 @@ export const lastSavedStateSessionStorage = {
         },
       };
     });
-    return { timeRange, panelsState: transformedPanels };
+    return { timeRange, panels: transformedPanels };
   },
-  save: (state: LastSavedState, embeddable: EmbeddableStart) => {
-    const transformedPanels = state.panelsState.map((panel) => {
-      const { rawState } = panel.panelState;
-      if (!isByValue(rawState)) return panel;
+  save: (state: PageState, embeddable: EmbeddableStart) => {
+    const transformedPanels = state.panels.map((panel) => {
+      const { serializedState } = panel;
+      if (!isByValue(serializedState)) return panel;
 
       // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
       const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
@@ -85,15 +89,13 @@ export const lastSavedStateSessionStorage = {
         embeddableCmDefinitions
       );
       if (!itemToSavedObject) return panel;
-      const savedState = itemToSavedObject(rawState);
+      const savedState = itemToSavedObject(serializedState);
       return {
         ...panel,
-        panelState: {
-          rawState: savedState,
-        },
+        serializedState: savedState,
       };
     });
-    state.panelsState = transformedPanels;
+    state.panels = transformedPanels;
     sessionStorage.setItem(SAVED_STATE_SESSION_STORAGE_KEY, JSON.stringify(state));
   },
 };

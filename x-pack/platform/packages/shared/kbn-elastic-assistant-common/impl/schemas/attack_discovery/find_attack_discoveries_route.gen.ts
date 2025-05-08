@@ -81,7 +81,7 @@ export const AttackDiscoveryFindResponse = z.object({
   connector_names: z.array(z.string()),
   data: z.array(AttackDiscoveryAlert),
   page: z.number().int(),
-  perPage: z.number().int(),
+  per_page: z.number().int().optional(),
   total: z.number().int(),
   unique_alert_ids_count: z.number().int(),
 });
