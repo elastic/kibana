@@ -162,6 +162,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const [containerDimensions, setContainerDimensions] = useState<
     undefined | PieContainerDimensions
   >();
+
   const parentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
