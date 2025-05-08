@@ -133,7 +133,7 @@ export const DocViewerTable = ({
   const { euiTheme } = useEuiTheme();
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings, toasts } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
 
@@ -330,8 +330,8 @@ export const DocViewerTable = ({
     [rows, isEsqlMode, filter, onToggleColumn]
   );
   const fieldValueCellActions = useMemo(
-    () => getFieldValueCellActions({ rows, isEsqlMode, onFilter: filter }),
-    [rows, isEsqlMode, filter]
+    () => getFieldValueCellActions({ rows, isEsqlMode, toasts, onFilter: filter }),
+    [rows, isEsqlMode, toasts, filter]
   );
 
   useWindowSize(); // trigger re-render on window resize to recalculate the grid container height
@@ -358,7 +358,7 @@ export const DocViewerTable = ({
           defaultMessage: 'Value',
         }),
         actions: false,
-        visibleCellActions: 2,
+        visibleCellActions: 3,
         cellActions: fieldValueCellActions,
       },
     ],
