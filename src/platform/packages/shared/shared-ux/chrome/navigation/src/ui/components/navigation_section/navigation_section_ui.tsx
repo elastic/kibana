@@ -375,8 +375,9 @@ const getEuiProps = (
         onClick: (e) => {
           if (href) {
             eventTracker.clickNavLink({
-              href: basePath.remove(href),
               id: navNode.id,
+              path: navNode.path,
+              href: basePath.remove(href),
               hrefPrev: basePath.remove(window.location.pathname),
             });
           }
@@ -401,8 +402,9 @@ const getEuiProps = (
   const onClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
     if (href) {
       eventTracker.clickNavLink({
-        href: basePath.remove(href),
         id: navNode.id,
+        path: navNode.path,
+        href: basePath.remove(href),
         hrefPrev: basePath.remove(window.location.pathname),
       });
     }
