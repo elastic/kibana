@@ -123,6 +123,7 @@ describe('useBaseEsQuery', () => {
     });
 
     expect(filterManager.setAppFilters).toHaveBeenCalledWith(filters);
+    expect(filterManager.setAppFilters).not.toHaveBeenCalledWith(pageFilters);
     expect(queryString.setQuery).toHaveBeenCalledWith(query);
     expect(notifications.toasts.addError).not.toHaveBeenCalled();
   });
