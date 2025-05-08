@@ -46,6 +46,15 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('FROM " /"', []);
       });
 
+      test('doesnt suggest indices twice', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions(
+          'from index, /',
+          visibleIndices.filter((i) => i !== 'index')
+        );
+      });
+
       test('can suggest integration data sources', async () => {
         const dataSources = indexes.concat(integrations);
         const visibleDataSources = dataSources
