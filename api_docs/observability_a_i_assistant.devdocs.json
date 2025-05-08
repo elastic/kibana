@@ -8804,7 +8804,7 @@
             "label": "chat",
             "description": [],
             "signature": [
-              "<TStream extends boolean>(name: string, { systemMessage, messages, connectorId, functions, functionCall, signal, simulateFunctionCalling, tracer, stream, }: { systemMessage?: string | undefined; messages: ",
+              "<TStream extends boolean>(name: string, { systemMessage, messages, connectorId, functions, functionCall, signal, simulateFunctionCalling, stream, }: { systemMessage?: string | undefined; messages: ",
               {
                 "pluginId": "observabilityAIAssistant",
                 "scope": "common",
@@ -8820,9 +8820,7 @@
                 "section": "def-common.CompatibleJSONSchema",
                 "text": "CompatibleJSONSchema"
               },
-              " | undefined; }[] | undefined; functionCall?: string | undefined; signal: AbortSignal; simulateFunctionCalling?: boolean | undefined; tracer: ",
-              "LangTracer",
-              "; stream: TStream; }) => TStream extends true ? ",
+              " | undefined; }[] | undefined; functionCall?: string | undefined; signal: AbortSignal; simulateFunctionCalling?: boolean | undefined; stream: TStream; }) => TStream extends true ? ",
               "Observable",
               "<",
               {
@@ -8882,7 +8880,7 @@
                 "id": "def-server.ObservabilityAIAssistantClient.chat.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      systemMessage,\n      messages,\n      connectorId,\n      functions,\n      functionCall,\n      signal,\n      simulateFunctionCalling,\n      tracer,\n      stream,\n    }",
+                "label": "{\n      systemMessage,\n      messages,\n      connectorId,\n      functions,\n      functionCall,\n      signal,\n      simulateFunctionCalling,\n      stream,\n    }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                 "deprecated": false,
@@ -8993,20 +8991,6 @@
                     "description": [],
                     "signature": [
                       "boolean | undefined"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "observabilityAIAssistant",
-                    "id": "def-server.ObservabilityAIAssistantClient.chat.$2.tracer",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "tracer",
-                    "description": [],
-                    "signature": [
-                      "LangTracer"
                     ],
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
