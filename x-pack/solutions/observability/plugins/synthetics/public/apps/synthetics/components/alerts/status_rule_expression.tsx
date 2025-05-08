@@ -63,6 +63,7 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         newCondition = {
           ...newCondition,
           alertOnNoData: {
+            // This is set to 60 seconds by default, but it could potentially be changed by UI if the user wants to wait more before considering the monitor as pending
             waitSecondsBeforeIsPending: 60,
           },
         };

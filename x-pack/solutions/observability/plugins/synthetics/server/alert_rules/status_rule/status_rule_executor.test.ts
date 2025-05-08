@@ -87,7 +87,7 @@ describe('StatusRuleExecutor', () => {
     it('should only query enabled monitors', async () => {
       const spy = jest.spyOn(configRepo, 'getAll').mockResolvedValue([]);
 
-      const { downConfigs, staleDownConfigs } = await statusRule.getDownChecks({});
+      const { downConfigs, staleDownConfigs } = await statusRule.getConfigs({});
 
       expect(downConfigs).toEqual({});
       expect(staleDownConfigs).toEqual({});
@@ -147,7 +147,7 @@ describe('StatusRuleExecutor', () => {
     it('marks deleted configs as expected', async () => {
       jest.spyOn(configRepo, 'getAll').mockResolvedValue(testMonitors);
 
-      const { downConfigs } = await statusRule.getDownChecks({});
+      const { downConfigs } = await statusRule.getConfigs({});
 
       expect(downConfigs).toEqual({});
 
@@ -237,7 +237,7 @@ describe('StatusRuleExecutor', () => {
         },
       ]);
 
-      const { downConfigs } = await statusRule.getDownChecks({});
+      const { downConfigs } = await statusRule.getConfigs({});
 
       expect(downConfigs).toEqual({});
 

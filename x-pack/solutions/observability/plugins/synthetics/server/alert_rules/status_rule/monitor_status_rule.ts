@@ -82,13 +82,20 @@ export const registerSyntheticsStatusCheckRule = (
 
       const statusRule = new StatusRuleExecutor(esClient, server, syntheticsMonitorClient, options);
 
-      const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
-        ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']
-      );
+      const { downConfigs, staleDownConfigs, upConfigs, pendingConfigs } =
+        await statusRule.getConfigs(
+          ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']
+        );
 
       statusRule.handleDownMonitorThresholdAlert({
         downConfigs,
       });
+
+      if (options.params.condition?.alertOnNoData) {
+        statusRule.handlePendingMonitorAlert({
+          pendingConfigs,
+        });
+      }
 
       setRecoveredAlertsContext({
         alertsClient,

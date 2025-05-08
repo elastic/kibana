@@ -355,7 +355,7 @@ export const getDefaultRecoveredSummary = ({
       ...(hit['error.message'] ? { error: { message: hit['error.message'] } } : {}),
       ...(hit['url.full'] ? { url: { full: hit['url.full'] } } : {}),
     } as unknown as OverviewPing,
-    statusMessage: RECOVERED_LABEL,
+    reason: 'recovered',
     locationId,
     configId,
     dateFormat,
@@ -383,7 +383,7 @@ export const getDeletedMonitorOrLocationSummary = ({
   const { ping } = downConfig;
   const monitorSummary = getMonitorSummary({
     monitorInfo: ping,
-    statusMessage: RECOVERED_LABEL,
+    reason: 'recovered',
     locationId: locationIds,
     configId: downConfig.configId,
     dateFormat,
@@ -458,7 +458,7 @@ export const getUpMonitorRecoverySummary = ({
 
   const monitorSummary = getMonitorSummary({
     monitorInfo: ping,
-    statusMessage: RECOVERED_LABEL,
+    reason: 'recovered',
     locationId: locationIds,
     configId,
     dateFormat,
@@ -502,10 +502,6 @@ export const getUpMonitorRecoverySummary = ({
     stateId,
   };
 };
-
-export const RECOVERED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.recoveredLabel', {
-  defaultMessage: 'recovered',
-});
 
 export const formatFilterString = async (
   syntheticsEsClient: SyntheticsEsClient,
