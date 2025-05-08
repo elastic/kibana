@@ -181,7 +181,7 @@ describe('Input package with custom data stream type', () => {
     cy.get('button').contains('Change defaults').click();
     cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
     cy.get('[data-test-subj="packagePolicyDataStreamType"')
-      .find('label')
+      .find('input')
       .should('have.length', 3)
       .each(($el) => cy.wrap($el).should('be.disabled'));
   });
