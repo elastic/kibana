@@ -28,6 +28,7 @@ import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
 import { MetricsService } from '@kbn/core-metrics-server-internal';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import { CacheService } from '@kbn/core-cache-server-internal';
 import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
 import { I18nService } from '@kbn/core-i18n-server-internal';
 import { DeprecationsService } from '@kbn/core-deprecations-server-internal';
@@ -83,6 +84,7 @@ export class Server {
   private readonly metrics: MetricsService;
   private readonly httpRateLimiter: HttpRateLimiterService;
   private readonly httpResources: HttpResourcesService;
+  private readonly cache: CacheService;
   private readonly status: StatusService;
   private readonly logging: LoggingService;
   private readonly coreApp: CoreAppsService;
@@ -137,6 +139,7 @@ export class Server {
     this.coreApp = new CoreAppsService(core);
     this.httpRateLimiter = new HttpRateLimiterService();
     this.httpResources = new HttpResourcesService(core);
+    this.cache = new CacheService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
@@ -273,6 +276,7 @@ export class Server {
     const docLinksSetup = this.docLinks.setup();
     const securitySetup = this.security.setup();
     const userProfileSetup = this.userProfile.setup();
+    const cacheSetup = await this.cache.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
@@ -370,6 +374,7 @@ export class Server {
       executionContext: executionContextSetup,
       featureFlags: featureFlagsSetup,
       http: httpSetup,
+      cache: cacheSetup,
       i18n: i18nServiceSetup,
       savedObjects: savedObjectsSetup,
       status: statusSetup,
@@ -442,6 +447,7 @@ export class Server {
     const uiSettingsStart = await this.uiSettings.start();
     const customBrandingStart = this.customBranding.start();
     const metricsStart = await this.metrics.start();
+    const cacheStart = this.cache.start();
     const httpStart = this.http.getStartContract();
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
@@ -467,6 +473,7 @@ export class Server {
       executionContext: executionContextStart,
       featureFlags: featureFlagsStart,
       http: httpStart,
+      cache: cacheStart,
       metrics: metricsStart,
       savedObjects: savedObjectsStart,
       uiSettings: uiSettingsStart,
@@ -499,6 +506,7 @@ export class Server {
 
     this.coreApp.stop();
     this.httpRateLimiter.stop();
+    await this.cache.stop();
     await this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();

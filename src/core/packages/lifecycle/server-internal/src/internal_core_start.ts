@@ -22,6 +22,7 @@ import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
 import type { InternalSecurityServiceStart } from '@kbn/core-security-server-internal';
 import type { InternalUserProfileServiceStart } from '@kbn/core-user-profile-server-internal';
+import { CacheSetupContract } from '@kbn/core/packages/cache/server';
 
 /**
  * @internal
@@ -33,6 +34,7 @@ export interface InternalCoreStart {
   featureFlags: FeatureFlagsStart;
   docLinks: DocLinksServiceStart;
   http: InternalHttpServiceStart;
+  cache: CacheSetupContract;
   metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;

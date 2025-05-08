@@ -21,6 +21,7 @@ import {
   externalUrlConfig,
   permissionsPolicyConfig,
 } from '@kbn/core-http-server-internal';
+import { config as cacheConfig } from '@kbn/core-cache-server-internal';
 import { config as elasticsearchConfig } from '@kbn/core-elasticsearch-server-internal';
 import { config as coreAppConfig } from '@kbn/core-apps-server-internal';
 import { opsConfig } from '@kbn/core-metrics-server-internal';
@@ -52,6 +53,7 @@ export function registerServiceConfig(configService: ConfigService) {
     featureFlagsConfig,
     externalUrlConfig,
     httpConfig,
+    cacheConfig,
     i18nConfig,
     loggingConfig,
     nodeConfig,
