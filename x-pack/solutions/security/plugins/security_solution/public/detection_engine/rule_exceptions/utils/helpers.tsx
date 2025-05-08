@@ -42,7 +42,7 @@ import type {
 import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
-import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
+import type { EcsSecurityExtension as Ecs, CodeSignature, FileEcs, DllEcs, ProcessEcs } from '@kbn/securitysolution-ecs';
 import type { EventSummaryField } from '../../../common/components/event_details/types';
 import { getHighlightedFieldsToDisplay } from '../../../common/components/event_details/get_alert_summary_rows';
 import * as i18n from './translations';
@@ -297,11 +297,11 @@ export const lowercaseHashValues = (
  */
 export const getEntityCodeSignature = <
   T extends {
-    Ext?: { code_signature?: CodeSignature[] | CodeSignature };
+    Ext?: { code_signature?: Flattened<CodeSignature[] | CodeSignature> };
     code_signature?: CodeSignature;
   }
 >(
-  entity: T | undefined,
+  entity: Flattened<FileEcs | ProcessEcs | DllEcs> | T | undefined,
   fieldPrefix: string
 ): EntriesArrayOrUndefined => {
   if (!entity) return undefined;
@@ -318,7 +318,7 @@ export const getEntityCodeSignature = <
         field: `${fieldPrefix}.code_signature.subject_name`,
         operator: 'included' as const,
         type: 'match' as const,
-        value: entity.code_signature?.subject_name ?? '',
+        value: entity.code_signature?.subject_name.toString() ?? '',
       },
       {
         field: `${fieldPrefix}.code_signature.trusted`,
@@ -432,7 +432,7 @@ function filterEmptyExceptionEntries(entries: EntriesArray): EntriesArray {
         (el) => 'value' in el && el.value !== undefined && el.value.length > 0
       );
       finalEntries.push(entry);
-    } else if ('value' in entry && entry.value !== undefined && entry.value.length > 0) {
+    } else if ('value' in entry && entry?.value?.length > 0) {
       finalEntries.push(entry);
     }
   }
