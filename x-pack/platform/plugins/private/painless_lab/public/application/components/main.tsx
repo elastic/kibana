@@ -6,8 +6,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { kibanaFullBodyHeightCss } from '@kbn/core/public';
 import { formatRequestPayload, formatJson } from '../lib/format';
 import { exampleScript } from '../constants';
 import { PayloadFormat } from '../types';
@@ -40,10 +42,38 @@ export const Main: React.FunctionComponent = () => {
     setRequestFlyoutOpen(!isRequestFlyoutOpen);
   };
 
+  const { euiTheme } = useEuiTheme();
+
+  /**
+   * This is a very brittle way of preventing the editor and other content from disappearing
+   * behind the bottom bar.
+   * The size comes in `px` and is set in the theme, so we need to parse it to get the number.
+   */
+  const bottomBarHeight = parseInt(euiTheme.size.base, 10) * 3;
+  // adding dev tool top bar + bottom bar height to the body offset
+  // (they're both the same height, hence the x2)
+  const bodyOffset = bottomBarHeight * 2;
+
   return (
-    <div className="painlessLabMainContainer">
-      <EuiFlexGroup className="painlessLabPanelsContainer" responsive={false} gutterSize="none">
-        <EuiFlexItem className="painlessLabLeftPane">
+    <div
+      css={css`
+        ${kibanaFullBodyHeightCss(bodyOffset)}
+      `}
+    >
+      <EuiFlexGroup
+        responsive={false}
+        gutterSize="none"
+        css={css`
+          // The panels container should adopt the height of the main container
+          height: 100%;
+        `}
+      >
+        <EuiFlexItem
+          css={css`
+            padding-top: ${euiTheme.size.m};
+            background-color: ${euiTheme.colors.emptyShade};
+          `}
+        >
           <EuiTitle className="euiScreenReaderOnly">
             <h1>
               {i18n.translate('xpack.painlessLab.title', {

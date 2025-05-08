@@ -12,9 +12,11 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiTabbedContent,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { css } from '@emotion/react';
 import { Response } from '../../types';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';
@@ -46,10 +48,28 @@ export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) =>
     </EuiFlexGroup>
   );
 
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <div className="painlessLabRightPane">
+    <div
+      css={css`
+        background-color: ${euiTheme.colors.emptyShade};
+        padding: ${euiTheme.size.s};
+        border-left: ${euiTheme.border.thin};
+        height: 100%;
+      `}
+    >
       <EuiTabbedContent
-        className="painlessLabRightPane__tabs"
+        css={css`
+          display: flex;
+          flex-direction: column;
+          height: 100%;
+
+          [role='tabpanel'] {
+            height: 100%;
+            overflow-y: auto;
+          }
+        `}
         data-test-subj={isLoading ? `painlessTabs-loading` : `painlessTabs-loaded`}
         size="s"
         tabs={[

@@ -16,8 +16,10 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { Links } from '../../links';
 
 interface Props {
@@ -102,7 +104,11 @@ export const RequestFlyout: FunctionComponent<Props> = ({
           ]}
         />
 
-        <div className="painlessLabBottomBarPlaceholder" />
+        <div
+          css={css`
+            height: calc(${useEuiTheme().euiTheme.size.base} * 3);
+          `}
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   );

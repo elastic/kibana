@@ -8,8 +8,18 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 
-import { EuiPage, EuiPageBody, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPanel,
+  useEuiTheme,
+} from '@elastic/eui';
 
+import { css } from '@emotion/react';
+import { kibanaFullBodyHeightCss } from '@kbn/core/public';
 import {
   SearchProfilerTabs,
   ProfileTree,
@@ -82,9 +92,20 @@ export const App = () => {
     return null;
   };
 
+  // adding dev tool top bar to the body offset
+  // Using parseInt because the size comes in `px` format.
+  const bodyOffset = parseInt(useEuiTheme().euiTheme.size.base, 10) * 3;
+
   return (
     <>
-      <EuiPage className="prfDevTool__page appRoot">
+      <EuiPage
+        className="prfDevTool__page"
+        css={css`
+          ${kibanaFullBodyHeightCss(bodyOffset)}
+          overflow: hidden;
+          flex-shrink: 1;
+        `}
+      >
         <EuiPageBody className="prfDevTool__page__pageBody">
           {renderLicenseWarning()}
           <EuiPanel className="prfDevTool__page__pageBodyContent">
