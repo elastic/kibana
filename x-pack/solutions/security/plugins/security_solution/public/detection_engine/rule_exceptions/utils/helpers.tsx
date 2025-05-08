@@ -42,7 +42,13 @@ import type {
 import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
-import type { EcsSecurityExtension as Ecs, CodeSignature, FileEcs, DllEcs, ProcessEcs } from '@kbn/securitysolution-ecs';
+import type {
+  EcsSecurityExtension as Ecs,
+  CodeSignature,
+  FileEcs,
+  DllEcs,
+  ProcessEcs,
+} from '@kbn/securitysolution-ecs';
 import type { EventSummaryField } from '../../../common/components/event_details/types';
 import { getHighlightedFieldsToDisplay } from '../../../common/components/event_details/get_alert_summary_rows';
 import * as i18n from './translations';
