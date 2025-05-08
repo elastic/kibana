@@ -592,7 +592,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       syntheticsMigrateFromIntegration: `${ELASTIC_DOCS}solutions/observability/synthetics/migrate-from-elastic-synthetics-integration`,
       slo: `${ELASTIC_DOCS}solutions/observability/incident-management/service-level-objectives-slos`,
       sloBurnRateRule: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-slo-burn-rate-rule`,
-      aiAssistant: `${ELASTIC_DOCS}explore-analyze/ai-assistant`,
+      aiAssistant: `${ELASTIC_DOCS}solutions/observability/observability-ai-assistant`,
     },
     alerting: {
       guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,
