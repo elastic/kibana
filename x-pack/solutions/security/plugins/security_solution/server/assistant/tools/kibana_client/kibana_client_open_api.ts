@@ -112,9 +112,10 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     return {
       name: 'kibana_client',
       description:
-        'This function interacts with the Kibana API. It takes a natural language request,' +
-        ' finds out the correct endpoint to call and returns the result of the API call. This function ' +
-        'should be used when the user requests information, configurations or changes in Kibana.',
+        'This function interacts with the Kibana API. It takes a natural language input, \
+finds out the correct endpoint to call and returns the result of the API call. This function \
+should be used when the USER requests information, configurations or changes in Kibana. Provide \
+as much information as possible in the input. Do not call this function in parallel.'
     };
   }
 
@@ -130,7 +131,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
       pathname: pathnameFromRequest,
     } = request.rewrittenUrl || request.url;
 
-    if(pathnameFromRequest.match(routeRegex) === null) {
+    if (pathnameFromRequest.match(routeRegex) === null) {
       throw new Error(
         `The Kibana client tool is not supported for this request. The request URL does not match the expected pattern.`
       );
@@ -179,7 +180,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
               ],
             },
           });
-          
+
         } catch (error) {
           if (isAxiosError(error)) {
             const status = error.response?.status;
@@ -188,9 +189,8 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
                 update: {
                   messages: [
                     new ToolMessage({
-                      content: `Client error: ${status} - ${
-                        error.response?.data?.message || error.message
-                      }`,
+                      content: `Client error: ${status} - ${error.response?.data?.message || error.message
+                        }`,
                       tool_call_id: config.toolCall.id,
                     }),
                   ],
@@ -230,7 +230,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
   ): Promise<StructuredToolInterface> {
     const { tools, name, description, assistantToolParams } = args;
     return tool(
-      async ({ input }) => {
+      async ({ input }, config) => {
         const agent = createReactAgent({
           llm: assistantToolParams.createLlmInstance(),
           tools: await tools,
@@ -239,20 +239,28 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
           messages: [
             new SystemMessage({
               content:
-                'You are Kibana API Client agent. You are an expert in using functions that call' +
-                ' the Kibana APIs. Use the functions at your disposal to action requested by the user. ' +
-                'You do not need to confirm with the user before using a function. If the tool' +
-                ' input did not match expected schema, try to fix it and call the tool again.' +
-                ' In your response include all the information from the function result. Try fixing any ' +
-                'malformed function calls.',
+                'You are a powerful Kibana agent who is an expert in using the Kibana API. Kibana is the open-source data visualization and management tool for Elasticsearch.\
+You are assisting a security analyst helping them complete various tasks. Act within the context of being a security analyst.\n\n\
+<tool_calling> You have functions at your disposal that you can use. The functions map to the public Kibana REST endpoints.\n\
+1. ALWAYS follow the schema specified by the function and infer parameters from the conversation context.\n\
+2. If your function input is malformed or there is a client error, fix your mistake and try again. Try to fix the error 5 times.\n\
+3. When possible split the task into separate steps and call the functions to complete each step one at a time. For example, create a case and add a comment, has 2 steps (first the case needs to be created, then the comment needs to be added to the case).\n\
+4. You do not need to ask the user for confirmation before completing the step.\n\
+5. Once a step has been completed without any errors, do not repeat that step.\n\
+6. Once all the steps have been completed, include all of the important values from the function responses in your final response (such as ids, dates, content, description, etc...). \n\
+7. If there is no suitable function for the task or step, state in your response that you were unable to complete the task with a one line description of that task.\n\
+8. NEVER refer to tool names when speaking to the USER. Explain what you did in a human readable way.\n\
+9. In your response, summarize the function results.\n\
+</tool_calling>\n'
             }),
             new HumanMessage({ content: input }),
           ],
         };
+
         const result = await agent.invoke(inputs);
         const lastMessage = result.messages[result.messages.length - 1];
 
-        return lastMessage;
+        return lastMessage.content;
       },
       {
         name,

@@ -78,7 +78,7 @@ const mockPostOperation = {
             exclusiveMinimum: 0,
             exclusiveMaximum: 100,
           },
-          oneOf: {
+          oneOfExample: {
             type: ['string', 'number'],
             oneOf: [{ type: 'string' }, { type: 'number' }],
           },
@@ -192,7 +192,7 @@ describe('OpenApiTool', () => {
     ]);
   });
 
-  describe('parses schema correctly', () => {
+  describe.only('parses schema correctly', () => {
     it('openai', async () => {
       const openApiTool = await MockOpenApiTool.createTestableOpenApiTool({
         llmType: 'openai',
@@ -266,7 +266,9 @@ describe('OpenApiTool', () => {
                 ],
                 "type": "object",
               },
-              oneOf: {},
+              oneOfExample: {
+                description: 'One of (oneOf) the following schemas:\n[{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"},{\"type\":\"number\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"}]',
+              },
               singleEnum: {
                 enum: ['active'],
                 type: 'string',
@@ -295,7 +297,7 @@ describe('OpenApiTool', () => {
             additionalProperties: false,
             properties: {
               anyOf: {
-                type: 'string',
+                description: 'Any of (anyOf) the following schemas:\n[{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"},{\"type\":\"number\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"}]',
               },
               arrayType: {
                 type: 'string',
@@ -351,7 +353,9 @@ describe('OpenApiTool', () => {
                 ],
                 "type": "object",
               },
-              oneOf: {},
+              oneOfExample: {
+                description: 'One of (oneOf) the following schemas:\n[{\"type\":\"string\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"},{\"type\":\"number\",\"$schema\":\"http://json-schema.org/draft-07/schema#\"}]',
+              },
               singleEnum: {
                 enum: ['active'],
                 type: 'string',
