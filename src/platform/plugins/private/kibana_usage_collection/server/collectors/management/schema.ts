@@ -456,10 +456,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmEnableContinuousRollups': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmEnableTableSearchBar': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -579,10 +575,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmTraceExplorerTab': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmEnableProfilingIntegration': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -612,10 +604,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableInfrastructureProfilingIntegration': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:enableInfrastructureAssetCustomDashboards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
