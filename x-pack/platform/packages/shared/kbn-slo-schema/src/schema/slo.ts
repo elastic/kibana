@@ -94,6 +94,7 @@ const sloDefinitionSchema = t.intersection([
     updatedAt: dateType,
     groupBy: groupBySchema,
     version: t.number,
+    isTemplate: t.boolean,
   }),
   t.partial({
     createdBy: t.string,

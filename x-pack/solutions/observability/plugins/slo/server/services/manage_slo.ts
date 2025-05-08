@@ -23,6 +23,10 @@ export class ManageSLO {
       return;
     }
 
+    if (slo.isTemplate) {
+      throw new Error('Cannot enable a Template SLO');
+    }
+
     await this.summaryTransformManager.start(getSLOSummaryTransformId(slo.id, slo.revision));
     await this.transformManager.start(getSLOTransformId(slo.id, slo.revision));
     slo.enabled = true;
@@ -35,6 +39,10 @@ export class ManageSLO {
     const slo = await this.repository.findById(sloId);
     if (!slo.enabled) {
       return;
+    }
+
+    if (slo.isTemplate) {
+      throw new Error('Cannot disable a Template SLO');
     }
 
     await this.summaryTransformManager.stop(getSLOSummaryTransformId(slo.id, slo.revision));

@@ -37,6 +37,9 @@ export class ResetSLO {
 
   public async execute(sloId: string) {
     const slo = await this.repository.findById(sloId);
+    if (slo.isTemplate) {
+      throw new Error('Cannot reset a Template SLO');
+    }
 
     await assertExpectedIndicatorSourceIndexPrivileges(slo, this.scopedClusterClient.asCurrentUser);
 

@@ -21,14 +21,12 @@ export interface SLORepository {
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
   findById(id: string): Promise<SLODefinition>;
   deleteById(id: string, options?: { ignoreNotFound?: boolean }): Promise<void>;
-  search(
-    search: string,
-    pagination: Pagination,
-    options?: {
-      includeOutdatedOnly: boolean;
-      tags: string[];
-    }
-  ): Promise<Paginated<SLODefinition>>;
+  search(params: {
+    search: string;
+    pagination: Pagination;
+    includeOutdatedOnly: boolean;
+    tags: string[];
+  }): Promise<Paginated<SLODefinition>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
@@ -112,15 +110,17 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       .filter((slo) => slo !== undefined) as SLODefinition[];
   }
 
-  async search(
-    search: string,
-    pagination: Pagination,
-    options: {
-      includeOutdatedOnly?: boolean;
-      tags: string[];
-    } = { tags: [] }
-  ): Promise<Paginated<SLODefinition>> {
-    const { includeOutdatedOnly, tags } = options;
+  async search({
+    search,
+    pagination,
+    tags,
+    includeOutdatedOnly,
+  }: {
+    search: string;
+    pagination: Pagination;
+    tags: string[];
+    includeOutdatedOnly: boolean;
+  }): Promise<Paginated<SLODefinition>> {
     const filter = [];
     if (tags.length > 0) {
       filter.push(`slo.attributes.tags: (${tags.join(' OR ')})`);
@@ -168,6 +168,8 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       ),
       createdBy: storedSLO.createdBy ?? storedSLOObject.created_by,
       updatedBy: storedSLO.updatedBy ?? storedSLOObject.updated_by,
+      // added in 8.19/9.1
+      isTemplate: storedSLO.isTemplate ?? false,
     });
 
     if (isLeft(result)) {
