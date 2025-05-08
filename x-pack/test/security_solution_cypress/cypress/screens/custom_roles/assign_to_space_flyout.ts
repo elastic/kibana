@@ -12,6 +12,7 @@ export const SECURITY_CATEGORY = '[data-test-subj="featureCategory_securitySolut
 
 // Sub-privileges
 export const SECURITY_FEATURE = '[data-test-subj="featureCategory_securitySolution_siemV2"]';
+export const SECURITY_FEATURE_DESCRIPTION = '[aria-describedby="Security description text"]';
 
 export const CASES_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionCasesV3"]';
@@ -24,3 +25,5 @@ export const TIMELINE_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionTimeline"]';
 export const NOTES_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionNotes"]';
+export const SIEM_MIGRATIONS_FEATURE =
+  '[data-test-subj="featureCategory_securitySolution_securitySolutionSiemMigrations"]';

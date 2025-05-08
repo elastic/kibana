@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -44,16 +45,21 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
 
   const hasGroupBy = selectedSlos?.some((slo) => slo.instanceId !== ALL_VALUE);
 
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'alertsConfigurationFlyout',
+  });
+
   return (
     <EuiFlyout
       onClose={onCancel}
       css={css`
         min-width: 550px;
       `}
+      aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.slo.sloEmbeddable.config.sloSelector.headerTitle', {
               defaultMessage: 'Alerts configuration',
             })}

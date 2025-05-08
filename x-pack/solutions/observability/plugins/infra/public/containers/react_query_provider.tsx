@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { QueryClientConfig } from '@tanstack/react-query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import merge from 'lodash/merge';
+import { merge } from 'lodash';
 import { EuiButtonIcon } from '@elastic/eui';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
@@ -44,7 +44,7 @@ function HideableReactQueryDevTools() {
         data-test-subj="infraHideableReactQueryDevToolsButton"
         iconType="cross"
         color="primary"
-        style={{ zIndex: 99999, position: 'fixed', bottom: '40px', left: '40px' }}
+        css={{ zIndex: 99999, position: 'fixed', bottom: '40px', left: '40px' }}
         onClick={() => setIsHidden(!isHidden)}
         aria-label={i18n.translate(
           'xpack.infra.hideableReactQueryDevTools.euiButtonIcon.disableReactQueryDevLabel',

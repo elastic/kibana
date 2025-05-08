@@ -69,4 +69,5 @@ export enum LensVisualizationType {
   Gauge = 'lnsGauge',
   Datatable = 'lnsDatatable',
   LegacyMetric = 'lnsLegacyMetric',
+  Tagcloud = 'lnsTagcloud',
 }

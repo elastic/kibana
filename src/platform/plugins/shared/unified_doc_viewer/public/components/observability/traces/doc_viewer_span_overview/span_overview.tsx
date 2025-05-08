@@ -9,14 +9,15 @@
 
 import React, { useMemo } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
   SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
   TRACE_ID_FIELD,
+  SPAN_ID_FIELD,
+  SPAN_NAME_FIELD,
   TRANSACTION_ID_FIELD,
-  getTraceDocumentOverview,
+  getSpanDocumentOverview,
 } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { TransactionProvider } from './hooks/use_transaction';
@@ -25,6 +26,7 @@ import { getSpanFieldConfiguration } from './resources/get_span_field_configurat
 import { SpanSummaryField } from './sub_components/span_summary_field';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
 import { Trace } from '../components/trace';
+import { SpanSummaryTitle } from './sub_components/span_summary_title';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;
@@ -38,13 +40,15 @@ export function SpanOverview({
   onRemoveColumn,
   transactionIndexPattern,
 }: SpanOverviewProps) {
-  const parsedDoc = useMemo(() => getTraceDocumentOverview(hit), [hit]);
+  const parsedDoc = useMemo(() => getSpanDocumentOverview(hit), [hit]);
   const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
-  const transactionId = parsedDoc[TRANSACTION_ID_FIELD];
   const fieldConfigurations = useMemo(() => getSpanFieldConfiguration(parsedDoc), [parsedDoc]);
 
   return (
-    <TransactionProvider transactionId={transactionId} indexPattern={transactionIndexPattern}>
+    <TransactionProvider
+      transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
+      indexPattern={transactionIndexPattern}
+    >
       <FieldActionsProvider
         columns={columns}
         filter={filter}
@@ -53,13 +57,7 @@ export function SpanOverview({
       >
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('unifiedDocViewer.observability.traces.spanOverview.title', {
-                defaultMessage: 'Span detail',
-              })}
-            </h2>
-          </EuiTitle>
+          <SpanSummaryTitle name={parsedDoc[SPAN_NAME_FIELD]} id={parsedDoc[SPAN_ID_FIELD]} />
           <EuiSpacer size="m" />
           {spanFields.map((fieldId) => (
             <SpanSummaryField
@@ -72,21 +70,20 @@ export function SpanOverview({
           {spanDuration && (
             <>
               <EuiSpacer size="m" />
-              <SpanDurationSummary duration={spanDuration} />
-            </>
-          )}
-          {transactionId && (
-            <>
-              <EuiSpacer size="m" />
-              <Trace
-                fields={fieldConfigurations}
+              <SpanDurationSummary
+                spanDuration={spanDuration}
+                spanName={parsedDoc[SPAN_NAME_FIELD]}
                 serviceName={parsedDoc[SERVICE_NAME_FIELD]}
-                traceId={parsedDoc[TRACE_ID_FIELD]}
-                transactionId={transactionId}
-                displayType="span"
               />
             </>
           )}
+          <EuiSpacer size="m" />
+          <Trace
+            fields={fieldConfigurations}
+            traceId={parsedDoc[TRACE_ID_FIELD]}
+            docId={parsedDoc[SPAN_ID_FIELD]}
+            displayType="span"
+          />
         </EuiPanel>
       </FieldActionsProvider>
     </TransactionProvider>
