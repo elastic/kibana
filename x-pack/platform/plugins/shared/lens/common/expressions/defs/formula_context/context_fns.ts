@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getAbsoluteTimeRange, calcAutoIntervalNear } from '@kbn/data-plugin/common';
+import {
+  getAbsoluteTimeRange,
+  calcAutoIntervalNear,
+  calcAutoIntervalLessThan,
+} from '@kbn/data-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
@@ -47,6 +51,7 @@ export type ExpressionFunctionFormulaInterval = ExpressionFunctionDefinition<
   undefined,
   {
     targetBars?: number;
+    maxBars?: number;
     override?: number;
   },
   number
@@ -66,6 +71,12 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
         defaultMessage: 'The target number of bars for the date histogram.',
       }),
     },
+    maxBars: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.formula.interval.maxBars.help', {
+        defaultMessage: 'The max number of bars for the date histogram.',
+      }),
+    },
     override: {
       types: ['number'],
       help: i18n.translate('xpack.lens.formula.interval.override.help', {
@@ -79,20 +90,19 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
     if (!timeRange) {
       return 0;
     }
+    const timeRangeInMs = getTimeRangeAsNumber(timeRange, now);
 
-    if (args.override != null) {
-      // compute the smallest possible interval ES can use
-      const lowerBoundInterval = calcAutoIntervalNear(
-        // this is the max number of buckets ES can compute
-        1440,
-        getTimeRangeAsNumber(timeRange, now)
-      ).asMilliseconds();
-      // try to guess the same ES bucket size if the override is too small
-      return lowerBoundInterval < args.override ? args.override : lowerBoundInterval;
-    }
-    return args.targetBars
-      ? calcAutoIntervalNear(args.targetBars, getTimeRangeAsNumber(timeRange, now)).asMilliseconds()
+    const autoInterval = args.targetBars
+      ? calcAutoIntervalNear(args.targetBars, timeRangeInMs).asMilliseconds()
       : 0;
+
+    const possibleInterval = args.override ?? autoInterval;
+
+    const minInterval = args.maxBars
+      ? calcAutoIntervalLessThan(args.maxBars, timeRangeInMs).asMilliseconds()
+      : possibleInterval;
+
+    return possibleInterval < minInterval ? minInterval : possibleInterval;
   },
 };
 

@@ -695,7 +695,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
     columnId: string,
     indexPattern: IndexPattern,
     visualizationGroups: VisualizationDimensionGroupConfig[],
-    context?: { dateRange?: DateRange; now?: Date; targetBars?: number }
+    context?: { dateRange?: DateRange; now?: Date; targetBars?: number; maxBars?: number }
   ) => ExpressionAstFunction[];
   /**
    * Managed references control the IDs of their inner columns, so we need to be able to copy from the

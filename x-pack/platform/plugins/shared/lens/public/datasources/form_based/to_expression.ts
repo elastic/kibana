@@ -151,6 +151,7 @@ function getExpressionForLayer(
     let aggs: ExpressionAstExpressionBuilder[] = [];
     const expressions: ExpressionAstFunction[] = [];
     const histogramBarsTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
+    const histogramBarsMax = uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
 
     sortedReferences(referenceEntries).forEach((colId) => {
       const col = columns[colId];
@@ -161,6 +162,7 @@ function getExpressionForLayer(
             dateRange,
             now: nowInstant,
             targetBars: histogramBarsTarget,
+            maxBars: histogramBarsMax,
           })
         );
       }

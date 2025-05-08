@@ -94,6 +94,7 @@ export interface ContextValues {
   dateRange?: DateRange;
   now?: Date;
   targetBars?: number;
+  maxBars?: number;
   intervalOverride?: number;
 }
 
@@ -167,7 +168,8 @@ function getIntervalErrorMessages(
   indexPattern: IndexPattern,
   dateRange?: DateRange | undefined,
   operationDefinitionMap?: Record<string, GenericOperationDefinition> | undefined,
-  targetBars?: number
+  targetBars?: number,
+  maxBars?: number
 ): FieldBasedOperationErrorMessage[] {
   const errors: FieldBasedOperationErrorMessage[] = [];
   if (!targetBars) {
@@ -177,6 +179,17 @@ function getIntervalErrorMessages(
         defaultMessage: `Missing "{uiSettingVar}" value`,
         values: {
           uiSettingVar: UI_SETTINGS.HISTOGRAM_BAR_TARGET,
+        },
+      }),
+    });
+  }
+  if (!maxBars) {
+    errors.push({
+      uniqueId: INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
+      message: i18n.translate('xpack.lens.indexPattern.interval.noMaxBars', {
+        defaultMessage: `Missing "{uiSettingVar}" value`,
+        values: {
+          uiSettingVar: UI_SETTINGS.HISTOGRAM_MAX_BARS,
         },
       }),
     });
@@ -210,9 +223,10 @@ export const intervalOperation = createContextValueBasedOperation<IntervalIndexP
   description: i18n.translate('xpack.lens.formula.interval.help', {
     defaultMessage: 'The specified minimum interval for the date histogram, in milliseconds (ms).',
   }),
-  getExpressionFunction: ({ targetBars, intervalOverride }: ContextValues) =>
+  getExpressionFunction: ({ targetBars, maxBars, intervalOverride }: ContextValues) =>
     buildExpressionFunction<ExpressionFunctionFormulaInterval>('formula_interval', {
       targetBars,
+      maxBars,
       override: intervalOverride,
     }),
   getErrorMessage: getIntervalErrorMessages,
