@@ -13,6 +13,7 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 import { useBreadcrumbs, TagsList } from '@kbn/observability-shared-plugin/public';
 import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
+import { dashboardServiceProvider } from '@kbn/response-ops-rule-form/src/common';
 import { waitFor } from '@testing-library/react';
 import { Chance } from 'chance';
 import React, { Fragment } from 'react';
@@ -35,6 +36,7 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('../../utils/kibana_react');
+jest.mock('@kbn/response-ops-rule-form/src/common');
 const validationMethod = (): ValidationResult => ({ errors: {} });
 const ruleType: RuleTypeModel = {
   id: 'logs.alert.document.count',
@@ -49,6 +51,8 @@ const ruleType: RuleTypeModel = {
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 const useKibanaMock = useKibana as jest.Mock;
+
+const dashboardServiceProviderMock = dashboardServiceProvider as jest.Mock;
 
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
@@ -66,6 +70,7 @@ const mockKibana = () => {
       },
       observabilityAIAssistant: mockObservabilityAIAssistant,
       theme: {},
+      dashboard: {},
     },
   });
 };
@@ -79,6 +84,16 @@ jest.mock('../../hooks/use_fetch_rule', () => {
         id: 'ruleId',
         name: 'ruleName',
         consumer: 'logs',
+        artifacts: {
+          dashboards: [
+            {
+              id: 'dashboard-1',
+            },
+            {
+              id: 'dashboard-2',
+            },
+          ],
+        },
       },
     }),
   };
@@ -95,6 +110,14 @@ const useBreadcrumbsMock = useBreadcrumbs as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
 
 usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
+
+dashboardServiceProviderMock.mockReturnValue({
+  fetchValidDashboards: jest.fn().mockResolvedValue([
+    {
+      id: 'dashboard-1',
+    },
+  ]),
+});
 
 const chance = new Chance();
 const params = {
