@@ -12,6 +12,7 @@ import {
   useEuiTheme,
   type EuiThemeComputed,
 } from '@elastic/eui';
+import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { Axis, BarSeries, Chart, Position, Settings, ScaleType } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
@@ -106,13 +107,7 @@ export const AssetInventoryBarChart = ({
               const seriesData = assetInventoryChartData.find(
                 (data) => data[ASSET_FIELDS.ENTITY_SUB_TYPE] === param.label
               );
-
-              const count = !seriesData
-                ? 0
-                : seriesData.count > 1000
-                ? `${(seriesData.count / 1000).toFixed(1)}k`
-                : seriesData.count;
-
+              const count = !seriesData ? 0 : getAbbreviatedNumber(seriesData.count);
               return <span>{count}</span>;
             }}
           />
