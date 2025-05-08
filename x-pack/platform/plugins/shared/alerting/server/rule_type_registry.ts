@@ -277,7 +277,7 @@ export class RuleTypeRegistry {
     // validate cancelAlertsOnTimeout if set
     if (
       ruleType.cancelAlertsOnRuleTimeout === false &&
-      (!ruleType.autoRecoverAlerts || ruleType.autoRecoverAlerts === true)
+      (ruleType.autoRecoverAlerts == null || ruleType.autoRecoverAlerts === true)
     ) {
       throw new Error(
         i18n.translate('xpack.alerting.ruleTypeRegistry.register.cancelAlertsOnTimeoutError', {
