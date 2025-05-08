@@ -18,7 +18,6 @@ export function parseSimpleRuleTypeBucket(
   return (buckets ?? []).reduce((acc, bucket: AggregationsStringTermsBucketKeys) => {
     const ruleType: string = replaceDotSymbols(`${bucket.key}`);
     acc[ruleType] = bucket.doc_count ?? 0;
-    console.log(acc, ruleType);
     return acc;
   }, {} as Record<string, number>);
 }
