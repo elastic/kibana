@@ -22,8 +22,14 @@ export const inspectSLORoute = createSloServerRoute({
   handler: async ({ context, params, logger, request, plugins, corePlugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { scopedClusterClient, spaceId, repository, transformManager, summaryTransformManager } =
-      await getScopedClients({ request, logger });
+    const {
+      scopedClusterClient,
+      internalSoClient,
+      spaceId,
+      repository,
+      transformManager,
+      summaryTransformManager,
+    } = await getScopedClients({ request, logger });
 
     const core = await context.core;
     const basePath = corePlugins.http.basePath;
@@ -32,6 +38,7 @@ export const inspectSLORoute = createSloServerRoute({
     const createSLO = new CreateSLO(
       scopedClusterClient,
       repository,
+      internalSoClient,
       transformManager,
       summaryTransformManager,
       logger,

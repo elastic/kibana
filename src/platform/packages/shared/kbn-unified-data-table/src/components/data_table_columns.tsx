@@ -16,7 +16,8 @@ import {
   EuiListGroupItemProps,
   type EuiDataGridColumnSortingConfig,
 } from '@elastic/eui';
-import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -150,17 +151,11 @@ function buildEuiGridColumn({
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
 }) {
-  const dataViewField = !isPlainRecord
-    ? dataView.getFieldByName(columnName)
-    : new DataViewField({
-        name: columnName,
-        type: columnsMeta?.[columnName]?.type ?? 'unknown',
-        esTypes: columnsMeta?.[columnName]?.esType
-          ? ([columnsMeta[columnName].esType] as string[])
-          : undefined,
-        searchable: true,
-        aggregatable: false,
-      });
+  const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+    dataView,
+    fieldName: columnName,
+    columnMeta: columnsMeta?.[columnName],
+  });
   const editFieldButton =
     editField &&
     dataViewField &&
@@ -214,7 +209,7 @@ function buildEuiGridColumn({
     }
   }
 
-  const columnType = columnsMeta?.[columnName]?.type ?? dataViewField?.type;
+  const columnType = dataViewField?.type;
 
   const column: EuiDataGridColumn = {
     id: columnName,

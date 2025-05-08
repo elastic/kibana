@@ -76,6 +76,8 @@ export function TransactionDetailsTabs() {
     transactionName,
     kuery,
     environment,
+    rangeFrom,
+    rangeTo,
   });
 
   const { sampleRangeFrom, sampleRangeTo, transactionId, traceId } = urlParams;
@@ -120,7 +122,7 @@ export function TransactionDetailsTabs() {
         ...history.location,
         search: fromQuery({
           ...omit(toQuery(history.location.search), ['traceId', 'transactionId']),
-          ...preferredSample,
+          ...{ traceId: preferredSample?.traceId, transactionId: preferredSample?.transactionId },
         }),
       });
     }

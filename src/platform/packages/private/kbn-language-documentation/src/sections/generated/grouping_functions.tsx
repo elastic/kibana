@@ -46,11 +46,10 @@ export const functions = {
   Creates groups of values - buckets - out of a datetime or numeric input.
   The size of the buckets can either be provided directly, or chosen based on a recommended count and values range.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
   | STATS hire_date = MV_SORT(VALUES(hire_date)) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-  | SORT hire_date
   \`\`\`
   `,
               description:
@@ -82,7 +81,7 @@ export const functions = {
   ### CATEGORIZE
   Groups text messages into categories of similarly formatted text values.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM sample_data
   | STATS count=COUNT() BY category=CATEGORIZE(message)
   \`\`\`

@@ -14,10 +14,10 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { invokeChatCompleteWithFunctionRequest } from '../../utils/conversation';
 import {
-  clearKnowledgeBase,
-  deleteKnowledgeBaseModel,
-  setupKnowledgeBase,
-} from '../../utils/knowledge_base';
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../../utils/model_and_inference';
+import { clearKnowledgeBase, getKnowledgeBaseEntriesFromApi } from '../../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -31,15 +31,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let connectorId: string;
 
     before(async () => {
-      await setupKnowledgeBase(getService);
-
+      await deployTinyElserAndSetupKb(getService);
       proxy = await createLlmProxy(log);
+
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: proxy.getPort(),
       });
 
       // intercept the LLM request and return a fixed response
-      void proxy.interceptConversation('Hello from LLM Proxy');
+      void proxy.interceptWithResponse('Hello from LLM Proxy');
 
       await invokeChatCompleteWithFunctionRequest({
         connectorId,
@@ -61,26 +61,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      proxy.close();
+      proxy?.close();
 
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
-      await deleteKnowledgeBaseModel(getService);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
     });
 
     it('persists entry in knowledge base', async () => {
-      const res = await observabilityAIAssistantAPIClient.editor({
-        endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-        params: {
-          query: {
-            query: '',
-            sortBy: 'title',
-            sortDirection: 'asc',
-          },
-        },
-      });
+      const res = await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient });
 
       const { role, public: isPublic, text, type, user, title } = res.body.entries[0];
 

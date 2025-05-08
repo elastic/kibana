@@ -54,6 +54,7 @@ export interface UsageStats {
   'observability:apmEnableTableSearchBar': boolean;
   'observability:apmEnableServiceInventoryTableSearchBar': boolean;
   'observability:logsExplorer:allowedDataViews': string[];
+  'observability:apmEnableServiceMapApiV2': boolean;
   'observability:logSources': string[];
   'observability:enableLogsStream': boolean;
   'observability:newLogsOverview': boolean;

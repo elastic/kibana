@@ -74,7 +74,8 @@ export function AddFromLibraryButton({ onItemAdd }: AddFromLibraryButtonProps) {
     }
     return {
       addNewPanel: async (panel, displaySuccessMessage) => {
-        const state = panel.initialState! as {
+        if (!panel.serializedState) return;
+        const state = panel.serializedState.rawState as {
           savedObjectId: string;
         };
         const savedObject = (await contentManagement.client.get({

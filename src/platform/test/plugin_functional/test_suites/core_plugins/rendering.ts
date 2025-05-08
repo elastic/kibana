@@ -208,7 +208,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.serviceMapEnabled (boolean?)',
         'xpack.apm.ui.enabled (boolean?)',
         'xpack.apm.ui.maxTraceItems (number?)',
-        'xpack.apm.ui.serviceMapApiV2Enabled (boolean?)',
         'xpack.apm.managedServiceUrl (string?|never)',
         'xpack.apm.serverlessOnboarding (boolean?|never)',
         'xpack.apm.latestAgentVersionsUrl (string?)',

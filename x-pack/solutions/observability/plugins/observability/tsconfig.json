@@ -102,7 +102,6 @@
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
-    "@kbn/safer-lodash-set",
     "@kbn/features-plugin",
     "@kbn/files-plugin",
     "@kbn/server-route-repository",
@@ -118,6 +117,7 @@
     "@kbn/ebt-tools",
     "@kbn/dashboard-plugin",
     "@kbn/fields-metadata-plugin",
+    "@kbn/object-utils"
   ],
   "exclude": ["target/**/*"]
 }

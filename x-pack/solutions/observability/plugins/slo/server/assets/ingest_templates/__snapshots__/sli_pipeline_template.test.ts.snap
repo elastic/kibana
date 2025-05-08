@@ -36,6 +36,12 @@ Object {
       },
     },
     Object {
+      "set": Object {
+        "field": "spaceId",
+        "value": "default",
+      },
+    },
+    Object {
       "date_index_name": Object {
         "date_formats": Array [
           "UNIX_MS",
@@ -106,6 +112,12 @@ Object {
       "set": Object {
         "field": "slo.revision",
         "value": 1,
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "spaceId",
+        "value": "default",
       },
     },
     Object {

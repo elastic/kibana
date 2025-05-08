@@ -16,7 +16,6 @@ import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
 export interface SLORepository {
-  exists(id: string): Promise<boolean>;
   create(slo: SLODefinition): Promise<SLODefinition>;
   update(slo: SLODefinition): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
@@ -34,16 +33,6 @@ export interface SLORepository {
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
-
-  async exists(id: string) {
-    const findResponse = await this.soClient.find<StoredSLODefinition>({
-      type: SO_SLO_TYPE,
-      perPage: 0,
-      filter: `slo.attributes.id:(${id})`,
-    });
-
-    return findResponse.total > 0;
-  }
 
   async create(slo: SLODefinition): Promise<SLODefinition> {
     await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, toStoredSLO(slo));
@@ -127,9 +116,9 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     search: string,
     pagination: Pagination,
     options: {
-      includeOutdatedOnly: boolean;
+      includeOutdatedOnly?: boolean;
       tags: string[];
-    } = { includeOutdatedOnly: false, tags: [] }
+    } = { tags: [] }
   ): Promise<Paginated<SLODefinition>> {
     const { includeOutdatedOnly, tags } = options;
     const filter = [];

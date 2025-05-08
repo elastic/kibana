@@ -196,6 +196,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
+              "urls": undefined,
             },
           },
           "enabledMonitorQueryIds": Array [
@@ -226,6 +227,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
+              "urls": undefined,
             },
             "id2-asia_japan": Object {
               "configId": "id2",
@@ -246,6 +248,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
+              "urls": undefined,
             },
           },
         }
@@ -355,6 +358,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
+              "urls": undefined,
             },
           },
           "enabledMonitorQueryIds": Array [
@@ -385,6 +389,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
+              "urls": undefined,
             },
             "id2-asia_japan": Object {
               "configId": "id2",
@@ -405,6 +410,7 @@ describe('current status route', () => {
               "timestamp": "2022-09-15T16:19:16.724Z",
               "type": "browser",
               "updated_at": undefined,
+              "urls": undefined,
             },
           },
         }
@@ -464,6 +470,7 @@ describe('current status route', () => {
               "timestamp": undefined,
               "type": "browser",
               "updated_at": undefined,
+              "urls": undefined,
             },
             "id2-asia_japan": Object {
               "configId": "id2",
@@ -484,6 +491,7 @@ describe('current status route', () => {
               "timestamp": undefined,
               "type": "browser",
               "updated_at": undefined,
+              "urls": undefined,
             },
             "id2-europe_germany": Object {
               "configId": "id2",
@@ -504,6 +512,7 @@ describe('current status route', () => {
               "timestamp": undefined,
               "type": "browser",
               "updated_at": undefined,
+              "urls": undefined,
             },
           },
           "projectMonitorsCount": 0,

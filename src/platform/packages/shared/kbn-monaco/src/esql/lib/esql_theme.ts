@@ -56,7 +56,6 @@ export const buildESQLTheme = ({
         [
           'dev_time_series',
           'dev_rerank',
-          'dev_fork',
           'metadata',
           'mv_expand',
           'stats',
@@ -91,7 +90,6 @@ export const buildESQLTheme = ({
           'nulls_order',
           'join_lookup',
           'join',
-          'change_point',
           'dev_insist',
           'dev_rrf',
           'dev_completion',

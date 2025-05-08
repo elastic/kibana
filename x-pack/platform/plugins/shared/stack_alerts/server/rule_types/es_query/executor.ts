@@ -25,6 +25,7 @@ import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 
 import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
+import { unflattenObject } from '@kbn/object-utils';
 import type { EsQueryRuleActionContext } from './action_context';
 import { addMessages, getContextConditionsDescription } from './action_context';
 import type {
@@ -124,8 +125,17 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         dateStart,
         dateEnd,
       });
+
+  const resultGroupSet = new Set<string>();
+  for (const result of parsedResults.results) {
+    resultGroupSet.add(result.group);
+  }
+
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
+    const groupingObject = result.groupingObject
+      ? unflattenObject(result.groupingObject)
+      : undefined;
     const alertId = result.group;
     const value = result.value ?? result.count;
 
@@ -144,6 +154,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       hits: result.hits,
       link,
       sourceFields: result.sourceFields,
+      grouping: groupingObject,
     };
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
@@ -171,7 +182,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     alertsClient.report({
       id,
       actionGroup: ActionGroupId,
-      state: { latestTimestamp, dateStart, dateEnd },
+      state: { latestTimestamp, dateStart, dateEnd, grouping: groupingObject },
       context: actionContext,
       payload: {
         [ALERT_URL]: actionContext.link,
@@ -197,8 +208,13 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
   alertsClient.setAlertLimitReached(parsedResults.truncated);
 
   const { getRecoveredAlerts } = alertsClient;
-  for (const recoveredAlert of getRecoveredAlerts()) {
+
+  const recoveredAlerts = getRecoveredAlerts() ?? [];
+
+  for (const recoveredAlert of recoveredAlerts) {
     const alertId = recoveredAlert.alert.getId();
+    const recoveredAlertState = recoveredAlert.alert.getState();
+
     const baseRecoveryContext: EsQueryRuleActionContext = {
       title: name,
       date: currentTimestamp,
@@ -215,6 +231,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
       sourceFields: [],
+      grouping: recoveredAlertState?.grouping,
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,

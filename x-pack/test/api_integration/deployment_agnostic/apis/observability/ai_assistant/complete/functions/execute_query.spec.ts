@@ -43,6 +43,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
+    afterEach(async () => {
+      llmProxy.clear();
+    });
+
     // Calling `execute_query` via the chat/complete endpoint
     describe('POST /internal/observability_ai_assistant/chat/complete', function () {
       let messageAddedEvents: MessageAddEvent[];
@@ -62,7 +66,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'query',
           arguments: () => JSON.stringify({}),
-          when: () => true,
         });
 
         void llmProxy.interceptWithFunctionRequest({
@@ -81,10 +84,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             | SORT @timestamp DESC
             | LIMIT 10`,
             }),
-          when: () => true,
         });
 
-        void llmProxy.interceptConversation({ content: 'Hello from user' });
+        void llmProxy.interceptWithResponse('Hello from user');
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: 'Please retrieve the most recent Apache log messages',
@@ -101,6 +103,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => {
         await logsSynthtraceEsClient.clean();
+      });
+
+      afterEach(async () => {
+        llmProxy.clear();
       });
 
       it('makes 4 requests to the LLM', () => {

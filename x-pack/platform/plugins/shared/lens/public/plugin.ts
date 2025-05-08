@@ -73,7 +73,7 @@ import type {
   FormBasedDatasourceSetupPlugins,
   FormulaPublicApi,
 } from './datasources/form_based';
-import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/text_based';
+import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/form_based/esql_layer';
 
 import type {
   XyVisualization as XyVisualizationType,
@@ -147,7 +147,6 @@ import {
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
-import { deserializeState } from './react_embeddable/helper';
 import { ACTION_CREATE_ESQL_CHART } from './trigger_actions/open_lens_config/constants';
 
 export type { SaveProps } from './app_plugin';
@@ -398,18 +397,14 @@ export class LensPlugin {
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
-          const services = await getStartServicesForEmbeddable();
-          // deserialize the saved object from visualize library
-          // this make sure to fit into the new embeddable model, where the following build()
-          // function expects a fully loaded runtime state
-          const state = await deserializeState(
-            services,
-            { savedObjectId: savedObject.id },
-            savedObject.references
-          );
           container.addNewPanel({
             panelType: LENS_EMBEDDABLE_TYPE,
-            initialState: state,
+            serializedState: {
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+              references: savedObject.references,
+            },
           });
         },
         savedObjectType: LENS_EMBEDDABLE_TYPE,

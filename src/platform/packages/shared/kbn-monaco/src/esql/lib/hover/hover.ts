@@ -15,12 +15,12 @@ import {
   isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
 import {
+  ESQLFieldWithMetadata,
+  collectUserDefinedColumns,
   getFunctionDefinition,
   getFunctionSignatures,
   type ESQLCallbacks,
   getPolicyHelper,
-  collectUserDefinedColumns,
-  ESQLRealField,
 } from '@kbn/esql-validation-autocomplete';
 import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
 import {
@@ -177,12 +177,12 @@ async function getHintForFunctionArg(
   if (!fnDefinition) {
     return [];
   }
-  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
-  const anyVariables = collectUserDefinedColumns(root.commands, fieldsMap, query);
+  const fieldsMap: Map<string, ESQLFieldWithMetadata> = await getFieldsMap();
+  const anyUserDefinedColumns = collectUserDefinedColumns(root.commands, fieldsMap, query);
 
   const references = {
     fields: fieldsMap,
-    userDefinedColumns: anyVariables,
+    userDefinedColumns: anyUserDefinedColumns,
   };
 
   const { typesToSuggestNext, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(

@@ -130,6 +130,7 @@ export class StreamManager {
     this.trackedGeneratorStreams.push(generatorStream);
 
     await awaitStream(generatorStream).finally(() => {
+      pull(this.trackedGeneratorStreams, generatorStream);
       pull(streams, generatorStream);
     });
   }

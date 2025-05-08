@@ -29,6 +29,7 @@
     "@kbn/visualization-utils",
     "@kbn/react-kibana-context-render",
     "@kbn/transpose-utils",
+    "@kbn/ebt-tools",
   ],
   "exclude": [
     "target/**/*",

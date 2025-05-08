@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
 
 export const shallowMockedFields = [
   {
@@ -103,6 +103,10 @@ export const buildDataViewMock = ({
 
   dataViewFields.getAll = () => {
     return dataViewFields;
+  };
+
+  dataViewFields.create = (spec: FieldSpec) => {
+    return new DataViewField(spec);
   };
 
   id = id ?? `${name}-id`;

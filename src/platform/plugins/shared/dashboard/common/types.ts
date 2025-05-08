@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord, Writable } from '@kbn/utility-types';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
@@ -46,7 +46,7 @@ export interface DashboardAttributesAndReferences {
   references: Reference[];
 }
 
-export type DashboardSettings = DashboardOptions & {
+export type DashboardSettings = Writable<DashboardOptions> & {
   description?: DashboardAttributes['description'];
   tags: string[];
   timeRestore: DashboardAttributes['timeRestore'];
@@ -71,18 +71,30 @@ export interface DashboardState extends DashboardSettings {
    * Serialized control group state.
    * Contains state loaded from dashboard saved object
    */
-  controlGroupInput?: ControlGroupSerializedState | undefined;
-  /**
-   * Runtime control group state.
-   * Contains state passed from dashboard locator
-   * Use runtime state when building input for portable dashboards
-   */
-  controlGroupState?: Partial<ControlGroupRuntimeState>;
+  controlGroupInput?: ControlGroupSerializedState;
 }
 
-export type DashboardLocatorParams = Partial<
-  Omit<DashboardState, 'panels' | 'controlGroupInput' | 'references'>
-> & {
+/**
+ * Dashboard state stored in dashboard URLs
+ * Do not change type without considering BWC of stored URLs
+ */
+export type SharedDashboardState = Partial<
+  Omit<DashboardState, 'panels'> & {
+    controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
+
+    /**
+     * Runtime control group state.
+     * @deprecated use controlGroupInput
+     */
+    controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord;
+
+    panels: DashboardPanel[];
+
+    references?: DashboardState['references'] & SerializableRecord;
+  }
+>;
+
+export type DashboardLocatorParams = Partial<SharedDashboardState> & {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
    * a new, unsaved dashboard will be loaded up.
@@ -108,14 +120,4 @@ export type DashboardLocatorParams = Partial<
    * (Background search)
    */
   searchSessionId?: string;
-
-  /**
-   * List of dashboard panels
-   */
-  panels?: Array<DashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
-
-  /**
-   * Control group changes
-   */
-  controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord; // used SerializableRecord here to force the GridData type to be read as serializable
 };

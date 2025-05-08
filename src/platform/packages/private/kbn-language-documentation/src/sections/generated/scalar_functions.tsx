@@ -42,8 +42,8 @@ export const functions = {
   ### ABS
   Returns the absolute value.
 
-  \`\`\` esql
-  ROW number = -1.0
+  \`\`\`esql
+  ROW number = -1.0 
   | EVAL abs_number = ABS(number)
   \`\`\`
   `,
@@ -71,9 +71,9 @@ export const functions = {
   -->
 
   ### ACOS
-  Returns the [arccosine](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of \`n\` as an angle, expressed in radians.
+  Returns the arccosine of \`n\` as an angle, expressed in radians.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=.9
   | EVAL acos=ACOS(a)
   \`\`\`
@@ -102,10 +102,10 @@ export const functions = {
   -->
 
   ### ASIN
-  Returns the [arcsine](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of the input
+  Returns the arcsine of the input
   numeric expression as an angle, expressed in radians.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=.9
   | EVAL asin=ASIN(a)
   \`\`\`
@@ -134,10 +134,10 @@ export const functions = {
   -->
 
   ### ATAN
-  Returns the [arctangent](https://en.wikipedia.org/wiki/Inverse_trigonometric_functions) of the input
+  Returns the arctangent of the input
   numeric expression as an angle, expressed in radians.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=12.9
   | EVAL atan=ATAN(a)
   \`\`\`
@@ -168,10 +168,10 @@ export const functions = {
   -->
 
   ### ATAN2
-  The [angle](https://en.wikipedia.org/wiki/Atan2) between the positive x-axis and the ray from the
+  The angle between the positive x-axis and the ray from the
   origin to the point (x , y) in the Cartesian plane, expressed in radians.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW y=12.9, x=.6
   | EVAL atan2=ATAN2(y, x)
   \`\`\`
@@ -205,7 +205,7 @@ export const functions = {
   ### BIT_LENGTH
   Returns the bit length of a string.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airports
   | WHERE country == "India"
   | KEEP city
@@ -242,7 +242,7 @@ export const functions = {
   ### BYTE_LENGTH
   Returns the byte length of a string.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airports
   | WHERE country == "India"
   | KEEP city
@@ -282,7 +282,7 @@ export const functions = {
   is returned when no condition matches. If the number of arguments is even, and
   no condition matches, the function returns \`null\`.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | EVAL type = CASE(
       languages <= 1, "monolingual",
@@ -318,7 +318,7 @@ export const functions = {
   Returns the cube root of a number. The input can be any numeric value, the return value is always a double.
   Cube roots of infinities are null.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW d = 1000.0
   | EVAL c = cbrt(d)
   \`\`\`
@@ -349,11 +349,11 @@ export const functions = {
   ### CEIL
   Round a number up to the nearest integer.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=1.8
   | EVAL a=CEIL(a)
   \`\`\`
-  Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to [Math.ceil](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Math.html#ceil(double)).
+  Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to Math.ceil.
   `,
             description:
               'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -383,9 +383,9 @@ export const functions = {
   ### CIDR_MATCH
   Returns true if the provided IP is contained in one of the provided CIDR blocks.
 
-  \`\`\` esql
-  FROM hosts
-  | WHERE CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32")
+  \`\`\`esql
+  FROM hosts 
+  | WHERE CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32") 
   | KEEP card, host, ip0, ip1
   \`\`\`
   `,
@@ -418,7 +418,7 @@ export const functions = {
   ### COALESCE
   Returns the first of its arguments that is not null. If all arguments are null, it returns \`null\`.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=null, b="b"
   | EVAL COALESCE(a, b)
   \`\`\`
@@ -452,7 +452,7 @@ export const functions = {
   ### CONCAT
   Concatenates two or more strings.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | KEEP first_name, last_name
   | EVAL fullname = CONCAT(first_name, " ", last_name)
@@ -483,10 +483,10 @@ export const functions = {
   -->
 
   ### COS
-  Returns the [cosine](https://en.wikipedia.org/wiki/Sine_and_cosine) of an angle.
+  Returns the cosine of an angle.
 
-  \`\`\` esql
-  ROW a=1.8
+  \`\`\`esql
+  ROW a=1.8 
   | EVAL cos=COS(a)
   \`\`\`
   `,
@@ -514,10 +514,10 @@ export const functions = {
   -->
 
   ### COSH
-  Returns the [hyperbolic cosine](https://en.wikipedia.org/wiki/Hyperbolic_functions) of a number.
+  Returns the hyperbolic cosine of a number.
 
-  \`\`\` esql
-  ROW a=1.8
+  \`\`\`esql
+  ROW a=1.8 
   | EVAL cosh=COSH(a)
   \`\`\`
   `,
@@ -550,7 +550,7 @@ export const functions = {
   Subtracts the \`startTimestamp\` from the \`endTimestamp\` and returns the difference in multiples of \`unit\`.
   If \`startTimestamp\` is later than the \`endTimestamp\`, negative values are returned.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
   | EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)
   \`\`\`
@@ -584,7 +584,7 @@ export const functions = {
   ### DATE_EXTRACT
   Extracts parts of a date, like year, month, day, hour.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")
   | EVAL year = DATE_EXTRACT("year", date)
   \`\`\`
@@ -618,7 +618,7 @@ export const functions = {
   ### DATE_FORMAT
   Returns a string representation of a date, in the provided format.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | KEEP first_name, last_name, hire_date
   | EVAL hired = DATE_FORMAT("yyyy-MM-dd", hire_date)
@@ -653,7 +653,7 @@ export const functions = {
   ### DATE_PARSE
   Returns a date by parsing the second argument using the format specified in the first argument.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW date_string = "2022-05-06"
   | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
   \`\`\`
@@ -687,7 +687,7 @@ export const functions = {
   ### DATE_TRUNC
   Rounds down a date to the closest interval.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | KEEP first_name, last_name, hire_date
   | EVAL year_hired = DATE_TRUNC(1 year, hire_date)
@@ -718,9 +718,9 @@ export const functions = {
   -->
 
   ### E
-  Returns [Euler’s number](https://en.wikipedia.org/wiki/E_(mathematical_constant)).
+  Returns Euler's number.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW E()
   \`\`\`
   `,
@@ -752,7 +752,7 @@ export const functions = {
   ### ENDS_WITH
   Returns a boolean that indicates whether a keyword string ends with another string.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | KEEP last_name
   | EVAL ln_E = ENDS_WITH(last_name, "d")
@@ -785,7 +785,7 @@ export const functions = {
   ### EXP
   Returns the value of e raised to the power of the given number.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW d = 5.0
   | EVAL s = EXP(d)
   \`\`\`
@@ -818,13 +818,13 @@ export const functions = {
   ### FLOOR
   Round a number down to the nearest integer.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=1.8
   | EVAL a=FLOOR(a)
   \`\`\`
   Note: This is a noop for \`long\` (including unsigned) and \`integer\`.
   For \`double\` this picks the closest \`double\` value to the integer
-  similar to [Math.floor](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/lang/Math.html#floor(double)).
+  similar to Math.floor.
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -855,8 +855,8 @@ export const functions = {
   ### FROM_BASE64
   Decode a base64 string.
 
-  \`\`\` esql
-  row a = "ZWxhc3RpYw=="
+  \`\`\`esql
+  row a = "ZWxhc3RpYw==" 
   | eval d = from_base64(a)
   \`\`\`
   `,
@@ -890,7 +890,7 @@ export const functions = {
   Returns the maximum value from multiple columns. This is similar to \`MV_MAX\`
   except it is intended to run on multiple columns at once.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a = 10, b = 20
   | EVAL g = GREATEST(a, b)
   \`\`\`
@@ -923,8 +923,8 @@ export const functions = {
   ### HASH
   Computes the hash of the input using various algorithms such as MD5, SHA, SHA-224, SHA-256, SHA-384, SHA-512.
 
-  \`\`\` esql
-  FROM sample_data
+  \`\`\`esql
+  FROM sample_data 
   | WHERE message != "Connection error"
   | EVAL md5 = hash("md5", message), sha256 = hash("sha256", message) 
   | KEEP message, md5, sha256;
@@ -959,7 +959,7 @@ export const functions = {
   Returns the hypotenuse of two numbers. The input can be any numeric values, the return value is always a double.
   Hypotenuses of infinities are null.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a = 3.0, b = 4.0
   | EVAL c = HYPOT(a, b)
   \`\`\`
@@ -993,7 +993,7 @@ export const functions = {
   ### IP_PREFIX
   Truncates an IP to a given prefix length.
 
-  \`\`\` esql
+  \`\`\`esql
   row ip4 = to_ip("1.2.3.4"), ip6 = to_ip("fe80::cae2:65ff:fece:feb9")
   | eval ip4_prefix = ip_prefix(ip4, 24, 0), ip6_prefix = ip_prefix(ip6, 0, 112);
   \`\`\`
@@ -1025,12 +1025,11 @@ export const functions = {
   ### KQL
   Performs a KQL query. Returns true if the provided KQL query string matches the row.
 
-  \`\`\` esql
-  FROM books
+  \`\`\`esql
+  FROM books 
   | WHERE KQL("author: Faulkner")
   | KEEP book_no, author 
   | SORT book_no 
-  | LIMIT 5
   \`\`\`
   `,
             description:
@@ -1061,7 +1060,7 @@ export const functions = {
   ### LEAST
   Returns the minimum value from multiple columns. This is similar to \`MV_MIN\` except it is intended to run on multiple columns at once.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a = 10, b = 20
   | EVAL l = LEAST(a, b)
   \`\`\`
@@ -1093,12 +1092,10 @@ export const functions = {
   ### LEFT
   Returns the substring that extracts 'length' chars from 'string' starting from the left.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | KEEP last_name
   | EVAL left = LEFT(last_name, 3)
-  | SORT last_name ASC
-  | LIMIT 5
   \`\`\`
   `,
             description:
@@ -1129,7 +1126,7 @@ export const functions = {
   ### LENGTH
   Returns the character length of a string.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airports
   | WHERE country == "India"
   | KEEP city
@@ -1168,7 +1165,7 @@ export const functions = {
   Returns \`0\` if the substring cannot be found.
   Note that string positions start from \`1\`.
 
-  \`\`\` esql
+  \`\`\`esql
   row a = "hello"
   | eval a_ll = locate(a, "ll")
   \`\`\`
@@ -1202,7 +1199,7 @@ export const functions = {
 
   Logs of zero, negative numbers, and base of one return \`null\` as well as a warning.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW base = 2.0, value = 8.0
   | EVAL s = LOG(base, value)
   \`\`\`
@@ -1237,8 +1234,8 @@ export const functions = {
 
   Logs of 0 and negative numbers return \`null\` as well as a warning.
 
-  \`\`\` esql
-  ROW d = 1000.0
+  \`\`\`esql
+  ROW d = 1000.0 
   | EVAL s = LOG10(d)
   \`\`\`
   `,
@@ -1271,7 +1268,7 @@ export const functions = {
   ### LTRIM
   Removes leading whitespaces from a string.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW message = "   some text  ",  color = " red "
   | EVAL message = LTRIM(message)
   | EVAL color = LTRIM(color)
@@ -1309,7 +1306,7 @@ export const functions = {
   Use \`MATCH\` to perform a match query on the specified field.
   Using \`MATCH\` is equivalent to using the \`match\` query in the Elasticsearch Query DSL.
 
-  Match can be used on fields from the text family like text and semantic_text,
+  Match can be used on fields from the text family like  text and  semantic_text,
   as well as other field types like keyword, boolean, dates, and numeric types.
 
   Match can use function named parameters to specify additional options for the match query.
@@ -1319,12 +1316,9 @@ export const functions = {
 
   \`MATCH\` returns true if the provided query matches the row.
 
-  \`\`\` esql
-  FROM books
+  \`\`\`esql
+  FROM books 
   | WHERE MATCH(author, "Faulkner")
-  | KEEP book_no, author 
-  | SORT book_no 
-  | LIMIT 5
   \`\`\`
   `,
               description:
@@ -1354,8 +1348,8 @@ export const functions = {
   ### MD5
   Computes the MD5 hash of the input.
 
-  \`\`\` esql
-  FROM sample_data
+  \`\`\`esql
+  FROM sample_data 
   | WHERE message != "Connection error"
   | EVAL md5 = md5(message)
   | KEEP message, md5;
@@ -1417,9 +1411,9 @@ export const functions = {
   -->
 
   ### MV_AVG
-  Converts a multivalued field into a single valued field containing the average of all the values.
+  Converts a multivalued field into a single valued field containing the average of all of the values.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=[3, 5, 1, 6]
   | EVAL avg_a = MV_AVG(a)
   \`\`\`
@@ -1453,7 +1447,7 @@ export const functions = {
   ### MV_CONCAT
   Converts a multivalued string expression into a single valued column containing the concatenation of all values separated by a delimiter.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=["foo", "zoo", "bar"]
   | EVAL j = MV_CONCAT(a, ", ")
   \`\`\`
@@ -1487,7 +1481,7 @@ export const functions = {
   ### MV_COUNT
   Converts a multivalued expression into a single valued column containing a count of the number of values.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=["foo", "zoo", "bar"]
   | EVAL count_a = MV_COUNT(a)
   \`\`\`
@@ -1521,7 +1515,7 @@ export const functions = {
   ### MV_DEDUPE
   Remove duplicate values from a multivalued field.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=["foo", "foo", "bar", "foo"]
   | EVAL dedupe_a = MV_DEDUPE(a)
   \`\`\`
@@ -1558,7 +1552,7 @@ export const functions = {
   first value. This is most useful when reading from a function that emits
   multivalued columns in a known order like \`SPLIT\`.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a="foo;bar;baz"
   | EVAL first_a = MV_FIRST(SPLIT(a, ";"))
   \`\`\`
@@ -1594,7 +1588,7 @@ export const functions = {
   value. This is most useful when reading from a function that emits multivalued
   columns in a known order like \`SPLIT\`.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a="foo;bar;baz"
   | EVAL last_a = MV_LAST(SPLIT(a, ";"))
   \`\`\`
@@ -1628,7 +1622,7 @@ export const functions = {
   ### MV_MAX
   Converts a multivalued expression into a single valued column containing the maximum value.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=[3, 5, 1]
   | EVAL max_a = MV_MAX(a)
   \`\`\`
@@ -1662,7 +1656,7 @@ export const functions = {
   ### MV_MEDIAN
   Converts a multivalued field into a single valued field containing the median value.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=[3, 5, 1]
   | EVAL median_a = MV_MEDIAN(a)
   \`\`\`
@@ -1701,7 +1695,7 @@ export const functions = {
 
   It is calculated as the median of each data point's deviation from the median of the entire sample. That is, for a random variable \`X\`, the median absolute deviation is \`median(|median(X) - X|)\`.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW values = [0, 2, 5, 6]
   | EVAL median_absolute_deviation = MV_MEDIAN_ABSOLUTE_DEVIATION(values), median = MV_MEDIAN(values)
   \`\`\`
@@ -1736,7 +1730,7 @@ export const functions = {
   ### MV_MIN
   Converts a multivalued expression into a single valued column containing the minimum value.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=[2, 1]
   | EVAL min_a = MV_MIN(a)
   \`\`\`
@@ -1770,7 +1764,7 @@ export const functions = {
   ### MV_PERCENTILE
   Converts a multivalued field into a single valued field containing the value at which a certain percentage of observed values occur.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW values = [5, 5, 10, 12, 5000]
   | EVAL p50 = MV_PERCENTILE(values, 50), median = MV_MEDIAN(values)
   \`\`\`
@@ -1804,7 +1798,7 @@ export const functions = {
   ### MV_PSERIES_WEIGHTED_SUM
   Converts a multivalued expression into a single-valued column by multiplying every element on the input list by its corresponding term in P-Series and computing the sum.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a = [70.0, 45.0, 21.0, 21.0, 21.0]
   | EVAL sum = MV_PSERIES_WEIGHTED_SUM(a, 1.5)
   | KEEP sum
@@ -1841,7 +1835,7 @@ export const functions = {
   This is most useful when reading from a function that emits multivalued columns
   in a known order like \`SPLIT\` or \`MV_SORT\`.
 
-  \`\`\` esql
+  \`\`\`esql
   row a = [1, 2, 2, 3]
   | eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)
   \`\`\`
@@ -1875,7 +1869,7 @@ export const functions = {
   ### MV_SORT
   Sorts a multivalued field in lexicographical order.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a = [4, 2, -3, 2]
   | EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")
   \`\`\`
@@ -1907,9 +1901,9 @@ export const functions = {
   -->
 
   ### MV_SUM
-  Converts a multivalued field into a single valued field containing the sum of all the values.
+  Converts a multivalued field into a single valued field containing the sum of all of the values.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=[3, 5, 6]
   | EVAL sum_a = MV_SUM(a)
   \`\`\`
@@ -1943,7 +1937,7 @@ export const functions = {
   ### MV_ZIP
   Combines the values from two multivalued fields with a delimiter that joins them together.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a = ["x", "y", "z"], b = ["1", "2"]
   | EVAL c = mv_zip(a, b, "-")
   | KEEP a, b, c
@@ -1976,7 +1970,7 @@ export const functions = {
   ### NOW
   Returns current date and time.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW current_date = NOW()
   \`\`\`
   `,
@@ -2004,9 +1998,9 @@ export const functions = {
   -->
 
   ### PI
-  Returns [Pi](https://en.wikipedia.org/wiki/Pi), the ratio of a circle’s circumference to its diameter.
+  Returns Pi, the ratio of a circle's circumference to its diameter.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW PI()
   \`\`\`
   `,
@@ -2036,7 +2030,7 @@ export const functions = {
   ### POW
   Returns the value of \`base\` raised to the power of \`exponent\`.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW base = 2.0, exponent = 2
   | EVAL result = POW(base, exponent)
   \`\`\`
@@ -2068,12 +2062,9 @@ export const functions = {
   ### QSTR
   Performs a query string query. Returns true if the provided query string matches the row.
 
-  \`\`\` esql
-  FROM books
+  \`\`\`esql
+  FROM books 
   | WHERE QSTR("author: Faulkner")
-  | KEEP book_no, author 
-  | SORT book_no 
-  | LIMIT 5
   \`\`\`
   `,
             description:
@@ -2104,9 +2095,9 @@ export const functions = {
   ### REPEAT
   Returns a string constructed by concatenating \`string\` with itself the specified \`number\` of times.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a = "Hello!"
-  | EVAL triple_a = REPEAT(a, 3)
+  | EVAL triple_a = REPEAT(a, 3);
   \`\`\`
   `,
               description:
@@ -2139,7 +2130,7 @@ export const functions = {
   The function substitutes in the string \`str\` any match of the regular expression \`regex\`
   with the replacement string \`newStr\`.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW str = "Hello World"
   | EVAL str = REPLACE(str, "World", "Universe")
   | KEEP str
@@ -2174,9 +2165,12 @@ export const functions = {
   ### REVERSE
   Returns a new string representing the input string in reverse order.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW message = "Some Text" | EVAL message_reversed = REVERSE(message);
   \`\`\`
+  Note: If Elasticsearch is running with a JDK version less than 20 then this will not properly reverse Grapheme Clusters.
+  Elastic Cloud and the JDK bundled with Elasticsearch all use newer JDKs. But if you've explicitly shifted to an older jdk
+  then you'll see things like "👍🏽😊" be reversed to  "🏽👍😊" instead of the correct "😊👍🏽".
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -2207,12 +2201,10 @@ export const functions = {
   ### RIGHT
   Return the substring that extracts 'length' chars from 'str' starting from the right.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | KEEP last_name
   | EVAL right = RIGHT(last_name, 3)
-  | SORT last_name ASC
-  | LIMIT 5
   \`\`\`
   `,
               description:
@@ -2247,7 +2239,7 @@ export const functions = {
   precision is a negative number, rounds to the number of digits left
   of the decimal point.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | KEEP first_name, last_name, height
   | EVAL height_ft = ROUND(height * 3.281, 1)
@@ -2282,7 +2274,7 @@ export const functions = {
   ### RTRIM
   Removes trailing whitespaces from a string.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW message = "   some text  ",  color = " red "
   | EVAL message = RTRIM(message)
   | EVAL color = RTRIM(color)
@@ -2317,8 +2309,8 @@ export const functions = {
   ### SHA1
   Computes the SHA1 hash of the input.
 
-  \`\`\` esql
-  FROM sample_data
+  \`\`\`esql
+  FROM sample_data 
   | WHERE message != "Connection error"
   | EVAL sha1 = sha1(message)
   | KEEP message, sha1;
@@ -2352,8 +2344,8 @@ export const functions = {
   ### SHA256
   Computes the SHA256 hash of the input.
 
-  \`\`\` esql
-  FROM sample_data
+  \`\`\`esql
+  FROM sample_data 
   | WHERE message != "Connection error"
   | EVAL sha256 = sha256(message)
   | KEEP message, sha256;
@@ -2389,7 +2381,7 @@ export const functions = {
   Returns the sign of the given number.
   It returns \`-1\` for negative numbers, \`0\` for \`0\` and \`1\` for positive numbers.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW d = 100.0
   | EVAL s = SIGNUM(d)
   \`\`\`
@@ -2419,10 +2411,10 @@ export const functions = {
   -->
 
   ### SIN
-  Returns the [sine](https://en.wikipedia.org/wiki/Sine_and_cosine) of an angle.
+  Returns the sine of an angle.
 
-  \`\`\` esql
-  ROW a=1.8
+  \`\`\`esql
+  ROW a=1.8 
   | EVAL sin=SIN(a)
   \`\`\`
   `,
@@ -2450,10 +2442,10 @@ export const functions = {
   -->
 
   ### SINH
-  Returns the [hyperbolic sine](https://en.wikipedia.org/wiki/Hyperbolic_functions) of a number.
+  Returns the hyperbolic sine of a number.
 
-  \`\`\` esql
-  ROW a=1.8
+  \`\`\`esql
+  ROW a=1.8 
   | EVAL sinh=SINH(a)
   \`\`\`
   `,
@@ -2485,7 +2477,7 @@ export const functions = {
   ### SPACE
   Returns a string made of \`number\` spaces.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW message = CONCAT("Hello", SPACE(1), "World!");
   \`\`\`
   `,
@@ -2518,7 +2510,7 @@ export const functions = {
   ### SPLIT
   Split a single valued string into multiple strings.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW words="foo;bar;baz;qux;quux;corge"
   | EVAL word = SPLIT(words, ";")
   \`\`\`
@@ -2551,7 +2543,7 @@ export const functions = {
   Returns the square root of a number. The input can be any numeric value, the return value is always a double.
   Square roots of negative numbers and infinities are null.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW d = 100.0
   | EVAL s = SQRT(d)
   \`\`\`
@@ -2583,9 +2575,9 @@ export const functions = {
 
   ### ST_CONTAINS
   Returns whether the first geometry contains the second geometry.
-  This is the inverse of the ST_WITHIN function.
+  This is the inverse of the \`ST_WITHIN\` function.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airport_city_boundaries
   | WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE("POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))"))
   | KEEP abbrev, airport, region, city, city_location
@@ -2619,10 +2611,10 @@ export const functions = {
 
   ### ST_DISJOINT
   Returns whether the two geometries or geometry columns are disjoint.
-  This is the inverse of the ST_INTERSECTS function.
+  This is the inverse of the \`ST_INTERSECTS\` function.
   In mathematical terms: ST_Disjoint(A, B) ⇔ A ⋂ B = ∅
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airport_city_boundaries
   | WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))"))
   | KEEP abbrev, airport, region, city, city_location
@@ -2659,7 +2651,7 @@ export const functions = {
   For cartesian geometries, this is the pythagorean distance in the same units as the original coordinates.
   For geographic geometries, this is the circular distance along the great circle in meters.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airports
   | WHERE abbrev == "CPH"
   | EVAL distance = ST_DISTANCE(location, city_location)
@@ -2695,7 +2687,7 @@ export const functions = {
   ### ST_ENVELOPE
   Determines the minimum bounding box of the supplied geometry.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airport_city_boundaries
   | WHERE abbrev == "CPH"
   | EVAL envelope = ST_ENVELOPE(city_boundary)
@@ -2732,10 +2724,10 @@ export const functions = {
   Returns true if two geometries intersect.
   They intersect if they have any point in common, including their interior points
   (points along lines or within polygons).
-  This is the inverse of the ST_DISJOINT function.
+  This is the inverse of the \`ST_DISJOINT\` function.
   In mathematical terms: ST_Intersects(A, B) ⇔ A ⋂ B ≠ ∅
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airports
   | WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))
   \`\`\`
@@ -2768,9 +2760,9 @@ export const functions = {
 
   ### ST_WITHIN
   Returns whether the first geometry is within the second geometry.
-  This is the inverse of the ST_CONTAINS function.
+  This is the inverse of the \`ST_CONTAINS\` function.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airport_city_boundaries
   | WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE("POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))"))
   | KEEP abbrev, airport, region, city, city_location
@@ -2804,7 +2796,7 @@ export const functions = {
   Extracts the \`x\` coordinate from the supplied point.
   If the points is of type \`geo_point\` this is equivalent to extracting the \`longitude\` value.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
   | EVAL x =  ST_X(point), y = ST_Y(point)
   \`\`\`
@@ -2838,7 +2830,7 @@ export const functions = {
   Extracts the maximum value of the \`x\` coordinates from the supplied geometry.
   If the geometry is of type \`geo_point\` or \`geo_shape\` this is equivalent to extracting the maximum \`longitude\` value.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airport_city_boundaries
   | WHERE abbrev == "CPH"
   | EVAL envelope = ST_ENVELOPE(city_boundary)
@@ -2876,7 +2868,7 @@ export const functions = {
   Extracts the minimum value of the \`x\` coordinates from the supplied geometry.
   If the geometry is of type \`geo_point\` or \`geo_shape\` this is equivalent to extracting the minimum \`longitude\` value.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airport_city_boundaries
   | WHERE abbrev == "CPH"
   | EVAL envelope = ST_ENVELOPE(city_boundary)
@@ -2912,7 +2904,7 @@ export const functions = {
   Extracts the \`y\` coordinate from the supplied point.
   If the points is of type \`geo_point\` this is equivalent to extracting the \`latitude\` value.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")
   | EVAL x =  ST_X(point), y = ST_Y(point)
   \`\`\`
@@ -2946,7 +2938,7 @@ export const functions = {
   Extracts the maximum value of the \`y\` coordinates from the supplied geometry.
   If the geometry is of type \`geo_point\` or \`geo_shape\` this is equivalent to extracting the maximum \`latitude\` value.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airport_city_boundaries
   | WHERE abbrev == "CPH"
   | EVAL envelope = ST_ENVELOPE(city_boundary)
@@ -2984,7 +2976,7 @@ export const functions = {
   Extracts the minimum value of the \`y\` coordinates from the supplied geometry.
   If the geometry is of type \`geo_point\` or \`geo_shape\` this is equivalent to extracting the minimum \`latitude\` value.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airport_city_boundaries
   | WHERE abbrev == "CPH"
   | EVAL envelope = ST_ENVELOPE(city_boundary)
@@ -3021,7 +3013,7 @@ export const functions = {
   ### STARTS_WITH
   Returns a boolean that indicates whether a keyword string starts with another string.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | KEEP last_name
   | EVAL ln_S = STARTS_WITH(last_name, "B")
@@ -3056,7 +3048,7 @@ export const functions = {
   ### SUBSTRING
   Returns a substring of a string, specified by a start position and an optional length.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | KEEP last_name
   | EVAL ln_sub = SUBSTRING(last_name, 1, 3)
@@ -3087,10 +3079,10 @@ export const functions = {
   -->
 
   ### TAN
-  Returns the [tangent](https://en.wikipedia.org/wiki/Sine_and_cosine) of an angle.
+  Returns the tangent of an angle.
 
-  \`\`\` esql
-  ROW a=1.8
+  \`\`\`esql
+  ROW a=1.8 
   | EVAL tan=TAN(a)
   \`\`\`
   `,
@@ -3118,10 +3110,10 @@ export const functions = {
   -->
 
   ### TANH
-  Returns the [hyperbolic tangent](https://en.wikipedia.org/wiki/Hyperbolic_functions) of a number.
+  Returns the hyperbolic tangent of a number.
 
-  \`\`\` esql
-  ROW a=1.8
+  \`\`\`esql
+  ROW a=1.8 
   | EVAL tanh=TANH(a)
   \`\`\`
   `,
@@ -3151,7 +3143,7 @@ export const functions = {
   ### TAU
   Returns the ratio of a circle's circumference to its radius.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW TAU()
   \`\`\`
   `,
@@ -3177,12 +3169,16 @@ export const functions = {
             'languageDocumentation.documentationESQL.to_aggregate_metric_double.markdown',
             {
               defaultMessage: `<!--
-  This is generated by ESQL’s AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
+  This is generated by ESQL's AbstractFunctionTestCase. Do no edit it. See ../README.md for how to regenerate it.
   -->
 
   ### TO_AGGREGATE_METRIC_DOUBLE
   Encode a numeric to an aggregate_metric_double.
 
+  \`\`\`esql
+  ROW x = 3892095203
+  | EVAL agg_metric = TO_AGGREGATE_METRIC_DOUBLE(x)
+  \`\`\`
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -3213,8 +3209,8 @@ export const functions = {
   ### TO_BASE64
   Encode a string to a base64 string.
 
-  \`\`\` esql
-  row a = "elastic"
+  \`\`\`esql
+  row a = "elastic" 
   | eval e = to_base64(a)
   \`\`\`
   `,
@@ -3250,7 +3246,7 @@ export const functions = {
   For anything else, including the empty string, the function will return *false*.
   The numerical value of *0* will be converted to *false*, anything else will be converted to *true*.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW str = ["true", "TRuE", "false", "", "yes", "1"]
   | EVAL bool = TO_BOOLEAN(str)
   \`\`\`
@@ -3283,10 +3279,9 @@ export const functions = {
 
   ### TO_CARTESIANPOINT
   Converts an input value to a \`cartesian_point\` value.
-  A string will only be successfully converted if it respects the
-  [WKT Point](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
+  A string will only be successfully converted if it respects WKT Point format.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
   | MV_EXPAND wkt
   | EVAL pt = TO_CARTESIANPOINT(wkt)
@@ -3320,10 +3315,9 @@ export const functions = {
 
   ### TO_CARTESIANSHAPE
   Converts an input value to a \`cartesian_shape\` value.
-  A string will only be successfully converted if it respects the
-  [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
+  A string will only be successfully converted if it respects WKT format.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]
   | MV_EXPAND wkt
   | EVAL geom = TO_CARTESIANSHAPE(wkt)
@@ -3389,7 +3383,7 @@ export const functions = {
   ### TO_DATEPERIOD
   Converts an input value into a \`date_period\` value.
 
-  \`\`\` esql
+  \`\`\`esql
   row x = "2024-01-01"::datetime | eval y = x + "3 DAYS"::date_period, z = x - to_dateperiod("3 days");
   \`\`\`
   `,
@@ -3424,7 +3418,7 @@ export const functions = {
   A string will only be successfully converted if it's respecting the format \`yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\`.
   To convert dates in other formats, use \`DATE_PARSE\`.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]
   | EVAL datetime = TO_DATETIME(string)
   \`\`\`
@@ -3457,9 +3451,9 @@ export const functions = {
   -->
 
   ### TO_DEGREES
-  Converts a number in [radians](https://en.wikipedia.org/wiki/Radian) to [degrees](https://en.wikipedia.org/wiki/Degree_(angle)).
+  Converts a number in radians to degrees.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW rad = [1.57, 3.14, 4.71]
   | EVAL deg = TO_DEGREES(rad)
   \`\`\`
@@ -3492,10 +3486,10 @@ export const functions = {
 
   ### TO_DOUBLE
   Converts an input value to a double value. If the input parameter is of a date type,
-  its value will be interpreted as milliseconds since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time),
-  converted to double. Boolean \`true\` will be converted to double \`1.0\`, \`false\` to \`0.0\`.
+  its value will be interpreted as milliseconds since the Unix epoch,
+  converted to double. Boolean *true* will be converted to double *1.0*, *false* to *0.0*.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW str1 = "5.20128E11", str2 = "foo"
   | EVAL dbl = TO_DOUBLE("520128000000"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)
   \`\`\`
@@ -3528,10 +3522,9 @@ export const functions = {
 
   ### TO_GEOPOINT
   Converts an input value to a \`geo_point\` value.
-  A string will only be successfully converted if it respects the
-  [WKT Point](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
+  A string will only be successfully converted if it respects WKT Point format.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW wkt = "POINT(42.97109630194 14.7552534413725)"
   | EVAL pt = TO_GEOPOINT(wkt)
   \`\`\`
@@ -3564,10 +3557,9 @@ export const functions = {
 
   ### TO_GEOSHAPE
   Converts an input value to a \`geo_shape\` value.
-  A string will only be successfully converted if it respects the
-  [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format.
+  A string will only be successfully converted if it respects WKT format.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
   | EVAL geom = TO_GEOSHAPE(wkt)
   \`\`\`
@@ -3601,10 +3593,10 @@ export const functions = {
   ### TO_INTEGER
   Converts an input value to an integer value.
   If the input parameter is of a date type, its value will be interpreted as milliseconds
-  since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time), converted to integer.
-  Boolean \`true\` will be converted to integer \`1\`, \`false\` to \`0\`.
+  since the Unix epoch, converted to integer.
+  Boolean *true* will be converted to integer *1*, *false* to *0*.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW long = [5013792, 2147483647, 501379200000]
   | EVAL int = TO_INTEGER(long)
   \`\`\`
@@ -3638,7 +3630,7 @@ export const functions = {
   ### TO_IP
   Converts an input string to an IP value.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW str1 = "1.1.1.1", str2 = "foo"
   | EVAL ip1 = TO_IP(str1), ip2 = TO_IP(str2)
   | WHERE CIDR_MATCH(ip1, "1.0.0.0/8")
@@ -3672,10 +3664,10 @@ export const functions = {
 
   ### TO_LONG
   Converts an input value to a long value. If the input parameter is of a date type,
-  its value will be interpreted as milliseconds since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time), converted to long.
-  Boolean \`true\` will be converted to long \`1\`, \`false\` to \`0\`.
+  its value will be interpreted as milliseconds since the Unix epoch, converted to long.
+  Boolean *true* will be converted to long *1*, *false* to *0*.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
   | EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)
   \`\`\`
@@ -3709,7 +3701,7 @@ export const functions = {
   ### TO_LOWER
   Returns a new string representing the input string converted to lower case.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW message = "Some Text"
   | EVAL message_lower = TO_LOWER(message)
   \`\`\`
@@ -3741,9 +3733,9 @@ export const functions = {
   -->
 
   ### TO_RADIANS
-  Converts a number in [degrees](https://en.wikipedia.org/wiki/Degree_(angle)) to [radians](https://en.wikipedia.org/wiki/Radian).
+  Converts a number in degrees to radians.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW deg = [90.0, 180.0, 270.0]
   | EVAL rad = TO_RADIANS(deg)
   \`\`\`
@@ -3777,7 +3769,7 @@ export const functions = {
   ### TO_STRING
   Converts an input value into a string.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW a=10
   | EVAL j = TO_STRING(a)
   \`\`\`
@@ -3811,7 +3803,7 @@ export const functions = {
   ### TO_TIMEDURATION
   Converts an input value into a \`time_duration\` value.
 
-  \`\`\` esql
+  \`\`\`esql
   row x = "2024-01-01"::datetime | eval y = x + "3 hours"::time_duration, z = x - to_timeduration("3 hours");
   \`\`\`
   `,
@@ -3843,10 +3835,10 @@ export const functions = {
 
   ### TO_UNSIGNED_LONG
   Converts an input value to an unsigned long value. If the input parameter is of a date type,
-  its value will be interpreted as milliseconds since the [Unix epoch](https://en.wikipedia.org/wiki/Unix_time), converted to unsigned long.
-  Boolean \`true\` will be converted to unsigned long \`1\`, \`false\` to \`0\`.
+  its value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long.
+  Boolean *true* will be converted to unsigned long *1*, *false* to *0*.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
   | EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)
   \`\`\`
@@ -3880,7 +3872,7 @@ export const functions = {
   ### TO_UPPER
   Returns a new string representing the input string converted to upper case.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW message = "Some Text"
   | EVAL message_upper = TO_UPPER(message)
   \`\`\`
@@ -3914,7 +3906,7 @@ export const functions = {
   ### TO_VERSION
   Converts an input string to a version value.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW v = TO_VERSION("1.2.3")
   \`\`\`
   `,
@@ -3945,7 +3937,7 @@ export const functions = {
   ### TRIM
   Removes leading and trailing whitespaces from a string.
 
-  \`\`\` esql
+  \`\`\`esql
   ROW message = "   some text  ",  color = " red "
   | EVAL message = TRIM(message)
   | EVAL color = TRIM(color)

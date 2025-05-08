@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { render } from '../../helpers/test_helper';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
@@ -20,6 +21,12 @@ jest.mock('../../hooks/use_create_knowledge_base_entry');
 jest.mock('../../hooks/use_import_knowledge_base_entries');
 jest.mock('../../hooks/use_delete_knowledge_base_entry');
 jest.mock('@kbn/ai-assistant/src/hooks');
+jest.mock('@kbn/ai-assistant/src/hooks/use_inference_endpoints', () => ({
+  useInferenceEndpoints: () => ({
+    inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
+    isLoading: false,
+  }),
+}));
 
 const useGetKnowledgeBaseEntriesMock = useGetKnowledgeBaseEntries as jest.Mock;
 const useCreateKnowledgeBaseEntryMock = useCreateKnowledgeBaseEntry as jest.Mock;
@@ -57,12 +64,13 @@ describe('KnowledgeBaseTab', () => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            ready: false,
+            kbState: KnowledgeBaseState.NOT_INSTALLED,
             enabled: true,
           },
           loading: true,
         },
         isInstalling: false,
+        isPolling: false,
         install: jest.fn(),
       });
     });
@@ -78,7 +86,7 @@ describe('KnowledgeBaseTab', () => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            ready: false,
+            kbState: KnowledgeBaseState.NOT_INSTALLED,
             enabled: true,
           },
           loading: false,
@@ -101,7 +109,7 @@ describe('KnowledgeBaseTab', () => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            ready: true,
+            kbState: KnowledgeBaseState.READY,
             enabled: true,
           },
         },
@@ -109,6 +117,7 @@ describe('KnowledgeBaseTab', () => {
         install: jest.fn(),
       });
     });
+
     it('should render a table', () => {
       const { getByTestId } = render(<KnowledgeBaseTab />);
       expect(getByTestId('knowledgeBaseTable')).toBeInTheDocument();

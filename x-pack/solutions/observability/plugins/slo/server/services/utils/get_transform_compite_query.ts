@@ -8,10 +8,10 @@
 import {
   AggregationsCompositeAggregationSource,
   TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { createEsParams } from '../../utils/queries';
 
-export function getTransformQueryComposite(transform: TransformPutTransformRequest['body']) {
+export function getTransformQueryComposite(transform: TransformPutTransformRequest) {
   let transformQueryString: string = '';
   if (transform) {
     const pivotGroupBy = transform.pivot?.group_by ?? {};

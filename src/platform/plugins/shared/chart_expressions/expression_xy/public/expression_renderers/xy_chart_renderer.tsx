@@ -12,6 +12,11 @@ import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  createPerformanceTracker,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_TYPES,
+} from '@kbn/ebt-tools';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -202,6 +207,13 @@ export const getXyChartRenderer = ({
   validate: () => undefined,
   reuseDomNode: true,
   render: async (domNode: Element, config: XYChartProps, handlers) => {
+    const performanceTracker = createPerformanceTracker({
+      type: PERFORMANCE_TRACKER_TYPES.PANEL,
+      subType: 'xyVis',
+    });
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
+
     const deps = await getStartDeps();
 
     // Lazy loaded parts
@@ -231,6 +243,8 @@ export const getXyChartRenderer = ({
     );
 
     const renderComplete = () => {
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
+
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
       const visualizationType = extractVisualizationType(executionContext);
@@ -258,6 +272,8 @@ export const getXyChartRenderer = ({
       width: '100%',
       height: '100%',
     });
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
     ReactDOM.render(
       <KibanaRenderContextProvider {...deps.startServices}>

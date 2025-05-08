@@ -141,6 +141,36 @@ export class SampleTaskManagerFixturePlugin
           },
         },
       },
+      sampleTaskSharedConcurrencyType1: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Shared Concurrency 1',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description: 'A sample task that shares concurrency with another task type.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => ({ count: state.count }),
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
+      },
+      sampleTaskSharedConcurrencyType2: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Shared Concurrency 2',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description: 'A sample task that shares concurrency with another task type.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => ({ count: state.count }),
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
+      },
       sampleTaskWithLimitedConcurrency: {
         ...defaultSampleTaskConfig,
         title: 'Sample Task With Max Concurrency of 2',

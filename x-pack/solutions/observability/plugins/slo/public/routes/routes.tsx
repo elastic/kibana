@@ -12,7 +12,6 @@ import { SloDetailsPage } from '../pages/slo_details/slo_details';
 import { SloEditPage } from '../pages/slo_edit/slo_edit';
 import {
   SLOS_MANAGEMENT_PATH,
-  SLOS_OUTDATED_DEFINITIONS_PATH,
   SLOS_PATH,
   SLOS_WELCOME_PATH,
   SLO_CREATE_PATH,
@@ -20,7 +19,6 @@ import {
   SLO_EDIT_PATH,
   SLO_SETTINGS_PATH,
 } from '../../common/locators/paths';
-import { SlosOutdatedDefinitions } from '../pages/slo_outdated_definitions';
 import { SloSettingsPage } from '../pages/slo_settings/slo_settings';
 import { SloManagementPage } from '../pages/slo_management/slo_management_page';
 
@@ -51,13 +49,6 @@ export const getRoutes = (
     [SLOS_WELCOME_PATH]: {
       handler: () => {
         return <SlosWelcomePage />;
-      },
-      params: {},
-      exact: true,
-    },
-    [SLOS_OUTDATED_DEFINITIONS_PATH]: {
-      handler: () => {
-        return <SlosOutdatedDefinitions />;
       },
       params: {},
       exact: true,

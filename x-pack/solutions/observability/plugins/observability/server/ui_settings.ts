@@ -47,6 +47,7 @@ import {
   profilingFetchTopNFunctionsFromStacktraces,
   enableInfrastructureContainerAssetView,
   searchExcludedDataTiers,
+  apmEnableServiceMapApiV2,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -389,6 +390,23 @@ export const uiSettings: Record<string, UiSettings> = {
     schema: schema.boolean(),
     value: true,
     requiresPageReload: true,
+    type: 'boolean',
+    solution: 'oblt',
+  },
+  [apmEnableServiceMapApiV2]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableServiceMapApiV2', {
+      defaultMessage: 'Service Map API v2',
+    }),
+    description: i18n.translate('xpack.observability.apmEnableServiceMapApiV2Description', {
+      defaultMessage: '{technicalPreviewLabel} Enables the usage of the new Service Map API v2.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: false,
     type: 'boolean',
     solution: 'oblt',
   },
