@@ -151,9 +151,11 @@ export abstract class OpenApiTool<T> {
     if (schema instanceof z.ZodObject) {
       const shape = schema.shape;
       for (const key in shape) {
-        const field = shape[key];
-        if (!field.isOptional()) {
-          return true;
+        if (Object.prototype.hasOwnProperty.call(shape, key)) {
+          const field = shape[key];
+          if (!field.isOptional()) {
+            return true;
+          }
         }
       }
     }

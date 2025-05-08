@@ -30,6 +30,7 @@ describe('utils', () => {
   describe('formatToolName', () => {
     it.each([
       ['tool name', 'tool_name'],
+      ['toolName', 'tool_name'],
       ['tool/name', 'tool_name'],
       ['tool?name', 'tool_name'],
       ['tool  name', 'tool__name'],
