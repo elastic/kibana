@@ -117,7 +117,7 @@ describe('persistTokenCloudData', () => {
     );
   });
 
-  it('updates an existing saved object if onboardingToken is provided and different', async () => {
+  it('updates an existing saved object if onboardingToken is provided', async () => {
     (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
       id: CLOUD_DATA_SAVED_OBJECT_ID,
       attributes: {
@@ -145,7 +145,7 @@ describe('persistTokenCloudData', () => {
     );
   });
 
-  it('updates an existing saved object if resourceData is provided and different', async () => {
+  it('updates an existing saved object if resourceData is provided', async () => {
     (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
       id: CLOUD_DATA_SAVED_OBJECT_ID,
       attributes: {
@@ -191,7 +191,7 @@ describe('persistTokenCloudData', () => {
     );
   });
 
-  it('updates an existing saved object if security details are provided and different', async () => {
+  it('updates an existing saved object if security details are provided', async () => {
     (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
       id: CLOUD_DATA_SAVED_OBJECT_ID,
       attributes: {
