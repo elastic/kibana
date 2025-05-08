@@ -82,7 +82,6 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           >
-            
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
@@ -422,7 +421,6 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
           <div
             class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
           >
-            
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
