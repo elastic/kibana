@@ -199,13 +199,12 @@ describe('EditSpaceSettings', () => {
     const updateButton = await screen.findByTestId('save-space-button'); // appears via re-render
     await userEvent.click(updateButton);
 
-      expect(updateSpaceSpy).toHaveBeenCalledWith({
-        ...spaceToUpdate,
-        name: 'Updated Name Of Space',
-        initials: 'UN',
-        imageUrl: '',
-        color: '#D6BF57',
-      });
+    expect(updateSpaceSpy).toHaveBeenCalledWith({
+      ...spaceToUpdate,
+      name: 'Updated Name Of Space',
+      initials: 'UN',
+      imageUrl: '',
+      color: '#D6BF57',
     });
 
     expect(navigateSpy).toHaveBeenCalledTimes(1);
@@ -277,13 +276,12 @@ describe('EditSpaceSettings', () => {
     const updateButton = await screen.findByTestId('save-space-button'); // appears via re-render
     await userEvent.click(updateButton);
 
-      expect(updateSpaceSpy).toHaveBeenCalledWith({
-        ...spaceToUpdate,
-        name: 'Updated Existing Space',
-        color: '#D6BF57',
-        initials: 'UE',
-        imageUrl: '',
-      });
+    expect(updateSpaceSpy).toHaveBeenCalledWith({
+      ...spaceToUpdate,
+      name: 'Updated Existing Space',
+      color: '#D6BF57',
+      initials: 'UE',
+      imageUrl: '',
     });
   });
 
