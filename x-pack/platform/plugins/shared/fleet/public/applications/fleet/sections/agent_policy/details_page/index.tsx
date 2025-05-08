@@ -149,7 +149,10 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             />
           </EuiPortal>
         )}
-        <AgentPolicyDetailsContent agentPolicy={agentPolicy} />
+        <AgentPolicyDetailsContent
+          agentPolicy={agentPolicy}
+          refreshAgentPolicy={refreshAgentPolicy}
+        />
       </>
     );
   }, [
@@ -160,6 +163,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     isEnrollmentFlyoutOpen,
     onCancelEnrollment,
     policyId,
+    refreshAgentPolicy,
   ]);
   const headerLeftContent = (
     <HeaderLeftContent agentPolicy={agentPolicy} policyId={policyId} isLoading={isLoading} />
@@ -188,9 +192,10 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   );
 };
 
-const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPolicy }> = ({
-  agentPolicy,
-}) => {
+const AgentPolicyDetailsContent: React.FunctionComponent<{
+  agentPolicy: AgentPolicy;
+  refreshAgentPolicy: () => void;
+}> = ({ agentPolicy, refreshAgentPolicy }) => {
   useBreadcrumbs('policy_details', { policyName: agentPolicy.name });
   return (
     <Routes>
@@ -203,7 +208,12 @@ const AgentPolicyDetailsContent: React.FunctionComponent<{ agentPolicy: AgentPol
       <Route
         path={FLEET_ROUTING_PATHS.policy_details}
         render={() => {
-          return <PackagePoliciesView agentPolicy={agentPolicy} />;
+          return (
+            <PackagePoliciesView
+              agentPolicy={agentPolicy}
+              refreshAgentPolicy={refreshAgentPolicy}
+            />
+          );
         }}
       />
     </Routes>

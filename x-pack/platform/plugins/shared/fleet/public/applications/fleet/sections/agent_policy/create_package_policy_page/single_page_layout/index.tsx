@@ -300,7 +300,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   useEffect(() => {
     addIntegrationFlyoutProps?.updateHasErrors(
-      packageInfo && (formState === 'INVALID' || hasAgentPolicyError)
+      Boolean(packageInfo && (formState === 'INVALID' || hasAgentPolicyError))
     );
   }, [packageInfo, formState, hasAgentPolicyError, addIntegrationFlyoutProps]);
 

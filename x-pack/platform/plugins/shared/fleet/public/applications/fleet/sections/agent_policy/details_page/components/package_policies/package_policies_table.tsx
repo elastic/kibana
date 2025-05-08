@@ -47,6 +47,7 @@ interface Props {
   // Pass through props to InMemoryTable
   loading?: EuiInMemoryTableProps<InMemoryPackagePolicy>['loading'];
   message?: EuiInMemoryTableProps<InMemoryPackagePolicy>['message'];
+  refreshAgentPolicy: () => void;
 }
 
 interface FilterOption {
@@ -60,6 +61,7 @@ const toFilterOption = (value: string): FilterOption => ({ name: value, value })
 export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   packagePolicies: originalPackagePolicies,
   agentPolicy,
+  refreshAgentPolicy,
   ...rest
 }) => {
   const authz = useAuthz();
@@ -455,7 +457,10 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       />
       {showAddIntegrationFlyout && (
         <AddIntegrationFlyout
-          onClose={() => setShowAddIntegrationFlyout(false)}
+          onClose={() => {
+            setShowAddIntegrationFlyout(false);
+            refreshAgentPolicy();
+          }}
           agentPolicy={agentPolicy}
         />
       )}
