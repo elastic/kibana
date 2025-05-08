@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
-  describe('Metric', function describeIndexTests() {
+  describe('Metric -- nick', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
     });
@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         {
           title: 'Count',
           subtitle: undefined,
-          extraText: '',
+          extraText: undefined,
           value: '14,005',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
