@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const indexName = 'test-my-index';
 
-  describe.skip('Search Overview page', function () {
+  describe('Search Overview page', function () {
     describe('Solution Nav - Search', function () {
       let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };
