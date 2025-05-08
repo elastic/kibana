@@ -168,7 +168,7 @@ const useStyles = () => {
   const styles = useMemo(() => {
     return {
       selectableStyles: css({
-        height: '360px',
+        height: `calc(${euiTheme.size.xxl} * 9)`, // 40 * 9 = 360px
         '.presFieldPicker__fieldButton[aria-checked=true]': {
           backgroundColor: euiTheme.colors.backgroundBasePrimary,
         },
