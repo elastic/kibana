@@ -46,7 +46,7 @@ export interface CacheStorage {
 }
 
 export interface CacheSetupContract {
-  cache?: CacheStorage;
+  store?: CacheStorage;
 }
 
 export type CacheStartContract = CacheSetupContract;

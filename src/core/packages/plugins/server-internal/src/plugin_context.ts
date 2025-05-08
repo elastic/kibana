@@ -250,6 +250,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
     },
+    cache: deps.cache,
     i18n: deps.i18n,
     logging: {
       configure: (config$) => deps.logging.configure(['plugins', plugin.name], config$),
@@ -349,6 +350,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       getStringValue$: deps.featureFlags.getStringValue$,
       getNumberValue$: deps.featureFlags.getNumberValue$,
     },
+    cache: deps.cache,
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,

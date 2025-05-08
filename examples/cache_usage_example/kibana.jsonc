@@ -1,0 +1,13 @@
+{
+  "visibility": "private",
+  "type": "plugin",
+  "id": "@kbn/cache-usage-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Example plugin integrating with files plugin",
+  "plugin": {
+    "id": "cacheUsageExample",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [ ]
+  }
+}

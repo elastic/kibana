@@ -3952,6 +3952,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cache-usage-example-plugin@link:examples/cache_usage_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/calculate-auto@link:src/platform/packages/shared/kbn-calculate-auto":
   version "0.0.0"
   uid ""

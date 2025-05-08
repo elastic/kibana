@@ -8,13 +8,19 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 export const redisClientConfigSchema = schema.object({
   url: schema.uri({ scheme: ['redis', 'rediss'] }), // Redis connection URL (must be a valid URI with redis or rediss scheme)
 });
 
-export const config = schema.object({
-  client: redisClientConfigSchema,
+const cacheConfigSchema = schema.object({
+  client: schema.object({ redis: redisClientConfigSchema }),
 });
 
-export type CacheConfig = TypeOf<typeof config>;
+export type CacheConfig = TypeOf<typeof cacheConfigSchema>;
+
+export const config: ServiceConfigDescriptor<CacheConfig> = {
+  path: 'cache' as const,
+  schema: cacheConfigSchema,
+};

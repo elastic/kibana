@@ -1,0 +1,7 @@
+{
+  "prefix": "cacheUsageExample",
+  "paths": {
+    "cacheUsageExample": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}

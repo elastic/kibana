@@ -22,6 +22,7 @@ import type { CustomBrandingStart } from '@kbn/core-custom-branding-server';
 import type { PluginsServiceStart } from '@kbn/core-plugins-contracts-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
+import type { CacheStartContract } from '@kbn/core-cache-server';
 
 /**
  * Context passed to the plugins `start` method.
@@ -45,6 +46,8 @@ export interface CoreStart {
   featureFlags: FeatureFlagsStart;
   /** {@link HttpServiceStart} */
   http: HttpServiceStart;
+  /** {@link CacheStartContract} */
+  cache: CacheStartContract;
   /** {@link MetricsServiceStart} */
   metrics: MetricsServiceStart;
   /** {@link SavedObjectsServiceStart} */

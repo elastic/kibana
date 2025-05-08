@@ -14,7 +14,11 @@ import type { CacheConfig } from '../config';
 export class RedisCacheClient implements CacheClient {
   private client: RedisClientType;
 
-  constructor({ client: { url } }: CacheConfig) {
+  constructor({
+    client: {
+      redis: { url },
+    },
+  }: CacheConfig) {
     this.client = createClient({ url });
     this.client.on('error', (err) => {
       console.error('Redis Client Error', err);

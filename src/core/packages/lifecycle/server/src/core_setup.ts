@@ -29,6 +29,7 @@ import type { UserSettingsServiceSetup } from '@kbn/core-user-settings-server';
 import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-server';
 import type { SecurityServiceSetup } from '@kbn/core-security-server';
 import type { UserProfileServiceSetup } from '@kbn/core-user-profile-server';
+import type { CacheSetupContract } from '@kbn/core-cache-server';
 import type { CoreStart } from './core_start';
 
 /**
@@ -60,6 +61,8 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
     /** {@link HttpResources} */
     resources: HttpResources;
   };
+  /** {@link CacheSetupContract} */
+  cache: CacheSetupContract;
   /** {@link I18nServiceSetup} */
   i18n: I18nServiceSetup;
   /** {@link LoggingServiceSetup} */

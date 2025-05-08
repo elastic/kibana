@@ -56,7 +56,7 @@ export class CacheService {
       },
     };
     return {
-      cache: this.cache,
+      store: this.cache,
     };
   }
 
@@ -65,7 +65,7 @@ export class CacheService {
    */
   public start() {
     return {
-      cache: this.cache,
+      store: this.cache,
     };
   }
 
