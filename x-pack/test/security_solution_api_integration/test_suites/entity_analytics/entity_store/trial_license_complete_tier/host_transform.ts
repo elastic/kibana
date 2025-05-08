@@ -132,57 +132,19 @@ export default function (providerContext: FtrProviderContext) {
 
       it('Should successfully collect all expected fields', async () => {
         const HOST_NAME: string = 'host-transform-test-ip';
-        const DOMAIN: string[] = ['example.com', 'sub.example.com'];
-        const HOST_HOSTNAME: string[] = ['example.com', 'example.com'];
-        const IDs: string[] = ['alpha', 'beta'];
-        const OS_NAMES: string = ['ubuntu', 'macos'];
-        const OS_TYPES: string = ['linux', 'darwin'];
-        const MAC: string = ['abc', 'def'];
-        const ARCH: string = ['x86-64', 'arm64'];
-        const IPs: string[] = ['1.1.1.1', '2.2.2.2'];
-        const { count, transforms } = await es.transform.getTransformStats({
-          transform_id: HOST_TRANSFORM_ID,
-        });
-        expect(count).to.eql(1);
-        let transform = transforms[0];
-        expect(transform.id).to.eql(HOST_TRANSFORM_ID);
-        const triggerCount: number = transform.stats.trigger_count;
-        const docsProcessed: number = transform.stats.documents_processed;
-
-        // Create two documents with the same host.name, different IPs
-        for (let i = 0; i < 2; i++) {
-          const { result } = await es.index(
-            buildHostTransformDocument(HOST_NAME, {
-              domain: DOMAIN[i],
-              hostname: HOST_HOSTNAME[i],
-              id: IDs[i],
-              os: {
-                name: OS_NAMES[i],
-                type: OS_TYPES[i],
-              },
-              mac: MAC[i],
-              architecture: ARCH[i],
-              ip: IPs[i],
-            }),
-          );
-          expect(result).to.eql('created');
+        const testDocs: hostTransformTestDocuments = {
+          name: HOST_NAME,
+          domain: ['example.com', 'sub.example.com'],
+          hostname: ['example.com', 'example.com'],
+          id: ['alpha', 'beta'],
+          osName: ['ubuntu', 'macos'],
+          osType: ['linux', 'darwin'],
+          mac: ['abc', 'def'],
+          arch: ['x86-64', 'arm64'],
+          ip: ['1.1.1.1', '2.2.2.2'],
         }
 
-        // Trigger the transform manually
-        const { acknowledged } = await es.transform.scheduleNowTransform({
-          transform_id: HOST_TRANSFORM_ID,
-        });
-        expect(acknowledged).to.be(true);
-
-        await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
-          const response = await es.transform.getTransformStats({
-            transform_id: HOST_TRANSFORM_ID,
-          });
-          transform = response.transforms[0];
-          expect(transform.stats.trigger_count).to.greaterThan(triggerCount);
-          expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
-          return true;
-        });
+        await createDocumentsAndTriggerTransform(providerContext, testDocs, 2);
 
         await retry.waitForWithTimeout(
           'Document to be processed and transformed',
@@ -202,15 +164,14 @@ export default function (providerContext: FtrProviderContext) {
             expect(hit._source).ok();
 
             expect(hit._source?.host?.name).to.eql(HOST_NAME);
-            expectFieldToEqualValues(hit._source?.host?.domain, DOMAIN);
-            expectFieldToEqualValues(hit._source?.host?.domain, DOMAIN);
+            expectFieldToEqualValues(hit._source?.host?.domain, testDocs.domain);
             expectFieldToEqualValues(hit._source?.host?.hostname, ['example.com']);
-            expectFieldToEqualValues(hit._source?.host?.id, IDs);
-            expectFieldToEqualValues(hit._source?.host?.os?.name, OS_NAMES);
-            expectFieldToEqualValues(hit._source?.host?.os?.type, OS_TYPES);
-            expectFieldToEqualValues(hit._source?.host?.ip, IPs);
-            expectFieldToEqualValues(hit._source?.host?.mac, MAC);
-            expectFieldToEqualValues(hit._source?.host?.architecture, ARCH);
+            expectFieldToEqualValues(hit._source?.host?.id, testDocs.id);
+            expectFieldToEqualValues(hit._source?.host?.os?.name, testDocs.osName);
+            expectFieldToEqualValues(hit._source?.host?.os?.type, testDocs.osType);
+            expectFieldToEqualValues(hit._source?.host?.ip, testDocs.ip);
+            expectFieldToEqualValues(hit._source?.host?.mac, testDocs.mac);
+            expectFieldToEqualValues(hit._source?.host?.architecture, testDocs.arch);
 
             return true;
           }
@@ -258,19 +219,35 @@ async function createDocumentsAndTriggerTransform(providerContext: FtrProviderCo
   const docsProcessed: number = transform.stats.documents_processed;
 
   for (let i = 0; i < docCount; i++) {
+    let host: EcsHost = {}
+    if (docs.domain?.[i] !== undefined) {
+      host.domain = docs.domain[i]
+    }
+    if (docs.hostname?.[i] !== undefined) {
+      host.hostname = docs.hostname[i]
+    }
+    if (docs.id?.[i] !== undefined) {
+      host.id = docs.id[i]
+    }
+    host.os = {}
+    if (docs.osName?.[i] !== undefined) {
+      host.os.name = docs.osName[i]
+    }
+    if (docs.osType?.[i] !== undefined) {
+      host.os.type = docs.osType[i]
+    }
+    if (docs.mac?.[i] !== undefined) {
+      host.mac = docs.mac[i]
+    }
+    if (docs.arch?.[i] !== undefined) {
+      host.architecture = docs.arch[i]
+    }
+    if (docs.ip?.[i] !== undefined) {
+      host.ip = docs.ip[i]
+    }
+
     const { result } = await es.index(
-      buildHostTransformDocument(docs.name, {
-        domain: docs.domain?.[i] ? docs.domain[i] : '',
-        hostname: docs.hostHostname?.[i] ? docs.hostHostname[i] : '',
-        id: docs.id?.[i] ? docs.id[i] : '',
-        os: {
-          name: docs.osName?.[i] ? docs.osName[i] : '',
-          type: docs.osType?.[i] ? docs.osType[i] : '',
-        },
-        mac: docs.mac?.[i] ? docs.mac[i] : '',
-        architecture: docs.arch?.[i] ? docs.arch[i] : '',
-        ip: docs.ip?.[i] ? docs.ip[i] : '',
-      }),
+      buildHostTransformDocument(docs.name, host),
     );
     expect(result).to.eql('created');
   }
@@ -290,14 +267,13 @@ async function createDocumentsAndTriggerTransform(providerContext: FtrProviderCo
     expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
     return true;
   });
-  // await Promise.resolve();
 };
 
 type hostTransformTestDocuments = {
   name: string; // required
 
   domain: string[];
-  hostHostname: string[];
+  hostname: string[];
   id: string[];
   osName: string[];
   osType: string[];
