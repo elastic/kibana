@@ -235,9 +235,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
                   })
                 ),
                 resource_data: schema.maybe(
-                  schema.oneOf([
-                    schema.object({
-                      project: schema.object({
+                  schema.object({
+                    project: schema.maybe(
+                      schema.object({
                         search: schema.maybe(
                           schema.object({
                             type: schema.oneOf([
@@ -247,13 +247,11 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
                             ]),
                           })
                         ),
-                      }),
-                    }),
+                      })
+                    ),
                     // Can be added in the future if needed:
-                    // schema.object({
-                    //   deployment: schema.object({}),
-                    // }),
-                  ])
+                    // deployment: schema.maybe(schema.object({})),
+                  })
                 ),
               },
               { unknowns: 'ignore' }
