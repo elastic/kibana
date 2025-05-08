@@ -9,6 +9,7 @@ import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
+import semverGte from 'semver/functions/gte';
 import {
   EuiCallOut,
   EuiFieldText,
@@ -701,8 +702,14 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       defaultSetupTechnology,
     });
 
+    const agentlessByDefaultVersion = '1.13.0';
+    const showAgentlessByDefaultPackageVersion = semverGte(
+      packageInfo.version,
+      agentlessByDefaultVersion
+    );
     const shouldRenderAgentlessSelector =
-      (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
+      (!isEditPage && isAgentlessAvailable && showAgentlessByDefaultPackageVersion) ||
+      (isEditPage && isAgentlessEnabled && showAgentlessByDefaultPackageVersion);
 
     const getDefaultCloudCredentialsType = (
       isAgentless: boolean,
@@ -773,13 +780,21 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         const inputVars = getPostureInputHiddenVars(
           inputType,
           packageInfo,
-          inputType === CLOUDBEAT_AWS ? SetupTechnology.AGENTLESS : SetupTechnology.AGENT_BASED,
+          inputType === CLOUDBEAT_AWS && showAgentlessByDefaultPackageVersion
+            ? SetupTechnology.AGENTLESS
+            : SetupTechnology.AGENT_BASED,
           showCloudConnectors
         );
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [packageInfo, newPolicy, updatePolicy, showCloudConnectors]
+      [
+        packageInfo,
+        newPolicy,
+        updatePolicy,
+        showCloudConnectors,
+        showAgentlessByDefaultPackageVersion,
+      ]
     );
 
     // search for non null fields of the validation?.vars object
