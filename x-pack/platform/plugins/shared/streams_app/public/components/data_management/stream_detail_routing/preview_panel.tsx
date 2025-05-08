@@ -6,26 +6,28 @@
  */
 
 import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiSpacer,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiLoadingLogo,
   EuiProgress,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
 import { isEmpty } from 'lodash';
-import { useDebounced } from '../../../util/use_debounce';
+import React, { useEffect } from 'react';
 import { useAsyncSample } from '../../../hooks/queries/use_async_sample';
-import { PreviewTable } from '../preview_table';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
-import { PreviewMatches } from './preview_matches';
-import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
-import { selectCurrentRule } from './state_management/stream_routing_state_machine';
-import { AssetImage } from '../../asset_image';
 import { useTimefilter } from '../../../hooks/use_timefilter';
+import { useDebounced } from '../../../util/use_debounce';
+import { AssetImage } from '../../asset_image';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { PreviewTable } from '../preview_table';
+import { PreviewMatches } from './preview_matches';
+import {
+  selectCurrentRule,
+  useStreamsRoutingSelector,
+} from './state_management/stream_routing_state_machine';
 
 export function PreviewPanel() {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);

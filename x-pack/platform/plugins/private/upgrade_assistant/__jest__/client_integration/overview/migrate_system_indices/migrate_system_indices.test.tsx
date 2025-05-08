@@ -9,6 +9,7 @@ import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../../helpers';
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
+import { systemIndicesMigrationErrorStatus } from './mocks';
 
 describe('Overview - Migrate system indices', () => {
   let testBed: OverviewTestBed;
@@ -175,33 +176,23 @@ describe('Overview - Migrate system indices', () => {
       expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(false);
     });
 
-    test('Handles errors from migration', async () => {
-      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
-        migration_status: 'ERROR',
-        features: [
-          {
-            feature_name: 'kibana',
-            indices: [
-              {
-                index: '.kibana',
-                migration_status: 'ERROR',
-                failure_cause: {
-                  error: {
-                    type: 'mapper_parsing_exception',
-                  },
-                },
-              },
-            ],
-          },
-        ],
-      });
+    test('Shows migration error with details', async () => {
+      httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(
+        systemIndicesMigrationErrorStatus
+      );
 
       testBed = await setupOverviewPage(httpSetup);
 
-      const { exists } = testBed;
+      const { component, exists, find } = testBed;
+
+      component.update();
 
       // Error is displayed
       expect(exists('migrationFailedCallout')).toBe(true);
+      expect(find('migrationFailedCallout').text()).toContain(
+        'Errors occurred while migrating system indices:kibana: mapper_parsing_exception'
+      );
+
       // CTA is enabled
       expect(exists('startSystemIndicesMigrationButton')).toBe(true);
     });
