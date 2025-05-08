@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+.buildkite/scripts/bootstrap.sh
+
 echo "Starting Storybook server..."
 yarn storybook & 
 STORYBOOK_PID=$!
