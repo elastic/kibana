@@ -67,7 +67,6 @@ export const ProjectList = (props: Props) => {
       {items.length > 0 ? (
         <ul>
           {items}
-          {items}
         </ul>
       ) : (
         <EmptyList solutions={solutions} />
