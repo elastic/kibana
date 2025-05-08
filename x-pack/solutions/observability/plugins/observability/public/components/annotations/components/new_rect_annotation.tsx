@@ -11,9 +11,9 @@ import { useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 import { useFormContext } from 'react-hook-form';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { cloneDeep } from 'lodash';
 import { AnnotationTooltip } from './annotation_tooltip';
 import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
-import { cloneDeep } from 'lodash';
 
 export function NewRectAnnotation({
   slo,

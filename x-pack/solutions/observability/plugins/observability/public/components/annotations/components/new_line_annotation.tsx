@@ -11,10 +11,10 @@ import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { cloneDeep } from 'lodash';
 import { AnnotationIcon } from '.';
 import { AnnotationTooltip } from './annotation_tooltip';
 import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
-import { cloneDeep } from 'lodash';
 
 export function NewLineAnnotation({
   slo,
