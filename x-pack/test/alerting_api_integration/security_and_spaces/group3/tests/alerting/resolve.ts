@@ -104,6 +104,10 @@ export default ({ getService }: FtrProviderContext) => {
                     id: '456',
                   },
                 ],
+
+                investigation_guide: {
+                  blob: '# Summary',
+                },
               },
             })
           )
@@ -126,6 +130,9 @@ export default ({ getService }: FtrProviderContext) => {
               id: '456',
             },
           ],
+          investigation_guide: {
+            blob: '# Summary',
+          },
         });
       });
     });

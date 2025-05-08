@@ -42,14 +42,19 @@ const sectionStyles = {
     paddingBlock: euiTheme.size.xs,
     paddingInline: euiTheme.size.s,
   }),
-  euiCollapsibleNavItem: ({ euiTheme }: Theme) => css`
-    .euiAccordion__childWrapper {
-      transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
+  euiCollapsibleNavSection: ({ euiTheme }: Theme) => css`
+    .euiCollapsibleNavAccordion.isSelected {
+      .euiAccordion__triggerWrapper,
+      .euiCollapsibleNavLink {
+        background-color: ${euiTheme.colors.backgroundLightPrimary};
+      }
     }
+
     .euiAccordion__children .euiCollapsibleNavItem__items {
       padding-inline-start: ${euiTheme.size.m};
       margin-inline-start: ${euiTheme.size.m};
     }
+
     &:only-child .euiCollapsibleNavItem__icon {
       transform: scale(1.33);
     }
@@ -60,15 +65,19 @@ const sectionStyles = {
       :hover {
         background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
       }
+
       &.isSelected {
+        background-color: ${euiTheme.colors.backgroundLightPrimary};
         :hover {
           background-color: ${euiTheme.colors.backgroundLightPrimary};
         }
       }
     }
-
+  `,
+  euiAccordionChildWrapper: ({ euiTheme }: Theme) => css`
     .euiAccordion__childWrapper {
       background-color: ${euiTheme.colors.backgroundBasePlain};
+      transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
     }
   `,
 };
@@ -461,7 +470,8 @@ function nodeToEuiCollapsibleNavProps(
       path,
       isSelected,
       onClick,
-      css: sectionStyles.euiCollapsibleNavSubItem,
+      css: [sectionStyles.euiCollapsibleNavSubItem, sectionStyles.euiAccordionChildWrapper],
+      className: classnames([isSelected ? 'isSelected' : undefined]),
       icon: navNode.icon,
       // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
       title: navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
@@ -609,12 +619,12 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
       {items ? (
         <EuiCollapsibleNavItem
           {...rest}
-          css={sectionStyles.euiCollapsibleNavItem}
+          css={[sectionStyles.euiCollapsibleNavSection, sectionStyles.euiAccordionChildWrapper]}
           items={items}
           accordionProps={getAccordionProps(navNode.path)}
         />
       ) : (
-        <EuiCollapsibleNavItem {...props} css={sectionStyles.euiCollapsibleNavItem} />
+        <EuiCollapsibleNavItem {...props} css={sectionStyles.euiCollapsibleNavSection} />
       )}
     </div>
   );
