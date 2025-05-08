@@ -15,7 +15,7 @@ import {
 } from './get_model_options_for_inference_endpoints';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
-  DEFAULT_ELSER_INFERENCE_ID,
+  ELSER_ON_ML_NODE_INFERENCE_ID,
   E5_LARGE_IN_EIS_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
   ELSER_IN_EIS_INFERENCE_ID,
@@ -24,7 +24,7 @@ import {
 describe('getModelOptionsForInferenceEndpoints', () => {
   it('maps known inference endpoints to user-friendly titles and descriptions', () => {
     const endpoints = [
-      { inference_id: DEFAULT_ELSER_INFERENCE_ID },
+      { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
       { inference_id: E5_SMALL_INFERENCE_ID },
     ] as InferenceAPIConfigResponse[];
 
@@ -34,7 +34,7 @@ describe('getModelOptionsForInferenceEndpoints', () => {
 
     expect(options).toEqual([
       {
-        key: DEFAULT_ELSER_INFERENCE_ID,
+        key: ELSER_ON_ML_NODE_INFERENCE_ID,
         label: elserTitle,
         description: elserDescription,
       },
@@ -48,7 +48,7 @@ describe('getModelOptionsForInferenceEndpoints', () => {
 
   it('shows only ELSER in EIS when both ELSER models are available', () => {
     const endpoints = [
-      { inference_id: DEFAULT_ELSER_INFERENCE_ID },
+      { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
       { inference_id: ELSER_IN_EIS_INFERENCE_ID },
       { inference_id: E5_SMALL_INFERENCE_ID },
     ] as InferenceAPIConfigResponse[];
@@ -62,7 +62,7 @@ describe('getModelOptionsForInferenceEndpoints', () => {
 
   it('shows only E5-large in EIS when both E5 (small and large) models are available', () => {
     const endpoints = [
-      { inference_id: DEFAULT_ELSER_INFERENCE_ID },
+      { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
       { inference_id: E5_SMALL_INFERENCE_ID },
       { inference_id: E5_LARGE_IN_EIS_INFERENCE_ID },
     ] as InferenceAPIConfigResponse[];
@@ -72,14 +72,14 @@ describe('getModelOptionsForInferenceEndpoints', () => {
     });
 
     expect(options.map((o) => o.key)).toEqual([
-      DEFAULT_ELSER_INFERENCE_ID,
+      ELSER_ON_ML_NODE_INFERENCE_ID,
       E5_LARGE_IN_EIS_INFERENCE_ID,
     ]);
   });
 
   it('shows only EIS models when both ELSER and E5-large pre-configured endpoints are available in EIS', () => {
     const endpoints = [
-      { inference_id: DEFAULT_ELSER_INFERENCE_ID },
+      { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
       { inference_id: ELSER_IN_EIS_INFERENCE_ID },
       { inference_id: E5_SMALL_INFERENCE_ID },
       { inference_id: E5_LARGE_IN_EIS_INFERENCE_ID },
@@ -97,7 +97,7 @@ describe('getModelOptionsForInferenceEndpoints', () => {
 
   it('does not show any EIS models if EIS pre-configured endpoints are not available', () => {
     const endpoints = [
-      { inference_id: DEFAULT_ELSER_INFERENCE_ID },
+      { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
       { inference_id: E5_SMALL_INFERENCE_ID },
     ] as InferenceAPIConfigResponse[];
 
@@ -105,6 +105,6 @@ describe('getModelOptionsForInferenceEndpoints', () => {
       endpoints,
     });
 
-    expect(options.map((o) => o.key)).toEqual([DEFAULT_ELSER_INFERENCE_ID, E5_SMALL_INFERENCE_ID]);
+    expect(options.map((o) => o.key)).toEqual([ELSER_ON_ML_NODE_INFERENCE_ID, E5_SMALL_INFERENCE_ID]);
   });
 });

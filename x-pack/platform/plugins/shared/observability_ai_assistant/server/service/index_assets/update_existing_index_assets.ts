@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { DEFAULT_ELSER_INFERENCE_ID } from '../../../common';
+import { ELSER_ON_ML_NODE_INFERENCE_ID } from '../../../common';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { createOrUpdateConversationIndexAssets } from './create_or_update_conversation_index_assets';
 import { createOrUpdateKnowledgeBaseIndexAssets } from './create_or_update_knowledge_base_index_assets';
@@ -47,7 +47,7 @@ export async function updateExistingIndexAssets({
       logger.debug(
         `Current KB write index does not have an inference_id. This is to be expected for indices created before 8.16`
       );
-      return DEFAULT_ELSER_INFERENCE_ID;
+      return ELSER_ON_ML_NODE_INFERENCE_ID;
     });
 
     await createOrUpdateKnowledgeBaseIndexAssets({ logger, core, inferenceId: currentInferenceId });

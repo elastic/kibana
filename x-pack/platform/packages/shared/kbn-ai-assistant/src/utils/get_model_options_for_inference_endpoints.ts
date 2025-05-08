@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {
-  DEFAULT_ELSER_INFERENCE_ID,
+  ELSER_ON_ML_NODE_INFERENCE_ID,
   E5_LARGE_IN_EIS_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
   ELSER_IN_EIS_INFERENCE_ID,
@@ -69,7 +69,7 @@ const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
   string,
   { title: string; description: string }
 > = {
-  [DEFAULT_ELSER_INFERENCE_ID]: {
+  [ELSER_ON_ML_NODE_INFERENCE_ID]: {
     title: elserTitle,
     description: elserDescription,
   },
@@ -98,7 +98,7 @@ export const getModelOptionsForInferenceEndpoints = ({
   return endpoints
     .filter((endpoint) => {
       // if ELSER exists in EIS, skip the other ELSER model
-      if (endpoint.inference_id === DEFAULT_ELSER_INFERENCE_ID && hasElserEIS) {
+      if (endpoint.inference_id === ELSER_ON_ML_NODE_INFERENCE_ID && hasElserEIS) {
         return false;
       }
 

@@ -69,7 +69,7 @@ export {
   ConversationAccess,
   KnowledgeBaseType,
   KnowledgeBaseState,
-  DEFAULT_ELSER_INFERENCE_ID,
+  ELSER_ON_ML_NODE_INFERENCE_ID,
   ELSER_IN_EIS_INFERENCE_ID,
   E5_SMALL_INFERENCE_ID,
   E5_LARGE_IN_EIS_INFERENCE_ID,
