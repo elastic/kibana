@@ -145,7 +145,7 @@ export const getPackagePolicyCreateCallback = (
 
     logger.debug(
       () =>
-        `Checking endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
+        `Checking create of endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
     );
 
     if (newPackagePolicy?.inputs) {
@@ -249,7 +249,7 @@ export const getPackagePolicyUpdateCallback = (
 
     logger.debug(
       () =>
-        `Checking endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
+        `Checking update of endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
     );
 
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
@@ -273,7 +273,9 @@ export const getPackagePolicyUpdateCallback = (
         endpointIntegrationData,
         (await endpointServices
           .getInternalFleetServices()
-          .packagePolicy.get(soClient, endpointIntegrationData.id as string)
+          .packagePolicy.get(soClient, endpointIntegrationData.id as string, {
+            spaceId: '*',
+          })
           .catch(catchAndWrapError)) as PolicyData,
         featureUsageService
       );

@@ -71,12 +71,6 @@ export class ManifestTask {
 
               const endTime = new Date().getTime();
 
-              this.logger.debug(
-                `Complete. Task run took ${
-                  endTime - startTime.getTime()
-                }ms [ stated: ${startTime.toISOString()} ]`
-              );
-
               const nextRun = new Date();
 
               if (taskInterval.endsWith('s')) {
@@ -89,6 +83,13 @@ export class ManifestTask {
                 this.logger.error(`Invalid task interval: ${taskInterval}`);
                 return;
               }
+
+              this.logger.debug(
+                () =>
+                  `Complete. Task run took ${
+                    endTime - startTime.getTime()
+                  }ms [ stated: ${startTime.toISOString()} ]. Next run at: [${nextRun.toISOString()}]`
+              );
 
               return {
                 state: {},

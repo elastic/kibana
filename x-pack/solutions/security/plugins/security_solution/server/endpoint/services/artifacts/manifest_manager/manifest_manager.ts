@@ -16,7 +16,6 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { asyncForEach } from '@kbn/std';
-import { endpointServices } from '../../../endpoint_app_context_services';
 import { UnifiedManifestClient } from '../unified_manifest_client';
 import { stringify } from '../../../utils/stringify';
 import { QueueProcessor } from '../../../utils/queue_processor';
@@ -664,30 +663,37 @@ export class ManifestManager {
       logger: this.logger,
       key: `tryDispatch.${execId}`,
       batchHandler: async ({ data: currentBatch }) => {
-        const response = await this.packagePolicyService.bulkUpdate(
-          this.savedObjectsClient,
-          this.esClient,
-          currentBatch
-        );
-
-        if (!isEmpty(response.failedPolicies)) {
-          errors.push(
-            ...response.failedPolicies.map((failedPolicy) => {
-              if (failedPolicy.error instanceof Error) {
-                return failedPolicy.error;
-              } else {
-                return new Error(failedPolicy.error.message);
-              }
-            })
+        try {
+          const response = await this.packagePolicyService.bulkUpdate(
+            this.savedObjectsClient,
+            this.esClient,
+            currentBatch,
+            { spaceIds: ['*'] }
           );
-        }
 
-        if (response.updatedPolicies) {
-          updatedPolicies.push(
-            ...response.updatedPolicies.map((policy) => {
-              return `[${policy.id}][${policy.name}] updated with manifest version: [${manifestVersion}]`;
-            })
-          );
+          if (!isEmpty(response.failedPolicies)) {
+            errors.push(
+              ...response.failedPolicies.map((failedPolicy) => {
+                if (failedPolicy.error instanceof Error) {
+                  return failedPolicy.error;
+                } else {
+                  this.logger.debug(`Update failure:\n${stringify(failedPolicy.error)}`);
+
+                  return new EndpointError(failedPolicy.error.message, failedPolicy.error);
+                }
+              })
+            );
+          }
+
+          if (response.updatedPolicies) {
+            updatedPolicies.push(
+              ...response.updatedPolicies.map((policy) => {
+                return `[${policy.id}][${policy.name}] updated with manifest version: [${manifestVersion}]`;
+              })
+            );
+          }
+        } catch (err) {
+          errors.push(new EndpointError(`packagePolicy.bulkUpdate error: ${err.message}`, err));
         }
       },
     });
@@ -777,23 +783,27 @@ export class ManifestManager {
   private fetchAllPolicies(): Promise<AsyncIterable<PackagePolicy[]>> {
     return this.packagePolicyService.fetchAllItems(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
+      spaceIds: ['*'],
     });
   }
 
   private async listEndpointPolicyIds(): Promise<string[]> {
-    // FIXME:PT DEV TEST CODE
-    const unscopedSoClient = endpointServices.savedObjects.createInternalUnscopedSoClient(false);
-
     const allPolicyIds: string[] = [];
-    const idFetcher = await this.packagePolicyService.fetchAllItemIds(unscopedSoClient, {
+    const idFetcher = await this.packagePolicyService.fetchAllItemIds(this.savedObjectsClient, {
       kuery: 'ingest-package-policies.package.name:endpoint',
+      spaceIds: ['*'],
     });
 
     for await (const itemIds of idFetcher) {
       allPolicyIds.push(...itemIds);
     }
 
-    this.logger.debug(`Retrieved [${allPolicyIds.length}] endpoint integration policy IDs`);
+    this.logger.debug(
+      () =>
+        `Retrieved [${allPolicyIds.length}] endpoint integration policy IDs:\n${stringify(
+          allPolicyIds
+        )}`
+    );
 
     return allPolicyIds;
   }

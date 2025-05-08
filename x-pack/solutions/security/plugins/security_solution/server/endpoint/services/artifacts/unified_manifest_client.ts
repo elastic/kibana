@@ -12,7 +12,6 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { endpointServices } from '../../endpoint_app_context_services';
 import { createSoFindIterable } from '../../utils/create_so_find_iterable';
 import { mapUnifiedManifestSavedObjectToUnifiedManifest } from './utils';
 import type {
@@ -161,10 +160,8 @@ export class UnifiedManifestClient {
       sortField = 'created_at',
     }: FetchAllUnifiedManifestsOptions = {}
   ): AsyncIterable<InternalUnifiedManifestSchema[]> {
-    const unscopedSoClient = endpointServices.savedObjects.createInternalUnscopedSoClient(false);
-
     return createSoFindIterable<InternalUnifiedManifestBaseSchema>({
-      soClient: unscopedSoClient,
+      soClient,
       findRequest: {
         type: ManifestConstants.UNIFIED_SAVED_OBJECT_TYPE,
         perPage,
