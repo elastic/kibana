@@ -84,7 +84,7 @@ interface Props {
   selectedNode: PanelSelectedNode;
 }
 
-export const DefaultContent: FC<Props> = ({ selectedNode }) => {
+export const Panel: FC<Props> = ({ selectedNode }) => {
   const filteredChildren = selectedNode.children?.filter(
     (child) => child.sideNavStatus !== 'hidden'
   );
