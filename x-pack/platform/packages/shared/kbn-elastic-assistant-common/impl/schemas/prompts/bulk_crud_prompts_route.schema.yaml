@@ -21,7 +21,7 @@ paths:
               type: object
               properties:
                 delete:
-                  $ref: '#/components/schemas/BulkActionBase'
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/BulkActionBase'
                   description: Criteria for deleting prompts in bulk.
                 create:
                   type: array
@@ -255,27 +255,6 @@ components:
         - deleted
         - skipped
 
-    BulkCrudActionSummary:
-      type: object
-      properties:
-        failed:
-          type: integer
-          example: 1
-        skipped:
-          type: integer
-          example: 2
-        succeeded:
-          type: integer
-          example: 3
-        total:
-          type: integer
-          example: 6
-      required:
-        - failed
-        - skipped
-        - succeeded
-        - total
-
     PromptsBulkCrudActionResponse:
       type: object
       properties:
@@ -301,7 +280,7 @@ components:
             results:
               $ref: '#/components/schemas/PromptsBulkCrudActionResults'
             summary:
-              $ref: '#/components/schemas/BulkCrudActionSummary'
+              $ref: '../common_attributes.schema.yaml#/components/schemas/BulkCrudActionSummary'
             errors:
               type: array
               items:
@@ -311,22 +290,6 @@ components:
             - summary
       required:
         - attributes
-
-    BulkActionBase:
-      x-inline: true
-      type: object
-      properties:
-        query:
-          type: string
-          description: The query used to filter prompts for the bulk action.
-          example: "status:active"
-        ids:
-          type: array
-          description: List of prompt IDs to be affected by the bulk action.
-          minItems: 1
-          items:
-            type: string
-          example: ["prompt1", "prompt2"]
 
     PromptCreateProps:
       type: object

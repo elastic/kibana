@@ -16,6 +16,7 @@
 
 import { z } from '@kbn/zod';
 
+import { BulkActionBase, BulkCrudActionSummary } from '../common_attributes.gen';
 import {
   ConversationCreateProps,
   ConversationUpdateProps,
@@ -96,26 +97,6 @@ export const ConversationsBulkCrudActionResults = z.object({
   skipped: z.array(ConversationsBulkActionSkipResult),
 });
 
-export type BulkCrudActionSummary = z.infer<typeof BulkCrudActionSummary>;
-export const BulkCrudActionSummary = z.object({
-  /**
-   * The number of failed actions.
-   */
-  failed: z.number().int(),
-  /**
-   * The number of skipped actions.
-   */
-  skipped: z.number().int(),
-  /**
-   * The number of successfully performed actions.
-   */
-  succeeded: z.number().int(),
-  /**
-   * The total number of actions attempted.
-   */
-  total: z.number().int(),
-});
-
 export type ConversationsBulkCrudActionResponse = z.infer<
   typeof ConversationsBulkCrudActionResponse
 >;
@@ -141,18 +122,6 @@ export const ConversationsBulkCrudActionResponse = z.object({
     summary: BulkCrudActionSummary,
     errors: z.array(NormalizedConversationError).optional(),
   }),
-});
-
-export type BulkActionBase = z.infer<typeof BulkActionBase>;
-export const BulkActionBase = z.object({
-  /**
-   * Query to filter conversations for the bulk action.
-   */
-  query: z.string().optional(),
-  /**
-   * Array of conversation IDs to apply the action to.
-   */
-  ids: z.array(z.string()).min(1).optional(),
 });
 
 export type PerformBulkActionRequestBody = z.infer<typeof PerformBulkActionRequestBody>;

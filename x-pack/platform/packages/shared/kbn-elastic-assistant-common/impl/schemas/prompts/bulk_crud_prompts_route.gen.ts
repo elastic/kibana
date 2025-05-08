@@ -16,7 +16,13 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, NonEmptyTimestamp, User } from '../common_attributes.gen';
+import {
+  BulkActionBase,
+  NonEmptyString,
+  NonEmptyTimestamp,
+  User,
+  BulkCrudActionSummary,
+} from '../common_attributes.gen';
 
 /**
  * Reason why a prompt was skipped during the bulk action.
@@ -162,14 +168,6 @@ export const PromptsBulkCrudActionResults = z.object({
   skipped: z.array(PromptsBulkActionSkipResult),
 });
 
-export type BulkCrudActionSummary = z.infer<typeof BulkCrudActionSummary>;
-export const BulkCrudActionSummary = z.object({
-  failed: z.number().int(),
-  skipped: z.number().int(),
-  succeeded: z.number().int(),
-  total: z.number().int(),
-});
-
 export type PromptsBulkCrudActionResponse = z.infer<typeof PromptsBulkCrudActionResponse>;
 export const PromptsBulkCrudActionResponse = z.object({
   /**
@@ -193,18 +191,6 @@ export const PromptsBulkCrudActionResponse = z.object({
     summary: BulkCrudActionSummary,
     errors: z.array(NormalizedPromptError).optional(),
   }),
-});
-
-export type BulkActionBase = z.infer<typeof BulkActionBase>;
-export const BulkActionBase = z.object({
-  /**
-   * The query used to filter prompts for the bulk action.
-   */
-  query: z.string().optional(),
-  /**
-   * List of prompt IDs to be affected by the bulk action.
-   */
-  ids: z.array(z.string()).min(1).optional(),
 });
 
 export type PromptCreateProps = z.infer<typeof PromptCreateProps>;

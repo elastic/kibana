@@ -19,7 +19,7 @@ paths:
               type: object
               properties:
                 delete:
-                  $ref: '#/components/schemas/BulkActionBase'
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/BulkActionBase'
                   description: Object with query to filter anonymization fields and array of anonymization fields IDs
                 create:
                   type: array
@@ -240,27 +240,6 @@ components:
         - deleted
         - skipped
 
-    BulkCrudActionSummary:
-      type: object
-      properties:
-        failed:
-          type: integer
-          example: 1
-        skipped:
-          type: integer
-          example: 2
-        succeeded:
-          type: integer
-          example: 3
-        total:
-          type: integer
-          example: 6
-      required:
-        - failed
-        - skipped
-        - succeeded
-        - total
-
     AnonymizationFieldsBulkCrudActionResponse:
       type: object
       properties:
@@ -278,7 +257,7 @@ components:
             results:
               $ref: '#/components/schemas/AnonymizationFieldsBulkCrudActionResults'
             summary:
-              $ref: '#/components/schemas/BulkCrudActionSummary'
+              $ref: '../common_attributes.schema.yaml#/components/schemas/BulkCrudActionSummary'
             errors:
               type: array
               items:
@@ -288,18 +267,6 @@ components:
             - summary
       required:
         - attributes
-
-    BulkActionBase:
-      x-inline: true
-      type: object
-      properties:
-        query:
-          type: string
-        ids:
-          type: array
-          minItems: 1
-          items:
-            type: string
 
     AnonymizationFieldCreateProps:
       type: object

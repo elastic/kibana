@@ -56,11 +56,17 @@ paths:
                   type: object
                   properties:
                     ids:
+                      description: Array of IDs to apply the action to.
+                      example:
+                        - '1234'
+                        - '5678'
                       items:
                         type: string
                       minItems: 1
                       type: array
                     query:
+                      description: Query to filter the bulk action.
+                      example: 'status: ''inactive'''
                       type: string
                 update:
                   description: Array of objects with anonymization fields to update
@@ -1255,17 +1261,17 @@ paths:
                   type: object
                   properties:
                     ids:
-                      description: List of prompt IDs to be affected by the bulk action.
+                      description: Array of IDs to apply the action to.
                       example:
-                        - prompt1
-                        - prompt2
+                        - '1234'
+                        - '5678'
                       items:
                         type: string
                       minItems: 1
                       type: array
                     query:
-                      description: The query used to filter prompts for the bulk action.
-                      example: status:active
+                      description: Query to filter the bulk action.
+                      example: 'status: ''inactive'''
                       type: string
                 update:
                   description: List of prompts to be updated.
@@ -1658,16 +1664,20 @@ components:
       type: object
       properties:
         failed:
-          example: 1
+          description: The number of failed actions.
+          example: 0
           type: integer
         skipped:
-          example: 2
+          description: The number of skipped actions.
+          example: 1
           type: integer
         succeeded:
-          example: 3
+          description: The number of successfully performed actions.
+          example: 10
           type: integer
         total:
-          example: 6
+          description: The total number of actions attempted.
+          example: 12
           type: integer
       required:
         - failed

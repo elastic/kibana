@@ -57,6 +57,49 @@ components:
           type: string
           example: "America/New_York"
 
+    BulkCrudActionSummary:
+      type: object
+      properties:
+        failed:
+          type: integer
+          description: The number of failed actions.
+          example: 0
+        skipped:
+          type: integer
+          description: The number of skipped actions.
+          example: 1
+        succeeded:
+          type: integer
+          description: The number of successfully performed actions.
+          example: 10
+        total:
+          type: integer
+          description: The total number of actions attempted.
+          example: 12
+      required:
+        - failed
+        - skipped
+        - succeeded
+        - total
+
+    BulkActionBase:
+      x-inline: true
+      type: object
+      properties:
+        query:
+          type: string
+          description: Query to filter the bulk action.
+          example: "status: 'inactive'"
+        ids:
+          type: array
+          description: Array of IDs to apply the action to.
+          minItems: 1
+          items:
+            type: string
+          example:
+            - "1234"
+            - "5678"
+
     PromptIds:
       description: User screen context.
       type: object

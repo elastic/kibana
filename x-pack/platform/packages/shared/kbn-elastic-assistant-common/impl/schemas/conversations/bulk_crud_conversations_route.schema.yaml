@@ -19,7 +19,7 @@ paths:
               type: object
               properties:
                 delete:
-                  $ref: '#/components/schemas/BulkActionBase'
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/BulkActionBase'
                   description: Details of the bulk delete action to apply.
                 create:
                   type: array
@@ -161,31 +161,6 @@ components:
         - deleted
         - skipped
 
-    BulkCrudActionSummary:
-      type: object
-      properties:
-        failed:
-          type: integer
-          description: The number of failed actions.
-          example: 0
-        skipped:
-          type: integer
-          description: The number of skipped actions.
-          example: 1
-        succeeded:
-          type: integer
-          description: The number of successfully performed actions.
-          example: 10
-        total:
-          type: integer
-          description: The total number of actions attempted.
-          example: 12
-      required:
-        - failed
-        - skipped
-        - succeeded
-        - total
-
     ConversationsBulkCrudActionResponse:
       type: object
       properties:
@@ -211,7 +186,7 @@ components:
             results:
               $ref: '#/components/schemas/ConversationsBulkCrudActionResults'
             summary:
-              $ref: '#/components/schemas/BulkCrudActionSummary'
+              $ref: '../common_attributes.schema.yaml#/components/schemas/BulkCrudActionSummary'
             errors:
               type: array
               items:
@@ -221,21 +196,3 @@ components:
             - summary
       required:
         - attributes
-
-    BulkActionBase:
-      x-inline: true
-      type: object
-      properties:
-        query:
-          type: string
-          description: Query to filter conversations for the bulk action.
-          example: "status: 'inactive'"
-        ids:
-          type: array
-          description: Array of conversation IDs to apply the action to.
-          minItems: 1
-          items:
-            type: string
-          example:
-            - "1234"
-            - "5678"

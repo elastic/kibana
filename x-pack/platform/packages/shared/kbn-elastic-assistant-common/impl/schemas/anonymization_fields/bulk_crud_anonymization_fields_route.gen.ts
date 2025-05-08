@@ -16,7 +16,12 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyString, NonEmptyTimestamp } from '../common_attributes.gen';
+import {
+  BulkActionBase,
+  NonEmptyString,
+  NonEmptyTimestamp,
+  BulkCrudActionSummary,
+} from '../common_attributes.gen';
 
 /**
  * Reason why the anonymization field was not modified
@@ -132,14 +137,6 @@ export const AnonymizationFieldsBulkCrudActionResults = z.object({
   skipped: z.array(AnonymizationFieldsBulkActionSkipResult),
 });
 
-export type BulkCrudActionSummary = z.infer<typeof BulkCrudActionSummary>;
-export const BulkCrudActionSummary = z.object({
-  failed: z.number().int(),
-  skipped: z.number().int(),
-  succeeded: z.number().int(),
-  total: z.number().int(),
-});
-
 export type AnonymizationFieldsBulkCrudActionResponse = z.infer<
   typeof AnonymizationFieldsBulkCrudActionResponse
 >;
@@ -153,12 +150,6 @@ export const AnonymizationFieldsBulkCrudActionResponse = z.object({
     summary: BulkCrudActionSummary,
     errors: z.array(NormalizedAnonymizationFieldError).optional(),
   }),
-});
-
-export type BulkActionBase = z.infer<typeof BulkActionBase>;
-export const BulkActionBase = z.object({
-  query: z.string().optional(),
-  ids: z.array(z.string()).min(1).optional(),
 });
 
 export type AnonymizationFieldCreateProps = z.infer<typeof AnonymizationFieldCreateProps>;

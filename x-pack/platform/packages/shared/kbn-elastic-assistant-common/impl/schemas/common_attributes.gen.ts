@@ -69,6 +69,38 @@ export const ScreenContext = z.object({
   timeZone: z.string().optional(),
 });
 
+export type BulkCrudActionSummary = z.infer<typeof BulkCrudActionSummary>;
+export const BulkCrudActionSummary = z.object({
+  /**
+   * The number of failed actions.
+   */
+  failed: z.number().int(),
+  /**
+   * The number of skipped actions.
+   */
+  skipped: z.number().int(),
+  /**
+   * The number of successfully performed actions.
+   */
+  succeeded: z.number().int(),
+  /**
+   * The total number of actions attempted.
+   */
+  total: z.number().int(),
+});
+
+export type BulkActionBase = z.infer<typeof BulkActionBase>;
+export const BulkActionBase = z.object({
+  /**
+   * Query to filter the bulk action.
+   */
+  query: z.string().optional(),
+  /**
+   * Array of IDs to apply the action to.
+   */
+  ids: z.array(z.string()).min(1).optional(),
+});
+
 /**
  * User screen context.
  */
