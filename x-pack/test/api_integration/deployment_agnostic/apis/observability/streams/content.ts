@@ -12,7 +12,7 @@ import {
   ContentPack,
   ContentPackSavedObject,
   INDEX_PLACEHOLDER,
-  findIndexPatterns,
+  findConfiguration,
 } from '@kbn/content-packs-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -88,7 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('puts placeholders for patterns matching the source stream', async () => {
         expect(contentPack.entries.length).to.eql(2);
         contentPack.entries.forEach((entry) => {
-          const patterns = findIndexPatterns(entry);
+          const { patterns } = findConfiguration(entry);
           expect(patterns).to.eql([INDEX_PLACEHOLDER]);
         });
       });
@@ -124,6 +124,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(stream.dashboards).to.eql([response.created[0]['asset.id']]);
       });
 
+      it('does not duplicate objects when re-importing a content pack', async () => {
+        const archive = await generateArchive(contentPack, contentPack.entries);
+        const response = await importContent(apiClient, 'logs.importstream', {
+          include: { all: {} },
+          content: Readable.from(archive),
+        });
+
+        expect(response.errors.length).to.be(0);
+        expect(response.created.length).to.be(1);
+
+        const stream = await getStream(apiClient, 'logs.importstream');
+        expect(stream.dashboards).to.eql([response.created[0]['asset.id']]);
+      });
+
       it('replaces placeholders with target stream pattern', async () => {
         const stream = await getStream(apiClient, 'logs.importstream');
         const dashboard = await kibanaServer.savedObjects.get({
@@ -137,7 +151,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         [dashboard, indexPattern].forEach((object) => {
-          const patterns = findIndexPatterns(object as ContentPackSavedObject);
+          const { patterns } = findConfiguration(object as ContentPackSavedObject);
           expect(patterns).to.eql(['logs.importstream']);
         });
       });
