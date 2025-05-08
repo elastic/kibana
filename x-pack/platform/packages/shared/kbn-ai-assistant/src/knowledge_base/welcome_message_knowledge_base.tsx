@@ -13,6 +13,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { UseKnowledgeBaseResult } from '../hooks';
 import { KnowledgeBaseInstallationStatusPanel } from './knowledge_base_installation_status_panel';
 import { SettingUpKnowledgeBase } from './setting_up_knowledge_base';
+import { InspectKnowledgeBasePopover } from './inspect_knowlegde_base_popover';
 
 export function WelcomeMessageKnowledgeBase({
   knowledgeBase,
@@ -29,7 +30,12 @@ export function WelcomeMessageKnowledgeBase({
   }, [knowledgeBase.isInstalling, prevIsInstalling]);
 
   if (knowledgeBase.isInstalling) {
-    return <SettingUpKnowledgeBase />;
+    return (
+      <>
+        <SettingUpKnowledgeBase />
+        <InspectKnowledgeBasePopover knowledgeBase={knowledgeBase} />
+      </>
+    );
   }
 
   if (knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY) {
