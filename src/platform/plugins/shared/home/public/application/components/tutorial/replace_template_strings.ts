@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, type RenderOptions } from 'mustache';
+import Mustache, { type RenderOptions } from 'mustache';
 import { getServices } from '../../kibana_services';
 
 const TEMPLATE_TAGS: [string, string] = ['{', '}'];
@@ -64,5 +64,5 @@ export function replaceTemplateStrings(text: string) {
     tags: TEMPLATE_TAGS,
     escape: (s: string) => s,
   };
-  return render(text, variables, undefined, config);
+  return Mustache.render(text, variables, undefined, config);
 }
