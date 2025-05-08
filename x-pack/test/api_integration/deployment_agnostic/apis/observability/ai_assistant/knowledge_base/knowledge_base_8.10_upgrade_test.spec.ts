@@ -33,7 +33,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   // Sparse vector field was introduced in Elasticsearch 8.11
   // The semantic text field was added to the knowledge base index in 8.17
   // Indices created in 8.10 do not support semantic text field and need to be reindexed
-  describe('when upgrading from 8.10 to 8.18', function () {
+  describe('Knowledge base: when upgrading from 8.10 to 8.18', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);
