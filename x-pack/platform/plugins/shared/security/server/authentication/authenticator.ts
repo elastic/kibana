@@ -701,7 +701,6 @@ export class Authenticator {
    */
   private async getSessionValue(request: KibanaRequest) {
     const existingSession = await this.session.get(request);
-    console.log(existingSession);
 
     // If we detect that for some reason we have a session stored for the provider that is not
     // available anymore (e.g. when user was logged in with one provider, but then configuration has
