@@ -76,13 +76,13 @@ describe('Differential Functions page', () => {
         { id: 'overallPerformance', value: '65.89%' },
         {
           id: 'annualizedCo2',
-          value: '78.48 lbs / 35.6 kg',
-          comparisonValue: '26.68 lbs / 12.1 kg (66.01%)',
+          value: '74.52 lbs / 33.8 kg',
+          comparisonValue: '25.35 lbs / 11.5 kg (65.98%)',
         },
         {
           id: 'annualizedCost',
-          value: '$335.07',
-          comparisonValue: '$114.3 (65.89%)',
+          value: '$318.32',
+          comparisonValue: '$108.59 (65.89%)',
         },
         {
           id: 'totalNumberOfSamples',
@@ -112,13 +112,13 @@ describe('Differential Functions page', () => {
         { id: 'overallPerformance', value: '193.14%' },
         {
           id: 'annualizedCo2',
-          value: '26.68 lbs / 12.1 kg',
-          comparisonValue: '78.48 lbs / 35.6 kg (194.21%)',
+          value: '25.35 lbs / 11.5 kg',
+          comparisonValue: '74.52 lbs / 33.8 kg (193.91%)',
         },
         {
           id: 'annualizedCost',
-          value: '$114.3',
-          comparisonValue: '$335.07 (193.14%)',
+          value: '$108.59',
+          comparisonValue: '$318.32 (193.14%)',
         },
         {
           id: 'totalNumberOfSamples',
