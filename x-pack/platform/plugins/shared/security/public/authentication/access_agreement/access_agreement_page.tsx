@@ -133,7 +133,7 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
 
   return (
     <AuthenticationStatePage
-      styles={css({
+      cssStyles={css({
         maxWidth: '600px',
       })}
       title={

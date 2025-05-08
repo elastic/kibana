@@ -2,19 +2,19 @@
 
 exports[`AuthenticationStatePage renders 1`] = `
 <div
-  className="secAuthenticationStatePage "
+  css="unknown styles"
 >
   <header
-    className="secAuthenticationStatePage__header"
+    css="unknown styles"
   >
     <div
-      className="secAuthenticationStatePage__content eui-textCenter"
+      css="unknown styles"
     >
       <EuiSpacer
         size="xxl"
       />
       <span
-        className="secAuthenticationStatePage__logo"
+        css="unknown styles"
       >
         <EuiIcon
           size="xxl"
@@ -22,7 +22,6 @@ exports[`AuthenticationStatePage renders 1`] = `
         />
       </span>
       <EuiTitle
-        className="secAuthenticationStatePage__title"
         size="l"
       >
         <h1>
@@ -35,7 +34,7 @@ exports[`AuthenticationStatePage renders 1`] = `
     </div>
   </header>
   <div
-    className="secAuthenticationStatePage__content eui-textCenter"
+    css="unknown styles"
   >
     <span>
       hello world

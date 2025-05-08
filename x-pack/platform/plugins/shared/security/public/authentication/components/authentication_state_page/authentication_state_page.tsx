@@ -16,7 +16,7 @@ interface Props {
   className?: string;
   title: React.ReactNode;
   logo?: string;
-  styles?: SerializedStyles;
+  cssStyles?: SerializedStyles;
 }
 
 export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => {
@@ -28,7 +28,7 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
     <div
       css={[
         fullScreenGraphicsMixinStyles(Number(euiTheme.levels.toast), theme),
-        props.styles || '',
+        props.cssStyles || '',
       ]}
     >
       <header css={css({ position: 'relative', padding: euiTheme.size.xl, zIndex: 10 })}>

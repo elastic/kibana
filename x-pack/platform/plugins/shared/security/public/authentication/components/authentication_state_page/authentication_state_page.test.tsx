@@ -21,14 +21,4 @@ describe('AuthenticationStatePage', () => {
       )
     ).toMatchSnapshot();
   });
-
-  it('renders with custom CSS class', () => {
-    expect(
-      shallowWithIntl(
-        <AuthenticationStatePage className="customClassName" title={'foo'}>
-          <span>hello world</span>
-        </AuthenticationStatePage>
-      ).exists('.secAuthenticationStatePage.customClassName')
-    ).toBe(true);
-  });
 });

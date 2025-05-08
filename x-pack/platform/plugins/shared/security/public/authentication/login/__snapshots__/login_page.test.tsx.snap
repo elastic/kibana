@@ -293,17 +293,15 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
 `;
 
 exports[`LoginPage page renders as expected 1`] = `
-<div
-  className="loginWelcome login-form"
->
+<Container>
   <header
-    className="loginWelcome__header"
+    css="unknown styles"
   >
     <div
-      className="loginWelcome__content eui-textCenter"
+      css="unknown styles"
     >
       <span
-        className="loginWelcome__logo"
+        css="unknown styles"
         style={Object {}}
       >
         <EuiIcon
@@ -312,7 +310,6 @@ exports[`LoginPage page renders as expected 1`] = `
         />
       </span>
       <EuiTitle
-        className="loginWelcome__title"
         data-test-subj="loginWelcomeTitle"
         size="m"
       >
@@ -326,7 +323,7 @@ exports[`LoginPage page renders as expected 1`] = `
     </div>
   </header>
   <div
-    className="loginWelcome__content loginWelcome-body"
+    css="unknown styles"
   >
     <EuiFlexGroup
       gutterSize="l"
@@ -371,21 +368,19 @@ exports[`LoginPage page renders as expected 1`] = `
       </EuiFlexItem>
     </EuiFlexGroup>
   </div>
-</div>
+</Container>
 `;
 
 exports[`LoginPage page renders with custom branding 1`] = `
-<div
-  className="loginWelcome login-form"
->
+<Container>
   <header
-    className="loginWelcome__header"
+    css="unknown styles"
   >
     <div
-      className="loginWelcome__content eui-textCenter"
+      css="unknown styles"
     >
       <span
-        className="loginWelcome__logo"
+        css="unknown styles"
         style={
           Object {
             "padding": 0,
@@ -399,7 +394,6 @@ exports[`LoginPage page renders with custom branding 1`] = `
         />
       </span>
       <EuiTitle
-        className="loginWelcome__title"
         data-test-subj="loginWelcomeTitle"
         size="m"
       >
@@ -413,7 +407,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
     </div>
   </header>
   <div
-    className="loginWelcome__content loginWelcome-body"
+    css="unknown styles"
   >
     <EuiFlexGroup
       gutterSize="l"
@@ -458,5 +452,5 @@ exports[`LoginPage page renders with custom branding 1`] = `
       </EuiFlexItem>
     </EuiFlexGroup>
   </div>
-</div>
+</Container>
 `;
