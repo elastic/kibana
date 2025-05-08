@@ -195,6 +195,9 @@ export default async function ({ readConfigFile }) {
       enterpriseSearch: {
         pathname: '/app/elasticsearch/overview',
       },
+      searchPlayground: {
+        pathname: '/app/search_playground',
+      },
     },
 
     suiteTags: {
