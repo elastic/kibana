@@ -21,29 +21,25 @@ export async function reIndexKnowledgeBaseWithLock({
   core,
   logger,
   esClient,
-  inferenceId,
 }: {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   logger: Logger;
   esClient: {
     asInternalUser: ElasticsearchClient;
   };
-  inferenceId: string;
 }): Promise<void> {
   const lmService = new LockManagerService(core, logger);
   return lmService.withLock(KB_REINDEXING_LOCK_ID, () =>
-    reIndexKnowledgeBase({ logger, esClient, inferenceId })
+    reIndexKnowledgeBase({ logger, esClient })
   );
 }
 
 async function reIndexKnowledgeBase({
   logger,
   esClient,
-  inferenceId,
 }: {
   logger: Logger;
   esClient: { asInternalUser: ElasticsearchClient };
-  inferenceId: string;
 }): Promise<void> {
   const activeReindexingTask = await getActiveReindexingTaskId(esClient);
   if (activeReindexingTask) {
@@ -57,7 +53,7 @@ async function reIndexKnowledgeBase({
     logger,
   });
 
-  await createKnowledgeBaseIndex({ esClient, logger, inferenceId, indexName: nextWriteIndexName });
+  await createKnowledgeBaseIndex({ esClient, logger, indexName: nextWriteIndexName });
 
   logger.info(
     `Re-indexing knowledge base from "${currentWriteIndexName}" to index "${nextWriteIndexName}"...`

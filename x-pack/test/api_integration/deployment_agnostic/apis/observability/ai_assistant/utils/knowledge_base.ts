@@ -181,11 +181,6 @@ export async function reIndexKnowledgeBase(
 ) {
   return observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
-    params: {
-      query: {
-        inference_id: TINY_ELSER_INFERENCE_ID,
-      },
-    },
   });
 }
 

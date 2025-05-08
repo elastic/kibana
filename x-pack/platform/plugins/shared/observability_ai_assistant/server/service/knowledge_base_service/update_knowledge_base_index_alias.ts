@@ -24,10 +24,15 @@ export async function updateKnowledgeBaseWriteIndexAlias({
     `Updating write index alias from "${currentWriteIndexName}" to "${nextWriteIndexName}"`
   );
   const alias = resourceNames.writeIndexAlias.kb;
-  await esClient.asInternalUser.indices.updateAliases({
-    actions: [
-      { remove: { index: currentWriteIndexName, alias } },
-      { add: { index: nextWriteIndexName, alias, is_write_index: true } },
-    ],
-  });
+  try {
+    await esClient.asInternalUser.indices.updateAliases({
+      actions: [
+        { remove: { index: currentWriteIndexName, alias } },
+        { add: { index: nextWriteIndexName, alias, is_write_index: true } },
+      ],
+    });
+  } catch (error) {
+    logger.error(`Failed to update write index alias: ${error.message}`);
+    throw error;
+  }
 }
