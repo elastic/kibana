@@ -41,7 +41,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     before(async () => {
       await teardownTinyElserModelAndInferenceEndpoint(getService);
-      await deleteIndexAssets(es);
+      await deleteIndexAssets(getService);
       await restoreKbSnapshot({
         log,
         es,
@@ -56,7 +56,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     after(async () => {
       await teardownTinyElserModelAndInferenceEndpoint(getService);
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      await restoreIndexAssets(getService);
     });
 
     describe('before migrating', () => {

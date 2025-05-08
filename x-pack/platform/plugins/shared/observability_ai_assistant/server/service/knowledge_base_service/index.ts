@@ -30,7 +30,6 @@ import { recallFromSearchConnectors } from './recall_from_search_connectors';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { hasKbWriteIndex } from './has_kb_index';
-import { getInferenceIdFromWriteIndex } from './get_inference_id_from_write_index';
 import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
 import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
 
@@ -440,13 +439,10 @@ export class KnowledgeBaseService {
       }
 
       if (isSemanticTextUnsupportedError(error)) {
-        const inferenceId = await getInferenceIdFromWriteIndex(this.dependencies.esClient);
-
         reIndexKnowledgeBaseWithLock({
           core: this.dependencies.core,
           logger: this.dependencies.logger,
           esClient: this.dependencies.esClient,
-          inferenceId,
         }).catch((e) => {
           if (isLockAcquisitionError(e)) {
             this.dependencies.logger.info(`Re-indexing operation is already in progress`);
