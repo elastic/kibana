@@ -15,9 +15,10 @@ import {
   EuiImage,
   EuiSpacer,
   EuiText,
+  type EuiThemeComputed,
   EuiTitle,
 } from '@elastic/eui';
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import type { Subscription } from 'rxjs';
@@ -138,13 +139,21 @@ export class LoginPage extends Component<Props, State> {
         ? false
         : allowLogin && layout === 'form';
 
-    const contentHeaderClasses = classNames('loginWelcome__content', 'eui-textCenter', {
-      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
-    });
+    const loginWelcomeStyle = (euiTheme: EuiThemeComputed) =>
+      css({
+        position: 'relative',
+        margin: 'auto',
+        maxWidth: '460px',
+        paddingLeft: euiTheme.size.xl,
+        paddingRight: euiTheme.size.xl,
+        zIndex: 10,
+        textAlign: 'center',
+      });
 
-    const contentBodyClasses = classNames('loginWelcome__content', 'loginWelcome-body', {
-      ['loginWelcome__contentDisabledForm']: !loginIsSupported,
-    });
+    const contentHeaderStyles = (euiTheme: EuiThemeComputed) => [
+      loginWelcomeStyle(euiTheme),
+      !loginIsSupported && css({ maxWidth: '700px' }),
+    ];
 
     const customLogo = this.state.customBranding?.logo;
     const logo = customLogo ? (
@@ -155,13 +164,30 @@ export class LoginPage extends Component<Props, State> {
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
     return (
-      <div className="loginWelcome login-form">
-        <header className="loginWelcome__header">
-          <div className={contentHeaderClasses}>
-            <span className="loginWelcome__logo" style={logoStyle}>
+      <div css={} data-test-subj="login-form">
+        <header
+          css={({ euiTheme }) =>
+            css({
+              marginTop: `calc(${euiTheme.size.xxl} * 3)`,
+              position: 'relative',
+              padding: euiTheme.size.base,
+              zIndex: 10,
+            })
+          }
+        >
+          <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
+            <span
+              css={({ euiTheme }) =>
+                css({
+                  marginBottom: euiTheme.size.xl,
+                  display: 'inline-block',
+                })
+              }
+              style={logoStyle}
+            >
               {logo}
             </span>
-            <EuiTitle size="m" className="loginWelcome__title" data-test-subj="loginWelcomeTitle">
+            <EuiTitle size="m" data-test-subj="loginWelcomeTitle">
               <h1>
                 <FormattedMessage
                   id="xpack.security.loginPage.welcomeTitle"
@@ -171,7 +197,7 @@ export class LoginPage extends Component<Props, State> {
             </EuiTitle>
           </div>
         </header>
-        <div className={contentBodyClasses}>
+        <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem>
               {this.getLoginForm({

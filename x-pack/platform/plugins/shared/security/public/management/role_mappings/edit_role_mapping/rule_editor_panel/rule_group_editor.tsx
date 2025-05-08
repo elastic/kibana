@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './rule_group_editor.scss';
-
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -14,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiPanel,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { Component, Fragment } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,7 +40,15 @@ export class RuleGroupEditor extends Component<Props, {}> {
   public render() {
     return (
       <EuiPanel
-        className={`secRoleMapping__ruleEditorGroup--${this.props.ruleDepth % 2 ? 'odd' : 'even'}`}
+        css={({ euiTheme }) =>
+          this.props.ruleDepth % 2
+            ? css({
+                backgroundColor: euiTheme.colors.emptyShade,
+              })
+            : css({
+                backgroundColor: euiTheme.colors.lightestShade,
+              })
+        }
         hasBorder={true}
         hasShadow={false}
       >
