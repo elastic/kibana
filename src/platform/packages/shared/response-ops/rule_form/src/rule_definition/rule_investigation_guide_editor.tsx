@@ -18,20 +18,18 @@ interface Props {
 
 export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
   return (
-    <>
-      <EuiMarkdownEditor
-        aria-label={i18n.translate('responseOpsRuleForm.investigationGuide.editor.ariaLabel', {
-          defaultMessage: 'Add guidelines for addressing alerts created by this rule',
-        })}
-        placeholder={i18n.translate('responseOpsRuleForm.investigationGuide.editor.placeholder', {
-          defaultMessage: 'Add guidelines for addressing alerts created by this rule',
-        })}
-        value={value}
-        onChange={(blob) => setRuleParams({ investigation_guide: { blob } })}
-        height={200}
-        data-test-subj="investigationGuideEditor"
-        initialViewMode="editing"
-      />
-    </>
+    <EuiMarkdownEditor
+      aria-label={i18n.translate('responseOpsRuleForm.investigationGuide.editor.ariaLabel', {
+        defaultMessage: 'Add guidelines for addressing alerts created by this rule',
+      })}
+      placeholder={i18n.translate('responseOpsRuleForm.investigationGuide.editor.placeholder', {
+        defaultMessage: 'Add guidelines for addressing alerts created by this rule',
+      })}
+      value={value}
+      onChange={(blob) => setRuleParams({ investigation_guide: { blob } })}
+      height={200}
+      data-test-subj="investigationGuideEditor"
+      initialViewMode="editing"
+    />
   );
 }
