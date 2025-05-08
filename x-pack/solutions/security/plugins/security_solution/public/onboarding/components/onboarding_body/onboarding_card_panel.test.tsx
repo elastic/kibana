@@ -15,7 +15,7 @@ import { TestProviders } from '../../../common/mock/test_providers';
 const mockUseDarkMode = jest.fn(() => false);
 jest.mock('@kbn/react-kibana-context-theme', () => ({
   ...jest.requireActual('@kbn/react-kibana-context-theme'),
-  useKibanaDarkMode: () => mockUseDarkMode(),
+  useKibanaIsDarkMode: () => mockUseDarkMode(),
 }));
 
 jest.mock('@elastic/eui', () => ({

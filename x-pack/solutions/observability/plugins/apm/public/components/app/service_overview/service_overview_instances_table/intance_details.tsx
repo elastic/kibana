@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import {
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_INSTANCE_ID,
@@ -90,7 +90,7 @@ const cloudDetailsKeys = [
 ];
 
 export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) {
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const history = useHistory();
 
   const { data, status } = useInstanceDetailsFetcher({

@@ -31,7 +31,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@ela
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React from 'react';
-import { useKibanaDarkMode } from '@kbn/react-kibana-context-theme';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useHistory } from 'react-router-dom';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
@@ -79,7 +79,7 @@ export function TimeseriesChart({
   const history = useHistory();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const { euiTheme } = useEuiTheme();
-  const isDarkMode = useKibanaDarkMode();
+  const isDarkMode = useKibanaIsDarkMode();
   const chartThemes = useChartThemes();
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
