@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
-
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { StateComparators } from '@kbn/presentation-publishing';
 
 import type { DefaultControlState } from '../../../common';
 import { getControlFactory } from '../../control_factory_registry';
@@ -38,8 +35,6 @@ export const ControlRenderer = <
   onApiAvailable?: (api: ApiType) => void;
   isControlGroupInitialized: boolean;
 }) => {
-  const cleanupFunction = useRef<(() => void) | null>(null);
-
   const [component, setComponent] = useState<undefined | React.FC<{ className: string }>>(
     undefined
   );
@@ -49,33 +44,26 @@ export const ControlRenderer = <
       let ignore = false;
 
       async function buildControl() {
-        const parentApi = getParentApi();
+        const controlGroupApi = getParentApi();
         const factory = await getControlFactory<StateType, ApiType>(type);
-        const buildApi = (
-          apiRegistration: ControlApiRegistration<ApiType>,
-          comparators: StateComparators<StateType>
-        ): ApiType => {
-          const unsavedChanges = initializeUnsavedChanges<StateType>(
-            parentApi.getLastSavedControlState(uuid) as StateType,
-            parentApi,
-            comparators
-          );
-
-          cleanupFunction.current = () => unsavedChanges.cleanup();
-
+        const finalizeApi = (apiRegistration: ControlApiRegistration<ApiType>): ApiType => {
           return {
             ...apiRegistration,
-            ...unsavedChanges.api,
             uuid,
-            parentApi,
+            parentApi: controlGroupApi,
             type: factory.type,
           } as unknown as ApiType;
         };
 
-        const { rawState: initialState } = parentApi.getSerializedStateForChild(uuid) ?? {
+        const { rawState: initialState } = controlGroupApi.getSerializedStateForChild(uuid) ?? {
           rawState: {},
         };
-        return await factory.buildControl(initialState as StateType, buildApi, uuid, parentApi);
+        return await factory.buildControl({
+          initialState: initialState as StateType,
+          finalizeApi,
+          uuid,
+          controlGroupApi,
+        });
       }
 
       buildControl()
@@ -126,12 +114,6 @@ export const ControlRenderer = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [type]
   );
-
-  useEffect(() => {
-    return () => {
-      cleanupFunction.current?.();
-    };
-  }, []);
 
   return component && isControlGroupInitialized ? (
     // @ts-expect-error
