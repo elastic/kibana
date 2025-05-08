@@ -45754,47 +45754,53 @@ paths:
       requestBody:
         content:
           application/json:
-            example:
-              create:
-                - allowed: true
-                  anonymized: false
-                  field: host.name
-                - allowed: false
-                  anonymized: true
-                  field: user.name
-              delete:
-                ids:
-                  - field5
-                  - field6
-                query: 'field: host.name'
-              update:
-                - allowed: true
-                  anonymized: false
-                  id: field8
-                - allowed: false
-                  anonymized: true
-                  id: field9
             schema:
+              example:
+                create:
+                  - allowed: true
+                    anonymized: false
+                    field: host.name
+                  - allowed: false
+                    anonymized: true
+                    field: user.name
+                delete:
+                  ids:
+                    - field5
+                    - field6
+                  query: 'field: host.name'
+                update:
+                  - allowed: true
+                    anonymized: false
+                    id: field8
+                  - allowed: false
+                    anonymized: true
+                    id: field9
               type: object
               properties:
                 create:
-                  description: Array of objects with anonymization fields to create
+                  description: Array of anonymization fields to create.
                   items:
                     $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldCreateProps'
                   type: array
                 delete:
-                  description: Object with query to filter anonymization fields and array of anonymization fields IDs
+                  description: Object containing the query to filter anonymization fields and/or an array of anonymization field IDs to delete.
                   type: object
                   properties:
                     ids:
+                      description: Array of IDs to apply the action to.
+                      example:
+                        - '1234'
+                        - '5678'
                       items:
                         type: string
                       minItems: 1
                       type: array
                     query:
+                      description: Query to filter the bulk action.
+                      example: 'status: ''inactive'''
                       type: string
                 update:
-                  description: Array of objects with anonymization fields to update
+                  description: Array of anonymization fields to update.
                   items:
                     $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldUpdateProps'
                   type: array
@@ -45856,13 +45862,13 @@ paths:
                 type: object
                 properties:
                   error:
-                    description: Error message
+                    description: Error type or name.
                     type: string
                   message:
-                    description: detailed error message
+                    description: Detailed error message.
                     type: string
                   statusCode:
-                    description: status code of the response
+                    description: Status code of the response.
                     type: number
           description: Generic Error
       summary: Apply a bulk action to anonymization fields
@@ -46892,17 +46898,17 @@ paths:
                   type: object
                   properties:
                     ids:
-                      description: List of prompt IDs to be affected by the bulk action.
+                      description: Array of IDs to apply the action to.
                       example:
-                        - prompt1
-                        - prompt2
+                        - '1234'
+                        - '5678'
                       items:
                         type: string
                       minItems: 1
                       type: array
                     query:
-                      description: The query used to filter prompts for the bulk action.
-                      example: status:active
+                      description: Query to filter the bulk action.
+                      example: 'status: ''inactive'''
                       type: string
                 update:
                   description: List of prompts to be updated.
@@ -66176,10 +66182,16 @@ components:
       type: object
       properties:
         allowed:
+          description: Whether this field is allowed to be sent to the model.
+          example: true
           type: boolean
         anonymized:
+          description: Whether this field should be anonymized.
+          example: false
           type: boolean
         field:
+          description: Name of the anonymization field to create.
+          example: host.name
           type: string
       required:
         - field
@@ -66187,10 +66199,12 @@ components:
       type: object
       properties:
         id:
-          description: The id of the anonymization field
+          description: The ID of the anonymization field.
+          example: field12
           type: string
         name:
-          description: Name of the anonymization field
+          description: Name of the anonymization field.
+          example: host.name
           type: string
       required:
         - id
@@ -66198,40 +66212,48 @@ components:
       type: object
       properties:
         allowed:
-          description: Whether field is allowed to be sent to the model
+          description: Whether this field is allowed to be sent to the model.
+          example: true
           type: boolean
         anonymized:
-          description: Whether field is anonymized
+          description: Whether this field should be anonymized.
+          example: false
           type: boolean
         createdAt:
-          description: Timestamp of the creation
+          description: Timestamp of when the anonymization field was created.
+          example: '2023-10-31T12:00:00Z'
           type: string
         createdBy:
-          description: User who created the field
+          description: Username of the person who created the anonymization field.
+          example: user1
           type: string
         field:
-          description: Field name
+          description: Name of the anonymization field.
+          example: url.domain
           type: string
         id:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
-          description: The id of the anonymization field
+          description: The ID of the anonymization field.
         namespace:
-          description: Kibana space
+          description: Kibana space in which this anonymization field exists.
+          example: default
           type: string
         timestamp:
           $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
-          description: Timestamp of the field creation
+          description: Timestamp when the anonymization field was initially created.
         updatedAt:
-          description: Timestamp of the last update
+          description: Timestamp of the last update.
+          example: '2023-10-31T12:00:00Z'
           type: string
         updatedBy:
-          description: User who last updated the field
+          description: Username of the person who last updated the field.
+          example: user1
           type: string
       required:
         - id
         - field
     Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipReason:
-      description: Reason why the anonymization field was not modified
+      description: Reason why the anonymization field was not modified.
       enum:
         - ANONYMIZATION_FIELD_NOT_MODIFIED
       type: string
@@ -66239,14 +66261,16 @@ components:
       type: object
       properties:
         id:
-          description: The id of the anonymization field that was not modified
+          description: The ID of the anonymization field that was not modified.
+          example: field4
           type: string
         name:
-          description: Name of the anonymization field that was not modified
+          description: Name of the anonymization field that was not modified.
+          example: user.name
           type: string
         skip_reason:
           $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipReason'
-          description: Reason why the anonymization field was not modified
+          description: Reason why the anonymization field was not modified.
       required:
         - id
         - skip_reason
@@ -66254,11 +66278,14 @@ components:
       type: object
       properties:
         anonymization_fields_count:
+          description: Total number of anonymization fields processed.
+          example: 5
           type: integer
         attributes:
           type: object
           properties:
             errors:
+              description: List of errors that occurred during the bulk operation.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_NormalizedAnonymizationFieldError'
               type: array
@@ -66270,10 +66297,16 @@ components:
             - results
             - summary
         message:
+          description: Message providing information about the bulk action result.
+          example: Bulk action completed successfully
           type: string
         status_code:
+          description: HTTP status code returned.
+          example: 200
           type: integer
         success:
+          description: Indicates if the bulk action was successful.
+          example: true
           type: boolean
       required:
         - attributes
@@ -66281,19 +66314,23 @@ components:
       type: object
       properties:
         created:
+          description: List of anonymization fields successfully created.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
           type: array
         deleted:
           items:
-            description: array of deleted anonymization field IDs
+            description: Array of IDs of anonymization fields that were deleted.
+            example: field3
             type: string
           type: array
         skipped:
+          description: List of anonymization fields that were skipped during the operation.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldsBulkActionSkipResult'
           type: array
         updated:
+          description: List of anonymization fields successfully updated.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldResponse'
           type: array
@@ -66306,10 +66343,16 @@ components:
       type: object
       properties:
         allowed:
+          description: Whether this field is allowed to be sent to the model.
+          example: true
           type: boolean
         anonymized:
+          description: Whether this field should be anonymized.
+          example: false
           type: boolean
         id:
+          description: The ID of the anonymization field to update.
+          example: field8
           type: string
       required:
         - id
@@ -66358,16 +66401,20 @@ components:
       type: object
       properties:
         failed:
-          example: 1
+          description: The number of failed actions.
+          example: 0
           type: integer
         skipped:
-          example: 2
+          description: The number of skipped actions.
+          example: 1
           type: integer
         succeeded:
-          example: 3
+          description: The number of successfully performed actions.
+          example: 10
           type: integer
         total:
-          example: 6
+          description: The total number of actions attempted.
+          example: 12
           type: integer
       required:
         - failed
@@ -67268,18 +67315,21 @@ components:
       type: object
       properties:
         anonymization_fields:
-          description: array of anonymization fields that caused the error
+          description: Array of anonymization fields that caused the error.
           items:
             $ref: '#/components/schemas/Security_AI_Assistant_API_AnonymizationFieldDetailsInError'
           type: array
         err_code:
-          description: Error code
+          description: Error code indicating the type of failure.
+          example: UPDATE_FAILED
           type: string
         message:
-          description: Error message
+          description: Error message.
+          example: Failed to update anonymization field.
           type: string
         status_code:
-          description: Status code of the response
+          description: Status code of the response.
+          example: 400
           type: integer
       required:
         - message
