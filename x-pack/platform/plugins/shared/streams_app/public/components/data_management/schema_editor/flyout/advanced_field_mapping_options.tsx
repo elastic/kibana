@@ -75,7 +75,7 @@ export const AdvancedFieldMappingOptions = ({
                 link: (
                   <EuiLink
                     data-test-subj="streamsAppAdvancedFieldMappingOptionsViewDocumentationLink"
-                    href={core.docLinks.links.elasticsearch.docsBase.concat('mapping-params.html')}
+                    href={core.docLinks.links.elasticsearch.mappingParameters}
                     target="_blank"
                     external
                   >
