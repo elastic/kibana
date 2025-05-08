@@ -62,7 +62,7 @@ export function TransactionOverview({
           <TransactionSummaryTitle
             serviceName={parsedDoc[SERVICE_NAME_FIELD]}
             id={transactionId}
-            name={parsedDoc[TRANSACTION_NAME_FIELD]!}
+            name={parsedDoc[TRANSACTION_NAME_FIELD]}
           />
           <EuiSpacer size="m" />
           {transactionFields.map((fieldId) => (
