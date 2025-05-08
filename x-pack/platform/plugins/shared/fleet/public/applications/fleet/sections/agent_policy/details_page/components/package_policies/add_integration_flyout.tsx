@@ -70,7 +70,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
   }, []);
 
   const selectIntegrationStep = {
-    title: i18n.translate('xpack.fleet.createPackagePolicy.selectIntegrationTitle', {
+    title: i18n.translate('xpack.fleet.addIntegrationFlyout.selectIntegrationTitle', {
       defaultMessage: 'Select integration',
     }),
     'data-test-subj': 'selectIntegrationStep',
@@ -123,10 +123,10 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
                 <EuiButtonEmpty
                   onClick={onClose}
                   flush="left"
-                  data-test-subj="editDownloadSourcesFlyout.cancelBtn"
+                  data-test-subj="addIntegrationFlyout.cancelBtn"
                 >
                   <FormattedMessage
-                    id="xpack.fleet.settings.editDownloadSourcesFlyout.cancelButtonLabel"
+                    id="xpack.fleet.addIntegrationFlyout.cancelButtonLabel"
                     defaultMessage="Cancel"
                   />
                 </EuiButtonEmpty>
@@ -139,10 +139,10 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
                   onClick={() => {
                     setIsSubmitted(true);
                   }}
-                  data-test-subj="editDownloadSourcesFlyout.submitBtn"
+                  data-test-subj="addIntegrationFlyout.submitBtn"
                 >
                   <FormattedMessage
-                    id="xpack.fleet.settings.editDownloadSourcesFlyout.saveButton"
+                    id="xpack.fleet.addIntegrationFlyout.submitButton"
                     defaultMessage="Add integration"
                   />
                 </EuiButton>

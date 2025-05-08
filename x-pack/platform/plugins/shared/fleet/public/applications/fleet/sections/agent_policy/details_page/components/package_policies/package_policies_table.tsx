@@ -33,7 +33,6 @@ import {
   useLink,
   useIsPackagePolicyUpgradable,
   usePermissionCheck,
-  useStartServices,
   useMultipleAgentPolicies,
   useGetOutputs,
   useDefaultOutput,
@@ -63,7 +62,6 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   agentPolicy,
   ...rest
 }) => {
-  const { application } = useStartServices();
   const authz = useAuthz();
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
   const canReadAgentPolicies = authz.fleet.readAgentPolicies;
