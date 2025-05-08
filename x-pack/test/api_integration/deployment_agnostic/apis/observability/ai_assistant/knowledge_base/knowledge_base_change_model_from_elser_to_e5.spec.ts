@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let e5WriteIndex: string;
 
     before(async () => {
-      await importModel(ml, { modelId: TINY_ELSER_MODEL_ID });
+      await importModel(getService, { modelId: TINY_ELSER_MODEL_ID });
       await createTinyElserInferenceEndpoint(getService, { inferenceId: TINY_ELSER_INFERENCE_ID });
       await setupKnowledgeBase(observabilityAIAssistantAPIClient, TINY_ELSER_INFERENCE_ID);
       await waitForKnowledgeBaseReady(getService);
@@ -71,7 +71,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       elserWriteIndex = await getConcreteWriteIndexFromAlias(es);
 
       // setup KB with E5-like model
-      await importModel(ml, { modelId: TINY_TEXT_EMBEDDING_MODEL_ID });
+      await importModel(getService, { modelId: TINY_TEXT_EMBEDDING_MODEL_ID });
       await ml.api.startTrainedModelDeploymentES(TINY_TEXT_EMBEDDING_MODEL_ID);
       await createTinyTextEmbeddingInferenceEndpoint(getService, {
         inferenceId: TINY_TEXT_EMBEDDING_INFERENCE_ID,
@@ -99,7 +99,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await deleteModel(getService, { modelId: TINY_TEXT_EMBEDDING_MODEL_ID });
       await deleteInferenceEndpoint(getService, { inferenceId: TINY_TEXT_EMBEDDING_INFERENCE_ID });
 
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      await restoreIndexAssets(getService);
     });
 
     describe('when model is ELSER', () => {
