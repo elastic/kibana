@@ -56,7 +56,6 @@ import { getAuthorizedConsumers } from '../utils';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
-import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
 
 export const RuleDefinition = () => {
   const {
@@ -216,18 +215,6 @@ export const RuleDefinition = () => {
     [dispatch]
   );
 
-  const onSetArtifacts = useCallback(
-    (value: object) => {
-      dispatch({
-        type: 'setRuleProperty',
-        payload: {
-          property: 'artifacts',
-          value: formData.artifacts ? { ...formData.artifacts, ...value } : value,
-        },
-      });
-    },
-    [dispatch, formData.artifacts]
-  );
   return (
     <EuiSplitPanel.Outer
       hasBorder
@@ -298,15 +285,6 @@ export const RuleDefinition = () => {
                 </EuiErrorBoundary>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <Suspense fallback={null}>
-              <EuiFlexItem>
-                <EuiSpacer size="l" />
-                <InvestigationGuideEditor
-                  setRuleParams={onSetArtifacts}
-                  value={formData.artifacts?.investigation_guide?.blob ?? ''}
-                />
-              </EuiFlexItem>
-            </Suspense>
           </Suspense>
         )}
       </EuiSplitPanel.Inner>
