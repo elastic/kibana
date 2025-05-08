@@ -15,8 +15,10 @@ const assistantToolParams = {
   request: {
     rewrittenUrl: {
       origin: 'http://localhost:5601',
+      pathname: 'basepath/internal/elastic_assistant/actions/connector/1234/_execute',
     },
     headers: {
+      origin: 'http://localhost:5601',
       'kbn-version': '8.0.0',
     },
   },
@@ -35,7 +37,26 @@ describe('Kibana client tool', () => {
   });
 
   describe('DynamicStructuredTool', () => {
-    it('gets tool', async () => {
+    it('isSupported', async () => {
+      expect(KIBANA_CLIENT_TOOL.isSupported(assistantToolParams)).toBe(true);
+    });
+
+    it('isSupported feature flag off', async () => {
+      (assistantToolParams.assistantContext?.getRegisteredFeatures as jest.Mock).mockReturnValueOnce({
+        kibanaClientToolEnabled: false,
+      })
+      expect(KIBANA_CLIENT_TOOL.isSupported(assistantToolParams)).toBe(false);
+    });
+
+    it('isSupported missing createLlmInstance', async () => {
+      expect(KIBANA_CLIENT_TOOL.isSupported({...assistantToolParams, createLlmInstance: undefined})).toBe(false);
+    });
+
+    it('isSupported missing assistantContext', async () => {
+      expect(KIBANA_CLIENT_TOOL.isSupported({...assistantToolParams, assistantContext: undefined})).toBe(false);
+    });
+
+    it('gets tool returns tool', async () => {
       const tool = (await KIBANA_CLIENT_TOOL.getTool(assistantToolParams)) as DynamicStructuredTool;
 
       expect(tool).not.toBeNull();

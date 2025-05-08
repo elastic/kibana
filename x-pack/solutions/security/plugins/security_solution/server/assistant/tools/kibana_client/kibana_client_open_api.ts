@@ -17,9 +17,9 @@ import path from 'path';
 import Oas from 'oas';
 import { parse as yamlParse } from 'yaml';
 import type { BuildFlavor } from '@kbn/config';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import type { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
-import { Command, END } from '@langchain/langgraph';
+import { Command } from '@langchain/langgraph';
 import type { JsonSchema, JsonSchemaObject, Refs } from '@n8n/json-schema-to-zod';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { format, URL } from 'url';
@@ -32,6 +32,8 @@ export const kibanaServerlessOpenApiSpec = path.resolve(
   './oas_docs/output/kibana.serverless.yaml'
 );
 export const kibanaOpenApiSpec = path.resolve(REPO_ROOT, './oas_docs/output/kibana.yaml');
+
+const routeRegex = /\/internal\/elastic_assistant\/actions\/connector\/[^/]+\/_execute/
 
 const defaultOptions: Options = {
   apiSpecPath: kibanaOpenApiSpec,
@@ -46,6 +48,8 @@ interface Options {
 interface RuntimeOptions {
   assistantToolParams: KibanaClientToolParams;
 }
+
+
 export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
   private copiedHeaderNames = [
     'accept-encoding',
@@ -118,14 +122,22 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     operation,
     assistantToolParams,
   }: RuntimeOptions & { operation: Operation }) {
+
+    const { request } = assistantToolParams;
+    const {
+      protocol,
+      host,
+      pathname: pathnameFromRequest,
+    } = request.rewrittenUrl || request.url;
+
+    if(pathnameFromRequest.match(routeRegex) === null) {
+      throw new Error(
+        `The Kibana client tool is not supported for this request. The request URL does not match the expected pattern.`
+      );
+    }
+
     return tool(
       async (input, config) => {
-        const { request } = assistantToolParams;
-        const {
-          protocol,
-          host,
-          pathname: pathnameFromRequest,
-        } = request.rewrittenUrl || request.url;
 
         const origin = first(castArray(request.headers.origin));
 
@@ -136,7 +148,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
           protocol,
           ...(origin ? pick(new URL(origin), 'host', 'protocol') : {}),
           pathname: pathnameFromRequest.replace(
-            /\/internal\/elastic_assistant\/actions\/connector\/[^/]+\/_execute/,
+            routeRegex,
             pathname
           ),
           query: input.query ? (input.query as Record<string, string>) : undefined,
@@ -158,7 +170,6 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
           });
 
           return new Command({
-            goto: END, // This is not working, potential bug in langchain
             update: {
               messages: [
                 new ToolMessage({
@@ -168,12 +179,12 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
               ],
             },
           });
+          
         } catch (error) {
-          if (axios.isAxiosError(error)) {
+          if (isAxiosError(error)) {
             const status = error.response?.status;
             if (status && status >= 400 && status < 500) {
               return new Command({
-                goto: 'agent',
                 update: {
                   messages: [
                     new ToolMessage({
@@ -187,6 +198,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
               });
             }
           }
+
           throw error;
         }
       },

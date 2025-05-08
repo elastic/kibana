@@ -108,8 +108,17 @@ const mockPostOperation = {
             type: 'string',
             enum: ['active'],
           },
+          objectWithRequired: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+              },
+            },
+            required: ['id'],
+          }
         },
-        required: ['id'],
+        required: ['objectWithRequired'],
       },
     },
   ],
@@ -245,12 +254,25 @@ describe('OpenApiTool', () => {
                 exclusiveMinimum: 0,
                 type: 'integer',
               },
+              "objectWithRequired": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "id",
+                ],
+                "type": "object",
+              },
               oneOf: {},
               singleEnum: {
                 enum: ['active'],
                 type: 'string',
               },
             },
+            required: ['objectWithRequired'],
             type: 'object',
           },
         },
@@ -317,12 +339,25 @@ describe('OpenApiTool', () => {
               exclusiveNumber: {
                 type: 'integer',
               },
+              "objectWithRequired": {
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                  },
+                },
+                "required": [
+                  "id",
+                ],
+                "type": "object",
+              },
               oneOf: {},
               singleEnum: {
                 enum: ['active'],
                 type: 'string',
               },
             },
+            required: ['objectWithRequired'],
             type: 'object',
           },
         },

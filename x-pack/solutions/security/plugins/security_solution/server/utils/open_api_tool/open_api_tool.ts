@@ -138,10 +138,26 @@ export abstract class OpenApiTool<T> {
     const schemaTypeToZod = Object.keys(schemaTypeToSchemaObject).reduce((total, next) => {
       const schema = schemaTypeToSchemaObject[next];
       const zodSchema = jsonSchemaToZodWithParserOverride(schema as JsonSchema);
-      return { ...total, [next]: zodSchema };
+      if (this.zodHasRequiredProperties(zodSchema)) {
+        return { ...total, [next]: zodSchema };
+      }
+      return { ...total, [next]: zodSchema.optional() };
     }, {} as Record<'query' | 'body' | 'header' | 'path' | 'cookie' | 'formData', z.ZodTypeAny>);
 
     return z.object(schemaTypeToZod);
+  }
+
+  private zodHasRequiredProperties(schema: z.ZodTypeAny): boolean {
+    if (schema instanceof z.ZodObject) {
+      const shape = schema.shape;
+      for (const key in shape) {
+        const field = shape[key];
+        if (!field.isOptional()) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   // Simple implementation that groups tools by operation tags

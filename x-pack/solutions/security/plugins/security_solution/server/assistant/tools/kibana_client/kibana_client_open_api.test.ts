@@ -12,7 +12,10 @@ import {
 } from './kibana_client_open_api';
 import type { KibanaClientToolParams } from './kibana_client_tool';
 import type { Operation } from '../../../utils/open_api_tool/utils';
-import axios from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
+import { Command } from '@langchain/langgraph';
+import { ToolMessage } from '@langchain/core/messages';
+import zodToJsonSchema from 'zod-to-json-schema';
 
 const assistantToolParams = {
   createLlmInstance: jest.fn().mockReturnValue({ bindTools: jest.fn().mockReturnValue({}) }),
@@ -32,7 +35,13 @@ const assistantToolParams = {
   },
 } as unknown as KibanaClientToolParams;
 
-jest.mock('axios');
+jest.mock('axios', () => {
+  return {
+    ...jest.requireActual('axios'),
+    __esModule: true,
+    default: jest.fn().mockImplementation(() => 'mocked default')
+  };
+});
 const mockedAxios = axios as jest.MockedFunction<typeof axios>;
 
 const mockPostOperation = {
@@ -53,6 +62,21 @@ const mockPostOperation = {
     },
   ],
   getParametersAsJSONSchema: () => [
+    {
+      type: 'headers',
+      label: 'headers',
+      schema: {
+        type: 'object',
+        properties: {
+          "kbn-xsrf": {
+            type: 'string',
+            $schema: 'http://json-schema.org/draft-04/schema#',
+            description: 'kbn-xsrf header',
+          }
+        },
+        required: ['kbn-xsrf'],
+      },
+    },
     {
       type: 'path',
       label: 'Path Params',
@@ -112,126 +136,448 @@ describe('kibana_client_open_api', () => {
     jest.clearAllMocks();
   });
 
-  it('can initialize KibanaClientTool default', async () => {
-    const kibanaClientTool = await KibanaClientTool.create();
+  describe('initialize step', () => {
+    it('can initialize KibanaClientTool default', async () => {
+      const kibanaClientTool = await KibanaClientTool.create();
 
-    await expect(kibanaClientTool.getTool({ assistantToolParams })).resolves.toBeDefined();
-  });
-
-  it('can initialize KibanaClientTool traditional', async () => {
-    const kibanaClientTool = await KibanaClientTool.create({
-      options: {
-        apiSpecPath: kibanaOpenApiSpec,
-        llmType: undefined,
-      },
+      await expect(kibanaClientTool.getTool({ assistantToolParams })).resolves.toBeDefined();
     });
 
-    await expect(kibanaClientTool.getTool({ assistantToolParams })).resolves.toBeDefined();
-  });
+    it('can initialize KibanaClientTool traditional', async () => {
+      const kibanaClientTool = await KibanaClientTool.create({
+        options: {
+          apiSpecPath: kibanaOpenApiSpec,
+          llmType: undefined,
+        },
+      });
 
-  it('can initialize KibanaClientTool serverless', async () => {
-    const kibanaClientTool = await KibanaClientTool.create({
-      options: {
-        apiSpecPath: kibanaServerlessOpenApiSpec,
-        llmType: undefined,
-      },
+      await expect(kibanaClientTool.getTool({ assistantToolParams })).resolves.toBeDefined();
     });
 
-    await expect(
-      kibanaClientTool.getTool({
-        assistantToolParams,
-      })
-    ).resolves.toBeDefined();
-  });
+    it('can initialize KibanaClientTool serverless', async () => {
+      const kibanaClientTool = await KibanaClientTool.create({
+        options: {
+          apiSpecPath: kibanaServerlessOpenApiSpec,
+          llmType: undefined,
+        },
+      });
 
-  it('can not initialize KibanaClientTool if yaml file does not exist', async () => {
-    const promise = new Promise(async (resolve, reject) => {
-      try {
-        const kibanaClientTool = await KibanaClientTool.create({
-          options: {
-            apiSpecPath: 'fake-path',
-            llmType: undefined,
-          },
-        });
-
-        await kibanaClientTool.getTool({
+      await expect(
+        kibanaClientTool.getTool({
           assistantToolParams,
-        });
-        resolve(kibanaClientTool);
-      } catch (error) {
-        reject(error);
+        })
+      ).resolves.toBeDefined();
+    });
+
+    it('can not initialize KibanaClientTool if yaml file does not exist', async () => {
+      const promise = new Promise(async (resolve, reject) => {
+        try {
+          const kibanaClientTool = await KibanaClientTool.create({
+            options: {
+              apiSpecPath: 'fake-path',
+              llmType: undefined,
+            },
+          });
+
+          await kibanaClientTool.getTool({
+            assistantToolParams,
+          });
+          resolve(kibanaClientTool);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      await expect(promise).rejects.toThrow();
+    });
+  })
+
+  describe('getToolForOperation constructs tool correctly ', () => {
+    it('generates correct schema', async () => {
+      const kibanaClientTool = await TestableKibanaClientTool.create();
+
+      if (!(kibanaClientTool instanceof TestableKibanaClientTool)) {
+        throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
       }
+
+      const toolForOperation = await kibanaClientTool.callGetToolForOperation({
+        assistantToolParams,
+        operation: mockPostOperation,
+      });
+
+      expect(zodToJsonSchema(toolForOperation.schema)).toEqual({
+        "type": "object",
+        "properties": {
+          "body": {
+            "type": "object",
+            "properties": {
+              "test": {
+                "type": "string",
+                "description": "A test query param"
+              }
+            },
+            "required": [
+              "test"
+            ],
+            "additionalProperties": false
+          },
+          "query": {
+            "type": "object",
+            "properties": {
+              "test-query-param": {
+                "type": "string",
+                "description": "A test query param"
+              }
+            },
+            "required": [
+              "test-query-param"
+            ],
+            "additionalProperties": false
+          },
+          "path": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "An identifier for the connector."
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": false
+          },
+          "headers": {
+            "type": "object",
+            "properties": {
+              "kbn-xsrf": {
+                "type": "string",
+                "description": "kbn-xsrf header"
+              },
+            },
+            "additionalProperties": false
+            // since the kbn-xsrf header is made optional in the tool, we don't need to include it in the required list
+          }
+        },
+        "required": [
+          "body",
+          "query",
+          "path",
+          // since there are no required headers in the operation, we don't need to include it in the required list
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      });
+    })
+
+    it('generates correct required header properties when only kbn-xsrf exists', async () => {
+      const kibanaClientTool = await TestableKibanaClientTool.create();
+
+      if (!(kibanaClientTool instanceof TestableKibanaClientTool)) {
+        throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
+      }
+
+      const toolForOperation = await kibanaClientTool.callGetToolForOperation({
+        assistantToolParams,
+        operation: {
+          ...mockPostOperation, getParametersAsJSONSchema: () => [
+            {
+              type: 'headers',
+              label: 'headers',
+              schema: {
+                type: 'object',
+                properties: {
+                  "kbn-xsrf": {
+                    type: 'string',
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    description: 'kbn-xsrf header',
+                  }
+                },
+                required: ['kbn-xsrf'],
+              },
+            }]
+        } as unknown as Operation,
+      });
+
+      expect(zodToJsonSchema(toolForOperation.schema)).toEqual({
+        "type": "object",
+        "properties": {
+          "headers": {
+            "type": "object",
+            "properties": {
+              "kbn-xsrf": {
+                "type": "string",
+                "description": "kbn-xsrf header"
+              },
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      });
+    })
+
+    it('generates correct required header properties when required headers exist', async () => {
+      const kibanaClientTool = await TestableKibanaClientTool.create();
+
+      if (!(kibanaClientTool instanceof TestableKibanaClientTool)) {
+        throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
+      }
+
+      const toolForOperation = await kibanaClientTool.callGetToolForOperation({
+        assistantToolParams,
+        operation: {
+          ...mockPostOperation, getParametersAsJSONSchema: () => [
+            {
+              type: 'headers',
+              label: 'headers',
+              schema: {
+                type: 'object',
+                properties: {
+                  "kbn-xsrf": {
+                    type: 'string',
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    description: 'kbn-xsrf header',
+                  },
+                  "other": {
+                    type: 'string',
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    description: 'other header',
+                  }
+                },
+                required: ['kbn-xsrf', 'other'],
+              },
+            }]
+        } as unknown as Operation,
+      });
+
+      expect(zodToJsonSchema(toolForOperation.schema)).toEqual({
+        "type": "object",
+        "properties": {
+          "headers": {
+            "type": "object",
+            "properties": {
+              "kbn-xsrf": {
+                "type": "string",
+                "description": "kbn-xsrf header"
+              },
+              "other": {
+                "type": "string",
+                "description": "other header"
+              },
+            },
+            required: [
+              "other"
+            ],
+            "additionalProperties": false
+          }
+        },
+        required: [
+          "headers"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      });
+    })
+
+    it('generates correct required header properties when optional headers exist', async () => {
+      const kibanaClientTool = await TestableKibanaClientTool.create();
+
+      if (!(kibanaClientTool instanceof TestableKibanaClientTool)) {
+        throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
+      }
+
+      const toolForOperation = await kibanaClientTool.callGetToolForOperation({
+        assistantToolParams,
+        operation: {
+          ...mockPostOperation, getParametersAsJSONSchema: () => [
+            {
+              type: 'headers',
+              label: 'headers',
+              schema: {
+                type: 'object',
+                properties: {
+                  "kbn-xsrf": {
+                    type: 'string',
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    description: 'kbn-xsrf header',
+                  },
+                  "other": {
+                    type: 'string',
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    description: 'other header',
+                  }
+                },
+                required: ['kbn-xsrf'],
+              },
+            }]
+        } as unknown as Operation,
+      });
+
+      expect(zodToJsonSchema(toolForOperation.schema)).toEqual({
+        "type": "object",
+        "properties": {
+          "headers": {
+            "type": "object",
+            "properties": {
+              "kbn-xsrf": {
+                "type": "string",
+                "description": "kbn-xsrf header"
+              },
+              "other": {
+                "type": "string",
+                "description": "other header"
+              },
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      });
+    })
+
+    it('calls the correct endpoints and returns success message', async () => {
+      const kibanaClientTool = await TestableKibanaClientTool.create();
+      mockedAxios.mockResolvedValue({ data: 'mockResult' });
+
+      if (!(kibanaClientTool instanceof TestableKibanaClientTool)) {
+        throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
+      }
+
+      const toolForOperation = await kibanaClientTool.callGetToolForOperation({
+        assistantToolParams,
+        operation: mockPostOperation,
+      });
+
+      const result = await toolForOperation.invoke({
+        type: 'tool_call',
+        id: '123',
+        name: 'get_actions_connector_id',
+        args: {
+          path: {
+            id: '123',
+          },
+          query: {
+            'test-query-param': 'test',
+          },
+          body: {
+            test: 'test',
+          },
+        },
+      });
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'POST',
+          url: 'http://localhost:5601/basepath/api/actions/connector/123?test-query-param=test',
+          headers: expect.objectContaining({
+            'kbn-version': '8.0.0',
+            'kbn-xsrf': 'mock-kbn-xsrf'
+          }),
+          data: JSON.stringify({
+            test: 'test',
+          }),
+        })
+      );
+
+      expect(result).toEqual(
+        new Command({
+          update: {
+            messages: [
+              new ToolMessage({
+                content: '"mockResult"',
+                tool_call_id: "123",
+              }),
+            ],
+          },
+        })
+      )
     });
 
-    await expect(promise).rejects.toThrow();
-  });
+    it('calls the correct endpoints and returns error message', async () => {
+      const kibanaClientTool = await TestableKibanaClientTool.create();
+      mockedAxios.mockRejectedValue(new AxiosError('mock error', '400', undefined, undefined, { status: 400 } as AxiosResponse));
 
-  it('getToolForOperation parses mockPostOperation correctly', async () => {
-    const kibanaClientTool = await TestableKibanaClientTool.create();
-    mockedAxios.mockResolvedValue({ data: 'ok' });
+      if (!(kibanaClientTool instanceof TestableKibanaClientTool)) {
+        throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
+      }
 
-    if (!(kibanaClientTool instanceof TestableKibanaClientTool)) {
-      throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
-    }
+      const toolForOperation = await kibanaClientTool.callGetToolForOperation({
+        assistantToolParams,
+        operation: mockPostOperation,
+      });
 
-    const toolForOperation = await kibanaClientTool.callGetToolForOperation({
-      assistantToolParams,
-      operation: mockPostOperation,
+      const result = await toolForOperation.invoke({
+        type: 'tool_call',
+        id: '123',
+        name: 'get_actions_connector_id',
+        args: {
+          path: {
+            id: '123',
+          },
+          query: {
+            'test-query-param': 'test',
+          },
+          body: {
+            test: 'test',
+          },
+        },
+      });
+
+      expect(mockedAxios).toHaveBeenCalledWith(
+        expect.objectContaining({
+          method: 'POST',
+          url: 'http://localhost:5601/basepath/api/actions/connector/123?test-query-param=test',
+          headers: expect.objectContaining({
+            'kbn-version': '8.0.0',
+            'kbn-xsrf': 'mock-kbn-xsrf'
+          }),
+          data: JSON.stringify({
+            test: 'test',
+          }),
+        })
+      );
+
+      expect(result).toEqual(
+        new Command({
+          update: {
+            messages: [
+              new ToolMessage({
+                content: 'Client error: 400 - mock error',
+                tool_call_id: "123",
+              }),
+            ],
+          },
+        })
+      )
     });
 
-    await toolForOperation.invoke({
-      type: 'tool_call',
-      id: '123',
-      name: 'get_actions_connector_id',
-      args: {
-        path: {
-          id: '123',
-        },
-        query: {
-          'test-query-param': 'test',
-        },
-        body: {
-          test: 'test',
-        },
-      },
+    it('can not invoke tool with invalid input schema (missing body)', async () => {
+      const kibanaClientTool = await TestableKibanaClientTool.create();
+      mockedAxios.mockResolvedValue({ data: 'ok' });
+
+      if (!(kibanaClientTool instanceof TestableKibanaClientTool)) {
+        throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
+      }
+
+      const toolForOperation = await kibanaClientTool.callGetToolForOperation({
+        assistantToolParams,
+        operation: mockPostOperation,
+      });
+
+      await expect(
+        toolForOperation.invoke({
+          path: {
+            id: '123',
+          },
+          query: {
+            'test-query-param': 'test',
+          },
+        })
+      ).rejects.toThrow();
     });
 
-    expect(mockedAxios).toHaveBeenCalledWith(
-      expect.objectContaining({
-        method: 'POST',
-        url: 'http://localhost:5601/basepath/api/actions/connector/123?test-query-param=test',
-        headers: expect.objectContaining({
-          'kbn-version': '8.0.0',
-        }),
-        data: JSON.stringify({
-          test: 'test',
-        }),
-      })
-    );
-  });
-
-  it('getToolForOperation fails for mockPostOperation when body is missing', async () => {
-    const kibanaClientTool = await TestableKibanaClientTool.create();
-    mockedAxios.mockResolvedValue({ data: 'ok' });
-
-    if (!(kibanaClientTool instanceof TestableKibanaClientTool)) {
-      throw new Error('kibanaClientTool is not an instance of TestableKibanaClientTool');
-    }
-
-    const toolForOperation = await kibanaClientTool.callGetToolForOperation({
-      assistantToolParams,
-      operation: mockPostOperation,
-    });
-
-    await expect(
-      toolForOperation.invoke({
-        path: {
-          id: '123',
-        },
-        query: {
-          'test-query-param': 'test',
-        },
-      })
-    ).rejects.toThrow();
-  });
+  })
 });
