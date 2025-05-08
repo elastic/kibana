@@ -91,11 +91,9 @@ export const registerSyntheticsStatusCheckRule = (
         downConfigs,
       });
 
-      if (options.params.condition?.alertOnNoData) {
-        statusRule.handlePendingMonitorAlert({
-          pendingConfigs,
-        });
-      }
+      statusRule.handlePendingMonitorAlert({
+        pendingConfigs,
+      });
 
       setRecoveredAlertsContext({
         alertsClient,

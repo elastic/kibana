@@ -37,7 +37,8 @@ export const getMonitorAlertDocument = (
   monitorSummary: MonitorSummaryStatusRule,
   locationNames: string[],
   locationIds: string[],
-  useLatestChecks: boolean
+  useLatestChecks: boolean,
+  threshold: number
 ) => ({
   [MONITOR_ID]: monitorSummary.monitorId,
   [MONITOR_TYPE]: monitorSummary.monitorType,
@@ -56,7 +57,7 @@ export const getMonitorAlertDocument = (
   'location.name': locationNames,
   labels: monitorSummary.labels,
   configId: monitorSummary.configId,
-  'kibana.alert.evaluation.threshold': monitorSummary.downThreshold,
+  'kibana.alert.evaluation.threshold': threshold,
   'kibana.alert.evaluation.value':
     (useLatestChecks ? monitorSummary.checks?.downWithinXChecks : monitorSummary.checks?.down) ?? 1,
   'monitor.tags': monitorSummary.monitorTags ?? [],
