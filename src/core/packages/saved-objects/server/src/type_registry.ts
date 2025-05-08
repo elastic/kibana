@@ -13,6 +13,9 @@ import type { SavedObjectsType } from './saved_objects_type';
  * Registry holding information about all the registered {@link SavedObjectsType | saved object types}.
  */
 export interface ISavedObjectTypeRegistry {
+  /** Return legacy types, this types can't be registered */
+  getLegacyTypes(): string[];
+
   /**
    * Return the {@link SavedObjectsType | type} definition for given type name.
    */
