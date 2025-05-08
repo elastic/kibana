@@ -1,4 +1,4 @@
-name: Add Team:obs-ux-management label to PRs
+name: Add author:obs-ux-management label to PRs
 
 on:
   pull_request_target:
@@ -12,7 +12,7 @@ jobs:
       contents: read
 
     steps:
-      - name: Label if author is in the approved list
+      - name: Label if author is in the obs-ux-management team
         uses: actions/github-script@v7
         with:
           script: |
