@@ -64,6 +64,14 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
   >([]);
 
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [hasErrors, setHasErrors] = useState<boolean>(false);
+
+  const updateHasErrors = useCallback(
+    (errors: boolean) => {
+      setHasErrors(errors);
+    },
+    [setHasErrors]
+  );
 
   const onChange = useCallback((selected: any) => {
     setSelectedOptions(selected);
@@ -152,11 +160,12 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
                 onSubmitCompleted,
                 isSubmitted,
                 agentPolicy,
+                updateHasErrors,
               }}
             />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   onClick={onClose}
@@ -170,9 +179,17 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
+                {hasErrors ? (
+                  <FormattedMessage
+                    id="xpack.fleet.addIntegrationFlyout.errorOnSaveText"
+                    defaultMessage="Your integration policy has errors."
+                  />
+                ) : null}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
-                  disabled={isSubmitted || selectedOptions.length === 0}
+                  disabled={isSubmitted || selectedOptions.length === 0 || hasErrors}
                   isLoading={isSubmitted}
                   onClick={() => {
                     setIsSubmitted(true);

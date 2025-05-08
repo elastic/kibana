@@ -48,5 +48,6 @@ export type CreatePackagePolicyParams = React.FunctionComponent<{
     onSubmitCompleted: () => void;
     isSubmitted: boolean;
     agentPolicy: AgentPolicy;
+    updateHasErrors: (hasErrors: boolean) => void;
   };
 }>;

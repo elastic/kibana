@@ -298,6 +298,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     }
   }, [addIntegrationFlyoutProps, onSubmit, setFormState, formState]);
 
+  useEffect(() => {
+    addIntegrationFlyoutProps?.updateHasErrors(
+      packageInfo && (formState === 'INVALID' || hasAgentPolicyError)
+    );
+  }, [packageInfo, formState, hasAgentPolicyError, addIntegrationFlyoutProps]);
+
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
   >(
