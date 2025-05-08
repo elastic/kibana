@@ -12,28 +12,9 @@ import type {
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { APIEndpoint } from '@kbn/apm-plugin/server';
-import type {
-  APIEndpoint as SourcesAPIEndpoint,
-  APIReturnType as SourcesAPIReturnType,
-  APIClientRequestParamsOf as SourcesAPIClientRequestParamsOf,
-} from '@kbn/apm-sources-access-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
-
-type CombinedAPIRequest<TEndpoint extends APIEndpoint | SourcesAPIEndpoint> =
-  TEndpoint extends APIEndpoint
-    ? APIReturnType<TEndpoint>
-    : TEndpoint extends SourcesAPIEndpoint
-    ? SourcesAPIReturnType<TEndpoint>
-    : never;
-
-type CombinedOptions<TEndpoint extends APIEndpoint | SourcesAPIEndpoint> =
-  TEndpoint extends APIEndpoint
-    ? Options<TEndpoint>
-    : TEndpoint extends SourcesAPIEndpoint
-    ? SourceOptions<TEndpoint>
-    : never;
 
 type Options<TEndpoint extends APIEndpoint> = {
   type?: 'form-data';
@@ -43,14 +24,9 @@ type Options<TEndpoint extends APIEndpoint> = {
     params?: { query?: { _inspect?: boolean } };
   };
 
-type SourceOptions<TEndpoint extends SourcesAPIEndpoint> = {
-  type?: 'form-data';
-  endpoint: TEndpoint;
-  spaceId?: string;
-} & SourcesAPIClientRequestParamsOf<TEndpoint>;
-
-type InternalEndpoint<T extends APIEndpoint | SourcesAPIEndpoint> =
-  T extends `${string} /internal/${string}` ? T : never;
+type InternalEndpoint<T extends APIEndpoint> = T extends `${string} /internal/${string}`
+  ? T
+  : never;
 
 type PublicEndpoint<T extends APIEndpoint> = T extends `${string} /api/${string}` ? T : never;
 
@@ -59,14 +35,11 @@ function createApmApiClient({ getService }: DeploymentAgnosticFtrProviderContext
   const samlAuth = getService('samlAuth');
   const logger = getService('log');
 
-  async function makeApiRequest<
-    TEndpoint extends APIEndpoint | SourcesAPIEndpoint,
-    TOpts extends CombinedOptions<TEndpoint>
-  >({
+  async function makeApiRequest<TEndpoint extends APIEndpoint>({
     options,
     headers,
   }: {
-    options: TOpts;
+    options: Options<TEndpoint>;
     headers: Record<string, string>;
   }): Promise<SupertestReturnType<TEndpoint>> {
     const { endpoint, type } = options;
@@ -111,24 +84,8 @@ function createApmApiClient({ getService }: DeploymentAgnosticFtrProviderContext
   }
 
   function makeInternalApiRequest(role: string) {
-    return async <TEndpoint extends InternalEndpoint<APIEndpoint | SourcesAPIEndpoint>>(
-      options: CombinedOptions<TEndpoint>
-    ): Promise<SupertestReturnType<TEndpoint>> => {
-      const headers: Record<string, string> = {
-        ...samlAuth.getInternalRequestHeader(),
-        ...(await samlAuth.getM2MApiCookieCredentialsWithRoleScope(role)),
-      };
-
-      return makeApiRequest({
-        options,
-        headers,
-      });
-    };
-  }
-
-  function makeInternalSourceRequest(role: string) {
-    return async <TEndpoint extends InternalEndpoint<SourcesAPIEndpoint>>(
-      options: CombinedOptions<TEndpoint>
+    return async <TEndpoint extends InternalEndpoint<APIEndpoint>>(
+      options: Options<TEndpoint>
     ): Promise<SupertestReturnType<TEndpoint>> => {
       const headers: Record<string, string> = {
         ...samlAuth.getInternalRequestHeader(),
@@ -144,7 +101,7 @@ function createApmApiClient({ getService }: DeploymentAgnosticFtrProviderContext
 
   function makePublicApiRequest() {
     return async <TEndpoint extends PublicEndpoint<APIEndpoint>>(
-      options: CombinedOptions<TEndpoint> & {
+      options: Options<TEndpoint> & {
         roleAuthc: RoleCredentials;
       }
     ): Promise<SupertestReturnType<TEndpoint>> => {
@@ -163,7 +120,6 @@ function createApmApiClient({ getService }: DeploymentAgnosticFtrProviderContext
   return {
     makeInternalApiRequest,
     makePublicApiRequest,
-    makeInternalSourceRequest,
   };
 }
 
@@ -193,9 +149,9 @@ Body: ${JSON.stringify(res.body)}`
   }
 }
 
-export interface SupertestReturnType<TEndpoint extends APIEndpoint | SourcesAPIEndpoint> {
+export interface SupertestReturnType<TEndpoint extends APIEndpoint> {
   status: number;
-  body: CombinedAPIRequest<TEndpoint>;
+  body: APIReturnType<TEndpoint>;
 }
 
 export function ApmApiProvider(context: DeploymentAgnosticFtrProviderContext) {
