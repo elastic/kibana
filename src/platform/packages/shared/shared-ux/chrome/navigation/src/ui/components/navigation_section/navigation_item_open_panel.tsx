@@ -93,7 +93,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
     [selectedNode?.id, item, closePanel, openPanel]
   );
 
-  const onLinkClick = useCallback(
+  const onTogglePanelClick = useCallback(
     (e: React.MouseEvent) => {
       e.preventDefault();
       togglePanel(e.target);
@@ -103,7 +103,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
 
   return (
     <EuiButton
-      onClick={onLinkClick}
+      onClick={onTogglePanelClick}
       iconSide="right"
       iconSize="s"
       iconType="arrowRight"

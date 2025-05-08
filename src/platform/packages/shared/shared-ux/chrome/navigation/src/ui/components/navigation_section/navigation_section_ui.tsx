@@ -23,7 +23,7 @@ import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/projec
 
 import { SubItemTitle } from '../subitem_title';
 import { useNavigation as useServices } from '../../../services';
-import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../../utils';
+import { isAbsoluteLink, isActiveFromUrl, isAccordionNode, isSpecialClick } from '../../../utils';
 import type { BasePathService, NavigateToUrlFn } from '../../../types';
 import { useNavigation } from '../../navigation';
 import { EventTracker } from '../../../analytics';
@@ -367,16 +367,6 @@ const getEuiProps = (
           return itemsFlattened;
         })
         .flat();
-
-  /**
-   * Check if the click event is a special click (e.g. right click, click with modifier key)
-   * We do not want to prevent the default behavior in these cases.
-   */
-  const isSpecialClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
-    const isModifiedEvent = !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
-    const isLeftClickEvent = e.button === 0;
-    return isModifiedEvent || !isLeftClickEvent;
-  };
 
   const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
     ? {

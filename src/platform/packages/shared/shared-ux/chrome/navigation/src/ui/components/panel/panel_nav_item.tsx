@@ -14,6 +14,7 @@ import { Theme, css } from '@emotion/react';
 
 import { useNavigation } from '../../navigation';
 import { useNavigation as useServices } from '../../../services';
+import { isSpecialClick } from '../../../utils';
 import { SubItemTitle } from '../subitem_title';
 import { usePanel } from './context';
 
@@ -62,9 +63,14 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
 
   const href = deepLink?.url ?? item.href;
 
-  const onClick = useCallback<React.MouseEventHandler>(
+  const onClick = useCallback<React.MouseEventHandler<HTMLButtonElement | HTMLElement>>(
     (e) => {
-      if (!!href) {
+
+      if (isSpecialClick(e)) {
+        return;
+      }
+
+      if (href) {
         e.preventDefault();
         navigateToUrl(href);
         closePanel();

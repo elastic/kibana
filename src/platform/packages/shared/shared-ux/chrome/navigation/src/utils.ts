@@ -46,3 +46,13 @@ export const isAccordionNode = (
 ) =>
   node.renderAs === 'accordion' ||
   ['defaultIsCollapsed', 'isCollapsible'].some((prop) => Object.hasOwn(node, prop));
+
+/**
+ * Can check if the click event is a special click (e.g. right click, click with modifier key)
+ * Allows us to not prevent the default behavior in these cases.
+ */
+export const isSpecialClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
+  const isModifiedEvent = !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
+  const isLeftClickEvent = e.button === 0;
+  return isModifiedEvent || !isLeftClickEvent;
+};
