@@ -19,6 +19,7 @@ import type { RuleMigrationsDataClient } from './data/rule_migrations_data_clien
 import type { RuleMigrationsTaskClient } from './task/rule_migrations_task_client';
 import { RuleMigrationsTaskService } from './task/rule_migrations_task_service';
 import type { SiemRuleMigrationsClientDependencies } from './types';
+import type { RuleMigrationIndexMigrator } from './index_migrator';
 
 export interface SiemRulesMigrationsSetupParams {
   esClusterClient: IClusterClient;
@@ -43,6 +44,7 @@ export class SiemRuleMigrationsService {
   private esClusterClient?: IClusterClient;
   private taskService: RuleMigrationsTaskService;
   private logger: Logger;
+  private indexMigrator?: RuleMigrationIndexMigrator;
 
   constructor(logger: LoggerFactory, kibanaVersion: string, elserInferenceId?: string) {
     this.logger = logger.get('siemRuleMigrations');
@@ -54,7 +56,7 @@ export class SiemRuleMigrationsService {
     this.esClusterClient = esClusterClient;
     const esClient = esClusterClient.asInternalUser;
 
-    this.dataService.install({ ...params, esClient }).catch((err) => {
+    this.dataService.setup({ ...params, esClient }).catch((err) => {
       this.logger.error('Error installing data service.', err);
     });
   }

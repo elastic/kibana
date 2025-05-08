@@ -20,8 +20,7 @@ import type {
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { type RuleMigrationResource } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_client';
-
-export type Stored<T extends object> = T & { id: string };
+import type { Stored } from '../types';
 
 export type StoredSiemMigration = Stored<RuleMigration>;
 export type StoredRuleMigration = Stored<RuleMigrationRule>;
