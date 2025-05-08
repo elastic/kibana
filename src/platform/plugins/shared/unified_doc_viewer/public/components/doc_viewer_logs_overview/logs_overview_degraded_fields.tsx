@@ -121,6 +121,8 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
     prefix: qualityIssuesAccordionTitle,
   });
 
+  const isRemoteClusterDataStream = rawDoc._index?.includes(':') ?? false;
+
   const [tableOptions, setTableOptions] = useState<TableOptions>(DEFAULT_TABLE_OPTIONS);
 
   const onTableChange = (options: {
@@ -192,7 +194,11 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
         buttonContent={accordionTitle}
         paddingSize="m"
         initialIsOpen={false}
-        extraAction={<DatasetQualityLink urlService={urlService} dataStream={dataStream} />}
+        extraAction={
+          !isRemoteClusterDataStream && (
+            <DatasetQualityLink urlService={urlService} dataStream={dataStream} />
+          )
+        }
         data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsAccordion"
       >
         <EuiBasicTable
