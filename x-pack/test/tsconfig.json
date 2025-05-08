@@ -11,10 +11,6 @@
   },
   "include": [
     "**/*",
-    "./api_integration/apis/logstash/pipeline/fixtures/*.json",
-    "./api_integration/apis/logstash/pipelines/fixtures/*.json",
-    "./api_integration/apis/telemetry/fixtures/*.json",
-    "./monitoring_api_integration/fixtures/**/*.json",
     "../../typings/**/*",
     "../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
@@ -45,22 +41,18 @@
     "@kbn/event-log-plugin",
     "@kbn/features-plugin",
     "@kbn/global-search-plugin",
-    "@kbn/index-management-plugin",
     "@kbn/infra-plugin",
     "@kbn/licensing-plugin",
     "@kbn/ml-plugin",
-    "@kbn/monitoring-plugin",
     "@kbn/observability-plugin",
     "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
-    "@kbn/snapshot-restore-plugin",
     "@kbn/spaces-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/transform-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/upgrade-assistant-plugin",
     "@kbn/remote-clusters-plugin",
-    "@kbn/cross-cluster-replication-plugin",
     "@kbn/synthetics-plugin",
     "@kbn/global-search-test-plugin",
     "@kbn/test",
@@ -101,7 +93,6 @@
     "@kbn/core-provider-plugin",
     "@kbn/user-profile-components",
     "@kbn/apm-synthtrace-client",
-    "@kbn/utils",
     "@kbn/journeys",
     "@kbn/alerting-api-integration-helpers",
     "@kbn/cloud-security-posture-plugin",
@@ -172,7 +163,6 @@
     "@kbn/palettes",
     "@kbn/sse-utils-server",
     "@kbn/gen-ai-functional-testing",
-    "@kbn/automatic-import-plugin",
     "@kbn/core-elasticsearch-server",
     "@kbn/streams-schema",
     "@kbn/server-route-repository-utils",
@@ -186,6 +176,7 @@
     "@kbn/content-packs-schema",
     "@kbn/lock-manager",
     "@kbn/alerts-ui-shared",
-    "@kbn/test-suites-xpack-observability"
+    "@kbn/test-suites-xpack-observability",
+    "@kbn/test-suites-xpack-platform"
   ]
 }
