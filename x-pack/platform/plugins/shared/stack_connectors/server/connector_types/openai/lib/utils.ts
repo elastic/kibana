@@ -206,7 +206,6 @@ export const validatePKICertificates = (
   try {
     // Check file paths if provided
     if (certificateFile) {
-      logger.debug(`Validating certificate file: ${certificateFile}`);
       const certPath = Array.isArray(certificateFile) ? certificateFile[0] : certificateFile;
       if (!fs.existsSync(certPath)) {
         return false;
@@ -214,7 +213,6 @@ export const validatePKICertificates = (
       fs.accessSync(certPath, fs.constants.R_OK);
     }
     if (privateKeyFile) {
-      logger.debug(`Validating private key file: ${privateKeyFile}`);
       const keyPath = Array.isArray(privateKeyFile) ? privateKeyFile[0] : privateKeyFile;
       if (!fs.existsSync(keyPath)) {
         return false;
@@ -307,7 +305,6 @@ export function formatPEMContent(
 
   // Verify header and footer
   if (!normalizedContent.startsWith(header) || !normalizedContent.endsWith(footer)) {
-    logger.debug(`Invalid PEM format for ${type}: Missing header or footer`);
     return pemContent;
   }
 

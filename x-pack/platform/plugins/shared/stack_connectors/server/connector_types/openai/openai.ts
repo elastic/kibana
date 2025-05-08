@@ -18,11 +18,8 @@ import type {
 } from 'openai/resources/chat/completions';
 import type { Stream } from 'openai/streaming';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import fs from 'fs';
 import https from 'https';
-import type { Logger } from '@kbn/logging';
 import { removeEndpointFromUrl } from './lib/openai_utils';
-import type { Type } from '@kbn/config-schema';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -59,7 +56,6 @@ import {
   sanitizeRequest,
   validatePKICertificates,
   getPKISSLOverrides,
-  formatPEMContent,
 } from './lib/utils';
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
@@ -80,10 +76,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
-
-    // Top-level log to confirm constructor is called
-    this.logger.debug('OpenAIConnector constructed');
-
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
     this.key = this.secrets.apiKey;
@@ -105,10 +97,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       caData?: string;
       verificationMode?: 'full' | 'certificate' | 'none';
     };
-    this.logger.debug(
-      `Provider: ${this.provider}, certificateFile: ${this.configAny.certificateFile}, certificateData: ${this.configAny.certificateData}, privateKeyFile: ${this.configAny.privateKeyFile}, privateKeyData: ${this.configAny.privateKeyData}, caFile: ${this.configAny.caFile}, caData: ${this.configAny.caData}, verificationMode: ${this.configAny.verificationMode}`
-    );
-
+ 
     try {
       if (
         this.provider === OpenAiProviderType.Other &&
@@ -303,7 +292,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           connectorUsageCollector
         );
 
-        this.logger.debug('runApi response:', JSON.stringify(response.data, null, 2));
         return response.data;
       } catch (error) {
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
@@ -407,7 +395,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           connectorUsageCollector
         );
 
-        this.logger.debug('streamApi response:', JSON.stringify(response.data, null, 2));
         return stream ? pipeStreamingResponse(response) : response.data;
       } catch (error) {
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
