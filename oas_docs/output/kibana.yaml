@@ -66219,7 +66219,7 @@ components:
           description: Kibana space
           type: string
         timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
           description: Timestamp of the field creation
         updatedAt:
           description: Timestamp of the last update
@@ -66561,7 +66561,7 @@ components:
         summary:
           $ref: '#/components/schemas/Security_AI_Assistant_API_ConversationSummary'
         timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
         title:
           description: The conversation title.
           example: Security AI Assistant Setup
@@ -66597,7 +66597,7 @@ components:
           example: true
           type: boolean
         timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
           description: The timestamp summary was updated.
           example: '2025-04-30T16:00:00Z'
     Security_AI_Assistant_API_ConversationUpdateProps:
@@ -67220,7 +67220,7 @@ components:
           description: Message role.
           example: assistant
         timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
           description: The timestamp message was sent or received.
           example: '2025-04-30T15:30:00Z'
         traceData:
@@ -67255,6 +67255,12 @@ components:
     Security_AI_Assistant_API_NonEmptyString:
       description: A string that does not contain only whitespace characters.
       example: I am a string
+      format: nonempty
+      minLength: 1
+      type: string
+    Security_AI_Assistant_API_NonEmptyTimestamp:
+      description: A string that represents a timestamp in ISO 8601 format and does not contain only whitespace characters.
+      example: '2023-10-31T12:00:00Z'
       format: nonempty
       minLength: 1
       type: string
@@ -67442,7 +67448,7 @@ components:
           $ref: '#/components/schemas/Security_AI_Assistant_API_PromptType'
           description: The type of the prompt.
         timestamp:
-          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyTimestamp'
         updatedAt:
           description: The timestamp of when the prompt was last updated.
           type: string
