@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags, test, expect } from '@kbn/scout';
+import { test, expect } from '@kbn/scout';
 
 test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
