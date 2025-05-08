@@ -737,7 +737,7 @@ export class ObservabilityAIAssistantClient {
 
     logger.debug(`Warming up model for for inference ID: ${inferenceId}`);
     warmupModel({ esClient, logger, inferenceId }).catch(() => {});
-    return { currentInferenceId: inferenceId };
+    return;
   };
 
   reIndexKnowledgeBaseWithLock = (inferenceId: string) => {
