@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { InfraClientCoreStart } from '../types';
 export function useProfilingPluginSetting() {
   const { capabilities } = useKibana<InfraClientCoreStart>().services.application;
 

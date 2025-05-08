@@ -11,7 +11,7 @@ import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_contex
 export function useProfilingPluginSetting() {
   const { core } = useApmPluginContext();
 
-  return core.application.capabilities.profiling?.show;
+  return Boolean(core.application.capabilities.profiling?.show);
 }
 
 export function useTransactionProfilingSetting() {
