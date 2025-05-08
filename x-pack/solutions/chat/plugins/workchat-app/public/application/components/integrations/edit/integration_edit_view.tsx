@@ -23,6 +23,7 @@ import {
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { IntegrationType } from '@kbn/wci-common';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useBreadcrumb } from '../../../hooks/use_breadcrumbs';
@@ -158,36 +159,52 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
             <EuiForm component="form" fullWidth onSubmit={handleSubmit((data) => submit(data))}>
               <EuiDescribedFormGroup
                 ratio="third"
-                title={<h3>Base configuration</h3>}
-                description="Configure your tool"
+                title={<h3>{toolLabels.editView.baseConfigurationTitle}</h3>}
+                description={toolLabels.editView.baseConfigurationDescription}
               >
-                <EuiFormRow label="Name">
+                <EuiFormRow
+                  label={toolLabels.editView.nameLabel}
+                  isInvalid={!!formMethods.formState.errors.name}
+                  error={
+                    formMethods.formState.errors.name ? toolLabels.editView.nameRequired : undefined
+                  }
+                >
                   <Controller
-                    rules={{ required: true }}
+                    rules={{ required: toolLabels.editView.nameRequired }}
                     name="name"
                     control={control}
                     render={({ field }) => (
                       <EuiFieldText
                         data-test-subj="workchatAppIntegrationEditViewFieldText"
+                        isInvalid={!!formMethods.formState.errors.name}
                         {...field}
                       />
                     )}
                   />
                 </EuiFormRow>
-                <EuiFormRow label="Description">
+                <EuiFormRow
+                  label={toolLabels.editView.descriptionLabel}
+                  isInvalid={!!formMethods.formState.errors.description}
+                  error={
+                    formMethods.formState.errors.description
+                      ? toolLabels.editView.descriptionRequired
+                      : undefined
+                  }
+                >
                   <Controller
-                    rules={{ required: true }}
+                    rules={{ required: toolLabels.editView.descriptionRequired }}
                     name="description"
                     control={control}
                     render={({ field }) => (
                       <EuiFieldText
                         data-test-subj="workchatAppIntegrationEditViewFieldText"
+                        isInvalid={!!formMethods.formState.errors.description}
                         {...field}
                       />
                     )}
                   />
                 </EuiFormRow>
-                <EuiFormRow label="Type">
+                <EuiFormRow label={toolLabels.editView.typeLabel}>
                   <Controller
                     name="type"
                     control={control}
@@ -253,15 +270,20 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
 
             {isDeleteModalVisible && (
               <EuiConfirmModal
-                title="Delete tool"
+                title={toolLabels.editView.deleteModalTitle}
                 onCancel={closeDeleteModal}
                 onConfirm={handleDelete}
-                cancelButtonText="Cancel"
-                confirmButtonText="Delete"
+                cancelButtonText={toolLabels.editView.cancelButtonLabel}
+                confirmButtonText={toolLabels.editView.deleteButtonLabel}
                 buttonColor="danger"
                 defaultFocusedButton="confirm"
               >
-                <p>Are you sure you want to delete this tool? This action cannot be undone.</p>
+                <p>
+                  {i18n.translate('workchatApp.integrations.editView.deleteMessage', {
+                    defaultMessage:
+                      'Are you sure you want to delete this tool? This action cannot be undone.',
+                  })}
+                </p>
               </EuiConfirmModal>
             )}
           </FormProvider>
