@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { isEmpty, uniq } from 'lodash';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import useMount from 'react-use/lib/useMount';
+import { StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api';
 import { getFormattedError } from '../../../../../util/errors';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { ProcessorFieldSelector } from '../processor_field_selector';
@@ -31,6 +33,9 @@ import {
 } from '../../state_management/stream_enrichment_state_machine';
 import { DateFormState } from '../../types';
 
+type DateSuggestionsRequestSamples =
+  StreamsAPIClientRequestParamsOf<'POST /internal/streams/{name}/processing/_suggestions/date'>['params']['body']['dates'];
+
 export const DateProcessorForm = () => {
   const { core, dependencies } = useKibana();
   const { toasts } = core.notifications;
@@ -43,8 +48,9 @@ export const DateProcessorForm = () => {
     selectPreviewDocuments(snapshot.context)
   );
 
-  const applySuggestions = async ({ fieldName }: { fieldName: string }) => {
-    const dates = previewDocuments.map((doc) => doc[fieldName]).filter(Boolean);
+  const applySuggestions = async ({ field }: { field: string }) => {
+    // Collect sample dates from the preview documents for the selected field
+    const dates = previewDocuments.map((doc) => doc[field]).filter(Boolean);
 
     // Short-circuit if the formats is touched by the user, formats are already set, or no date samples are available
     if (isEmpty(dates)) return;
@@ -59,13 +65,14 @@ export const DateProcessorForm = () => {
               name: definition.stream.name,
             },
             body: {
-              dates: dates as [string, ...string[]], // At least one sample is required by the API
+              dates: dates as DateSuggestionsRequestSamples, // At least one sample is required by the API
             },
           },
         }
       );
 
       if (!isEmpty(suggestions.formats)) {
+        // Merge the suggested formats with the existing ones
         const prevFormats = form.getValues('formats');
         form.setValue('formats', uniq([...prevFormats, ...suggestions.formats]));
         form.clearErrors();
@@ -82,29 +89,49 @@ export const DateProcessorForm = () => {
     }
   };
 
-  useEffect(() => {
-    const { field: fieldName, formats } = form.getValues();
-    const isTouched = form.formState.touchedFields.formats;
-    if (fieldName && isEmpty(formats) && !isTouched) {
-      applySuggestions({ fieldName });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const hasPrivileges = definition.privileges.text_structure;
 
-  const handleProcessorFieldChange: React.ChangeEventHandler<HTMLInputElement> = (event) => {
-    const fieldName = event.target.value;
-    const prevFormats = form.getValues('formats');
-    const hasFormats = !isEmpty(prevFormats);
+  /**
+   * When the component mounts, we want to apply suggestions if the field name is prepopulated
+   * and the formats field is empty. This is to avoid overwriting user input.
+   * We also check if the formats field is touched to avoid overwriting user input.
+   */
+  useMount(() => {
+    const { field, formats } = form.getValues();
     const isTouched = form.formState.touchedFields.formats;
-    if (!hasFormats || !isTouched) {
-      applySuggestions({ fieldName });
+    if (hasPrivileges && field && isEmpty(formats) && !isTouched) {
+      applySuggestions({ field });
     }
-  };
+  });
 
-  const handleGenerateSuggestionClick = definition.privileges.text_structure
+  /*
+   * When the processor field changes, we want to apply suggestions if the formats field is not touched
+   * and the formats field is empty. This is to avoid overwriting user input.
+   * The function is intentionally created depending on privileges, so that in case of no privileges
+   * the component does not try to call it.
+   */
+  const handleProcessorFieldChange = hasPrivileges
+    ? (event: React.ChangeEvent<HTMLInputElement>) => {
+        const field = event.target.value;
+        const prevFormats = form.getValues('formats');
+        const hasFormats = !isEmpty(prevFormats);
+        const isTouched = form.formState.touchedFields.formats;
+        if (!hasFormats || !isTouched) {
+          applySuggestions({ field });
+        }
+      }
+    : undefined;
+
+  /**
+   * When the user clicks the "Generate" button, we want to apply suggestions
+   * regardless of whether the formats field is touched or not.
+   * The function is intentionally created depending on privileges, so that in case of no privileges
+   * the component does not render the regenerate button.
+   */
+  const handleGenerateSuggestionClick = hasPrivileges
     ? () => {
-        const fieldName = form.getValues('field');
-        applySuggestions({ fieldName });
+        const field = form.getValues('field');
+        applySuggestions({ field });
       }
     : undefined;
 

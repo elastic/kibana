@@ -15,7 +15,7 @@ import {
   getProcessorType,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { countBy, isEmpty, isString, mapValues, orderBy, sortBy } from 'lodash';
+import { countBy, isEmpty, mapValues, orderBy } from 'lodash';
 import {
   DissectFormState,
   ProcessorDefinitionWithUIAttributes,
