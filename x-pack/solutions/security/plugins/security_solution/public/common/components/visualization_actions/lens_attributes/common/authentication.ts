@@ -11,12 +11,12 @@ import {
 } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
-const layerAuthenticationSuccess = uuidv4();
-const layerAuthenticationFailure = uuidv4();
-const columnTimestampFailure = uuidv4();
-const columnEventOutcomeFailure = uuidv4();
-const columnTimestampSuccess = uuidv4();
-const columnEventOutcomeSuccess = uuidv4();
+const layerAuthenticationSuccess = `layer-authentication-success-id-${uuidv4()}`;
+const layerAuthenticationFailure = `layer-authentication-failure-id-${uuidv4()}`;
+const columnTimestampFailure = `column-timestamp-failure-id-${uuidv4()}`;
+const columnEventOutcomeFailure = `column-event-outcome-failure-id-${uuidv4()}`;
+const columnTimestampSuccess = `column-timestamp-success-id-${uuidv4()}`;
+const columnEventOutcomeSuccess = `column-event-outcome-success-id-${uuidv4()}`;
 
 export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme }) =>
   ({

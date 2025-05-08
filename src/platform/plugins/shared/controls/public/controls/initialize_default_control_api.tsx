@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, map, merge } from 'rxjs';
 import { StateComparators, SerializedPanelState } from '@kbn/presentation-publishing';
 
 import type { ControlWidth, DefaultControlState } from '../../common';
@@ -15,13 +15,19 @@ import type { ControlApiInitialization, ControlStateManager, DefaultControlApi }
 
 export type ControlApi = ControlApiInitialization<DefaultControlApi>;
 
+export const defaultControlComparators: StateComparators<DefaultControlState> = {
+  grow: 'referenceEquality',
+  width: 'referenceEquality',
+};
+
 export const initializeDefaultControlApi = (
   state: DefaultControlState
 ): {
-  api: ControlApi;
+  api: Omit<ControlApi, 'hasUnsavedChanges$' | 'resetUnsavedChanges'>;
   stateManager: ControlStateManager<DefaultControlState>;
-  comparators: StateComparators<DefaultControlState>;
-  serialize: () => SerializedPanelState<DefaultControlState>;
+  anyStateChange$: Observable<void>;
+  getLatestState: () => SerializedPanelState<DefaultControlState>;
+  reinitializeState: (lastSaved?: DefaultControlState) => void;
 } => {
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
@@ -37,16 +43,17 @@ export const initializeDefaultControlApi = (
       setBlockingError: (error) => blockingError$.next(error),
       setDataLoading: (loading) => dataLoading$.next(loading),
     },
-    comparators: {
-      grow: [grow, (newGrow: boolean | undefined) => grow.next(newGrow)],
-      width: [width, (newWidth: ControlWidth | undefined) => width.next(newWidth)],
-    },
+    anyStateChange$: merge(grow, width).pipe(map(() => undefined)),
     stateManager: {
       grow,
       width,
     },
-    serialize: () => {
+    getLatestState: () => {
       return { rawState: { grow: grow.getValue(), width: width.getValue() }, references: [] };
+    },
+    reinitializeState: (lastSaved?: DefaultControlState) => {
+      grow.next(lastSaved?.grow);
+      width.next(lastSaved?.width);
     },
   };
 };
