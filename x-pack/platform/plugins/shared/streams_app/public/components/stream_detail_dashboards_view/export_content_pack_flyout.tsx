@@ -12,7 +12,7 @@ import { Streams } from '@kbn/streams-schema';
 import {
   ContentPackEntry,
   ContentPackManifest,
-  findIndexPatterns,
+  findConfiguration,
   isIndexPlaceholder,
 } from '@kbn/content-packs-schema';
 import {
@@ -88,7 +88,7 @@ export function ExportContentPackFlyout({
       });
 
       const indexPatterns = uniq(
-        contentPack.entries.flatMap((object) => findIndexPatterns(object))
+        contentPack.entries.flatMap((object) => findConfiguration(object).patterns)
       ).filter((index) => !isIndexPlaceholder(index));
 
       setManifest({
