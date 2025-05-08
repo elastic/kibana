@@ -8,7 +8,7 @@
 import { CoreStart } from 'kibana/public';
 import Mustache from 'mustache';
 
-const TEMPLATE_TAGS = ['{', '}'];
+const TEMPLATE_TAGS: [string, string] = ['{', '}'];
 
 export function replaceTemplateStrings(text: string, docLinks?: CoreStart['docLinks']) {
   Mustache.parse(text, TEMPLATE_TAGS);

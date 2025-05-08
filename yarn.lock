@@ -6155,10 +6155,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/mustache@^0.8.31":
-  version "0.8.31"
-  resolved "https://registry.yarnpkg.com/@types/mustache/-/mustache-0.8.31.tgz#7c86cbf74f7733f9e3bdc28817623927eb386616"
-  integrity sha512-72flCZJkEJHPwhmpHgg4a0ZBLssMhg5NB0yltRblRlZMo4py3B/u/d7icevc4EeN9MPQUo/dPtuVOoVy9ih6cQ==
+"@types/mustache@^4.2.5":
+  version "4.2.5"
+  resolved "https://registry.yarnpkg.com/@types/mustache/-/mustache-4.2.5.tgz#9129f0d6857f976e00e171bbb3460e4b702f84ef"
+  integrity sha512-PLwiVvTBg59tGFL/8VpcGvqOu3L4OuveNvPi0EYbWchRdEVP++yRUXJPFl+CApKEq13017/4Nf7aQ5lTtHUNsA==
 
 "@types/ncp@^2.0.1":
   version "2.0.1"
@@ -19238,10 +19238,10 @@ murmurhash-js@^1.0.0:
   resolved "https://registry.yarnpkg.com/murmurhash-js/-/murmurhash-js-1.0.0.tgz#b06278e21fc6c37fa5313732b0412bcb6ae15f51"
   integrity sha1-sGJ44h/Gw3+lMTcysEEry2rhX1E=
 
-mustache@^2.3.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/mustache/-/mustache-2.3.2.tgz#a6d4d9c3f91d13359ab889a812954f9230a3d0c5"
-  integrity sha512-KpMNwdQsYz3O/SBS1qJ/o3sqUJ5wSb8gb0pul8CO0S56b9Y2ALm8zCfsjPXsqGFfoNBkDwZuZIAjhsZI03gYVQ==
+mustache@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.npmjs.org/mustache/-/mustache-4.2.0.tgz"
+  integrity sha512-71ippSywq5Yb7/tVYyGbkBggbU8H3u5Rz56fH60jGFgr8uHwxs+aSKeqmluIVzM0m0kB7xQjKS6qPfd0b2ZoqQ==
 
 mutation-observer@^1.0.3:
   version "1.0.3"
