@@ -9,5 +9,5 @@ import type { InfraClientCoreStart } from '../types';
 export function useProfilingPluginSetting() {
   const { capabilities } = useKibana<InfraClientCoreStart>().services.application;
 
-  return capabilities.profiling?.show;
+  return Boolean(capabilities.profiling?.show);
 }
