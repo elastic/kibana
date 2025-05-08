@@ -2962,7 +2962,8 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
           if (
             oldStream &&
             oldStream?.vars?.[DATA_STREAM_TYPE_VAR_NAME] &&
-            oldStream?.vars[DATA_STREAM_TYPE_VAR_NAME]?.value !== stream?.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value
+            oldStream?.vars[DATA_STREAM_TYPE_VAR_NAME]?.value !==
+              stream?.vars?.[DATA_STREAM_TYPE_VAR_NAME]?.value
           ) {
             // seeing this error in dev? Package policy must be called with prepareInputPackagePolicyDataset function first in UI code
             appContextService
