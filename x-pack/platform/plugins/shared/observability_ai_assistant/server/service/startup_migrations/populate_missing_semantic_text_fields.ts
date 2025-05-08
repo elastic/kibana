@@ -45,9 +45,7 @@ async function populateMissingSemanticTextField({
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
 }) {
-  logger.debug(
-    'Checking for remaining entries without semantic_text field that need to be migrated'
-  );
+  logger.debug('Initalizing semantic text migration for knowledge base entries...');
 
   await pRetry(
     async () => {
@@ -71,4 +69,6 @@ async function populateMissingSemanticTextField({
     },
     { retries: 10, minTimeout: 10_000 }
   );
+
+  logger.debug('Semantic text migration completed successfully.');
 }
