@@ -248,6 +248,40 @@ describe('AlertDelete Modal', () => {
       expect(closeModalMock).toHaveBeenCalledTimes(1);
     });
   });
+});
+
+describe('AlertDelete Modal Error Handling', () => {
+  const closeModalMock = jest.fn();
+  const servicesMock = { http, notifications };
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        cacheTime: 0,
+      },
+    },
+    logger: {
+      // eslint-disable-next-line no-console
+      log: console.log,
+      // eslint-disable-next-line no-console
+      warn: console.warn,
+      error: () => {},
+    },
+  });
+
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <IntlProvider locale="en">
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </IntlProvider>
+  );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    closeModalMock.mockClear();
+  });
 
   it('shows an error toast on schedule submission failure', async () => {
     http.get.mockResolvedValueOnce({ affected_alert_count: 100 });
@@ -324,7 +358,7 @@ describe('AlertDelete Modal', () => {
     await waitFor(() => {
       expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
         title: i18n.ALERT_DELETE_FAILURE,
-        text: JSON.stringify(errorResponse),
+        text: 'Unknown error',
       });
     });
   });

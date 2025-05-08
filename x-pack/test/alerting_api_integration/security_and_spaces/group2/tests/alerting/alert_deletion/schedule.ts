@@ -228,7 +228,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
               expect(scheduleResponse.statusCode).to.eql(403);
               expect(scheduleResponse.body).to.eql({
                 error: 'Forbidden',
-                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings,write-alert-deletion-settings]`,
+                message: `API [POST /internal/alerting/rules/settings/_alert_delete_schedule] is unauthorized for user, this action is granted by the Kibana privileges [write-alert-deletion-settings]`,
                 statusCode: 403,
               });
               break;
