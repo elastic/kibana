@@ -26,6 +26,7 @@ import {
   isDefendInsightsEnabled,
   invokeDefendInsightsGraph,
   handleGraphError,
+  runExternalCallbacks,
 } from './helpers';
 import { CallbackIds, appContextService } from '../../services/app_context';
 
@@ -72,6 +73,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
 
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
+        const savedObjectsClient = assistantContext.savedObjectsClient;
 
         try {
           const isEnabled = isDefendInsightsEnabled({
@@ -108,6 +110,8 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
               statusCode: 500,
             });
           }
+
+          await runExternalCallbacks(CallbackIds.DefendInsightsPreCreate, request);
 
           const {
             endpointIds,
@@ -147,6 +151,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             latestReplacements,
             logger,
             onNewReplacements,
+            savedObjectsClient,
           })
             .then(({ anonymizedEvents, insights }) =>
               updateDefendInsights({
@@ -160,6 +165,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
                 logger,
                 startTime,
                 telemetry,
+                insightType,
               }).then(() => insights)
             )
             .then((insights) =>

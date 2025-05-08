@@ -379,7 +379,7 @@ const getAccountStatsBasedOnEnablesRule = async (
           must_not: mutedRulesFilterQuery,
           must: {
             terms: {
-              'rule.benchmark.id': benchmarksWithMutedRules,
+              'rule.benchmark.id': benchmarksWithMutedRules as string[],
             },
           },
         },

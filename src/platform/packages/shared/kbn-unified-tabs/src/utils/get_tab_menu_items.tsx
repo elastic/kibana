@@ -8,7 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TabItem, GetTabMenuItems, TabMenuItemWithClick, TabMenuItem } from '../types';
+import {
+  TabItem,
+  GetTabMenuItems,
+  TabMenuItemWithClick,
+  TabMenuItem,
+  TabMenuItemName,
+} from '../types';
 import { isLastTab, hasSingleTab, type TabsState } from './manage_tabs';
 
 const DividerMenuItem = 'divider';
@@ -17,7 +23,7 @@ interface TabMenuItemProps {
   name: string;
   label: string;
   item: TabItem;
-  onClick: (item: TabItem) => void;
+  onClick: ((item: TabItem) => void) | null; // `null` can be overridden inside tab menu
 }
 
 const getTabMenuItem = ({
@@ -29,11 +35,12 @@ const getTabMenuItem = ({
   'data-test-subj': `unifiedTabs_tabMenuItem_${name}`,
   name,
   label,
-  onClick: () => onClick(item),
+  onClick: onClick ? () => onClick(item) : null,
 });
 
 export interface GetTabMenuItemsFnProps {
   tabsState: TabsState;
+  maxItemsCount: number | undefined;
   onDuplicate: (item: TabItem) => void;
   onCloseOtherTabs: (item: TabItem) => void;
   onCloseTabsToTheRight: (item: TabItem) => void;
@@ -41,6 +48,7 @@ export interface GetTabMenuItemsFnProps {
 
 export const getTabMenuItemsFn = ({
   tabsState,
+  maxItemsCount,
   onDuplicate,
   onCloseOtherTabs,
   onCloseTabsToTheRight,
@@ -50,7 +58,7 @@ export const getTabMenuItemsFn = ({
       ? null
       : getTabMenuItem({
           item,
-          name: 'closeOtherTabs',
+          name: TabMenuItemName.closeOtherTabs,
           label: i18n.translate('unifiedTabs.tabMenu.closeOtherTabsMenuItem', {
             defaultMessage: 'Close other tabs',
           }),
@@ -61,7 +69,7 @@ export const getTabMenuItemsFn = ({
       ? null
       : getTabMenuItem({
           item,
-          name: 'closeTabsToTheRight',
+          name: TabMenuItemName.closeTabsToTheRight,
           label: i18n.translate('unifiedTabs.tabMenu.closeTabsToTheRightMenuItem', {
             defaultMessage: 'Close tabs to the right',
           }),
@@ -71,16 +79,31 @@ export const getTabMenuItemsFn = ({
     const items: TabMenuItem[] = [
       getTabMenuItem({
         item,
-        name: 'duplicate',
-        label: i18n.translate('unifiedTabs.tabMenu.duplicateMenuItem', {
-          defaultMessage: 'Duplicate',
+        name: TabMenuItemName.enterRenamingMode,
+        label: i18n.translate('unifiedTabs.tabMenu.renameTabMenuItem', {
+          defaultMessage: 'Rename',
         }),
-        onClick: onDuplicate,
+        onClick: null,
       }),
     ];
 
+    if (!maxItemsCount || tabsState.items.length < maxItemsCount) {
+      items.push(
+        getTabMenuItem({
+          item,
+          name: TabMenuItemName.duplicate,
+          label: i18n.translate('unifiedTabs.tabMenu.duplicateMenuItem', {
+            defaultMessage: 'Duplicate',
+          }),
+          onClick: onDuplicate,
+        })
+      );
+    }
+
     if (closeOtherTabsItem || closeTabsToTheRightItem) {
-      items.push(DividerMenuItem);
+      if (items.length > 0) {
+        items.push(DividerMenuItem);
+      }
 
       if (closeOtherTabsItem) {
         items.push(closeOtherTabsItem);

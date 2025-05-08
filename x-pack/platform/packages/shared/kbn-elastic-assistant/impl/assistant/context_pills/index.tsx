@@ -67,7 +67,7 @@ const ContextPillsComponent: React.FC<Props> = ({
             {description}
           </EuiButtonEmpty>
         );
-        return (
+        return description.length > 0 ? (
           <EuiFlexItem grow={false} key={id}>
             {selectedPromptContexts[id] != null ? (
               button
@@ -75,7 +75,7 @@ const ContextPillsComponent: React.FC<Props> = ({
               <EuiToolTip content={tooltip}>{button}</EuiToolTip>
             )}
           </EuiFlexItem>
-        );
+        ) : null;
       })}
     </EuiFlexGroup>
   );

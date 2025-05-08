@@ -405,6 +405,7 @@ describe('request', () => {
           defaults: {
             ...axios.defaults,
             baseURL: 'https://here-we-go.com',
+            allowAbsoluteUrls: false,
           },
         } as unknown as AxiosInstance,
         url: '/test',

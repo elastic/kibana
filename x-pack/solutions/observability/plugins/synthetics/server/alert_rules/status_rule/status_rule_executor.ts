@@ -36,7 +36,7 @@ import {
   getUngroupedReasonMessage,
 } from './message_utils';
 import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
-import { parseArrayFilters } from '../../routes/common';
+import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
 import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
@@ -118,21 +118,34 @@ export class StatusRuleExecutor {
       return processMonitors([]);
     }
 
+    const locationIds = await parseLocationFilter(
+      {
+        savedObjectsClient: this.soClient,
+        server: this.server,
+        syntheticsMonitorClient: this.syntheticsMonitorClient,
+      },
+      this.params.locations
+    );
+
     const { filtersStr } = parseArrayFilters({
       configIds,
       filter: baseFilter,
-      tags: this.params?.tags,
-      locations: this.params?.locations,
-      monitorTypes: this.params?.monitorTypes,
-      monitorQueryIds: this.params?.monitorIds,
-      projects: this.params?.projects,
+      tags: this.params.tags,
+      locations: locationIds,
+      monitorTypes: this.params.monitorTypes,
+      monitorQueryIds: this.params.monitorIds,
+      projects: this.params.projects,
     });
 
     this.monitors = await this.monitorConfigRepository.getAll({
       filter: filtersStr,
     });
 
-    this.debug(`Found ${this.monitors.length} monitors for params ${JSON.stringify(this.params)}`);
+    this.debug(
+      `Found ${this.monitors.length} monitors for params ${JSON.stringify(
+        this.params
+      )} | parsed location filter is ${JSON.stringify(locationIds)} `
+    );
     return processMonitors(this.monitors);
   }
 
@@ -282,7 +295,7 @@ export class StatusRuleExecutor {
             statusConfig,
           });
 
-          return this.scheduleAlert({
+          this.scheduleAlert({
             idWithLocation,
             alertId,
             monitorSummary,
@@ -310,7 +323,7 @@ export class StatusRuleExecutor {
           const monitorSummary = this.getUngroupedDownSummary({
             statusConfigs: configs,
           });
-          return this.scheduleAlert({
+          this.scheduleAlert({
             idWithLocation: configId,
             alertId,
             monitorSummary,

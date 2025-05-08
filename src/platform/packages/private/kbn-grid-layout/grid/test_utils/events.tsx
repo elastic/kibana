@@ -8,19 +8,23 @@
  */
 
 import { fireEvent } from '@testing-library/react';
+import { PointerPosition } from '../use_grid_layout_events/types';
 
 class TouchEventFake extends Event {
-  constructor(public touches: Array<{ clientX: number; clientY: number }>) {
+  constructor(public touches: PointerPosition[]) {
     super('touchmove');
     this.touches = [{ clientX: 256, clientY: 128 }];
   }
 }
 
-export const mouseStartDragging = (handle: HTMLElement, options = { clientX: 0, clientY: 0 }) => {
+export const mouseStartDragging = (
+  handle: HTMLElement,
+  options: PointerPosition = { clientX: 0, clientY: 0 }
+) => {
   fireEvent.mouseDown(handle, options);
 };
 
-export const mouseMoveTo = (options = { clientX: 256, clientY: 128 }) => {
+export const mouseMoveTo = (options: PointerPosition = { clientX: 256, clientY: 128 }) => {
   fireEvent.mouseMove(document, options);
 };
 
@@ -29,14 +33,14 @@ export const mouseDrop = (handle: HTMLElement) => {
 };
 export const touchStart = (
   handle: HTMLElement,
-  options = { touches: [{ clientX: 0, clientY: 0 }] }
+  options: { touches: PointerPosition[] } = { touches: [{ clientX: 0, clientY: 0 }] }
 ) => {
   fireEvent.touchStart(handle, options);
 };
 
 export const touchMoveTo = (
   handle: HTMLElement,
-  options = { touches: [{ clientX: 256, clientY: 128 }] }
+  options: { touches: PointerPosition[] } = { touches: [{ clientX: 256, clientY: 128 }] }
 ) => {
   const realTouchEvent = window.TouchEvent;
   // @ts-expect-error

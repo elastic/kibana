@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import {
@@ -16,6 +16,7 @@ import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './ty
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef } from '../processor_state_machine';
 import { PreviewDocsFilterOption, SimulationActorSnapshot } from '../simulation_state_machine';
+import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 
 const consoleInspector = createConsoleInspector();
 
@@ -24,6 +25,11 @@ const StreamEnrichmentContext = createActorContext(streamEnrichmentMachine);
 export const useStreamsEnrichmentSelector = StreamEnrichmentContext.useSelector;
 
 export type StreamEnrichmentEvents = ReturnType<typeof useStreamEnrichmentEvents>;
+
+export const useGetStreamEnrichmentState = () => {
+  const service = StreamEnrichmentContext.useActorRef();
+  return useCallback(() => service.getSnapshot(), [service]);
+};
 
 export const useStreamEnrichmentEvents = () => {
   const service = StreamEnrichmentContext.useActorRef();
@@ -50,6 +56,12 @@ export const useStreamEnrichmentEvents = () => {
       },
       changePreviewDocsFilter: (filter: PreviewDocsFilterOption) => {
         service.send({ type: 'simulation.changePreviewDocsFilter', filter });
+      },
+      mapField: (field: SchemaField) => {
+        service.send({ type: 'simulation.fields.map', field: field as MappedSchemaField });
+      },
+      unmapField: (fieldName: string) => {
+        service.send({ type: 'simulation.fields.unmap', fieldName });
       },
     }),
     [service]

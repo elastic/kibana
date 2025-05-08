@@ -59,6 +59,7 @@ describe('secrets', () => {
         vars: [
           { name: 'pkg-secret-1', type: 'text', secret: true },
           { name: 'pkg-secret-2', type: 'text', secret: true },
+          { name: 'pkg-multi-secret', type: 'text', multi: true, secret: true },
         ],
         data_streams: [
           {
@@ -70,6 +71,7 @@ describe('secrets', () => {
                 vars: [
                   { name: 'stream-secret-1', type: 'text', secret: true },
                   { name: 'stream-secret-2', type: 'text', secret: true },
+                  { name: 'stream-multi-secret', type: 'text', multi: true, secret: true },
                 ],
               },
             ],
@@ -96,6 +98,12 @@ describe('secrets', () => {
                     type: 'text',
                     secret: true,
                   },
+                  {
+                    name: 'input-multi-secret',
+                    type: 'text',
+                    multi: true,
+                    secret: true,
+                  },
                   { name: 'foo-input3-var-name', type: 'text', multi: true },
                 ],
               },
@@ -103,6 +111,7 @@ describe('secrets', () => {
           },
         ],
       } as unknown as PackageInfo;
+
       it('policy with package level secret vars', () => {
         const packagePolicy = {
           vars: {
@@ -111,6 +120,9 @@ describe('secrets', () => {
             },
             'pkg-secret-2': {
               value: 'pkg-secret-2-val',
+            },
+            'pkg-multi-secret': {
+              value: ['pkg-multi-secret-val1', 'pkg-multi-secret-val2'],
             },
           },
           inputs: [],
@@ -127,6 +139,12 @@ describe('secrets', () => {
             path: ['vars', 'pkg-secret-2'],
             value: {
               value: 'pkg-secret-2-val',
+            },
+          },
+          {
+            path: ['vars', 'pkg-multi-secret'],
+            value: {
+              value: ['pkg-multi-secret-val1', 'pkg-multi-secret-val2'],
             },
           },
         ]);
@@ -163,6 +181,9 @@ describe('secrets', () => {
                 'input-secret-2': {
                   value: 'input-secret-2-val',
                 },
+                'input-multi-secret': {
+                  value: ['input-multi-secret-val1', 'input-multi-secret-val2'],
+                },
               },
               streams: [],
             },
@@ -177,6 +198,10 @@ describe('secrets', () => {
           {
             path: ['inputs', '0', 'vars', 'input-secret-2'],
             value: { value: 'input-secret-2-val' },
+          },
+          {
+            path: ['inputs', '0', 'vars', 'input-multi-secret'],
+            value: { value: ['input-multi-secret-val1', 'input-multi-secret-val2'] },
           },
         ]);
       });
@@ -199,6 +224,9 @@ describe('secrets', () => {
                     'stream-secret-2': {
                       value: 'stream-secret-2-value',
                     },
+                    'stream-multi-secret': {
+                      value: ['stream-multi-secret-val1', 'stream-multi-secret-val2'],
+                    },
                   },
                 },
               ],
@@ -214,6 +242,10 @@ describe('secrets', () => {
           {
             path: ['inputs', '0', 'streams', '0', 'vars', 'stream-secret-2'],
             value: { value: 'stream-secret-2-value' },
+          },
+          {
+            path: ['inputs', '0', 'streams', '0', 'vars', 'stream-multi-secret'],
+            value: { value: ['stream-multi-secret-val1', 'stream-multi-secret-val2'] },
           },
         ]);
       });
@@ -798,6 +830,15 @@ describe('secrets', () => {
             },
           },
         },
+        {
+          path: ['somepath4'],
+          value: {
+            value: {
+              isSecretRef: true,
+              ids: ['secret-4-1', 'secret-4-2'],
+            },
+          },
+        },
       ];
 
       expect(diffSecretPaths(paths, paths.slice().reverse())).toEqual({
@@ -854,7 +895,7 @@ describe('secrets', () => {
         noChange: [paths1[0]],
       });
     });
-    it('double secret modified', () => {
+    it('multiple secret modified', () => {
       const paths1 = [
         {
           path: ['somepath1'],
@@ -874,6 +915,15 @@ describe('secrets', () => {
             },
           },
         },
+        {
+          path: ['somepath3'],
+          value: {
+            value: {
+              isSecretRef: true,
+              ids: ['secret-3-1', 'secret-3-2'],
+            },
+          },
+        },
       ];
 
       const paths2 = [
@@ -884,6 +934,10 @@ describe('secrets', () => {
         {
           path: ['somepath2'],
           value: { value: 'newvalue2' },
+        },
+        {
+          path: ['somepath3'],
+          value: { value: ['newvalue3-1', 'newvalue3-2'] },
         },
       ];
 
@@ -896,6 +950,10 @@ describe('secrets', () => {
           {
             path: ['somepath2'],
             value: { value: 'newvalue2' },
+          },
+          {
+            path: ['somepath3'],
+            value: { value: ['newvalue3-1', 'newvalue3-2'] },
           },
         ],
         toDelete: [
@@ -914,6 +972,15 @@ describe('secrets', () => {
               value: {
                 isSecretRef: true,
                 id: 'secret-2',
+              },
+            },
+          },
+          {
+            path: ['somepath3'],
+            value: {
+              value: {
+                isSecretRef: true,
+                ids: ['secret-3-1', 'secret-3-2'],
               },
             },
           },
@@ -980,6 +1047,7 @@ describe('secrets', () => {
         { name: 'pkg-secret-1', type: 'text', secret: true, required: true },
         { name: 'pkg-secret-2', type: 'text', secret: true, required: false },
         { name: 'dot-notation.pkg-secret-3', type: 'text', secret: true, required: false },
+        { name: 'pkg-multi-secret', type: 'text', secret: true, multi: true },
       ],
       data_streams: [
         {
@@ -994,6 +1062,12 @@ describe('secrets', () => {
                   type: 'text',
                   secret: true,
                   required: false,
+                },
+                {
+                  name: 'stream-multi-secret',
+                  type: 'text',
+                  secret: true,
+                  multi: true,
                 },
               ],
             },
@@ -1015,6 +1089,12 @@ describe('secrets', () => {
                   type: 'text',
                   secret: true,
                   required: false,
+                },
+                {
+                  name: 'input-multi-secret',
+                  type: 'text',
+                  secret: true,
+                  multi: true,
                 },
               ],
             },
@@ -1132,6 +1212,64 @@ describe('secrets', () => {
         ).toBe(true);
       });
     });
+
+    describe('when secrets have multiple values', () => {
+      it('handles multi-value secrets correctly', async () => {
+        const mockPackagePolicy = {
+          vars: {
+            'pkg-multi-secret': {
+              value: ['multi-secret-val1', 'multi-secret-val2'],
+            },
+          },
+          inputs: [
+            {
+              type: 'foo',
+              vars: {
+                'input-multi-secret': {
+                  value: ['input-multi-secret-val1', 'input-multi-secret-val2'],
+                },
+              },
+              streams: [
+                {
+                  data_stream: { type: 'foo', dataset: 'somedataset' },
+                  vars: {
+                    'stream-multi-secret': {
+                      value: ['stream-multi-secret-val1', 'stream-multi-secret-val2'],
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        } as unknown as NewPackagePolicy;
+
+        const result = await extractAndWriteSecrets({
+          packagePolicy: mockPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(6);
+        expect(result.secretReferences).toHaveLength(6);
+
+        expect(result.packagePolicy.vars!['pkg-multi-secret'].value.ids).toHaveLength(2);
+        expect(result.packagePolicy.vars!['pkg-multi-secret'].value.isSecretRef).toBe(true);
+
+        expect(result.packagePolicy.inputs[0].vars!['input-multi-secret'].value.ids).toHaveLength(
+          2
+        );
+        expect(result.packagePolicy.inputs[0].vars!['input-multi-secret'].value.isSecretRef).toBe(
+          true
+        );
+
+        expect(
+          result.packagePolicy.inputs[0].streams[0].vars!['stream-multi-secret'].value.ids
+        ).toHaveLength(2);
+        expect(
+          result.packagePolicy.inputs[0].streams[0].vars!['stream-multi-secret'].value.isSecretRef
+        ).toBe(true);
+      });
+    });
   });
 
   describe('extractAndUpdateSecrets', () => {
@@ -1158,6 +1296,7 @@ describe('secrets', () => {
         { name: 'pkg-secret-1', type: 'text', secret: true, required: true },
         { name: 'pkg-secret-2', type: 'text', secret: true, required: false },
         { name: 'dot-notation.pkg-secret-3', type: 'text', secret: true, required: false },
+        { name: 'pkg-multi-secret', type: 'text', secret: true, multi: true },
       ],
       data_streams: [
         {
@@ -1172,6 +1311,12 @@ describe('secrets', () => {
                   type: 'text',
                   secret: true,
                   required: false,
+                },
+                {
+                  name: 'stream-multi-secret',
+                  type: 'text',
+                  secret: true,
+                  multi: true,
                 },
               ],
             },
@@ -1193,6 +1338,12 @@ describe('secrets', () => {
                   type: 'text',
                   secret: true,
                   required: false,
+                },
+                {
+                  name: 'input-multi-secret',
+                  type: 'text',
+                  secret: true,
+                  multi: true,
                 },
               ],
             },
@@ -1366,6 +1517,96 @@ describe('secrets', () => {
         ).toBe(true);
 
         expect(result.secretsToDelete).toHaveLength(2);
+      });
+    });
+
+    describe('when secrets have multiple values', () => {
+      it('handles multi-value secrets correctly', async () => {
+        const oldPackagePolicy = {
+          vars: {
+            'pkg-multi-secret': {
+              value: { ids: ['id1', 'id2'], isSecretRef: true },
+            },
+          },
+          inputs: [
+            {
+              type: 'foo',
+              vars: {
+                'input-multi-secret': {
+                  value: { ids: ['id3', 'id4'], isSecretRef: true },
+                },
+              },
+              streams: [
+                {
+                  data_stream: { type: 'foo', dataset: 'somedataset' },
+                  vars: {
+                    'stream-multi-secret': {
+                      value: { ids: ['id5', 'id6'], isSecretRef: true },
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        } as unknown as PackagePolicy;
+
+        const updatedPackagePolicy = {
+          vars: {
+            'pkg-multi-secret': {
+              value: ['multi-secret-val1', 'multi-secret-val2'],
+            },
+          },
+          inputs: [
+            {
+              type: 'foo',
+              vars: {
+                'input-multi-secret': {
+                  value: ['input-multi-secret-val1', 'input-multi-secret-val2'],
+                },
+              },
+              streams: [
+                {
+                  data_stream: { type: 'foo', dataset: 'somedataset' },
+                  vars: {
+                    'stream-multi-secret': {
+                      value: ['stream-multi-secret-val1', 'stream-multi-secret-val2'],
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy,
+          packagePolicyUpdate: updatedPackagePolicy,
+          packageInfo: mockIntegrationPackage,
+          esClient: esClientMock,
+        });
+
+        expect(esClientMock.transport.request).toHaveBeenCalledTimes(6);
+        expect(result.secretReferences).toHaveLength(6);
+
+        expect(result.packagePolicyUpdate.vars!['pkg-multi-secret'].value.ids).toHaveLength(2);
+        expect(result.packagePolicyUpdate.vars!['pkg-multi-secret'].value.isSecretRef).toBe(true);
+
+        expect(
+          result.packagePolicyUpdate.inputs[0].vars!['input-multi-secret'].value.ids
+        ).toHaveLength(2);
+        expect(
+          result.packagePolicyUpdate.inputs[0].vars!['input-multi-secret'].value.isSecretRef
+        ).toBe(true);
+
+        expect(
+          result.packagePolicyUpdate.inputs[0].streams[0].vars!['stream-multi-secret'].value.ids
+        ).toHaveLength(2);
+        expect(
+          result.packagePolicyUpdate.inputs[0].streams[0].vars!['stream-multi-secret'].value
+            .isSecretRef
+        ).toBe(true);
+
+        expect(result.secretsToDelete).toHaveLength(6);
       });
     });
   });
@@ -1688,6 +1929,39 @@ describe('secrets', () => {
         });
 
         expect(result.secretsToDelete).toEqual([{ id: 'token' }]);
+      });
+
+      it('should delete secret if secret is undefined in update', async () => {
+        const result = await extractAndUpdateOutputSecrets({
+          oldOutput: {
+            id: 'logstash-id',
+            name: 'logstash',
+            type: 'logstash',
+            is_default: false,
+            is_default_monitoring: false,
+            secrets: {
+              ssl: {
+                key: {
+                  id: 'ssl-key-token',
+                },
+              },
+            },
+          },
+          outputUpdate: {
+            id: 'logstash-id',
+            name: 'logstash',
+            type: 'logstash',
+            secrets: {
+              ssl: undefined,
+            },
+            is_default: false,
+            is_default_monitoring: false,
+            proxy_id: null,
+          },
+          esClient: esClientMock,
+        });
+
+        expect(result.secretsToDelete).toEqual([{ id: 'ssl-key-token' }]);
       });
     });
     describe('deleteOutputSecrets', () => {

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { WiredStreamDefinition } from '../models/ingest/base';
+import { Streams } from '../models/streams';
 import {
   isInheritLifecycle,
   WiredIngestStreamEffectiveLifecycle,
 } from '../models/ingest/lifecycle';
-import { isDescendantOf, isChildOf, getSegments } from './hierarchy';
+import { isDescendantOf, isChildOf, getSegments } from '../shared/hierarchy';
 
 export function findInheritedLifecycle(
-  definition: WiredStreamDefinition,
-  ancestors: WiredStreamDefinition[]
+  definition: Streams.WiredStream.Definition,
+  ancestors: Streams.WiredStream.Definition[]
 ): WiredIngestStreamEffectiveLifecycle {
   const originDefinition = [...ancestors, definition]
     .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length)
@@ -28,8 +28,8 @@ export function findInheritedLifecycle(
 }
 
 export function findInheritingStreams(
-  root: WiredStreamDefinition,
-  descendants: WiredStreamDefinition[]
+  root: Streams.WiredStream.Definition,
+  descendants: Streams.WiredStream.Definition[]
 ): string[] {
   const inheriting = [];
   const queue = [root];

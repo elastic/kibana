@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   ALERT_ACTION_GROUP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getEventLog, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
 

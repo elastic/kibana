@@ -12,8 +12,11 @@ import type {
   AuditLogger,
   IScopedClusterClient,
   AuditEvent,
+  IUiSettingsClient,
   AnalyticsServiceSetup,
+  KibanaRequest,
 } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
 import type { HealthStatus, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -23,8 +26,20 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
+import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entityManager-plugin/server/saved_objects';
+import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
+import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/constants';
+import {
+  ENTITY_STORE_INDEX_PATTERN,
+  ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+  ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
+} from '../../../../common/entity_analytics/entity_store/constants';
+import { getEnabledEntityTypes } from '../../../../common/entity_analytics/utils';
+import {
+  getAllMissingPrivileges,
+  getMissingPrivilegesErrorMessage,
+} from '../../../../common/entity_analytics/privileges';
 import { merge } from '../../../../common/utils/objects/merge';
-import { getEnabledStoreEntityTypes } from '../../../../common/entity_analytics/entity_store/utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
@@ -85,6 +100,7 @@ import {
   getEntitiesIndexName,
   isPromiseFulfilled,
   isPromiseRejected,
+  mergeEntityStoreIndices,
 } from './utils';
 import { EntityEngineActions } from './auditing/actions';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
@@ -96,8 +112,9 @@ import {
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 import { createEngineDescription } from './installation/engine_description';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
-
 import type { ApiKeyManager } from './auth/api_key';
+import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
+import { entityEngineDescriptorTypeName } from './saved_object';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -126,6 +143,9 @@ interface EntityStoreClientOpts {
   experimentalFeatures: ExperimentalFeatures;
   telemetry?: AnalyticsServiceSetup;
   apiKeyManager?: ApiKeyManager;
+  security: SecurityPluginStart;
+  request: KibanaRequest;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 interface SearchEntitiesParams {
@@ -144,6 +164,7 @@ export class EntityStoreDataClient {
   private riskScoreDataClient: RiskScoreDataClient;
   private esClient: ElasticsearchClient;
   private apiKeyGenerator?: ApiKeyManager;
+  private uiSettingsClient: IUiSettingsClient;
 
   constructor(private readonly options: EntityStoreClientOpts) {
     const {
@@ -154,9 +175,11 @@ export class EntityStoreDataClient {
       kibanaVersion,
       namespace,
       apiKeyManager,
+      uiSettingsClient,
     } = options;
     this.esClient = clusterClient.asCurrentUser;
     this.apiKeyGenerator = apiKeyManager;
+    this.uiSettingsClient = uiSettingsClient;
 
     this.entityClient = new EntityClient({
       clusterClient,
@@ -235,8 +258,7 @@ export class EntityStoreDataClient {
     const run = <T>(fn: () => Promise<T>) =>
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
-    const { experimentalFeatures } = this.options;
-    const enabledEntityTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+    const enabledEntityTypes = await this.getEnabledEntityTypes();
 
     // When entityTypes param is defined it only enables the engines that are provided
     const enginesTypes = requestBodyOverrides.entityTypes
@@ -253,26 +275,39 @@ export class EntityStoreDataClient {
     return { engines, succeeded: true };
   }
 
+  private async getEnabledEntityTypes(): Promise<EntityType[]> {
+    const genericEntityStoreEnabled = await this.uiSettingsClient.get<boolean>(
+      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
+    );
+
+    return getEnabledEntityTypes(genericEntityStoreEnabled);
+  }
+
   public async status({
     include_components: withComponents = false,
   }: GetEntityStoreStatusRequestQuery): Promise<GetEntityStoreStatusResponse> {
     const { namespace } = this.options;
-    const { engines, count } = await this.engineClient.list();
+    const { engines } = await this.engineClient.list();
+
+    const enabledEntityTypes = await this.getEnabledEntityTypes();
+    const enabledEngines = engines.filter((engine) => {
+      return enabledEntityTypes.indexOf(EntityType[engine.type]) > -1;
+    });
 
     let status = ENTITY_STORE_STATUS.RUNNING;
-    if (count === 0) {
+    if (enabledEngines.length === 0) {
       status = ENTITY_STORE_STATUS.NOT_INSTALLED;
-    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.ERROR)) {
+    } else if (enabledEngines.some((engine) => engine.status === ENGINE_STATUS.ERROR)) {
       status = ENTITY_STORE_STATUS.ERROR;
-    } else if (engines.every((engine) => engine.status === ENGINE_STATUS.STOPPED)) {
+    } else if (enabledEngines.every((engine) => engine.status === ENGINE_STATUS.STOPPED)) {
       status = ENTITY_STORE_STATUS.STOPPED;
-    } else if (engines.some((engine) => engine.status === ENGINE_STATUS.INSTALLING)) {
+    } else if (enabledEngines.some((engine) => engine.status === ENGINE_STATUS.INSTALLING)) {
       status = ENTITY_STORE_STATUS.INSTALLING;
     }
 
     if (withComponents) {
       const enginesWithComponents = await Promise.all(
-        engines.map(async (engine) => {
+        enabledEngines.map(async (engine) => {
           const id = buildEntityDefinitionId(engine.type, namespace);
           const {
             definitions: [definition],
@@ -297,7 +332,7 @@ export class EntityStoreDataClient {
 
       return { engines: enginesWithComponents, status };
     } else {
-      return { engines, status };
+      return { engines: enabledEngines, status };
     }
   }
 
@@ -481,7 +516,6 @@ export class EntityStoreDataClient {
         status: ENGINE_STATUS.ERROR,
         error: {
           message: err.message,
-          stack: err.stack,
           action: 'init',
         },
       });
@@ -788,6 +822,22 @@ export class EntityStoreDataClient {
 
     const { engines } = await this.engineClient.list();
 
+    if (engines.length === 0) {
+      logger.debug(
+        `In namespace ${this.options.namespace}: No entity engines found, skipping data view index application`
+      );
+      return {
+        successes: [],
+        errors: [],
+      };
+    }
+
+    const defaultIndexPatterns = await buildIndexPatterns(
+      this.options.namespace,
+      this.options.appClient,
+      this.options.dataViewsService
+    );
+
     const updateDefinitionPromises: Array<Promise<EngineDataviewUpdateResult>> = engines.map(
       async (engine) => {
         const originalStatus = engine.status;
@@ -803,11 +853,7 @@ export class EntityStoreDataClient {
           );
         }
 
-        const indexPatterns = await buildIndexPatterns(
-          this.options.namespace,
-          this.options.appClient,
-          this.options.dataViewsService
-        );
+        const indexPatterns = mergeEntityStoreIndices(defaultIndexPatterns, engine.indexPattern);
 
         // Skip update if index patterns are the same
         if (isEqual(definition.indexPatterns, indexPatterns)) {
@@ -818,6 +864,18 @@ export class EntityStoreDataClient {
         } else {
           logger.info(
             `In namespace ${this.options.namespace}: Data view index changes detected, applying changes to entity definition.`
+          );
+        }
+
+        const privileges = await this.getEntityStoreSourceIndicesPrivileges(indexPatterns);
+
+        if (!privileges.has_all_required) {
+          const missingPrivilegesMsg = getMissingPrivilegesErrorMessage(
+            getAllMissingPrivileges(privileges)
+          );
+
+          throw new Error(
+            `The current user does not have the required indices privileges for updating the '${engine.type}' entity store.\n${missingPrivilegesMsg}`
           );
         }
 
@@ -861,6 +919,61 @@ export class EntityStoreDataClient {
       successes: updateSuccesses,
       errors: updateErrors,
     };
+  }
+
+  /**
+   * Get the index privileges required for installing all entity store resources
+   */
+  public getEntityStoreInitPrivileges = async (indices: string[]) => {
+    const security = this.options.security;
+
+    // The entity store needs access to all security solution indices
+    const indicesPrivileges = this.getEntityStoreSourceRequiredIndicesPrivileges(indices);
+
+    // The entity store has to create the following indices
+    indicesPrivileges[ENTITY_STORE_INDEX_PATTERN] = ['read', 'manage'];
+    indicesPrivileges[RISK_SCORE_INDEX_PATTERN] = ['read', 'manage'];
+
+    return checkAndFormatPrivileges({
+      request: this.options.request,
+      security,
+      privilegesToCheck: {
+        kibana: [
+          security.authz.actions.savedObject.get(entityEngineDescriptorTypeName, 'create'),
+          security.authz.actions.savedObject.get(SO_ENTITY_DEFINITION_TYPE, 'create'),
+        ],
+        elasticsearch: {
+          cluster: ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+          index: indicesPrivileges,
+        },
+      },
+    });
+  };
+
+  /**
+   * Get the index privileges required for running the transform
+   */
+  public getEntityStoreSourceIndicesPrivileges = (indexPatterns: string[]) => {
+    const requiredIndicesPrivileges =
+      this.getEntityStoreSourceRequiredIndicesPrivileges(indexPatterns);
+
+    return checkAndFormatPrivileges({
+      request: this.options.request,
+      security: this.options.security,
+      privilegesToCheck: {
+        elasticsearch: {
+          cluster: [],
+          index: requiredIndicesPrivileges,
+        },
+      },
+    });
+  };
+
+  private getEntityStoreSourceRequiredIndicesPrivileges(securitySolutionIndices: string[]) {
+    return securitySolutionIndices.reduce<Record<string, string[]>>((acc, index) => {
+      acc[index] = ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES;
+      return acc;
+    }, {});
   }
 
   private log(

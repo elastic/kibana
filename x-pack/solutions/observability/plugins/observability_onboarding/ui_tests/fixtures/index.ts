@@ -6,18 +6,25 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { test as base, ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
-import { mergeTests } from 'playwright/test';
-import { onboardingApiFixture, OnboardingApiFixture } from './onboarding_api';
+import { test as base } from '@kbn/scout-oblt';
+import type {
+  KbnClient,
+  ObltApiServicesFixture,
+  ObltTestFixtures,
+  ObltWorkerFixtures,
+} from '@kbn/scout-oblt';
+import { getOnboardingApiHelper, OnboardingApiService } from './apis/onboarding';
 
 export type ExtendedScoutTestFixtures = ObltTestFixtures;
+
+export interface ExtendedApiServicesFixture extends ObltApiServicesFixture {
+  onboarding: OnboardingApiService;
+}
 export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
-  onboardingApi: OnboardingApiFixture;
+  apiServices: ExtendedApiServicesFixture;
 }
 
-const testFixtures = mergeTests(base, onboardingApiFixture);
-
-export const test = testFixtures.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFixtures>({
+export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
@@ -32,8 +39,18 @@ export const test = testFixtures.extend<ExtendedScoutTestFixtures, ExtendedScout
 
     await use(extendedPageObjects);
   },
+  apiServices: [
+    async (
+      { apiServices, kbnClient }: { apiServices: ObltApiServicesFixture; kbnClient: KbnClient },
+      use: (extendedApiServices: ExtendedApiServicesFixture) => Promise<void>
+    ) => {
+      const extendedApiServices = apiServices as ExtendedApiServicesFixture;
+      extendedApiServices.onboarding = getOnboardingApiHelper(kbnClient);
+
+      await use(extendedApiServices);
+    },
+    { scope: 'worker' },
+  ],
 });
 
 export const generateIntegrationName = (name: string) => `${name}_${uuidv4().slice(0, 5)}`;
-
-export * as assertionMessages from './assertion_messages';

@@ -20,8 +20,9 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { useAlertsContext } from './alerts_context';
-import { getBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
+import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type {
   SecurityAlertsTableContext,
@@ -68,6 +69,7 @@ import { useFetchUserProfilesFromAlerts } from '../../configurations/security_so
 import { useCellActionsOptions } from '../../hooks/trigger_actions_alert_table/use_cell_actions';
 import { useAlertsTableFieldsBrowserOptions } from '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options';
 import { AlertTableCellContextProvider } from '../../configurations/security_solution_detections/cell_value_context';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 const { updateIsLoading, updateTotalCount } = dataTableActions;
 
@@ -156,8 +158,17 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   ...tablePropsOverrides
 }) => {
   const { id } = tablePropsOverrides;
-  const { data, http, notifications, fieldFormats, application, licensing, uiSettings, settings } =
-    useKibana().services;
+  const {
+    data,
+    http,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    uiSettings,
+    settings,
+    cases,
+  } = useKibana().services;
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
@@ -176,7 +187,18 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  const { browserFields, sourcererDataView } = useSourcererDataView(sourcererScope);
+  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
+    useSourcererDataView(sourcererScope);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(sourcererScope);
+  const experimentalBrowserFields = useBrowserFields(sourcererScope);
+
+  const sourcererDataView = newDataViewPickerEnabled
+    ? experimentalDataViewSpec
+    : oldSourcererDataView;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+
   const license = useLicense();
   const isEnterprisePlus = license.isEnterprise();
 
@@ -210,7 +232,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       return combineQueries({
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
-        indexPattern: sourcererDataView,
+        dataViewSpec: sourcererDataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,
@@ -357,12 +379,16 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     [leadingControlColumn, sourcererScope, tableType, userProfiles]
   );
 
+  const refreshAlertsTable = useCallback(() => {
+    alertsTableRef.current?.refresh();
+  }, [alertsTableRef]);
+
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
     SourcererScopeName.detections,
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
-  const getBulkActions = useMemo(() => getBulkActionsByTableType(tableType), [tableType]);
+  const bulkActions = useBulkActionsByTableType(tableType, finalBoolQuery, refreshAlertsTable);
 
   useEffect(() => {
     if (isDataTableInitialized) return;
@@ -411,8 +437,9 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       application,
       licensing,
       settings,
+      cases,
     }),
-    [application, data, fieldFormats, http, licensing, notifications, settings]
+    [application, data, fieldFormats, http, licensing, notifications, settings, cases]
   );
 
   /**
@@ -475,7 +502,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
                   tableType !== TableId.alertsOnCasePage ? AdditionalToolbarControls : undefined
                 }
                 actionsColumnWidth={leadingControlColumn.width}
-                getBulkActions={getBulkActions}
+                additionalBulkActions={bulkActions}
                 fieldsBrowserOptions={
                   tableType === TableId.alertsOnAlertsPage ||
                   tableType === TableId.alertsOnRuleDetailsPage

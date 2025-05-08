@@ -75,7 +75,7 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
           kibanaRunApiInConsole: docLinks.consoleGuide,
         }}
         isPanelLeft={isPanelLeft}
-        overviewPanelProps={{ color: 'plain', hasShadow: false }}
+        overviewPanelProps={{ hasShadow: false }}
         application={services.application}
         sharePlugin={services.share}
         consolePlugin={services.console}
@@ -101,7 +101,7 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
         application={services.application}
         sharePlugin={services.share}
         isPanelLeft={isPanelLeft}
-        overviewPanelProps={{ color: 'plain', hasShadow: false }}
+        overviewPanelProps={{ hasShadow: false }}
       />
 
       <OverviewPanel
@@ -129,14 +129,14 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
             defaultMessage: 'Generate an API key',
           }
         )}
-        overviewPanelProps={{ color: 'plain', hasShadow: false }}
+        overviewPanelProps={{ hasShadow: false }}
       />
 
       <CloudDetailsPanel
         cloudId={codeArgs.cloudId}
         elasticsearchUrl={codeArgs.url}
         isPanelLeft={isPanelLeft}
-        overviewPanelProps={{ color: 'plain', hasShadow: false }}
+        overviewPanelProps={{ hasShadow: false }}
       />
 
       <OverviewPanel
@@ -173,7 +173,7 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
             defaultMessage: 'Configure your client',
           }
         )}
-        overviewPanelProps={{ color: 'plain', hasShadow: false }}
+        overviewPanelProps={{ hasShadow: false }}
       />
 
       <OverviewPanel
@@ -211,7 +211,7 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
             defaultMessage: 'Test your connection',
           }
         )}
-        overviewPanelProps={{ color: 'plain', hasShadow: false }}
+        overviewPanelProps={{ hasShadow: false }}
       />
       <OverviewPanel
         description={i18n.translate(
@@ -244,7 +244,7 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
         title={i18n.translate('xpack.enterpriseSearch.overview.gettingStarted.ingestData.title', {
           defaultMessage: 'Ingest Data',
         })}
-        overviewPanelProps={{ color: 'plain', hasShadow: false }}
+        overviewPanelProps={{ hasShadow: false }}
       />
 
       <OverviewPanel
@@ -279,7 +279,7 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
         title={i18n.translate('xpack.enterpriseSearch.overview.gettingStarted.searchQuery.title', {
           defaultMessage: 'Build your first search query',
         })}
-        overviewPanelProps={{ color: 'plain', hasShadow: false }}
+        overviewPanelProps={{ hasShadow: false }}
       />
       {showPipelinesPanel && (
         <OverviewPanel
@@ -326,7 +326,7 @@ export const GettingStarted: React.FC<GettingStartedProps> = ({
           }
           leftPanelContent={<GettingStartedPipelinePanel />}
           links={[]}
-          overviewPanelProps={{ color: 'plain', hasShadow: false }}
+          overviewPanelProps={{ hasShadow: false }}
           title={i18n.translate('xpack.enterpriseSearch.pipeline.title', {
             defaultMessage: 'Transform and enrich your data',
           })}

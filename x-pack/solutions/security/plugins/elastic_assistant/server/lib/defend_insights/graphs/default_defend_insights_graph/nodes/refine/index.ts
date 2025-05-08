@@ -9,6 +9,7 @@ import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { Logger } from '@kbn/core/server';
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 
+import { DefendInsightsGenerationPrompts } from '../helpers/prompts/incompatible_antivirus';
 import type { GraphState } from '../../types';
 import { getMaxHallucinationFailuresReached } from '../../helpers/get_max_hallucination_failures_reached';
 import { getMaxRetriesReached } from '../../helpers/get_max_retries_reached';
@@ -26,10 +27,12 @@ export const getRefineNode = ({
   insightType,
   llm,
   logger,
+  prompts,
 }: {
   insightType: DefendInsightType;
   llm: ActionsClientLlm;
   logger?: Logger;
+  prompts: DefendInsightsGenerationPrompts;
 }): ((state: GraphState) => Promise<GraphState>) => {
   const refine = async (state: GraphState): Promise<GraphState> => {
     logger?.debug(() => '---REFINE---');
@@ -44,6 +47,7 @@ export const getRefineNode = ({
       maxRepeatedGenerations,
       refinements,
       refinePrompt,
+      continuePrompt,
       unrefinedResults,
     } = state;
 
@@ -54,14 +58,16 @@ export const getRefineNode = ({
       const query = getCombinedRefinePrompt({
         prompt,
         combinedRefinements,
+        continuePrompt,
         refinePrompt,
         unrefinedResults,
       });
 
-      const { chain, formatInstructions, llmType } = getChainWithFormatInstructions(
+      const { chain, formatInstructions, llmType } = getChainWithFormatInstructions({
         insightType,
-        llm
-      );
+        llm,
+        prompts,
+      });
 
       logger?.debug(
         () => `refine node is invoking the chain (${llmType}), attempt ${generationAttempts}`
@@ -122,6 +128,7 @@ export const getRefineNode = ({
         llmType,
         logger,
         nodeName: 'refine',
+        prompts,
       });
 
       return {

@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import { PY_LANG_CLIENT } from './py_lang_client'; // Adjust the import path according to your project structure
 import { ES_CLIENT_DETAILS } from '../view_code_flyout';
-import { ChatForm } from '../../../types';
+import { PlaygroundForm } from '../../../types';
 
 describe('PY_LANG_CLIENT function', () => {
   test('renders with correct content', () => {
@@ -21,7 +21,7 @@ describe('PY_LANG_CLIENT function', () => {
       prompt: 'Your prompt',
       citations: true,
       summarization_model: 'Your-new-model',
-    } as unknown as ChatForm;
+    } as unknown as PlaygroundForm;
 
     const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
 
@@ -39,7 +39,7 @@ describe('PY_LANG_CLIENT function', () => {
       prompt: 'Your prompt',
       citations: true,
       summarization_model: 'Your-new-model',
-    } as unknown as ChatForm;
+    } as unknown as PlaygroundForm;
 
     const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
 

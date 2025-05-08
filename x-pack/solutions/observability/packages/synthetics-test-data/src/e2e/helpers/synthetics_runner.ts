@@ -8,18 +8,26 @@
 /* eslint-disable no-console */
 
 import Url from 'url';
-import { run as syntheticsRun } from '@elastic/synthetics';
-import { PromiseType } from 'utility-types';
+import { JourneyResult, run as syntheticsRun, Runner } from '@elastic/synthetics';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 
 import { EsArchiver } from '@kbn/es-archiver';
 import { esArchiverUnload } from '../tasks/es_archiver';
 import { TestReporter } from './test_reporter';
 
+const SYNTHETICS_RUNNER = Symbol.for('SYNTHETICS_RUNNER');
+
+// @ts-ignore
+export const runner: Runner = global[SYNTHETICS_RUNNER];
+
 export interface ArgParams {
   headless: boolean;
   match?: string;
   pauseOnError: boolean;
+}
+
+interface JourneyResults {
+  [x: string]: JourneyResult;
 }
 
 export class SyntheticsRunner {
@@ -57,6 +65,34 @@ export class SyntheticsRunner {
     this.loadTestFilesCallback = callback;
     this.testFilesLoaded = true;
     console.log('Successfully loaded test files');
+  }
+
+  async reloadTestFiles(results: JourneyResults, onlyOnFailure = false) {
+    if (!this.loadTestFilesCallback) {
+      throw new Error('Test files not loaded');
+    }
+    console.log('Reloading test files');
+    // Clear require cache
+    const fileKeys = Object.keys(require.cache);
+    Object.entries(results).forEach(([_journey, result]) => {
+      const fileName = result.location?.file;
+      if (fileName) {
+        const key = fileKeys.find((k) => k.includes(fileName));
+        if (key && (onlyOnFailure ? result.status !== 'succeeded' : true)) {
+          delete require.cache[key];
+          // make sure key is deleted
+          if (require.cache[key]) {
+            console.log(`Failed to delete ${key} from require cache`);
+          } else {
+            // reload the file
+            console.log(`Reloading ${key}...`);
+            require(key);
+          }
+        }
+      }
+    });
+
+    await this.loadTestFiles(this.loadTestFilesCallback, true);
   }
 
   async loadTestData(e2eDir: string, dataArchives: string[]) {
@@ -106,12 +142,12 @@ export class SyntheticsRunner {
       throw new Error('Test files not loaded');
     }
     const { headless, match, pauseOnError } = this.params;
-    const noOfRuns = process.env.NO_OF_RUNS ? Number(process.env.NO_OF_RUNS) : 1;
     const CI = process.env.CI === 'true';
+    const noOfRuns = process.env.NO_OF_RUNS ? Number(process.env.NO_OF_RUNS) : CI ? 2 : 1;
     console.log(`Running ${noOfRuns} times`);
-    let results: PromiseType<ReturnType<typeof syntheticsRun>> = {};
+    let results: JourneyResults = {};
     for (let i = 0; i < noOfRuns; i++) {
-      results = await syntheticsRun({
+      const currResults = await syntheticsRun({
         params: {
           kibanaUrl: this.kibanaUrl,
           getService: this.getService,
@@ -135,16 +171,25 @@ export class SyntheticsRunner {
         screenshots: 'only-on-failure',
         reporter: TestReporter,
       });
-      if (noOfRuns > 1) {
+      results = { ...results, ...currResults };
+      if (i < noOfRuns - 1) {
+        console.log(`Run ${i + 1} completed, reloading test files...`);
         // need to reload again since runner resets the journeys
-        await this.loadTestFiles(this.loadTestFilesCallback!, true);
+        const failedJourneys = Object.entries(currResults).filter(
+          ([_journey, result]) => result.status !== 'succeeded'
+        );
+        if (CI && failedJourneys.length === 0) {
+          console.log('All journeys succeeded, skipping reload');
+          break;
+        }
+        await this.reloadTestFiles(results, CI);
       }
     }
 
-    await this.assertResults(results);
+    this.assertResults(results);
   }
 
-  assertResults(results: PromiseType<ReturnType<typeof syntheticsRun>>) {
+  assertResults(results: JourneyResults) {
     console.log('Asserting results...');
     Object.entries(results).forEach(([_journey, result]) => {
       console.log(`Journey: ${_journey}, Status: ${result.status}`);

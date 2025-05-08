@@ -25,7 +25,7 @@ export const isLastTab = ({ items }: TabsState, item: TabItem): boolean => {
 export const addTab = (
   { items, selectedItem }: TabsState,
   item: TabItem,
-  maxItemsCount?: number
+  maxItemsCount: number | undefined
 ): TabsState => {
   if (maxItemsCount && items.length >= maxItemsCount) {
     return {
@@ -79,8 +79,16 @@ export const closeTab = ({ items, selectedItem }: TabsState, item: TabItem): Tab
 export const insertTabAfter = (
   { items, selectedItem }: TabsState,
   item: TabItem,
-  insertAfterItem: TabItem
+  insertAfterItem: TabItem,
+  maxItemsCount: number | undefined
 ): TabsState => {
+  if (maxItemsCount && items.length >= maxItemsCount) {
+    return {
+      items,
+      selectedItem,
+    };
+  }
+
   const insertAfterIndex = items.findIndex((i) => i.id === insertAfterItem.id);
 
   if (insertAfterIndex === -1) {

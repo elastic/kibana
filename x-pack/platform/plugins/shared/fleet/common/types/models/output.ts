@@ -62,6 +62,7 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   sync_integrations?: boolean;
   kibana_url?: string | null;
   kibana_api_key?: string | null;
+  sync_uninstalled_integrations?: boolean;
 }
 
 export interface NewLogstashOutput extends NewBaseOutput {
@@ -133,5 +134,4 @@ interface KafkaOutputSecrets extends BaseSSLSecrets {
 }
 interface RemoteESOutputSecrets extends BaseSSLSecrets {
   service_token?: SOSecret;
-  kibana_api_key?: SOSecret;
 }

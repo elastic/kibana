@@ -63,18 +63,26 @@ export const useDebounceWithOptions = (
   );
 };
 
-// Quotes can be used as separators for multiple warnings unless
-// they are escaped with backslashes. This regexp will match any
-// quoted string that is not escaped.
-const quotedWarningMessageRegexp = /"[^"\\]*(?:\\.[^"\\]*)*?"/g;
+/**
+ * Quotes can be used as separators for multiple warnings unless
+ * they are escaped with backslashes. This regexp will match any
+ * quoted string that is not escaped.
+ *
+ * The warning comes from ES and a user can't change it.
+ * This function is used to parse the warning message and format it
+ * so it can be displayed in the editor.
+ **/
+const quotedWarningMessageRegexp = /"([^"\\]|\\.)*"/g;
+const maxWarningLength = 1000;
 
 export const parseWarning = (warning: string): MonacoMessage[] => {
-  if (quotedWarningMessageRegexp.test(warning)) {
-    const matches = warning.match(quotedWarningMessageRegexp);
+  // we limit the length to reduce ReDoS risks
+  const truncatedWarning = warning.substring(0, maxWarningLength);
+  if (quotedWarningMessageRegexp.test(truncatedWarning)) {
+    const matches = truncatedWarning.match(quotedWarningMessageRegexp);
     if (matches) {
       return matches.map((message) => {
-        // start extracting the quoted message and with few default positioning
-        // replaces the quotes only if they are not escaped
+        // replaces the quotes only if they are not escaped,
         let warningMessage = message.replace(/(?<!\\)"|\\/g, '');
         let startColumn = 1;
         let startLineNumber = 1;
@@ -188,7 +196,13 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   });
 };
 
-export const getRemoteIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
+export const getRemoteIndicesList = async (
+  dataViews: DataViewsPublicPluginStart,
+  areRemoteIndicesAvailable: boolean
+) => {
+  if (!areRemoteIndicesAvailable) {
+    return [];
+  }
   const indices = await dataViews.getIndices({
     showAllIndices: false,
     pattern: '*:*',
@@ -247,9 +261,13 @@ const getIntegrations = async (core: CoreStart) => {
   );
 };
 
-export const getESQLSources = async (dataViews: DataViewsPublicPluginStart, core: CoreStart) => {
+export const getESQLSources = async (
+  dataViews: DataViewsPublicPluginStart,
+  core: CoreStart,
+  areRemoteIndicesAvailable: boolean
+) => {
   const [remoteIndices, localIndices, integrations] = await Promise.all([
-    getRemoteIndicesList(dataViews),
+    getRemoteIndicesList(dataViews, areRemoteIndicesAvailable),
     getIndicesList(dataViews),
     getIntegrations(core),
   ]);
@@ -347,6 +365,10 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     }
     .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
       border-radius: ${theme.euiTheme.border.radius.medium};
+    }
+    // fixes the bug with the broken suggestion details https://github.com/elastic/kibana/issues/217998
+    .suggest-details > .monaco-scrollable-element > .body > .header > .type {
+      white-space: normal !important;
     }
   `;
 };

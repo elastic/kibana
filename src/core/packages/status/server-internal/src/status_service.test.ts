@@ -101,12 +101,21 @@ describe('StatusService', () => {
         {
           path: '/api/status',
           options: {
-            authRequired: false,
             tags: ['api'],
             access: 'public',
             excludeFromRateLimiter: true,
           },
           validate: false,
+          security: {
+            authz: {
+              enabled: false,
+              reason: expect.any(String),
+            },
+            authc: {
+              enabled: false,
+              reason: expect.any(String),
+            },
+          },
         },
         expect.any(Function)
       );

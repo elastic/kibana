@@ -27,11 +27,15 @@ export const isArtifactGlobal = (item: Partial<Pick<ExceptionListItemSchema, 'ta
   return (item.tags ?? []).includes(GLOBAL_ARTIFACT_TAG);
 };
 
-export const isArtifactByPolicy = (item: Pick<ExceptionListItemSchema, 'tags'>): boolean => {
+export const isArtifactByPolicy = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): boolean => {
   return !isArtifactGlobal(item);
 };
 
-export const getPolicyIdsFromArtifact = (item: Pick<ExceptionListItemSchema, 'tags'>): string[] => {
+export const getPolicyIdsFromArtifact = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): string[] => {
   const policyIds = [];
   const tags = item.tags ?? [];
 

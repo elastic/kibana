@@ -2,6 +2,9 @@
 navigation_title: "Spaces settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/spaces-settings-kb.html
+applies_to:
+  deployment:
+    self: all
 ---
 
 # Spaces settings in {{kib}} [spaces-settings-kb]

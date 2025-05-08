@@ -10,6 +10,11 @@
 import fastGlob from 'fast-glob';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
+import fs from 'fs';
+import yaml from 'js-yaml';
+import { createFailError } from '@kbn/dev-cli-errors';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 
 export const DEFAULT_TEST_PATH_PATTERNS = ['src/platform/plugins', 'x-pack/**/plugins'];
 
@@ -32,9 +37,10 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
   const files = patterns.flatMap((pattern) => fastGlob.sync(pattern, { onlyFiles: true }));
 
   const typeMappings: Record<string, string> = {
-    'x-pack/solutions/security': 'security',
-    'x-pack/solutions/search': 'search',
-    'x-pack/solutions/observability': 'observability',
+    ...KIBANA_SOLUTIONS.reduce<Record<string, string>>((agg, solution) => {
+      agg[`x-pack/solutions/${solution}`] = solution;
+      return agg;
+    }, {}),
     'x-pack/platform/plugins': 'platform',
     'src/platform/plugins': 'platform',
   };
@@ -42,7 +48,7 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
   const matchPluginPath = (filePath: string): { pluginPath: string; pluginName: string } | null => {
     const regexes = [
       /(x-pack\/platform\/plugins\/(?:private|shared|[^\/]+)\/([^\/]+))\/ui_tests\//,
-      /(x-pack\/solutions\/[^\/]+\/plugins\/([^\/]+))\/ui_tests\//,
+      /(x-pack\/solutions\/[^\/]+\/plugins\/([^\/]+))\/ui_tests\//, // covers all Kibana solutions
       /(src\/platform\/plugins\/(?:private|shared)?\/?([^\/]+))\/ui_tests\//,
     ];
 
@@ -87,4 +93,57 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
   });
 
   return pluginsWithConfigs;
+};
+
+export const validateWithScoutCiConfig = (
+  log: ToolingLog,
+  pluginsWithConfigs: Map<string, PluginScoutConfig>
+) => {
+  const scoutCiConfigRelPath = path.join('.buildkite', 'scout_ci_config.yml');
+  const scoutCiConfigPath = path.resolve(REPO_ROOT, scoutCiConfigRelPath);
+  const ciConfig = yaml.load(fs.readFileSync(scoutCiConfigPath, 'utf8')) as {
+    ui_tests: {
+      enabled?: string[];
+      disabled?: string[];
+    };
+  };
+
+  const enabledPlugins = new Set(ciConfig.ui_tests.enabled || []);
+  const disabledPlugins = new Set(ciConfig.ui_tests.disabled || []);
+  const allRegisteredPlugins = new Set([...enabledPlugins, ...disabledPlugins]);
+
+  const unregisteredPlugins: string[] = [];
+  const runnablePlugins = new Map<string, PluginScoutConfig>();
+
+  for (const [pluginName, config] of pluginsWithConfigs.entries()) {
+    if (!allRegisteredPlugins.has(pluginName)) {
+      unregisteredPlugins.push(pluginName);
+    } else if (enabledPlugins.has(pluginName)) {
+      runnablePlugins.set(pluginName, config);
+    }
+  }
+
+  if (unregisteredPlugins.length > 0) {
+    throw createFailError(
+      `The following plugins are not registered in Scout CI config '${scoutCiConfigRelPath}':\n${unregisteredPlugins
+        .map((plugin) => {
+          return `- ${plugin}`;
+        })
+        .join('\n')}\nRead more: src/platform/packages/shared/kbn-scout/README.md`
+    );
+  }
+
+  if (disabledPlugins.size > 0) {
+    log.warning(
+      `The following plugins are disabled in '${scoutCiConfigRelPath}' and will be excluded from CI run\n${[
+        ...disabledPlugins,
+      ]
+        .map((plugin) => {
+          return `- ${plugin}`;
+        })
+        .join('\n')}`
+    );
+  }
+
+  return runnablePlugins;
 };

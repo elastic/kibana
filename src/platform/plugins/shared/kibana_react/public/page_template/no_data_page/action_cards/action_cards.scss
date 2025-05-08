@@ -1,7 +1,0 @@
-.kbnNoDataPageContents__item:only-child {
-  min-width: ($euiSize * 22.5);
-
-  @include euiBreakpoint('xs', 's') {
-    min-width: auto;
-  }
-}

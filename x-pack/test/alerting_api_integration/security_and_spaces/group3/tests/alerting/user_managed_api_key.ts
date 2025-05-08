@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { generateAPIKeyName } from '@kbn/alerting-plugin/server/rules_client/common';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import {
   checkAAD,
@@ -16,7 +16,7 @@ import {
   getUrlPrefix,
   ObjectRemover,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { SuperuserAtSpace1 } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export

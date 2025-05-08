@@ -19,6 +19,7 @@ import {
   enableDefaultAlertingSilentlyEffect,
   getDefaultAlertingEffect,
   inspectStatusRuleEffect,
+  inspectTLSRuleEffect,
   updateDefaultAlertingEffect,
 } from './alert_rules/effects';
 import { executeEsQueryEffect } from './elasticsearch';
@@ -28,7 +29,6 @@ import {
   fetchLocationMonitorsEffect,
   setDynamicSettingsEffect,
 } from './settings/effects';
-import { syncGlobalParamsEffect } from './settings';
 import { privateLocationsEffects } from './private_locations/effects';
 import { fetchNetworkEventsEffect } from './network_events/effects';
 import { fetchSyntheticsMonitorEffect } from './monitor_details';
@@ -63,7 +63,6 @@ export const rootEffect = function* root(): Generator {
     fork(fetchLocationMonitorsEffect),
     fork(setDynamicSettingsEffect),
     fork(fetchAlertConnectorsEffect),
-    fork(syncGlobalParamsEffect),
     fork(enableDefaultAlertingEffect),
     fork(enableMonitorAlertEffect),
     fork(updateDefaultAlertingEffect),
@@ -82,6 +81,7 @@ export const rootEffect = function* root(): Generator {
     fork(fetchOverviewTrendStats),
     fork(refreshOverviewTrendStats),
     fork(inspectStatusRuleEffect),
+    fork(inspectTLSRuleEffect),
     ...privateLocationsEffects.map((effect) => fork(effect)),
   ]);
 };

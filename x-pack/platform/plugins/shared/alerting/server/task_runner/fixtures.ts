@@ -298,6 +298,16 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
     } as SanitizedRuleAction;
   }),
   isSnoozedUntil: undefined,
+  artifacts: {
+    dashboards: [
+      {
+        id: 'dashboard-1',
+      },
+    ],
+    investigation_guide: {
+      blob: '## Summary',
+    },
+  },
 };
 
 export const mockTaskInstance = () => ({
@@ -369,6 +379,7 @@ export const generateRunnerResult = ({
   alertRecoveredInstances = {},
   summaryActions = {},
   taskRunError,
+  trackedExecutions = ['5f6aa57d-3e22-484e-bae8-cbed868f4d28'],
 }: GeneratorParams = {}) => {
   return {
     monitoring: {
@@ -402,6 +413,7 @@ export const generateRunnerResult = ({
       ...(state && { alertTypeState: {} }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z').toISOString() }),
       ...(state && { summaryActions }),
+      ...(state && { trackedExecutions }),
     },
     taskRunError,
   };

@@ -69,3 +69,24 @@ Hook managing an abort controller instance that aborts when it goes out of scope
   // Will be aborted when the component unmounts
   await fetch(url, { signal })
 ```
+
+### [useTruncateText](.src/use_truncate_text/use_truncate_text.ts)
+
+Hook for managing text truncation with expand/collapse functionality. Provides controlled truncation of long text content with customizable length. 
+
+```tsx
+const { displayText, isExpanded, toggleExpanded, shouldTruncate } = useTruncateText(
+  longContent,
+  150,          // Max length before truncation (default: 500)
+  100           // Optional: Max characters to show when truncated
+);
+
+<EuiText>
+  {displayText}
+  {shouldTruncate && (
+    <EuiLink onClick={toggleExpanded}>
+      {isExpanded ? 'Show less' : 'Show more'}
+    </EuiLink>
+  )}
+</EuiText>
+```

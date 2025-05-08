@@ -9,7 +9,7 @@
 
 import { parse } from '@kbn/esql-ast';
 import { getBracketsToClose, getExpressionType, shouldBeQuotedSource } from './helpers';
-import { SupportedDataType, FunctionDefinitionTypes } from '../definitions/types';
+import { SupportedDataType, FunctionDefinitionTypes, Location } from '../definitions/types';
 import { setTestFunctions } from './test_functions';
 
 describe('shouldBeQuotedSource', () => {
@@ -135,8 +135,8 @@ describe('getExpressionType', () => {
     );
   });
 
-  describe('fields and variables', () => {
-    it('detects the type of fields and variables which exist', () => {
+  describe('fields and userDefinedColumns', () => {
+    it('detects the type of fields and userDefinedColumns which exist', () => {
       expect(
         getExpressionType(
           getASTForExpression('fieldName'),
@@ -155,14 +155,14 @@ describe('getExpressionType', () => {
 
       expect(
         getExpressionType(
-          getASTForExpression('var0'),
+          getASTForExpression('col0'),
           new Map(),
           new Map([
             [
-              'var0',
+              'col0',
               [
                 {
-                  name: 'var0',
+                  name: 'col0',
                   type: 'long',
                   location: { min: 0, max: 0 },
                 },
@@ -173,7 +173,7 @@ describe('getExpressionType', () => {
       ).toBe('long');
     });
 
-    it('handles fields and variables which do not exist', () => {
+    it('handles fields and userDefinedColumns which do not exist', () => {
       expect(getExpressionType(getASTForExpression('fieldName'), new Map(), new Map())).toBe(
         'unknown'
       );
@@ -187,7 +187,7 @@ describe('getExpressionType', () => {
           type: FunctionDefinitionTypes.SCALAR,
           name: 'test',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             { params: [{ name: 'arg', type: 'keyword' }], returnType: 'keyword' },
             { params: [{ name: 'arg', type: 'double' }], returnType: 'double' },
@@ -204,14 +204,14 @@ describe('getExpressionType', () => {
           type: FunctionDefinitionTypes.SCALAR,
           name: 'returns_keyword',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [{ params: [], returnType: 'keyword' }],
         },
         {
           type: FunctionDefinitionTypes.SCALAR,
           name: 'accepts_dates',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -300,7 +300,7 @@ describe('getExpressionType', () => {
           type: FunctionDefinitionTypes.SCALAR,
           name: 'test',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [{ params: [{ name: 'arg', type: 'any' }], returnType: 'keyword' }],
         },
       ]);

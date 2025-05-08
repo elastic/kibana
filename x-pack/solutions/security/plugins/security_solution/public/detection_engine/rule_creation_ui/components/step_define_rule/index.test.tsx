@@ -17,10 +17,10 @@ import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { TestProviders } from '../../../../common/mock';
 import { schema as defineRuleSchema } from './schema';
-import { stepDefineDefaultValue } from '../../../../detections/pages/detection_engine/rules/utils';
+import { stepDefineDefaultValue } from '../../../common/utils';
 import type { FormSubmitHandler } from '../../../../shared_imports';
 import { useForm } from '../../../../shared_imports';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../common/types';
 import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__';
 import {
   addRequiredFieldRow,

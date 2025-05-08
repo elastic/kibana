@@ -9,8 +9,8 @@
 
 import { ESQLCommand } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
+import { ENRICH_MODES } from '../../../definitions/commands_helpers';
 import { isSingleItem } from '../../../..';
-import { ENRICH_MODES } from '../../../definitions/settings';
 import { SuggestionRawDefinition } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../../factories';
 
@@ -92,13 +92,25 @@ export const noPoliciesAvailableSuggestion: SuggestionRawDefinition = {
   },
 };
 
-export const modeSuggestions: SuggestionRawDefinition[] = ENRICH_MODES.values.map(
+export const modeDescription = i18n.translate(
+  'kbn-esql-validation-autocomplete.esql.definitions.ccqMode',
+  {
+    defaultMessage: 'Cross-cluster query mode',
+  }
+);
+
+export const modeSuggestions: SuggestionRawDefinition[] = ENRICH_MODES?.map(
   ({ name, description }) => ({
-    label: `${ENRICH_MODES.prefix || ''}${name}`,
-    text: `${ENRICH_MODES.prefix || ''}${name}:$0`,
+    label: `_${name}`,
+    text: `_${name}:$0`,
     asSnippet: true,
     kind: 'Reference',
-    detail: `${ENRICH_MODES.description} - ${description}`,
+    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ccqModeDoc', {
+      defaultMessage: 'Cross-cluster query mode - ${description}',
+      values: {
+        description,
+      },
+    }),
     sortText: 'D',
     command: TRIGGER_SUGGESTION_COMMAND,
   })

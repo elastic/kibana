@@ -20,10 +20,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DataStreamReindexStatus } from '../../../../../../../../../common/types';
+import {
+  DataStreamMigrationStatus,
+  DataStreamResolutionType,
+  DataStreamsAction,
+} from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
-import type { ReindexState } from '../../../use_reindex_state';
-import { ReindexProgress } from './progress';
+import type { MigrationState } from '../../../use_migration_state';
+import { MigrationProgress } from './progress';
 import { useAppContext } from '../../../../../../../app_context';
 import { getPrimaryButtonLabel } from '../../messages';
 
@@ -32,41 +36,56 @@ import { getPrimaryButtonLabel } from '../../messages';
  */
 export const ChecklistFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
-  reindexState: ReindexState;
-  startReindex: () => void;
-  cancelReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
+  migrationState: MigrationState;
+  resolutionType: DataStreamResolutionType;
+  executeAction: () => void;
+  cancelAction: () => void;
+  startReadonly: () => void;
+  correctiveAction: DataStreamsAction;
+}> = ({
+  closeFlyout,
+  migrationState,
+  resolutionType,
+  executeAction,
+  cancelAction,
+  startReadonly,
+  correctiveAction,
+}) => {
   const {
     services: { api },
   } = useAppContext();
 
-  const { loadingState, status, hasRequiredPrivileges } = reindexState;
+  const { loadingState, status, hasRequiredPrivileges } = migrationState;
   const loading =
-    loadingState === LoadingState.Loading || status === DataStreamReindexStatus.inProgress;
-  const isCompleted = status === DataStreamReindexStatus.completed;
-  const hasFetchFailed = status === DataStreamReindexStatus.fetchFailed;
-  const hasReindexingFailed = status === DataStreamReindexStatus.failed;
+    loadingState === LoadingState.Loading || status === DataStreamMigrationStatus.inProgress;
+  const isCompleted = status === DataStreamMigrationStatus.completed;
+  const hasFetchFailed = status === DataStreamMigrationStatus.fetchFailed;
+  const hasMigrationFailed = status === DataStreamMigrationStatus.failed;
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
   const showMainButton = !hasFetchFailed && !isCompleted && hasRequiredPrivileges;
-  const shouldShowCancelButton = showMainButton && status === DataStreamReindexStatus.inProgress;
+  const shouldShowCancelButton = showMainButton && status === DataStreamMigrationStatus.inProgress;
+  const readOnlyExcluded = correctiveAction.metadata.excludedActions?.includes('readOnly');
+  const shouldShowReadOnlyButton =
+    !readOnlyExcluded && !loading && status === DataStreamMigrationStatus.failed;
 
   return (
     <Fragment>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="dataStreamMigrationChecklistFlyout">
         {hasRequiredPrivileges === false && (
           <Fragment>
             <EuiSpacer />
             <EuiCallOut
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
-                  defaultMessage="You do not have sufficient privileges to reindex this index"
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
+                  defaultMessage="You do not have sufficient privileges to migrate this data stream"
                 />
               }
               color="danger"
               iconType="warning"
+              data-test-subj="dsInsufficientPrivilegesCallout"
             />
           </Fragment>
         )}
@@ -79,15 +98,15 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               data-test-subj="lowDiskSpaceCallout"
               title={
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.lowDiskSpaceCalloutTitle"
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceCalloutTitle"
                   defaultMessage="Nodes with low disk space"
                 />
               }
             >
               <>
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.lowDiskSpaceCalloutDescription"
-                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent reindexing. The following nodes are impacted:"
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceCalloutDescription"
+                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent migration. The following nodes are impacted:"
                 />
 
                 <EuiSpacer size="s" />
@@ -96,7 +115,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                   {nodes.map(({ nodeName, available, nodeId }) => (
                     <li key={nodeId} data-test-subj="impactedNodeListItem">
                       <FormattedMessage
-                        id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.lowDiskSpaceUsedText"
+                        id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceUsedText"
                         defaultMessage="{nodeName} ({available} available)"
                         values={{
                           nodeName,
@@ -112,27 +131,30 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           </>
         )}
 
-        {(hasFetchFailed || hasReindexingFailed) && (
+        {(hasFetchFailed || hasMigrationFailed) && (
           <>
             <EuiCallOut
               color="danger"
               iconType="warning"
-              data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'reindexingFailedCallout'}
+              data-test-subj={
+                hasFetchFailed ? 'fetchFailedCallout' : 'dataStreamMigrationFailedCallout'
+              }
               title={
                 hasFetchFailed ? (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.fetchFailedCalloutTitle"
-                    defaultMessage="Reindex status not available"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.fetchFailedCalloutTitle"
+                    defaultMessage="Migration status not available"
                   />
                 ) : (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.reindexingFailedCalloutTitle"
-                    defaultMessage="Reindexing error"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.migrationFailedCalloutTitle"
+                    defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {Migration}} error"
+                    values={{ resolutionType }}
                   />
                 )
               }
             >
-              {reindexState.errorMessage}
+              {migrationState.errorMessage}
             </EuiCallOut>
             <EuiSpacer />
           </>
@@ -142,19 +164,24 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           <p>
             <FormattedMessage
               defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress."
-              id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
+              id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
             />
           </p>
         </EuiText>
         <EuiSpacer />
-        <ReindexProgress reindexState={reindexState} />
+        <MigrationProgress migrationState={migrationState} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="closeDataStreamReindexingButton"
+            >
               <FormattedMessage
-                id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.closeButtonLabel"
+                id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.closeButtonLabel"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -167,13 +194,28 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                   <EuiButton
                     color={'accent'}
                     iconType={'pause'}
-                    onClick={cancelReindex}
+                    onClick={cancelAction}
                     disabled={!hasRequiredPrivileges}
-                    data-test-subj="cancelDataStreamReindexingButton"
+                    data-test-subj="cancelDataStreamMigrationButton"
                   >
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.dataStream.reindexing.flyout.checklistStep.cancelReindexButtonLabel"
-                      defaultMessage="Cancel reindexing"
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.cancelMigrationButtonLabel"
+                      defaultMessage="Cancel {resolutionType, select, reindex {reindexing} readonly {marking as read-only} other {migration}}"
+                      values={{ resolutionType }}
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+              {shouldShowReadOnlyButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color={'primary'}
+                    onClick={startReadonly}
+                    data-test-subj="startDataStreamReadonlyButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.initMarkAsReadOnlyButtonLabel"
+                      defaultMessage="Mark as read-only"
                     />
                   </EuiButton>
                 </EuiFlexItem>
@@ -183,12 +225,14 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
-                    color={status === DataStreamReindexStatus.inProgress ? 'primary' : 'warning'}
-                    iconType={status === DataStreamReindexStatus.inProgress ? undefined : 'refresh'}
-                    onClick={startReindex}
+                    color={'primary'}
+                    iconType={
+                      status === DataStreamMigrationStatus.inProgress ? undefined : 'refresh'
+                    }
+                    onClick={executeAction}
                     isLoading={loading}
                     disabled={loading || !hasRequiredPrivileges}
-                    data-test-subj="startDataStreamReindexingButton"
+                    data-test-subj="startDataStreamMigrationButton"
                   >
                     {getPrimaryButtonLabel(status)}
                   </EuiButton>

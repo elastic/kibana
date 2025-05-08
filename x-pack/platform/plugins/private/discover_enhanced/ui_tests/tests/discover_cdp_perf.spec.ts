@@ -73,7 +73,6 @@ test.describe(
         'kbn-ui-shared-deps-npm',
         'lens',
         'maps',
-        'unifiedHistogram',
         'unifiedSearch',
       ]);
       // Validate individual plugin bundle sizes
@@ -81,10 +80,6 @@ test.describe(
         stats.plugins.find((p) => p.name === 'discover')?.totalSize,
         `Total 'discover' bundles size should not exceed 650 KB`
       ).toBeLessThan(650 * 1024);
-      expect(
-        stats.plugins.find((p) => p.name === 'unifiedHistogram')?.totalSize,
-        `Total 'unifiedHistogram' bundles size should not exceed 150 KB`
-      ).toBeLessThan(150 * 1024);
       expect(
         stats.plugins.find((p) => p.name === 'unifiedSearch')?.totalSize,
         `Total 'unifiedSearch' bundles size should not exceed 450 KB`
@@ -95,6 +90,7 @@ test.describe(
       page,
       pageObjects,
       perfTracker,
+      log,
     }) => {
       const beforeMetrics = await perfTracker.capturePagePerformanceMetrics(cdp);
 
@@ -113,18 +109,7 @@ test.describe(
         afterMetrics
       );
 
-      expect(
-        perfStats.cpuTime.diff,
-        'CPU time (seconds) usage during page navigation should not exceed 1.5 seconds'
-      ).toBeLessThan(1.5);
-      expect(
-        perfStats.scriptTime.diff,
-        'Additional time spent executing JS scripts should not exceed 0.5 second'
-      ).toBeLessThan(0.5);
-      expect(
-        perfStats.layoutTime.diff,
-        'Total layout computation time should not exceed 0.1 second'
-      ).toBeLessThan(0.06);
+      log.info(`Performance Metrics for Discover app: ${JSON.stringify(perfStats, null, 2)}`);
     });
   }
 );

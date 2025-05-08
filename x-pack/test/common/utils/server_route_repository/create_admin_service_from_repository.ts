@@ -15,7 +15,11 @@ import {
 import { Subtract, RequiredKeys } from 'utility-types';
 import { format } from 'url';
 import supertest from 'supertest';
-import { RoleScopedSupertestProvider } from '../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
+import {
+  RoleScopedSupertestProvider,
+  SupertestWithRoleScope,
+} from '../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
+import { CustomRoleScopedSupertestProvider } from '../../../api_integration/deployment_agnostic/services/custom_role_scoped_supertest';
 
 type MaybeOptional<TArgs extends Record<string, any>> = RequiredKeys<TArgs> extends never
   ? [TArgs] | []
@@ -29,6 +33,13 @@ export interface RepositorySupertestClient<TServerRouteRepository extends Server
         type?: 'form-data';
       } & ClientRequestParamsOf<TServerRouteRepository, TEndpoint>
     >
+  ) => RepositorySupertestReturnOf<TServerRouteRepository, TEndpoint>;
+
+  sendFile: <TEndpoint extends EndpointOf<TServerRouteRepository>>(
+    endpoint: TEndpoint,
+    options: ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & {
+      file: { key: string; filename: string };
+    }
   ) => RepositorySupertestReturnOf<TServerRouteRepository, TEndpoint>;
 }
 
@@ -44,13 +55,9 @@ type RepositorySupertestReturnOf<
   }>
 >;
 
-export async function getAdminApiClient<TServerRouteRepository extends ServerRouteRepository>(
-  st: ReturnType<typeof RoleScopedSupertestProvider>
+async function getApiClient<TServerRouteRepository extends ServerRouteRepository>(
+  supertestWithRoleScoped: SupertestWithRoleScope
 ): Promise<RepositorySupertestClient<TServerRouteRepository>> {
-  const supertestAdmin = await st.getSupertestWithRoleScope('admin', {
-    useCookieHeader: true,
-    withInternalHeaders: true,
-  });
   return {
     fetch: (endpoint, ...rest) => {
       const options = rest.length ? rest[0] : { type: undefined };
@@ -74,7 +81,7 @@ export async function getAdminApiClient<TServerRouteRepository extends ServerRou
       let res: unknown;
       if (type === 'form-data') {
         const fields: Array<[string, any]> = Object.entries(params.body);
-        const formDataRequest = supertestAdmin[method](url)
+        const formDataRequest = supertestWithRoleScoped[method](url)
           .set(headers)
           .set('Content-type', 'multipart/form-data');
 
@@ -84,9 +91,9 @@ export async function getAdminApiClient<TServerRouteRepository extends ServerRou
 
         res = formDataRequest;
       } else if (params.body) {
-        res = supertestAdmin[method](url).send(params.body).set(headers);
+        res = supertestWithRoleScoped[method](url).send(params.body).set(headers);
       } else {
-        res = supertestAdmin[method](url).set(headers);
+        res = supertestWithRoleScoped[method](url).set(headers);
       }
 
       return res as RepositorySupertestReturnOf<
@@ -94,7 +101,59 @@ export async function getAdminApiClient<TServerRouteRepository extends ServerRou
         EndpointOf<TServerRouteRepository>
       >;
     },
+
+    sendFile: (endpoint, options) => {
+      const params = 'params' in options ? (options.params as Record<string, any>) : {};
+      const { method, pathname, version } = formatRequest(endpoint, params.path);
+      const url = format({ pathname, query: params.query });
+
+      const headers: Record<string, string> = {
+        'kbn-xsrf': 'foo',
+        'x-elastic-internal-origin': 'kibana',
+      };
+
+      if (version) {
+        headers['Elastic-Api-Version'] = version;
+      }
+
+      const fields: Array<[string, any]> = Object.entries(params.body);
+      const formDataRequest = supertestWithRoleScoped[method](url)
+        .set(headers)
+        .set('Content-type', 'multipart/form-data')
+        .attach(options.file.key, params.body[options.file.key], {
+          filename: options.file.filename,
+        });
+
+      for (const field of fields.filter(([key]) => key !== options.file.key)) {
+        void formDataRequest.field(field[0], field[1]);
+      }
+
+      return formDataRequest as RepositorySupertestReturnOf<
+        TServerRouteRepository,
+        EndpointOf<TServerRouteRepository>
+      >;
+    },
   };
+}
+
+export async function getCustomRoleApiClient<TServerRouteRepository extends ServerRouteRepository>(
+  st: ReturnType<typeof CustomRoleScopedSupertestProvider>
+): Promise<RepositorySupertestClient<TServerRouteRepository>> {
+  const supertestWithCustomRoleScoped = await st.getSupertestWithCustomRoleScope({
+    useCookieHeader: true,
+    withInternalHeaders: true,
+  });
+  return await getApiClient(supertestWithCustomRoleScoped);
+}
+
+export async function getAdminApiClient<TServerRouteRepository extends ServerRouteRepository>(
+  st: ReturnType<typeof RoleScopedSupertestProvider>
+): Promise<RepositorySupertestClient<TServerRouteRepository>> {
+  const supertestWithRoleScoped = await st.getSupertestWithRoleScope('admin', {
+    useCookieHeader: true,
+    withInternalHeaders: true,
+  });
+  return await getApiClient(supertestWithRoleScoped);
 }
 
 type WithoutPromise<T extends Promise<any>> = Subtract<T, Promise<any>>;

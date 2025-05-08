@@ -15,10 +15,18 @@ import {
   createDispatchHook,
   createSelectorHook,
 } from 'react-redux';
-import React, { type PropsWithChildren, useMemo, createContext } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { useMemo, createContext } from 'react';
 import { useAdHocDataViews } from './runtime_state';
-import type { DiscoverInternalState } from './types';
-import type { InternalStateDispatch, InternalStateStore } from './internal_state';
+import type { DiscoverInternalState, TabState } from './types';
+import {
+  type TabActionPayload,
+  type InternalStateDispatch,
+  type InternalStateStore,
+} from './internal_state';
+import { selectTab } from './selectors';
+import { type TabActionInjector, createTabActionInjector } from './utils';
+import type { ChartPortalNode } from '../../components/chart';
 
 const internalStateContext = createContext<ReactReduxContextValue>(
   // Recommended approach for versions of Redux prior to v9:
@@ -40,6 +48,55 @@ export const useInternalStateDispatch: () => InternalStateDispatch =
 
 export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
   createSelectorHook(internalStateContext);
+
+interface CurrentTabContextValue {
+  currentTabId: string;
+  currentChartPortalNode?: ChartPortalNode;
+  injectCurrentTab: TabActionInjector;
+}
+
+const currentTabContext = createContext<CurrentTabContextValue | undefined>(undefined);
+
+export const CurrentTabProvider = ({
+  currentTabId,
+  currentChartPortalNode,
+  children,
+}: PropsWithChildren<{ currentTabId: string; currentChartPortalNode?: ChartPortalNode }>) => {
+  const contextValue = useMemo<CurrentTabContextValue>(
+    () => ({
+      currentTabId,
+      currentChartPortalNode,
+      injectCurrentTab: createTabActionInjector(currentTabId),
+    }),
+    [currentChartPortalNode, currentTabId]
+  );
+
+  return <currentTabContext.Provider value={contextValue}>{children}</currentTabContext.Provider>;
+};
+
+export const useCurrentTabContext = () => {
+  const context = React.useContext(currentTabContext);
+
+  if (!context) {
+    throw new Error('useCurrentTabContext must be used within a CurrentTabProvider');
+  }
+
+  return context;
+};
+
+export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector) => {
+  const { currentTabId } = useCurrentTabContext();
+  return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)));
+};
+
+export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
+  actionCreator: (params: TPayload) => TReturn
+) => {
+  const { injectCurrentTab } = useCurrentTabContext();
+  return useMemo(() => injectCurrentTab(actionCreator), [actionCreator, injectCurrentTab]);
+};
+
+export const useCurrentChartPortalNode = () => useCurrentTabContext().currentChartPortalNode;
 
 export const useDataViewsForPicker = () => {
   const originalAdHocDataViews = useAdHocDataViews();

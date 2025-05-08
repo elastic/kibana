@@ -2161,6 +2161,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManager.getSupportedRoles",
+            "type": "Function",
+            "tags": [],
+            "label": "getSupportedRoles",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5811,6 +5827,20 @@
             "signature": [
               "SupportedRoles",
               " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManagerOptions.cloudHostName",
+            "type": "string",
+            "tags": [],
+            "label": "cloudHostName",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
             "deprecated": false,

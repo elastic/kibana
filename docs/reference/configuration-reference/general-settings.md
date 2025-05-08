@@ -1,19 +1,16 @@
 ---
-mapped_pages:
-  - https://www.elastic.co/guide/en/kibana/current/settings.html
+navigation_title: General settings
+applies_to:
+  deployment:
+    ess: all
+    self: all
 ---
 
-# Configure {{kib}} [settings]
+# General settings in {{kib}}
 
-The {{kib}} server reads properties from the `kibana.yml` file on startup. The location of this file differs depending on how you installed {{kib}}. For example, if you installed {{kib}} from an archive distribution (`.tar.gz` or `.zip`), by default it is in `$KIBANA_HOME/config`. By default, with package distributions (Debian or RPM), it is in `/etc/kibana`.  The config directory can be changed via the `KBN_PATH_CONF` environment variable:
-
-```text
-KBN_PATH_CONF=/home/kibana/config ./bin/kibana
-```
-
-The default host and port settings configure {{kib}} to run on `localhost:5601`. To change this behavior and allow remote users to connect, you’ll need to update your `kibana.yml` file. You can also enable SSL and set a variety of other options.
-
-Environment variables can be injected into configuration using `${MY_ENV_VAR}` syntax. By default, configuration validation will fail if an environment variable used in the config file is not present when Kibana starts. This behavior can be changed by using a default value for the environment variable, using the `${MY_ENV_VAR:defaultValue}` syntax.
+:::{note}
+If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+:::
 
 `console.ui.enabled`
 :   Toggling this causes the server to regenerate assets on the next startup, which may cause a delay before pages start being served. Set to `false` to disable Console. **Default: `true`**
@@ -22,10 +19,10 @@ Environment variables can be injected into configuration using `${MY_ENV_VAR}` s
 :   Add sources for the [Content Security Policy `script-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src).
 
 `csp.disableUnsafeEval`
-:   [8.7.0] Set this to `false` to add the [`unsafe-eval`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions) source expression to the `script-src` directive. **Default: `true`**
+:   Deprecated in 8.7.0. Use `csp.script_src: ['unsafe-eval']` instead if you wish to enable `unsafe-eval`. This config option will have no effect in a future version.
+    Set this to `false` to add the [`unsafe-eval`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions) source expression to the `script-src` directive. **Default: `true`**
 
     When `csp.disableUnsafeEval` is set to `true`, Kibana will use a custom version of the Handlebars template library. Handlebars is used in various locations in the Kibana frontend where custom templates can be supplied by the user when for instance setting up a visualisation. If you experience any issues rendering Handlebars templates, please set this setting to `false` and [open an issue](https://github.com/elastic/kibana/issues/new/choose) in the Kibana GitHub repository.
-
 
 `csp.worker_src`
 :   Add sources for the [Content Security Policy `worker-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/worker-src).
@@ -73,11 +70,17 @@ $$$csp-strict$$$ `csp.strict`
 `csp.warnLegacyBrowsers`
 :   Shows a warning message after loading {{kib}} to any browser that does not enforce even rudimentary CSP rules, though {{kib}} is still accessible. This configuration is effectively ignored when [`csp.strict`](#csp-strict) is enabled. **Default: `true`**
 
-`permissionsPolicy.report_to:`
-:   Add sources for the [Permissions Policy `report-to` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy).
+`data.autocomplete.valueSuggestions.terminateAfter` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Specifies the max number of documents loaded by each shard to generate autocomplete suggestions. The default is 100000. Allowed values are between 1 and 10000000.
+% TBD: Applicable only to Elastic Cloud?
 
-$$$elasticsearch-maxSockets$$$ `elasticsearch.maxSockets`
+`data.autocomplete.valueSuggestions.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Specifies the time in milliseconds to wait for autocomplete suggestions from Elasticsearch. The default is 1000. Allowed values are between 1 and 1200000.
+% TBD: Applicable only to Elastic Cloud?
+
+$$$elasticsearch-maxSockets$$$ `elasticsearch.maxSockets` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The maximum number of sockets that can be used for communications with {{es}}. **Default: `Infinity`**
+    It is available in {{ecloud}} 8.2.0 and later versions.
 
 $$$elasticsearch-maxResponseSize$$$ `elasticsearch.maxResponseSize`
 :   Either `false` or a `byteSize` value. When set, responses from {{es}} with a size higher than the defined limit will be rejected. This is intended to be used as a circuit-breaker mechanism to avoid memory errors in case of unexpectedly high responses coming from {{es}}. **Default: `false`**
@@ -89,7 +92,7 @@ $$$elasticsearch-idleSocketTimeout$$$ `elasticsearch.idleSocketTimeout`
 :   The timeout for idle sockets kept open between {{kib}} and {{es}}. If the socket is idle for longer than this timeout, it will be closed. If you have a transparent proxy between {{kib}} and {{es}} be sure to set this value lower than or equal to the proxy’s timeout. **Default: `60s`**
 
 `elasticsearch.customHeaders`
-:   | Header names and values to send to {{es}}. Any custom headers cannot be overwritten by client-side headers, regardless of the [`elasticsearch.requestHeadersWhitelist`](#elasticsearch-requestHeadersWhitelist) configuration. **Default: `{}`**
+:   Header names and values to send to {{es}}. Any custom headers cannot be overwritten by client-side headers, regardless of the [`elasticsearch.requestHeadersWhitelist`](#elasticsearch-requestHeadersWhitelist) configuration. **Default: `{}`**
 
 $$$elasticsearch-hosts$$$ `elasticsearch.hosts:`
 :   The URLs of the {{es}} instances to use for all your queries. All nodes listed here must be on the same cluster. **Default: `[ "http://localhost:9200" ]`**
@@ -104,7 +107,7 @@ $$$elasticsearch-pingTimeout$$$ `elasticsearch.pingTimeout`
 :   Time in milliseconds to wait for {{es}} to respond to pings. **Default: the value of the [`elasticsearch.requestTimeout`](#elasticsearch-requestTimeout) setting**
 
 $$$elasticsearch-requestHeadersWhitelist$$$ `elasticsearch.requestHeadersWhitelist`
-:   List of {{kib}} client-side headers to send to {{es}}. To send **no** client-side headers, set this value to [] (an empty list). Removing the `authorization` header from being whitelisted means that you cannot use [basic authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-authentication.md#basic-authentication) in {{kib}}. **Default: `[ 'authorization', 'es-client-authentication' ]`**
+:   List of {{kib}} client-side headers to send to {{es}}. To send **no** client-side headers, set this value to [] (an empty list). Removing the `authorization` header from being whitelisted means that you cannot use [basic authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#basic-authentication) in {{kib}}. **Default: `[ 'authorization', 'es-client-authentication' ]`**
 
 $$$elasticsearch-requestTimeout$$$ `elasticsearch.requestTimeout`
 :   Time in milliseconds to wait for responses from the back end or {{es}}. This value must be a positive integer. **Default: `30000`**
@@ -112,8 +115,10 @@ $$$elasticsearch-requestTimeout$$$ `elasticsearch.requestTimeout`
 `elasticsearch.shardTimeout`
 :   Time in milliseconds for {{es}} to wait for responses from shards. Set to 0 to disable. **Default: `30000`**
 
-`elasticsearch.compression`
-:   Specifies whether {{kib}} should use compression for communications with {{es}}. **Default: `false`**
+`elasticsearch.compression` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Specifies whether {{kib}} should use compression for communications with {{es}}.
+    **Default: `false`**
+    It is available in {{ecloud}} 8.3.0 and later versions.
 
 `elasticsearch.sniffInterval`
 :   Time in milliseconds between requests to check {{es}} for an updated list of nodes. **Default: `false`**
@@ -158,7 +163,6 @@ $$$elasticsearch-ssl-keystore-path$$$ `elasticsearch.ssl.keystore.path`
     This setting cannot be used in conjunction with [`elasticsearch.ssl.certificate`](#elasticsearch-ssl-cert-key) or [`elasticsearch.ssl.key`](#elasticsearch-ssl-cert-key).
     ::::
 
-
 `elasticsearch.ssl.keystore.password`
 :   The password that decrypts the keystore specified via [`elasticsearch.ssl.keystore.path`](#elasticsearch-ssl-keystore-path). If the keystore has no password, leave this as blank. If the keystore has an empty password, set this to `""`.
 
@@ -180,16 +184,10 @@ $$$elasticsearch-user-passwd$$$ `elasticsearch.username` and `elasticsearch.pass
 $$$elasticsearch-service-account-token$$$ `elasticsearch.serviceAccountToken`
 :   If your {{es}} is protected with basic authentication, this token provides the credentials that the {{kib}} server uses to perform maintenance on the {{kib}} index at startup. This setting is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
-`unifiedSearch.autocomplete.valueSuggestions.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   Time in milliseconds to wait for autocomplete suggestions from {{es}}. This value must be a whole number greater than zero. **Default: `"1000"`**
-
-`unifiedSearch.autocomplete.valueSuggestions.terminateAfter` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   Maximum number of documents loaded by each shard to generate autocomplete suggestions. This value must be a whole number greater than zero. **Default: `"100000"`**
-
-    ::::{note}
-    To reload the logging settings, send a SIGHUP signal to {{kib}}. For more logging configuration options, see the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide.
-    ::::
-
+`execution_context.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Propagate request-specific metadata to Elasticsearch server by way of the `x-opaque-id` header.
+    It is available in {{ecloud}} 8.1.0 and later versions.
+% TBD: Available only in Elastic Cloud?
 
 $$$logging-root$$$ `logging.root`
 :   The `root` logger has is a [dedicated logger](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md#dedicated-loggers) and is pre-configured. The `root` logger logs at `info` level by default. If any other logging configuration is specified, `root` *must* also be explicitly configured.
@@ -197,11 +195,11 @@ $$$logging-root$$$ `logging.root`
 $$$logging-root-appenders$$$ `logging.root.appenders`
 :   A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that logs to stdout with a `pattern` layout. This is the configuration that all custom loggers will use unless they’re re-configured explicitly. You can override the default behavior by configuring a different [appender](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md#logging-appenders) to apply to `root`.
 
-$$$logging-root-level$$$ `logging.root.level` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$logging-root-level$$$ `logging.root.level` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Level at which a log record should be logged. Supported levels are: *all*, *fatal*, *error*, *warn*, *info*, *debug*, *trace*, *off*. Levels are ordered from *all* (highest) to *off* and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to [change the overall log level](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#change-overall-log-level). **Default: `info`**.
 
     ::::{tip}
-    Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs.  You can also use the logging [cli commands](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging-cli-configuration.md#logging-cli-migration) to set log level to `verbose` or silence all logs.
+    Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs.  You can also use the logging [cli commands](docs-content://deploy-manage/monitor/logging-configuration/kib-advanced-logging.md#logging-cli-migration) to set log level to `verbose` or silence all logs.
     ::::
 
 
@@ -227,29 +225,39 @@ $$$logging-loggers$$$ `logging.loggers[]`
 `logging.appenders[]`
 :   [Appenders](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md#logging-appenders) define how and where log messages are displayed (eg. **stdout** or console) and stored (eg. file on the disk).
 
-`map.includeElasticMapsService` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`map.includeElasticMapsService` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set to `false` to disable connections to Elastic Maps Service. When `includeElasticMapsService` is turned off, only tile layer configured by [`map.tilemap.url`](#tilemap-url) is available in [Maps](docs-content://explore-analyze/visualize/maps.md). **Default: `true`**
 
 `map.emsUrl`
 :   Specifies the URL of a self hosted [{{hosted-ems}}](docs-content://explore-analyze/visualize/maps/maps-connect-to-ems.md#elastic-maps-server)
 
-$$$tilemap-settings$$$ `map.tilemap.options.attribution` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$tilemap-settings$$$ `map.tilemap.options.attribution` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The map attribution string. Provide attributions in markdown and use `\|` to delimit attributions, for example: `"[attribution 1](https://www.attribution1)\|[attribution 2](https://www.attribution2)"`. **Default: `"© [Elastic Maps Service](https://www.elastic.co/elastic-maps-service)"`**
 
-$$$tilemap-max-zoom$$$ `map.tilemap.options.maxZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$tilemap-max-zoom$$$ `map.tilemap.options.maxZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The maximum zoom level. **Default: `10`**
 
-$$$tilemap-min-zoom$$$ `map.tilemap.options.minZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$tilemap-min-zoom$$$ `map.tilemap.options.minZoom` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The minimum zoom level. **Default: `1`**
 
-$$$tilemap-subdomains$$$ `map.tilemap.options.subdomains` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$tilemap-subdomains$$$ `map.tilemap.options.subdomains` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   An array of subdomains used by the tile service. Specify the position of the subdomain the URL with the token `{{s}}`.
 
-$$$tilemap-url$$$ `map.tilemap.url` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$tilemap-url$$$ `map.tilemap.url` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The URL to the service that {{kib}} uses as the default basemap in [maps](docs-content://explore-analyze/visualize/maps.md) and [vega maps](docs-content://explore-analyze/visualize/custom-visualizations-with-vega.md#vega-with-a-map). By default, {{kib}} sets a basemap from the [Elastic Maps Service](docs-content://explore-analyze/visualize/maps/maps-connect-to-ems.md), but users can point to their own Tile Map Service. For example: `"https://tiles.elastic.co/v2/default/{{z}}/{x}/{{y}}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
-`migrations.batchSize`
+`migrations.batchSize` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Defines the number of documents migrated at a time. The higher the value, the faster the Saved Objects migration process performs at the cost of higher memory consumption. If upgrade migrations results in {{kib}} crashing with an out of memory exception or fails due to an Elasticsearch `circuit_breaking_exception`, use a smaller `batchSize` value to reduce the memory pressure. **Default: `1000`**
+
+`migrations.discardUnknownObjects` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Discard saved objects with unknown types during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined.
+    It is available in {{ecloud}} 8.4.0 and later versions.
+% TBD: Supported only in Elastic Cloud?
+
+`migrations.discardCorruptObjects` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Discard corrupt saved objects, as well as those that cause transform errors during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined.
+    It is available in {{ecloud}} 8.4.0 and later versions.
+% TBD: Supported only in Elastic Cloud?
 
 `migrations.maxBatchSizeBytes`
 :   Defines the maximum payload size for indexing batches of upgraded saved objects to avoid migrations failing due to a 413 Request Entity Too Large response from Elasticsearch. This value should be lower than or equal to your Elasticsearch cluster’s `http.max_content_length` configuration option. **Default: `100mb`**
@@ -261,16 +269,10 @@ $$$tilemap-url$$$ `map.tilemap.url` ![logo cloud](https://doc-icons.s3.us-east-2
 :   Controls whether to enable the newsfeed system for the {{kib}} UI notification center. Set to `false` to disable the newsfeed system. **Default: `true`**
 
 `node.roles`
-:   [preview] Indicates which roles to configure the {{kib}} process with, which will effectively run {{kib}} in different modes. Valid options are `background_tasks` and `ui`, or `*` to select all roles. **Default: `*`**
+:   Indicates which roles to configure the {{kib}} process with, which will effectively run {{kib}} in different modes. Valid options are `background_tasks` and `ui`, or `*` to select all roles. **Default: `*`**. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
 `notifications.connectors.default.email`
 :   Choose the default email connector for user notifications. As of `8.6.0`, {{kib}} is shipping with a new notification mechanism that will send email notifications for various user actions, e.g. assigning a *Case* to a user. To enable notifications, an email connector must be [preconfigured](/reference/connectors-kibana/pre-configured-connectors.md) in the system via `kibana.yml`, and the notifications plugin must be configured to point to the ID of that connector.
-
-$$$path-data$$$ `path.data`
-:   The path where {{kib}} stores persistent data not saved in {{es}}. **Default: `data`**
-
-`pid.file`
-:   Specifies the path where {{kib}} creates the process ID file.
 
 `ops.interval`
 :   Set the interval in milliseconds to sample system and process performance metrics. The minimum value is 100. **Default: `5000`**
@@ -281,6 +283,16 @@ $$$ops-cGroupOverrides-cpuPath$$$ `ops.cGroupOverrides.cpuPath`
 $$$ops-cGroupOverrides-cpuAcctPath$$$ `ops.cGroupOverrides.cpuAcctPath`
 :   Override for cgroup cpuacct path when mounted in a manner that is inconsistent with `/proc/self/cgroup`.
 
+$$$path-data$$$ `path.data`
+:   The path where {{kib}} stores persistent data not saved in {{es}}. **Default: `data`**
+
+`permissionsPolicy.report_to:`
+:   Add sources for the [Permissions Policy `report-to` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy).
+
+
+`pid.file`
+:   Specifies the path where {{kib}} creates the process ID file.
+
 $$$savedObjects-maxImportExportSize$$$ `savedObjects.maxImportExportSize`
 :   The maximum count of saved objects that can be imported or exported. This setting exists to prevent the {{kib}} server from running out of memory when handling large numbers of saved objects. It is recommended to only raise this setting if you are confident your server can hold this many objects in memory. **Default: `10000`**
 
@@ -290,6 +302,10 @@ $$$savedObjects-maxImportPayloadBytes$$$ `savedObjects.maxImportPayloadBytes`
 $$$server-basePath$$$ `server.basePath`
 :   Enables you to specify a path to mount {{kib}} at if you are running behind a proxy. Use the [`server.rewriteBasePath`](#server-rewriteBasePath) setting to tell {{kib}} if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (`/`).
 
+`server.defaultRoute` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Specifies the default route when opening Kibana. You can use this setting to modify the landing page when opening Kibana.
+% TBD: Applicable only to Elastic Cloud?
+
 $$$server-publicBaseUrl$$$ `server.publicBaseUrl`
 :   The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the [`server.basePath`](#server-basePath) (when that setting is configured explicitly). This setting cannot end in a slash (`/`).
 
@@ -297,10 +313,10 @@ $$$server-compression$$$ `server.compression.enabled`
 :   Set to `false` to disable HTTP compression for all responses. **Default: `true`**
 
 `server.cors.enabled`
-:   [preview] Set to `true` to allow cross-origin API calls. **Default:** `false`
+:   Set to `true` to allow cross-origin API calls. **Default:** `false`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
 `server.cors.allowCredentials`
-:   [preview] Set to `true` to allow browser code to access response body whenever request performed with user credentials. **Default:** `false`
+:   Set to `true` to allow browser code to access response body whenever request performed with user credentials. **Default:** `false`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
 `server.cors.allowOrigin`
 :   experimental::[] List of origins permitted to access resources. You must specify explicit hostnames and not use `server.cors.allowOrigin: ["*"]` when `server.cors.allowCredentials: true`. **Default:** ["*"]
@@ -308,31 +324,33 @@ $$$server-compression$$$ `server.compression.enabled`
 `server.compression.referrerWhitelist`
 :   Specifies an array of trusted hostnames, such as the {{kib}} host, or a reverse proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request `Referer` header. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`. **Default: `none`**
 
-`server.compression.brotli.enabled`
-:   Set to `true` to enable brotli (br) compression format. Note: browsers not supporting brotli compression will fallback to using gzip instead. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`. **Default: `false`**
+`server.compression.brotli.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Set to `true` to enable brotli (br) compression format. NOTE: Browsers not supporting brotli compression will fallback to using gzip instead. This setting may not be used when [`server.compression.enabled`](#server-compression) is set to `false`. **Default: `false`**
+    It is available in {{ecloud}} 8.6.0 and later versions.
 
-$$$server-securityResponseHeaders-strictTransportSecurity$$$ `server.securityResponseHeaders.strictTransportSecurity`
+$$$server-securityResponseHeaders-strictTransportSecurity$$$ `server.securityResponseHeaders.strictTransportSecurity` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`Strict-Transport-Security`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. To disable, set to `null`. **Default:** `null`
 
-$$$server-securityResponseHeaders-xContentTypeOptions$$$ `server.securityResponseHeaders.xContentTypeOptions`
+$$$server-securityResponseHeaders-xContentTypeOptions$$$ `server.securityResponseHeaders.xContentTypeOptions` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`X-Content-Type-Options`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `nosniff` or `null`. To disable, set to `null`. **Default:** `"nosniff"`
 
-$$$server-securityResponseHeaders-referrerPolicy$$$ `server.securityResponseHeaders.referrerPolicy`
+$$$server-securityResponseHeaders-referrerPolicy$$$ `server.securityResponseHeaders.referrerPolicy` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `no-referrer`, `no-referrer-when-downgrade`, `origin`, `origin-when-cross-origin`, `same-origin`, `strict-origin`, `strict-origin-when-cross-origin`, `unsafe-url`, or `null`. To disable, set to `null`. **Default:** `"strict-origin-when-cross-origin"`
 
-$$$server-securityResponseHeaders-permissionsPolicy$$$ `server.securityResponseHeaders.permissionsPolicy`
-:   [preview] Controls whether the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format. To disable, set to `null`. **Default:** `camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()`
+$$$server-securityResponseHeaders-permissionsPolicy$$$ `server.securityResponseHeaders.permissionsPolicy` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Controls whether the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format. To disable, set to `null`. **Default:** `camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
-$$$server-securityResponseHeaders-permissionsPolicyReportOnly$$$ `server.securityResponseHeaders.permissionsPolicyReportOnly`
-:   [preview] Controls whether the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format.
+$$$server-securityResponseHeaders-permissionsPolicyReportOnly$$$ `server.securityResponseHeaders.permissionsPolicyReportOnly` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Controls whether the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are any text value or `null`. Refer to the [`Permissions-Policy` documentation](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy) for defined directives, values, and text format. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
-$$$server-securityResponseHeaders-disableEmbedding$$$`server.securityResponseHeaders.disableEmbedding`
+$$$server-securityResponseHeaders-disableEmbedding$$$`server.securityResponseHeaders.disableEmbedding` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`Content-Security-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) and [`X-Frame-Options`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options) headers are configured to disable embedding {{kib}} in other webpages using iframes. When set to `true`, secure headers are used to disable embedding, which adds the `frame-ancestors: 'self'` directive to the `Content-Security-Policy` response header and adds the `X-Frame-Options: SAMEORIGIN` response header. **Default:** `false`
 
-$$$server-securityResponseHeaders-crossOriginOpenerPolicy$$$ `server.securityResponseHeaders.crossOriginOpenerPolicy`
+$$$server-securityResponseHeaders-crossOriginOpenerPolicy$$$ `server.securityResponseHeaders.crossOriginOpenerPolicy` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Controls whether the [`Cross-Origin-Opener-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) header is used in all responses to the client from the {{kib}} server, and specifies what value is used. Allowed values are `unsafe-none`, `same-origin-allow-popups`, `same-origin`, or `null`. To disable, set to `null`. **Default:** `"same-origin"`
+    It is available in {{ecloud}} 8.7.0 and later versions.
 
-`server.customResponseHeaders` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`server.customResponseHeaders` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Header names and values to send on all responses to the client from the {{kib}} server. **Default: `{}`**
 
 $$$server-shutdownTimeout$$$ `server.shutdownTimeout`
@@ -344,7 +362,7 @@ $$$server-host$$$ `server.host`
 `server.keepaliveTimeout`
 :   The number of milliseconds to wait for additional data before restarting the [`server.socketTimeout`](#server-socketTimeout) counter. **Default: `"120000"`**
 
-$$$server-maxPayload$$$ `server.maxPayload`
+$$$server-maxPayload$$$ `server.maxPayload` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   The maximum payload size in bytes for incoming server requests. **Default: `1048576`**
 
 `server.name`
@@ -354,7 +372,7 @@ $$$server-port$$$ `server.port`
 :   {{kib}} is served by a back end server. This setting specifies the port to use. **Default: `5601`**
 
 $$$server-protocol$$$ `server.protocol`
-:   [preview] The http protocol to use, either `http1` or `http2`. Set to `http1` to opt out of `HTTP/2` support when TLS is enabled. Use of `http1` may impact browser loading performance especially for dashboards with many panels. **Default**: `http2` if TLS is enabled, otherwise `http1`.
+:   The HTTP protocol to use, either `http1` or `http2`. Set to `http1` to opt out of `HTTP/2` support when TLS is enabled. Use of `http1` may impact browser loading performance especially for dashboards with many panels. **Default**: `http2` if TLS is enabled, otherwise `http1`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
 
     ::::{note}
     By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via [`server.ssl.enabled`](#server-ssl-enabled) and [`server.ssl.supportedProtocols`](#server-ssl-supportedProtocols), if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration.
@@ -459,12 +477,13 @@ $$$server-ssl-supportedProtocols$$$ `server.ssl.supportedProtocols`
 $$$server-uuid$$$ `server.uuid`
 :   The unique identifier for this {{kib}} instance. It must be a valid UUIDv4. It gets automatically generated on the first startup if not specified and persisted in the `data` path.
 
-$$$settings-xsrf-allowlist$$$ `server.xsrf.allowlist`
+$$$settings-xsrf-allowlist$$$ `server.xsrf.allowlist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   It is not recommended to disable protections for arbitrary API endpoints. Instead, supply the `kbn-xsrf` header. The [`server.xsrf.allowlist`](#settings-xsrf-allowlist) setting requires the following format:
 
     ```text
     *Default: [ ]* An array of API endpoints which should be exempt from Cross-Site Request Forgery ("XSRF") protections.
     ```
+    It is available in {{ecloud}} 8.0.0 and later versions.
 
 
 $$$settings-xsrf-disableProtection$$$ `server.xsrf.disableProtection`
@@ -481,8 +500,23 @@ $$$settings-telemetry-optIn$$$ `telemetry.optIn`
 
     This setting can be changed at any time in [Advanced Settings](/reference/advanced-settings.md). To prevent users from changing it, set [`telemetry.allowChangingOptInStatus`](#telemetry-allowChangingOptInStatus) to `false`. **Default: `true`**
 
+`unifiedSearch.autocomplete.valueSuggestions.timeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Time in milliseconds to wait for autocomplete suggestions from {{es}}. This value must be a whole number greater than zero. **Default: `"1000"`**
 
-`vis_type_vega.enableExternalUrls` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`unifiedSearch.autocomplete.valueSuggestions.terminateAfter` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Maximum number of documents loaded by each shard to generate autocomplete suggestions. This value must be a whole number greater than zero. **Default: `"100000"`**
+
+    ::::{note}
+    To reload the logging settings, send a SIGHUP signal to {{kib}}. For more logging configuration options, see the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide.
+    ::::
+
+`vega.enableExternalUrls` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Set to `true` to allow Vega vizualizations to use data from sources other than the linked Elasticsearch cluster. In version 8.0 and later, the `vega.enableExternalUrls` is not supported. Use `vis_type_vega.enableExternalUrls` instead.
+
+`vis_type_table.legacyVisEnabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   For 7.x versions version 7.11 and later, a new version of the datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
+
+`vis_type_vega.enableExternalUrls` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Set this value to true to allow Vega to use any URL to access external data sources and images. When false, Vega can only get data from {{es}}. **Default: `false`**
 
 `xpack.ccr.ui.enabled`
@@ -492,7 +526,6 @@ $$$settings-explore-data-in-context$$$ `xpack.discoverEnhanced.actions.exploreDa
 :   Enables the **Explore underlying data** option that allows you to open **Discover** from a dashboard panel and view the panel data. **Default: `false`**
 
     When you create visualizations using the **Lens** drag-and-drop editor, you can use the toolbar to open and explore your data in **Discover**. For more information, check out [Explore the data in Discover](docs-content://explore-analyze/visualize/lens.md#explore-lens-data-in-discover).
-
 
 $$$settings-explore-data-in-chart$$$ `xpack.discoverEnhanced.actions.exploreDataInChart.enabled`
 :   Enables you to view the underlying documents in a data series from a dashboard panel. **Default: `false`**
@@ -518,33 +551,13 @@ $$$settings-explore-data-in-chart$$$ `xpack.discoverEnhanced.actions.exploreData
     Rollups are deprecated and will be removed in a future version. Use [downsampling](docs-content://manage-data/data-store/data-streams/downsampling-time-series-data-stream.md) instead.
     ::::
 
+`xpack.securitySolution.maxUploadResponseActionFileBytes` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
+:   Allow to configure the max file upload size for use with the Upload File Repsonse action available with the Defend Integration.  To learn more, check [Endpoint Response actions](docs-content://solutions/security/endpoint-response-actions.md).
+    It is available in {{ecloud}} 8.9.0 and later versions.
+% TBD: Available only in Elastic Cloud?
 
 `xpack.snapshot_restore.ui.enabled`
 :   Set this value to false to disable the Snapshot and Restore UI. **Default: true**
 
 `xpack.upgrade_assistant.ui.enabled`
 :   Set this value to false to disable the Upgrade Assistant UI. **Default: true**
-
-`i18n.locale` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   Set this value to change the {{kib}} interface language. Valid locales are: `en`, `zh-CN`, `ja-JP`, `fr-FR`. **Default: `en`**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

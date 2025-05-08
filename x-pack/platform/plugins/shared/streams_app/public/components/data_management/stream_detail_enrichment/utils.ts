@@ -8,53 +8,132 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import {
+  FlattenRecord,
   ProcessorDefinition,
   ProcessorDefinitionWithId,
   ProcessorType,
   getProcessorType,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import { isEmpty, mapValues } from 'lodash';
 import {
   DissectFormState,
   ProcessorDefinitionWithUIAttributes,
   GrokFormState,
   ProcessorFormState,
   WithUIAttributes,
+  DateFormState,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
+import { configDrivenProcessors } from './processors/config_driven';
+import {
+  ConfigDrivenProcessorType,
+  ConfigDrivenProcessors,
+} from './processors/config_driven/types';
 
-const defaultGrokProcessorFormState: GrokFormState = {
+/**
+ * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
+ */
+export const SPECIALISED_TYPES = ['date', 'dissect', 'grok'];
+
+const defaultDateProcessorFormState: () => DateFormState = () => ({
+  type: 'date',
+  field: '',
+  formats: [],
+  locale: '',
+  target_field: '',
+  timezone: '',
+  output_format: '',
+  ignore_failure: true,
+  if: ALWAYS_CONDITION,
+});
+
+const WELL_KNOWN_TEXT_FIELDS = [
+  'message',
+  'body.text',
+  'error.message',
+  'event.original',
+  'attributes.exception.message',
+];
+
+const getDefaultTextField = (sampleDocs: FlattenRecord[]) => {
+  const stringFieldCounts = sampleDocs
+    .map((doc) =>
+      Object.keys(doc).filter(
+        (key) => doc[key] && typeof doc[key] === 'string' && WELL_KNOWN_TEXT_FIELDS.includes(key)
+      )
+    )
+    .reduce((acc, keys) => {
+      keys.forEach((key) => {
+        acc[key] = (acc[key] || 0) + 1;
+      });
+      return acc;
+    }, {} as Record<string, number>);
+
+  // sort by count descending first, then by order of field in WELL_KNOWN_TEXT_FIELDS
+  const sortedFields = Object.entries(stringFieldCounts).sort(
+    ([fieldA, countA], [fieldB, countB]) => {
+      const countSorting = countB - countA;
+      if (countSorting !== 0) {
+        return countSorting;
+      }
+      const indexA = WELL_KNOWN_TEXT_FIELDS.indexOf(fieldA);
+      const indexB = WELL_KNOWN_TEXT_FIELDS.indexOf(fieldB);
+      return indexA - indexB;
+    }
+  );
+  const mostCommonField = sortedFields[0];
+  return mostCommonField ? mostCommonField[0] : '';
+};
+
+const defaultDissectProcessorFormState: (sampleDocs: FlattenRecord[]) => DissectFormState = (
+  sampleDocs: FlattenRecord[]
+) => ({
+  type: 'dissect',
+  field: getDefaultTextField(sampleDocs),
+  pattern: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  if: ALWAYS_CONDITION,
+});
+
+const defaultGrokProcessorFormState: (sampleDocs: FlattenRecord[]) => GrokFormState = (
+  sampleDocs: FlattenRecord[]
+) => ({
   type: 'grok',
-  field: 'message',
+  field: getDefaultTextField(sampleDocs),
   patterns: [{ value: '' }],
   pattern_definitions: {},
   ignore_failure: true,
   ignore_missing: true,
   if: ALWAYS_CONDITION,
+});
+
+const configDrivenDefaultFormStates = mapValues(
+  configDrivenProcessors,
+  (config) => () => config.defaultFormState
+) as {
+  [TKey in ConfigDrivenProcessorType]: () => ConfigDrivenProcessors[TKey]['defaultFormState'];
 };
 
-const defaultDissectProcessorFormState: DissectFormState = {
-  type: 'dissect',
-  field: 'message',
-  pattern: '',
-  ignore_failure: true,
-  ignore_missing: true,
-  if: ALWAYS_CONDITION,
-};
-
-const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
+const defaultProcessorFormStateByType: Record<
+  ProcessorType,
+  (sampleDocs: FlattenRecord[]) => ProcessorFormState
+> = {
+  date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
+  ...configDrivenDefaultFormStates,
 };
 
-export const getDefaultFormStateByType = (type: ProcessorType) =>
-  defaultProcessorFormStateByType[type];
+export const getDefaultFormStateByType = (type: ProcessorType, sampleDocuments: FlattenRecord[]) =>
+  defaultProcessorFormStateByType[type](sampleDocuments);
 
 export const getFormStateFrom = (
+  sampleDocuments: FlattenRecord[],
   processor?: ProcessorDefinitionWithUIAttributes
 ): ProcessorFormState => {
-  if (!processor) return defaultGrokProcessorFormState;
+  if (!processor) return defaultGrokProcessorFormState(sampleDocuments);
 
   if (isGrokProcessor(processor)) {
     const { grok } = processor;
@@ -73,6 +152,21 @@ export const getFormStateFrom = (
       ...dissect,
       type: 'dissect',
     });
+  }
+
+  if (isDateProcessor(processor)) {
+    const { date } = processor;
+
+    return structuredClone({
+      ...date,
+      type: 'date',
+    });
+  }
+
+  if (processor.type in configDrivenProcessors) {
+    return configDrivenProcessors[
+      processor.type as ConfigDrivenProcessorType
+    ].convertProcessorToFormState(processor as any);
   }
 
   throw new Error(`Form state for processor type "${processor.type}" is not implemented.`);
@@ -109,6 +203,28 @@ export const convertFormStateToProcessor = (formState: ProcessorFormState): Proc
     };
   }
 
+  if (formState.type === 'date') {
+    const { field, formats, locale, ignore_failure, target_field, timezone, output_format } =
+      formState;
+
+    return {
+      date: {
+        if: formState.if,
+        field,
+        formats,
+        ignore_failure,
+        locale: isEmpty(locale) ? undefined : locale,
+        target_field: isEmpty(target_field) ? undefined : target_field,
+        timezone: isEmpty(timezone) ? undefined : timezone,
+        output_format: isEmpty(output_format) ? undefined : output_format,
+      },
+    };
+  }
+
+  if (configDrivenProcessors[formState.type]) {
+    return configDrivenProcessors[formState.type].convertFormStateToConfig(formState as any);
+  }
+
   throw new Error('Cannot convert form state to processing: unknown type.');
 };
 
@@ -121,8 +237,9 @@ const createProcessorGuardByType =
   > =>
     processor.type === type;
 
-export const isGrokProcessor = createProcessorGuardByType('grok');
+export const isDateProcessor = createProcessorGuardByType('date');
 export const isDissectProcessor = createProcessorGuardByType('dissect');
+export const isGrokProcessor = createProcessorGuardByType('grok');
 
 const createId = htmlIdGenerator();
 const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(

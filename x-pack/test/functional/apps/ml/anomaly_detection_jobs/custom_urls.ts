@@ -85,8 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('opens the custom URLs tab in the edit job flyout', async () => {
       await ml.testExecution.logTestStep('load the job management page');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       await ml.testExecution.logTestStep('open the custom URLs tab in the edit job flyout');
       await ml.jobTable.openEditCustomUrlsForJobTab(JOB_CONFIG.job_id);

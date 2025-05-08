@@ -9,7 +9,7 @@ import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { backgroundTaskNodeMapping, taskMappings } from './mappings';
 import { getMigrations } from './migrations';
-import { TaskManagerConfig } from '../config';
+import type { TaskManagerConfig } from '../config';
 import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 import { TASK_MANAGER_INDEX } from '../constants';
 import { backgroundTaskNodeModelVersions, taskModelVersions } from './model_versions';

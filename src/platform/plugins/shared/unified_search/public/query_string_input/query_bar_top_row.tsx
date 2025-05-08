@@ -46,7 +46,7 @@ import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { IUnifiedSearchPluginServices } from '../types';
-import QueryStringInputUI from './query_string_input';
+import { QueryStringInput } from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
@@ -62,6 +62,7 @@ import './query_bar.scss';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
+const textBasedRunShortcut = `${COMMAND_KEY} + Enter`;
 
 export const strings = {
   getNeedsUpdatingLabel: () =>
@@ -87,6 +88,11 @@ export const strings = {
   getRunQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
       defaultMessage: 'Run query',
+    }),
+  getRunQueryShortcutLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.shortcutLabel', {
+      defaultMessage: `(shortcut {textBasedRunShortcut})`,
+      values: { textBasedRunShortcut },
     }),
   getRunButtonLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.runButton', {
@@ -565,9 +571,11 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
-      const textBasedRunShortcut = `${COMMAND_KEY} + Enter`;
-      const buttonLabelUpdate = strings.getNeedsUpdatingLabel();
       const buttonLabelRefresh = Boolean(isQueryLangSelected)
+        ? `${strings.getRunQueryLabel()} ${strings.getRunQueryShortcutLabel()}`
+        : strings.getRefreshQueryLabel();
+      const buttonLabelUpdate = strings.getNeedsUpdatingLabel();
+      const tooltipText = Boolean(isQueryLangSelected)
         ? textBasedRunShortcut
         : strings.getRefreshQueryLabel();
       const buttonLabelRun = textBasedRunShortcut;
@@ -598,7 +606,7 @@ export const QueryBarTopRow = React.memo(
               needsUpdate={props.isDirty}
               data-test-subj="querySubmitButton"
               toolTipProps={{
-                content: props.isDirty ? tooltipDirty : buttonLabelRefresh,
+                content: props.isDirty ? tooltipDirty : tooltipText,
                 delay: 'long',
                 position: 'bottom',
               }}
@@ -677,7 +685,7 @@ export const QueryBarTopRow = React.memo(
       const filterButtonGroup = !renderFilterMenuOnly() && renderFilterButtonGroup();
       const queryInput = shouldRenderQueryInput() && (
         <EuiFlexItem data-test-subj="unifiedQueryInput">
-          <QueryStringInputUI
+          <QueryStringInput
             disableAutoFocus={props.disableAutoFocus}
             indexPatterns={props.indexPatterns!}
             query={props.query! as Query}
@@ -822,7 +830,3 @@ export const QueryBarTopRow = React.memo(
     return isQueryEqual && shallowEqual(prevProps, nextProps);
   }
 ) as GenericQueryBarTopRow;
-
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default QueryBarTopRow;

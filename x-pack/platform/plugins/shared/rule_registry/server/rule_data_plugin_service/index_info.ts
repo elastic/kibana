@@ -6,7 +6,7 @@
  */
 
 import { INDEX_PREFIX } from '../config';
-import { IndexOptions } from './index_options';
+import type { IndexOptions } from './index_options';
 import { joinWithDash } from './utils';
 
 interface ConstructorOptions {

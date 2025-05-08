@@ -25,6 +25,9 @@ export const setBrokenRuntimeField = async ({ es, index }: UpdateMappingsProps) 
     },
     index,
   });
+  await es.indices.refresh({
+    index,
+  });
 };
 
 export const unsetBrokenRuntimeField = async ({ es, index }: UpdateMappingsProps) => {
@@ -34,6 +37,9 @@ export const unsetBrokenRuntimeField = async ({ es, index }: UpdateMappingsProps
       // @ts-expect-error null is valid, see link above
       broken: null,
     },
+    index,
+  });
+  await es.indices.refresh({
     index,
   });
 };

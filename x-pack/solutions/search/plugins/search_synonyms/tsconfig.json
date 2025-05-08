@@ -25,6 +25,8 @@
     "@kbn/core-http-server",
     "@kbn/kibana-utils-plugin",
     "@kbn/logging",
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin",
   ],
   "exclude": [
     "target/**/*",

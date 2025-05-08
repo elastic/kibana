@@ -8,35 +8,23 @@
  */
 
 import {
-  TRANSACTION_DURATION_FIELD,
   USER_AGENT_NAME_FIELD,
-  TraceDocumentOverview,
   USER_AGENT_VERSION_FIELD,
+  TransactionDocumentOverview,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { asDuration } from '../../utils';
 import {
   FieldConfiguration,
   getCommonFieldConfiguration,
 } from '../../resources/get_field_configuration';
 
 export const getTransactionFieldConfiguration = (
-  attributes: TraceDocumentOverview
+  attributes: TransactionDocumentOverview
 ): Record<string, FieldConfiguration> => {
   return {
     ...getCommonFieldConfiguration(attributes),
-    [TRANSACTION_DURATION_FIELD]: {
-      title: i18n.translate(
-        'unifiedDocViewer.observability.traces.details.transactionDuration.title',
-        {
-          defaultMessage: 'Duration',
-        }
-      ),
-      content: (value) => <EuiText size="xs">{asDuration(value as number)}</EuiText>,
-      value: attributes[TRANSACTION_DURATION_FIELD] ?? 0,
-    },
     [USER_AGENT_NAME_FIELD]: {
       title: i18n.translate('unifiedDocViewer.observability.traces.details.userAgent.title', {
         defaultMessage: 'User agent',

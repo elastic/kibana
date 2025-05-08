@@ -20,7 +20,6 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { Space } from '@kbn/spaces-plugin/public';
 import type { SolutionId, SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import type {
   NavigationPublicSetup,
   NavigationPublicStart,
@@ -148,9 +147,7 @@ export class NavigationPublicPlugin
 
   private getSideNavComponent({
     dataTestSubj,
-    panelContentProvider,
   }: {
-    panelContentProvider?: PanelContentProvider;
     dataTestSubj?: string;
   } = {}): SolutionNavigationDefinition['sideNavComponent'] {
     if (!this.coreStart) throw new Error('coreStart is not available');
@@ -163,7 +160,7 @@ export class NavigationPublicPlugin
 
     return () => (
       <SideNavComponent
-        navProps={{ navigationTree$: navigationTreeUi$, dataTestSubj, panelContentProvider }}
+        navProps={{ navigationTree$: navigationTreeUi$, dataTestSubj }}
         deps={{ core, activeNodes$: activeNavigationNodes$ }}
       />
     );
@@ -171,8 +168,8 @@ export class NavigationPublicPlugin
 
   private addSolutionNavigation(solutionNavigation: AddSolutionNavigationArg) {
     if (!this.coreStart) throw new Error('coreStart is not available');
-    const { dataTestSubj, panelContentProvider, ...rest } = solutionNavigation;
-    const sideNavComponent = this.getSideNavComponent({ dataTestSubj, panelContentProvider });
+    const { dataTestSubj, ...rest } = solutionNavigation;
+    const sideNavComponent = this.getSideNavComponent({ dataTestSubj });
     const { project } = this.coreStart.chrome as InternalChromeStart;
     project.updateSolutionNavigations({
       [solutionNavigation.id]: { ...rest, sideNavComponent },

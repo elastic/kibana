@@ -123,6 +123,7 @@ jest.mock(
             : Promise.resolve(packagePolicy)
         ),
         upgrade: jest.fn(),
+        bulkUpgrade: jest.fn(),
         getUpgradeDryRunDiff: jest.fn(),
         enrichPolicyWithDefaultsFromPackage: jest
           .fn()
@@ -809,7 +810,7 @@ describe('When calling package policy', () => {
           },
         },
       ];
-      packagePolicyServiceMock.upgrade.mockResolvedValue(responseBody);
+      packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
       const request = httpServerMock.createKibanaRequest({
         body: {
           packagePolicyIds: ['1'],

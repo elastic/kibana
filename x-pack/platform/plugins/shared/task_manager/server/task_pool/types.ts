@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { Logger } from '@kbn/core/server';
-import { TaskRunner } from '../task_running';
-import { TaskDefinition } from '../task';
+import type { Observable } from 'rxjs';
+import type { Logger } from '@kbn/core/server';
+import type { TaskRunner } from '../task_running';
+import type { TaskDefinition } from '../task';
 
 export interface ICapacity {
   get capacity(): number;

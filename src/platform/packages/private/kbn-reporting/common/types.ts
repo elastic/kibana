@@ -109,6 +109,12 @@ export interface ReportingServerInfo {
   uuid: string;
 }
 
+export interface ReportingHealthInfo {
+  isSufficientlySecure: boolean;
+  hasPermanentEncryptionKey: boolean;
+  areNotificationsEnabled: boolean;
+}
+
 export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
 
 export interface IlmPolicyStatusResponse {

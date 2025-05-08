@@ -41,13 +41,15 @@ const createAggField = (ctx: AggFieldContext) => {
   return aggField;
 };
 
-export const createStatsCommand = (ctx: StatsCommandContext, src: string): ESQLCommand<'stats'> => {
+export const createStatsCommand = (ctx: StatsCommandContext): ESQLCommand<'stats'> => {
   const command = createCommand('stats', ctx);
 
   if (ctx._stats) {
     const fields = ctx.aggFields();
 
     for (const fieldCtx of fields.aggField_list()) {
+      if (fieldCtx.getText() === '') continue;
+
       const node = createAggField(fieldCtx);
 
       command.args.push(node);

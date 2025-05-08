@@ -5,31 +5,24 @@
  * 2.0.
  */
 
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
-import type { ThresholdBucket } from './types';
-import type { SecuritySharedParams } from '../types';
+import type { ThresholdCompositeBucket } from './types';
+import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { ThresholdRuleParams } from '../../rule_schema';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import { bulkCreateWithSuppression } from '../utils/bulk_create_with_suppression';
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 import { wrapSuppressedThresholdALerts } from './wrap_suppressed_threshold_alerts';
 import { transformBulkCreatedItemsToHits } from './utils';
-import type { ExperimentalFeatures } from '../../../../../common';
 
 interface BulkCreateSuppressedThresholdAlertsParams {
   sharedParams: SecuritySharedParams<ThresholdRuleParams>;
-  buckets: ThresholdBucket[];
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  buckets: ThresholdCompositeBucket[];
+  services: SecurityRuleServices;
   startedAt: Date;
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -42,7 +35,6 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
   buckets,
   services,
   startedAt,
-  experimentalFeatures,
 }: BulkCreateSuppressedThresholdAlertsParams): Promise<{
   bulkCreateResult: GenericBulkCreateResponse<BaseFieldsLatest & SuppressionFieldsLatest>;
   unsuppressedAlerts: Array<SearchHit<unknown>>;
@@ -66,7 +58,6 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
     wrappedDocs: wrappedAlerts,
     services,
     suppressionWindow,
-    experimentalFeatures,
   });
 
   return {

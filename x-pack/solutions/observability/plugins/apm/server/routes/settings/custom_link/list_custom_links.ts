@@ -7,11 +7,11 @@
 
 import type * as t from 'io-ts';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { APM_CUSTOM_LINK_INDEX } from '@kbn/apm-sources-access-plugin/server';
 import type { CustomLink, CustomLinkES } from '../../../../common/custom_link/custom_link_types';
 import { fromESFormat } from './helper';
 import type { filterOptionsRt } from './custom_link_types';
 import type { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { APM_CUSTOM_LINK_INDEX } from '../apm_indices/apm_system_index_constants';
 
 export async function listCustomLinks({
   internalESClient,

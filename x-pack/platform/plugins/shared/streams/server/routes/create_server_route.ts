@@ -9,8 +9,10 @@ import { createServerRouteFactory } from '@kbn/server-route-repository';
 import { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
 import { badRequest, conflict, forbidden, internal, notFound } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
+import { get } from 'lodash';
 import { StreamsRouteHandlerResources } from './types';
 import { StatusError } from '../lib/streams/errors/status_error';
+import { AggregateStatusError } from '../lib/streams/errors/aggregate_status_error';
 
 const createPlainStreamsServerRoute = createServerRouteFactory<StreamsRouteHandlerResources>();
 
@@ -25,27 +27,38 @@ export const createServerRoute: CreateServerRouteFactory<
       tags: [...(config.options?.tags ?? []), 'oas-tag:streams'],
     },
     handler: (options) => {
-      return handler(options).catch((error) => {
-        if (error instanceof StatusError || error instanceof errors.ResponseError) {
-          switch (error.statusCode) {
-            case 400:
-              throw badRequest(error);
-
-            case 403:
-              throw forbidden(error);
-
-            case 404:
-              throw notFound(error);
-
-            case 409:
-              throw conflict(error);
-
-            case 500:
-              throw internal(error);
-          }
-        }
-        throw error;
+      const { telemetry } = options;
+      const finishTracking = telemetry.startTrackingEndpointLatency({
+        name: get(options, 'params.path.name', '__all__'),
+        endpoint: config.endpoint,
       });
+      return handler(options)
+        .catch((error) => {
+          if (
+            error instanceof StatusError ||
+            error instanceof AggregateStatusError ||
+            error instanceof errors.ResponseError
+          ) {
+            switch (error.statusCode) {
+              case 400:
+                throw badRequest(error);
+
+              case 403:
+                throw forbidden(error);
+
+              case 404:
+                throw notFound(error);
+
+              case 409:
+                throw conflict(error);
+
+              case 500:
+                throw internal(error);
+            }
+          }
+          throw error;
+        })
+        .finally(finishTracking);
     },
   });
 };

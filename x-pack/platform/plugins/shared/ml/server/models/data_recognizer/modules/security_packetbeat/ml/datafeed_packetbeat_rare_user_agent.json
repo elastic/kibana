@@ -10,7 +10,10 @@
         { "term": { "event.dataset": "network_traffic.http" } }
       ],
       "minimum_should_match": 1,
-      "must_not": [{ "wildcard": { "user_agent.original": { "value": "Mozilla*" } } }]
+      "must_not": [
+        { "wildcard": { "user_agent.original": { "value": "Mozilla*" } } },
+        { "terms": { "process.name": ["elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", "winlogbeat.exe", "winlogbeat"] } }
+      ]
     }
   }
 }

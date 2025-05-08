@@ -19,6 +19,12 @@ import { z } from '@kbn/zod';
 import { RuleExecutionStatus, RuleExecutionStatusOrder } from './execution_status.gen';
 import { RuleExecutionMetrics } from './execution_metrics.gen';
 
+/**
+  * Summary of the last execution of a rule.
+> info
+> This field is under development and its usage or schema may change
+
+  */
 export type RuleExecutionSummary = z.infer<typeof RuleExecutionSummary>;
 export const RuleExecutionSummary = z.object({
   last_execution: z.object({

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import http from 'http';
-import https from 'https';
+import type http from 'http';
+import type https from 'https';
 import getPort from 'get-port';
-import { Agent as SuperTestAgent } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
 import {
   getWebhookServer,
   getHttpsWebhookServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { createTlsWebhookServer } from '../../../../../common/lib/get_tls_webhook_servers';
 
 // eslint-disable-next-line import/no-default-export

@@ -9,11 +9,20 @@ import { FakeLLM } from '@langchain/core/utils/testing';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 
 import { getChainWithFormatInstructions } from '.';
+import { DEFEND_INSIGHTS } from '../../../../../../prompt/prompts';
 
 describe('getChainWithFormatInstructions', () => {
   const mockLlm = new FakeLLM({
     response: JSON.stringify({}, null, 2),
   }) as unknown as ActionsClientLlm;
+
+  const prompts = {
+    group: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.GROUP,
+    events: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS,
+    eventsId: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_ID,
+    eventsEndpointId: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_ENDPOINT_ID,
+    eventsValue: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_VALUE,
+  };
 
   it('returns the chain with format instructions', () => {
     const expectedFormatInstructions = `You must format your output as a JSON value that adheres to a given "JSON Schema" instance.
@@ -32,10 +41,11 @@ Here is the JSON Schema instance your output must adhere to. Include the enclosi
 \`\`\`
 `;
 
-    const chainWithFormatInstructions = getChainWithFormatInstructions(
-      'incompatible_antivirus',
-      mockLlm
-    );
+    const chainWithFormatInstructions = getChainWithFormatInstructions({
+      insightType: 'incompatible_antivirus',
+      llm: mockLlm,
+      prompts,
+    });
     expect(chainWithFormatInstructions).toEqual({
       chain: expect.any(Object),
       formatInstructions: expectedFormatInstructions,

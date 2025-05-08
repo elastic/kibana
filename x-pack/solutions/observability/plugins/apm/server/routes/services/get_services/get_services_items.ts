@@ -90,11 +90,11 @@ export async function getServicesItems({
         apmEventClient,
       }),
       getHealthStatuses({ ...commonParams, mlClient }).catch((err) => {
-        logger.error(err);
+        logger.debug(err);
         return [];
       }),
       getServicesAlerts({ ...commonParams, apmAlertsClient }).catch((err) => {
-        logger.error(err);
+        logger.debug(err);
         return [];
       }),
     ]);

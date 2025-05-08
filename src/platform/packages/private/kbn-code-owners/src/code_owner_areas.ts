@@ -10,13 +10,20 @@
 /**
  * Code owner area names
  */
-export const CODE_OWNER_AREAS = ['platform', 'search', 'observability', 'security'] as const;
+export const CODE_OWNER_AREAS = [
+  'platform',
+  'search',
+  'observability',
+  'security',
+  'chat',
+] as const;
 export type CodeOwnerArea = (typeof CODE_OWNER_AREAS)[number];
 
 /**
  * Area mappings for code owners
  */
 export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
+  // BOOKMARK - List of Kibana solutions
   platform: [
     'elastic/appex-ai-infra',
     'elastic/appex-qa',
@@ -77,6 +84,10 @@ export const CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/security-threat-hunting',
     'elastic/security-threat-hunting-explore',
     'elastic/security-threat-hunting-investigations',
+  ],
+  chat: [
+    // TODO add owner teams here (once they exist)
+    // https://github.com/elastic/kibana/issues/213469
   ],
 };
 

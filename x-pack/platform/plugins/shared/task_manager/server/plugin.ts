@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, Subject, BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest, Subject, BehaviorSubject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
@@ -13,29 +14,42 @@ import type {
   UsageCollectionStart,
   UsageCounter,
 } from '@kbn/usage-collection-plugin/server';
-import { PluginInitializerContext, Plugin, CoreSetup, Logger, CoreStart } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  Logger,
+  CoreStart,
+} from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
 } from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskPollingLifecycle } from './polling_lifecycle';
-import { TaskManagerConfig } from './config';
-import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
+import type { TaskManagerConfig } from './config';
+import type { Middleware } from './lib/middleware';
+import { createInitialMiddleware, addMiddlewareToChain } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
-import { TaskDefinitionRegistry, TaskTypeDictionary } from './task_type_dictionary';
-import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
+import type { TaskDefinitionRegistry } from './task_type_dictionary';
+import { TaskTypeDictionary } from './task_type_dictionary';
+import type { AggregationOpts, FetchResult, SearchOpts } from './task_store';
+import { TaskStore } from './task_store';
 import { TaskScheduling } from './task_scheduling';
 import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
-import { createMonitoringStats, MonitoringStats } from './monitoring';
-import { ConcreteTaskInstance } from './task';
+import type { MonitoringStats } from './monitoring';
+import { createMonitoringStats } from './monitoring';
+import type { ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
-import { metricsStream, Metrics } from './metrics';
+import type { Metrics } from './metrics';
+import { metricsStream } from './metrics';
 import { TaskManagerMetricsCollector } from './metrics/task_metrics_collector';
 import { TaskPartitioner } from './lib/task_partitioner';
 import { getDefaultCapacity } from './lib/get_default_capacity';
@@ -57,6 +71,7 @@ export interface TaskManagerSetupContract {
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
+  registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -74,11 +89,13 @@ export type TaskManagerStartContract = Pick<
     removeIfExists: TaskStore['remove'];
   } & {
     getRegisteredTypes: () => string[];
+    registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => void;
   };
 
 export interface TaskManagerPluginsStart {
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface TaskManagerPluginsSetup {
@@ -116,6 +133,7 @@ export class TaskManagerPlugin
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
+  private canEncryptSavedObjects: boolean;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -126,6 +144,7 @@ export class TaskManagerPlugin
     this.nodeRoles = initContext.node.roles;
     this.shouldRunBackgroundTasks = this.nodeRoles.backgroundTasks;
     this.adHocTaskCounter = new AdHocTaskCounter();
+    this.canEncryptSavedObjects = false;
   }
 
   isNodeBackgroundTasksOnly() {
@@ -156,6 +175,7 @@ export class TaskManagerPlugin
       });
 
     setupSavedObjects(core.savedObjects, this.config);
+
     this.taskManagerId = this.initContext.env.instanceUuid;
 
     if (!this.taskManagerId) {
@@ -260,12 +280,15 @@ export class TaskManagerPlugin
       registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
+      registerCanEncryptedSavedObjects: (canEncrypt: boolean) => {
+        this.canEncryptSavedObjects = canEncrypt;
+      },
     };
   }
 
   public start(
-    { savedObjects, elasticsearch, executionContext, docLinks }: CoreStart,
-    { cloud }: TaskManagerPluginsStart
+    { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
+    { cloud, spaces }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -288,6 +311,7 @@ export class TaskManagerPlugin
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
+      savedObjectsService: savedObjects,
       esClient: elasticsearch.client.asInternalUser,
       index: TASK_MANAGER_INDEX,
       definitions: this.definitions,
@@ -296,6 +320,9 @@ export class TaskManagerPlugin
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       logger: this.logger,
       requestTimeouts: this.config.request_timeouts,
+      security,
+      canEncryptSavedObjects: this.canEncryptSavedObjects,
+      spaces,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -340,6 +367,7 @@ export class TaskManagerPlugin
       });
 
       this.taskPollingLifecycle = new TaskPollingLifecycle({
+        basePathService: http.basePath,
         config: this.config!,
         definitions: this.definitions,
         logger: this.logger,
@@ -399,6 +427,9 @@ export class TaskManagerPlugin
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
       getRegisteredTypes: () => this.definitions.getAllTypes(),
       bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
+      registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => {
+        taskStore.registerEncryptedSavedObjectsClient(client);
+      },
     };
   }
 

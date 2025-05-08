@@ -852,6 +852,18 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should not populate agent.protection and signed properties for standalone policies', async () => {
+    appContextService.start(createAppContextStartContractMock());
+
+    mockAgentPolicy({});
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy', {
+      standalone: true,
+    });
+
+    expect(agentPolicy!.agent!.protection).toBeUndefined();
+    expect(agentPolicy!.signed).toBeUndefined();
+  });
+
   it('should compile full policy with correct namespaces', async () => {
     mockedGetPackageInfo.mockResolvedValue({
       data_streams: [
@@ -1425,6 +1437,40 @@ ssl.test: 123
     `);
   });
 
+  it('should not override advanced yaml ssl fields for logstash output type', () => {
+    const policyOutput = transformOutputToFullPolicyOutput(
+      {
+        id: 'id123',
+        hosts: ['host.fr:3332'],
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'test output',
+        type: 'logstash',
+        config_yaml: 'ssl:\n  verification_mode: "none" ',
+        ssl: {
+          certificate: '',
+          certificate_authorities: [],
+        },
+      },
+      undefined,
+      false
+    );
+
+    expect(policyOutput).toMatchInlineSnapshot(`
+      Object {
+        "hosts": Array [
+          "host.fr:3332",
+        ],
+        "ssl": Object {
+          "certificate": "",
+          "certificate_authorities": Array [],
+          "verification_mode": "none",
+        },
+        "type": "logstash",
+      }
+    `);
+  });
+
   it('should work with kafka output', () => {
     const policyOutput = transformOutputToFullPolicyOutput({
       id: 'id123',
@@ -1681,6 +1727,9 @@ describe('generateFleetConfig', () => {
           certificate: 'my-cert',
           key: 'my-key',
         },
+        secrets: {
+          service_token: { id: 'my-service-token' },
+        },
       },
       {
         id: 'output-2',
@@ -1707,6 +1756,9 @@ describe('generateFleetConfig', () => {
         certificate: 'my-cert',
         certificate_authorities: ['/tmp/ssl/ca.crt'],
         key: 'my-key',
+      },
+      secrets: {
+        service_token: { id: 'my-service-token' },
       },
     });
   });
@@ -1842,6 +1894,7 @@ describe('generateFleetConfig', () => {
           ssl: {
             key: { id: 'my-secret-key' },
           },
+          service_token: { id: 'my-service-token' },
         },
       },
     ] as any;
@@ -1864,6 +1917,7 @@ describe('generateFleetConfig', () => {
             id: 'my-secret-key',
           },
         },
+        service_token: { id: 'my-service-token' },
       },
       ssl: {
         certificate: 'my-cert',

@@ -41,6 +41,12 @@ export function registerRouteForBundle(
           path: schema.string(),
         }),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is used for serving assets and does not require authorization.',
+        },
+      },
     },
     createDynamicAssetHandler({
       publicPath,

@@ -17,7 +17,11 @@ export {
 } from './handlers';
 
 export { isESClientError } from './utils';
-export { FleetError as FleetError } from '../../common/errors';
+export {
+  FleetError as FleetError,
+  OutputInvalidError as OutputInvalidError,
+  AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
+} from '../../common/errors';
 
 export class RegistryError extends FleetError {}
 export class RegistryConnectionError extends RegistryError {}
@@ -57,6 +61,7 @@ export class AgentlessAgentCreateError extends FleetError {
     super(`Error creating agentless agent in Fleet, ${message}`);
   }
 }
+
 export class AgentlessAgentDeleteError extends FleetError {
   constructor(message: string) {
     super(`Error deleting agentless agent in Fleet, ${message}`);
@@ -115,7 +120,6 @@ export class FleetNotFoundError<TMeta = unknown> extends FleetError<TMeta> {}
 export class FleetTooManyRequestsError extends FleetError {}
 
 export class OutputUnauthorizedError extends FleetError {}
-export class OutputInvalidError extends FleetError {}
 export class OutputLicenceError extends FleetError {}
 export class DownloadSourceError extends FleetError {}
 export class DeleteUnenrolledAgentsPreconfiguredError extends FleetError {}
@@ -132,7 +136,9 @@ export class InputNotFoundError extends FleetNotFoundError {}
 export class OutputNotFoundError extends FleetNotFoundError {}
 export class PackageNotFoundError extends FleetNotFoundError {}
 export class ArchiveNotFoundError extends FleetNotFoundError {}
-
+export class IndexNotFoundError extends FleetNotFoundError {}
+export class CustomIntegrationNotFoundError extends FleetNotFoundError {}
+export class NotACustomIntegrationError extends FleetNotFoundError {}
 export class PackagePolicyNotFoundError extends FleetNotFoundError<{
   /** The package policy ID that was not found */
   packagePolicyId: string;

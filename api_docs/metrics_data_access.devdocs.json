@@ -999,7 +999,7 @@
         "label": "hostSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"memory\" | \"rx\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpu\" | \"cpuV2\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"rxV2\" | \"txV2\")[]"
+          "(\"memory\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"logRate\" | \"cpu\" | \"cpuV2\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"rxV2\" | \"txV2\")[]"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/host/metrics/index.ts",
         "deprecated": false,
@@ -2575,7 +2575,7 @@
         "label": "SnapshotMetricType",
         "description": [],
         "signature": [
-          "\"count\" | \"custom\" | \"memory\" | \"rx\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"cpuV2\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"rxV2\" | \"txV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
+          "\"count\" | \"custom\" | \"memory\" | \"rx\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"logRate\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"cpuV2\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"rxV2\" | \"txV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,

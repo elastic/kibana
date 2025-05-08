@@ -4,25 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { AppMountParameters } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
+import {
+  DiscoverSharedPublicSetup,
+  DiscoverSharedPublicStart,
+} from '@kbn/discover-shared-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 import {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { AppMountParameters } from '@kbn/core/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-/* eslint-disable @typescript-eslint/no-empty-interface*/
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
+/* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
 
 export interface StreamsApplicationProps {
@@ -33,25 +41,30 @@ export interface StreamsApplicationProps {
 export type StreamsApplicationComponentType = React.FC<StreamsApplicationProps>;
 
 export interface StreamsAppSetupDependencies {
-  streams: StreamsPluginSetup;
   data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
-  unifiedSearch: {};
+  discoverShared: DiscoverSharedPublicSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   share: SharePublicSetup;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
+  unifiedSearch: {};
 }
 
 export interface StreamsAppStartDependencies {
-  streams: StreamsPluginStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  share: SharePublicStart;
-  savedObjectsTagging: SavedObjectTaggingPluginStart;
-  navigation: NavigationPublicStart;
+  discover: DiscoverStart;
+  discoverShared: DiscoverSharedPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  indexManagement: IndexManagementPluginStart;
+  ingestPipelines: IngestPipelinesPluginStart;
   licensing: LicensingPluginStart;
+  navigation: NavigationPublicStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  savedObjectsTagging: SavedObjectTaggingPluginStart;
+  share: SharePublicStart;
+  streams: StreamsPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface StreamsAppPublicSetup {}

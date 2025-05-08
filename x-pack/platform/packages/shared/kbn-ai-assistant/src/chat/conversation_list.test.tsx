@@ -20,10 +20,10 @@ jest.mock('../hooks/use_conversations_by_date', () => ({
 }));
 
 jest.mock('../hooks/use_confirm_modal', () => ({
-  useConfirmModal: jest.fn().mockReturnValue({
+  useConfirmModal: jest.fn(() => ({
     element: <div data-test-subj="confirmModal" />,
     confirm: jest.fn(() => Promise.resolve(true)),
-  }),
+  })),
 }));
 
 jest.mock('../hooks/use_conversation_context_menu', () => ({
@@ -116,50 +116,83 @@ describe('ConversationList', () => {
     (useConversationsByDate as jest.Mock).mockReturnValue(mockCategorizedConversations);
   });
 
-  it('renders the component without errors', () => {
+  it('renders conversations and archived sections properly', () => {
     render(<ConversationList {...defaultProps} />);
-
-    const todayCategoryLabel = screen.getByText(/today/i, {
-      selector: 'div.euiText',
-    });
-    expect(todayCategoryLabel).toBeInTheDocument();
-
-    const yesterdayCategoryLabel = screen.getByText(/yesterday/i, {
-      selector: 'div.euiText',
-    });
-    expect(yesterdayCategoryLabel).toBeInTheDocument();
-
-    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
     expect(
-      screen.queryByText(
-        i18n.translate('xpack.aiAssistant.conversationList.errorMessage', {
-          defaultMessage: 'Failed to load',
+      screen.getByText(
+        i18n.translate('xpack.aiAssistant.conversationList.conversationsTitle', {
+          defaultMessage: 'Conversations',
         })
       )
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
 
     expect(
-      screen.queryByText(
-        i18n.translate('xpack.aiAssistant.conversationList.noConversations', {
-          defaultMessage: 'No conversations',
+      screen.getByText(
+        i18n.translate('xpack.aiAssistant.conversationList.archivedTitle', {
+          defaultMessage: 'Archived',
         })
       )
-    ).not.toBeInTheDocument();
-
-    expect(screen.getByTestId('observabilityAiAssistantNewChatButton')).toBeInTheDocument();
+    ).toBeInTheDocument();
   });
 
-  it('displays loading state', () => {
-    render(<ConversationList {...defaultProps} isLoading={true} />);
+  it('toggles conversations and archived sections correctly', async () => {
+    render(<ConversationList {...defaultProps} />);
+    const conversationsHeader = screen.getByText(/Conversations/i);
+    const archivedHeader = screen.getByText(/Archived/i);
+
+    fireEvent.click(archivedHeader);
+    expect(
+      screen.getByText(
+        i18n.translate('xpack.aiAssistant.conversationList.archivedTitle', {
+          defaultMessage: 'Archived',
+        })
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.click(conversationsHeader);
+    expect(
+      screen.getByText(
+        i18n.translate('xpack.aiAssistant.conversationList.conversationsTitle', {
+          defaultMessage: 'Conversations',
+        })
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('renders categorized conversations inside collapsible sections', () => {
+    render(<ConversationList {...defaultProps} />);
+    const todayLabels = screen.getAllByText(DATE_CATEGORY_LABELS.TODAY);
+    expect(todayLabels.length).toBeGreaterThan(0);
+
+    const conversationLinks = screen.getAllByText("Today's Conversation");
+    expect(conversationLinks.length).toBeGreaterThan(0);
+  });
+
+  it('calls onConversationSelect when a conversation is clicked', () => {
+    render(<ConversationList {...defaultProps} />);
+    const conversationLinks = screen.getAllByText("Today's Conversation");
+    fireEvent.click(conversationLinks[0]);
+    expect(defaultProps.onConversationSelect).toHaveBeenCalledWith('1');
+  });
+
+  it('displays loading state when isLoading is true and no conversations', () => {
+    render(
+      <ConversationList
+        {...defaultProps}
+        isLoading={true}
+        conversations={{ ...mockConversations, value: { conversations: [] } }}
+      />
+    );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('displays error state', () => {
-    const errorProps = {
-      ...defaultProps,
-      conversations: { ...mockConversations, error: new Error('An error occurred') },
-    };
-    render(<ConversationList {...errorProps} />);
+  it('displays error state when error is set', () => {
+    render(
+      <ConversationList
+        {...defaultProps}
+        conversations={{ ...mockConversations, error: new Error('An error occurred') }}
+      />
+    );
     expect(
       screen.getByText(
         i18n.translate('xpack.aiAssistant.conversationList.errorMessage', {
@@ -169,28 +202,24 @@ describe('ConversationList', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders categorized conversations', () => {
-    render(<ConversationList {...defaultProps} />);
-    Object.entries(mockCategorizedConversations).forEach(([category, conversationList]) => {
-      if (conversationList.length > 0) {
-        expect(screen.getByText(DATE_CATEGORY_LABELS[category])).toBeInTheDocument();
-        conversationList.forEach((conversation) => {
-          expect(screen.getByText(conversation.label)).toBeInTheDocument();
-        });
-      }
-    });
+  it('renders "no conversations" message when conversation list is empty', () => {
+    render(
+      <ConversationList
+        {...defaultProps}
+        conversations={{ ...mockConversations, value: { conversations: [] } }}
+      />
+    );
+    expect(
+      screen.getByText(
+        i18n.translate('xpack.aiAssistant.conversationList.noConversations', {
+          defaultMessage: 'No conversations',
+        })
+      )
+    ).toBeInTheDocument();
   });
 
-  it('calls onConversationSelect when a conversation is clicked', () => {
-    render(<ConversationList {...defaultProps} />);
-    const todayConversation = screen.getByText("Today's Conversation");
-    fireEvent.click(todayConversation);
-    expect(defaultProps.onConversationSelect).toHaveBeenCalledWith('1');
-  });
-
-  it('calls delete conversation when delete icon is clicked', async () => {
+  it('triggers delete flow when delete icon is clicked and confirmed', async () => {
     const mockDeleteConversation = jest.fn(() => Promise.resolve());
-
     (useConversationContextMenu as jest.Mock).mockReturnValue({
       deleteConversation: mockDeleteConversation,
     });
@@ -198,27 +227,39 @@ describe('ConversationList', () => {
     render(<ConversationList {...defaultProps} />);
     fireEvent.click(screen.getAllByLabelText('Delete')[0]);
 
-    await waitFor(() => expect(mockDeleteConversation).toHaveBeenCalledTimes(1));
-    expect(mockDeleteConversation).toHaveBeenCalledWith('1');
+    await waitFor(() => {
+      expect(mockDeleteConversation).toHaveBeenCalledWith('1');
+    });
   });
 
-  it('renders a new chat button and triggers onConversationSelect when clicked', () => {
+  it('renders new chat button and triggers onConversationSelect', () => {
     render(<ConversationList {...defaultProps} />);
-    const newChatButton = screen.getByTestId('observabilityAiAssistantNewChatButton');
-    fireEvent.click(newChatButton);
+    const newChatBtn = screen.getByTestId('observabilityAiAssistantNewChatButton');
+    fireEvent.click(newChatBtn);
     expect(defaultProps.onConversationSelect).toHaveBeenCalledWith(undefined);
   });
 
-  it('renders "no conversations" message when there are no conversations', () => {
-    const emptyProps = {
-      ...defaultProps,
-      conversations: { ...mockConversations, value: { conversations: [] } },
+  it('defaults to archived section open if selected conversation is archived', () => {
+    const archivedConversation = {
+      ...mockConversations.value!.conversations[0],
+      archived: true,
     };
-    render(<ConversationList {...emptyProps} />);
+
+    render(
+      <ConversationList
+        {...defaultProps}
+        selectedConversationId="1"
+        conversations={{
+          ...mockConversations,
+          value: { conversations: [archivedConversation] },
+        }}
+      />
+    );
+
     expect(
       screen.getByText(
-        i18n.translate('xpack.aiAssistant.conversationList.noConversations', {
-          defaultMessage: 'No conversations',
+        i18n.translate('xpack.aiAssistant.conversationList.archivedTitle', {
+          defaultMessage: 'Archived',
         })
       )
     ).toBeInTheDocument();

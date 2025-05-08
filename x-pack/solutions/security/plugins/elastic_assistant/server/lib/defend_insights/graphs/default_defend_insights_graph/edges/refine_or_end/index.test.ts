@@ -51,6 +51,7 @@ const initialGraphState: GraphState = {
   refinePrompt: 'refinePrompt',
   replacements: {},
   unrefinedResults: [mockDefendInsight],
+  continuePrompt: 'continuePrompt',
 };
 
 describe('getRefineOrEndEdge', () => {

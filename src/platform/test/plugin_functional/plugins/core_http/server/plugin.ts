@@ -17,6 +17,7 @@ export class CoreHttpPlugin implements Plugin {
       {
         path: '/api/core_http/never_reply',
         validate: false,
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (ctx, req, res) => {
         // need the endpoint to never reply to test request cancelation on the client side.
@@ -28,6 +29,7 @@ export class CoreHttpPlugin implements Plugin {
       {
         path: '/api/core_http/headers',
         validate: false,
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (ctx, req, res) => {
         return res.ok({ body: req.headers });
@@ -39,6 +41,7 @@ export class CoreHttpPlugin implements Plugin {
         path: '/api/core_http/public_versioned_route',
         access: 'public',
         enableQueryVersion: false,
+        security: { authz: { enabled: false, reason: '' } },
       })
       .addVersion({ version: '2023-10-31', validate: false }, (ctx, req, res) => {
         return res.ok({
@@ -53,6 +56,7 @@ export class CoreHttpPlugin implements Plugin {
         path: '/api/core_http/internal_versioned_route',
         access: 'internal',
         enableQueryVersion: false,
+        security: { authz: { enabled: false, reason: '' } },
       })
       .addVersion({ version: '1', validate: false }, (ctx, req, res) => {
         return res.ok({
@@ -74,6 +78,7 @@ export class CoreHttpPlugin implements Plugin {
         path: '/api/core_http/versioned_route_with_query_version',
         access: 'internal',
         enableQueryVersion: true,
+        security: { authz: { enabled: false, reason: '' } },
       })
       .addVersion({ version: '1', validate: false }, (ctx, req, res) => {
         return res.ok({
@@ -94,6 +99,7 @@ export class CoreHttpPlugin implements Plugin {
       {
         path: '/api/core_http/error_stream',
         validate: false,
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (ctx, req, res) => {
         return res.customError({
@@ -107,6 +113,7 @@ export class CoreHttpPlugin implements Plugin {
       {
         path: '/api/core_http/error_buffer',
         validate: false,
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (ctx, req, res) => {
         return res.customError({

@@ -141,8 +141,8 @@ export const AgentResponseSchema = schema.object({
     schema.recordOf(
       schema.string(),
       schema.object({
-        api_key_id: schema.string(),
-        type: schema.string(),
+        api_key_id: schema.maybe(schema.string()),
+        type: schema.maybe(schema.string()),
         to_retire_api_key_ids: schema.maybe(
           schema.arrayOf(
             schema.object({
@@ -615,6 +615,8 @@ export const GetActionStatusResponseSchema = schema.object({
   items: schema.arrayOf(
     schema.object({
       actionId: schema.string(),
+      is_automatic: schema.maybe(schema.boolean()),
+
       nbAgentsActionCreated: schema.number({
         meta: {
           description: 'number of agents included in action from kibana',

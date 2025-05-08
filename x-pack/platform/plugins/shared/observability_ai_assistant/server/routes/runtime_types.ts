@@ -68,6 +68,7 @@ export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.interse
   }),
   t.partial({
     systemMessage: t.string,
+    archived: toBooleanRt,
   }),
 ]);
 

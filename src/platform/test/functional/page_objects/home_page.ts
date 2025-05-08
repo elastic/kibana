@@ -77,11 +77,11 @@ export class HomePageObject extends FtrService {
   }
 
   async getVisibileSolutions() {
-    const solutionPanels = await this.testSubjects.findAll('~homSolutionPanel', 2000);
+    const solutionPanels = await this.testSubjects.findAll('~homeSolutionPanel', 2000);
     const panelAttributes = await Promise.all(
       solutionPanels.map((panel) => panel.getAttribute('data-test-subj'))
     );
-    return panelAttributes.map((attributeValue) => attributeValue?.split('homSolutionPanel_')[1]);
+    return panelAttributes.map((attributeValue) => attributeValue?.split('homeSolutionPanel_')[1]);
   }
 
   async goToSampleDataPage() {
@@ -248,17 +248,5 @@ export class HomePageObject extends FtrService {
   // collapse the observability side nav details
   async collapseObservabibilitySideNav() {
     await this.testSubjects.click('collapsibleNavGroup-observability');
-  }
-
-  async loadSavedObjects() {
-    await this.retry.try(async () => {
-      await this.testSubjects.click('loadSavedObjects');
-      const successMsgExists = await this.testSubjects.exists('loadSavedObjects_success', {
-        timeout: 5000,
-      });
-      if (!successMsgExists) {
-        throw new Error('Failed to load saved objects');
-      }
-    });
   }
 }

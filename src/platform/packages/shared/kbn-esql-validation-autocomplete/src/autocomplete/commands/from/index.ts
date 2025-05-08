@@ -8,8 +8,8 @@
  */
 
 import { ESQLCommandOption } from '@kbn/esql-ast';
+import { i18n } from '@kbn/i18n';
 import { isMarkerNode } from '../../../shared/context';
-import { metadataOption } from '../../../definitions/options';
 import type { SuggestionRawDefinition } from '../../types';
 import { getOverlapRange, handleFragment, removeQuoteForSuggestedSources } from '../../helper';
 import { CommandSuggestParams } from '../../../definitions/types';
@@ -23,7 +23,6 @@ import {
 import {
   TRIGGER_SUGGESTION_COMMAND,
   buildFieldsDefinitions,
-  buildOptionDefinition,
   buildSourcesDefinitions,
 } from '../../factories';
 import { ESQLSourceResult } from '../../../shared/types';
@@ -70,18 +69,14 @@ export async function suggest({
   }
   // FROM something /
   else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
-    suggestions.push(buildOptionDefinition(metadataOption));
+    suggestions.push(metadataSuggestion);
     suggestions.push(commaCompleteItem);
     suggestions.push(pipeCompleteItem);
     suggestions.push(...(await getRecommendedQueriesSuggestions()));
   }
   // FROM something MET/
-  else if (
-    indexes.length > 0 &&
-    /^FROM\s+\S+\s+/i.test(innerText) &&
-    metadataOverlap.start !== metadataOverlap.end
-  ) {
-    suggestions.push(buildOptionDefinition(metadataOption));
+  else if (indexes.length > 0 && /^FROM\s+\S+\s+/i.test(innerText) && metadataOverlap) {
+    suggestions.push(metadataSuggestion);
   }
   // FROM someth/
   // FROM something/
@@ -127,10 +122,9 @@ export async function suggest({
               rangeToReplace,
             },
             {
-              ...buildOptionDefinition(metadataOption),
+              ...metadataSuggestion,
               filterText: fragment,
               text: fragment + ' METADATA ',
-              asSnippet: false, // turn this off because $ could be contained within the source name
               rangeToReplace,
             },
             ...recommendedQuerySuggestions.map((suggestion) => ({
@@ -160,6 +154,17 @@ function getSourceSuggestions(sources: ESQLSourceResult[]) {
       })
   );
 }
+
+const metadataSuggestion: SuggestionRawDefinition = {
+  label: 'METADATA',
+  text: 'METADATA ',
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metadataDoc', {
+    defaultMessage: 'Metadata',
+  }),
+  sortText: '1',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};
 
 async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string) {
   const existingFields = new Set(metadata.args.filter(isColumnItem).map(({ name }) => name));

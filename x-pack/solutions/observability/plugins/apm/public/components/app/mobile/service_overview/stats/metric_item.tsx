@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import type { MetricDatum } from '@elastic/charts';
-import { Chart, Metric } from '@elastic/charts';
+import { Chart, Metric, Settings } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EuiSkeletonText, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { EuiErrorBoundary } from '@elastic/eui';
@@ -22,6 +23,7 @@ export function MetricItem({
   isLoading: boolean;
   height?: string;
 }) {
+  const chartBaseTheme = useElasticChartsTheme();
   const hasData = !isEmpty(data);
   return (
     <div
@@ -40,6 +42,7 @@ export function MetricItem({
       ) : (
         <EuiErrorBoundary>
           <Chart>
+            <Settings baseTheme={chartBaseTheme} />
             <Metric id={`metric_${id}`} data={[data]} />
           </Chart>
         </EuiErrorBoundary>

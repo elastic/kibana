@@ -58,7 +58,17 @@ describe('DeprecationsService', () => {
       // registers get route '/'
       expect(router.get).toHaveBeenCalledTimes(1);
       expect(router.get).toHaveBeenCalledWith(
-        { options: { access: 'public' }, path: '/', validate: false },
+        {
+          options: { access: 'public' },
+          path: '/',
+          validate: false,
+          security: {
+            authz: {
+              enabled: false,
+              reason: expect.any(String),
+            },
+          },
+        },
         expect.any(Function)
       );
     });

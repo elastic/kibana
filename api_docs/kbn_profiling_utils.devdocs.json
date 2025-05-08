@@ -2385,7 +2385,7 @@
         "tags": [],
         "label": "FrameType",
         "description": [
-          "\nFrame type"
+          "\nFrame type\nThese frame types need to match with the constants defined in\nhttps://github.com/open-telemetry/opentelemetry-ebpf-profiler/blob/main/libpf/frametype.go"
         ],
         "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,

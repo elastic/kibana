@@ -60,7 +60,7 @@ async function getTestConfig({
       services: {
         observabilityAIAssistantUI: (context: InheritedFtrProviderContext) =>
           ObservabilityAIAssistantUIProvider(context),
-        observabilityAIAssistantAPIClient: async (context: InheritedFtrProviderContext) => {
+        observabilityAIAssistantApi: async () => {
           return {
             admin: getScopedApiClient(kibanaServer, 'elastic'),
             viewer: getScopedApiClient(kibanaServer, viewer.username),

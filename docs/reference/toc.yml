@@ -14,6 +14,7 @@ toc:
       - file: configuration-reference/internationalization-settings.md
       - file: configuration-reference/logging-settings.md
       - file: configuration-reference/logs-settings.md
+      - file: configuration-reference/map-settings.md
       - file: configuration-reference/metrics-settings.md
       - file: configuration-reference/monitoring-settings.md
       - file: configuration-reference/reporting-settings.md

@@ -73,7 +73,8 @@ export async function indexHistoricalData({
       generatorsAndClients.map(async ({ client, generator }) => {
         await streamManager.index(client, generator);
       })
-    ).finally(() => {
+    ).finally(async () => {
+      await streamManager.teardown();
       clearInterval(intervalId);
     });
   });

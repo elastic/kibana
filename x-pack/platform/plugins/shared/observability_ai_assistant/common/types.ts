@@ -62,6 +62,7 @@ export interface Conversation {
   numeric_labels: Record<string, number>;
   namespace: string;
   public: boolean;
+  archived?: boolean;
 }
 
 type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
@@ -100,6 +101,15 @@ export enum KnowledgeBaseType {
 
   // contextual entries are only included in the system prompt if the user's input matches the context
   Contextual = 'contextual',
+}
+
+export enum KnowledgeBaseState {
+  NOT_INSTALLED = 'NOT_INSTALLED',
+  MODEL_PENDING_DEPLOYMENT = 'MODEL_PENDING_DEPLOYMENT',
+  DEPLOYING_MODEL = 'DEPLOYING_MODEL',
+  MODEL_PENDING_ALLOCATION = 'MODEL_PENDING_ALLOCATION',
+  READY = 'READY',
+  ERROR = 'ERROR',
 }
 
 export interface ObservabilityAIAssistantScreenContextRequest {

@@ -59,7 +59,6 @@ export function ApmAvailabilityIndicatorTypeForm() {
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexGroup direction="row" gutterSize="m">
         <FieldSelector
-          allowAllOption={false}
           label={i18n.translate('xpack.slo.sloEdit.apmAvailability.serviceName', {
             defaultMessage: 'Service name',
           })}

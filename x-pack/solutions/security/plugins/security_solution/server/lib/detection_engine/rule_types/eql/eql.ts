@@ -5,25 +5,18 @@
  * 2.0.
  */
 import { performance } from 'perf_hooks';
-
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
 
 import type { ShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import { buildEqlSearchRequest } from './build_eql_search_request';
-import { createEnrichEventsFunction } from '../utils/enrichments';
 
 import type { ExperimentalFeatures } from '../../../../../common';
 import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
-  CreateRuleOptions,
   WrapSuppressedHits,
   SecuritySharedParams,
+  SecurityRuleServices,
 } from '../types';
 import {
   addToSearchAfterReturn,
@@ -53,16 +46,17 @@ import { isEqlSequenceQuery } from '../../../../../common/detection_engine/utils
 import { logShardFailures } from '../utils/log_shard_failure';
 import { checkErrorDetails } from '../utils/check_error_details';
 import { wrapSequences } from './wrap_sequences';
-import { wrapHits } from '../factories';
+import { bulkCreate, wrapHits } from '../factories';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 interface EqlExecutorParams {
   sharedParams: SecuritySharedParams<EqlRuleParams>;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: SecurityRuleServices;
   wrapSuppressedHits: WrapSuppressedHits;
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
   state?: Record<string, unknown>;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }
 
 export const eqlExecutor = async ({
@@ -77,7 +71,7 @@ export const eqlExecutor = async ({
   result: SearchAfterAndBulkCreateReturnType;
   loggedRequests?: RulePreviewLoggedRequest[];
 }> => {
-  const { completeRule, tuple, ruleExecutionLogger, bulkCreate } = sharedParams;
+  const { completeRule, tuple, ruleExecutionLogger } = sharedParams;
   const ruleParams = completeRule.ruleParams;
   const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
@@ -146,7 +140,10 @@ export const eqlExecutor = async ({
       const { events, sequences } = response.hits;
 
       if (events) {
-        if (isAlertSuppressionActive) {
+        if (
+          isAlertSuppressionActive &&
+          alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
+        ) {
           await bulkCreateSuppressedAlertsInMemory({
             sharedParams,
             enrichedEvents: events,
@@ -155,7 +152,6 @@ export const eqlExecutor = async ({
             buildReasonMessage: buildReasonMessageForEqlAlert,
             alertSuppression: completeRule.ruleParams.alertSuppression,
             wrapSuppressedHits,
-            experimentalFeatures,
           });
         } else {
           newSignals = wrapHits(sharedParams, events, buildReasonMessageForEqlAlert);
@@ -163,7 +159,6 @@ export const eqlExecutor = async ({
       } else if (sequences) {
         if (
           isAlertSuppressionActive &&
-          experimentalFeatures.alertSuppressionForSequenceEqlRuleEnabled &&
           alertSuppressionTypeGuard(completeRule.ruleParams.alertSuppression)
         ) {
           await bulkCreateSuppressedSequencesInMemory({
@@ -173,7 +168,6 @@ export const eqlExecutor = async ({
             services,
             buildReasonMessage: buildReasonMessageForEqlAlert,
             alertSuppression: completeRule.ruleParams.alertSuppression,
-            experimentalFeatures,
           });
         } else {
           newSignals = wrapSequences({
@@ -189,14 +183,11 @@ export const eqlExecutor = async ({
       }
 
       if (newSignals?.length) {
-        const createResult = await bulkCreate(
-          newSignals,
-          undefined,
-          createEnrichEventsFunction({
-            services,
-            logger: ruleExecutionLogger,
-          })
-        );
+        const createResult = await bulkCreate({
+          wrappedAlerts: newSignals,
+          sharedParams,
+          services,
+        });
         addToSearchAfterReturn({ current: result, next: createResult });
       }
 

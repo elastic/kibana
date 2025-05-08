@@ -16,7 +16,7 @@ interface MissingAIConnectorCalloutProps {
 
 export const MissingAIConnectorCallout = React.memo<MissingAIConnectorCalloutProps>(
   ({ onExpandAiConnectorsCard }) => (
-    <EuiPanel hasShadow={false} paddingSize="none">
+    <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
       <CardCallOut
         color="warning"
         text={i18n.START_MIGRATION_CARD_CONNECTOR_MISSING_TEXT}

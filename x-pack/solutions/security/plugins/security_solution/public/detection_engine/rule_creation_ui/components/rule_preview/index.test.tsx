@@ -16,12 +16,12 @@ import { TestProviders } from '../../../../common/mock';
 import type { RulePreviewProps } from '.';
 import { RulePreview, REASONABLE_INVOCATION_COUNT } from '.';
 import { usePreviewRoute } from './use_preview_route';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import { DataSourceType } from '../../../common/types';
 import {
   getStepScheduleDefaultValue,
   stepAboutDefaultValue,
   stepDefineDefaultValue,
-} from '../../../../detections/pages/detection_engine/rules/utils';
+} from '../../../common/utils';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 
 jest.mock('../../../../common/lib/kibana');
@@ -38,6 +38,8 @@ jest.mock('./use_preview_invocation_count');
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
+
+const verifyRuleDefinitionMock = jest.fn().mockResolvedValue(true);
 
 // rule types that do not support logged requests
 const doNotSupportLoggedRequests: Type[] = ['threat_match'];
@@ -59,6 +61,7 @@ const getMockIndexPattern = (): DataViewBase => ({
 });
 
 const defaultProps: RulePreviewProps = {
+  verifyRuleDefinition: verifyRuleDefinitionMock,
   defineRuleData: {
     ...stepDefineDefaultValue,
     ruleType: 'threat_match',
@@ -153,6 +156,18 @@ describe('PreviewQuery', () => {
     );
 
     expect(await wrapper.findByTestId('previewInvocationCountWarning')).toBeTruthy();
+  });
+
+  test('it renders a warning when the definition step form is invalid', async () => {
+    verifyRuleDefinitionMock.mockResolvedValueOnce(false);
+
+    const wrapper = render(
+      <TestProviders>
+        <RulePreview {...defaultProps} />
+      </TestProviders>
+    );
+    (await wrapper.findByTestId('previewSubmitButton')).click();
+    expect(await wrapper.findByTestId('previewRuleDefinitionInvalidWarning')).toBeTruthy();
   });
 
   supportLoggedRequests.forEach((ruleType) => {

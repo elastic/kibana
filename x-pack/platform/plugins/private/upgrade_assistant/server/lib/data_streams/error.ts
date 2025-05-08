@@ -12,16 +12,17 @@ import {
   ReindexAlreadyInProgress,
   ReindexCannotBeCancelled,
   MetadataCannotBeGrabbed,
+  ReadonlyTaskFailed,
 } from './error_symbols';
 
-export class ReindexError extends Error {
+export class DataStreamMigrationError extends Error {
   constructor(message: string, public readonly symbol: symbol) {
     super(message);
   }
 }
 
 export const createErrorFactory = (symbol: symbol) => (message: string) => {
-  return new ReindexError(message, symbol);
+  return new DataStreamMigrationError(message, symbol);
 };
 
 export const error = {
@@ -31,4 +32,5 @@ export const error = {
   reindexTaskFailed: createErrorFactory(ReindexTaskFailed),
   reindexAlreadyInProgress: createErrorFactory(ReindexAlreadyInProgress),
   reindexCannotBeCancelled: createErrorFactory(ReindexCannotBeCancelled),
+  readonlyTaskFailed: createErrorFactory(ReadonlyTaskFailed),
 };

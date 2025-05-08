@@ -17,16 +17,24 @@ import { getConfigFromFiles } from '@kbn/config';
 const isNotEmpty = _.negate(_.isEmpty);
 const isNotNull = _.negate(_.isNull);
 
-/** @typedef {'es' | 'oblt' | 'security'} ServerlessProjectMode */
-/** @type {ServerlessProjectMode[]} */
-const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
+/**
+ * BOOKMARK - List of Kibana project types
+ * @type {import('@kbn/projects-solutions-groups').KibanaProject[]}
+ * */
+const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security', 'chat'];
 
 /**
  * Collects paths to configurations to be included in the final configuration stack.
- * @param {{configOverrides?: string[], devConfig?: boolean, dev?: boolean, serverless?: string | true}} options Options impacting the outgoing config list
+ * @param {{configOverrides?: string[], devConfig?: boolean, dev?: boolean, serverless?: string | true, securityProductTier?: ServerlessSecurityTier}} options Options impacting the outgoing config list
  * @returns List of paths to configurations to be merged, from left to right.
  */
-export function compileConfigStack({ configOverrides, devConfig, dev, serverless }) {
+export function compileConfigStack({
+  configOverrides,
+  devConfig,
+  dev,
+  serverless,
+  securityProductTier,
+}) {
   const cliConfigs = configOverrides || [];
   const envConfigs = getEnvConfigs();
   const defaultConfig = getConfigPath();
@@ -51,9 +59,10 @@ export function compileConfigStack({ configOverrides, devConfig, dev, serverless
     }
   }
 
+  // Security specific configs
   if (serverlessMode === 'security') {
     // Security specific tier configs
-    const serverlessSecurityTier = getSecurityTierFromCfg(configs);
+    const serverlessSecurityTier = securityProductTier || getSecurityTierFromCfg(configs);
     if (serverlessSecurityTier) {
       configs.push(resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.yml`));
       if (dev && devConfig !== false) {
@@ -85,6 +94,8 @@ function getServerlessModeFromCfg(configs) {
 function getSecurityTierFromCfg(configs) {
   const config = getConfigFromFiles(configs.filter(isNotNull));
 
+  // A product type is always present and for multiple addons in the config the product type/tier is always the same for all of them,
+  // and is the only element in the array, which is why we can access the first element for product type/tier
   const productType = _.get(config, 'xpack.securitySolutionServerless.productTypes', [])[0];
   return productType?.product_tier;
 }

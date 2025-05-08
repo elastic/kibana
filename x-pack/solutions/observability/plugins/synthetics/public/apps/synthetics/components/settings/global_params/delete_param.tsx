@@ -15,7 +15,6 @@ import {
   deleteGlobalParamsAction,
   selectGlobalParamState,
 } from '../../../state/global_params';
-import { syncGlobalParamsAction } from '../../../state/settings';
 import { NO_LABEL, YES_LABEL } from '../../monitors_page/management/monitor_list_table/labels';
 import { ListParamItem } from './params_list';
 
@@ -38,7 +37,6 @@ export const DeleteParam = ({
     if (!isDeleting && (listOfParams ?? []).length === 0) {
       setIsDeleteModalVisible(false);
       dispatch(getGlobalParamAction.get());
-      dispatch(syncGlobalParamsAction.get());
     }
   }, [isDeleting, setIsDeleteModalVisible, name, dispatch, listOfParams]);
 

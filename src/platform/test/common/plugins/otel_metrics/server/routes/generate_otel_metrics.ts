@@ -14,6 +14,12 @@ export const generateOtelMetrics = (router: IRouter, metrics: Metrics) => {
   router.post(
     {
       path: '/api/generate_otel_metrics',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (_context, _req, res): Promise<IKibanaResponse<{}>> {

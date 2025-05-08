@@ -14,7 +14,8 @@
     "requiredPlugins": [
       "data",
       "fieldFormats",
-      "share"
+      "share",
+      "embeddable"
     ],
     "optionalPlugins": [
       "fieldsMetadata"

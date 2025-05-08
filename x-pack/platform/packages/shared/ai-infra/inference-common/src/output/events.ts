@@ -23,8 +23,9 @@ export type Output = Record<string, any> | undefined | unknown;
 /**
  * Update (chunk) event for the {@link OutputAPI}
  */
-export type OutputUpdateEvent<TId extends string = string> =
-  InferenceTaskEventBase<OutputEventType.OutputUpdate> & {
+export type OutputUpdateEvent<TId extends string = string> = InferenceTaskEventBase<
+  OutputEventType.OutputUpdate,
+  {
     /**
      * The id of the operation, as provided as input
      */
@@ -33,7 +34,8 @@ export type OutputUpdateEvent<TId extends string = string> =
      * The text content of the chunk
      */
     content: string;
-  };
+  }
+>;
 
 /**
  * Completion (complete message) event for the {@link OutputAPI}
@@ -41,21 +43,24 @@ export type OutputUpdateEvent<TId extends string = string> =
 export type OutputCompleteEvent<
   TId extends string = string,
   TOutput extends Output = Output
-> = InferenceTaskEventBase<OutputEventType.OutputComplete> & {
-  /**
-   * The id of the operation, as provided as input
-   */
-  id: TId;
-  /**
-   * The task output, following the schema specified as input
-   */
-  output: TOutput;
-  /**
-   * Potential text content provided by the LLM,
-   * if it was provided in addition to the tool call
-   */
-  content: string;
-};
+> = InferenceTaskEventBase<
+  OutputEventType.OutputComplete,
+  {
+    /**
+     * The id of the operation, as provided as input
+     */
+    id: TId;
+    /**
+     * The task output, following the schema specified as input
+     */
+    output: TOutput;
+    /**
+     * Potential text content provided by the LLM,
+     * if it was provided in addition to the tool call
+     */
+    content: string;
+  }
+>;
 
 /**
  * Events emitted from the {@link OutputEvent}.

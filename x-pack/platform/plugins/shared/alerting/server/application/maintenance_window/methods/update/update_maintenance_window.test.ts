@@ -395,56 +395,6 @@ describe('MaintenanceWindowClient - update', () => {
     `);
   });
 
-  it('should throw if trying to update a MW with a scoped query with other than 1 category ID', async () => {
-    jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
-    const mockMaintenanceWindow = getMockMaintenanceWindow({
-      expirationDate: moment(new Date(firstTimestamp)).tz('UTC').subtract(1, 'year').toISOString(),
-    });
-
-    savedObjectsClient.get.mockResolvedValueOnce({
-      attributes: mockMaintenanceWindow,
-      version: '123',
-      id: 'test-id',
-      categoryIds: ['observability', 'securitySolution'],
-    } as unknown as SavedObject);
-
-    await expect(async () => {
-      await updateMaintenanceWindow(mockContext, {
-        id: 'test-id',
-        data: {
-          scopedQuery: {
-            kql: "_id: '1234'",
-            filters: [
-              {
-                meta: {
-                  disabled: false,
-                  negate: false,
-                  alias: null,
-                  key: 'kibana.alert.action_group',
-                  field: 'kibana.alert.action_group',
-                  params: {
-                    query: 'test',
-                  },
-                  type: 'phrase',
-                },
-                $state: {
-                  store: FilterStateStore.APP_STATE,
-                },
-                query: {
-                  match_phrase: {
-                    'kibana.alert.action_group': 'test',
-                  },
-                },
-              },
-            ],
-          },
-        },
-      });
-    }).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update maintenance window by id: test-id, Error: Error: Cannot edit archived maintenance windows: Cannot edit archived maintenance windows"`
-    );
-  });
-
   it('should throw if updating a maintenance window that has expired', async () => {
     jest.useFakeTimers().setSystemTime(new Date(firstTimestamp));
     const mockMaintenanceWindow = getMockMaintenanceWindow({

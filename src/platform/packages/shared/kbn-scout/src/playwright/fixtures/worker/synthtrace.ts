@@ -12,7 +12,7 @@ import type {
   ApmFields,
   Fields,
   InfraDocument,
-  OtelDocument,
+  ApmOtelFields,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
 import Url from 'url';
@@ -20,7 +20,6 @@ import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base
 import {
   getApmSynthtraceEsClient,
   getInfraSynthtraceEsClient,
-  getOtelSynthtraceEsClient,
 } from '../../../common/services/synthtrace';
 import { coreWorkerFixtures } from './core_fixtures';
 
@@ -32,7 +31,7 @@ interface SynthtraceFixtureEsClient<TFields extends Fields> {
 export interface SynthtraceFixture {
   apmSynthtraceEsClient: SynthtraceFixtureEsClient<ApmFields>;
   infraSynthtraceEsClient: SynthtraceFixtureEsClient<InfraDocument>;
-  otelSynthtraceEsClient: SynthtraceFixtureEsClient<OtelDocument>;
+  otelSynthtraceEsClient: SynthtraceFixtureEsClient<ApmOtelFields>;
 }
 
 const useSynthtraceClient = async <TFields extends Fields>(
@@ -79,14 +78,6 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
       );
 
       await useSynthtraceClient<InfraDocument>(infraSynthtraceEsClient, use);
-    },
-    { scope: 'worker' },
-  ],
-  otelSynthtraceEsClient: [
-    async ({ esClient, log }, use) => {
-      const otelSynthtraceEsClient = await getOtelSynthtraceEsClient(esClient, log);
-
-      await useSynthtraceClient<OtelDocument>(otelSynthtraceEsClient, use);
     },
     { scope: 'worker' },
   ],

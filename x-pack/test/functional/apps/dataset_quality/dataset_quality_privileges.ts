@@ -114,7 +114,14 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         it('Estimated data are not available due to underprivileged user', async () => {
           await testSubjects.existOrFail(
-            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-${PageObjects.datasetQuality.texts.estimatedData}`
+            `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-${PageObjects.datasetQuality.texts.estimatedData}`,
+            /**
+             * This test was failing periodically because of
+             * poor network conditions in the CI.
+             * In those cases the default timeout of 2 minutes
+             * was not enough to properly load the UI and pass the test.
+             */
+            { timeout: 240000 }
           );
         });
 

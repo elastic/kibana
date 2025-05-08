@@ -64,6 +64,9 @@ const configSchema = schema.object({
   managedServiceUrl: offeringBasedSchema({
     serverless: schema.string({ defaultValue: '' }),
   }),
+  managedOtlpServiceUrl: offeringBasedSchema({
+    serverless: schema.string({ defaultValue: '' }),
+  }),
   featureFlags: schema.object({
     agentConfigurationAvailable: disabledOnServerless,
     configurableIndicesAvailable: disabledOnServerless,

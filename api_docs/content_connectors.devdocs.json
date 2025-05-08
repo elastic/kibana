@@ -1,0 +1,267 @@
+{
+  "id": "contentConnectors",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "contentConnectors",
+      "id": "def-public.SearchConnectorsPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchConnectorsPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/content_connectors/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "contentConnectors",
+          "id": "def-public.SearchConnectorsPluginSetup.getConnectorTypes",
+          "type": "Function",
+          "tags": [],
+          "label": "getConnectorTypes",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "@kbn/search-connectors",
+              "scope": "common",
+              "docId": "kibKbnSearchConnectorsPluginApi",
+              "section": "def-common.ConnectorServerSideDefinition",
+              "text": "ConnectorServerSideDefinition"
+            },
+            "[]"
+          ],
+          "path": "x-pack/platform/plugins/shared/content_connectors/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "contentConnectors",
+      "id": "def-public.SearchConnectorsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchConnectorsPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/content_connectors/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "contentConnectors",
+          "id": "def-public.SearchConnectorsPluginStart.getConnectorTypes",
+          "type": "Function",
+          "tags": [],
+          "label": "getConnectorTypes",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "@kbn/search-connectors",
+              "scope": "common",
+              "docId": "kibKbnSearchConnectorsPluginApi",
+              "section": "def-common.ConnectorDefinition",
+              "text": "ConnectorDefinition"
+            },
+            "[]"
+          ],
+          "path": "x-pack/platform/plugins/shared/content_connectors/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "contentConnectors",
+      "id": "def-server.SearchConnectorsPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchConnectorsPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/content_connectors/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "contentConnectors",
+          "id": "def-server.SearchConnectorsPluginSetup.getConnectorTypes",
+          "type": "Function",
+          "tags": [],
+          "label": "getConnectorTypes",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "@kbn/search-connectors",
+              "scope": "common",
+              "docId": "kibKbnSearchConnectorsPluginApi",
+              "section": "def-common.ConnectorServerSideDefinition",
+              "text": "ConnectorServerSideDefinition"
+            },
+            "[]"
+          ],
+          "path": "x-pack/platform/plugins/shared/content_connectors/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "contentConnectors",
+      "id": "def-server.SearchConnectorsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "SearchConnectorsPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/content_connectors/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "contentConnectors",
+          "id": "def-server.SearchConnectorsPluginStart.cloud",
+          "type": "Object",
+          "tags": [],
+          "label": "cloud",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "cloud",
+              "scope": "server",
+              "docId": "kibCloudPluginApi",
+              "section": "def-server.CloudStart",
+              "text": "CloudStart"
+            },
+            " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/content_connectors/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "contentConnectors",
+          "id": "def-server.SearchConnectorsPluginStart.data",
+          "type": "Object",
+          "tags": [],
+          "label": "data",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "data",
+              "scope": "server",
+              "docId": "kibDataPluginApi",
+              "section": "def-server.DataPluginStart",
+              "text": "DataPluginStart"
+            },
+            " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/content_connectors/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "contentConnectors",
+          "id": "def-server.SearchConnectorsPluginStart.fleet",
+          "type": "Object",
+          "tags": [],
+          "label": "fleet",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "fleet",
+              "scope": "server",
+              "docId": "kibFleetPluginApi",
+              "section": "def-server.FleetStartContract",
+              "text": "FleetStartContract"
+            },
+            " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/content_connectors/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "contentConnectors",
+          "id": "def-server.SearchConnectorsPluginStart.spaces",
+          "type": "Object",
+          "tags": [],
+          "label": "spaces",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "spaces",
+              "scope": "server",
+              "docId": "kibSpacesPluginApi",
+              "section": "def-server.SpacesPluginStart",
+              "text": "SpacesPluginStart"
+            },
+            " | undefined"
+          ],
+          "path": "x-pack/platform/plugins/shared/content_connectors/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "contentConnectors",
+          "id": "def-server.SearchConnectorsPluginStart.getConnectors",
+          "type": "Function",
+          "tags": [],
+          "label": "getConnectors",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "@kbn/search-connectors",
+              "scope": "common",
+              "docId": "kibKbnSearchConnectorsPluginApi",
+              "section": "def-common.ConnectorServerSideDefinition",
+              "text": "ConnectorServerSideDefinition"
+            },
+            "[]"
+          ],
+          "path": "x-pack/platform/plugins/shared/content_connectors/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -91,6 +91,13 @@ export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
             description: 'Whether the conversation is public or not.',
           },
         },
+        archived: {
+          type: 'boolean',
+          _meta: {
+            description: 'Whether the conversation is archived or not.',
+            optional: true,
+          },
+        },
       },
     },
   },

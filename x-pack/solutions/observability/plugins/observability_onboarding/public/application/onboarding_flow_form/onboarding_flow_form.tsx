@@ -27,6 +27,7 @@ import { css } from '@emotion/react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { PackageListSearchForm } from '../package_list_search_form/package_list_search_form';
 import { Category } from './types';
 import { useCustomCards } from './use_custom_cards';
@@ -113,6 +114,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
   const categorySelectorTitleId = useGeneratedHtmlId();
   const packageListTitleId = useGeneratedHtmlId();
+  const { onPageReady } = usePerformanceContext();
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -147,6 +149,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
     },
     [] // eslint-disable-line react-hooks/exhaustive-deps
   );
+
+  useEffect(() => {
+    onPageReady({
+      meta: { description: '[ttfmp_onboarding] The UI with onboarding categories is rendered' },
+    });
+  }, [onPageReady]);
 
   const featuredCardsForCategoryMap: Record<Category, string[]> = {
     host: ['auto-detect-logs', 'otel-logs'],

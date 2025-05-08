@@ -18,7 +18,7 @@ import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
-import './rule.scss';
+
 import type { RuleEventLogListProps } from './rule_event_log_list';
 import { AlertListItem, RefreshToken } from './types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
@@ -112,7 +112,7 @@ export function RuleComponent({
   });
 
   const renderRuleAlertList = useCallback(() => {
-    if (ruleType.hasAlertsMappings || ruleType.hasFieldsForAAD) {
+    if (ruleType.hasAlertsMappings) {
       return (
         <AlertsTable
           id="rule-detail-alerts-table"
@@ -154,7 +154,6 @@ export function RuleComponent({
     readOnly,
     rule.id,
     ruleType.hasAlertsMappings,
-    ruleType.hasFieldsForAAD,
     ruleType.id,
     settings,
   ]);
