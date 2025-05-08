@@ -508,6 +508,7 @@ describe('Handle request to schedule', () => {
       jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValue({
         isSufficientlySecure: true,
         hasPermanentEncryptionKey: false,
+        areNotificationsEnabled: true,
       });
 
       expect(
@@ -526,6 +527,7 @@ describe('Handle request to schedule', () => {
       jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValue({
         isSufficientlySecure: false,
         hasPermanentEncryptionKey: true,
+        areNotificationsEnabled: true,
       });
 
       expect(

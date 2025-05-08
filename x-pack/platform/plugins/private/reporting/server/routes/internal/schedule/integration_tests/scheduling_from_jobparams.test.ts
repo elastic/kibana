@@ -97,6 +97,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
     jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValue({
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: true,
+      areNotificationsEnabled: true,
     });
 
     mockExportTypesRegistry = new ExportTypesRegistry();
@@ -251,6 +252,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
     jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
       isSufficientlySecure: true,
       hasPermanentEncryptionKey: false,
+      areNotificationsEnabled: false,
     });
     registerScheduleRoutesInternal(reportingCore, mockLogger);
 
@@ -274,6 +276,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
     jest.spyOn(reportingCore, 'getHealthInfo').mockResolvedValueOnce({
       isSufficientlySecure: false,
       hasPermanentEncryptionKey: true,
+      areNotificationsEnabled: false,
     });
     registerScheduleRoutesInternal(reportingCore, mockLogger);
 
