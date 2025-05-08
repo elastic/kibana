@@ -21,7 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const dashboardName = 'Dashboard Listing A11y';
     const clonedDashboardName = 'Dashboard Listing A11y (1)';
 
-    it('navitate to dashboard app', async () => {
+    // https://github.com/elastic/kibana/issues/220515
+    it.skip('navigate to dashboard app', async () => {
       await common.navigateToApp('dashboard');
       await a11y.testAppSnapshot();
     });
