@@ -18,6 +18,8 @@ export const rawNotificationSchema = schema.object({
   email: schema.maybe(
     schema.object({
       to: schema.arrayOf(schema.string(), { minSize: 1 }),
+      bcc: schema.maybe(schema.arrayOf(schema.string())),
+      cc: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
 });

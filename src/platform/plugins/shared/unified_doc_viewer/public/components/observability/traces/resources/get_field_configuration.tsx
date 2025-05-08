@@ -12,9 +12,10 @@ import {
   TRACE_ID_FIELD,
   TIMESTAMP_FIELD,
   HTTP_RESPONSE_STATUS_CODE_FIELD,
-  TraceDocumentOverview,
   AGENT_NAME_FIELD,
   TRANSACTION_NAME_FIELD,
+  SpanDocumentOverview,
+  TransactionDocumentOverview,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -35,7 +36,7 @@ export interface FieldConfiguration {
 }
 
 export const getCommonFieldConfiguration = (
-  attributes: TraceDocumentOverview
+  attributes: TransactionDocumentOverview | SpanDocumentOverview
 ): Record<string, FieldConfiguration> => {
   return {
     [TRANSACTION_NAME_FIELD]: {
