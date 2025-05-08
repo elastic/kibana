@@ -78,59 +78,60 @@ const mockDataViewsService = {
   clearInstanceCache: () => Promise.resolve(),
 };
 
+const mockUseKibanaReturnValue = {
+  services: {
+    application: {
+      navigateToUrl: jest.fn(),
+      capabilities: {
+        [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+      },
+    },
+    dataViews: mockDataViewsService,
+    cases: {
+      ui: { getCasesContext: mockCasesContext },
+    },
+    timelines: { ...mockTimelines },
+    data: {
+      query: {
+        filterManager: mockFilterManager,
+      },
+    },
+    docLinks: {
+      links: {
+        [SECURITY_FEATURE_ID]: {
+          privileges: 'link',
+        },
+      },
+    },
+    storage: {
+      get: jest.fn(),
+      set: jest.fn(),
+    },
+    triggersActionsUi: {
+      alertsTableConfigurationRegistry: {},
+      getAlertsStateTable: () => <></>,
+    },
+    sessionView: {
+      getSessionView: jest.fn(() => <div />),
+    },
+    notifications: {
+      toasts: {
+        addWarning: jest.fn(),
+        addError: jest.fn(),
+        addSuccess: jest.fn(),
+        addDanger: jest.fn(),
+        remove: jest.fn(),
+      },
+    },
+  },
+};
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
 
   return {
     ...original,
     useUiSetting$: jest.fn().mockReturnValue([]),
-    useKibana: () => ({
-      services: {
-        application: {
-          navigateToUrl: jest.fn(),
-          capabilities: {
-            [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
-          },
-        },
-        dataViews: mockDataViewsService,
-        cases: {
-          ui: { getCasesContext: mockCasesContext },
-        },
-        timelines: { ...mockTimelines },
-        data: {
-          query: {
-            filterManager: mockFilterManager,
-          },
-        },
-        docLinks: {
-          links: {
-            [SECURITY_FEATURE_ID]: {
-              privileges: 'link',
-            },
-          },
-        },
-        storage: {
-          get: jest.fn(),
-          set: jest.fn(),
-        },
-        triggersActionsUi: {
-          alertsTableConfigurationRegistry: {},
-          getAlertsStateTable: () => <></>,
-        },
-        sessionView: {
-          getSessionView: jest.fn(() => <div />),
-        },
-        notifications: {
-          toasts: {
-            addWarning: jest.fn(),
-            addError: jest.fn(),
-            addSuccess: jest.fn(),
-            addDanger: jest.fn(),
-            remove: jest.fn(),
-          },
-        },
-      },
-    }),
+    useKibana: () => mockUseKibanaReturnValue,
     useToasts: jest.fn().mockReturnValue({
       addError: jest.fn(),
       addSuccess: jest.fn(),

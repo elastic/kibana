@@ -62,6 +62,30 @@ const props = {
   timelineId: 'alerts-page',
 };
 
+const mockUseKibanaReturnValue = {
+  services: {
+    timelines: { ...mockTimelines },
+    application: {
+      capabilities: { [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true } },
+    },
+    cases: {
+      ...mockCasesContract(),
+      helpers: {
+        canUseCases: jest.fn().mockReturnValue({
+          all: true,
+          create: true,
+          read: true,
+          update: true,
+          delete: true,
+          push: true,
+          createComment: true,
+          reopenCase: true,
+        }),
+        getRuleIdFromEvent: jest.fn(),
+      },
+    },
+  },
+};
 jest.mock('../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../common/lib/kibana');
 
@@ -73,30 +97,7 @@ jest.mock('../../../../common/lib/kibana', () => {
       addWarning: jest.fn(),
       remove: jest.fn(),
     }),
-    useKibana: () => ({
-      services: {
-        timelines: { ...mockTimelines },
-        application: {
-          capabilities: { [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true } },
-        },
-        cases: {
-          ...mockCasesContract(),
-          helpers: {
-            canUseCases: jest.fn().mockReturnValue({
-              all: true,
-              create: true,
-              read: true,
-              update: true,
-              delete: true,
-              push: true,
-              createComment: true,
-              reopenCase: true,
-            }),
-            getRuleIdFromEvent: jest.fn(),
-          },
-        },
-      },
-    }),
+    useKibana: () => mockUseKibanaReturnValue,
   };
 });
 

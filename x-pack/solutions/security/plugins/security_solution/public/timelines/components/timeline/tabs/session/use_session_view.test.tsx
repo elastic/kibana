@@ -34,37 +34,39 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
+
+const mockUseKibana = jest.fn().mockReturnValue({
+  services: {
+    application: {
+      navigateToApp: jest.fn(),
+      getUrlForApp: jest.fn(),
+      capabilities: {
+        [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+      },
+    },
+    sessionView: {
+      getSessionView: jest.fn(() => <div />),
+    },
+    data: {
+      search: jest.fn(),
+      query: jest.fn(),
+    },
+    uiSettings: {
+      get: jest.fn(),
+    },
+    savedObjects: {
+      client: {},
+    },
+    timelines: {
+      getLastUpdated: jest.fn(),
+    },
+  },
+});
 jest.mock('../../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../../common/lib/kibana');
   return {
     ...originalModule,
-    useKibana: jest.fn().mockReturnValue({
-      services: {
-        application: {
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
-          capabilities: {
-            [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
-          },
-        },
-        sessionView: {
-          getSessionView: jest.fn(() => <div />),
-        },
-        data: {
-          search: jest.fn(),
-          query: jest.fn(),
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        savedObjects: {
-          client: {},
-        },
-        timelines: {
-          getLastUpdated: jest.fn(),
-        },
-      },
-    }),
+    useKibana: () => mockUseKibana(),
   };
 });
 

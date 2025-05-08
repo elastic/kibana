@@ -78,6 +78,9 @@ const mockProps = {
 
 const mockMapVisibility = jest.fn();
 const mockNavigateToApp = jest.fn();
+const mockSecurityCapabilities = {
+  [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+};
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
 
@@ -89,7 +92,7 @@ jest.mock('../../../common/lib/kibana', () => {
         application: {
           ...original.useKibana().services.application,
           capabilities: {
-            [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+            ...mockSecurityCapabilities,
             maps_v2: mockMapVisibility(),
           },
           navigateToApp: mockNavigateToApp,

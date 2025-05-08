@@ -70,6 +70,77 @@ const mockCreateSourcererDataView = jest.fn(() => {
   errToReturn.name = 'AbortError';
   throw errToReturn;
 });
+const mockUseKibana = () => ({
+  services: {
+    application: {
+      capabilities: {
+        [SECURITY_FEATURE_ID]: {
+          crud: true,
+        },
+      },
+    },
+    data: {
+      dataViews: {
+        get: mockSearch.mockImplementation(
+          async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
+            Promise.resolve({
+              id: dataViewId,
+              matchedIndices: refreshFields ? ['hello', 'world', 'refreshed'] : ['hello', 'world'],
+              fields: [
+                {
+                  name: 'bytes',
+                  type: 'number',
+                  esTypes: ['long'],
+                  aggregatable: true,
+                  searchable: true,
+                  count: 10,
+                  readFromDocValues: true,
+                  scripted: false,
+                  isMapped: true,
+                },
+                {
+                  name: 'ssl',
+                  type: 'boolean',
+                  esTypes: ['boolean'],
+                  aggregatable: true,
+                  searchable: true,
+                  count: 20,
+                  readFromDocValues: true,
+                  scripted: false,
+                  isMapped: true,
+                },
+                {
+                  name: '@timestamp',
+                  type: 'date',
+                  esTypes: ['date'],
+                  aggregatable: true,
+                  searchable: true,
+                  count: 30,
+                  readFromDocValues: true,
+                  scripted: false,
+                  isMapped: true,
+                },
+              ],
+              getIndexPattern: () => 'hello*,world*,refreshed*',
+              getRuntimeMappings: () => ({
+                myfield: {
+                  type: 'keyword',
+                },
+              }),
+              toSpec: () => ({
+                id: dataViewId,
+              }),
+            })
+        ),
+        getExistingIndices: jest.fn(() => [] as string[]),
+      },
+      indexPatterns: {
+        getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
+      },
+    },
+    notifications: {},
+  },
+});
 
 jest.mock('../../common/lib/kibana', () => ({
   useToasts: () => ({
@@ -78,79 +149,7 @@ jest.mock('../../common/lib/kibana', () => ({
     addWarning: mockAddWarning,
     remove: jest.fn(),
   }),
-  useKibana: () => ({
-    services: {
-      application: {
-        capabilities: {
-          [SECURITY_FEATURE_ID]: {
-            crud: true,
-          },
-        },
-      },
-      data: {
-        dataViews: {
-          get: mockSearch.mockImplementation(
-            async (dataViewId: string, displayErrors?: boolean, refreshFields = false) =>
-              Promise.resolve({
-                id: dataViewId,
-                matchedIndices: refreshFields
-                  ? ['hello', 'world', 'refreshed']
-                  : ['hello', 'world'],
-                fields: [
-                  {
-                    name: 'bytes',
-                    type: 'number',
-                    esTypes: ['long'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 10,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: 'ssl',
-                    type: 'boolean',
-                    esTypes: ['boolean'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 20,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                  {
-                    name: '@timestamp',
-                    type: 'date',
-                    esTypes: ['date'],
-                    aggregatable: true,
-                    searchable: true,
-                    count: 30,
-                    readFromDocValues: true,
-                    scripted: false,
-                    isMapped: true,
-                  },
-                ],
-                getIndexPattern: () => 'hello*,world*,refreshed*',
-                getRuntimeMappings: () => ({
-                  myfield: {
-                    type: 'keyword',
-                  },
-                }),
-                toSpec: () => ({
-                  id: dataViewId,
-                }),
-              })
-          ),
-          getExistingIndices: jest.fn(() => [] as string[]),
-        },
-        indexPatterns: {
-          getTitles: jest.fn().mockImplementation(() => Promise.resolve(mockPatterns)),
-        },
-      },
-      notifications: {},
-    },
-  }),
+  useKibana: () => mockUseKibana(),
   useUiSetting$: jest.fn().mockImplementation(() => [mockPatterns]),
 }));
 

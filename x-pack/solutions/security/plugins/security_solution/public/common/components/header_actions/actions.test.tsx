@@ -62,29 +62,30 @@ jest.mock('./add_note_icon_item', () => {
   };
 });
 
+const mockUseKibanaReturnValue = {
+  services: {
+    application: {
+      navigateToApp: jest.fn(),
+      getUrlForApp: jest.fn(),
+      capabilities: {
+        [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+      },
+    },
+    cases: mockCasesContract(),
+    uiSettings: {
+      get: jest.fn(),
+    },
+    savedObjects: {
+      client: {},
+    },
+  },
+};
 jest.mock('../../lib/kibana', () => {
   const originalKibanaLib = jest.requireActual('../../lib/kibana');
 
   return {
     ...originalKibanaLib,
-    useKibana: () => ({
-      services: {
-        application: {
-          navigateToApp: jest.fn(),
-          getUrlForApp: jest.fn(),
-          capabilities: {
-            [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
-          },
-        },
-        cases: mockCasesContract(),
-        uiSettings: {
-          get: jest.fn(),
-        },
-        savedObjects: {
-          client: {},
-        },
-      },
-    }),
+    useKibana: () => mockUseKibanaReturnValue,
     useToasts: jest.fn().mockReturnValue({
       addError: jest.fn(),
       addSuccess: jest.fn(),
