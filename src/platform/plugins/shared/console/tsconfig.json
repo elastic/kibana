@@ -34,6 +34,7 @@
     "@kbn/esql-editor",
     "@kbn/data-views-plugin",
     "@kbn/esql-validation-autocomplete",
+    "@kbn/licensing-plugin",
   ],
   "exclude": [
     "target/**/*",
