@@ -21,7 +21,7 @@ export const Debug = ({ payload }: { payload: unknown }) => {
 
   return (
     <EuiCode css={wrapperStyles}>
-      <pre data-test-subj="canvasDebug__content" css={contentStyles}>
+      <pre data-test-subj="canvasDebug__content" css={contentStyles} className="eui-scrollBar">
         {JSON.stringify(payload, LimitRows, 2)}
       </pre>
     </EuiCode>
