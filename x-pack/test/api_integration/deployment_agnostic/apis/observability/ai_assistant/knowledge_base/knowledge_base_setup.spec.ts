@@ -29,18 +29,19 @@ import {
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
-  const ml = getService('ml');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('Knowledge base: POST /internal/observability_ai_assistant/kb/setup', function () {
     before(async () => {
-      await teardownTinyElserModelAndInferenceEndpoint(getService);
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
+      await restoreIndexAssets(getService);
     });
 
     afterEach(async () => {
+      await restoreIndexAssets(getService);
+    });
+
+    after(async () => {
       await teardownTinyElserModelAndInferenceEndpoint(getService);
-      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
     it('returns 200 when model is deployed', async () => {
@@ -65,6 +66,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         before(async () => {
           // setup KB initially
+
           await deployTinyElserAndSetupKb(getService);
 
           // setup KB with custom inference endpoint
@@ -113,8 +115,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       const customInferenceId = 'my_custom_inference_id';
 
       before(async () => {
-        await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
-        await importModel(ml, { modelId: TINY_ELSER_MODEL_ID });
+        await restoreIndexAssets(getService);
+        await importModel(getService, { modelId: TINY_ELSER_MODEL_ID });
         await createTinyElserInferenceEndpoint(getService, {
           inferenceId: customInferenceId,
         });

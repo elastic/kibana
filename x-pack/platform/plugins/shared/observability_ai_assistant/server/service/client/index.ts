@@ -725,7 +725,6 @@ export class ObservabilityAIAssistantClient {
           core,
           logger,
           esClient,
-          inferenceId: nextInferenceId,
         });
         await populateMissingSemanticTextFieldWithLock({
           core,
@@ -758,12 +757,11 @@ export class ObservabilityAIAssistantClient {
     });
   };
 
-  reIndexKnowledgeBaseWithLock = (inferenceId: string) => {
+  reIndexKnowledgeBaseWithLock = () => {
     return reIndexKnowledgeBaseWithLock({
       core: this.dependencies.core,
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
-      inferenceId,
     });
   };
 
