@@ -19,6 +19,7 @@ import { ID as LensPluginId } from './plugins/lens/constants';
 
 export const usePlugins = (disabledPlugins?: string[]) => {
   const kibanaConfig = KibanaServices.getConfig();
+  const services = KibanaServices.get();
   const timelinePlugins = useTimelineContext()?.editor_plugins;
   const appCapabilities = useApplicationCapabilities();
 
@@ -38,6 +39,7 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     }
 
     if (
+      services.lens !== undefined &&
       kibanaConfig?.markdownPlugins?.lens &&
       !disabledPlugins?.includes(LensPluginId) &&
       appCapabilities?.visualize.crud
@@ -58,6 +60,7 @@ export const usePlugins = (disabledPlugins?: string[]) => {
     appCapabilities?.visualize.crud,
     disabledPlugins,
     kibanaConfig?.markdownPlugins?.lens,
+    services.lens,
     timelinePlugins,
   ]);
 };
