@@ -2,21 +2,17 @@ name: Trigger Chromium Build
 
 on:
   issues:
-    types: [labeled, opened, reopened, edited, closed]
+    types: [labeled, opened, reopened, edited]
 
 permissions:
   contents: read
   issues: write
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   matches_label:
     if: | 
       github.event.label.name == 'trigger-chromium-build'
-      && github.event.issue.author_association == 'MEMBER' && github.event.action != 'closed'
+      && github.event.issue.author_association == 'MEMBER'
     runs-on: ubuntu-latest
     outputs:
       version_bump_config: ${{ steps.extract_version_bump_config.outputs.result }}
