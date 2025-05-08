@@ -146,12 +146,12 @@ describe('saved search embeddable', () => {
       await waitOneTick();
       expect(api.dataLoading$.getValue()).toBe(false);
 
-      expect(discoverComponent.queryByTestId('embeddedSavedSearchDocTable')).toBeInTheDocument();
-      await waitFor(() =>
+      await waitFor(() => {
+        expect(discoverComponent.queryByTestId('embeddedSavedSearchDocTable')).toBeInTheDocument();
         expect(discoverComponent.getByTestId('embeddedSavedSearchDocTable').textContent).toEqual(
           'No results found'
-        )
-      );
+        );
+      });
     });
 
     it('should render field stats table in AGGREGATED_LEVEL view mode', async () => {
