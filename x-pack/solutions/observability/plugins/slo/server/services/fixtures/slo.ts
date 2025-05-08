@@ -171,6 +171,7 @@ const defaultSLO: Omit<SLODefinition, 'id' | 'revision' | 'createdAt' | 'updated
   tags: ['critical', 'k8s'],
   enabled: true,
   groupBy: ALL_VALUE,
+  isTemplate: false,
 };
 
 const defaultCreateSloParams: CreateSLOParams = {
