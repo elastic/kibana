@@ -11,13 +11,13 @@ import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 
 import { EsqlService } from '../services/esql_service';
 
-export const registerGetJoinIndicesRoute = (
+export const registerGetTimeseriesIndicesRoute = (
   router: IRouter,
   { logger }: PluginInitializerContext
 ) => {
   router.get(
     {
-      path: '/internal/esql/autocomplete/join/indices',
+      path: '/internal/esql/autocomplete/timeseries/indices',
       validate: {},
       security: {
         authz: {
@@ -30,7 +30,7 @@ export const registerGetJoinIndicesRoute = (
       try {
         const core = await requestHandlerContext.core;
         const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
-        const result = await service.getIndicesByIndexMode('lookup');
+        const result = await service.getIndicesByIndexMode('time_series');
 
         return response.ok({
           body: result,

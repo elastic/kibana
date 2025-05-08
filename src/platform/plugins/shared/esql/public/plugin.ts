@@ -27,7 +27,7 @@ import {
 } from './triggers/update_esql_query/update_esql_query_trigger';
 import { ACTION_UPDATE_ESQL_QUERY, ACTION_CREATE_ESQL_CONTROL } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
-import { JoinIndicesAutocompleteResult } from '../common';
+import { IndicesAutocompleteResult } from '../common';
 import { cacheNonParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
 
@@ -47,7 +47,8 @@ interface EsqlPluginStartDependencies {
 }
 
 export interface EsqlPluginStart {
-  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   variablesService: EsqlVariablesService;
 }
 
@@ -102,8 +103,20 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
 
     const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
       async () => {
-        const result = await core.http.get<JoinIndicesAutocompleteResult>(
+        const result = await core.http.get<IndicesAutocompleteResult>(
           '/internal/esql/autocomplete/join/indices'
+        );
+
+        return result;
+      },
+      1000 * 60 * 5, // Keep the value in cache for 5 minutes
+      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
+    );
+
+    const getTimeseriesIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
+      async () => {
+        const result = await core.http.get<IndicesAutocompleteResult>(
+          '/internal/esql/autocomplete/timeseries/indices'
         );
 
         return result;
@@ -114,6 +127,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
 
     const start = {
       getJoinIndicesAutocomplete,
+      getTimeseriesIndicesAutocomplete,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
     };
