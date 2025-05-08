@@ -13,7 +13,7 @@ import { SecurityPageName } from '../../../../common';
 import { TestProviders } from '../../mock';
 import { generateHistoryMock } from '../../utils/route/mocks';
 import type { LinkInfo } from '../../links';
-import { useLinkInfo } from '../../links';
+import { useLinkInfo, useNavLinkExists } from '../../links';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
 
@@ -24,6 +24,7 @@ jest.mock('../../utils/route/spy_routes', () => ({
 }));
 
 const mockUseLinkInfo = useLinkInfo as jest.Mock;
+const mockUseNavLinkExists = useNavLinkExists as jest.Mock;
 const mockUseUpsellingPage = useUpsellingPage as jest.Mock;
 
 const defaultLinkInfo: LinkInfo = {
@@ -57,6 +58,7 @@ describe('SecurityRoutePageWrapper', () => {
     jest.clearAllMocks();
 
     mockUseLinkInfo.mockReturnValue(defaultLinkInfo);
+    mockUseNavLinkExists.mockReturnValue(true);
     mockUseUpsellingPage.mockReturnValue(undefined);
   });
 
@@ -84,7 +86,20 @@ describe('SecurityRoutePageWrapper', () => {
     expect(getByTestId(TEST_UPSELL_SUBJ)).toBeInTheDocument();
   });
 
-  it('should redirect to landing when link missing', () => {
+  it('should redirect to landing when nav link does not exist', () => {
+    mockUseNavLinkExists.mockReturnValue(false);
+
+    render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding}>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    expect(mockRedirect).toHaveBeenCalled();
+  });
+
+  it('should redirect to landing when link is missing', () => {
     mockUseLinkInfo.mockReturnValue(undefined);
 
     render(

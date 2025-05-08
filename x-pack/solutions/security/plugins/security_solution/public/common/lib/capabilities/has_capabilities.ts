@@ -21,6 +21,11 @@ import type { Capabilities } from '@kbn/core/public';
  */
 export type RequiredCapabilities = string | Array<string | string[]>;
 
+/**
+ * Checks if the capabilities exist and are enabled in the capabilities object.
+ * It checks if the capabilities are enabled or not.
+ * It does not distinguish between missing and disabled capabilities.
+ */
 export const hasCapabilities = (
   capabilities: Capabilities,
   requiredCapabilities?: RequiredCapabilities
@@ -40,6 +45,11 @@ export const hasCapabilities = (
   }
 };
 
+/**
+ * Checks if the capabilities exist in the capabilities object.
+ * It does not check if the capabilities are enabled or not.
+ * This is used to check if the capabilities have been registered in the Kibana feature privileges configuration.
+ */
 export const existCapabilities = (
   capabilities: Capabilities,
   requiredCapabilities?: RequiredCapabilities

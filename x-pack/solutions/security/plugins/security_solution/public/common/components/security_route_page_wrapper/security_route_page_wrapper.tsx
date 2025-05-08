@@ -9,7 +9,7 @@ import React, { type PropsWithChildren } from 'react';
 import { Redirect } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecurityPageName } from '../../../../common';
-import { useLinkInfo } from '../../links';
+import { useLinkInfo, useNavLinkExists } from '../../links';
 import { NoPrivilegesPage } from '../no_privileges';
 import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
@@ -46,6 +46,7 @@ type SecurityRoutePageWrapperProps = {
 export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRoutePageWrapperProps>> =
   React.memo(({ children, pageName, omitSpyRoute = false }) => {
     const link = useLinkInfo(pageName);
+    const linkExists = useNavLinkExists(pageName);
     const UpsellingPage = useUpsellingPage(pageName);
 
     // The upselling page is only returned when the license/product requirements are not met.
@@ -60,8 +61,8 @@ export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRouteP
     }
 
     // Redirect to the home page if the link does not exist in the application links (has been filtered out).
-    // or if the link is unavailable (if it had upselling page associated it would have been rendered above).
-    if (link == null || link.unavailable) {
+    // or if the link is unavailable (payment plan not met, if it had upselling page associated it would have been rendered above).
+    if (link == null || !linkExists || link.unavailable) {
       return <Redirect to="" />;
     }
 

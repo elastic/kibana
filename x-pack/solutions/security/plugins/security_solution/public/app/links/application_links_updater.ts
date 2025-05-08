@@ -114,11 +114,13 @@ class ApplicationLinksUpdater {
         !existCapabilities(capabilities, appLinkInfo.capabilities) ||
         !this.isLinkLicenseAllowed(appLinkInfo, license)
       ) {
+        // The link is not available in the current product payment plan
         if (!upselling.isPageUpsellable(appLinkInfo.id)) {
           return acc; // no upselling registered for this link, just exclude it
         }
         extraProps.unavailable = true;
       } else if (!hasCapabilities(capabilities, appLinkInfo.capabilities)) {
+        // The link is available for the product payment plan but the user doesn't have privileges to access it
         extraProps.unauthorized = true;
       }
 
