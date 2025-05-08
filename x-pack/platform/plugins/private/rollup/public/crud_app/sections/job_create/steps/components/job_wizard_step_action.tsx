@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { FieldChooser } from './field_chooser';
-export { StepError } from './step_error';
-export { JobWizardStepAction } from './job_wizard_step_action';
+import { EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
+import React from 'react';
+
+export const JobWizardStepAction = (props: EuiFlexItemProps) => (
+  <EuiFlexItem grow={false} css={{ alignItems: 'flex-end' }} {...props} />
+);
