@@ -225,12 +225,12 @@ export function useChangePointResults(
             : result.rawResponse.aggregations.groupings.buckets
         ) as ChangePointAggResponse['aggregations']['groupings']['buckets'];
 
+        const hasNoBuckets = isSingleMetric
+          ? !buckets || buckets[0].over_time.buckets.length === 0
+          : !buckets || buckets.length === 0;
+
         // If there are no buckets on first page, it means there is no data for the selected time range
-        if (
-          pageNumber === 1 &&
-          ((!isSingleMetric && (!buckets || buckets.length === 0)) ||
-            (isSingleMetric && (!buckets || buckets[0].over_time.buckets.length === 0)))
-        ) {
+        if (pageNumber === 1 && hasNoBuckets) {
           setResults([]);
           setProgress(null);
           return;
@@ -240,7 +240,7 @@ export function useChangePointResults(
           isFetchCompleted ? null : Math.min(Math.round((pageNumber / totalAggPages) * 100), 100)
         );
 
-        const mappedBuckets = buckets.map((v) => {
+        const changePointAnnotations = buckets.map((v) => {
           const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
           const timeAsString = v.change_point_request.bucket?.key;
           const rawPValue = v.change_point_request.type[changePointType].p_value;
@@ -267,7 +267,7 @@ export function useChangePointResults(
         });
 
         // Filter for real change points
-        let groups = mappedBuckets.filter(
+        let groups = changePointAnnotations.filter(
           (v) => v.kind === 'changePoint' && !EXCLUDED_CHANGE_POINT_TYPES.has(v.type)
         );
 
@@ -279,8 +279,8 @@ export function useChangePointResults(
 
         // If filtering removed all results but we have buckets,
         // it means we have data but no change points
-        if (groups.length === 0 && mappedBuckets.length > 0) {
-          const firstBucket = mappedBuckets[0];
+        if (groups.length === 0 && changePointAnnotations.length > 0) {
+          const firstBucket = changePointAnnotations[0];
           groups = [
             {
               ...firstBucket,
