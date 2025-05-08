@@ -39,7 +39,12 @@ export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIconTip content="Include a guide or useful information for addressing alerts created by this rule" />
+          <EuiIconTip
+            content={i18n.translate('responseOpsRuleForm.investigationGuide.editor.title.tooltip', {
+              defaultMessage:
+                'Include a guide or useful information for addressing alerts created by this rule',
+            })}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
