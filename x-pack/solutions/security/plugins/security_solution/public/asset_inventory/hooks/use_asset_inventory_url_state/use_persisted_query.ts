@@ -10,9 +10,7 @@ import type { Query } from '@kbn/es-query';
 import { useKibana } from '../../../common/lib/kibana';
 import type { AssetsBaseURLQuery } from './use_asset_inventory_url_state';
 
-export const usePersistedQuery = <T>(
-  getter: ({ filters, pageFilters, query }: AssetsBaseURLQuery) => T
-) => {
+export const usePersistedQuery = <T>(getter: ({ filters, query }: AssetsBaseURLQuery) => T) => {
   const {
     data: {
       query: { filterManager, queryString },
@@ -23,7 +21,6 @@ export const usePersistedQuery = <T>(
     () =>
       getter({
         filters: filterManager.getAppFilters(),
-        pageFilters: filterManager.getFilters(),
         query: queryString.getQuery() as Query,
       }),
     [getter, filterManager, queryString]

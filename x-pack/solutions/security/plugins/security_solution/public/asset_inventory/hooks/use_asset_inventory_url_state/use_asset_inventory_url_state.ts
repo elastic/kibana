@@ -17,7 +17,7 @@ import { usePersistedQuery } from './use_persisted_query';
 export interface AssetsBaseURLQuery {
   query: Query;
   filters: Filter[];
-  pageFilters: Filter[];
+  pageFilters?: Filter[];
   /**
    * Grouping component selection
    */
@@ -51,7 +51,7 @@ export interface AssetInventoryURLStateResult {
   getRowsFromPages: (data: Array<{ page: DataTableRecord[] }> | undefined) => DataTableRecord[];
 }
 
-const getDefaultQuery = ({ query, filters, pageFilters }: AssetsBaseURLQuery) => ({
+const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery) => ({
   query,
   filters,
   pageFilters: [],
