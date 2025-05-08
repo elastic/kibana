@@ -41,6 +41,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('should apply density changes correctly', async () => {
+      await lens.openVisualOptions();
+      await lens.setDataTableDensity('compact');
+      expect(
+        await find.existsByCssSelector(
+          `[data-test-subj="lnsDataTable"][class*="cellPadding-s-fontSize-s"]`
+        )
+      ).to.be(true);
+
+      await lens.openVisualOptions();
+      await lens.setDataTableDensity('expanded');
+      expect(
+        await find.existsByCssSelector(
+          `[data-test-subj="lnsDataTable"][class*="cellPadding-l-fontSize-l"]`
+        )
+      ).to.be(true);
+
+      await lens.openVisualOptions();
+      await lens.setDataTableDensity('normal');
+      expect(
+        await find.existsByCssSelector(
+          `[data-test-subj="lnsDataTable"][class*="cellPadding-m-fontSize-m"]`
+        )
+      ).to.be(true);
+    });
+
     it('should able to sort a last_value column correctly in a table', async () => {
       // configure last_value with a keyword field
       await lens.configureDimension({

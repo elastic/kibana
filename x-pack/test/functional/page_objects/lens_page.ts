@@ -2064,5 +2064,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async toggleDebug(enable: boolean = true) {
       await browser.execute(`window.ELASTIC_LENS_LOGGER = arguments[0];`, enable);
     },
+
+    async setDataTableDensity(value: string) {
+      const settings = await testSubjects.find('lnsDensitySettings');
+      const option = await settings.findByTestSubject(value);
+      await option.click();
+    },
   });
 }
