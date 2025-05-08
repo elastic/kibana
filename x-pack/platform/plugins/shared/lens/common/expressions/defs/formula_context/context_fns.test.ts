@@ -51,27 +51,35 @@ describe('interval', () => {
   });
 
   it('should return the override interval if passed and valid', () => {
-    const result = formulaIntervalFn.fn(undefined, { targetBars: 100, override: 2000 }, {
-      getSearchContext: () => ({
-        timeRange: {
-          from: 'now-15m',
-          to: 'now',
-        },
-      }),
-    } as ExecutionContext<Adapters>);
+    const result = formulaIntervalFn.fn(
+      undefined,
+      { targetBars: 100, maxBars: 1440, override: 2000 },
+      {
+        getSearchContext: () => ({
+          timeRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+        }),
+      } as ExecutionContext<Adapters>
+    );
     expect(result).toEqual(2000);
   });
 
   it('should return the ES limit if the passed override is too low', () => {
-    const result = formulaIntervalFn.fn(undefined, { targetBars: 100, override: 1 }, {
-      getSearchContext: () => ({
-        timeRange: {
-          from: 'now-15m',
-          to: 'now',
-        },
-      }),
-    } as ExecutionContext<Adapters>);
-    expect(result).toEqual(1000);
+    const result = formulaIntervalFn.fn(
+      undefined,
+      { targetBars: 100, maxBars: 1440, override: 1 },
+      {
+        getSearchContext: () => ({
+          timeRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+        }),
+      } as ExecutionContext<Adapters>
+    );
+    expect(result).toEqual(100);
   });
 });
 
