@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import React, { useCallback } from 'react';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { spanTraceFields } from '../doc_viewer_span_overview/resources/fields';
@@ -37,15 +37,7 @@ export const Trace = ({
 }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
 
-  const { absoluteTimeRange } = data.query.timefilter.timefilter.useTimefilter();
-
-  const { rangeFrom, rangeTo } = useMemo(
-    () => ({
-      rangeFrom: new Date(absoluteTimeRange.start).toISOString(),
-      rangeTo: new Date(absoluteTimeRange.end).toISOString(),
-    }),
-    [absoluteTimeRange]
-  );
+  const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
 
   const getParentApi = useCallback(
     () => ({
@@ -90,7 +82,7 @@ export const Trace = ({
         <EuiFlexItem>{fieldRows}</EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type="APM_TRACE_WATERFALL_EMBEDDABLE"
         getParentApi={getParentApi}
         hidePanelChrome={true}
