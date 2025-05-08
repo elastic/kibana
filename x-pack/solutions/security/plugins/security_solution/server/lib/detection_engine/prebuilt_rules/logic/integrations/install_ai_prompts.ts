@@ -15,16 +15,13 @@ export async function installSecurityAiPromptsPackage(
   context: SecuritySolutionApiRequestHandlerContext
 ) {
   try {
-    await findLatestPackageVersion(context, SECURITY_AI_PROMPTS_PACKAGE_NAME);
+    const pkgVersion = await findLatestPackageVersion(context, SECURITY_AI_PROMPTS_PACKAGE_NAME);
+    return context.getInternalFleetServices().packages.ensureInstalledPackage({
+      pkgName: SECURITY_AI_PROMPTS_PACKAGE_NAME,
+      pkgVersion,
+    });
   } catch (e) {
     // fail silently
     return null;
   }
-
-  const pkgVersion = await findLatestPackageVersion(context, SECURITY_AI_PROMPTS_PACKAGE_NAME);
-
-  return context.getInternalFleetServices().packages.ensureInstalledPackage({
-    pkgName: SECURITY_AI_PROMPTS_PACKAGE_NAME,
-    pkgVersion,
-  });
 }
