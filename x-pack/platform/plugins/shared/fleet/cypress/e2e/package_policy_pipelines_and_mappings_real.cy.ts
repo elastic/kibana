@@ -159,7 +159,9 @@ describe('Input package with custom data stream type', () => {
 
     // Select metrics data stream type.
     cy.get('[data-test-subj^="advancedStreamOptionsToggle"]').click();
-    cy.get('[data-test-subj="packagePolicyDataStreamType"').find(`label[for="${dataStreamType}"]`).click();
+    cy.get('[data-test-subj="packagePolicyDataStreamType"')
+      .find(`label[for="${dataStreamType}"]`)
+      .click();
 
     cy.getBySel(EXISTING_HOSTS_TAB).click();
 
@@ -197,14 +199,16 @@ describe('Input package with custom data stream type', () => {
     cy.get('[data-test-subj="packagePolicyDataStreamType"')
       .find('input')
       .should('have.length', 3)
-      .each(($el) => cy.wrap($el).should('be.disabled'))
+      .each(($el) => cy.wrap($el).should('be.disabled'));
   });
 
   it('has an index template', () => {
-    cy.visit(`app/management/data/index_management/templates/${dataStreamType}-${packagePolicyNamespace}`);
+    cy.visit(
+      `app/management/data/index_management/templates/${dataStreamType}-${packagePolicyNamespace}`
+    );
 
     // Check that the index pattern appears in the view.
-    cy.contains("Index pattern").parent().contains(`${dataStreamType}-${packagePolicyNamespace}-*`);
+    cy.contains('Index pattern').parent().contains(`${dataStreamType}-${packagePolicyNamespace}-*`);
   });
 });
 
