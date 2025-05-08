@@ -26,15 +26,21 @@ export const bookAttributesDefinition: VersionableEmbeddableObject<
     numberOfPages: item.pages,
   }),
   itemToSavedObject: (item) => ({
-    bookTitle: item.title,
-    authorName: item.author,
-    numberOfPages: item.pages,
-    bookSynopsis: item.synopsis,
+    attributes: {
+      bookTitle: item.title,
+      authorName: item.author,
+      numberOfPages: item.pages,
+      bookSynopsis: item.synopsis,
+    },
+    references: [],
   }),
   savedObjectToItem: (savedObject) => ({
-    title: savedObject.bookTitle,
-    author: savedObject.authorName,
-    pages: savedObject.numberOfPages,
-    synopsis: savedObject.bookSynopsis,
+    attributes: {
+      title: savedObject.bookTitle,
+      author: savedObject.authorName,
+      pages: savedObject.numberOfPages,
+      synopsis: savedObject.bookSynopsis,
+    },
+    references: [],
   }),
 };
