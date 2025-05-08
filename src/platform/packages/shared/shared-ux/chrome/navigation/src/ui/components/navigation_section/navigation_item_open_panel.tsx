@@ -103,6 +103,8 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
 
   return (
     <EuiButton
+      aria-label={title}
+      aria-expanded={isExpanded}
       onClick={onTogglePanelClick}
       iconSide="right"
       iconSize="s"

@@ -100,6 +100,7 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
     <EuiListGroupItem
       key={id}
       label={<SubItemTitle item={item} />}
+      aria-label={item.title}
       wrapText
       size="s"
       css={panelNavStyles}
