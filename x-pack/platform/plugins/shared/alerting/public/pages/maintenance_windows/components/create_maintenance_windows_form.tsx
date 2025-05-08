@@ -33,12 +33,12 @@ import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-c
 import type { Filter } from '@kbn/es-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { convertToRRule } from '@kbn/response-ops-recurring-schedule-form/utils/convert_to_rrule';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import * as i18n from '../translations';
-import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule';
+import { RecurringScheduleField } from './recurring_schedule_field';
 import { SubmitButton } from './submit_button';
-import { convertToRRule } from '../helpers/convert_to_rrule';
 import { isScopedQueryError } from '../../../../common';
 import { useCreateMaintenanceWindow } from '../../../hooks/use_create_maintenance_window';
 import { useUpdateMaintenanceWindow } from '../../../hooks/use_update_maintenance_window';
@@ -408,7 +408,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         </EuiFlexItem>
         {isRecurring && (
           <EuiFlexItem>
-            <RecurringSchedule data-test-subj="recurring-form" />
+            <RecurringScheduleField data-test-subj="recurring-form" />
           </EuiFlexItem>
         )}
 
