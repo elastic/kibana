@@ -15,4 +15,40 @@ export class StreamsApp {
   async goto() {
     await this.page.gotoApp('streams');
   }
+
+  async gotoStreamsFromBreadcrumb() {
+    await this.page
+      .getByTestId('breadcrumbs')
+      .getByRole('link', { name: 'Streams', exact: true })
+      .click();
+  }
+
+  async gotoManageStream(stream: string) {
+    const last = await this.page.getByTestId('breadcrumb last').textContent();
+    if (last !== 'Streams') {
+      await this.gotoStreamsFromBreadcrumb();
+    }
+    await this.page.getByRole('link', { name: stream, exact: true }).click();
+    await this.page.getByRole('link', { name: 'Manage stream' }).click();
+  }
+
+  async gotoCreateChildStream(parent: string) {
+    await this.gotoManageStream(parent);
+    await this.page.getByRole('button', { name: 'Create child stream' }).click();
+  }
+
+  async gotoDataRetentionTab(stream: string) {
+    await this.gotoManageStream(stream);
+    await this.page.getByRole('tab', { name: 'Data retention' }).click();
+  }
+
+  async gotoExtractFieldTab(stream: string) {
+    await this.gotoManageStream(stream);
+    await this.page.getByRole('tab', { name: 'Extract field' }).click();
+  }
+
+  async gotoSchemaEditorTab(stream: string) {
+    await this.gotoManageStream(stream);
+    await this.page.getByRole('tab', { name: 'Schema editor' }).click();
+  }
 }

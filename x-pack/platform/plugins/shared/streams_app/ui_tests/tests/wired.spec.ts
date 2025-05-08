@@ -18,25 +18,24 @@ test.describe('Wired Streams', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     await apiServices.streams.disable();
   });
 
-  test('full flow', async ({ page, esClient }) => {
-    await page.getByRole('link', { name: 'logs', exact: true }).click();
-    await page.getByRole('link', { name: 'Manage stream' }).click();
-    await page.getByRole('button', { name: 'Create child stream' }).click();
+  test('full flow', async ({ page, esClient, pageObjects }) => {
+    await pageObjects.streams.gotoCreateChildStream('logs');
 
     await page.getByLabel('Stream name').fill('logs.nginx');
     await page.getByPlaceholder('Field').fill('agent.name');
     await page.getByPlaceholder('Value').fill('nginx');
     await page.getByRole('button', { name: 'Save' }).click();
-
-    await page.getByRole('link', { name: 'logs.nginx' }).click();
+    await expect(page.getByRole('link', { name: 'logs.nginx', exact: true })).toBeVisible();
 
     // Update "logs.nginx" data retention
-    await page.getByRole('tab', { name: 'Data retention' }).click();
+    await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
     await page.getByRole('button', { name: 'Edit data retention' }).click();
     await page.getByRole('button', { name: 'Set specific retention days' }).click();
     await page.getByTestId('streamsAppDslModalDaysField').fill('7');
     await page.getByRole('button', { name: 'Save' }).click();
-    await expect(page.getByTitle('7d', { exact: true })).toBeVisible();
+    await expect(
+      page.getByTestId('streamsAppRetentionMetadataRetentionPeriod').getByText('7d')
+    ).toBeVisible();
 
     // Update "logs.nginx" processing
     await esClient.index({
@@ -54,7 +53,7 @@ test.describe('Wired Streams', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
       refresh: 'wait_for',
     });
 
-    await page.getByRole('tab', { name: 'Extract field' }).click();
+    await pageObjects.streams.gotoExtractFieldTab('logs.nginx');
     await page.getByText('Add a processor').click();
 
     await page.locator('input[name="field"]').fill('message');
@@ -66,7 +65,7 @@ test.describe('Wired Streams', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     await expect(page.getByText("Stream's processors updated")).toBeVisible();
 
     // Update "logs.nginx" mapping
-    await page.getByRole('tab', { name: 'Schema editor' }).click();
+    await pageObjects.streams.gotoSchemaEditorTab('logs.nginx');
 
     await page
       .getByRole('row', { name: 'agent.name ----- ----- logs.' })
