@@ -1,0 +1,39 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+// TODO filter privileged user by join index
+export const getGrantedRightsEsqlSource = () => {
+  return `FROM "logs-*" METADATA _id, _index
+    | WHERE (host.os.type == "linux"
+      AND event.type == "start"
+      AND event.action IN ("exec", "exec_event", "start", "ProcessRollup2", "executed", "process_started")
+      AND (
+        process.name IN ("usermod", "adduser") OR
+        (process.name == "gpasswd" AND process.args IN ("-a", "--add", "-M", "--members"))
+      )) OR (
+      host.os.type=="windows"
+      AND event.action=="added-member-to-group"
+    )
+    | RENAME user.name as privileged_user, user.target.name as target_user, group.name as group_name, host.ip as host_ip
+    | KEEP @timestamp, privileged_user, process.args, target_user, group_name, host_ip, _id, _index`;
+};
+
+export const getAccountSwitchesEsqlSource = () => {
+  return `FROM logs-* METADATA _id, _index
+  | WHERE process.command_line.caseless RLIKE "(su|sudo su|sudo -i|sudo -s|ssh [^@]+@[^\s]+)"
+  | RENAME process.command_line.caseless AS command_process, process.group_leader.user.name AS target_user, process.parent.real_group.name AS group_name, process.real_user.name as privileged_user, host.ip AS host_ip
+  | KEEP @timestamp, privileged_user, host_ip, target_user, group_name, command_process, _id, _index`;
+};
+
+export const getAuthenticationsEsqlSource = () => {
+  return `FROM logs-okta.system-* METADATA _id, _index
+  | RENAME source.ip AS host_ip, okta.target.display_name as destination, client.user.name as privileged_user, event.module as source, okta.debug_context.debug_data.url as type, okta.outcome.result as result
+  | WHERE privileged_user IS NOT NULL
+  | EVAL event_combined = COALESCE(event.action, okta.event_type, event.category)
+  | WHERE to_lower(event_combined) RLIKE ".*?(authn|authentication|sso|mfa|token\.grant|authorize\.code|session\.start|unauth_app_access_attempt|evaluate_sign_on|verify_push).*?"
+  | KEEP @timestamp, privileged_user, source, type, host_ip, result, destination, okta.authentication_context*, _id, _index`;
+};

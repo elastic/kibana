@@ -23,9 +23,10 @@ import {
   getNetworkDetailsPageFilter,
   fieldNameExistsFilter,
 } from './utils';
-import { buildESQLWithKQLQuery } from '../../utils/esql';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useKibana } from '../../lib/kibana';
+import { useGlobalFilterQuery } from '../../hooks/use_global_filter_query';
 
 export const useLensAttributes = ({
   applyGlobalQueriesAndFilters = true,
@@ -93,10 +94,18 @@ export const useLensAttributes = ({
     return [];
   }, [detailName, pageName]);
 
-  const esqlQuery = useMemo(
-    () => (esql ? buildESQLWithKQLQuery(esql, globalQuery.query as string) : undefined),
-    [esql, globalQuery.query]
-  );
+  // const esqlQuery = useMemo(
+  //   () => (esql ? buildESQLWithKQLQuery(esql, globalQuery.query as string) : undefined),
+  //   [esql, globalQuery.query]
+  // );
+  const { uiSettings } = useKibana().services;
+
+  // const kqlFilterQuery = useMemo(
+  //   () => buildEsQuery(dataView, [globalQuery], [], getEsQueryConfig(uiSettings)),
+  //   [dataView, globalQuery, uiSettings]
+  // );
+
+  const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
 
   const attrs: LensAttributes = useMemo(
     () =>
@@ -107,9 +116,9 @@ export const useLensAttributes = ({
           stackByField,
           euiTheme,
           extraOptions,
-          esql: esqlQuery,
+          esql,
         })) as LensAttributes),
-    [euiTheme, extraOptions, getLensAttributes, lensAttributes, stackByField, esqlQuery]
+    [esql, euiTheme, extraOptions, getLensAttributes, lensAttributes, stackByField]
   );
 
   const hasAdHocDataViews = Object.values(attrs?.state?.adHocDataViews ?? {}).length > 0;
@@ -123,7 +132,28 @@ export const useLensAttributes = ({
     }
 
     const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
-    const query = esqlQuery ? { esql: esqlQuery } : globalQuery;
+    const query = esql ? { esql } : globalQuery;
+
+    const queryFilters =
+      applyGlobalQueriesAndFilters && esql
+        ? [
+            {
+              meta: {
+                alias: null,
+                disabled: false,
+                key: 'bleh',
+                negate: false,
+                params: {},
+                type: 'string',
+              },
+              query: {
+                bool: {
+                  filter: globalFilterQuery,
+                },
+              },
+            },
+          ]
+        : [...(applyGlobalQueriesAndFilters ? filters : [])];
 
     return {
       ...attrs,
@@ -136,7 +166,7 @@ export const useLensAttributes = ({
           ...(applyPageAndTabsFilters ? pageFilters : []),
           ...(applyPageAndTabsFilters ? tabsFilters : []),
           ...indexFilters,
-          ...(applyGlobalQueriesAndFilters ? filters : []),
+          ...queryFilters,
         ],
       },
       references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
@@ -150,8 +180,9 @@ export const useLensAttributes = ({
     stackByField,
     hasAdHocDataViews,
     selectedPatterns,
-    esqlQuery,
+    esql,
     globalQuery,
+    globalFilterQuery,
     attrs,
     title,
     applyGlobalQueriesAndFilters,

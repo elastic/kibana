@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { RiskLevelsPrivilegedUsersPanel } from './components/risk_level_panel';
+import { UserActivityPrivilegedUsersPanel } from './components/privileged_user_activity';
 
 export const PrivilegedUserMonitoring = () => {
   return (
@@ -30,9 +31,7 @@ export const PrivilegedUserMonitoring = () => {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel hasShadow={false} hasBorder={true}>
-          {'TODO: Privileged user activity'}
-        </EuiPanel>
+        <UserActivityPrivilegedUsersPanel />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasShadow={false} hasBorder={true}>

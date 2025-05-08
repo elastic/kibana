@@ -8,20 +8,23 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EsqlDashboardPanel, DEFAULT_PAGE_SIZE } from './esql_dashboard_panel';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../../../common/mock';
 
-jest.mock('../../../../common/components/visualization_actions/visualization_embeddable', () => ({
-  VisualizationEmbeddable: jest.fn(() => (
-    <div data-test-subj="mockVisualizationEmbeddable">{'Mock Visualization Embeddable'}</div>
-  )),
-}));
+jest.mock(
+  '../../../../../common/components/visualization_actions/visualization_embeddable',
+  () => ({
+    VisualizationEmbeddable: jest.fn(() => (
+      <div data-test-subj="mockVisualizationEmbeddable">{'Mock Visualization Embeddable'}</div>
+    )),
+  })
+);
 
-jest.mock('../../../../common/hooks/use_error_toast', () => ({
+jest.mock('../../../../../common/hooks/use_error_toast', () => ({
   useErrorToast: jest.fn(),
 }));
 
-jest.mock('../../../../common/lib/kibana', () => {
-  const actual = jest.requireActual('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../../common/lib/kibana');
   return {
     ...actual,
     useKibana: jest.fn(() => ({

@@ -27,8 +27,8 @@ const privMonLinks: LinkItem = {
     }),
   ],
   experimentalKey: 'privilegeMonitoringEnabled',
-  hideTimeline: true,
-  skipUrlState: true,
+  hideTimeline: false,
+  skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };

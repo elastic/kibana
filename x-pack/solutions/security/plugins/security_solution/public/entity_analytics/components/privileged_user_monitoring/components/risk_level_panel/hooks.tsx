@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiText, type EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
-import { useEsqlQueryWithGlobalFilters } from '../../../../../common/hooks/esql/use_esql_query_with_global_filter';
+import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_esql_query_with_global_filter';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGetDefaultRiskIndex } from '../../../../hooks/use_get_default_risk_index';
 import { RISK_LEVELS_PRIVILEGED_USERS_QUERY_BODY } from './constants';
@@ -25,10 +25,8 @@ export const useRiskLevelsPrivilegedUserQuery = ({ skip }: { skip: boolean }) =>
   const { data } = useKibana().services;
 
   const index = useGetDefaultRiskIndex(true); // only latest
-  const { query, filterQuery } = useEsqlQueryWithGlobalFilters(
-    `FROM ${index} ${RISK_LEVELS_PRIVILEGED_USERS_QUERY_BODY}`
-  );
-
+  const filterQuery = useEsqlGlobalFilterQuery();
+  const query = `FROM ${index} ${RISK_LEVELS_PRIVILEGED_USERS_QUERY_BODY}`;
   const {
     isLoading,
     isRefetching,
@@ -64,7 +62,13 @@ export const useRiskLevelsPrivilegedUserQuery = ({ skip }: { skip: boolean }) =>
 
   const inspect = useMemo(() => {
     return {
-      dsl: [JSON.stringify({ index: [index] ?? [''], body: prettifyQuery(query, false) }, null, 2)],
+      dsl: [
+        JSON.stringify(
+          { index: index ? [index] : [''], body: prettifyQuery(query, false) },
+          null,
+          2
+        ),
+      ],
       response: response ? [JSON.stringify(response, null, 2)] : [],
     };
   }, [index, query, response]);
@@ -79,6 +83,7 @@ export const useRiskLevelsPrivilegedUserQuery = ({ skip }: { skip: boolean }) =>
     isError,
   };
 };
+
 export const useRiskLevelsTableColumns = () => {
   return useMemo(
     (): Array<EuiBasicTableColumn<RiskLevelsTableItem>> => [

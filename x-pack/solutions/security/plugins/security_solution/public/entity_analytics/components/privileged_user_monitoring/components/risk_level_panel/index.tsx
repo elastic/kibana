@@ -87,6 +87,7 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC = () => {
     <InspectButtonContainer>
       <EuiPanel hasBorder hasShadow={false} data-test-subj="severity-level-panel">
         <HeaderSection
+          hideSubtitle
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
           id={RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID}
@@ -151,3 +152,5 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC = () => {
     </InspectButtonContainer>
   );
 };
+
+// TODO Handle index not found error
