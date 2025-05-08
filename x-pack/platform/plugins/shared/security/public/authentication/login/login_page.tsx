@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './login_page.scss';
-
 import {
   EuiButton,
   EuiFlexGroup,
@@ -46,6 +44,7 @@ import {
 import type { LoginState } from '../../../common/login_state';
 import type { LogoutReason } from '../../../common/types';
 import type { ConfigType } from '../../config';
+import { kibanaFullScreenGraphicsCss } from '../../components/mixins';
 
 interface Props {
   http: HttpStart;
@@ -164,7 +163,10 @@ export class LoginPage extends Component<Props, State> {
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
     return (
-      <div css={} data-test-subj="login-form">
+      <div
+        css={({ euiTheme }) => kibanaFullScreenGraphicsCss({ euiTheme })}
+        data-test-subj="login-form"
+      >
         <header
           css={({ euiTheme }) =>
             css({

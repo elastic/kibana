@@ -29,6 +29,11 @@ import './index.scss';
 
 import 'reflect-metadata';
 
+import bg_bottom_branded from './styles/core_app/images/bg_bottom_branded.svg';
+import bg_bottom_branded_dark from './styles/core_app/images/bg_bottom_branded_dark.svg';
+import bg_top_branded from './styles/core_app/images/bg_top_branded.svg';
+import bg_top_branded_dark from './styles/core_app/images/bg_top_branded_dark.svg';
+
 export type { DocLinksStart } from '@kbn/core-doc-links-browser';
 export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 export type { I18nStart } from '@kbn/core-i18n-browser';
@@ -310,3 +315,5 @@ export type { CoreSystem } from '@kbn/core-root-browser-internal';
 export { __kbnBootstrap__ } from '@kbn/core-root-browser-internal';
 
 export { kibanaFullBodyHeightCss, fullScreenGraphicsMixinStyles } from './cssUtils';
+
+export { bg_bottom_branded, bg_bottom_branded_dark, bg_top_branded, bg_top_branded_dark };
