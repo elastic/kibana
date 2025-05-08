@@ -33,7 +33,6 @@ import { hasKbWriteIndex } from './has_kb_index';
 import { getInferenceIdFromWriteIndex } from './get_inference_id_from_write_index';
 import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
 import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
-import { isKnowledgeBaseIndexWriteBlocked } from './index_write_block_utils';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -458,12 +457,6 @@ export class KnowledgeBaseService {
 
         throw serverUnavailable(
           `The index "${resourceNames.writeIndexAlias.kb}" does not support semantic text and must be reindexed. This re-index operation has been scheduled and will be started automatically. Please try again later.`
-        );
-      }
-
-      if (isKnowledgeBaseIndexWriteBlocked(error)) {
-        throw new Error(
-          `Writes to the knowledge base are currently blocked due to an Elasticsearch write index block. This is most likely due to an ongoing re-indexing operation. Please try again later. Error: ${error.message}`
         );
       }
 

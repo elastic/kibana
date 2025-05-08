@@ -34,7 +34,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   // In 8.16 and earlier embeddings were stored in the `ml.tokens` field
   // In 8.17 `ml.tokens` is replaced with `semantic_text` field and the custom ELSER inference endpoint "obs_ai_assistant_kb_inference" is introduced
   // When upgrading we must ensure that the semantic_text field is populated
-  describe('when upgrading from 8.16 to 8.17', function () {
+  describe('Knowledge base: when upgrading from 8.16 to 8.17', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);

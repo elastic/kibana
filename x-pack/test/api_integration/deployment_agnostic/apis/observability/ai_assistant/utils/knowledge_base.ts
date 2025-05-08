@@ -162,12 +162,6 @@ export async function getConcreteWriteIndexFromAlias(es: Client) {
   return writeIndex;
 }
 
-export async function hasIndexWriteBlock(es: Client, index: string) {
-  const response = await es.indices.getSettings({ index });
-  const writeBlockSetting = Object.values(response)[0]?.settings?.index?.blocks?.write;
-  return writeBlockSetting === 'true' || writeBlockSetting === true;
-}
-
 export async function getKbIndexCreatedVersion(es: Client) {
   const indexSettings = await es.indices.getSettings({
     index: resourceNames.writeIndexAlias.kb,

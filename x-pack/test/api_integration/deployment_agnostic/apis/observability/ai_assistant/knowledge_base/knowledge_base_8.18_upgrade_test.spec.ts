@@ -35,7 +35,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   // In 8.19 / 9.1 the custom inference endpoint ("obs_ai_assistant_kb_inference") is replaced with the preconfigured endpoint ".elser-2-elasticsearch"
   // We need to make sure that the custom inference endpoint continues to work after the migration
 
-  describe('when upgrading from 8.18 to 8.19', function () {
+  describe('Knowledge base: when upgrading from 8.18 to 8.19', function () {
     this.tags(['skipServerless']);
 
     before(async () => {

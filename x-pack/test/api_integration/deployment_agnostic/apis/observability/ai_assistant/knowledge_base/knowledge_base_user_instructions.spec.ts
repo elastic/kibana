@@ -31,7 +31,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('Knowledge base user instructions', function () {
+  describe('Knowledge base: user instructions', function () {
     before(async () => {
       await deployTinyElserAndSetupKb(getService);
     });
