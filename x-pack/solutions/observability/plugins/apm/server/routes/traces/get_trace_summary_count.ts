@@ -25,14 +25,16 @@ export async function getTraceSummaryCount({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    track_total_hits: true,
-    size: 0,
-    query: {
-      bool: {
-        filter: [...rangeQuery(start, end), ...termQuery(TRACE_ID, traceId)],
+    body: {
+      track_total_hits: true,
+      size: 0,
+      query: {
+        bool: {
+          filter: [...rangeQuery(start, end), ...termQuery(TRACE_ID, traceId)],
+        },
       },
+      aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
     },
-    aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
   };
 
   const { aggregations, hits } = await apmEventClient.search(
