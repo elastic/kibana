@@ -42,9 +42,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   type KnowledgeBaseEsEntry = Awaited<ReturnType<typeof getKnowledgeBaseEntriesFromEs>>[0];
 
-  describe('when changing from ELSER to E5-like model', function () {
-    // see details: https://github.com/elastic/kibana/issues/220248
-    this.tags(['failsOnMKI']);
+  describe('Knowledge base: when changing from ELSER to E5-like model', function () {
     let elserEntriesFromApi: KnowledgeBaseEntry[];
     let elserEntriesFromEs: KnowledgeBaseEsEntry[];
     let elserInferenceId: string;
