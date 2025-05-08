@@ -227,26 +227,30 @@ Array [
             role="columnheader"
             scope="col"
           >
-            <button
-              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-              data-test-subj="tableHeaderSortButton"
-              type="button"
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
             >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
               >
-                <span
-                  class="eui-textTruncate"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                 >
-                  column1
-                </span>
-                <span
-                  class="euiTableSortIcon euiTableSortIcon--sortable"
-                  color="subdued"
-                  data-euiicon-type="sortable"
-                />
-              </div>
-            </button>
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    column1
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </span>
           </th>
         </tr>
       </thead>
@@ -507,27 +511,31 @@ Array [
             role="columnheader"
             scope="col"
           >
-            <button
-              class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-              data-test-subj="tableHeaderSortButton"
-              type="button"
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
             >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+              <button
+                class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                data-test-subj="tableHeaderSortButton"
+                type="button"
               >
-                <span
-                  class="eui-textTruncate"
-                  title="column1"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
                 >
-                  column1
-                </span>
-                <span
-                  class="euiTableSortIcon euiTableSortIcon--sortable"
-                  color="subdued"
-                  data-euiicon-type="sortable"
-                />
-              </div>
-            </button>
+                  <span
+                    class="eui-textTruncate"
+                    title="column1"
+                  >
+                    column1
+                  </span>
+                  <span
+                    class="euiTableSortIcon euiTableSortIcon--sortable"
+                    color="subdued"
+                    data-euiicon-type="sortable"
+                  />
+                </div>
+              </button>
+            </span>
           </th>
         </tr>
       </thead>
