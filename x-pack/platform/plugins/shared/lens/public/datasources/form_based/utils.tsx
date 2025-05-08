@@ -116,12 +116,13 @@ export function isColumnInvalid(
   columnId: string,
   indexPattern: IndexPattern,
   dateRange: DateRange,
-  targetBars: number
+  targetBars: number,
+  maxBars: number
 ): boolean {
   // check also references for errors
   const referencesHaveErrors =
     'references' in column &&
-    hasReferencesErrors(layer, column, indexPattern, dateRange, targetBars);
+    hasReferencesErrors(layer, column, indexPattern, dateRange, targetBars, maxBars);
 
   const operationHasErrorMessages =
     (
@@ -131,7 +132,8 @@ export function isColumnInvalid(
         indexPattern,
         dateRange,
         operationDefinitionMap,
-        targetBars
+        targetBars,
+        maxBars
       ) ?? []
     ).length > 0;
 
@@ -146,7 +148,8 @@ function hasReferencesErrors(
   column: ReferenceBasedIndexPatternColumn,
   indexPattern: IndexPattern,
   dateRange: DateRange,
-  targetBars: number
+  targetBars: number,
+  maxBars: number
 ) {
   return column.references?.some((referenceId: string) => {
     const referencedOperation = layer.columns[referenceId]?.operationType;
@@ -159,7 +162,8 @@ function hasReferencesErrors(
           indexPattern,
           dateRange,
           operationDefinitionMap,
-          targetBars
+          targetBars,
+          maxBars
         ) ?? []
       ).length > 0
     );

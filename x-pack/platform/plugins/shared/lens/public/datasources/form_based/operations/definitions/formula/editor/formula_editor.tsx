@@ -357,7 +357,8 @@ export function FormulaEditor({
                   indexPattern,
                   dateRange,
                   visibleOperationsMap,
-                  uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
+                  uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+                  uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS)
                 );
                 if (messages.length) {
                   const startPosition = offsetToRowColumn(text, locations[id].min);

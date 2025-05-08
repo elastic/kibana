@@ -1582,7 +1582,8 @@ export function getErrorMessages(
           indexPattern,
           { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
           operationDefinitionMap,
-          core.uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
+          core.uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+          core.uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS)
         );
       }
     })

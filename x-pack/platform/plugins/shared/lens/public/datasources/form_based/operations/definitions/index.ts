@@ -333,7 +333,8 @@ interface BaseOperationDefinitionProps<
     indexPattern: IndexPattern,
     dateRange?: DateRange,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>,
-    targetBars?: number
+    targetBars?: number,
+    maxBars?: number
   ) => FieldBasedOperationErrorMessage[];
 
   /*

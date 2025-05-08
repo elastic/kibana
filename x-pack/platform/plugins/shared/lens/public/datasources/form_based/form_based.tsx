@@ -789,7 +789,8 @@ export function getFormBasedDatasource({
             columnId,
             indexPattern,
             framePublicAPI.dateRange,
-            uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
+            uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+            uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS)
           );
         }
       );

@@ -49,6 +49,8 @@ export const TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS = 'time_shift_multiple_date_his
 
 export const INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET =
   'missing_ui_settings_histogram_bar_target';
+export const INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_MAX_BARS =
+  'missing_ui_settings_histogram_max_bars';
 export const INTERVAL_OP_MISSING_TIME_RANGE = 'interval_op_missing_time_range';
 export const INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL =
   'missing_date_histogram_to_compute_interval';

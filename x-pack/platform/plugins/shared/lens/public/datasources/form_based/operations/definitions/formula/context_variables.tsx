@@ -35,6 +35,7 @@ import {
   INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
   INTERVAL_OP_MISSING_TIME_RANGE,
   INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
+  INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_MAX_BARS,
   TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
   TIMERANGE_OP_MISSING_TIME_RANGE,
 } from '../../../../../user_messages_ids';
@@ -185,7 +186,7 @@ function getIntervalErrorMessages(
   }
   if (!maxBars) {
     errors.push({
-      uniqueId: INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
+      uniqueId: INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_MAX_BARS,
       message: i18n.translate('xpack.lens.indexPattern.interval.noMaxBars', {
         defaultMessage: `Missing "{uiSettingVar}" value`,
         values: {

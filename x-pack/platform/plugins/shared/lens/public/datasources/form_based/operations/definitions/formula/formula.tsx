@@ -68,7 +68,15 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     getDisabledStatus(indexPattern: IndexPattern) {
       return undefined;
     },
-    getErrorMessage(layer, columnId, indexPattern, dateRange, operationDefinitionMap, targetBars) {
+    getErrorMessage(
+      layer,
+      columnId,
+      indexPattern,
+      dateRange,
+      operationDefinitionMap,
+      targetBars,
+      maxBars
+    ) {
       const column = layer.columns[columnId] as FormulaIndexPatternColumn;
       if (!column.params.formula || !operationDefinitionMap) {
         return [];
@@ -102,11 +110,11 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       }
 
       const managedColumns = getManagedColumnsFrom(columnId, layer.columns);
-      const innerErrors = [
-        ...managedColumns
-          .flatMap(([id, col]) => {
+      // dedup messages with the same content
+      const innerErrors = Array.from(
+        new Set<FieldBasedOperationErrorMessage>(
+          managedColumns.flatMap(([id, col]) => {
             const def = visibleOperationsMap[col.operationType];
-            // TOOD: it would be nice to have nicer column names here rather than `Part of <formula content>`
             return (
               def?.getErrorMessage?.(
                 layer,
@@ -114,16 +122,14 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
                 indexPattern,
                 dateRange,
                 visibleOperationsMap,
-                targetBars
+                targetBars,
+                maxBars
               ) ?? []
             );
           })
-          // dedup messages with the same content
-          .reduce((memo, message) => {
-            memo.add(message);
-            return memo;
-          }, new Set<FieldBasedOperationErrorMessage>()),
-      ];
+        )
+      );
+
       const hasBuckets = layer.columnOrder.some((colId) => layer.columns[colId].isBucketed);
       const hasOtherMetrics = layer.columnOrder.some((colId) => {
         const col = layer.columns[colId];
