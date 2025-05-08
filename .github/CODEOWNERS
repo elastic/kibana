@@ -1062,7 +1062,6 @@ x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
-x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
@@ -1107,8 +1106,8 @@ x-pack/test_serverless/api_integration/test_suites/common/platform_security @ela
 
 # Observability Entities Team (@elastic/obs-entities)
 /x-pack/plugins/observability_solution/entities_data_access @elastic/obs-entities
-/x-pack/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
-/x-pack/test/api_integration/apis/entity_manager @elastic/obs-entities
+/x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
+/x-pack/platform/test/api_integration/apis/entity_manager @elastic/obs-entities
 
 
 # Data Discovery

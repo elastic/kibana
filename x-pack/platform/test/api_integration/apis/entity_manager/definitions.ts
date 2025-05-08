@@ -18,7 +18,6 @@ import {
   updateDefinition,
   getInstalledDefinitions,
 } from './helpers/request';
-import { waitForDocumentInIndex } from '../../../alerting_api_integration/observability/helpers/alerting_wait_for_helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -26,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const retryService = getService('retry');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const alertingApi = getService('alertingApi');
 
   describe('Entity definitions', () => {
     describe('definitions installations', () => {
@@ -123,12 +123,10 @@ export default function ({ getService }: FtrProviderContext) {
           ],
         };
         dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
-        await waitForDocumentInIndex({
+        await alertingApi.waitForDocumentInIndex({
           esClient,
           indexName: 'kbn-data-forge-fake_stack.admin-console-*',
           docCountTarget: 2020,
-          retryService,
-          logger,
         });
       });
 
@@ -139,12 +137,10 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should create the proper entities in the latest index', async () => {
         await installDefinition(supertest, { definition: mockDefinition });
-        const sample = await waitForDocumentInIndex({
+        const sample = await alertingApi.waitForDocumentInIndex({
           esClient,
           indexName: generateLatestIndexName(mockDefinition),
           docCountTarget: 5,
-          retryService,
-          logger,
         });
 
         const parsedSample = entityLatestSchema.safeParse(sample.hits.hits[0]._source);

@@ -17,10 +17,12 @@ import { SpacesServiceProvider } from './spaces';
 import { SearchSecureProvider } from './search_secure';
 import { TransformProvider } from './transform';
 import { IndexManagementProvider } from './index_management';
+import { AlertingApiProvider } from './alerting_api';
 
 export const services = {
   ...kibanaApiIntegrationServices,
   aiops: AiopsProvider,
+  alertingApi: AlertingApiProvider,
   dataViewApi: DataViewApiProvider,
   esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   indexManagement: IndexManagementProvider,
