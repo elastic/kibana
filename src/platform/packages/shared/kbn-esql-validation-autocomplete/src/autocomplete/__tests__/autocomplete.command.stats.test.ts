@@ -331,7 +331,7 @@ describe('autocomplete.suggest', () => {
         const expected = [
           'col0 = ',
           getDateHistogramCompletionItem(),
-          ...getFieldNamesByType('any').map((field) => `${field} `),
+          ...getFieldNamesByType('any'),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ];
@@ -341,12 +341,54 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats a=min(b) by /', expected);
       });
 
+      test('on partial column name', async () => {
+        const expected = [
+          'col0 = ',
+          getDateHistogramCompletionItem(),
+          ...allEvaFunctions,
+          ...allGroupingFunctions,
+        ];
+
+        await assertSuggestions('from a | stats a=max(b) BY keywor/', [
+          ...expected,
+          ...getFieldNamesByType('any'),
+        ]);
+
+        await assertSuggestions('from a | stats a=max(b) BY integerField, keywor/', [
+          ...expected,
+          ...getFieldNamesByType('any').filter((f) => f !== 'integerField'),
+        ]);
+      });
+
+      test('on complete column name', async () => {
+        await assertSuggestions('from a | stats a=max(b) by integerField/', [
+          'col0 = ',
+          'integerField | ',
+          'integerField, ',
+        ]);
+
+        await assertSuggestions('from a | stats a=max(b) by keywordField, integerField/', [
+          'col0 = ',
+          'integerField | ',
+          'integerField, ',
+        ]);
+      });
+
+      test('attaches field range', async () => {
+        const suggestions = await suggest('from a | stats a=max(b) by integerF/');
+        const fieldSuggestion = suggestions.find((s) => s.text === 'integerField');
+        expect(fieldSuggestion?.rangeToReplace).toEqual({
+          start: 27,
+          end: 35,
+        });
+      });
+
       test('on space after grouping field', async () => {
         await assertSuggestions('from a | stats a=c by d /', [', ', '| ']);
       });
 
       test('after comma "," in grouping fields', async () => {
-        const fields = getFieldNamesByType('any').map((field) => `${field} `);
+        const fields = getFieldNamesByType('any');
         await assertSuggestions('from a | stats a=c by d, /', [
           'col0 = ',
           getDateHistogramCompletionItem(),
@@ -382,13 +424,13 @@ describe('autocomplete.suggest', () => {
         ]);
         await assertSuggestions('from a | stats avg(b) by col0 = /', [
           getDateHistogramCompletionItem(),
-          ...getFieldNamesByType('any').map((field) => `${field} `),
+          ...getFieldNamesByType('any'),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, col0 = /', [
           getDateHistogramCompletionItem(),
-          ...getFieldNamesByType('any').map((field) => `${field} `),
+          ...getFieldNamesByType('any'),
           ...allEvaFunctions,
           ...allGroupingFunctions,
         ]);

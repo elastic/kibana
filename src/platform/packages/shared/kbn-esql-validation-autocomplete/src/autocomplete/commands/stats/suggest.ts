@@ -73,7 +73,7 @@ export async function suggest({
         { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND, text: ', ' },
       ];
 
-    case 'after_where':
+    case 'after_where': {
       const whereFn = command.args[command.args.length - 1] as ESQLFunction;
       const expressionRoot = isMarkerNode(whereFn.args[1]) ? undefined : whereFn.args[1]!;
 
@@ -98,6 +98,7 @@ export async function suggest({
       }
 
       return suggestions;
+    }
 
     case 'grouping_expression_after_assignment': {
       const histogramBarTarget = (await getPreferences?.())?.histogramBarTarget;
@@ -128,7 +129,7 @@ export async function suggest({
         true
       );
 
-      return suggestColumns(
+      const suggestions = await suggestColumns(
         columnSuggestions,
         [
           ...getFunctionSuggestions({ location: Location.STATS_BY }),
@@ -137,6 +138,10 @@ export async function suggest({
         innerText,
         columnExists
       );
+
+      suggestions.push(getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()));
+
+      return suggestions;
     }
 
     case 'grouping_expression_complete':
