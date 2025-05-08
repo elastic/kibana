@@ -282,7 +282,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
   public async invokeAI(
     {
-      maxOutputTokens,
       messages,
       systemInstruction,
       model,
@@ -290,6 +289,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       signal,
       timeout,
       toolConfig,
+      maxOutputTokens,
     }: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
@@ -397,7 +397,7 @@ const formatGeminiPayload = ({
   temperature,
   toolConfig,
 }: {
-  maxOutputTokens?: number | undefined;
+  maxOutputTokens?: number;
   messages: Array<{ role: string; content: string; parts: MessagePart[] }>;
   systemInstruction?: string;
   toolConfig?: InvokeAIActionParams['toolConfig'];
