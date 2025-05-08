@@ -7,7 +7,7 @@
 import type { KbnSearchError } from '@kbn/data-plugin/server/search/report_search_error';
 
 const USER_ERRORS_EXCEPTIONS = [
-  'missing',
+  'index_not_found_exception',
   'status_exception',
   'verification_exception',
   'parsing_exception',
@@ -23,9 +23,20 @@ export const checkErrorDetails = (error: unknown): { isUserError: boolean } => {
     return { isUserError: true };
   }
 
+  if (
+    (error instanceof Error &&
+      typeof error.message === 'string' &&
+      (error.message as string).endsWith('missing')) ||
+    (typeof error === 'string' && error.endsWith('missing') && error.split(' ').length === 2)
+  ) {
+    return { isUserError: true };
+  }
+
   const isUserError =
-    error instanceof Error &&
-    USER_ERRORS_EXCEPTIONS.some((exception) => error.message.includes(exception));
+    (error instanceof Error &&
+      USER_ERRORS_EXCEPTIONS.some((exception) => error.message.includes(exception))) ||
+    (typeof error === 'string' &&
+      USER_ERRORS_EXCEPTIONS.some((exception) => error.includes(exception)));
 
   return { isUserError };
 };
