@@ -53,8 +53,8 @@ export const lastSavedStateSessionStorage = {
       ? (JSON.parse(savedState) as PageState)
       : { ...DEFAULT_STATE };
     const transformedPanels = panels.map((panel) => {
-      const { serializedState } = panel;
-      if (!isByValue(serializedState)) return panel;
+      const { rawState } = panel.serializedState ?? {};
+      if (!isByValue(rawState)) return panel;
 
       // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
       const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
@@ -65,7 +65,7 @@ export const lastSavedStateSessionStorage = {
         embeddableCmDefinitions
       );
       if (!savedObjectToItem) return panel;
-      const newState = savedObjectToItem(serializedState);
+      const newState = savedObjectToItem(rawState);
       return {
         ...panel,
         panelState: {
@@ -77,8 +77,8 @@ export const lastSavedStateSessionStorage = {
   },
   save: (state: PageState, embeddable: EmbeddableStart) => {
     const transformedPanels = state.panels.map((panel) => {
-      const { serializedState } = panel;
-      if (!isByValue(serializedState)) return panel;
+      const { rawState } = panel.serializedState ?? {};
+      if (!isByValue(rawState)) return panel;
 
       // Transform the panel state if necessary, e.g., to ensure compatibility with the latest version
       const embeddableCmDefinitions = embeddable.getEmbeddableContentManagementDefinition(
@@ -89,10 +89,10 @@ export const lastSavedStateSessionStorage = {
         embeddableCmDefinitions
       );
       if (!itemToSavedObject) return panel;
-      const savedState = itemToSavedObject(serializedState);
+      const savedState = itemToSavedObject(rawState);
       return {
         ...panel,
-        serializedState: savedState,
+        serializedState: { rawState: savedState },
       };
     });
     state.panels = transformedPanels;
