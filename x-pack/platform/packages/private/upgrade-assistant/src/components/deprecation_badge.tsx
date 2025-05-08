@@ -8,6 +8,7 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
+import { MIGRATION_DEPRECATION_LEVEL } from '../types';
 
 const i18nTexts = {
   criticalBadgeLabel: i18n.translate('xpack.upgradeAssistant.deprecationBadge.criticalBadgeLabel', {
@@ -21,8 +22,18 @@ const i18nTexts = {
   }),
 };
 
+enum WarningLevelsFetchError {
+  FETCH_ERROR = 'fetch_error',
+}
+
+type WarningLevels = MIGRATION_DEPRECATION_LEVEL | WarningLevelsFetchError;
+export const WarningLevels = {
+  ...MIGRATION_DEPRECATION_LEVEL,
+  ...WarningLevelsFetchError,
+} as const;
+
 interface Props {
-  level: 'none' | 'info' | 'warning' | 'critical' | 'fetch_error';
+  level: WarningLevels;
   isResolved?: boolean;
 }
 
@@ -35,7 +46,7 @@ export const DeprecationBadge: FunctionComponent<Props> = ({ level, isResolved }
     );
   }
 
-  if (level === 'critical') {
+  if (level === WarningLevels.CRITICAL) {
     return (
       <EuiBadge color="danger" data-test-subj="criticalDeprecationBadge">
         {i18nTexts.criticalBadgeLabel}

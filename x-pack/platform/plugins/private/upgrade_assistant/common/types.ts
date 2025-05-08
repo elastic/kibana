@@ -8,6 +8,7 @@
 import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { SavedObject } from '@kbn/core/types';
+import type { MIGRATION_DEPRECATION_LEVEL } from '@kbn/upgrade-assistant';
 import type { DataStreamsAction } from './data_stream_types';
 
 export * from './data_stream_types';
@@ -182,7 +183,6 @@ export interface UpgradeAssistantTelemetry {
   };
 }
 
-export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 export interface DeprecationInfo {
   level: MIGRATION_DEPRECATION_LEVEL;
   message: string;
