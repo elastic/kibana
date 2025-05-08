@@ -133,7 +133,7 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 
   return result;
 }
-
+// Update the agentless policy with cloud connector info in the new agent policy when the package policy input `aws.support_cloud_connectors is updated
 export const updateAgentlessCloudConnectorConfig = (
   packagePolicy: NewPackagePolicy,
   newAgentPolicy: NewAgentPolicy,
@@ -142,6 +142,7 @@ export const updateAgentlessCloudConnectorConfig = (
   const input = packagePolicy.inputs?.filter(
     (pinput: NewPackagePolicyInput) => pinput.enabled === true
   )[0];
+
   const enabled = input?.streams?.[0]?.vars?.['aws.supports_cloud_connectors']?.value;
   if (
     newAgentPolicy.agentless?.cloud_connectors?.enabled !== enabled &&
