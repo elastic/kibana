@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { Tutorial } from './tutorial';
 import { TutorialType } from '../../../services/tutorials/types';
 
@@ -97,7 +97,10 @@ describe('Tutorial component', () => {
           />
         </I18nProvider>
       );
-      await loadTutorialPromise;
+
+      await act(async () => {
+        await loadTutorialPromise;
+      });
 
       expect(getByText('onPrem instructions')).toBeInTheDocument();
     });
@@ -123,7 +126,9 @@ describe('Tutorial component', () => {
           />
         </I18nProvider>
       );
-      await loadBasicTutorialPromise;
+      await act(async () => {
+        await loadBasicTutorialPromise;
+      });
 
       expect(queryByTestId('selfManagedTutorial')).not.toBeInTheDocument();
       expect(queryByTestId('onCloudTutorial')).not.toBeInTheDocument();
@@ -141,7 +146,10 @@ describe('Tutorial component', () => {
           />
         </I18nProvider>
       );
-      await loadTutorialPromise;
+      await act(async () => {
+        await loadTutorialPromise;
+      });
+
       fireEvent.click(getByTestId('onCloudTutorial'));
 
       await waitFor(() => {
@@ -163,7 +171,9 @@ describe('Tutorial component', () => {
           />
         </I18nProvider>
       );
-      await loadTutorialPromise;
+      await act(async () => {
+        await loadTutorialPromise;
+      });
 
       expect(getByText('elasticCloud instructions')).toBeInTheDocument();
     });
@@ -182,7 +192,10 @@ describe('Tutorial component', () => {
           />
         </I18nProvider>
       );
-      await loadTutorialPromise;
+
+      await act(async () => {
+        await loadTutorialPromise;
+      });
 
       // Simulate status check
       fireEvent.click(getByTestId('statusCheckButton'));
@@ -212,7 +225,9 @@ describe('Tutorial component', () => {
           />
         </I18nProvider>
       );
-      await loadTutorialWithNoDataCheckPromise;
+      await act(async () => {
+        await loadTutorialWithNoDataCheckPromise;
+      });
 
       // Simulate status check
       fireEvent.click(getByTestId('statusCheckButton'));
