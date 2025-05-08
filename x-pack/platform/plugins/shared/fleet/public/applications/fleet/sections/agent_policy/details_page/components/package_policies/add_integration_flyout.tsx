@@ -25,9 +25,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Loading } from '../../../../agents/components';
-import { useGetPackagesQuery, useGetSettings } from '../../../../../hooks';
+import { useGetSettings } from '../../../../../hooks';
 import type { AgentPolicy } from '../../../../../../../../common';
 import { CreatePackagePolicySinglePage } from '../../../create_package_policy_page/single_page_layout';
+import { useAvailablePackages } from '../../../../../../integrations/sections/epm/screens/home/hooks/use_available_packages';
 
 export const AddIntegrationFlyout: React.FunctionComponent<{
   onClose: () => void;
@@ -43,25 +44,21 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
     }
   }, [settings?.item]);
 
-  // TODO useAvailablePackages
-  const {
-    data: eprPackages,
-    // isLoading: isLoadingAllPackages,
-    // error: eprPackageLoadingError,
-  } = useGetPackagesQuery({ prerelease });
+  const { filteredCards } = useAvailablePackages({ prereleaseIntegrationsEnabled: prerelease });
 
   const options = useMemo(() => {
     return (
-      eprPackages?.items.map((pkg) => ({
+      filteredCards.map((pkg) => ({
         label: pkg.title,
         value: pkg.name,
+        integration: pkg.integration,
       })) ?? []
     );
-  }, [eprPackages]);
+  }, [filteredCards]);
 
-  const [selectedOptions, setSelectedOptions] = useState<Array<{ value: string; label: string }>>([
-    // { value: 'system', label: 'System' },
-  ]);
+  const [selectedOptions, setSelectedOptions] = useState<
+    Array<{ value: string; label: string; integration?: string }>
+  >([]);
 
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
@@ -100,7 +97,12 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
         <EuiFlyout onClose={onClose} data-test-subj="addIntegrationFlyout">
           <EuiFlyoutHeader hasBorder>
             <EuiTitle>
-              <h2>Add integration to policy</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.fleet.addIntegrationFlyout.flyoutTitle"
+                  defaultMessage="Add integration to policy"
+                />
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -109,6 +111,7 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
               queryParamsPolicyId={agentPolicy.id}
               prerelease={prerelease}
               pkgName={selectedOptions[0]?.value}
+              integration={selectedOptions[0]?.integration}
               addIntegrationFlyoutProps={{
                 selectIntegrationStep,
                 onSubmitCompleted,

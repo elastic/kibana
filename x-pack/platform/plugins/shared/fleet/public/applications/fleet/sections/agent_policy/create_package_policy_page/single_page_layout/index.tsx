@@ -280,6 +280,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled]);
 
   useEffect(() => {
+    if (integrationToEnable !== integration) {
+      setIntegrationToEnable(integration);
+    }
+  }, [integration, integrationToEnable]);
+
+  useEffect(() => {
     if (addIntegrationFlyoutProps?.isSubmitted && formState !== 'LOADING') {
       setFormState('LOADING');
       onSubmit({ skipConfirmModal: true })
