@@ -138,7 +138,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     // Errors state
     const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
-    const hasRequiredVarGroupErrors = inputStreamValidationResults.required_vars;
+    const hasRequiredVarGroupErrors = inputStreamValidationResults?.required_vars;
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
         advancedVars.filter(
@@ -237,7 +237,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       }
                     >
                       <EuiText size="xs" color="danger">
-                        {Object.entries(inputStreamValidationResults.required_vars || {}).map(
+                        {Object.entries(inputStreamValidationResults?.required_vars || {}).map(
                           ([groupName, vars]) => {
                             return (
                               <>
@@ -283,7 +283,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                           },
                         });
                       }}
-                      errors={inputStreamValidationResults?.vars![varName]}
+                      errors={inputStreamValidationResults?.vars?.[varName]}
                       forceShowErrors={forceShowErrors}
                       packageType={packageInfo.type}
                       packageName={packageInfo.name}
@@ -349,7 +349,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                                   },
                                 });
                               }}
-                              errors={inputStreamValidationResults?.vars![varName]}
+                              errors={inputStreamValidationResults?.vars?.[varName]}
                               forceShowErrors={forceShowErrors}
                               packageType={packageInfo.type}
                               packageName={packageInfo.name}
