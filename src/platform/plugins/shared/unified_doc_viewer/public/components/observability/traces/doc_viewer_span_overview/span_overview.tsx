@@ -53,7 +53,7 @@ export function SpanOverview({
   );
   const fieldConfigurations = useMemo(
     () => getSpanFieldConfiguration({ attributes: formattedDoc, flattenedDoc }),
-    [hit.flattened, formattedDoc]
+    [formattedDoc, flattenedDoc]
   );
 
   const spanDuration = flattenedDoc[SPAN_DURATION_FIELD];
