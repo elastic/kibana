@@ -469,6 +469,11 @@ Machine Learning::
 [[release-notes-8.17.6]]
 == {kib} 8.17.6
 
+[IMPORTANT]
+====
+The 8.17.6 release contains fixes for potential security vulnerabilities. See our https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+====
+
 The 8.17.6 release includes the following enhancements and fixes.
 
 [float]
