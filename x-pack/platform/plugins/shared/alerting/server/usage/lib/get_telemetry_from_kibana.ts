@@ -47,6 +47,8 @@ type GetTotalCountsResults = Pick<
   | 'count_rules_snoozed'
   | 'count_rules_muted'
   | 'count_rules_with_muted_alerts'
+  | 'count_rules_with_linked_dashboards'
+  | 'count_rules_with_investigation_guide'
   | 'count_connector_types_by_consumers'
   | 'throttle_time'
   | 'schedule_time'
@@ -229,6 +231,34 @@ export async function getTotalCountAggregations({
                 }`,
           },
         },
+        rule_with_linked_dashboards: {
+          type: 'long' as const,
+          script: {
+            source: `
+               def rule = params._source['alert'];
+                if (rule != null && rule.artifacts != null && rule.artifacts.dashboards != null) {
+                  if (rule.artifacts.dashboards.size() > 0) {
+                    emit(1);
+                  } else {
+                    emit(0);
+                  }
+                }`,
+          },
+        },
+        rule_with_investigation_guide: {
+          type: 'long' as const,
+          script: {
+            source: `
+               def rule = params._source['alert'];
+                if (rule != null && rule.artifacts != null && rule.artifacts.investigation_guide != null && rule.artifacts.investigation_guide.blob != null) {
+                  if (rule.artifacts.investigation_guide.blob.trim() != '') {
+                    emit(1);
+                  } else {
+                    emit(0);
+                  }
+                }`,
+          },
+        },
       },
       aggs: {
         by_rule_type_id: {
@@ -284,6 +314,8 @@ export async function getTotalCountAggregations({
         sum_rules_snoozed: { sum: { field: 'rule_snoozed' } },
         sum_rules_muted: { sum: { field: 'rule_muted' } },
         sum_rules_with_muted_alerts: { sum: { field: 'rule_with_muted_alerts' } },
+        sum_rules_with_linked_dashboards: { sum: { field: 'rule_with_linked_dashboards' } },
+        sum_rules_with_investigation_guide: { sum: { field: 'rule_with_investigation_guide' } },
       },
     };
 
@@ -311,6 +343,8 @@ export async function getTotalCountAggregations({
       sum_rules_snoozed: AggregationsSingleMetricAggregateBase;
       sum_rules_muted: AggregationsSingleMetricAggregateBase;
       sum_rules_with_muted_alerts: AggregationsSingleMetricAggregateBase;
+      sum_rules_with_linked_dashboards: AggregationsSingleMetricAggregateBase;
+      sum_rules_with_investigation_guide: AggregationsSingleMetricAggregateBase;
     };
 
     const totalRulesCount =
@@ -345,6 +379,9 @@ export async function getTotalCountAggregations({
       count_rules_snoozed: aggregations.sum_rules_snoozed.value ?? 0,
       count_rules_muted: aggregations.sum_rules_muted.value ?? 0,
       count_rules_with_muted_alerts: aggregations.sum_rules_with_muted_alerts.value ?? 0,
+      count_rules_with_linked_dashboards: aggregations.sum_rules_with_linked_dashboards.value ?? 0,
+      count_rules_with_investigation_guide:
+        aggregations.sum_rules_with_investigation_guide.value ?? 0,
       count_connector_types_by_consumers: countConnectorTypesByConsumers,
       throttle_time: {
         min: `${aggregations.min_throttle_time.value ?? 0}s`,
@@ -390,6 +427,8 @@ export async function getTotalCountAggregations({
       count_rules_snoozed: 0,
       count_rules_muted: 0,
       count_rules_with_muted_alerts: 0,
+      count_rules_with_linked_dashboards: 0,
+      count_rules_with_investigation_guide: 0,
       count_connector_types_by_consumers: {},
       throttle_time: {
         min: '0s',
