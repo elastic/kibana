@@ -57,9 +57,6 @@ export default function (providerContext: FtrProviderContext) {
     streams:
       # Apache access logs: Collect Apache access logs
       - id: logfile-apache.access
-        data_stream:
-          dataset: apache.access
-          type: logs
         paths:
           - /var/log/apache2/access.log*
           - /var/log/apache2/other_vhosts_access.log*
@@ -71,11 +68,11 @@ export default function (providerContext: FtrProviderContext) {
               target: ''
               fields:
                 ecs.version: 1.5.0
+        data_stream:
+          dataset: apache.access
+          type: logs
       # Apache error logs: Collect Apache error logs
       - id: logfile-apache.error
-        data_stream:
-          dataset: apache.error
-          type: logs
         paths:
           - /var/log/apache2/error.log*
           - /var/log/httpd/error_log*
@@ -87,21 +84,24 @@ export default function (providerContext: FtrProviderContext) {
               target: ''
               fields:
                 ecs.version: 1.5.0
+        data_stream:
+          dataset: apache.error
+          type: logs
   # Collect metrics from Apache instances: Collecting Apache status metrics
   - id: apache-apache/metrics
     type: apache/metrics
     streams:
       # Apache status metrics: Collect Apache status metrics
       - id: apache/metrics-apache.status
-        data_stream:
-          dataset: apache.status
-          type: metrics
         metricsets:
           - status
         hosts:
           - http://127.0.0.1
         period: 10s
         server_status_path: /server-status
+        data_stream:
+          dataset: apache.status
+          type: metrics
 `;
     const expectedJson = [
       {
