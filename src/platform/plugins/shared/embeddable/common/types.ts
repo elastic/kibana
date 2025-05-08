@@ -16,7 +16,7 @@ import type {
 import type { ObjectTransform } from '@kbn/object-versioning';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Type } from '@kbn/config-schema';
-import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 export type EmbeddableStateWithType = {
   enhancements?: SerializableRecord;
@@ -31,14 +31,14 @@ export interface EmbeddableRegistryDefinition<
 
 export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
 
-export type SavedObjectAttributesWithReferences<SavedObjectAttributes> = Pick<
-  SavedObject<SavedObjectAttributes>,
-  'attributes' | 'references'
->;
+export type SavedObjectAttributesWithReferences<SavedObjectAttributes> = {
+  attributes: SavedObjectAttributes;
+  references?: SavedObjectReference[];
+};
 
 export type ItemAttributesWithReferences<ItemAttributes> = {
   attributes: ItemAttributes;
-  references: SavedObjectReference[];
+  references?: SavedObjectReference[];
 };
 
 export type VersionableEmbeddableObject<

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PageState } from '../types';
 import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { PageState } from '../types';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =
   'kibana.examples.embeddables.presentationContainerExample.savedState';
@@ -38,7 +38,10 @@ export const lastSavedStateSessionStorage = {
       const { savedObjectToItem } =
         embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
       if (!savedObjectToItem) return panel;
-      const newState = savedObjectToItem(panel.serializedState?.rawState);
+      const newState = savedObjectToItem({
+        attributes: panel.serializedState?.rawState,
+        references: panel.serializedState?.references,
+      });
       return {
         ...panel,
         serializedState: {
@@ -57,7 +60,10 @@ export const lastSavedStateSessionStorage = {
       const { itemToSavedObject } =
         embeddableCmDefinitions?.versions[embeddableCmDefinitions.latestVersion] ?? {};
       if (!itemToSavedObject) return panel;
-      const savedState = itemToSavedObject(panel.serializedState?.rawState);
+      const savedState = itemToSavedObject({
+        attributes: panel.serializedState?.rawState,
+        references: panel.serializedState?.references,
+      });
       return {
         ...panel,
         serializedState: {
