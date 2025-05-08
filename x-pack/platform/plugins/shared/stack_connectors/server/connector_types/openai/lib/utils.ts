@@ -89,7 +89,8 @@ export const getAxiosOptions = (
   provider: string,
   apiKey: string,
   stream: boolean,
-  config?: Config
+  config?: Config,
+  logger?: Logger
 ): { headers: Record<string, string>; httpsAgent?: https.Agent; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
 
@@ -112,67 +113,50 @@ export const getAxiosOptions = (
           config.privateKeyFile ||
           config.privateKeyData)
       ) {
-        if (!config.certificateFile && !config.certificateData) {
-          throw new Error('Either certificate file or certificate data must be provided for PKI');
-        }
-        if (!config.privateKeyFile && !config.privateKeyData) {
-          throw new Error('Either private key file or private key data must be provided for PKI');
-        }
-
-        // Debug: Log file paths and existence
-        const certPath = config.certificateFile ? (Array.isArray(config.certificateFile) ? config.certificateFile[0] : config.certificateFile) : undefined;
-        const keyPath = config.privateKeyFile ? (Array.isArray(config.privateKeyFile) ? config.privateKeyFile[0] : config.privateKeyFile) : undefined;
-        const caPath = config.caFile ? (Array.isArray(config.caFile) ? config.caFile[0] : config.caFile) : undefined;
-        console.log('PKI DEBUG:', {
-          certPath,
-          keyPath,
-          caPath,
-          certExists: certPath ? fs.existsSync(certPath) : false,
-          keyExists: keyPath ? fs.existsSync(keyPath) : false,
-          caExists: caPath ? fs.existsSync(caPath) : false,
-        });
-
         let cert, key, ca;
         try {
           if (config.certificateFile) {
-            cert = fs.readFileSync(Array.isArray(config.certificateFile) ? config.certificateFile[0] : config.certificateFile, 'utf8');
+            cert = fs.readFileSync(
+              Array.isArray(config.certificateFile)
+                ? config.certificateFile[0]
+                : config.certificateFile,
+              'utf8'
+            );
           } else {
             cert = config.certificateData!;
           }
         } catch (e) {
-          console.error('Failed to read client cert:', e);
+          logger?.error(`Failed to read client certificate: ${e.message}`);
+          throw new Error(`Failed to read client certificate: ${e.message}`);
         }
         try {
           if (config.privateKeyFile) {
-            key = fs.readFileSync(Array.isArray(config.privateKeyFile) ? config.privateKeyFile[0] : config.privateKeyFile, 'utf8');
+            key = fs.readFileSync(
+              Array.isArray(config.privateKeyFile)
+                ? config.privateKeyFile[0]
+                : config.privateKeyFile,
+              'utf8'
+            );
           } else {
             key = config.privateKeyData!;
           }
         } catch (e) {
-          console.error('Failed to read client key:', e);
+          logger?.error(`Failed to read private key: ${e.message}`);
+          throw new Error(`Failed to read private key: ${e.message}`);
         }
         try {
           if (config.caFile) {
-            ca = fs.readFileSync(Array.isArray(config.caFile) ? config.caFile[0] : config.caFile, 'utf8');
+            ca = fs.readFileSync(
+              Array.isArray(config.caFile) ? config.caFile[0] : config.caFile,
+              'utf8'
+            );
           } else if (config.caData) {
             ca = config.caData;
           }
         } catch (e) {
-          console.error('Failed to read CA cert:', e);
+          logger?.error(`Failed to read CA certificate: ${e.message}`);
+          throw new Error(`Failed to read CA certificate: ${e.message}`);
         }
-
-        // Debug: Log loaded values
-        console.log('Loaded cert:', cert ? cert.slice(0, 40) : 'undefined');
-        console.log('Loaded key:', key ? key.slice(0, 40) : 'undefined');
-        console.log('Loaded ca:', ca ? ca.slice(0, 40) : 'undefined');
-
-        if (!cert || !cert.toString().includes('-----BEGIN CERTIFICATE-----')) {
-          throw new Error('Invalid certificate format: Must be PEM-encoded');
-        }
-        if (!key || !key.toString().includes('-----BEGIN PRIVATE KEY-----')) {
-          throw new Error('Invalid private key format: Must be PEM-encoded');
-        }
-
         const httpsAgent = new https.Agent({
           cert,
           key,
@@ -183,9 +167,6 @@ export const getAxiosOptions = (
               ? () => undefined
               : undefined,
         });
-        // Debug: Print the https.Agent options
-        console.log('https.Agent options:', httpsAgent.options);
-
         return {
           headers: { ['content-type']: 'application/json', Accept: 'application/json' },
           httpsAgent,
@@ -216,6 +197,7 @@ export const getAzureApiVersionParameter = (url: string): string | undefined => 
 };
 
 export const validatePKICertificates = (
+  logger: Logger,
   certificateFile?: string | string[],
   certificateData?: string,
   privateKeyFile?: string | string[],
@@ -224,6 +206,7 @@ export const validatePKICertificates = (
   try {
     // Check file paths if provided
     if (certificateFile) {
+      logger.debug(`Validating certificate file: ${certificateFile}`);
       const certPath = Array.isArray(certificateFile) ? certificateFile[0] : certificateFile;
       if (!fs.existsSync(certPath)) {
         return false;
@@ -231,6 +214,7 @@ export const validatePKICertificates = (
       fs.accessSync(certPath, fs.constants.R_OK);
     }
     if (privateKeyFile) {
+      logger.debug(`Validating private key file: ${privateKeyFile}`);
       const keyPath = Array.isArray(privateKeyFile) ? privateKeyFile[0] : privateKeyFile;
       if (!fs.existsSync(keyPath)) {
         return false;
@@ -248,8 +232,63 @@ export const validatePKICertificates = (
 
     return true;
   } catch (error) {
+    logger.error(`Error validating PKI certificates: ${error.message}`);
     return false;
   }
+};
+
+export const getPKISSLOverrides = (
+  logger: Logger,
+  certificateFile?: string | string[],
+  certificateData?: string,
+  privateKeyFile?: string | string[],
+  privateKeyData?: string,
+  caFile?: string | string[],
+  caData?: string,
+  verificationMode?: 'full' | 'certificate' | 'none'
+): Record<string, any> => {
+  let cert: string;
+  let key: string;
+  let ca: string | undefined;
+
+  if (certificateFile) {
+    cert = fs.readFileSync(
+      Array.isArray(certificateFile) ? certificateFile[0] : certificateFile,
+      'utf8'
+    );
+  } else if (certificateData) {
+    cert = formatPEMContent(certificateData, 'CERTIFICATE', logger);
+  } else {
+    throw new Error('No certificate file or data provided');
+  }
+
+  if (privateKeyFile) {
+    key = fs.readFileSync(
+      Array.isArray(privateKeyFile) ? privateKeyFile[0] : privateKeyFile,
+      'utf8'
+    );
+  } else if (privateKeyData) {
+    key = formatPEMContent(privateKeyData, 'PRIVATE KEY', logger);
+  } else {
+    throw new Error('No private key file or data provided');
+  }
+
+  if (caFile) {
+    ca = fs.readFileSync(Array.isArray(caFile) ? caFile[0] : caFile, 'utf8');
+  } else if (caData) {
+    ca = formatPEMContent(caData, 'CERTIFICATE', logger);
+  }
+
+  return {
+    cert,
+    key,
+    ca,
+    rejectUnauthorized: verificationMode !== 'none',
+    checkServerIdentity:
+      verificationMode === 'certificate' || verificationMode === 'none'
+        ? () => undefined
+        : undefined,
+  };
 };
 
 export function formatPEMContent(
@@ -266,6 +305,11 @@ export function formatPEMContent(
   const header = `-----BEGIN ${type}-----`;
   const footer = `-----END ${type}-----`;
 
+  // Verify header and footer
+  if (!normalizedContent.startsWith(header) || !normalizedContent.endsWith(footer)) {
+    logger.debug(`Invalid PEM format for ${type}: Missing header or footer`);
+    return pemContent;
+  }
 
   // Extract base64 content between header and footer
   const base64Content = normalizedContent
