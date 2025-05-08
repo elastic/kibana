@@ -51,12 +51,6 @@ const originalConsoleError = console.error;
 console.error = (...args) => {
   const message = args[0]?.toString();
 
-  if (global.IS_REACT_ACT_ENVIRONMENT === false) {
-    if (message.includes('Warning: An update to %s inside a test was not wrapped in act')) {
-      return;
-    }
-  }
-
   // Additionally this is a restoration of the original console.error suppression
   // expected by the usage of renderHook from react-hooks-testing-library
   // which has been moved into latest react-testing-library but the suppression
