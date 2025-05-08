@@ -593,8 +593,11 @@ export function getColumnExists(
   return false;
 }
 
+const removeSourceNameQuotes = (sourceName: string) =>
+  sourceName.startsWith('"') && sourceName.endsWith('"') ? sourceName.slice(1, -1) : sourceName;
+
 export function sourceExists(index: string, sources: Set<string>) {
-  if (sources.has(index) || index.startsWith('-')) {
+  if (sources.has(removeSourceNameQuotes(index)) || index.startsWith('-')) {
     return true;
   }
   return Boolean(fuzzySearch(index, sources.keys()));

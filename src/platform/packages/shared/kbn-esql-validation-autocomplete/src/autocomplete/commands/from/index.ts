@@ -11,7 +11,7 @@ import { ESQLCommandOption } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import { isMarkerNode } from '../../../shared/context';
 import type { SuggestionRawDefinition } from '../../types';
-import { getOverlapRange, handleFragment, removeQuoteForSuggestedSources } from '../../helper';
+import { getOverlapRange, handleFragment } from '../../helper';
 import { CommandSuggestParams } from '../../../definitions/types';
 import {
   isColumnItem,
@@ -36,21 +36,21 @@ export async function suggest({
   getRecommendedQueriesSuggestions,
   getSourcesFromQuery,
 }: CommandSuggestParams<'from'>): Promise<SuggestionRawDefinition[]> {
-  if (/\".*$/.test(innerText)) {
-    // FROM "<suggest>"
+  let quoteCount = 0;
+  for (const char of innerText) {
+    if (char === '"') {
+      quoteCount++;
+    }
+  }
+
+  // if the number of quotes is odd, we are in a quoted string
+  if (quoteCount % 2 === 1) {
     return [];
   }
 
   const suggestions: SuggestionRawDefinition[] = [];
 
   const indexes = getSourcesFromQuery('index');
-  const canRemoveQuote = innerText.includes('"');
-  // Function to add suggestions based on canRemoveQuote
-  const addSuggestionsBasedOnQuote = (definitions: SuggestionRawDefinition[]) => {
-    suggestions.push(
-      ...(canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions)
-    );
-  };
 
   const metadataNode = command.args.find((arg) => isOptionItem(arg) && arg.name === 'metadata') as
     | ESQLCommandOption
@@ -65,8 +65,8 @@ export async function suggest({
 
   // FROM /
   if (indexes.length === 0) {
-    addSuggestionsBasedOnQuote(
-      getSourceSuggestions(
+    suggestions.push(
+      ...getSourceSuggestions(
         await getSources(),
         indexes.map(({ name }) => name)
       )
@@ -112,7 +112,7 @@ export async function suggest({
             exactMatch.dataStreams.map(({ name }) => ({ name, isIntegration: false }))
           );
 
-          return canRemoveQuote ? removeQuoteForSuggestedSources(definitions) : definitions;
+          return definitions;
         } else {
           const _suggestions: SuggestionRawDefinition[] = [
             {
@@ -146,7 +146,7 @@ export async function suggest({
         }
       }
     );
-    addSuggestionsBasedOnQuote(suggestionsToAdd);
+    suggestions.push(...suggestionsToAdd);
   }
 
   return suggestions;
@@ -228,4 +228,12 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
   }
 
   return suggestions;
+}
+
+function removeQuoteFromSource(suggestions: SuggestionRawDefinition[]) {
+  return suggestions.map((d) => ({
+    ...d,
+    // "text" -> text
+    text: d.text.startsWith('"') && d.text.endsWith('"') ? d.text.slice(1, -1) : d.text,
+  }));
 }

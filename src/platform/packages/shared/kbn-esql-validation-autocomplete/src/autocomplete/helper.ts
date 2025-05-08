@@ -160,14 +160,6 @@ export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'ind
   );
 }
 
-export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinition[]) {
-  return suggestions.map((d) => ({
-    ...d,
-    // "text" -> text
-    text: d.text.startsWith('"') && d.text.endsWith('"') ? d.text.slice(1, -1) : d.text,
-  }));
-}
-
 export function getSupportedTypesForBinaryOperators(
   fnDef: FunctionDefinition | undefined,
   previousType: string
