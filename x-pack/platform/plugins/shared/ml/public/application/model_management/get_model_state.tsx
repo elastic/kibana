@@ -121,7 +121,7 @@ export const getModelStateColor = (
                 'xpack.ml.trainedModels.modelsList.modelState.downloadedInDifferentSpaceTooltip.cannotDeploy',
                 {
                   defaultMessage:
-                    'The model is downloaded in a different space. If you have the right permissions, assign it to the current space to review model details, or contact your administrator.',
+                    'The model is downloaded in a different space. If you have permission, assign it to the current space to review model details, or contact your administrator.',
                 }
               );
           return (
