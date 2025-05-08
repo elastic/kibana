@@ -5,16 +5,14 @@
  * 2.0.
  */
 import { escapeRegExp } from 'lodash';
-import { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
+import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
 import { parse, Walker } from '@kbn/esql-ast';
-import { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { RuleTypeRegistryContract } from '@kbn/response-ops-rule-form';
-import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import React from 'react';
@@ -23,6 +21,7 @@ import type {
   LensCreateAlertRuleInitialValues,
   LensEmbeddableStartServices,
 } from '../types';
+import { mountInlinePanel } from '../inline_editing/mount';
 
 export function initializeAlertRules(
   uuid: string,
@@ -31,7 +30,7 @@ export function initializeAlertRules(
 ): { api: LensAlertRulesApi } {
   return {
     api: {
-      createAlertRule: (
+      createAlertRule: async (
         passedInitialValues: LensCreateAlertRuleInitialValues,
         ruleTypeRegistry: RuleTypeRegistryContract,
         actionTypeRegistry: ActionTypeRegistryContract
@@ -72,45 +71,33 @@ export function initializeAlertRules(
 
         const closeRuleForm = () => {
           overlayTracker?.clearOverlays();
-          handle?.close();
         };
 
-        const handle = coreStart.overlays.openFlyout(
-          toMountPoint(
-            <KibanaContextProvider services={ruleFormPlugins}>
-              <RuleFormFlyout
-                data-test-subj="lensEmbeddableRuleForm"
-                plugins={{ ...ruleFormPlugins, ruleTypeRegistry, actionTypeRegistry }}
-                ruleTypeId={ES_QUERY_ID}
-                initialValues={{
-                  ...initialValues,
-                  name: i18n.translate('xpack.lens.embeddable.alertRuleTitle.defaultName', {
-                    defaultMessage: 'Elasticsearch query rule from visualization',
-                  }),
-                }}
-                initialMetadata={{
-                  isManagementPage: false,
-                }}
-                onCancel={closeRuleForm}
-                onSubmit={closeRuleForm}
-              />
-            </KibanaContextProvider>,
-            coreStart
-          ),
-          {
-            className: 'lnsConfigPanel__overlay',
-            size: 's',
-            'data-test-subj': 'lensAlertRule',
-            type: 'push',
-            paddingSize: 'm',
-            maxWidth: 800,
-            hideCloseButton: true,
-            isResizable: true,
-            onClose: closeRuleForm,
-            outsideClickCloses: true,
-          }
+        const { RuleFormFlyout } = await import('@kbn/response-ops-rule-form/flyout');
+
+        mountInlinePanel(
+          <KibanaContextProvider services={ruleFormPlugins}>
+            <RuleFormFlyout
+              data-test-subj="lensEmbeddableRuleForm"
+              plugins={{ ...ruleFormPlugins, ruleTypeRegistry, actionTypeRegistry }}
+              ruleTypeId={ES_QUERY_ID}
+              initialValues={{
+                ...initialValues,
+                name: i18n.translate('xpack.lens.embeddable.alertRuleTitle.defaultName', {
+                  defaultMessage: 'Elasticsearch query rule from visualization',
+                }),
+              }}
+              initialMetadata={{
+                isManagementPage: false,
+              }}
+              onCancel={closeRuleForm}
+              onSubmit={closeRuleForm}
+            />
+          </KibanaContextProvider>,
+          coreStart,
+          overlayTracker,
+          { dataTestSubj: 'lensAlertRule', uuid }
         );
-        overlayTracker?.openOverlay(handle, { focusedPanelId: uuid });
       },
     },
   };

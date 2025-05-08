@@ -87,6 +87,7 @@ export const prepareLogTable = (
   dimensions: LayerDimension[] | Dimension[],
   removeUnmappedColumns: boolean = false
 ) => {
+  const hasLayerDimensions = isLayerDimensions(dimensions);
   return {
     ...datatable,
     columns: datatable.columns
@@ -96,7 +97,7 @@ export const prepareLogTable = (
           meta: {
             ...column.meta,
             dimensionName: getDimensionName(column, columnIndex, dimensions),
-            ...(isLayerDimensions(dimensions)
+            ...(hasLayerDimensions
               ? { dimensionType: getDimensionType(column, columnIndex, dimensions) }
               : {}),
           },
