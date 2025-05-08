@@ -7,7 +7,7 @@
 
 import { tags, test, expect } from '@kbn/scout';
 
-test.describe('Wired Streams', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
     await apiServices.streams.enable();
     await browserAuth.loginAsAdmin();
