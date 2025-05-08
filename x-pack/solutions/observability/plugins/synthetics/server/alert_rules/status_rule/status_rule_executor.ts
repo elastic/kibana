@@ -20,7 +20,7 @@ import {
   AlertPendingStatusMetaData,
   AlertStatusConfigs,
   AlertStatusMetaData,
-  StaleDownConfig,
+  StaleAlertMetadata,
   StatusRuleInspect,
 } from '../../../common/runtime_types/alert_rules/common';
 import { queryFilterMonitors } from './queries/filter_monitors';
@@ -32,7 +32,6 @@ import {
   getViewInAppUrl,
 } from '../common';
 import {
-  MissingPingMonitorInfo,
   getMonitorAlertDocument,
   getMonitorSummary,
   getUngroupedReasonMessage,
@@ -43,11 +42,7 @@ import { SyntheticsServerSetup } from '../../types';
 import { SyntheticsEsClient } from '../../lib';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { getConditionType } from '../../../common/rules/status_rule';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitorAttributes,
-  OverviewPing,
-} from '../../../common/runtime_types';
+import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
@@ -155,7 +150,13 @@ export class StatusRuleExecutor {
     return processMonitors(this.monitors);
   }
 
-  async getConfigs(prevDownConfigs: AlertStatusConfigs = {}): Promise<AlertOverviewStatus> {
+  async getConfigs({
+    prevDownConfigs = {},
+    prevPendingConfigs = {},
+  }: {
+    prevDownConfigs?: AlertStatusConfigs;
+    prevPendingConfigs?: AlertPendingStatusConfigs;
+  }): Promise<AlertOverviewStatus> {
     const { enabledMonitorQueryIds, maxPeriod, monitorLocationIds, monitorsData } =
       await this.init();
 
@@ -165,12 +166,14 @@ export class StatusRuleExecutor {
 
     if (enabledMonitorQueryIds.length === 0) {
       const staleDownConfigs = this.markDeletedConfigs(prevDownConfigs);
+      const stalePendingConfigs = this.markDeletedConfigs(prevPendingConfigs);
       return {
         downConfigs: { ...prevDownConfigs },
         upConfigs: {},
         staleDownConfigs,
         enabledMonitorQueryIds,
-        pendingConfigs: {},
+        pendingConfigs: { ...prevPendingConfigs },
+        stalePendingConfigs,
         maxPeriod,
       };
     }
@@ -191,6 +194,8 @@ export class StatusRuleExecutor {
       numberOfChecks,
       includeRetests: this.params.condition?.includeRetests,
       monitorsData,
+      monitors: this.monitors,
+      logger: this.logger,
     });
 
     const { downConfigs, upConfigs, pendingConfigs, configStats } = currentStatus;
@@ -208,17 +213,27 @@ export class StatusRuleExecutor {
       );
     });
 
-    Object.keys(prevDownConfigs).forEach((locId) => {
-      if (!downConfigs[locId] && !upConfigs[locId]) {
-        downConfigs[locId] = prevDownConfigs[locId];
+    const downConfigsToMarkAsStale = Object.keys(prevDownConfigs).reduce((acc, locId) => {
+      if (!pendingConfigs[locId] && !upConfigs[locId] && !downConfigs[locId]) {
+        acc[locId] = prevDownConfigs[locId];
       }
-    });
+      return acc;
+    }, {} as Record<string, AlertStatusMetaData>);
 
-    const staleDownConfigs = this.markDeletedConfigs(downConfigs);
+    const pendingConfigsToMarkAsStale = Object.keys(prevPendingConfigs).reduce((acc, locId) => {
+      if (!pendingConfigs[locId] && !upConfigs[locId] && !downConfigs[locId]) {
+        acc[locId] = prevPendingConfigs[locId];
+      }
+      return acc;
+    }, {} as Record<string, AlertPendingStatusMetaData>);
+
+    const staleDownConfigs = this.markDeletedConfigs(downConfigsToMarkAsStale);
+    const stalePendingConfigs = this.markDeletedConfigs(pendingConfigsToMarkAsStale);
 
     return {
       ...currentStatus,
       staleDownConfigs,
+      stalePendingConfigs,
       maxPeriod,
     };
   }
@@ -249,31 +264,34 @@ export class StatusRuleExecutor {
     return { from, to: 'now' };
   };
 
-  markDeletedConfigs(downConfigs: AlertStatusConfigs): Record<string, StaleDownConfig> {
+  markDeletedConfigs<T extends AlertStatusMetaData | AlertPendingStatusMetaData>(
+    configs: Record<string, T>
+  ): Record<string, T & StaleAlertMetadata> {
     const monitors = this.monitors;
-    const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {};
-    Object.keys(downConfigs).forEach((locPlusId) => {
-      const downConfig = downConfigs[locPlusId];
+    const staleConfigs: Record<string, T & StaleAlertMetadata> = {};
+
+    Object.keys(configs).forEach((locPlusId) => {
+      const config = configs[locPlusId];
       const monitor = monitors.find((m) => {
         return (
-          m.id === downConfig.configId ||
-          m.attributes[ConfigKey.MONITOR_QUERY_ID] === downConfig.monitorQueryId
+          m.id === config.configId ||
+          m.attributes[ConfigKey.MONITOR_QUERY_ID] === config.monitorQueryId
         );
       });
       if (!monitor) {
-        staleDownConfigs[locPlusId] = { ...downConfig, isDeleted: true };
-        delete downConfigs[locPlusId];
+        staleConfigs[locPlusId] = { ...config, isDeleted: true };
+        delete configs[locPlusId];
       } else {
         const { locations } = monitor.attributes;
-        const isLocationRemoved = !locations.some((l) => l.id === downConfig.locationId);
+        const isLocationRemoved = !locations.some((l) => l.id === config.locationId);
         if (isLocationRemoved) {
-          staleDownConfigs[locPlusId] = { ...downConfig, isLocationRemoved: true };
-          delete downConfigs[locPlusId];
+          staleConfigs[locPlusId] = { ...config, isLocationRemoved: true };
+          delete configs[locPlusId];
         }
       }
     });
 
-    return staleDownConfigs;
+    return staleConfigs;
   }
 
   schedulePendingAlertPerConfigIdPerLocation({
@@ -434,51 +452,8 @@ export class StatusRuleExecutor {
     });
   }
 
-  getMissingPingMonitorInfo({
-    configId,
-    locationId,
-  }: {
-    configId: string;
-    locationId: string;
-  }): MissingPingMonitorInfo | undefined {
-    const monitor = this.monitors.find((m) => m.id === configId);
-    if (!monitor) {
-      this.logger.error(`Monitor with id ${configId} not found`);
-      return;
-    }
-
-    // For some reason 'urls' is not considered a valid attribute in the monitor attributes, there's probably a problem with the EncryptedSyntheticsMonitorAttributes type
-    const fullUrl =
-      'urls' in monitor.attributes && typeof monitor.attributes.urls === 'string'
-        ? monitor.attributes.urls
-        : '';
-
-    return {
-      monitor: {
-        name: monitor.attributes.name,
-        id: configId,
-        type: monitor.attributes.type,
-      },
-      observer: {
-        geo: {
-          name: monitor.attributes.locations.find((l) => l.id === locationId)?.label || '',
-        },
-      },
-      labels: monitor.attributes.labels,
-      tags: monitor.attributes.tags,
-      url: { full: fullUrl },
-    };
-  }
-
   getMonitorPendingSummary({ statusConfig }: { statusConfig: AlertPendingStatusMetaData }) {
-    const { ping, configId, locationId } = statusConfig;
-    const monitorInfo: OverviewPing | MissingPingMonitorInfo | undefined =
-      ping || this.getMissingPingMonitorInfo({ configId, locationId });
-
-    if (!monitorInfo) {
-      this.logger.error(`Monitor info for monitor with id ${configId} not found`);
-      return;
-    }
+    const { monitorInfo } = statusConfig;
 
     return getMonitorSummary({
       monitorInfo,
@@ -521,13 +496,8 @@ export class StatusRuleExecutor {
 
   getUngroupedPendingSummary({ statusConfigs }: { statusConfigs: AlertPendingStatusMetaData[] }) {
     const sampleConfig = statusConfigs[0];
-    const { ping, configId } = sampleConfig;
-    const monitorInfo: OverviewPing | MissingPingMonitorInfo | undefined =
-      ping || this.getMissingPingMonitorInfo({ configId, locationId: sampleConfig.locationId });
-    if (!monitorInfo) {
-      this.logger.error(`Monitor info for monitor with id ${configId} not found`);
-      return;
-    }
+    const { configId, monitorInfo } = sampleConfig;
+
     const baseSummary = getMonitorSummary({
       monitorInfo,
       reason: 'pending',

@@ -82,10 +82,12 @@ export const registerSyntheticsStatusCheckRule = (
 
       const statusRule = new StatusRuleExecutor(esClient, server, syntheticsMonitorClient, options);
 
-      const { downConfigs, staleDownConfigs, upConfigs, pendingConfigs } =
-        await statusRule.getConfigs(
-          ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs']
-        );
+      const { downConfigs, staleDownConfigs, upConfigs, pendingConfigs, stalePendingConfigs } =
+        await statusRule.getConfigs({
+          prevDownConfigs: ruleState.meta?.downConfigs as AlertOverviewStatus['downConfigs'],
+          prevPendingConfigs: ruleState.meta
+            ?.pendingConfigs as AlertOverviewStatus['pendingConfigs'],
+        });
 
       statusRule.handleDownMonitorThresholdAlert({
         downConfigs,
@@ -104,11 +106,15 @@ export const registerSyntheticsStatusCheckRule = (
         params,
         groupByLocation,
         staleDownConfigs,
+        stalePendingConfigs,
         upConfigs,
       });
 
       return {
-        state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
+        state: updateState(ruleState, !isEmpty(downConfigs) || !isEmpty(pendingConfigs), {
+          downConfigs,
+          pendingConfigs,
+        }),
       };
     },
     alerts: SyntheticsRuleTypeAlertDefinition,

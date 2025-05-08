@@ -9,13 +9,18 @@ import pMap from 'p-map';
 import { times } from 'lodash';
 import { intersection } from 'lodash';
 import moment from 'moment';
+import { SavedObjectsFindResult } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   AlertStatusConfigs,
   AlertStatusMetaData,
   AlertPendingStatusConfigs,
+  MissingPingMonitorInfo,
 } from '../../../../common/runtime_types/alert_rules/common';
-
-import { OverviewPing } from '../../../../common/runtime_types';
+import {
+  EncryptedSyntheticsMonitorAttributes,
+  OverviewPing,
+} from '../../../../common/runtime_types';
 import { SyntheticsEsClient } from '../../../lib';
 import { getSearchPingsParams } from './get_search_ping_params';
 
@@ -34,18 +39,60 @@ export interface AlertStatusResponse {
   configStats: Record<string, ConfigStats>;
 }
 
+const getMissingPingMonitorInfo = ({
+  monitors,
+  configId,
+  locationId,
+}: {
+  monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>;
+  configId: string;
+  locationId: string;
+}): MissingPingMonitorInfo | undefined => {
+  const monitor = monitors.find((m) => m.id === configId);
+  if (!monitor) {
+    // This should never happen
+    return;
+  }
+
+  // For some reason 'urls' is not considered a valid attribute in the monitor attributes, there's probably a problem with the EncryptedSyntheticsMonitorAttributes type
+  const fullUrl =
+    'urls' in monitor.attributes && typeof monitor.attributes.urls === 'string'
+      ? monitor.attributes.urls
+      : '';
+
+  return {
+    monitor: {
+      name: monitor.attributes.name,
+      id: configId,
+      type: monitor.attributes.type,
+    },
+    observer: {
+      geo: {
+        name: monitor.attributes.locations.find((l) => l.id === locationId)?.label || '',
+      },
+    },
+    labels: monitor.attributes.labels,
+    tags: monitor.attributes.tags,
+    url: { full: fullUrl },
+  };
+};
+
 const getPendingConfigs = async ({
   monitorQueryIds,
   monitorLocationIds,
   upConfigs,
   downConfigs,
   monitorsData,
+  monitors,
+  logger,
 }: {
   monitorQueryIds: string[];
   monitorLocationIds: string[];
   upConfigs: AlertStatusConfigs;
   downConfigs: AlertStatusConfigs;
   monitorsData: Record<string, { scheduleInMs: number; locations: string[] }>;
+  monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>;
+  logger: Logger;
 }) => {
   // Check if a config is missing, if it is it means that the monitor is pending
   const pendingConfigs: AlertPendingStatusConfigs = {};
@@ -60,12 +107,24 @@ const getPendingConfigs = async ({
         monitorsData[monitorQueryId].locations.includes(locationId);
 
       if (isConfigMissing) {
-        pendingConfigs[configWithLocationId] = {
-          status: 'pending',
+        const monitorInfo = getMissingPingMonitorInfo({
           configId: monitorQueryId,
-          monitorQueryId,
           locationId,
-        };
+          monitors,
+        });
+        if (monitorInfo) {
+          pendingConfigs[configWithLocationId] = {
+            status: 'pending',
+            configId: monitorQueryId,
+            monitorQueryId,
+            locationId,
+            monitorInfo,
+          };
+        } else {
+          logger.error(
+            `Config ${configWithLocationId} not added to pending configs because the monitor info is missing`
+          );
+        }
       }
     }
   }
@@ -125,6 +184,8 @@ export async function queryMonitorStatusAlert({
   numberOfChecks,
   includeRetests = true,
   monitorsData,
+  monitors,
+  logger,
 }: {
   esClient: SyntheticsEsClient;
   monitorLocationIds: string[];
@@ -134,6 +195,8 @@ export async function queryMonitorStatusAlert({
   includeRetests?: boolean;
   waitSecondsBeforeIsPending?: number;
   monitorsData: Record<string, { scheduleInMs: number; locations: string[] }>;
+  monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>;
+  logger: Logger;
 }): Promise<AlertStatusResponse> {
   const idSize = Math.trunc(DEFAULT_MAX_ES_BUCKET_SIZE / monitorLocationIds.length || 1);
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
@@ -241,6 +304,8 @@ export async function queryMonitorStatusAlert({
     upConfigs,
     downConfigs,
     monitorsData,
+    monitors,
+    logger,
   });
 
   const configStats = getConfigStats({ downConfigs, upConfigs, pendingConfigs, monitorQueryIds });

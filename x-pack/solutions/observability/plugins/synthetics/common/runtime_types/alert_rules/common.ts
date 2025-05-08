@@ -44,11 +44,31 @@ export const AlertStatusMetaDataCodec = t.interface({
   }),
 });
 
+const StaleMetaDataCodec = t.partial({
+  isDeleted: t.boolean,
+  isLocationRemoved: t.boolean,
+});
+
 export const StaleAlertStatusMetaDataCodec = t.intersection([
   AlertStatusMetaDataCodec,
+  StaleMetaDataCodec,
+]);
+
+const MissingPingMonitorInfoCodec = t.intersection([
+  t.type({
+    monitor: t.type({ name: t.string, id: t.string, type: t.string }),
+    observer: t.type({ geo: t.type({ name: t.string }) }),
+    tags: t.array(t.string),
+  }),
   t.partial({
-    isDeleted: t.boolean,
-    isLocationRemoved: t.boolean,
+    labels: t.record(t.string, t.string),
+    url: t.partial({
+      full: t.string,
+    }),
+    error: t.type({ message: t.string, stack_trace: t.string }),
+    service: t.type({ name: t.string }),
+    agent: t.type({ name: t.string }),
+    state: t.type({ id: t.string }),
   }),
 ]);
 
@@ -58,11 +78,17 @@ export const AlertPendingStatusMetaDataCodec = t.intersection([
     configId: t.string,
     status: t.string,
     locationId: t.string,
+    monitorInfo: MissingPingMonitorInfoCodec,
   }),
   t.partial({
     timestamp: t.string,
     ping: OverviewPingCodec,
   }),
+]);
+
+const StaleAlertPendingStatusMetaDataCodec = t.intersection([
+  AlertPendingStatusMetaDataCodec,
+  StaleMetaDataCodec,
 ]);
 
 export const AlertStatusCodec = t.interface({
@@ -71,6 +97,7 @@ export const AlertStatusCodec = t.interface({
   pendingConfigs: t.record(t.string, AlertPendingStatusMetaDataCodec),
   enabledMonitorQueryIds: t.array(t.string),
   staleDownConfigs: t.record(t.string, StaleAlertStatusMetaDataCodec),
+  stalePendingConfigs: t.record(t.string, StaleAlertPendingStatusMetaDataCodec),
   maxPeriod: t.number,
 });
 
@@ -88,3 +115,5 @@ export type StatusRuleInspect = AlertOverviewStatus & {
 export type TLSRuleInspect = StatusRuleInspect;
 export type AlertStatusConfigs = Record<string, AlertStatusMetaData>;
 export type AlertPendingStatusConfigs = Record<string, AlertPendingStatusMetaData>;
+export type StaleAlertMetadata = t.TypeOf<typeof StaleMetaDataCodec>;
+export type MissingPingMonitorInfo = t.TypeOf<typeof MissingPingMonitorInfoCodec>;
