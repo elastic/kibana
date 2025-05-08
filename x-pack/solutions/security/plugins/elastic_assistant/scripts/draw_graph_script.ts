@@ -20,6 +20,7 @@ import { FakeLLM } from '@langchain/core/utils/testing';
 import { createOpenAIFunctionsAgent } from 'langchain/agents';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import {
   ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
   ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
@@ -69,6 +70,7 @@ async function getAssistantGraph(logger: Logger): Promise<Drawable> {
     tools: [],
     replacements: {},
     savedObjectsClient: savedObjectsClientMock.create(),
+    contentReferencesStore: newContentReferencesStoreMock(),
   });
   return graph.getGraph();
 }

@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { ContentPackEntry, ContentPackManifest } from '@kbn/content-packs-schema';
 import {
   EuiButton,
@@ -32,7 +32,7 @@ export function ImportContentPackFlyout({
   onImport,
   onClose,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   onClose: () => void;
   onImport: () => void;
 }) {

@@ -11,6 +11,8 @@ import { AgentState } from '../types';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { AIMessage } from '@langchain/core/messages';
+import { INCLUDE_CITATIONS } from '../../../../prompt/prompts';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 jest.mock('../../../../prompt', () => ({
   getPrompt: jest.fn(),
@@ -38,6 +40,7 @@ const testParams = {
   kbDataClient: {
     getRequiredKnowledgeBaseDocumentEntries: jest.fn().mockResolvedValue([{ text: 'foobar' }]),
   },
+  contentReferencesStore: newContentReferencesStoreMock(),
 } as unknown as RunAgentParams;
 
 describe('runAgent', () => {
@@ -76,6 +79,31 @@ describe('runAgent', () => {
             content: 'This message contains a reference ',
           }),
         ]),
+      }),
+      undefined
+    );
+  });
+
+  it('invoked with citations prompt', async () => {
+    await runAgent(testParams);
+    expect(invokeMock).toHaveBeenCalledTimes(1);
+    expect(invokeMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        citations_prompt: INCLUDE_CITATIONS,
+      }),
+      undefined
+    );
+  });
+
+  it('invoked without citations prompt', async () => {
+    await runAgent({
+      ...testParams,
+      contentReferencesStore: newContentReferencesStoreMock({ disabled: true }),
+    });
+    expect(invokeMock).toHaveBeenCalledTimes(1);
+    expect(invokeMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        citations_prompt: '',
       }),
       undefined
     );
