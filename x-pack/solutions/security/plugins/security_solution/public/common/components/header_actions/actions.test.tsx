@@ -20,6 +20,7 @@ import { Actions } from './actions';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../user_privileges';
 import { useHiddenByFlyout } from '../guided_onboarding_tour/use_hidden_by_flyout';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 const useHiddenByFlyoutMock = useHiddenByFlyout as jest.Mock;
 jest.mock('../guided_onboarding_tour/use_hidden_by_flyout', () => ({
@@ -72,7 +73,7 @@ jest.mock('../../lib/kibana', () => {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
           capabilities: {
-            siemV3: { crud_alerts: true, read_alerts: true },
+            [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
           },
         },
         cases: mockCasesContract(),

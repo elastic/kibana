@@ -21,6 +21,7 @@ import { useRuleForms } from '../../../rule_creation_ui/pages/form';
 import type { FormHook } from '../../../../shared_imports';
 import type { ActionsStepRule } from '../../../common/types';
 import { FrequencyDescription } from './notification_action';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({
@@ -28,7 +29,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
       application: {
         getUrlForApp: jest.fn(),
         capabilities: {
-          siemV3: {
+          [SECURITY_FEATURE_ID]: {
             crud: true,
           },
           actions: {

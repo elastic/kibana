@@ -18,6 +18,7 @@ import { NetworkRoutes } from './navigation';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 jest.mock('../../../common/components/empty_prompt');
 jest.mock('../../../sourcerer/containers');
@@ -88,7 +89,7 @@ jest.mock('../../../common/lib/kibana', () => {
         application: {
           ...original.useKibana().services.application,
           capabilities: {
-            siemV3: { crud_alerts: true, read_alerts: true },
+            [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
             maps_v2: mockMapVisibility(),
           },
           navigateToApp: mockNavigateToApp,

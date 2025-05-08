@@ -24,6 +24,7 @@ import * as alertFilterControlsPackage from '@kbn/alerts-ui-shared/src/alert_fil
 import { DetectionEnginePage } from './detection_engine';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useUpsellingMessage } from '../../../common/hooks/use_upselling';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -88,7 +89,7 @@ jest.mock('../../../common/lib/kibana', () => {
         application: {
           navigateToUrl: jest.fn(),
           capabilities: {
-            siemV3: { crud_alerts: true, read_alerts: true },
+            [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
           },
         },
         dataViews: mockDataViewsService,
@@ -103,7 +104,7 @@ jest.mock('../../../common/lib/kibana', () => {
         },
         docLinks: {
           links: {
-            siemV3: {
+            [SECURITY_FEATURE_ID]: {
               privileges: 'link',
             },
           },

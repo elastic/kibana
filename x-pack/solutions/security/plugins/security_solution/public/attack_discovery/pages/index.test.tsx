@@ -16,7 +16,7 @@ import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { TestProviders } from '../../common/mock';
-import { ATTACK_DISCOVERY_PATH } from '../../../common/constants';
+import { ATTACK_DISCOVERY_PATH, SECURITY_FEATURE_ID } from '../../../common/constants';
 import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
 import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
@@ -66,7 +66,7 @@ jest.mock(
 
 jest.mock('../../common/links', () => ({
   useLinkInfo: jest.fn().mockReturnValue({
-    capabilities: ['siemV3.show'],
+    capabilities: [`${SECURITY_FEATURE_ID}.show`],
     globalNavPosition: 4,
     globalSearchKeywords: ['Attack discovery'],
     id: 'attack_discovery',
@@ -117,7 +117,7 @@ jest.mock('../../common/lib/kibana', () => {
       services: {
         application: {
           capabilities: {
-            siemV3: { crud_alerts: true, read_alerts: true },
+            [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
           },
           navigateToUrl: jest.fn(),
         },
@@ -149,7 +149,7 @@ jest.mock('../../common/lib/kibana', () => {
         dataViews: mockDataViewsService,
         docLinks: {
           links: {
-            siemV3: {
+            [SECURITY_FEATURE_ID]: {
               privileges: 'link',
             },
           },

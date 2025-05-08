@@ -19,6 +19,7 @@ import {
 } from '../../../../../common/containers/use_full_screen';
 import { useSessionView, useSessionViewNavigation } from './use_session_view';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
 
 const mockDispatch = jest.fn();
 jest.mock('../../../../../common/hooks/use_selector');
@@ -43,7 +44,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
           capabilities: {
-            siemV3: { crud_alerts: true, read_alerts: true },
+            [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
           },
         },
         sessionView: {

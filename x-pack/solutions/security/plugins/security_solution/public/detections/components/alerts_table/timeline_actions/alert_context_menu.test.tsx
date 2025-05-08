@@ -16,6 +16,7 @@ import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '..
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { TimelineId } from '../../../../../common/types/timeline';
+import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 jest.mock('../../../../common/components/user_privileges');
 
@@ -76,7 +77,7 @@ jest.mock('../../../../common/lib/kibana', () => {
       services: {
         timelines: { ...mockTimelines },
         application: {
-          capabilities: { siemV3: { crud_alerts: true, read_alerts: true } },
+          capabilities: { [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true } },
         },
         cases: {
           ...mockCasesContract(),

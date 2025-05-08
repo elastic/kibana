@@ -16,6 +16,7 @@ import type { RouteSpyState } from '../../common/utils/route/types';
 import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_PATTERN,
+  SECURITY_FEATURE_ID,
   SecurityPageName,
 } from '../../../common/constants';
 import { useUserInfo, initialState as userInfoState } from '../../detections/components/user_info';
@@ -81,7 +82,7 @@ jest.mock('../../common/lib/kibana', () => ({
     services: {
       application: {
         capabilities: {
-          siemV3: {
+          [SECURITY_FEATURE_ID]: {
             crud: true,
           },
         },

@@ -6,6 +6,7 @@
  */
 
 import type { Role } from '@kbn/security-plugin/common';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 
 export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
   // IMPORTANT
@@ -57,7 +58,7 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
           osquery: ['all'],
           securitySolutionCasesV3: ['all'],
           builtinAlerts: ['all'],
-          siemV3: [
+          [SECURITY_FEATURE_ID]: [
             'all',
             'read_alerts',
             'policy_management_all',

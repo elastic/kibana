@@ -8,7 +8,7 @@
 import { PACKAGE_POLICY_API_ROUTES } from '@kbn/fleet-plugin/common/constants/routes';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { getT1Analyst } from '../../../../../scripts/endpoint/common/roles_users';
-import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
+import { APP_ENDPOINTS_PATH, SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
@@ -36,8 +36,8 @@ describe('Endpoints RBAC', { tags: ['@ess'] }, () => {
           ...base.kibana[0],
           feature: {
             ...base.kibana[0].feature,
-            siemV3: [
-              ...base.kibana[0].feature.siemV3,
+            [SECURITY_FEATURE_ID]: [
+              ...base.kibana[0].feature[SECURITY_FEATURE_ID],
               `endpoint_list_all`,
               `policy_management_${endpointPolicyManagementPrivilege}`,
             ],

@@ -27,7 +27,7 @@ describe('useUserInfo', () => {
       services: {
         application: {
           capabilities: {
-            siemV3: {
+            [SECURITY_FEATURE_ID]: {
               crud: true,
             },
           },
