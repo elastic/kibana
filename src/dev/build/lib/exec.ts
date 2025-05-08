@@ -42,7 +42,7 @@ export async function exec(
     preferLocal: true,
     ...(bufferLogs
       ? {
-          stdio: ['ignore', 'pipe', 'pipe'],
+          stdio: ['ignore', 'ignore', 'ignore'],
           all: true,
           buffer: false,
         }
