@@ -32,7 +32,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const ml = getService('ml');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('/internal/observability_ai_assistant/kb/setup', function () {
+  describe('Knowledge base: POST /internal/observability_ai_assistant/kb/setup', function () {
     before(async () => {
       await teardownTinyElserModelAndInferenceEndpoint(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
