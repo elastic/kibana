@@ -76,7 +76,7 @@ export async function sendEmail(
   connectorTokenClient: ConnectorTokenClientContract,
   connectorUsageCollector: ConnectorUsageCollector
 ): Promise<unknown> {
-  const { transport, content } = options;
+  const { transport, content, attachments } = options;
   const { message, messageHTML } = content;
 
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
@@ -87,10 +87,17 @@ export async function sendEmail(
       options,
       renderedMessage,
       connectorTokenClient,
-      connectorUsageCollector
+      connectorUsageCollector,
+      attachments
     );
   } else {
-    return await sendEmailWithNodemailer(logger, options, renderedMessage, connectorUsageCollector);
+    return await sendEmailWithNodemailer(
+      logger,
+      options,
+      renderedMessage,
+      connectorUsageCollector,
+      attachments
+    );
   }
 }
 
@@ -100,7 +107,8 @@ export async function sendEmailWithExchange(
   options: SendEmailOptions,
   messageHTML: string,
   connectorTokenClient: ConnectorTokenClientContract,
-  connectorUsageCollector: ConnectorUsageCollector
+  connectorUsageCollector: ConnectorUsageCollector,
+  attachments?: Attachment[]
 ): Promise<unknown> {
   const { transport, configurationUtilities, connectorId } = options;
   const { clientId, clientSecret, tenantId, oauthTokenUrl } = transport;
@@ -167,6 +175,7 @@ export async function sendEmailWithExchange(
       options,
       headers,
       messageHTML,
+      attachments,
     },
     logger,
     configurationUtilities,
@@ -180,7 +189,8 @@ async function sendEmailWithNodemailer(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  connectorUsageCollector: ConnectorUsageCollector
+  connectorUsageCollector: ConnectorUsageCollector,
+  attachments?: Attachment[]
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
@@ -197,6 +207,7 @@ async function sendEmailWithNodemailer(
     subject,
     html: messageHTML,
     text: message,
+    ...(attachments && { attachments }),
   };
 
   // The transport options do not seem to be exposed as a type, and we reference

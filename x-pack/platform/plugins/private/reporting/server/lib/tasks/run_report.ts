@@ -47,6 +47,7 @@ import { Report, SavedReport } from '../store';
 import type { ReportFailedFields } from '../store/store';
 import { errorLogger } from './error_logger';
 import { finishedWithNoPendingCallbacks, getContentStream } from '../content_stream';
+import { EmailNotificationService } from '../../services/notifications/email_notification_service';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
@@ -106,6 +107,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   protected kibanaName?: string;
   protected exportTypesRegistry: ExportTypesRegistry;
   protected eventTracker?: EventTracker;
+  protected emailNotificationService?: EmailNotificationService;
 
   constructor(protected readonly opts: ConstructorOpts) {
     this.logger = opts.logger.get('runTask');
@@ -127,13 +129,24 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
   protected abstract getMaxAttempts(): number | undefined;
 
+  protected abstract notify(
+    report: SavedReport,
+    taskInstance: ConcreteTaskInstance,
+    spaceId?: string
+  ): Promise<void>;
+
   // Public methods
-  public async init(taskManager: TaskManagerStartContract) {
+  public async init(
+    taskManager: TaskManagerStartContract,
+    emailNotificationService?: EmailNotificationService
+  ) {
     this.taskManagerStart = taskManager;
 
     const { uuid, name } = this.opts.reporting.getServerInfo();
     this.kibanaId = uuid;
     this.kibanaName = name;
+
+    this.emailNotificationService = emailNotificationService;
   }
 
   public getStatus() {
@@ -529,6 +542,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 ...output,
                 size: stream.bytesWritten,
               });
+
+              await this.notify(report, taskInstance, task.payload.spaceId);
             }
 
             // untrack the report for concurrency awareness

@@ -126,6 +126,8 @@ export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
     return this.opts.config.capture.maxAttempts ?? 1;
   }
 
+  protected async notify(): Promise<void> {}
+
   public getTaskDefinition() {
     // round up from ms to the nearest second
     const queueTimeout =

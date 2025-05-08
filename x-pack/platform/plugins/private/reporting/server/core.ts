@@ -45,7 +45,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { checkLicense } from '@kbn/reporting-server/check_license';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -62,6 +62,7 @@ import {
 import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
+import { EmailNotificationService } from './services/notifications/email_notification_service';
 
 export interface ReportingInternalSetup {
   actions: ActionsPluginSetupContract;
@@ -92,6 +93,7 @@ export interface ReportingInternalStart {
   screenshotting?: ScreenshottingStart;
   securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
+  notifications: NotificationsPluginStart;
 }
 
 /**
@@ -177,12 +179,16 @@ export class ReportingCore {
       et.start({ ...startDeps });
     });
 
-    const { taskManager } = startDeps;
+    const { taskManager, logger, notifications } = startDeps;
+    const emailNotificationService = new EmailNotificationService({
+      logger,
+      notifications,
+    });
     const { runSingleReportTask, runScheduledReportTask } = this;
     // enable this instance to generate reports
     await Promise.all([
       runSingleReportTask.init(taskManager),
-      runScheduledReportTask.init(taskManager),
+      runScheduledReportTask.init(taskManager, emailNotificationService),
     ]);
   }
 

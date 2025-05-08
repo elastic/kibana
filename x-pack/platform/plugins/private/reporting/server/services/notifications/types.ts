@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { ElasticsearchClient } from '@kbn/core/server';
+
+export interface NotifyArgs {
+  esClient: ElasticsearchClient;
+  index: string;
+  id: string;
+  to: string[];
+  bcc?: string[];
+  cc?: string[];
+  runAt: string;
+  spaceId?: string;
+}
+
+export interface NotificationService {
+  notify: (args: NotifyArgs) => Promise<void>;
+}

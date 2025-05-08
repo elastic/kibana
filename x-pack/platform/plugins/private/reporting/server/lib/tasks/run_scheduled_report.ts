@@ -75,6 +75,35 @@ export class RunScheduledReportTask extends RunReportTask<ScheduledReportTaskPar
     return undefined;
   }
 
+  protected async notify(
+    report: SavedReport,
+    taskInstance: ConcreteTaskInstance,
+    spaceId?: string
+  ): Promise<void> {
+    if (this.emailNotificationService) {
+      const { runAt, params } = taskInstance;
+      const task = params as ScheduledReportTaskParams;
+      const internalSoClient = await this.opts.reporting.getSoClient();
+      const reportSO = await internalSoClient.get<ScheduledReportType>(
+        SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+        task.id
+      );
+      const { notification } = reportSO.attributes;
+
+      if (notification && notification.email) {
+        const { asInternalUser: esClient } = await this.opts.reporting.getEsClient();
+        await this.emailNotificationService.notify({
+          esClient,
+          index: report._index,
+          id: report._id,
+          to: notification.email.to,
+          runAt: runAt.toISOString(),
+          spaceId,
+        });
+      }
+    }
+  }
+
   public getTaskDefinition() {
     // round up from ms to the nearest second
     const queueTimeout =

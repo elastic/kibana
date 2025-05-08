@@ -14,6 +14,7 @@ import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { SendEmailOptions } from './send_email';
+import type { Attachment } from '.';
 
 export async function sendEmailGraphApi(
   sendEmailOptions: SendEmailGraphApiOptions,
@@ -22,7 +23,7 @@ export async function sendEmailGraphApi(
   connectorUsageCollector: ConnectorUsageCollector,
   axiosInstance?: AxiosInstance
 ): Promise<AxiosResponse> {
-  const { options, headers, messageHTML } = sendEmailOptions;
+  const { options, headers, messageHTML, attachments } = sendEmailOptions;
 
   // Create a new axios instance if one is not provided
   axiosInstance = axiosInstance ?? axios.create();
@@ -35,7 +36,7 @@ export async function sendEmailGraphApi(
     }/sendMail`,
     method: 'post',
     logger,
-    data: getMessage(options, messageHTML),
+    data: getMessage(options, messageHTML, attachments),
     headers,
     configurationUtilities,
     validateStatus: () => true,
@@ -55,9 +56,14 @@ interface SendEmailGraphApiOptions {
   options: SendEmailOptions;
   headers: Record<string, string>;
   messageHTML: string;
+  attachments?: Attachment[];
 }
 
-function getMessage(emailOptions: SendEmailOptions, messageHTML: string) {
+function getMessage(
+  emailOptions: SendEmailOptions,
+  messageHTML: string,
+  attachments?: Attachment[]
+) {
   const { routing, content } = emailOptions;
   const { to, cc, bcc } = routing;
   const { subject } = content;
@@ -83,6 +89,16 @@ function getMessage(emailOptions: SendEmailOptions, messageHTML: string) {
           address: bccAddr,
         },
       })),
+      ...(attachments
+        ? {
+            attachments: attachments.map((attachment) => ({
+              '@odata.type': '#microsoft.graph.fileAttachment',
+              name: attachment.filename,
+              contentType: attachment.contentType,
+              contentBytes: attachment.content,
+            })),
+          }
+        : {}),
     },
   };
 }
