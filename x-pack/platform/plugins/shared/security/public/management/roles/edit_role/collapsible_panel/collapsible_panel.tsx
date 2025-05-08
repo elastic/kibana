@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './collapsible_panel.scss';
-
 import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,

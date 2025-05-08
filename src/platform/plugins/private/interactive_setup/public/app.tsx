@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './app.scss';
-
-import { EuiIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiIcon, EuiPanel, EuiSpacer, EuiTitle, useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
+import { fullScreenGraphicsMixinStyles } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ClusterAddressForm } from './cluster_address_form';
@@ -38,6 +38,10 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
     [http]
   );
 
+  const theme = useEuiTheme();
+  const { euiTheme } = theme;
+  const euiShadowM = useEuiShadow('m');
+
   if (state.loading) {
     return null;
   }
@@ -54,10 +58,23 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
   }
 
   return (
-    <div className="interactiveSetup">
-      <header className="interactiveSetup__header eui-textCenter">
+    <div css={fullScreenGraphicsMixinStyles(Number(euiTheme.levels.navigation), theme)}>
+      <header
+        css={css({
+          position: 'relative',
+          zIndex: 10,
+          padding: euiTheme.size.xl,
+          textAlign: 'center',
+        })}
+      >
         <EuiSpacer size="xxl" />
-        <span className="interactiveSetup__logo">
+        <span
+          css={css`
+            margin-bottom: ${euiTheme.size.xl};
+            display: 'inline-block';
+            ${euiShadowM}
+          `}
+        >
           <EuiIcon type="logoElastic" size="xxl" />
         </span>
         <EuiTitle size="m">
@@ -70,7 +87,17 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
         </EuiTitle>
         <EuiSpacer size="xl" />
       </header>
-      <div className="interactiveSetup__content">
+      <div
+        css={css({
+          position: 'relative',
+          zIndex: 10,
+          margin: 'auto',
+          marginBottom: euiTheme.size.xl,
+          maxWidth: `calc(${euiTheme.breakpoint.s} - ${euiTheme.size.xl})`,
+          paddingLeft: euiTheme.size.xl,
+          paddingRight: euiTheme.size.xl,
+        })}
+      >
         <EuiPanel paddingSize="l">
           <div hidden={page !== 'token'}>
             <EnrollmentTokenForm

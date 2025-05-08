@@ -15,6 +15,7 @@ import {
   EuiText,
   type EuiThemeComputed,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Component } from 'react';
@@ -29,6 +30,7 @@ import type {
   HttpStart,
   NotificationsStart,
 } from '@kbn/core/public';
+import { fullScreenGraphicsMixinStyles } from '@kbn/core/public';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -44,7 +46,6 @@ import {
 import type { LoginState } from '../../../common/login_state';
 import type { LogoutReason } from '../../../common/types';
 import type { ConfigType } from '../../config';
-import { kibanaFullScreenGraphicsCss } from '../../components/mixins';
 
 interface Props {
   http: HttpStart;
@@ -92,6 +93,18 @@ const loginFormMessages: Record<LogoutReason, NonNullable<LoginFormProps['messag
         'Try logging in again, and if the problem persists, contact your system administrator.',
     }),
   },
+};
+
+const Container: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const theme = useEuiTheme();
+  return (
+    <div
+      css={fullScreenGraphicsMixinStyles(Number(theme.euiTheme.levels.toast), theme)}
+      data-test-subj="login-form"
+    >
+      {children}
+    </div>
+  );
 };
 
 export class LoginPage extends Component<Props, State> {
@@ -163,10 +176,7 @@ export class LoginPage extends Component<Props, State> {
     // custom logo needs to be centered
     const logoStyle = customLogo ? { padding: 0 } : {};
     return (
-      <div
-        css={({ euiTheme }) => kibanaFullScreenGraphicsCss({ euiTheme })}
-        data-test-subj="login-form"
-      >
+      <Container>
         <header
           css={({ euiTheme }) =>
             css({
@@ -210,7 +220,7 @@ export class LoginPage extends Component<Props, State> {
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
-      </div>
+      </Container>
     );
   }
 

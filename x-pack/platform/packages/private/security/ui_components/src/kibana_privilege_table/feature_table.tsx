@@ -23,7 +23,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import classNames from 'classnames';
 import type { ReactElement } from 'react';
 import React, { Component } from 'react';
 
@@ -270,9 +269,7 @@ export class FeatureTable extends Component<Props, State> {
     const primaryFeaturePrivileges = feature.getPrimaryFeaturePrivileges();
 
     if (feature.reserved && primaryFeaturePrivileges.length === 0) {
-      const buttonContent = (
-        <FeatureTableCell className="noSubFeaturePrivileges" feature={feature} />
-      );
+      const buttonContent = <FeatureTableCell feature={feature} />;
 
       const extraAction = (
         <EuiText style={{ maxWidth: 200 }} size={'xs'} data-test-subj="reservedFeatureDescription">
@@ -338,10 +335,7 @@ export class FeatureTable extends Component<Props, State> {
 
     const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
     const buttonContent = (
-      <FeatureTableCell
-        className={classNames({ noSubFeaturePrivileges: !hasSubFeaturePrivileges })}
-        feature={feature}
-      />
+      <FeatureTableCell hasSubFeturePrivileges={hasSubFeaturePrivileges} feature={feature} />
     );
 
     const extraAction = (

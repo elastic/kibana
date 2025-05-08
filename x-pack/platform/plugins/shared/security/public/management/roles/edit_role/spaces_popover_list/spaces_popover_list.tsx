@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './spaces_popover_list.scss';
-
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
@@ -16,8 +14,10 @@ import {
   EuiPopoverTitle,
   EuiSelectable,
   EuiText,
+  useEuiFontSize,
 } from '@elastic/eui';
-import React, { Component, memo, Suspense } from 'react';
+import { css } from '@emotion/react';
+import React, { Component, FC, memo, Suspense } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -35,6 +35,20 @@ interface State {
   isPopoverOpen: boolean;
 }
 
+interface ButtonProps {
+  onButtonClick: () => void;
+  buttonText: string;
+}
+
+const EmptyButton: FC<ButtonProps> = ({ onButtonClick, buttonText }) => {
+  const { fontSize } = useEuiFontSize('xs');
+  return (
+    <EuiButtonEmpty size={'xs'} onClick={onButtonClick}>
+      <span css={() => css({ fontSize })}>{buttonText}</span>
+    </EuiButtonEmpty>
+  );
+};
+
 export class SpacesPopoverList extends Component<Props, State> {
   public state = {
     allowSpacesListFocus: false,
@@ -43,9 +57,7 @@ export class SpacesPopoverList extends Component<Props, State> {
 
   public render() {
     const button = (
-      <EuiButtonEmpty size={'xs'} onClick={this.onButtonClick}>
-        <span className="secSpacesPopoverList__buttonText">{this.props.buttonText}</span>
-      </EuiButtonEmpty>
+      <EmptyButton onButtonClick={this.onButtonClick} buttonText={this.props.buttonText} />
     );
 
     return (
