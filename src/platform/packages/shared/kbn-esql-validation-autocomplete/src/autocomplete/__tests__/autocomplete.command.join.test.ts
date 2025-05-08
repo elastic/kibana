@@ -136,6 +136,37 @@ describe('autocomplete.suggest', () => {
         expect(labels).toEqual(expected);
       });
 
+      test('supports field prefixes', async () => {
+        const { suggest } = await setup();
+        const suggestions = await suggest('FROM index | LOOKUP JOIN join_index ON keyw/');
+        const labels = suggestions.map((s) => s.text.trim()).sort();
+        const expected = getFieldNamesByType('any')
+          .sort()
+          .map((field) => field.trim());
+
+        for (const { name } of lookupIndexFields) {
+          expected.push(name.trim());
+        }
+
+        expected.sort();
+
+        expect(labels).toEqual(expected);
+      });
+
+      test('suggests comma and pipe on complete field name', async () => {
+        const { assertSuggestions } = await setup();
+        await assertSuggestions('FROM index | LOOKUP JOIN join_index ON keywordField/', [
+          'keywordField, ',
+          'keywordField | ',
+        ]);
+
+        // recognizes a complete join index field too
+        await assertSuggestions('FROM index | LOOKUP JOIN join_index ON joinIndexOnlyField/', [
+          'joinIndexOnlyField, ',
+          'joinIndexOnlyField | ',
+        ]);
+      });
+
       test('suggests pipe and comma after a field', async () => {
         const { suggest } = await setup();
 
