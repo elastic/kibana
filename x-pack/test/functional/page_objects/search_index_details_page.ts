@@ -322,5 +322,12 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
       expect(isMappingsFieldEnabled).to.be(true);
     },
+
+    async dismissIngestTourIfShown() {
+      if (await testSubjects.isDisplayed('searchIngestTourCloseButton')) {
+        await testSubjects.click('searchIngestTourCloseButton');
+        await testSubjects.missingOrFail('searchIngestTourCloseButton', { timeout: 2000 });
+      }
+    },
   };
 }
