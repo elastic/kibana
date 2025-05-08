@@ -27,7 +27,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('recall', function () {
     this.tags(['skipCloud']);
-    
+
     before(async () => {
       await deployTinyElserAndSetupKb(getService);
       await addSampleDocsToInternalKb(getService, technicalSampleDocs);
