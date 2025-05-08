@@ -24,7 +24,7 @@ export function registerRoutes(reporting: ReportingCore, logger: Logger) {
   registerGenerationRoutesInternal(reporting, logger);
   registerScheduleRoutesInternal(reporting, logger);
   registerJobInfoRoutesInternal(reporting);
-  registerScheduledRoutesInternal(reporting);
+  registerScheduledRoutesInternal(reporting, logger);
   registerGenerationRoutesPublic(reporting, logger);
   registerJobInfoRoutesPublic(reporting);
 }

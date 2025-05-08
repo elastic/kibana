@@ -6,7 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
+import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { ReportingCore } from '../../..';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 import { handleUnavailable } from '../../common/request_handler';
@@ -18,7 +20,7 @@ import {
 
 const { SCHEDULED } = INTERNAL_ROUTES;
 
-export function registerScheduledRoutesInternal(reporting: ReportingCore) {
+export function registerScheduledRoutesInternal(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();
   const { router } = setupDeps;
   const scheduledQuery = scheduledQueryFactory(reporting);
@@ -56,30 +58,34 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore) {
         options: { access: 'internal' },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
+        try {
+          const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
-        // ensure the async dependencies are loaded
-        if (!context.reporting) {
-          return handleUnavailable(res);
+          // ensure the async dependencies are loaded
+          if (!context.reporting) {
+            return handleUnavailable(res);
+          }
+
+          const {
+            page: queryPage = '1',
+            size: querySize = `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}`,
+          } = req.query;
+          const page = parseInt(queryPage, 10) || 1;
+          const size = Math.min(
+            MAX_SCHEDULED_REPORT_LIST_SIZE,
+            parseInt(querySize, 10) || DEFAULT_SCHEDULED_REPORT_LIST_SIZE
+          );
+          const results = await scheduledQuery.list(req, res, user, page, size);
+
+          counters.usageCounter();
+
+          return res.ok({ body: results, headers: { 'content-type': 'application/json' } });
+        } catch (err) {
+          if (err instanceof KibanaResponse) {
+            return err;
+          }
+          throw err;
         }
-
-        const { page: queryPage = '1', size: querySize = `${DEFAULT_SCHEDULED_REPORT_LIST_SIZE}` } =
-          req.query;
-        const page = parseInt(queryPage, 10) || 1;
-        const size = Math.min(
-          MAX_SCHEDULED_REPORT_LIST_SIZE,
-          parseInt(querySize, 10) || DEFAULT_SCHEDULED_REPORT_LIST_SIZE
-        );
-        const results = await scheduledQuery.list(req, user, page, size);
-
-        counters.usageCounter();
-
-        return res.ok({
-          body: results,
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
       })
     );
   };
@@ -105,20 +111,27 @@ export function registerScheduledRoutesInternal(reporting: ReportingCore) {
         options: { access: 'internal' },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
+        try {
+          const counters = getCounters(req.route.method, path, reporting.getUsageCounter());
 
-        // ensure the async dependencies are loaded
-        if (!context.reporting) {
-          return handleUnavailable(res);
+          // ensure the async dependencies are loaded
+          if (!context.reporting) {
+            return handleUnavailable(res);
+          }
+
+          const { ids } = req.body;
+
+          const results = await scheduledQuery.bulkDisable(logger, req, res, ids, user);
+
+          counters.usageCounter();
+
+          return res.ok({ body: results, headers: { 'content-type': 'application/json' } });
+        } catch (err) {
+          if (err instanceof KibanaResponse) {
+            return err;
+          }
+          throw err;
         }
-
-        const { ids } = req.body;
-
-        await scheduledQuery.bulkDisable(req, ids, user);
-
-        counters.usageCounter();
-
-        return res.noContent();
       })
     );
   };

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type {
-  ElasticsearchClient,
   KibanaRequest,
-  SavedObjectsClientContract,
+  KibanaResponseFactory,
+  SavedObject,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RRule } from '@kbn/rrule';
@@ -49,6 +49,12 @@ interface BulkOperationError {
   message: string;
   status?: number;
   id: string;
+}
+
+interface BulkDisableResult {
+  scheduled_report_ids: string[];
+  errors: BulkOperationError[];
+  total: number;
 }
 
 export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
@@ -90,129 +96,177 @@ export function transformResponse(
 }
 
 export interface ScheduledQueryFactory {
-  list(req: KibanaRequest, user: ReportingUser, page: number, size: number): Promise<ApiResponse>;
-  bulkDisable(req: KibanaRequest, ids: string[], user: ReportingUser): Promise<void>;
+  list(
+    req: KibanaRequest,
+    res: KibanaResponseFactory,
+    user: ReportingUser,
+    page: number,
+    size: number
+  ): Promise<ApiResponse>;
+  bulkDisable(
+    logger: Logger,
+    req: KibanaRequest,
+    res: KibanaResponseFactory,
+    ids: string[],
+    user: ReportingUser
+  ): Promise<BulkDisableResult>;
 }
 
 export function scheduledQueryFactory(reportingCore: ReportingCore): ScheduledQueryFactory {
   return {
-    async list(req, user, page = 1, size = DEFAULT_SCHEDULED_REPORT_LIST_SIZE) {
-      const esClient = await reportingCore.getEsClient();
-      const savedObjectsClient = await reportingCore.getSoClient(req);
-      const username = getUsername(user);
+    async list(req, res, user, page = 1, size = DEFAULT_SCHEDULED_REPORT_LIST_SIZE) {
+      try {
+        const esClient = await reportingCore.getEsClient();
+        const savedObjectsClient = await reportingCore.getSoClient(req);
+        const username = getUsername(user);
 
-      // if user has Manage Reporting privileges, we can list
-      // scheduled reports for all users in this space, otherwise
-      // we will filter only to the scheduled reports created by the user
-      const canManageReporting = await reportingCore.canManageReportingForSpace(req);
+        // if user has Manage Reporting privileges, we can list
+        // scheduled reports for all users in this space, otherwise
+        // we will filter only to the scheduled reports created by the user
+        const canManageReporting = await reportingCore.canManageReportingForSpace(req);
 
-      const response = await savedObjectsClient.find<ScheduledReportType>({
-        type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
-        page,
-        perPage: size,
-        ...(!canManageReporting ? { filter: `createdBy: "${username}"` } : {}),
-      });
+        const response = await savedObjectsClient.find<ScheduledReportType>({
+          type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
+          page,
+          perPage: size,
+          ...(!canManageReporting ? { filter: `createdBy: "${username}"` } : {}),
+        });
 
-      if (!response) {
-        return getEmptyApiResponse(page, size);
-      }
+        if (!response) {
+          return getEmptyApiResponse(page, size);
+        }
 
-      const scheduledReportSoIds = response?.saved_objects.map((so) => so.id);
+        const scheduledReportSoIds = response?.saved_objects.map((so) => so.id);
 
-      if (!scheduledReportSoIds || scheduledReportSoIds.length === 0) {
-        return getEmptyApiResponse(page, size);
-      }
+        if (!scheduledReportSoIds || scheduledReportSoIds.length === 0) {
+          return getEmptyApiResponse(page, size);
+        }
 
-      const lastRunResponse = (await esClient.asInternalUser.search({
-        index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
-        size,
-        _source: [CREATED_AT_FIELD],
-        sort: [{ [CREATED_AT_FIELD]: { order: 'desc' } }],
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  [SCHEDULED_REPORT_ID_FIELD]: scheduledReportSoIds,
+        const lastRunResponse = (await esClient.asInternalUser.search({
+          index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
+          size,
+          _source: [CREATED_AT_FIELD],
+          sort: [{ [CREATED_AT_FIELD]: { order: 'desc' } }],
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    [SCHEDULED_REPORT_ID_FIELD]: scheduledReportSoIds,
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
-        },
-        collapse: { field: SCHEDULED_REPORT_ID_FIELD },
-      })) as CreatedAtSearchResponse;
+          collapse: { field: SCHEDULED_REPORT_ID_FIELD },
+        })) as CreatedAtSearchResponse;
 
-      return transformResponse(response, lastRunResponse);
+        return transformResponse(response, lastRunResponse);
+      } catch (error) {
+        throw res.customError({
+          statusCode: 500,
+          body: `Error listing scheduled reports: ${error.message}`,
+        });
+      }
     },
 
-    async bulkDisable(req, ids, user) {
-      const savedObjectsClient = await reportingCore.getSoClient(req);
-      const taskManager = await reportingCore.getTaskManager();
+    async bulkDisable(logger, req, res, ids, user) {
+      try {
+        const savedObjectsClient = await reportingCore.getSoClient(req);
+        const taskManager = await reportingCore.getTaskManager();
 
-      const bulkErrors: BulkOperationError[] = [];
-      const username = getUsername(user);
+        const bulkErrors: BulkOperationError[] = [];
+        const disabledScheduledReportIds: string[] = [];
+        let taskIdsToDisable: string[] = [];
 
-      // if user has Manage Reporting privileges, they can disable
-      // scheduled reports for all users in this space
-      const canManageReporting = await reportingCore.canManageReportingForSpace(req);
+        const username = getUsername(user);
 
-      const bulkGetResult = await savedObjectsClient.bulkGet<ScheduledReportType>(
-        ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
-      );
+        // if user has Manage Reporting privileges, they can disable
+        // scheduled reports for all users in this space
+        const canManageReporting = await reportingCore.canManageReportingForSpace(req);
 
-      if (!bulkGetResult || bulkGetResult.saved_objects.length === 0) {
-        return;
-      }
+        const bulkGetResult = await savedObjectsClient.bulkGet<ScheduledReportType>(
+          ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
+        );
 
-      // check if the response contains reports that are not owned by the user
-      // if it does and user does not have Manage Reporting privileges, throw an error
-      const hasOtherUsersReports = bulkGetResult.saved_objects.some((so) => {
-        const { createdBy } = so.attributes;
-        return createdBy !== username;
-      });
-
-      if (hasOtherUsersReports && !canManageReporting) {
-        throw new Error('Insufficient privileges to disable scheduled reports from other users');
-      }
-
-      const bulkUpdateResult = await savedObjectsClient.bulkUpdate<ScheduledReportType>(
-        bulkGetResult.saved_objects.map((so) => ({
-          id: so.id,
-          type: so.type,
-          attributes: {
-            enabled: false,
-          },
-        }))
-      );
-
-      const tasksIdsToDisable: string[] = [];
-      bulkUpdateResult?.saved_objects.forEach((so) => {
-        if (so.error) {
-          bulkErrors.push({
-            message: so.error.message,
-            status: so.error.statusCode,
-            id: so.id,
-          });
-        } else {
-          tasksIdsToDisable.push(so.id);
+        const scheduledReportSavedObjectsToUpdate: Array<SavedObject<ScheduledReportType>> = [];
+        for (const so of bulkGetResult.saved_objects) {
+          if (so.error) {
+            bulkErrors.push({
+              message: so.error.message,
+              status: so.error.statusCode,
+              id: so.id,
+            });
+          } else {
+            // check if user is allowed to update this scheduled report
+            if (so.attributes.createdBy !== username && !canManageReporting) {
+              bulkErrors.push({
+                message: `Insufficient privileges to disable scheduled report "${so.id}".`,
+                status: 403,
+                id: so.id,
+              });
+            } else if (so.attributes.enabled === false) {
+              logger.debug(`Scheduled report ${so.id} is already disabled`);
+              disabledScheduledReportIds.push(so.id);
+            } else {
+              scheduledReportSavedObjectsToUpdate.push(so);
+            }
+          }
         }
-      });
 
-      const resultFromDisablingTasks = await taskManager.bulkDisable(tasksIdsToDisable);
+        // nothing to update, return early
+        if (scheduledReportSavedObjectsToUpdate.length > 0) {
+          const bulkUpdateResult = await savedObjectsClient.bulkUpdate<ScheduledReportType>(
+            scheduledReportSavedObjectsToUpdate.map((so) => ({
+              id: so.id,
+              type: so.type,
+              attributes: {
+                enabled: false,
+              },
+            }))
+          );
 
-      if (resultFromDisablingTasks.tasks.length) {
-        logger.debug(
-          `Successfully disabled schedules for underlying tasks: ${resultFromDisablingTasks.tasks
-            .map((task) => task.id)
-            .join(', ')}`
-        );
-      }
-      if (resultFromDisablingTasks.errors.length) {
-        logger.error(
-          `Failure to disable schedules for underlying tasks: ${resultFromDisablingTasks.errors
-            .map((error) => error.id)
-            .join(', ')}`
-        );
+          for (const so of bulkUpdateResult.saved_objects) {
+            if (so.error) {
+              bulkErrors.push({
+                message: so.error.message,
+                status: so.error.statusCode,
+                id: so.id,
+              });
+            } else {
+              taskIdsToDisable.push(so.id);
+            }
+          }
+        }
+
+        // it's possible that the scheduled report saved object was disabled but
+        // task disabling failed so add the list of already disabled IDs
+        // task manager filters out disabled tasks so this will not cause extra load
+        taskIdsToDisable = taskIdsToDisable.concat(disabledScheduledReportIds);
+
+        const resultFromDisablingTasks = await taskManager.bulkDisable(taskIdsToDisable);
+        for (const error of resultFromDisablingTasks.errors) {
+          bulkErrors.push({
+            message: `Scheduled report disabled but task disabling failed due to: ${error.error.message}`,
+            status: error.error.statusCode,
+            id: error.id,
+          });
+        }
+
+        for (const result of resultFromDisablingTasks.tasks) {
+          disabledScheduledReportIds.push(result.id);
+        }
+
+        return {
+          scheduled_report_ids: disabledScheduledReportIds,
+          errors: bulkErrors,
+          total: disabledScheduledReportIds.length + bulkErrors.length,
+        };
+      } catch (error) {
+        throw res.customError({
+          statusCode: 500,
+          body: `Error disabling scheduled reports: ${error.message}`,
+        });
       }
     },
   };
