@@ -101,6 +101,13 @@ export default function (providerContext: FtrProviderContext) {
         const testDocs: hostTransformTestDocuments = {
           name: HOST_NAME,
           ip: ['1.1.1.1', '2.2.2.2'],
+          domain: undefined,
+          hostname: undefined,
+          id: undefined,
+          osName: undefined,
+          osType: undefined,
+          mac: undefined,
+          arch: undefined,
         };
 
         await createDocumentsAndTriggerTransform(providerContext, testDocs, 2);
@@ -129,7 +136,6 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-
       it('Should successfully collect all expected fields', async () => {
         const HOST_NAME: string = 'host-transform-test-ip';
         const testDocs: hostTransformTestDocuments = {
@@ -142,7 +148,7 @@ export default function (providerContext: FtrProviderContext) {
           mac: ['abc', 'def'],
           arch: ['x86-64', 'arm64'],
           ip: ['1.1.1.1', '2.2.2.2'],
-        }
+        };
 
         await createDocumentsAndTriggerTransform(providerContext, testDocs, 2);
 
@@ -177,16 +183,16 @@ export default function (providerContext: FtrProviderContext) {
           }
         );
       });
-
     });
   });
 }
 
-function expectFieldToEqualValues(field: string[], values: string[]) {
-  expect(field.length).to.eql(values.length)
-  const sortedField: string[] = field.sort((a, b) => a > b ? 1 : -1);
-  const sortedValues: string[] = values.sort((a, b) => a > b ? 1 : -1);
-  for (let i = 0; i < sortedField.length; i++)  {
+function expectFieldToEqualValues(field: string[] | undefined, values: string[]) {
+  expect(field).to.ok();
+  expect((field as string[]).length).to.eql(values.length);
+  const sortedField: string[] = (field as string[]).sort((a, b) => (a > b ? 1 : -1));
+  const sortedValues: string[] = values.sort((a, b) => (a > b ? 1 : -1));
+  for (let i = 0; i < sortedField.length; i++) {
     expect(sortedField[i]).to.eql(sortedValues[i]);
   }
 }
@@ -219,36 +225,34 @@ async function createDocumentsAndTriggerTransform(providerContext: FtrProviderCo
   const docsProcessed: number = transform.stats.documents_processed;
 
   for (let i = 0; i < docCount; i++) {
-    let host: EcsHost = {}
+    const host: EcsHost = {};
     if (docs.domain?.[i] !== undefined) {
-      host.domain = docs.domain[i]
+      host.domain = docs.domain[i];
     }
     if (docs.hostname?.[i] !== undefined) {
-      host.hostname = docs.hostname[i]
+      host.hostname = docs.hostname[i];
     }
     if (docs.id?.[i] !== undefined) {
-      host.id = docs.id[i]
+      host.id = docs.id[i];
     }
-    host.os = {}
+    host.os = {};
     if (docs.osName?.[i] !== undefined) {
-      host.os.name = docs.osName[i]
+      host.os.name = docs.osName[i];
     }
     if (docs.osType?.[i] !== undefined) {
-      host.os.type = docs.osType[i]
+      host.os.type = docs.osType[i];
     }
     if (docs.mac?.[i] !== undefined) {
-      host.mac = docs.mac[i]
+      host.mac = docs.mac[i];
     }
     if (docs.arch?.[i] !== undefined) {
-      host.architecture = docs.arch[i]
+      host.architecture = docs.arch[i];
     }
     if (docs.ip?.[i] !== undefined) {
-      host.ip = docs.ip[i]
+      host.ip = docs.ip[i];
     }
 
-    const { result } = await es.index(
-      buildHostTransformDocument(docs.name, host),
-    );
+    const { result } = await es.index(buildHostTransformDocument(docs.name, host));
     expect(result).to.eql('created');
   }
 
@@ -267,17 +271,17 @@ async function createDocumentsAndTriggerTransform(providerContext: FtrProviderCo
     expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
     return true;
   });
-};
+}
 
-type hostTransformTestDocuments = {
+interface hostTransformTestDocuments {
   name: string; // required
 
-  domain: string[];
-  hostname: string[];
-  id: string[];
-  osName: string[];
-  osType: string[];
-  mac: string[];
-  arch: string[];
-  ip: string[];
-};
+  domain: string[] | undefined;
+  hostname: string[] | undefined;
+  id: string[] | undefined;
+  osName: string[] | undefined;
+  osType: string[] | undefined;
+  mac: string[] | undefined;
+  arch: string[] | undefined;
+  ip: string[] | undefined;
+}
