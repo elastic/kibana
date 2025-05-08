@@ -150,6 +150,11 @@ describe('Input package with custom data stream type', () => {
       .click()
       .type('/var/log/test.log');
 
+    cy.getBySel('multiTextInput-tags')
+      .find('[data-test-subj="multiTextInputRow-0"]')
+      .click()
+      .type('tag1');
+
     // Select metrics data stream type.
     cy.get('[data-test-subj^="advancedStreamOptionsToggle"]')
       .click();
