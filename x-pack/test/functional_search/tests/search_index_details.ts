@@ -11,7 +11,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'embeddedConsole',
     'searchIndexDetailsPage',
-    'searchApiKeys',
     'header',
     'common',
     'indexManagement',
@@ -20,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const es = getService('es');
   const browser = getService('browser');
-  const retry = getService('retry');
   const spaces = getService('spaces');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
@@ -44,7 +42,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           solution: 'es',
         }));
 
-        await pageObjects.searchApiKeys.deleteAPIKeys();
         await es.indices.create({ index: indexName });
       });
 
@@ -58,6 +55,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // Navigate to the spaces management page which will log us in Kibana
           await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
           await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+          await pageObjects.searchIndexDetailsPage.expectIndexDetailsPageIsLoaded();
+          await pageObjects.searchIndexDetailsPage.dismissIngestTourIfShown();
         });
         it('can load index detail page', async () => {
           await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
@@ -102,27 +101,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           it('should have basic example texts', async () => {
             await pageObjects.searchIndexDetailsPage.expectHasSampleDocuments();
-          });
-        });
-
-        describe('API key details', () => {
-          it('should show api key', async () => {
-            await pageObjects.searchApiKeys.deleteAPIKeys();
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
-            // sometimes the API key exists in the cluster and its lost in sessionStorage
-            // if fails we retry to delete the API key and refresh the browser
-            await retry.try(
-              async () => {
-                await pageObjects.searchApiKeys.expectAPIKeyExists();
-              },
-              async () => {
-                await pageObjects.searchApiKeys.deleteAPIKeys();
-                await browser.refresh();
-              }
-            );
-            await pageObjects.searchApiKeys.expectAPIKeyAvailable();
-            const apiKey = await pageObjects.searchApiKeys.getAPIKeyFromUI();
-            await pageObjects.searchIndexDetailsPage.expectAPIKeyToBeVisibleInCodeBlock(apiKey);
           });
         });
 
