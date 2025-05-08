@@ -44,7 +44,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const TIMESTAMP_ISO8601 = '2025-01-01T00:00:00.000Z';
     const TIMESTAMP_ISO8601_SPACED = '2025-01-01 00:00:00.000Z';
-    const TIMESTAMP_HTTPLIKE = 'Wed Jan 1 00:00:00 2025';
+    const TIMESTAMP_HTTPLIKE = 'Wed Jan 01 00:00:00 2025';
     const TIMESTAMP_INVALID = 'invalid-date';
 
     before(async () => {
