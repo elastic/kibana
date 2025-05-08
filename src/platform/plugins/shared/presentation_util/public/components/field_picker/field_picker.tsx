@@ -9,7 +9,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
-import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
 import { comboBoxFieldOptionMatcher, getFieldIconType } from '@kbn/field-utils';
 
@@ -118,9 +117,6 @@ export const FieldPicker = ({
     <EuiSelectable
       {...other}
       {...selectableProps}
-      className={classNames({
-        fieldPickerSelectableLoading: selectableProps?.isLoading,
-      })}
       css={selectableStyles}
       emptyMessage={i18n.translate('presentationUtil.fieldPicker.noFieldsLabel', {
         defaultMessage: 'No matching fields',

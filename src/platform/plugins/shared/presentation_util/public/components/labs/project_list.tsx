@@ -64,13 +64,7 @@ export const ProjectList = (props: Props) => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-      {items.length > 0 ? (
-        <ul>
-          {items}
-        </ul>
-      ) : (
-        <EmptyList solutions={solutions} />
-      )}
+      {items.length > 0 ? <ul>{items}</ul> : <EmptyList solutions={solutions} />}
     </EuiFlexGroup>
   );
 };
