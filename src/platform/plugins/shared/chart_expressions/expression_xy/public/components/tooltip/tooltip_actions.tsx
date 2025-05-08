@@ -198,7 +198,7 @@ export const getTooltipActions = (
             disabled: () => !isEsqlMode,
             label: () =>
               i18n.translate('expressionXY.tooltipActions.addAlertRule', {
-                defaultMessage: 'Add alert rule',
+                defaultMessage: 'Create alert rule',
               }),
 
             onSelect: (selectedValues: XYTooltipValue[], series: XYTooltipValue[]) => {

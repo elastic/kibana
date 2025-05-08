@@ -15,7 +15,7 @@ export const ALERT_RULE_TRIGGER = 'alertRule';
 export const alertRuleTrigger: Trigger = {
   id: ALERT_RULE_TRIGGER,
   title: i18n.translate('uiActions.triggers.dashboard.alertRule.title', {
-    defaultMessage: 'Add alert rule',
+    defaultMessage: 'Create alert rule',
   }),
   description: i18n.translate('uiActions.triggers.dashboard.alertRule.description', {
     defaultMessage: 'Create an alert rule from this dashboard panel',

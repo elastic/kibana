@@ -54,7 +54,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
 
   public getDisplayName = () =>
     i18n.translate('xpack.triggersActionsUI.alertRuleFromVis.actionName', {
-      defaultMessage: 'Add alert rule',
+      defaultMessage: 'Create alert rule',
     });
 
   public shouldAutoExecute = async () => true;
