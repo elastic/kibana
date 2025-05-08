@@ -17447,10 +17447,10 @@ ejs@^3.1.10:
   dependencies:
     jake "^10.8.5"
 
-elastic-apm-node@^4.10.0, elastic-apm-node@^4.12.0:
-  version "4.12.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.12.0.tgz#af30ac6f6baebebed2ed11a9365ecd77d3395ba3"
-  integrity sha512-vyQ3cPrJ+4wxrKb3iKd99yH/57AQq+QxJpsv1QSiwygmebOSyWTEStXs+eg5aPEMJIOrZZlZG7mSM5Dh2D/eJw==
+elastic-apm-node@^4.10.0, elastic-apm-node@^4.13.0:
+  version "4.13.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.13.0.tgz#dda70902ac03f455dddfbd9dd2f81b8dfaa57f06"
+  integrity sha512-zb0u1uSDEJCU9IRTzfz7BAz5bgMAJb8iTxGhqiF/x/JEdd4qn53ddIrq0bMPm/eIMA37rIjuaUurZpcbXy6Rvw==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
