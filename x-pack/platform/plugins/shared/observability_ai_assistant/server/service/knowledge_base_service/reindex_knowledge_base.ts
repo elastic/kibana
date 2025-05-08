@@ -193,8 +193,5 @@ export async function isReIndexInProgress({
     getActiveReindexingTaskId(esClient),
   ]);
 
-  logger.debug(`Lock: ${!!lock}`);
-  logger.debug(`ES re-indexing task: ${!!activeReindexingTask}`);
-
   return lock !== undefined || activeReindexingTask !== undefined;
 }
