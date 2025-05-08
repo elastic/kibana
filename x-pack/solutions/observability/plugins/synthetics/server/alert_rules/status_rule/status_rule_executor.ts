@@ -190,7 +190,6 @@ export class StatusRuleExecutor {
       monitorQueryIds: enabledMonitorQueryIds,
       numberOfChecks,
       includeRetests: this.params.condition?.includeRetests,
-      waitSecondsBeforeIsPending: this.params.condition?.alertOnNoData?.waitSecondsBeforeIsPending,
       monitorsData,
     });
 

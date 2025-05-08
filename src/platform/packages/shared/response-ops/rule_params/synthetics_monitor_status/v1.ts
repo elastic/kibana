@@ -31,7 +31,8 @@ const NumberOfChecksSchema = schema.object({
 });
 
 const AlertOnNoDataSchema = schema.object({
-  waitSecondsBeforeIsPending: schema.number(),
+  // This parameters is not used in the current implementation but is kept for future use if the user wants to wait for a certain number of missing pings before alerting
+  noOfMissingPings: schema.number({ min: 1 }),
 });
 
 const StatusRuleConditionSchema = schema.object({

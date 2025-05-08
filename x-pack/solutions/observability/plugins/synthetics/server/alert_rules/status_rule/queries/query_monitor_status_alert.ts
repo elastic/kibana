@@ -37,24 +37,18 @@ export interface AlertStatusResponse {
 const getPendingConfigs = async ({
   monitorQueryIds,
   monitorLocationIds,
-  esClient,
-  includeRetests,
   upConfigs,
   downConfigs,
   monitorsData,
 }: {
   monitorQueryIds: string[];
   monitorLocationIds: string[];
-  esClient: SyntheticsEsClient;
-  includeRetests: boolean;
   upConfigs: AlertStatusConfigs;
   downConfigs: AlertStatusConfigs;
   monitorsData: Record<string, { scheduleInMs: number; locations: string[] }>;
 }) => {
   // Check if a config is missing, if it is it means that the monitor is pending
   const pendingConfigs: AlertPendingStatusConfigs = {};
-  const idsToQuery: Set<string> = new Set();
-  const locationsToQuery: Set<string> = new Set();
 
   for (const monitorQueryId of monitorQueryIds) {
     for (const locationId of monitorLocationIds) {
@@ -66,12 +60,6 @@ const getPendingConfigs = async ({
         monitorsData[monitorQueryId].locations.includes(locationId);
 
       if (isConfigMissing) {
-        // Add the monitor and location ids to fetch the latest ping
-        // for the pending config
-        idsToQuery.add(monitorQueryId);
-        locationsToQuery.add(locationId);
-        // Add a temporary pending config, this will be updated if a ping is found
-        // If a monitor has no pings the config will not be updated
         pendingConfigs[configWithLocationId] = {
           status: 'pending',
           configId: monitorQueryId,
@@ -80,39 +68,6 @@ const getPendingConfigs = async ({
         };
       }
     }
-  }
-
-  const newIdsToQuery = Array.from(idsToQuery);
-
-  if (newIdsToQuery.length) {
-    // Get the last ping for the pending configs in the last month
-    const params = getSearchPingsParams({
-      idSize: newIdsToQuery.length,
-      idsToQuery: newIdsToQuery,
-      monitorLocationIds: Array.from(locationsToQuery),
-      numberOfChecks: 1,
-      includeRetests,
-      range: { from: moment().subtract(1, 'M').toISOString(), to: 'now' },
-    });
-
-    const {
-      body: { aggregations },
-    } = await esClient.search<OverviewPing, typeof params>(params);
-
-    aggregations?.id.buckets.forEach(({ location, key: monitorQueryId }) => {
-      location.buckets.forEach(({ key: locationId, totalChecks }) => {
-        const latestPing = totalChecks.hits.hits[0]._source;
-        const configWithLocationId = `${monitorQueryId}-${locationId}`;
-
-        if (pendingConfigs[configWithLocationId]) {
-          pendingConfigs[configWithLocationId] = {
-            ...pendingConfigs[configWithLocationId],
-            ping: latestPing,
-            timestamp: latestPing['@timestamp'],
-          };
-        }
-      });
-    });
   }
 
   return pendingConfigs;
@@ -169,7 +124,6 @@ export async function queryMonitorStatusAlert({
   monitorQueryIds,
   numberOfChecks,
   includeRetests = true,
-  waitSecondsBeforeIsPending = 60,
   monitorsData,
 }: {
   esClient: SyntheticsEsClient;
@@ -240,9 +194,9 @@ export async function queryMonitorStatusAlert({
               new Date().getTime() - new Date(latestPing['@timestamp']).getTime();
             const msBeforeIsPending =
               monitorsData[monitorQueryId].scheduleInMs +
-              moment.duration(waitSecondsBeforeIsPending, 'seconds').asMilliseconds();
+              moment.duration(60, 'seconds').asMilliseconds();
 
-            // Example: if a monitor has a schedule of 5m and the waitSecondsBeforeIsPending is 1m the last valid ping can be at (5+1)m
+            // Example: if a monitor has a schedule of 5m the last valid ping can be at (5+1)m
             // If it's greater than that it means the monitor is pending
             const isValidPing = msBeforeIsPending - msSinceLastPing > 0;
 
@@ -284,8 +238,6 @@ export async function queryMonitorStatusAlert({
   const pendingConfigs = await getPendingConfigs({
     monitorQueryIds,
     monitorLocationIds,
-    esClient,
-    includeRetests,
     upConfigs,
     downConfigs,
     monitorsData,
