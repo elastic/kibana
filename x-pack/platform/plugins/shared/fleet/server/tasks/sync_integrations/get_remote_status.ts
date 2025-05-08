@@ -83,6 +83,8 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {
       throw new FleetNotFoundError(`No output found with id ${outputId}`);
+    } else if (error.type === 'system' && error.code === 'ECONNREFUSED') {
+      throw new FleetError(`${error.message}${error.code}`);
     }
     logger.error(`${error}`);
     throw error;

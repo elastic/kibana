@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { type ComponentProps, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Alert } from '@kbn/alerting-types';
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { AssistantRowControlColumn } from './assistant_row_control_column';
+import type { GetTableProp } from './types';
 import { MoreActionsRowControlColumn } from './more_actions_row_control_column';
 import { OpenFlyoutRowControlColumn } from './open_flyout_row_control_column';
 
-export interface ActionsCellProps {
+export type ActionsCellProps = Pick<
+  ComponentProps<GetTableProp<'renderActionsCell'>>,
   /**
    * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
    */
-  alert: Alert;
+  | 'alert'
   /**
-   * The Ycs type is @deprecated but needed for the case actions within the more action dropdown
+   * The Ecs type is @deprecated but needed for the case actions within the more action dropdown
    */
-  ecsAlert: Ecs;
-}
+  | 'ecsAlert'
+>;
 
 /**
  * Component used in the AI for SOC alert summary table.
@@ -36,9 +35,6 @@ export const ActionsCell = memo(({ alert, ecsAlert }: ActionsCellProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="xs">
     <EuiFlexItem>
       <OpenFlyoutRowControlColumn alert={alert} />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <AssistantRowControlColumn alert={alert} />
     </EuiFlexItem>
     <EuiFlexItem>
       <MoreActionsRowControlColumn ecsAlert={ecsAlert} />

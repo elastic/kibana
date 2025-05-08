@@ -1,3 +1,5 @@
+# Common serverless config
+
 interactiveSetup.enabled: false
 newsfeed.enabled: false
 xpack.serverless.plugin.enabled: true
@@ -8,9 +10,6 @@ xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
 xpack.fleet.internal.useMeteringApi: true
-xpack.searchSynonyms.enabled: false
-
-xpack.searchQueryRules.enabled: false
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
@@ -119,9 +118,6 @@ migrations.batchSize: 250
 
 migrations.zdt:
   metaPickupSyncDelaySec: 5
-
-# Ess plugins
-xpack.securitySolutionEss.enabled: false
 
 # Management team plugins
 xpack.upgrade_assistant.enabled: false
@@ -257,9 +253,7 @@ xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.statefulSettings.enabled: false
 xpack.reporting.csv.maxConcurrentShardRequests: 0
 
-# Disabled Observability plugins
-xpack.ux.enabled: false
-xpack.legacy_uptime.enabled: false
+# Disabled Platform plugins
 monitoring.enabled: false
 monitoring.ui.enabled: false
 

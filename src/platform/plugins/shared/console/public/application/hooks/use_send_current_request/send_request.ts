@@ -158,16 +158,14 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
       } catch (error) {
         let value;
-        const { response } = error as IHttpFetchError;
+        const { response, body: errorBody } = error as IHttpFetchError;
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
-        // When the request is sent, the HTTP library tries to parse the response body as JSON.
-        // However, if the response body is not in valid JSON format, it throws an error.
-        // To handle this, if the request resolves with a 200 status code but has an invalid body,
-        // we should still display a success message to the user.
-        if (statusCode === 200) {
+        if (statusCode === 200 && !errorBody) {
           value = 'OK';
+        } else if (errorBody) {
+          value = JSON.stringify(errorBody, null, 2);
         } else {
           value = 'Request failed to get to the server (status code: ' + statusCode + ')';
         }

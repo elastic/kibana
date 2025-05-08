@@ -288,6 +288,11 @@ components:
     FindAttackDiscoveryAlertsParams:
       type: object
       properties:
+        alertIds:
+          description: filter by alert IDs within Attack discovery
+          type: array
+          items:
+            type: string
         connectorNames:
           description: filter by connector names
           type: array

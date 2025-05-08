@@ -41,6 +41,17 @@
         "children": [
           {
             "parentPluginId": "@kbn/kibana-api-cli",
+            "id": "def-common.FetchResponseError.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/kibana-api-cli",
             "id": "def-common.FetchResponseError.Unnamed",
             "type": "Function",
             "tags": [],
@@ -67,6 +78,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/kibana-api-cli",
+                "id": "def-common.FetchResponseError.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "content",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/kibana_fetch_response_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -139,7 +165,7 @@
             "label": "fetch",
             "description": [],
             "signature": [
-              "{ (options: FetchInputOptions, init: RequestInit & { asRawResponse: true; }): Promise<Response>; <T>(options: FetchInputOptions, init?: RequestInit | undefined): Promise<T>; }"
+              "{ (options: FetchInputOptions, init: Omit<RequestInit, \"body\"> & { body: unknown; } & { asRawResponse: true; }): Promise<Response>; <T>(options: FetchInputOptions, init?: FetchInitOptions | undefined): Promise<T>; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
             "deprecated": false,
@@ -168,7 +194,7 @@
                 "label": "init",
                 "description": [],
                 "signature": [
-                  "(RequestInit & { asRawResponse?: boolean | undefined; }) | undefined"
+                  "(Omit<RequestInit, \"body\"> & { body: unknown; } & { asRawResponse?: boolean | undefined; }) | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/client.ts",
                 "deprecated": false,

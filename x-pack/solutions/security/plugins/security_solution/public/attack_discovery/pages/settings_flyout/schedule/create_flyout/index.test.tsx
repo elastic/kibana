@@ -51,7 +51,6 @@ const defaultProps = {
   connectorId: undefined,
   onConnectorIdSelected: jest.fn(),
   onClose: jest.fn(),
-  stats: null,
 };
 
 const renderComponent = async () => {

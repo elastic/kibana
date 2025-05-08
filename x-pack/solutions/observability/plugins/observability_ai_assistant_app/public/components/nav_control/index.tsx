@@ -84,7 +84,11 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     }
   );
 
-  const [isOpen, setIsOpen] = useState(flyoutSettings.isOpen);
+  // only open on mount when in docked mode
+  const [isOpen, setIsOpen] = useState(() =>
+    flyoutSettings.mode === FlyoutPositionMode.PUSH ? flyoutSettings.isOpen : false
+  );
+
   const [hasBeenOpened, setHasBeenOpened] = useState(isOpen);
   const keyRef = useRef(v4());
 

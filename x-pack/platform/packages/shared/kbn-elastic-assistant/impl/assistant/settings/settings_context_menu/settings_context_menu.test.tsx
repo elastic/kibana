@@ -7,6 +7,7 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { userEvent } from '@testing-library/user-event';
 
 import {
   mockAssistantAvailability,
@@ -29,86 +30,86 @@ describe('SettingsContextMenu', () => {
     expect(screen.getByRole('button', { name: AI_ASSISTANT_MENU })).toBeInTheDocument();
   });
 
-  it('renders all menu items', () => {
+  it('renders all menu items', async () => {
     render(
       <TestProviders>
         <SettingsContextMenu />
       </TestProviders>
     );
 
-    screen.getByTestId('chat-context-menu').click();
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
     expect(screen.getByTestId('alerts-to-analyze')).toBeInTheDocument();
     expect(screen.getByTestId('anonymize-values')).toBeInTheDocument();
     expect(screen.getByTestId('show-citations')).toBeInTheDocument();
     expect(screen.getByTestId('clear-chat')).toBeInTheDocument();
   });
 
-  it('triggers the reset conversation modal when clicking RESET_CONVERSATION', () => {
+  it('triggers the reset conversation modal when clicking RESET_CONVERSATION', async () => {
     render(
       <TestProviders>
         <SettingsContextMenu />
       </TestProviders>
     );
 
-    screen.getByTestId('chat-context-menu').click();
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
 
-    screen.getByTestId('clear-chat').click();
+    await userEvent.click(screen.getByTestId('clear-chat'));
     expect(screen.getByTestId('reset-conversation-modal')).toBeInTheDocument();
   });
 
-  it('disables the anonymize values switch when no anonymized fields are present', () => {
+  it('disables the anonymize values switch when no anonymized fields are present', async () => {
     render(
       <TestProviders>
         <SettingsContextMenu />
       </TestProviders>
     );
 
-    screen.getByTestId('chat-context-menu').click();
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
 
     const anonymizeSwitch = screen.getByTestId('anonymize-switch');
     expect(anonymizeSwitch).toBeDisabled();
   });
 
-  it('enables the anonymize values switch when no anonymized fields are present', () => {
+  it('enables the anonymize values switch when no anonymized fields are present', async () => {
     render(
       <TestProviders>
         <SettingsContextMenu selectedConversation={alertConvo} />
       </TestProviders>
     );
 
-    screen.getByTestId('chat-context-menu').click();
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
 
     const anonymizeSwitch = screen.getByTestId('anonymize-switch');
     expect(anonymizeSwitch).not.toBeDisabled();
   });
 
-  it('disables the show citations switch when no citations are present', () => {
+  it('disables the show citations switch when no citations are present', async () => {
     render(
       <TestProviders>
         <SettingsContextMenu />
       </TestProviders>
     );
 
-    screen.getByTestId('chat-context-menu').click();
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
 
     const citationsSwitch = screen.getByTestId('citations-switch');
     expect(citationsSwitch).toBeDisabled();
   });
 
-  it('enables the show citations switch when no citations are present', () => {
+  it('enables the show citations switch when no citations are present', async () => {
     render(
       <TestProviders>
         <SettingsContextMenu selectedConversation={conversationWithContentReferences} />
       </TestProviders>
     );
 
-    screen.getByTestId('chat-context-menu').click();
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
 
     const citationsSwitch = screen.getByTestId('citations-switch');
     expect(citationsSwitch).not.toBeDisabled();
   });
 
-  it('Navigates to AI settings for non-AI4SOC', () => {
+  it('Navigates to AI settings for non-AI4SOC', async () => {
     const mockNavigateToApp = jest.fn();
     render(
       <TestProviders providerContext={{ navigateToApp: mockNavigateToApp }}>
@@ -116,15 +117,15 @@ describe('SettingsContextMenu', () => {
       </TestProviders>
     );
 
-    screen.getByTestId('chat-context-menu').click();
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
 
-    screen.getByTestId('ai-assistant-settings').click();
+    await userEvent.click(screen.getByTestId('ai-assistant-settings'));
     expect(mockNavigateToApp).toHaveBeenCalledWith('management', {
       path: 'kibana/securityAiAssistantManagement',
     });
   });
 
-  it('Navigates to AI settings for AI4SOC', () => {
+  it('Navigates to AI settings for AI4SOC', async () => {
     const mockNavigateToApp = jest.fn();
     render(
       <TestProviders
@@ -138,15 +139,15 @@ describe('SettingsContextMenu', () => {
       </TestProviders>
     );
 
-    screen.getByTestId('chat-context-menu').click();
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
 
-    screen.getByTestId('ai-assistant-settings').click();
+    await userEvent.click(screen.getByTestId('ai-assistant-settings'));
     expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       deepLinkId: SecurityPageName.configurationsAiSettings,
     });
   });
 
-  it('Navigates to Knowledge Base for non-AI4SOC', () => {
+  it('Navigates to Knowledge Base for non-AI4SOC', async () => {
     const mockNavigateToApp = jest.fn();
     render(
       <TestProviders providerContext={{ navigateToApp: mockNavigateToApp }}>
@@ -154,15 +155,15 @@ describe('SettingsContextMenu', () => {
       </TestProviders>
     );
 
-    screen.getByTestId('chat-context-menu').click();
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
 
-    screen.getByTestId('knowledge-base').click();
+    await userEvent.click(screen.getByTestId('knowledge-base'));
     expect(mockNavigateToApp).toHaveBeenCalledWith('management', {
       path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
     });
   });
 
-  it('Navigates to Knowledge Base for AI4SOC', () => {
+  it('Navigates to Knowledge Base for AI4SOC', async () => {
     const mockNavigateToApp = jest.fn();
     render(
       <TestProviders
@@ -176,9 +177,9 @@ describe('SettingsContextMenu', () => {
       </TestProviders>
     );
 
-    screen.getByTestId('chat-context-menu').click();
+    await userEvent.click(screen.getByTestId('chat-context-menu'));
 
-    screen.getByTestId('knowledge-base').click();
+    await userEvent.click(screen.getByTestId('knowledge-base'));
     expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
       deepLinkId: SecurityPageName.configurationsAiSettings,
       path: `?tab=${KNOWLEDGE_BASE_TAB}`,

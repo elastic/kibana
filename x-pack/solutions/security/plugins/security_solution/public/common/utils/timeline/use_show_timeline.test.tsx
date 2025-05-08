@@ -6,18 +6,21 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { allowedExperimentalValues } from '../../../../common/experimental_features';
-import { UpsellingService } from '@kbn/security-solution-upselling/service';
-import { updateAppLinks } from '../../links';
-import { appLinks } from '../../../app_links';
 import { useUserPrivileges } from '../../components/user_privileges';
 import { useShowTimeline } from './use_show_timeline';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+
 import { TestProviders } from '../../mock';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
+import type { LinkInfo } from '../../links';
 
 jest.mock('../../components/user_privileges');
 jest.mock('../../../helpers_access', () => ({ hasAccessToSecuritySolution: jest.fn(() => true) }));
+
+const mockUseNormalizedAppLinks = jest.fn((): LinkInfo[] => []);
+jest.mock('../../links/links_hooks', () => ({
+  ...jest.requireActual('../../links/links_hooks'),
+  useNormalizedAppLinks: () => mockUseNormalizedAppLinks(),
+}));
 
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/overview' });
 jest.mock('react-router-dom', () => {
@@ -38,34 +41,20 @@ jest.mock('../../../sourcerer/containers', () => ({
   useSourcererDataView: () => mockUseSourcererDataView(),
 }));
 
-const mockUpselling = new UpsellingService();
-const mockUiSettingsClient = uiSettingsServiceMock.createStartContract();
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 
-const renderUseShowTimeline = () => renderHook(() => useShowTimeline(), { wrapper: TestProviders });
+const renderUseShowTimeline = () => renderHook(useShowTimeline, { wrapper: TestProviders });
 
 describe('use show timeline', () => {
   beforeAll(() => {
-    (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
-      timelinePrivileges: { read: true },
-    });
+    jest.clearAllMocks();
 
-    // initialize all App links before running test
-    updateAppLinks(appLinks, {
-      experimentalFeatures: allowedExperimentalValues,
-      capabilities: {
-        navLinks: {},
-        management: {},
-        catalogue: {},
-        actions: { show: true, crud: true },
-        siemV2: {
-          show: true,
-          crud: true,
-          detections: true,
-        },
-      },
-      upselling: mockUpselling,
-      uiSettingsClient: mockUiSettingsClient,
-    });
+    mockUseUserPrivileges.mockReturnValue({ timelinePrivileges: { read: true } });
+    mockUseNormalizedAppLinks.mockReturnValue([
+      { path: '/rules' },
+      { path: '/rules/add_rules', hideTimeline: true },
+      { path: '/administration/policy', hideTimeline: true },
+    ] as LinkInfo[]);
   });
 
   it('shows timeline for routes on default', async () => {
@@ -91,9 +80,7 @@ describe('use show timeline', () => {
     await waitFor(() => expect(result.current).toEqual([false]));
   });
   it('hides timeline for users without timeline access', async () => {
-    (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
-      timelinePrivileges: { read: false },
-    });
+    mockUseUserPrivileges.mockReturnValue({ timelinePrivileges: { read: false } });
 
     const { result } = renderUseShowTimeline();
     const showTimeline = result.current;
@@ -101,9 +88,7 @@ describe('use show timeline', () => {
   });
 });
 it('shows timeline for users with timeline read access', async () => {
-  (useUserPrivileges as unknown as jest.Mock).mockReturnValue({
-    timelinePrivileges: { read: true },
-  });
+  mockUseUserPrivileges.mockReturnValue({ timelinePrivileges: { read: true } });
 
   const { result } = renderUseShowTimeline();
   const showTimeline = result.current;
