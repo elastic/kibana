@@ -422,6 +422,16 @@ describe('Handle request to schedule', () => {
       expect(requestHandler.getNotification()).toBeUndefined();
     });
 
+    test('returns undefined if notification.email arrays are all empty', () => {
+      // @ts-ignore body is a read-only property
+      mockRequest.body = {
+        jobParams: rison.encode(mockJobParams),
+        schedule: { rrule: { freq: 1, interval: 2 } },
+        notification: { email: { to: [], cc: [], bcc: [] } },
+      };
+      expect(requestHandler.getNotification()).toBeUndefined();
+    });
+
     test('returns undefined if notification.email object is null', () => {
       // @ts-ignore body is a read-only property
       mockRequest.body = {
@@ -451,6 +461,66 @@ describe('Handle request to schedule', () => {
 
       expect(error?.statusCode).toBe(400);
       expect(error?.body).toBe('Invalid email address(es): not valid emails: foo');
+    });
+
+    test('handles too many recipients', () => {
+      let error: { statusCode: number; body: string } | undefined;
+      try {
+        // @ts-ignore body is a read-only property
+        mockRequest.body = {
+          jobParams: rison.encode(mockJobParams),
+          schedule: { rrule: { freq: 1, interval: 2 } },
+          notification: {
+            email: {
+              to: [
+                '1@elastic.co',
+                '2@elastic.co',
+                '3@elastic.co',
+                '4@elastic.co',
+                '5@elastic.co',
+                '6@elastic.co',
+                '7@elastic.co',
+              ],
+              cc: [
+                '8@elastic.co',
+                '9@elastic.co',
+                '10@elastic.co',
+                '11@elastic.co',
+                '12@elastic.co',
+                '13@elastic.co',
+                '14@elastic.co',
+                '15@elastic.co',
+                '16@elastic.co',
+                '17@elastic.co',
+              ],
+              bcc: [
+                '18@elastic.co',
+                '19@elastic.co',
+                '20@elastic.co',
+                '21@elastic.co',
+                '22@elastic.co',
+                '23@elastic.co',
+                '24@elastic.co',
+                '25@elastic.co',
+                '26@elastic.co',
+                '27@elastic.co',
+                '28@elastic.co',
+                '29@elastic.co',
+                '30@elastic.co',
+                '31@elastic.co',
+              ],
+            },
+          },
+        };
+        requestHandler.getNotification();
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error?.statusCode).toBe(400);
+      expect(error?.body).toBe(
+        'Maximum number of recipients exceeded: cannot specify more than 30 recipients.'
+      );
     });
   });
 
