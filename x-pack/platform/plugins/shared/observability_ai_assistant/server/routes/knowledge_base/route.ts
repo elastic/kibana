@@ -84,7 +84,7 @@ const warmupModelKnowledgeBase = createObservabilityAIAssistantServerRoute({
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async (resources): Promise<{ currentInferenceId: string }> => {
+  handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
     const { inference_id: inferenceId } = resources.params.query;
     return client.warmupKbModel(inferenceId);
