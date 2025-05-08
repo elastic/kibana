@@ -22,6 +22,15 @@ export async function fetchRelatedSavedObjects(
   soClient: SavedObjectsClientContract,
   agentPolicy: AgentPolicy
 ) {
+  const logger = appContextService.getLogger().get('fetchRelatedSavedObjects');
+
+  logger.debug(
+    () =>
+      `getting related saved objects for policy [${
+        agentPolicy.id
+      }] for space [${soClient.getCurrentNamespace()}]`
+  );
+
   const [defaultDataOutputId, defaultMonitoringOutputId] = await Promise.all([
     outputService.getDefaultDataOutputId(soClient),
     outputService.getDefaultMonitoringOutputId(soClient),
@@ -50,9 +59,7 @@ export async function fetchRelatedSavedObjects(
     outputService.bulkGet(outputIds, { ignoreNotFound: true }),
     getDownloadSourceForAgentPolicy(soClient, agentPolicy),
     getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch((err) => {
-      appContextService
-        .getLogger()
-        ?.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
+      logger.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
 
       return undefined;
     }),
@@ -86,6 +93,8 @@ export async function fetchRelatedSavedObjects(
       downloadSourceProxyUri = downloadSourceProxy.url;
     }
   }
+
+  logger.debug(`Returning related saved objects for policy ${agentPolicy.id}`);
 
   return {
     outputs,

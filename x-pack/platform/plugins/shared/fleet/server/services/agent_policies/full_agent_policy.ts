@@ -77,16 +77,24 @@ export async function getFullAgentPolicy(
   id: string,
   options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
 ): Promise<FullAgentPolicy | null> {
+  const logger = appContextService.getLogger().get('getFullAgentPolicy');
+
+  logger.debug(
+    `Getting full policy for agent policy [${id}] for space [${soClient.getCurrentNamespace()}]`
+  );
+
   const standalone = options?.standalone ?? false;
 
   let agentPolicy: AgentPolicy | null;
   if (options?.agentPolicy?.package_policies) {
+    logger.debug(`agent policy [${id}] was providing on input - no need to fetch it`);
     agentPolicy = options.agentPolicy;
   } else {
     agentPolicy = await fetchAgentPolicy(soClient, id);
   }
 
   if (!agentPolicy) {
+    logger.debug(`Agent policy [${id}] was not found. Exiting.`);
     return null;
   }
 
@@ -99,6 +107,7 @@ export async function getFullAgentPolicy(
     downloadSource,
     downloadSourceProxyUri,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
+
   // Build up an in-memory object for looking up Package Info, so we don't have
   // call `getPackageInfo` for every single policy, which incurs performance costs
   const packageInfoCache = new Map<string, PackageInfo>();
@@ -349,6 +358,8 @@ export async function getFullAgentPolicy(
     delete fullAgentPolicy.agent?.protection;
     delete fullAgentPolicy.signed;
   }
+
+  logger.debug(`Building of full agent policy for [${id}] done.`);
 
   return fullAgentPolicy;
 }
