@@ -93,6 +93,7 @@ export interface ActivePanelEvent {
 
 export interface ActiveRowEvent {
   id: string;
+  targetSection?: string;
   sensorType: 'mouse' | 'touch' | 'keyboard';
   startingPosition: {
     top: number;

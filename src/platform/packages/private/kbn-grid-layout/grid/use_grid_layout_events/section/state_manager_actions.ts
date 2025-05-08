@@ -205,6 +205,7 @@ export const moveAction = (
   // update the dragged element
   gridLayoutStateManager.activeRowEvent$.next({
     ...currentActiveRowEvent,
+    targetSection: targetSectionId,
     translate: {
       top: currentPointer.clientY - startingPointer.clientY,
       left: currentPointer.clientX - startingPointer.clientX,

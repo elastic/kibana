@@ -44,6 +44,7 @@ import {
   setSerializedGridLayout,
 } from './serialized_grid_layout';
 import { MockSerializedDashboardState } from './types';
+import { useLayoutStyles } from './use_layout_styles';
 import { useMockDashboardApi } from './use_mock_dashboard_api';
 import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './utils';
 
@@ -59,6 +60,7 @@ export const GridExample = ({
   coreStart: CoreStart;
   uiActions: UiActionsStart;
 }) => {
+  const layoutStyles = useLayoutStyles();
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
@@ -278,16 +280,22 @@ export const GridExample = ({
           </EuiFlexGroup>
           <EuiSpacer size="m" />
 
-          <GridLayout
-            accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
-            expandedPanelId={expandedPanelId}
-            layout={currentLayout}
-            gridSettings={gridSettings}
-            renderPanelContents={renderPanelContents}
-            onLayoutChange={onLayoutChange}
-            css={layoutStyles}
-            useCustomDragHandle={true}
-          />
+          {/*
+            Wrap grid layout in span that removes the extra padding that EuiPageTemplate adds
+            in order to make it look more similar to Dashboard
+          */}
+          <span css={css({ marginLeft: '-24px', marginRight: '-24px' })}>
+            <GridLayout
+              accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
+              expandedPanelId={expandedPanelId}
+              layout={currentLayout}
+              gridSettings={gridSettings}
+              renderPanelContents={renderPanelContents}
+              onLayoutChange={onLayoutChange}
+              css={[layoutStyles, customLayoutStyles]}
+              useCustomDragHandle={true}
+            />
+          </span>
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
     </KibanaRenderContextProvider>
@@ -303,35 +311,8 @@ export const renderGridExampleApp = (
   return () => ReactDOM.unmountComponentAtNode(element);
 };
 
-const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
-  const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
+const customLayoutStyles = ({ euiTheme }: UseEuiTheme) => {
   return css({
-    // background for grid row that is being targetted
-    '.kbnGridSection--targeted': {
-      backgroundPosition: `top calc((var(--kbnGridGutterSize) / 2) * -1px) left calc((var(--kbnGridGutterSize) / 2) * -1px)`,
-      backgroundSize: `calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px) calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px)`,
-      backgroundImage: `linear-gradient(to right, ${gridColor} 1px, transparent 1px), linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`,
-      backgroundColor: `${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.1)}`,
-    },
-    // styling for the "locked to grid" preview for what the panel will look like when dropped / resized
-    '.kbnGridPanel--dragPreview': {
-      borderRadius: `${euiTheme.border.radius}`,
-      backgroundColor: `${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2)}`,
-      transition: `opacity 100ms linear`,
-    },
-    // styling for panel resize handle
-    '.kbnGridPanel--resizeHandle': {
-      opacity: '0',
-      transition: `opacity 0.2s, border 0.2s`,
-      borderRadius: `7px 0 7px 0`,
-      borderBottom: `2px solid ${euiTheme.colors.accentSecondary}`,
-      borderRight: `2px solid ${euiTheme.colors.accentSecondary}`,
-      '&:hover, &:focus': {
-        outlineStyle: `none !important`,
-        opacity: 1,
-        backgroundColor: `${transparentize(euiTheme.colors.accentSecondary, 0.05)}`,
-      },
-    },
     // styling for what the grid row header looks like when being dragged
     '.kbnGridSectionHeader--active': {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
@@ -345,7 +326,23 @@ const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
     },
     // styles for the area where the row will be dropped
     '.kbnGridSection--dragPreview': {
-      backgroundColor: euiTheme.components.dragDropDraggingBackground,
+      backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.1),
+      borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
+    },
+
+    '.kbnGridSectionFooter': {
+      height: `${euiTheme.size.s}`,
+      display: `block`,
+      borderTop: `${euiTheme.border.thin}`,
+
+      '&--targeted': {
+        borderTop: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
+      },
+    },
+
+    '.kbnGridSection--blocked': {
+      zIndex: 1,
+      backgroundColor: `${transparentize(euiTheme.colors.backgroundBaseSubdued, 0.5)}`,
     },
   });
 };

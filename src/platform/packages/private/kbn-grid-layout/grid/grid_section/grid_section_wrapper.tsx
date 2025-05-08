@@ -39,7 +39,7 @@ export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) =
   useEffect(
     () => {
       /** Update the styles of the grid row via a subscription to prevent re-renders */
-      const interactionStyleSubscription = gridLayoutStateManager.activePanelEvent$.subscribe(
+      const panelInteractionStyleSubscription = gridLayoutStateManager.activePanelEvent$.subscribe(
         (activePanel) => {
           const rowRef = gridLayoutStateManager.sectionRefs.current[sectionId];
           if (!rowRef) return;
@@ -52,8 +52,23 @@ export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) =
         }
       );
 
+      const sectionInteractionStyleSubscription = gridLayoutStateManager.activeRowEvent$.subscribe(
+        (activeSection) => {
+          const rowRef = gridLayoutStateManager.sectionRefs.current[sectionId];
+          if (!rowRef) return;
+          const targetSection = activeSection?.targetSection;
+          const layout = gridLayoutStateManager.gridLayout$.getValue();
+          if (sectionId === targetSection && !layout[sectionId].isMainSection) {
+            rowRef.classList.add('kbnGridSection--blocked');
+          } else {
+            rowRef.classList.remove('kbnGridSection--blocked');
+          }
+        }
+      );
+
       return () => {
-        interactionStyleSubscription.unsubscribe();
+        panelInteractionStyleSubscription.unsubscribe();
+        sectionInteractionStyleSubscription.unsubscribe();
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

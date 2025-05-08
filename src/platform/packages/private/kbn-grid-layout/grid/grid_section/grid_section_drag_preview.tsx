@@ -19,18 +19,6 @@ export const GridSectionDragPreview = React.memo(() => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
 
-  // useEffect(
-  //   () => {
-  //     return () => {
-  //       // when drag preview unmounts, this means the header was dropped - so, scroll to it
-  //       const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
-  //       headerRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  //     };
-  //   },
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  //   []
-  // );
-
   useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
