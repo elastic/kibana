@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import {
-  StreamDefinition,
-  StreamGetResponse,
-  streamUpsertRequestSchema,
-  isUnwiredStreamDefinition,
-} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { badData } from '@hapi/boom';
+import { Streams } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { UpsertStreamResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -36,7 +31,7 @@ export const readStreamRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<StreamGetResponse> => {
+  handler: async ({ params, request, getScopedClients }): Promise<Streams.all.GetResponse> => {
     const { assetClient, streamsClient, scopedClusterClient } = await getScopedClients({
       request,
     });
@@ -68,7 +63,10 @@ export const listStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ request, getScopedClients }): Promise<{ streams: StreamDefinition[] }> => {
+  handler: async ({
+    request,
+    getScopedClients,
+  }): Promise<{ streams: Streams.all.Definition[] }> => {
     const { streamsClient } = await getScopedClients({ request });
     return {
       streams: await streamsClient.listStreams(),
@@ -96,13 +94,15 @@ export const editStreamRoute = createServerRoute({
     path: z.object({
       name: z.string(),
     }),
-    body: streamUpsertRequestSchema,
+    body: Streams.all.UpsertRequest.right,
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
-    const streamDefinition = { ...params.body.stream, name: params.path.name };
 
-    if (!isUnwiredStreamDefinition(streamDefinition) && !(await streamsClient.isStreamsEnabled())) {
+    if (
+      !Streams.UnwiredStream.UpsertRequest.is(params.body) &&
+      !(await streamsClient.isStreamsEnabled())
+    ) {
       throw badData('Streams are not enabled for Wired and Group streams.');
     }
 

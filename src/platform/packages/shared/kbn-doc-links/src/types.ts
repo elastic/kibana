@@ -55,7 +55,6 @@ export interface DocLinks {
   };
   readonly console: {
     readonly guide: string;
-    readonly serverlessGuide: string;
   };
   readonly dashboard: {
     readonly guide: string;
@@ -256,7 +255,6 @@ export interface DocLinks {
     readonly autocompleteSuggestions: string;
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
-    readonly dashboardImportExport: string;
     readonly upgradeNotes: string;
   };
   readonly upgradeAssistant: {
@@ -266,6 +264,9 @@ export interface DocLinks {
     readonly remoteReindex: string;
     readonly unfreezeApi: string;
     readonly reindexWithPipeline: string;
+    readonly logsDatastream: string;
+    readonly usingLogsDbIndexModeWithESSecurity: string;
+    readonly dataStreamReindex: string;
   };
   readonly rollupJobs: string;
   readonly elasticsearch: Record<string, string>;
@@ -283,6 +284,7 @@ export interface DocLinks {
   };
   readonly server: {
     readonly protocol: string;
+    readonly publicBaseUrl: string;
   };
   readonly logging: {
     readonly enableDeprecationHttpDebugLogs: string;
@@ -325,8 +327,6 @@ export interface DocLinks {
     };
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
-    readonly legacyEndpointManagementApiDeprecations: string;
-    readonly legacyRuleManagementBulkApiDeprecations: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
   };
@@ -463,7 +463,6 @@ export interface DocLinks {
     mappingRoles: string;
     mappingRolesFieldRules: string;
     runAsPrivilege: string;
-    deprecatedV1Endpoints: string;
     enableElasticSearchSecurityFeatures: string;
   }>;
   readonly spaces: Readonly<{

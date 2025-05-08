@@ -36,12 +36,17 @@ interface AlertSearchBarStateTransitions {
   setControlConfigs: (
     state: AlertSearchBarContainerState
   ) => (controlConfigs: FilterControlConfig[]) => AlertSearchBarContainerState;
+  setGroupings: (
+    state: AlertSearchBarContainerState
+  ) => (groupings: string[]) => AlertSearchBarContainerState;
 }
 
 const DEFAULT_STATE: AlertSearchBarContainerState = {
   rangeFrom: 'now-24h',
   rangeTo: 'now',
   kuery: '',
+  filters: [],
+  groupings: [],
 };
 
 const transitions: AlertSearchBarStateTransitions = {
@@ -52,6 +57,7 @@ const transitions: AlertSearchBarStateTransitions = {
   setFilters: (state) => (filters) => ({ ...state, filters }),
   setSavedQueryId: (state) => (savedQueryId) => ({ ...state, savedQueryId }),
   setControlConfigs: (state) => (controlConfigs) => ({ ...state, controlConfigs }),
+  setGroupings: (state) => (groupings) => ({ ...state, groupings }),
 };
 
 const alertSearchBarStateContainer = createStateContainer(DEFAULT_STATE, transitions);

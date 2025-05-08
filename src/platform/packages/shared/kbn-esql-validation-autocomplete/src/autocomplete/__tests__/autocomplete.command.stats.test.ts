@@ -49,7 +49,14 @@ const allGroupingFunctions = getFunctionSignaturesByReturnType(
 );
 
 // types accepted by the AVG function
-const avgTypes: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
+export const AVG_TYPES: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
+
+export const EXPECTED_FOR_EMPTY_EXPRESSION = [
+  'col0 = ',
+  ...allAggFunctions,
+  ...allGroupingFunctions,
+  ...allEvaFunctions,
+];
 
 describe('autocomplete.suggest', () => {
   describe('STATS <aggregates> [ BY <grouping> ]', () => {
@@ -63,12 +70,7 @@ describe('autocomplete.suggest', () => {
 
     describe('... <aggregates> ...', () => {
       test('suggestions for a fresh expression', async () => {
-        const expected = [
-          'col0 = ',
-          ...allAggFunctions,
-          ...allGroupingFunctions,
-          ...allEvaFunctions,
-        ];
+        const expected = EXPECTED_FOR_EMPTY_EXPRESSION;
 
         await assertSuggestions('from a | stats /', expected);
         await assertSuggestions('FROM a | STATS /', expected);
@@ -139,16 +141,16 @@ describe('autocomplete.suggest', () => {
           ),
         ]);
         await assertSuggestions('from a | stats avg(/', [
-          ...getFieldNamesByType(avgTypes),
-          ...getFunctionSignaturesByReturnType(Location.EVAL, avgTypes, {
+          ...getFieldNamesByType(AVG_TYPES),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, AVG_TYPES, {
             scalar: true,
           }),
         ]);
         await assertSuggestions('from a | stats round(avg(/', [
-          ...getFieldNamesByType(avgTypes),
+          ...getFieldNamesByType(AVG_TYPES),
           ...getFunctionSignaturesByReturnType(
             Location.EVAL,
-            avgTypes,
+            AVG_TYPES,
             { scalar: true },
             undefined,
             ['round']
@@ -193,8 +195,8 @@ describe('autocomplete.suggest', () => {
 
       test('inside function argument list', async () => {
         await assertSuggestions('from a | stats avg(b/) by stringField', [
-          ...getFieldNamesByType(avgTypes),
-          ...getFunctionSignaturesByReturnType(Location.EVAL, avgTypes, {
+          ...getFieldNamesByType(AVG_TYPES),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, AVG_TYPES, {
             scalar: true,
           }),
         ]);

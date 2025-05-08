@@ -46,7 +46,7 @@ import {
   retrieveSources,
 } from './resources';
 import type {
-  ESQLRealField,
+  ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
   ErrorTypes,
   ReferenceMaps,
@@ -335,7 +335,7 @@ function validateOption(
 }
 
 function validateFieldsShadowing(
-  fields: Map<string, ESQLRealField>,
+  fields: Map<string, ESQLFieldWithMetadata>,
   userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>
 ) {
   const messages: ESQLMessage[] = [];
@@ -370,7 +370,7 @@ function validateFieldsShadowing(
   return messages;
 }
 
-function validateUnsupportedTypeFields(fields: Map<string, ESQLRealField>, ast: ESQLAst) {
+function validateUnsupportedTypeFields(fields: Map<string, ESQLFieldWithMetadata>, ast: ESQLAst) {
   const usedColumnsInQuery: string[] = [];
 
   walk(ast, {

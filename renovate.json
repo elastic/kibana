@@ -162,7 +162,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "/.*/"
+        "main",
+        "/^[8-9].*/"
       ],
       "labels": [
         "Team:Operations",
@@ -396,23 +397,6 @@
       "matchDepNames": [
         "deep-freeze-strict",
         "@types/deep-freeze-strict"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:SharedUX",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "enabled": true
-    },
-    {
-      "matchDepNames": [
-        "fflate"
       ],
       "reviewers": [
         "team:appex-sharedux"
@@ -3492,6 +3476,12 @@
       "enabled": true
     },
     {
+      "matchDepNames": [
+        "chromedriver"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "chromedriver",
       "matchDepNames": [
         "chromedriver"
@@ -3500,7 +3490,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "/.*/"
+        "main",
+        "/^[8-9].*/"
       ],
       "labels": [
         "Team:Operations",
@@ -3527,7 +3518,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "/.*/"
+        "main",
+        "/^[8-9].*/"
       ],
       "labels": [
         "Team:Operations",
@@ -4302,14 +4294,24 @@
         "@grpc/grpc-js",
         "@opentelemetry/api",
         "@opentelemetry/api-metrics",
+        "@opentelemetry/core",
         "@opentelemetry/exporter-metrics-otlp-grpc",
         "@opentelemetry/exporter-prometheus",
         "@opentelemetry/resources",
         "@opentelemetry/sdk-metrics-base",
-        "@opentelemetry/semantic-conventions"
+        "@opentelemetry/semantic-conventions",
+        "@arizeai/openinference-semantic-conventions",
+        "@opentelemetry/context-async-hooks",
+        "@opentelemetry/exporter-trace-otlp-grpc",
+        "@opentelemetry/exporter-trace-otlp-http",
+        "@opentelemetry/exporter-trace-otlp-proto",
+        "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/sdk-node",
+        "@opentelemetry/sdk-trace-node"
       ],
       "reviewers": [
-        "team:stack-monitoring"
+        "team:stack-monitoring",
+        "team:kibana-core"
       ],
       "matchBaseBranches": [
         "main"
@@ -4431,6 +4433,24 @@
         "release_note:skip"
       ],
       "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "Kibana ES|QL Highlighting",
+      "matchDepNames": [
+        "@elastic/monaco-esql"
+      ],
+      "reviewers": [
+        "team:kibana-esql"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:ESQL",
+        "release_note:skip",
+        "backport:version"
+      ],
       "enabled": true
     },
     {
@@ -4570,9 +4590,9 @@
       "enabled": true
     },
     {
-      "groupName": "node-libs-browser",
+      "groupName": "node-stdlib-browser",
       "matchDepNames": [
-        "node-libs-browser"
+        "node-stdlib-browser"
       ],
       "reviewers": [
         "team:kibana-operations"
