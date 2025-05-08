@@ -183,7 +183,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     this.registerSubActions();
   }
 
-  // Rest of the file remains unchanged
+
   private registerSubActions() {
     this.registerSubAction({
       name: SUB_ACTION.RUN,
@@ -229,7 +229,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }
 
   protected getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
+    // handle known Azure error from early release, we can probably get rid of this eventually
     if (error.message === '404 Unrecognized request argument supplied: functions') {
+      // add information for known Azure error
       return `API Error: ${error.message}
         \n\nFunction support with Azure OpenAI API was added in 2023-07-01-preview. Update the API version of the Azure OpenAI connector in use
       `;
@@ -237,6 +239,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     if (!error.response?.status) {
       return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
     }
+    // LM Studio returns error.response?.data?.error as string
     const errorMessage = error.response?.data?.error?.message ?? error.response?.data?.error;
     if (error.response.status === 401) {
       return `Unauthorized API Error${errorMessage ? ` - ${errorMessage}` : ''}`;
@@ -344,10 +347,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * responsible for making a POST request to a specified URL with a given request body.
-   * The method can handle both regular API requests and streaming requests based on the stream parameter.
-   * It uses helper functions getRequestWithStreamOption and getAxiosOptions to prepare the request body and headers respectively.
-   * The response is then processed based on whether it is a streaming response or a regular response.
+   *  responsible for making a POST request to a specified URL with a given request body.
+   *  The method can handle both regular API requests and streaming requests based on the stream parameter.
+   *  It uses helper functions getRequestWithStreamOption and getAxiosOptions to prepare the request body and headers respectively.
+   *  The response is then processed based on whether it is a streaming response or a regular response.
    * @param body request body for the API request
    * @param stream flag indicating whether it is a streaming request or not
    */
@@ -449,8 +452,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * retrieves a dashboard from the Kibana server and checks if the
-   * user has the necessary privileges to access it.
+   *  retrieves a dashboard from the Kibana server and checks if the
+   *  user has the necessary privileges to access it.
    * @param dashboardId The ID of the dashboard to retrieve.
    */
   public async getDashboard({
@@ -501,7 +504,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         body: JSON.stringify(rest),
         stream: true,
         signal,
-        timeout,
+        timeout, // do not default if not provided
       },
       connectorUsageCollector
     )) as unknown as IncomingMessage;
@@ -538,10 +541,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);
       const stream = await this.openAI.chat.completions.create(requestBody, {
         signal,
-        timeout,
+        timeout, // do not default if not provided
       });
+      // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
       const teed = stream.tee();
       return { consumerStream: teed[0], tokenCountStream: teed[1] };
+      // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);
       throw new Error(errorMessage);
