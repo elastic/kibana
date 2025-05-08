@@ -446,9 +446,14 @@ export class StatusRuleExecutor {
       this.logger.error(`Monitor with id ${configId} not found`);
       return;
     }
+
+    // For some reason 'urls' is not considered a valid attribute in the monitor attributes, there's probably a problem with the EncryptedSyntheticsMonitorAttributes type
+    const fullUrl =
+      'urls' in monitor.attributes && typeof monitor.attributes.urls === 'string'
+        ? monitor.attributes.urls
+        : '';
+
     return {
-      // If there is no ping the timestamp is the created_at date of the monitor
-      ['@timestamp']: monitor.created_at || '',
       monitor: {
         name: monitor.attributes.name,
         id: configId,
@@ -461,6 +466,7 @@ export class StatusRuleExecutor {
       },
       labels: monitor.attributes.labels,
       tags: monitor.attributes.tags,
+      url: { full: fullUrl },
     };
   }
 

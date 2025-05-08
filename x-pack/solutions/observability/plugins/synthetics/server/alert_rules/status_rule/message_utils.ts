@@ -64,7 +64,6 @@ export const getMonitorAlertDocument = (
 });
 
 export interface MissingPingMonitorInfo {
-  '@timestamp': string;
   monitor: {
     name: string;
     id: string;
@@ -136,9 +135,18 @@ export const getMonitorSummary = ({
   const formattedLocationName = Array.isArray(locationName)
     ? locationName.join(` ${AND_LABEL} `)
     : locationName;
-  const checkedAt = moment(monitorInfo?.['@timestamp'])
-    .tz(tz || 'UTC')
-    .format(dateFormat);
+
+  // When the monitor is pending there is no timestamp for the last ping
+  const { timestamp, checkedAt } =
+    monitorInfo && '@timestamp' in monitorInfo
+      ? {
+          timestamp: monitorInfo['@timestamp'],
+          checkedAt: moment(monitorInfo['@timestamp'])
+            .tz(tz || 'UTC')
+            .format(dateFormat),
+        }
+      : { timestamp: 'unavailable', checkedAt: 'unavailable' };
+
   const typeToLabelMap: Record<string, string> = {
     http: 'HTTP',
     tcp: 'TCP',
@@ -184,7 +192,7 @@ export const getMonitorSummary = ({
     }),
     checks,
     downThreshold,
-    timestamp: monitorInfo['@timestamp'],
+    timestamp,
     monitorTags: monitorInfo.tags,
   };
 };
