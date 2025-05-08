@@ -47,6 +47,9 @@ export interface PercentileIndexPatternColumn extends FieldBasedIndexPatternColu
   };
 }
 
+const DEFAULT_PERCENTILE_VALUE = 95;
+const ALLOWED_DECIMAL_DIGITS = 4;
+
 function ofName(
   name: string,
   percentile: number,
@@ -58,7 +61,7 @@ function ofName(
       (locale, opts) =>
         new Intl.NumberFormat(locale, {
           ...(opts as Intl.NumberFormatOptions), // To resolve a type mismatch in the 'useGrouping' property
-          maximumFractionDigits: 4,
+          maximumFractionDigits: ALLOWED_DECIMAL_DIGITS,
         })
     ),
     // @ts-expect-error - There’s a small mismatch between @formatjs type and Intl API that only applies to the date function, we’re ignoring that
@@ -67,7 +70,7 @@ function ofName(
       (locale, opts) =>
         new Intl.PluralRules(locale, {
           ...opts,
-          maximumFractionDigits: 4,
+          maximumFractionDigits: ALLOWED_DECIMAL_DIGITS,
         })
     ),
   };
@@ -87,9 +90,6 @@ function ofName(
     reducedTimeRange
   );
 }
-
-const DEFAULT_PERCENTILE_VALUE = 95;
-const ALLOWED_DECIMAL_DIGITS = 4;
 
 function getInvalidErrorMessage(
   value: string | undefined,
