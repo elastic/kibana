@@ -6,9 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import type { SavedObject } from '@kbn/core/server';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
-import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common/data_views';
+import { ContentPackSavedObject } from './saved_object';
+
+export * from './api';
+export * from './saved_object';
 
 export interface ContentPackManifest {
   name: string;
@@ -22,38 +23,23 @@ export const contentPackManifestSchema: z.Schema<ContentPackManifest> = z.object
   version: z.string(),
 });
 
+export function isContentPackSavedObject(entry: ContentPackEntry): entry is ContentPackSavedObject {
+  return ['dashboard', 'index-pattern'].includes(entry.type);
+}
+
+export type ContentPackEntry = ContentPackSavedObject;
+
 export interface ContentPack extends ContentPackManifest {
   entries: ContentPackEntry[];
 }
 
-type ContentPackDashboard = SavedObject<DashboardAttributes>;
-type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs>;
-export type ContentPackSavedObject = ContentPackDashboard | ContentPackDataView;
-
-export type ContentPackEntry = ContentPackSavedObject;
-
-export interface ContentPackIncludeObjects {
-  objects: {
-    dashboards: string[];
-  };
+export interface ContentPackPreviewEntry {
+  type: string;
+  id: string;
+  title: string;
+  errors: Array<{ severity: 'fatal' | 'warning'; message: string }>;
 }
 
-export interface ContentPackIncludeAll {
-  all: {};
+export interface ContentPackPreview extends ContentPackManifest {
+  entries: ContentPackPreviewEntry[];
 }
-
-export type ContentPackIncludedObjects = ContentPackIncludeObjects | ContentPackIncludeAll;
-
-const contentPackIncludeObjectsSchema = z.object({
-  objects: z.object({ dashboards: z.array(z.string()) }),
-});
-const contentPackIncludeAllSchema = z.object({ all: z.strictObject({}) });
-
-export const isIncludeAll = (value: ContentPackIncludedObjects): value is ContentPackIncludeAll => {
-  return contentPackIncludeAllSchema.safeParse(value).success;
-};
-
-export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.union([
-  contentPackIncludeObjectsSchema,
-  contentPackIncludeAllSchema,
-]);

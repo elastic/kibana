@@ -8,10 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
 import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { StateComparators } from '@kbn/presentation-publishing';
-import { omit } from 'lodash';
 import { BehaviorSubject, debounceTime, merge } from 'rxjs';
 import { v4 } from 'uuid';
 import {
@@ -19,15 +16,14 @@ import {
   getReferencesForPanelId,
 } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
 import { DASHBOARD_APP_ID } from '../../common/constants';
-import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { getSerializedState } from './get_serialized_state';
-import { openSaveModal } from './save_modal/open_save_modal';
 import { initializePanelsManager } from './panels_manager';
+import { openSaveModal } from './save_modal/open_save_modal';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
@@ -38,107 +34,100 @@ import {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
-  UnsavedPanelState,
 } from './types';
 import type { DashboardState } from '../../common/types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
+import {
+  CONTROL_GROUP_EMBEDDABLE_ID,
+  initializeControlGroupManager,
+} from './control_group_manager';
 
 export function getDashboardApi({
   creationOptions,
   incomingEmbeddable,
   initialState,
-  initialPanelsRuntimeState,
   savedObjectResult,
   savedObjectId,
 }: {
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddable?: EmbeddablePackageState | undefined;
   initialState: DashboardState;
-  initialPanelsRuntimeState?: UnsavedPanelState;
   savedObjectResult?: LoadDashboardReturn;
   savedObjectId?: string;
 }) {
-  const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = savedObjectResult?.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
 
   const viewModeManager = initializeViewModeManager(incomingEmbeddable, savedObjectResult);
-  const trackPanel = initializeTrackPanel(
-    async (id: string) => await panelsManager.api.untilEmbeddableLoaded(id)
-  );
+  const trackPanel = initializeTrackPanel(async (id: string) => {
+    await panelsManager.api.getChildApi(id);
+  });
 
   const references$ = new BehaviorSubject<Reference[] | undefined>(initialState.references);
-  const getPanelReferences = (id: string) => {
+  const getReferences = (id: string) => {
+    if (id === CONTROL_GROUP_EMBEDDABLE_ID) {
+      return getReferencesForControls(references$.value ?? []);
+    }
+
     const panelReferences = getReferencesForPanelId(id, references$.value ?? []);
     // references from old installations may not be prefixed with panel id
     // fall back to passing all references in these cases to preserve backwards compatability
     return panelReferences.length > 0 ? panelReferences : references$.value ?? [];
   };
-  const pushPanelReferences = (refs: Reference[]) => {
-    references$.next([...(references$.value ?? []), ...refs]);
-  };
-  const referencesComparator: StateComparators<Pick<DashboardState, 'references'>> = {
-    references: [references$, (nextRefs) => references$.next(nextRefs)],
-  };
 
   const panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
-    initialPanelsRuntimeState ?? {},
     trackPanel,
-    getPanelReferences,
-    pushPanelReferences,
-    savedObjectId
+    getReferences
+  );
+  const controlGroupManager = initializeControlGroupManager(
+    initialState.controlGroupInput,
+    getReferences
   );
   const dataLoadingManager = initializeDataLoadingManager(panelsManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
-    controlGroupApi$,
+    controlGroupManager.api.controlGroupApi$,
     panelsManager.api.children$
   );
   const settingsManager = initializeSettingsManager(initialState);
   const unifiedSearchManager = initializeUnifiedSearchManager(
     initialState,
-    controlGroupApi$,
+    controlGroupManager.api.controlGroupApi$,
     settingsManager.api.timeRestore$,
     dataLoadingManager.internalApi.waitForPanelsToLoad$,
     () => unsavedChangesManager.internalApi.getLastSavedState(),
     creationOptions
   );
   const unsavedChangesManager = initializeUnsavedChangesManager({
+    viewModeManager,
     creationOptions,
-    controlGroupApi$,
-    lastSavedState: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
-      ...DEFAULT_DASHBOARD_STATE,
-    },
+    controlGroupManager,
+    lastSavedState: savedObjectResult?.dashboardInput ?? DEFAULT_DASHBOARD_STATE,
     panelsManager,
     savedObjectId$,
     settingsManager,
-    viewModeManager,
     unifiedSearchManager,
-    referencesComparator,
+    getReferences,
   });
+
   function getState() {
-    const { panels, references: panelReferences } = panelsManager.internalApi.getState();
+    const { panels, references: panelReferences } = panelsManager.internalApi.serializePanels();
     const { state: unifiedSearchState, references: searchSourceReferences } =
       unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
-      ...settingsManager.internalApi.getState(),
+      ...settingsManager.api.getSettings(),
       ...unifiedSearchState,
       panels,
       viewMode: viewModeManager.api.viewMode$.value,
     };
 
-    const controlGroupApi = controlGroupApi$.value;
-    let controlGroupReferences: Reference[] | undefined;
-    if (controlGroupApi) {
-      const { rawState: controlGroupSerializedState, references: extractedReferences } =
-        controlGroupApi.serializeState();
-      controlGroupReferences = extractedReferences;
-      dashboardState.controlGroupInput = controlGroupSerializedState;
-    }
+    const { controlGroupInput, controlGroupReferences } =
+      controlGroupManager.internalApi.serializeControlGroup();
+    dashboardState.controlGroupInput = controlGroupInput;
 
     return {
       dashboardState,
@@ -161,7 +150,7 @@ export function getDashboardApi({
     ...unsavedChangesManager.api,
     ...trackOverlayApi,
     ...initializeTrackContentfulRender(),
-    controlGroupApi$,
+    ...controlGroupManager.api,
     executionContext: {
       type: 'dashboard',
       description: settingsManager.api.title$.value,
@@ -191,7 +180,10 @@ export function getDashboardApi({
       });
 
       if (saveResult) {
-        unsavedChangesManager.internalApi.onSave(saveResult.savedState);
+        unsavedChangesManager.internalApi.onSave(
+          saveResult.savedState,
+          saveResult.references ?? []
+        );
         const settings = settingsManager.api.getSettings();
         settingsManager.api.setSettings({
           ...settings,
@@ -221,22 +213,34 @@ export function getDashboardApi({
         lastSavedId: savedObjectId$.value,
       });
 
-      unsavedChangesManager.internalApi.onSave(dashboardState);
+      unsavedChangesManager.internalApi.onSave(dashboardState, searchSourceReferences);
       references$.next(saveResult.references);
 
       return;
     },
     savedObjectId$,
     setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
+    getSerializedStateForChild: (childId: string) => {
+      return childId === CONTROL_GROUP_EMBEDDABLE_ID
+        ? controlGroupManager.internalApi.getStateForControlGroup()
+        : panelsManager.internalApi.getSerializedStateForPanel(childId);
+    },
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     type: DASHBOARD_API_TYPE as 'dashboard',
     uuid: v4(),
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
+  const internalApi: DashboardInternalApi = {
+    ...panelsManager.internalApi,
+    ...unifiedSearchManager.internalApi,
+    setControlGroupApi: controlGroupManager.internalApi.setControlGroupApi,
+  };
+
   const searchSessionManager = initializeSearchSessionManager(
     creationOptions?.searchSessionSettings,
     incomingEmbeddable,
-    dashboardApi
+    dashboardApi,
+    internalApi
   );
 
   return {
@@ -244,35 +248,7 @@ export function getDashboardApi({
       ...dashboardApi,
       ...searchSessionManager.api,
     },
-    internalApi: {
-      ...panelsManager.internalApi,
-      ...unifiedSearchManager.internalApi,
-      getSerializedStateForControlGroup: () => {
-        return {
-          rawState: savedObjectResult?.dashboardInput?.controlGroupInput
-            ? savedObjectResult.dashboardInput.controlGroupInput
-            : ({
-                autoApplySelections: true,
-                chainingSystem: 'HIERARCHICAL',
-                controls: [],
-                ignoreParentSettings: {
-                  ignoreFilters: false,
-                  ignoreQuery: false,
-                  ignoreTimerange: false,
-                  ignoreValidations: false,
-                },
-                labelPosition: 'oneLine',
-                showApplySelections: false,
-              } as ControlGroupSerializedState),
-          references: getReferencesForControls(references$.value ?? []),
-        };
-      },
-      getRuntimeStateForControlGroup: () => {
-        return panelsManager!.api.getRuntimeStateForChild(PANELS_CONTROL_GROUP_KEY);
-      },
-      setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
-        controlGroupApi$.next(controlGroupApi),
-    } as DashboardInternalApi,
+    internalApi,
     cleanup: () => {
       dataLoadingManager.cleanup();
       dataViewsManager.cleanup();

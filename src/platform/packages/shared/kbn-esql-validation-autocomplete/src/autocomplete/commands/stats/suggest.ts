@@ -13,7 +13,7 @@ import { CommandSuggestParams, Location } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import {
   TRIGGER_SUGGESTION_COMMAND,
-  getNewVariableSuggestion,
+  getNewUserDefinedColumnSuggestion,
   getFunctionSuggestions,
   getControlSuggestionIfSupported,
 } from '../../factories';
@@ -32,7 +32,7 @@ export async function suggest({
   innerText,
   command,
   getColumnsByType,
-  getSuggestedVariableName,
+  getSuggestedUserDefinedColumnName,
   getPreferences,
   getVariables,
   supportsControls,
@@ -57,7 +57,7 @@ export async function suggest({
       return [
         ...controlSuggestions,
         ...getFunctionSuggestions({ location: Location.STATS }),
-        getNewVariableSuggestion(getSuggestedVariableName()),
+        getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()),
       ];
 
     case 'expression_after_assignment':
@@ -109,7 +109,7 @@ export async function suggest({
         ...getFunctionSuggestions({ location: Location.STATS_BY }),
         getDateHistogramCompletionItem((await getPreferences?.())?.histogramBarTarget),
         ...columnSuggestions,
-        getNewVariableSuggestion(getSuggestedVariableName()),
+        getNewUserDefinedColumnSuggestion(getSuggestedUserDefinedColumnName()),
       ];
 
     case 'grouping_expression_complete':

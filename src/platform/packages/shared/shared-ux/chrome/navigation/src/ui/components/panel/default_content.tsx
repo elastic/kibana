@@ -75,29 +75,23 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
       </EuiFlexItem>
 
       {/* Panel navigation */}
-      <EuiFlexItem style={{ width: '100%' }}>
-        <>
-          {serializedChildren && (
-            <>
-              {serializedChildren.map((child, i) => {
-                const hasHorizontalRuleBefore =
-                  i === 0 ? false : !!serializedChildren?.[i - 1]?.appendHorizontalRule;
-                const isGroup = !!child.children;
-                return isGroup ? (
-                  <Fragment key={child.id}>
-                    <PanelGroup
-                      navNode={child}
-                      isFirstInList={i === 0}
-                      hasHorizontalRuleBefore={hasHorizontalRuleBefore}
-                    />
-                  </Fragment>
-                ) : (
-                  <PanelNavItem key={child.id} item={child} />
-                );
-              })}
-            </>
-          )}
-        </>
+      <EuiFlexItem css={{ width: '100%' }}>
+        {serializedChildren?.map((child, i) => {
+          const hasHorizontalRuleBefore =
+            i === 0 ? false : !!serializedChildren?.[i - 1]?.appendHorizontalRule;
+          const isGroup = !!child.children;
+          return isGroup ? (
+            <Fragment key={child.id}>
+              <PanelGroup
+                navNode={child}
+                isFirstInList={i === 0}
+                hasHorizontalRuleBefore={hasHorizontalRuleBefore}
+              />
+            </Fragment>
+          ) : (
+            <PanelNavItem key={child.id} item={child} />
+          );
+        }) ?? null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
