@@ -25,6 +25,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.0.1 [kibana-9.0.1-release-notes]
 
+::::{important}
+The 9.0.1 release contains fixes for potential security vulnerabilities. See our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+::::
+
 ### Enhancements [kibana-9.0.1-features-enhancements]
 **Data ingestion and Fleet**:
 * Reuse shared integration policies when duplicating agent policies [#217872](https://github.com/elastic/kibana/pull/217872).
