@@ -64,9 +64,9 @@ export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) 
   return (
     <FilterGroup
       dataViewId={dataView.id || null}
-        onFiltersChange={(pageFilters: Filter[]) => {
-          setQuery({ pageFilters });
-        }}
+      onFiltersChange={(pageFilters: Filter[]) => {
+        setQuery({ pageFilters });
+      }}
       ruleTypeIds={ASSET_INVENTORY_RULE_TYPE_IDS}
       Storage={Storage}
       defaultControls={DEFAULT_ASSET_INVENTORY_FILTERS}

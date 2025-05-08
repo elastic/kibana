@@ -28,7 +28,7 @@ const getBaseQuery = ({
     dataView: DataView | undefined;
   }) => {
   try {
-    const mergedFilters = [...filters, ...pageFilters];
+    const mergedFilters = [...filters, ...(pageFilters ?? [])];
 
     return {
       query: buildEsQuery(dataView, query, mergedFilters, config), // will throw for malformed query
