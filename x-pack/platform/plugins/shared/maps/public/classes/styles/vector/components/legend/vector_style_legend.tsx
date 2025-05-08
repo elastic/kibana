@@ -27,15 +27,6 @@ interface Props {
   svg?: string;
 }
 
-const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  const styles = useMemo(
-    () => css({ '&:not(:last-child)': { marginBottom: euiTheme.size.s } }),
-    [euiTheme]
-  );
-  return styles;
-};
-
 export function VectorStyleLegend({
   isLinesOnly,
   isPointsOnly,
@@ -45,7 +36,13 @@ export function VectorStyleLegend({
   svg,
 }: Props) {
   const legendRows = [];
-  const spacerStyles = useStyles();
+
+  const { euiTheme } = useEuiTheme();
+  const { spacerStyles } = useMemo(() => {
+    return {
+      spacerStyles: css({ '&:not(:last-child)': { marginBottom: euiTheme.size.s } }),
+    };
+  }, [euiTheme]);
 
   for (let i = 0; i < styles.length; i++) {
     const styleMetaDataRequest = styles[i].isDynamic()
