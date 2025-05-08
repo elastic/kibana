@@ -179,8 +179,6 @@ export function useOnSubmit({
 
   // Used to render extension components only when package policy is initialized
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  // Used to initialize the package policy once
-  const isInitializedRef = useRef(false);
 
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
@@ -258,7 +256,7 @@ export function useOnSubmit({
   // Initial loading of package info
   useEffect(() => {
     async function init() {
-      if (isInitializedRef.current || !packageInfo) {
+      if (!packageInfo || packageInfo.name === packagePolicy.package?.name) {
         return;
       }
 
@@ -270,7 +268,6 @@ export function useOnSubmit({
       });
       const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
-      isInitializedRef.current = true;
       const basePackagePolicy = packageToPackagePolicy(
         packageInfo,
         agentPolicies.map((policy) => policy.id),
@@ -283,7 +280,14 @@ export function useOnSubmit({
       setIsInitialized(true);
     }
     init();
-  }, [packageInfo, agentPolicies, updatePackagePolicy, integrationToEnable, isInitialized]);
+  }, [
+    packageInfo,
+    agentPolicies,
+    updatePackagePolicy,
+    integrationToEnable,
+    isInitialized,
+    packagePolicy.package?.name,
+  ]);
 
   useEffect(() => {
     if (
@@ -353,7 +357,12 @@ export function useOnSubmit({
     async ({
       force,
       overrideCreatedAgentPolicy,
-    }: { overrideCreatedAgentPolicy?: AgentPolicy; force?: boolean } = {}) => {
+      skipConfirmModal,
+    }: {
+      overrideCreatedAgentPolicy?: AgentPolicy;
+      force?: boolean;
+      skipConfirmModal?: boolean;
+    } = {}) => {
       if (formState === 'VALID' && hasErrors) {
         setFormState('INVALID');
         return;
@@ -472,7 +481,7 @@ export function useOnSubmit({
       const isAgentlessConfigured = isAgentlessAgentPolicy(createdPolicy);
 
       // Removing this code will disabled the Save and Continue button. We need code below update form state and trigger correct modal depending on agent count
-      if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured) {
+      if (hasFleetAddAgentsPrivileges && !isAgentlessConfigured && !skipConfirmModal) {
         if (agentCount) {
           setFormState('SUBMITTED');
         } else if (hasAzureArmTemplate) {
@@ -494,27 +503,29 @@ export function useOnSubmit({
           !isAgentlessConfigured &&
           hasFleetAddAgentsPrivileges;
 
-        if (promptForAgentEnrollment && hasAzureArmTemplate) {
-          setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
-          return;
-        }
-        if (promptForAgentEnrollment && hasCloudFormation) {
-          setFormState('SUBMITTED_CLOUD_FORMATION');
-          return;
-        }
-        if (promptForAgentEnrollment && hasGoogleCloudShell) {
-          setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
-          return;
-        }
-        if (promptForAgentEnrollment) {
-          setFormState('SUBMITTED_NO_AGENTS');
-          return;
-        }
+        if (!skipConfirmModal) {
+          if (promptForAgentEnrollment && hasAzureArmTemplate) {
+            setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
+            return;
+          }
+          if (promptForAgentEnrollment && hasCloudFormation) {
+            setFormState('SUBMITTED_CLOUD_FORMATION');
+            return;
+          }
+          if (promptForAgentEnrollment && hasGoogleCloudShell) {
+            setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
+            return;
+          }
+          if (promptForAgentEnrollment) {
+            setFormState('SUBMITTED_NO_AGENTS');
+            return;
+          }
 
-        if (isAgentlessConfigured) {
-          onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
-        } else {
-          onSaveNavigate(data!.item);
+          if (isAgentlessConfigured) {
+            onSaveNavigate(data!.item, ['openEnrollmentFlyout']);
+          } else {
+            onSaveNavigate(data!.item);
+          }
         }
 
         notifications.toasts.addSuccess({
