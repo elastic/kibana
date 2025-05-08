@@ -122,8 +122,11 @@ const stateSchemaV2 = stateSchemaV1.extends({
 });
 
 const stateSchemaV3 = stateSchemaV2.extends({
+  count_rules_snoozed_by_type: schema.recordOf(schema.string(), schema.number()),
+  count_rules_muted_by_type: schema.recordOf(schema.string(), schema.number()),
   count_rules_with_linked_dashboards: schema.number(),
   count_rules_with_investigation_guide: schema.number(),
+  count_inactive_by_type: schema.recordOf(schema.string(), schema.number()),
 });
 
 export const stateSchemaByVersion = {
@@ -229,6 +232,9 @@ export const stateSchemaByVersion = {
       ...stateSchemaByVersion[2].up(state),
       count_rules_with_linked_dashboards: state.count_rules_with_linked_dashboards || 0,
       count_rules_with_investigation_guide: state.count_rules_with_investigation_guide || 0,
+      count_rules_snoozed_by_type: state.count_rules_snoozed_by_type || {},
+      count_rules_muted_by_type: state.count_rules_muted_by_type || {},
+      count_inactive_by_type: state.count_inactive_by_type || {},
     }),
     schema: stateSchemaV3,
   },
@@ -269,6 +275,7 @@ export const emptyState: LatestTaskStateSchema = {
     max: 0,
   },
   count_active_by_type: {},
+  count_inactive_by_type: {},
   count_active_total: 0,
   count_disabled_total: 0,
   count_rules_by_execution_status: {
@@ -284,6 +291,8 @@ export const emptyState: LatestTaskStateSchema = {
   },
   count_rules_snoozed: 0,
   count_rules_muted: 0,
+  count_rules_snoozed_by_type: {},
+  count_rules_muted_by_type: {},
   count_mw_total: 0,
   count_mw_with_repeat_toggle_on: 0,
   count_mw_with_filter_alert_toggle_on: 0,

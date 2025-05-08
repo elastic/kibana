@@ -394,19 +394,6 @@ export async function getTotalCountAggregations({
       parseSimpleRuleTypeBucket(aggregations.by_search_type.buckets)
     );
 
-    console.log(
-      JSON.stringify(aggregations.sum_rules_snoozed_by_type),
-      JSON.stringify(aggregations.sum_rules_muted_by_type),
-      {
-        count_rules_snoozed_by_type: {
-          ...parseSimpleRuleTypeBucket(aggregations.sum_rules_snoozed_by_type.buckets),
-        },
-        count_rules_muted_by_type: {
-          ...parseSimpleRuleTypeBucket(aggregations.sum_rules_muted_by_type.buckets),
-        },
-      }
-    );
-
     return {
       hasErrors: false,
       count_total: totalRulesCount ?? 0,

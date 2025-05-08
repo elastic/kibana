@@ -149,6 +149,14 @@ export function telemetryTaskRunner(
                 totalAlertsCountAggregations.errorMessage,
               ].filter((message) => message !== undefined);
 
+              const disabledCountPerType = Object.keys(totalCountAggregations.count_by_type).reduce(
+                (acc, key) => ({
+                  ...acc,
+                  [key]: totalCountAggregations.count_by_type[key] - totalInUse.countByType[key],
+                }),
+                {}
+              );
+
               const updatedState: LatestTaskStateSchema = {
                 has_errors: hasErrors,
                 ...(errorMessages.length > 0 && { error_messages: errorMessages }),
@@ -161,6 +169,7 @@ export function telemetryTaskRunner(
                 schedule_time_number_s: totalCountAggregations.schedule_time_number_s,
                 connectors_per_alert: totalCountAggregations.connectors_per_alert,
                 count_active_by_type: totalInUse.countByType,
+                count_inactive_by_type: disabledCountPerType,
                 count_active_total: totalInUse.countTotal,
                 count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
                 count_rules_by_execution_status:
@@ -169,6 +178,8 @@ export function telemetryTaskRunner(
                 count_rules_by_notify_when: totalCountAggregations.count_rules_by_notify_when,
                 count_rules_snoozed: totalCountAggregations.count_rules_snoozed,
                 count_rules_muted: totalCountAggregations.count_rules_muted,
+                count_rules_snoozed_by_type: totalCountAggregations.count_rules_snoozed_by_type,
+                count_rules_muted_by_type: totalCountAggregations.count_rules_muted_by_type,
                 count_rules_with_linked_dashboards:
                   totalCountAggregations.count_rules_with_linked_dashboards,
                 count_rules_with_investigation_guide:
