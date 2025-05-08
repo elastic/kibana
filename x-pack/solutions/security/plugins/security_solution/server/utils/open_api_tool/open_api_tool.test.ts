@@ -192,7 +192,7 @@ describe('OpenApiTool', () => {
     ]);
   });
 
-  describe.only('parses schema correctly', () => {
+  describe('parses schema correctly', () => {
     it('openai', async () => {
       const openApiTool = await MockOpenApiTool.createTestableOpenApiTool({
         llmType: 'openai',
