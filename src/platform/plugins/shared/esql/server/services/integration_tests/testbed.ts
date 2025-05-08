@@ -83,12 +83,13 @@ export class EsqlServiceTestbed {
       index: 'ts_index1',
       settings: {
         'index.mode': 'time_series',
+        'index.routing_path': ['field1'],
       },
       mappings: {
         properties: {
-          field_gauge1: {
+          field1: {
             type: 'long',
-            time_series_metric: 'gauge',
+            time_series_dimension: true,
           },
         },
       },
@@ -99,6 +100,7 @@ export class EsqlServiceTestbed {
       index: 'ts_index2',
       settings: {
         'index.mode': 'time_series',
+        'index.routing_path': ['field2'],
       },
       aliases: {
         ts_index2_alias1: {},
@@ -106,9 +108,9 @@ export class EsqlServiceTestbed {
       },
       mappings: {
         properties: {
-          field_gauge2: {
+          field2: {
             type: 'long',
-            time_series_metric: 'gauge',
+            time_series_dimension: true,
           },
         },
       },
