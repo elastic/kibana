@@ -26,5 +26,3 @@ export {
   ensureSAMLRoleMapping,
   getSAMLRequestId,
 } from './utils';
-
-export { createMockIdpMetadata, createSAMLResponse, ensureSAMLRoleMapping } from './utils';
