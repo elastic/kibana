@@ -14,6 +14,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { AnnotationIcon } from '.';
 import { AnnotationTooltip } from './annotation_tooltip';
 import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import { cloneDeep } from 'lodash';
 
 export function NewLineAnnotation({
   slo,
@@ -34,7 +35,7 @@ export function NewLineAnnotation({
 
   return (
     <ObsLineAnnotation
-      annotation={{
+      annotation={cloneDeep({
         ...values,
         annotation: {
           ...values.annotation,
@@ -42,7 +43,7 @@ export function NewLineAnnotation({
           type: annotationType,
         },
         ...(slo ? { slo: { id: slo.id, instanceId: slo.instanceId } } : {}),
-      }}
+      })}
     />
   );
 }

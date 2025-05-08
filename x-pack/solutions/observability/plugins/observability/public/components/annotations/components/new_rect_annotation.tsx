@@ -13,6 +13,7 @@ import { useFormContext } from 'react-hook-form';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { AnnotationTooltip } from './annotation_tooltip';
 import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
+import { cloneDeep } from 'lodash';
 
 export function NewRectAnnotation({
   slo,
@@ -35,7 +36,7 @@ export function NewRectAnnotation({
 
   return (
     <ObsRectAnnotation
-      annotation={{
+      annotation={cloneDeep({
         ...values,
         annotation: {
           ...values.annotation,
@@ -43,7 +44,7 @@ export function NewRectAnnotation({
           type: annotationType,
         },
         ...(slo ? { slo: { id: slo.id, instanceId: slo.instanceId } } : {}),
-      }}
+      })}
     />
   );
 }
