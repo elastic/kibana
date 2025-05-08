@@ -23,6 +23,7 @@ import {
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { IntegrationType } from '@kbn/wci-common';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useBreadcrumb } from '../../../hooks/use_breadcrumbs';
@@ -32,7 +33,6 @@ import { useIntegrationConfigurationForm } from '../../../hooks/use_integration_
 import { appPaths } from '../../../app_paths';
 import { toolLabels } from '../i18n';
 import { integrationTypeToLabel } from '../utils';
-import { i18n } from '@kbn/i18n';
 
 interface IntegrationEditViewProps {
   integrationId: string | undefined;
@@ -162,10 +162,12 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                 title={<h3>{toolLabels.editView.baseConfigurationTitle}</h3>}
                 description={toolLabels.editView.baseConfigurationDescription}
               >
-                <EuiFormRow 
+                <EuiFormRow
                   label={toolLabels.editView.nameLabel}
                   isInvalid={!!formMethods.formState.errors.name}
-                  error={formMethods.formState.errors.name ? toolLabels.editView.nameRequired : undefined}
+                  error={
+                    formMethods.formState.errors.name ? toolLabels.editView.nameRequired : undefined
+                  }
                 >
                   <Controller
                     rules={{ required: toolLabels.editView.nameRequired }}
@@ -180,10 +182,14 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                     )}
                   />
                 </EuiFormRow>
-                <EuiFormRow 
+                <EuiFormRow
                   label={toolLabels.editView.descriptionLabel}
                   isInvalid={!!formMethods.formState.errors.description}
-                  error={formMethods.formState.errors.description ? toolLabels.editView.descriptionRequired : undefined}
+                  error={
+                    formMethods.formState.errors.description
+                      ? toolLabels.editView.descriptionRequired
+                      : undefined
+                  }
                 >
                   <Controller
                     rules={{ required: toolLabels.editView.descriptionRequired }}
@@ -272,9 +278,12 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
                 buttonColor="danger"
                 defaultFocusedButton="confirm"
               >
-                <p>{i18n.translate('workchatApp.integrations.editView.deleteMessage', {
-                      defaultMessage: 'Are you sure you want to delete this tool? This action cannot be undone.',
-                    })}</p>
+                <p>
+                  {i18n.translate('workchatApp.integrations.editView.deleteMessage', {
+                    defaultMessage:
+                      'Are you sure you want to delete this tool? This action cannot be undone.',
+                  })}
+                </p>
               </EuiConfirmModal>
             )}
           </FormProvider>

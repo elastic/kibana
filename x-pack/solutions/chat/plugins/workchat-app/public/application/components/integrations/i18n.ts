@@ -55,12 +55,18 @@ export const toolLabels = {
     deleteButtonLabel: i18n.translate('workchatApp.integrations.editView.deleteButtonLabel', {
       defaultMessage: 'Delete',
     }),
-    baseConfigurationTitle: i18n.translate('workchatApp.integrations.editView.baseConfigurationTitle', {
-      defaultMessage: 'Base configuration',
-    }),
-    baseConfigurationDescription: i18n.translate('workchatApp.integrations.editView.baseConfigurationDescription', {
-      defaultMessage: 'Configure your tool',
-    }),
+    baseConfigurationTitle: i18n.translate(
+      'workchatApp.integrations.editView.baseConfigurationTitle',
+      {
+        defaultMessage: 'Base configuration',
+      }
+    ),
+    baseConfigurationDescription: i18n.translate(
+      'workchatApp.integrations.editView.baseConfigurationDescription',
+      {
+        defaultMessage: 'Configure your tool',
+      }
+    ),
     nameLabel: i18n.translate('workchatApp.integrations.editView.nameLabel', {
       defaultMessage: 'Name',
     }),
