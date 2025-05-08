@@ -55,6 +55,7 @@
     "@kbn/core-http-server-utils",
     "@kbn/core-saved-objects-server",
     "@kbn/rrule",
+    "@kbn/notifications-plugin",
   ],
   "exclude": [
     "target/**/*",
