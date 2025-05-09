@@ -80,7 +80,7 @@ export const hrefReference = (
     type: 'Href',
     id,
     href,
-    label: label,
+    label,
   };
 };
 

@@ -10,11 +10,15 @@ import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
-import { ContentReference, contentReferenceString } from '@kbn/elastic-assistant-common';
-import { APP_UI_ID } from '../../../../common';
+import type { ContentReference } from '@kbn/elastic-assistant-common';
+import { contentReferenceString } from '@kbn/elastic-assistant-common';
 import yaml from 'js-yaml';
-import { hrefReference, knowledgeBaseReference } from '@kbn/elastic-assistant-common/impl/content_references/references';
+import {
+  hrefReference,
+  knowledgeBaseReference,
+} from '@kbn/elastic-assistant-common/impl/content_references/references';
 import { Document } from 'langchain/document';
+import { APP_UI_ID } from '../../../../common';
 
 const toolDetails = {
   // note: this description is overwritten when `getTool` is called
@@ -50,10 +54,14 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           try {
             const yamlString = doc.pageContent.split('---')[1];
             const parsed = yaml.load(yamlString);
-            const slug = parsed.slug
-            const title = parsed.title
+            const slug = parsed.slug;
+            const title = parsed.title;
             reference = contentReferencesStore.add((p) =>
-              hrefReference(p.id, `https://www.elastic.co/security-labs/${slug}`, title ? `Security Labs: ${title}` : undefined)
+              hrefReference(
+                p.id,
+                `https://www.elastic.co/security-labs/${slug}`,
+                title ? `Security Labs: ${title}` : undefined
+              )
             );
           } catch (e) {
             reference = contentReferencesStore.add((p) =>
@@ -65,7 +73,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
             pageContent: `${contentReferenceString(reference)}\n${doc.pageContent}`,
             metadata: doc.metadata,
           });
-        })
+        });
 
         // TODO: Token pruning
         const result = JSON.stringify(citedDocs).substring(0, 20000);
