@@ -20,10 +20,10 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   const options = request.body;
-  // first validate the agent exists
+  // First validate the agent exists
   const agent = await AgentService.getAgentById(esClient, soClient, request.params.agentId);
 
-  // using the agent id, get the agent policy
+  // Using the agent id, get the agent policy
   const agentPolicy = await AgentService.getAgentPolicyForAgent(
     soClient,
     esClient,
@@ -31,7 +31,6 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
   );
   //  If the agent belongs to a policy that is protected or has fleet-server as a component meaning its a fleet server agent, throw an error
   if (agentPolicy?.is_protected || agent.components?.some((c) => c.type === 'fleet-server')) {
-    // need to update this to throw the correct error
     throw new AgentRequestInvalidError(`Agent is protected and cannot be migrated`);
   }
   const body = await AgentService.migrateSingleAgent(esClient, request.params.agentId, {
