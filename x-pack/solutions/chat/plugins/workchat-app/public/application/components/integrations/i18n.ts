@@ -52,6 +52,42 @@ export const toolLabels = {
     saveButtonLabel: i18n.translate('workchatApp.integrations.editView.saveButtonLabel', {
       defaultMessage: 'Save',
     }),
+    deleteButtonLabel: i18n.translate('workchatApp.integrations.editView.deleteButtonLabel', {
+      defaultMessage: 'Delete',
+    }),
+    baseConfigurationTitle: i18n.translate(
+      'workchatApp.integrations.editView.baseConfigurationTitle',
+      {
+        defaultMessage: 'Base configuration',
+      }
+    ),
+    baseConfigurationDescription: i18n.translate(
+      'workchatApp.integrations.editView.baseConfigurationDescription',
+      {
+        defaultMessage: 'Configure your tool',
+      }
+    ),
+    nameLabel: i18n.translate('workchatApp.integrations.editView.nameLabel', {
+      defaultMessage: 'Name',
+    }),
+    nameRequired: i18n.translate('workchatApp.integrations.editView.nameRequired', {
+      defaultMessage: 'Name is required',
+    }),
+    descriptionLabel: i18n.translate('workchatApp.integrations.editView.descriptionLabel', {
+      defaultMessage: 'Description',
+    }),
+    descriptionRequired: i18n.translate('workchatApp.integrations.editView.descriptionRequired', {
+      defaultMessage: 'Description is required',
+    }),
+    typeLabel: i18n.translate('workchatApp.integrations.editView.typeLabel', {
+      defaultMessage: 'Type',
+    }),
+    deleteModalTitle: i18n.translate('workchatApp.integrations.editView.deleteModalTitle', {
+      defaultMessage: 'Delete tool',
+    }),
+    deleteMessage: i18n.translate('workchatApp.integrations.editView.deleteMessage', {
+      defaultMessage: 'Are you sure you want to delete this tool?',
+    }),
   },
   listView: {
     addToolLabel: i18n.translate('workchatApp.integrations.listView.addTool', {
