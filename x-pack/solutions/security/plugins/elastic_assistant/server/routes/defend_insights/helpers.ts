@@ -23,7 +23,7 @@ import type {
   DefendInsightsResponse,
   Replacements,
 } from '@kbn/elastic-assistant-common';
-import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { ActionsClientLlm } from '@kbn/langchain/server';
