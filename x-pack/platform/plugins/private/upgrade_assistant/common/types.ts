@@ -182,6 +182,7 @@ export interface UpgradeAssistantTelemetry {
   };
 }
 
+// todo
 export type MIGRATION_DEPRECATION_LEVEL = 'none' | 'info' | 'warning' | 'critical';
 export interface DeprecationInfo {
   level: MIGRATION_DEPRECATION_LEVEL;
