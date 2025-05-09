@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { i18n } from '@kbn/i18n';
 
 export const translations = {
@@ -46,9 +53,12 @@ export const translations = {
         title: i18n.translate('wciIndexSource.configuration.filterFields.noFields.title', {
           defaultMessage: 'No filter fields defined',
         }),
-        description: i18n.translate('wciIndexSource.configuration.filterFields.noFields.description', {
-          defaultMessage: 'No filter fields have been defined for this index source',
-        }),
+        description: i18n.translate(
+          'wciIndexSource.configuration.filterFields.noFields.description',
+          {
+            defaultMessage: 'No filter fields have been defined for this index source',
+          }
+        ),
       },
       fieldName: i18n.translate('wciIndexSource.configuration.filterFields.fieldName.label', {
         defaultMessage: 'Field name',
@@ -67,9 +77,12 @@ export const translations = {
         label: i18n.translate('wciIndexSource.configuration.filterFields.description.label', {
           defaultMessage: 'Description',
         }),
-        placeholder: i18n.translate('wciIndexSource.configuration.filterFields.description.placeholder', {
-          defaultMessage: 'Field description',
-        }),
+        placeholder: i18n.translate(
+          'wciIndexSource.configuration.filterFields.description.placeholder',
+          {
+            defaultMessage: 'Field description',
+          }
+        ),
       },
       addField: i18n.translate('wciIndexSource.configuration.filterFields.addField', {
         defaultMessage: 'Add filter field',
@@ -86,9 +99,12 @@ export const translations = {
         title: i18n.translate('wciIndexSource.configuration.contextFields.noFields.title', {
           defaultMessage: 'No context fields defined',
         }),
-        description: i18n.translate('wciIndexSource.configuration.contextFields.noFields.description', {
-          defaultMessage: 'No context fields have been defined for this index source',
-        }),
+        description: i18n.translate(
+          'wciIndexSource.configuration.contextFields.noFields.description',
+          {
+            defaultMessage: 'No context fields have been defined for this index source',
+          }
+        ),
       },
       fieldName: i18n.translate('wciIndexSource.configuration.contextFields.fieldName.label', {
         defaultMessage: 'Field name',
@@ -103,4 +119,4 @@ export const translations = {
       }),
     },
   },
-}; 
+};

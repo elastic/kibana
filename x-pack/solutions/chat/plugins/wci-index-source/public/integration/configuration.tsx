@@ -197,7 +197,10 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
       >
         {filterFieldsArray.fields.length === 0 ? (
           <EuiFormRow>
-            <EuiCallOut title={translations.indexSourceConfiguration.filterFields.noFields.title} color="primary">
+            <EuiCallOut
+              title={translations.indexSourceConfiguration.filterFields.noFields.title}
+              color="primary"
+            >
               <p>{translations.indexSourceConfiguration.filterFields.noFields.description}</p>
             </EuiCallOut>
           </EuiFormRow>
@@ -221,7 +224,9 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                 </EuiFlexItem>
 
                 <EuiFlexItem>
-                  <EuiFormRow label={translations.indexSourceConfiguration.filterFields.fieldType.label}>
+                  <EuiFormRow
+                    label={translations.indexSourceConfiguration.filterFields.fieldType.label}
+                  >
                     <Controller
                       name={`configuration.fields.filterFields.${index}.type`}
                       control={control}
@@ -231,7 +236,9 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiFormRow label={translations.indexSourceConfiguration.filterFields.getValues.label}>
+                  <EuiFormRow
+                    label={translations.indexSourceConfiguration.filterFields.getValues.label}
+                  >
                     <Controller
                       name={`configuration.fields.filterFields.${index}.getValues`}
                       control={control}
@@ -259,13 +266,18 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                 </EuiFlexItem>
               </EuiFlexGroup>
 
-              <EuiFormRow label={translations.indexSourceConfiguration.filterFields.fieldDescription.label}>
+              <EuiFormRow
+                label={translations.indexSourceConfiguration.filterFields.fieldDescription.label}
+              >
                 <Controller
                   name={`configuration.fields.filterFields.${index}.description`}
                   control={control}
                   render={({ field }) => (
                     <EuiFieldText
-                      placeholder={translations.indexSourceConfiguration.filterFields.fieldDescription.placeholder}
+                      placeholder={
+                        translations.indexSourceConfiguration.filterFields.fieldDescription
+                          .placeholder
+                      }
                       {...field}
                     />
                   )}
@@ -300,7 +312,10 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
       >
         {contextFieldsArray.fields.length === 0 ? (
           <EuiFormRow>
-            <EuiCallOut title={translations.indexSourceConfiguration.contextFields.noFields.title} color="primary">
+            <EuiCallOut
+              title={translations.indexSourceConfiguration.contextFields.noFields.title}
+              color="primary"
+            >
               <p>{translations.indexSourceConfiguration.contextFields.noFields.description}</p>
             </EuiCallOut>
           </EuiFormRow>
@@ -315,7 +330,9 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                       control={control}
                       render={({ field }) => (
                         <EuiFieldText
-                          placeholder={translations.indexSourceConfiguration.contextFields.fieldName}
+                          placeholder={
+                            translations.indexSourceConfiguration.contextFields.fieldName
+                          }
                           {...field}
                         />
                       )}
@@ -324,7 +341,9 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiFormRow label={translations.indexSourceConfiguration.contextFields.semantic.label}>
+                  <EuiFormRow
+                    label={translations.indexSourceConfiguration.contextFields.semantic.label}
+                  >
                     <Controller
                       name={`configuration.fields.contextFields.${index}.type`}
                       control={control}
