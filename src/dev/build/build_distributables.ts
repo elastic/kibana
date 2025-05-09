@@ -9,7 +9,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { Config, Task, createRunner } from './lib';
+import { Config, createRunner } from './lib';
 import * as Tasks from './tasks';
 
 export interface BuildOptions {
@@ -45,70 +45,13 @@ export interface BuildOptions {
   eprRegistry: 'production' | 'snapshot';
 }
 
-interface TaskResult {
-  description: string;
-  output: string[];
-  error?: any;
-}
-
-const captureArtifactLogs = async (
-  task: Task,
-  artifactRun: ReturnType<typeof createRunner>
-): Promise<TaskResult> => {
-  const { description } = task;
-  const output: string[] = [];
-
-  const pushLogLine = (chunk: string | Uint8Array) => {
-    // End up with extra newlines so trim them now
-    output.push(chunk.toString().trimEnd());
-    return true;
-  };
-
-  const originalStdoutWrite = process.stdout.write;
-  const originalStderrWrite = process.stderr.write;
-
-  process.stdout.write = pushLogLine;
-  process.stderr.write = pushLogLine;
-
-  try {
-    await artifactRun(task);
-    return { description, output };
-  } catch (error) {
-    return { description, output, error };
-  } finally {
-    process.stdout.write = originalStdoutWrite;
-    process.stderr.write = originalStderrWrite;
-  }
-};
-
-const printArtifactLogs = async (result: PromiseSettledResult<TaskResult>, log: ToolingLog) => {
-  if (result.status === 'fulfilled') {
-    const { description, output, error } = result.value;
-
-    // First and last logs have different formatting
-    const lastLog = output.pop();
-    log.write(output.shift());
-
-    log.indent(4, () => log.write(output.join('\n')));
-
-    if (error) {
-      log.error(`${description} failed with error: ${error}`);
-    }
-
-    log.indent(-4);
-    log.write(lastLog);
-  } else {
-    log.error(`Build task failed with error: ${result.reason}`);
-  }
-};
-
 export async function buildDistributables(log: ToolingLog, options: BuildOptions): Promise<void> {
   log.verbose('building distributables with options:', options);
 
   const config = await Config.create(options);
 
   const run = createRunner({ config, log });
-  // Since the artifact tasks run in parallel the indention is additive, so we'll indent in printArtifactLogs
+  // Use a slightly different runner for the artifact tasks because they run in parallel
   const artifactRun = createRunner({ config, log, bufferLogs: true });
 
   /**
@@ -245,12 +188,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   }
 
   await Promise.allSettled(artifactTasks.map(async (task) => await artifactRun(task)));
-
-  // const artifactResults = await Promise.allSettled(
-  //   artifactTasks.map((task) => captureArtifactLogs(task, artifactRun))
-  // );
-
-  // artifactResults.forEach((result) => printArtifactLogs(result, log));
 
   /**
    * finalize artifacts by writing sha1sums of each into the target directory

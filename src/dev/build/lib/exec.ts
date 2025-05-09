@@ -60,9 +60,11 @@ export async function exec(
       .pipe(takeUntil(close$), toArray())
       .toPromise()
       .then((logs) => {
+        log.info('---------- START LOG BUFFER\n\n');
         build.getLogBuffer().forEach(logFn);
+        log.info('---------- END LOG BUFFER\n\n');
         if (logs?.length) {
-          logs.forEach((logLine) => logFn(logLine));
+          logs.forEach(logFn);
         }
       });
   } else {
