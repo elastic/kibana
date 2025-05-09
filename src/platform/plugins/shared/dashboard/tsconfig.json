@@ -79,12 +79,12 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-mount-utils-browser",
     "@kbn/visualization-utils",
-    "@kbn/std",
     "@kbn/core-rendering-browser",
     "@kbn/grid-layout",
     "@kbn/ui-actions-browser",
     "@kbn/esql-types",
-    "@kbn/saved-objects-tagging-plugin"
+    "@kbn/saved-objects-tagging-plugin",
+    "@kbn/std"
   ],
   "exclude": ["target/**/*"]
 }
