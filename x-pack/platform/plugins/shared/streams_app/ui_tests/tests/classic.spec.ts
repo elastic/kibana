@@ -64,17 +64,17 @@ test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
 
     // Update field extraction
     // uncomment when fixed classic stream extract field is fixed
-    // await pageObjects.streams.gotoExtractFieldTab(DATA_STREAM_NAME);
-    // await page.getByText('Add a processor').click();
+    await pageObjects.streams.gotoExtractFieldTab(DATA_STREAM_NAME);
+    await page.getByText('Add a processor').click();
 
-    // await page.locator('input[name="field"]').fill('message');
-    // await page
-    //   .locator('input[name="patterns\\.0\\.value"]')
-    //   .fill('%{WORD:method} %{URIPATH:request}');
-    // await page.getByRole('button', { name: 'Add processor' }).click();
-    // await page.getByRole('button', { name: 'Save changes' }).click();
+    await page.locator('input[name="field"]').fill('message');
+    await page
+      .locator('input[name="patterns\\.0\\.value"]')
+      .fill('%{WORD:method} %{URIPATH:request}');
+    await page.getByRole('button', { name: 'Add processor' }).click();
+    await page.getByRole('button', { name: 'Save changes' }).click();
 
-    // await expect(page.getByText("Stream's processors updated")).toBeVisible();
+    await expect(page.getByText("Stream's processors updated")).toBeVisible();
 
     // Add dashboard
     await pageObjects.streams.gotoStreamDashboard(DATA_STREAM_NAME);
