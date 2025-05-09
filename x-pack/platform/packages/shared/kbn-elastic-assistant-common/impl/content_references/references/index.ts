@@ -65,11 +65,11 @@ export const knowledgeBaseReference = (
 };
 
 /**
- * Generates a contentReference for when a knowledge base entry is referenced.
+ * Generates a contentReference for when a external page is referenced.
  * @param id id of the contentReference
- * @param knowledgeBaseEntryName name of the knowledge base entry
- * @param knowledgeBaseEntryId id of the knowledge base entry
- * @returns KnowledgeBaseReference
+ * @param href the external page url
+ * @param label content reference label
+ * @returns HrefContentReference
  */
 export const hrefReference = (
   id: ContentReferenceId,
