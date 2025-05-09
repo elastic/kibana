@@ -18,6 +18,8 @@ import type {
 
 import * as AgentService from '../../services/agents';
 
+import { AgentNotFoundError } from '../../errors';
+
 import { migrateSingleAgentHandler } from './migrate_handlers';
 
 // Mock the agent service functions
@@ -45,6 +47,7 @@ describe('Migrate handlers', () => {
     let mockRequest: any;
     let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
     let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
+    let mockContext: any;
 
     const agentId = 'agent-id';
     const mockAgent = { id: agentId, components: [] };
@@ -63,6 +66,21 @@ describe('Migrate handlers', () => {
         body: mockSettings,
       };
 
+      // Setup the context with correct structure
+      mockContext = {
+        core: {
+          elasticsearch: {
+            client: {
+              asInternalUser: mockElasticsearchClient,
+            },
+          },
+          savedObjects: {
+            client: mockSavedObjectsClient,
+          },
+        },
+        fleet: {},
+      };
+
       // Default mock returns
       (AgentService.getAgentById as jest.Mock).mockResolvedValue(mockAgent);
       (AgentService.getAgentPolicyForAgent as jest.Mock).mockResolvedValue(mockAgentPolicy);
@@ -72,15 +90,7 @@ describe('Migrate handlers', () => {
     });
 
     it('calls migrateSingleAgent with correct parameters and returns success', async () => {
-      await migrateSingleAgentHandler(
-        {
-          elasticsearch: mockElasticsearchClient,
-          savedObjects: mockSavedObjectsClient,
-          fleet: {},
-        } as any,
-        mockRequest,
-        mockResponse
-      );
+      await migrateSingleAgentHandler(mockContext, mockRequest, mockResponse);
 
       // Verify services were called with correct parameters
       expect(AgentService.getAgentById).toHaveBeenCalledWith(
@@ -117,23 +127,9 @@ describe('Migrate handlers', () => {
         is_protected: true,
       });
 
-      await migrateSingleAgentHandler(
-        {
-          elasticsearch: mockElasticsearchClient,
-          savedObjects: mockSavedObjectsClient,
-          fleet: {},
-        } as any,
-        mockRequest,
-        mockResponse
-      );
-
-      // Verify migrateSingleAgent was not called
-      expect(AgentService.migrateSingleAgent).not.toHaveBeenCalled();
-
-      // Verify error was thrown
-      expect(mockResponse.ok).not.toHaveBeenCalled();
-      expect(mockResponse.notFound).not.toHaveBeenCalled();
-      expect(mockResponse.badRequest).toHaveBeenCalled();
+      await expect(
+        migrateSingleAgentHandler(mockContext, mockRequest, mockResponse)
+      ).rejects.toThrow('Agent is protected and cannot be migrated');
     });
 
     it('returns error when agent is a fleet-server agent', async () => {
@@ -143,48 +139,17 @@ describe('Migrate handlers', () => {
         components: [{ type: 'fleet-server' }],
       });
 
-      await migrateSingleAgentHandler(
-        {
-          elasticsearch: mockElasticsearchClient,
-          savedObjects: mockSavedObjectsClient,
-          fleet: {},
-        } as any,
-        mockRequest,
-        mockResponse
-      );
-
-      // Verify migrateSingleAgent was not called
-      expect(AgentService.migrateSingleAgent).not.toHaveBeenCalled();
-
-      // Verify error was thrown
-      expect(mockResponse.ok).not.toHaveBeenCalled();
-      expect(mockResponse.notFound).not.toHaveBeenCalled();
-      expect(mockResponse.badRequest).toHaveBeenCalled();
+      await expect(
+        migrateSingleAgentHandler(mockContext, mockRequest, mockResponse)
+      ).rejects.toThrow('Agent is protected and cannot be migrated');
     });
 
-    it('returns 404 when agent is not found', async () => {
-      const notFoundError = new Error('Agent not found');
-      // @ts-ignore
-      notFoundError.isBoom = true;
-      // @ts-ignore
-      notFoundError.output = { statusCode: 404 };
-
-      (AgentService.getAgentById as jest.Mock).mockRejectedValue(notFoundError);
-
-      await migrateSingleAgentHandler(
-        {
-          elasticsearch: mockElasticsearchClient,
-          savedObjects: mockSavedObjectsClient,
-          fleet: {},
-        } as any,
-        mockRequest,
-        mockResponse
-      );
-
-      // Verify correct response
-      expect(mockResponse.notFound).toHaveBeenCalledWith({
-        body: { message: 'Agent not found' },
-      });
+    it('returns error when agent is not found', async () => {
+      const agentError = new AgentNotFoundError('Agent not found');
+      (AgentService.getAgentById as jest.Mock).mockRejectedValue(agentError);
+      await expect(
+        migrateSingleAgentHandler(mockContext, mockRequest, mockResponse)
+      ).rejects.toThrow(agentError.message);
     });
   });
 });

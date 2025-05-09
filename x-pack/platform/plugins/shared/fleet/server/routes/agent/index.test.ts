@@ -75,6 +75,9 @@ jest.mock('./handlers', () => ({
   deleteAgentUploadFileHandler: jest.fn(),
   postAgentReassignHandler: jest.fn(),
   postRetrieveAgentsByActionsHandler: jest.fn(),
+}));
+
+jest.mock('./migrate_handlers', () => ({
   migrateSingleAgentHandler: jest.fn(),
 }));
 

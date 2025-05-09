@@ -60,7 +60,6 @@ export async function createAgentAction(
     agents: newAgentAction.agents,
     namespaces: newAgentAction.namespaces,
     action_id: actionId,
-    id: actionId,
     data: newAgentAction.data,
     type: newAgentAction.type,
     start_time: newAgentAction.start_time,
@@ -70,7 +69,6 @@ export async function createAgentAction(
     traceparent: apm.currentTraceparent,
     is_automatic: newAgentAction.is_automatic,
     policyId: newAgentAction.policyId,
-    policy_id: newAgentAction.policyId,
     enrollment_token: newAgentAction.enrollment_token,
     target_uri: newAgentAction.target_uri,
     settings: newAgentAction.additionalSettings
@@ -86,7 +84,6 @@ export async function createAgentAction(
       signature: signedBody.signature,
     };
   }
-  console.log('the new agent action is', body);
   await esClient.create({
     index: AGENT_ACTIONS_INDEX,
     id: uuidv4(),

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-
 import { AGENTS_INDEX, AGENT_POLICY_INDEX } from '@kbn/fleet-plugin/common';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -16,7 +14,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const es = getService('es');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  // const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('fleet_agents_migrate', () => {
     before(async () => {
@@ -86,7 +84,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /agents/{agentId}/migrate', () => {
       it('should return a 200 if the migration action is successful', async () => {
-        const { body: apiResponse } = await supertest
+        const {} = await supertest
           .post(`/api/fleet/agents/agent1/migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
@@ -97,7 +95,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return a 500 if the agent is tamper protected', async () => {
-        const { body: apiResponse } = await supertest
+        const {} = await supertest
           .post(`/api/fleet/agents/agent2/migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
@@ -108,7 +106,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return a 500 is the agent is a fleet-agent', async () => {
-        const { body: apiResponse } = await supertest
+        const {} = await supertest
           .post(`/api/fleet/agents/agent3/migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
