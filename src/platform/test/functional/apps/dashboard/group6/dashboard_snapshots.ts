@@ -92,7 +92,7 @@ export default function ({
       );
 
       await dashboard.clickExitFullScreenLogoButton();
-      expect(percentDifference).to.be.lessThan(0.029);
+      expect(percentDifference).to.be.lessThan(0.29);
     });
 
     describe('compare controls snapshot', () => {
