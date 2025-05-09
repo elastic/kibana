@@ -55,11 +55,7 @@ export const startKeyboardInteraction = ({
       enableScroll();
     };
 
-    /**
-     * TODO: Blur is firing on re-render, so use `onClick` instead
-     * This should be fixed by https://github.com/elastic/kibana/issues/220309
-     */
-    document.addEventListener('click', handleBlur, { once: true });
+    ev.target?.addEventListener('blur', handleBlur, { once: true });
   };
 
   const handleMove = (ev: UserKeyboardEvent) => {

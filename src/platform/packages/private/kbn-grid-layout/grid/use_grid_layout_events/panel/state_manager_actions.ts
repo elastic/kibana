@@ -238,7 +238,6 @@ export const commitAction = ({
 }: GridLayoutStateManager) => {
   const event = activePanelEvent$.getValue();
   activePanelEvent$.next(undefined);
-  startingLayout = undefined;
 
   if (!event) return;
   panelRefs.current[event.id]?.scrollIntoView({
@@ -258,7 +257,6 @@ export const cancelAction = ({
    */
   if (startingLayout) {
     gridLayout$.next(startingLayout);
-    startingLayout = undefined;
   }
 
   const event = activePanelEvent$.getValue();

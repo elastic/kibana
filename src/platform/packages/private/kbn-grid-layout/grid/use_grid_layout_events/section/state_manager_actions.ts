@@ -42,7 +42,6 @@ export const startAction = (
 export const commitAction = ({ activeRowEvent$, headerRefs }: GridLayoutStateManager) => {
   const event = activeRowEvent$.getValue();
   activeRowEvent$.next(undefined);
-  startingLayout = undefined;
 
   if (!event) return;
   headerRefs.current[event.id]?.scrollIntoView({
@@ -62,7 +61,6 @@ export const cancelAction = ({
    */
   if (startingLayout) {
     gridLayout$.next(startingLayout);
-    startingLayout = undefined;
   }
 
   const event = activeRowEvent$.getValue();
