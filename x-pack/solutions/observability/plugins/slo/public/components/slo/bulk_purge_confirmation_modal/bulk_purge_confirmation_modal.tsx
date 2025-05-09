@@ -36,15 +36,6 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
 
   const basicCheckboxId = useGeneratedHtmlId({ prefix: 'basicCheckbox' });
 
-  const purgeDisplayType =
-    purgeType === 'fixed_age'
-      ? i18n.translate('xpack.slo.bulkPurgeConfirmationModal.age', {
-          defaultMessage: 'age',
-        })
-      : i18n.translate('xpack.slo.bulkPurgeConfirmationModal.date', {
-          defaultMessage: 'date',
-        });
-
   return (
     <EuiConfirmModal
       buttonColor="risk"
