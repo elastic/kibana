@@ -18,6 +18,7 @@ import { SearchSecureProvider } from './search_secure';
 import { TransformProvider } from './transform';
 import { IndexManagementProvider } from './index_management';
 import { AlertingApiProvider } from './alerting_api';
+import { MachineLearningProvider } from './ml';
 
 export const services = {
   ...kibanaApiIntegrationServices,
@@ -28,6 +29,7 @@ export const services = {
   indexManagement: IndexManagementProvider,
   ingestPipelines: IngestPipelinesProvider,
   fleetAndAgents: FleetAndAgentsProvider,
+  ml: MachineLearningProvider,
   secureSearch: SearchSecureProvider,
   spaces: SpacesServiceProvider,
   transform: TransformProvider,
