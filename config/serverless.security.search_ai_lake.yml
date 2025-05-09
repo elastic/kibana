@@ -20,6 +20,7 @@ xpack.features.overrides:
   securitySolutionTimeline.hidden: true
   securitySolutionNotes.hidden: true
   siem.description: null
+  siemV2.description: null
   siemV3.description: null
   securitySolutionSiemMigrations.hidden: true
 
@@ -36,6 +37,20 @@ xpack.features.overrides:
       ## We do not need to compose dashboard from maps and visualizations because these functionalities are disabled in this tier
       all.composedOf: []
       read.composedOf: []
+  siemV3:
+    privileges:
+      all.composedOf:
+        ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
+        ## We do not need to compose siemV3 from maps and visualizations because these functionalities are disabled in this tier
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "dashboard_v2"
+          privileges: [ "all" ]
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "dashboard_v2"
+          privileges: [ "read" ]
   siemV2:
     privileges:
       all.composedOf:
