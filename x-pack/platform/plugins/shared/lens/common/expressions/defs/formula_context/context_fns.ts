@@ -7,7 +7,7 @@
 
 import { getAbsoluteTimeRange, calcAutoIntervalNear } from '@kbn/data-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
-import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
@@ -44,11 +44,13 @@ export const formulaTimeRangeFn: ExpressionFunctionFormulaTimeRange = {
 
 export type ExpressionFunctionFormulaInterval = ExpressionFunctionDefinition<
   'formula_interval',
-  undefined,
+  Datatable,
   {
     targetBars?: number;
+    dateHistogramColumn?: string;
+    id: string;
   },
-  number
+  Datatable
 >;
 
 export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
@@ -65,13 +67,53 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
         defaultMessage: 'The target number of bars for the date histogram.',
       }),
     },
+    id: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.formula.interval.id.help', {
+        defaultMessage: 'The id of the resulting column. Must be unique.',
+      }),
+      required: true,
+    },
+    dateHistogramColumn: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.formula.interval.dateHistogramColumn.help', {
+        defaultMessage: 'The date histogram column id to use for the interval calculation.',
+      }),
+    },
   },
 
-  fn(_input, args, { getSearchContext }) {
+  fn(input, args, { getSearchContext }) {
     const { timeRange, now } = getSearchContext();
-    return timeRange && args.targetBars
-      ? calcAutoIntervalNear(args.targetBars, getTimeRangeAsNumber(timeRange, now)).asMilliseconds()
-      : 0;
+    if (input?.rows) {
+      const endRange = timeRange
+        ? moment(
+            getAbsoluteTimeRange(timeRange, now != null ? { forceNow: new Date(now) } : {}).to
+          ).valueOf()
+        : 0;
+      const fixedInterval =
+        timeRange && args.targetBars
+          ? calcAutoIntervalNear(
+              args.targetBars,
+              getTimeRangeAsNumber(timeRange, now)
+            ).asMilliseconds()
+          : 0;
+      const dateHistogramId = args.dateHistogramColumn;
+      const intervalFn = dateHistogramId
+        ? (i: number) => {
+            return (
+              (input.rows[i + 1]?.[dateHistogramId] ?? endRange) - input.rows[i][dateHistogramId]
+            );
+          }
+        : () => fixedInterval;
+      input.rows.forEach((row, i) => {
+        const interval = intervalFn(i);
+        row[args.id] = interval;
+        return row;
+      });
+      input.columns.push({ id: args.id, name: 'Formula interval', meta: { type: 'number' } });
+      return input;
+    }
+    return input;
   },
 };
 

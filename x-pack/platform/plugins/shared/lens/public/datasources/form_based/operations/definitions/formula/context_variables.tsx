@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { partition } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import {
   buildExpressionFunction,
   buildExpression,
@@ -72,6 +73,7 @@ export interface ContextValues {
   dateRange?: DateRange;
   now?: Date;
   targetBars?: number;
+  dateHistogramColumn?: string;
 }
 
 export interface TimeRangeIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
@@ -187,9 +189,11 @@ export const intervalOperation = createContextValueBasedOperation<IntervalIndexP
   description: i18n.translate('xpack.lens.formula.interval.help', {
     defaultMessage: 'The specified minimum interval for the date histogram, in milliseconds (ms).',
   }),
-  getExpressionFunction: ({ targetBars }: ContextValues) =>
+  getExpressionFunction: ({ targetBars, dateHistogramColumn }: ContextValues) =>
     buildExpressionFunction<ExpressionFunctionFormulaInterval>('formula_interval', {
       targetBars,
+      id: uuidv4(),
+      dateHistogramColumn,
     }),
   getErrorMessage: getIntervalErrorMessages,
 });
@@ -243,11 +247,17 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
     },
     toExpression: (layer, columnId, _, context = {}) => {
       const column = layer.columns[columnId] as ColumnType;
+      const [dateHistogramColumnId] =
+        Object.entries(layer.columns).find(([id, c]) =>
+          isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', c)
+        ) || [];
       return [
         buildExpressionFunction<ExpressionFunctionDefinitions['math_column']>('mathColumn', {
           id: columnId,
           name: column.label,
-          expression: buildExpression([getExpressionFunction(context)]),
+          expression: buildExpression([
+            getExpressionFunction({ ...context, dateHistogramColumn: dateHistogramColumnId }),
+          ]),
         }).toAst(),
       ];
     },
