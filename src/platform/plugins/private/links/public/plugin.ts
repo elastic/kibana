@@ -67,7 +67,7 @@ export class LinksPlugin
           container.addNewPanel<LinksRuntimeState>({
             panelType: CONTENT_ID,
             initialState,
-          });
+          }, true);
         },
         savedObjectType: CONTENT_ID,
         savedObjectName: APP_NAME,

@@ -19,7 +19,7 @@ export const registerMyEmbeddableSavedObject = (embeddableSetup: EmbeddableSetup
       container.addNewPanel({
         panelType: MY_EMBEDDABLE_TYPE,
         initialState: savedObject.attributes,
-      });
+      },true); // shows a toast and scrolls to panel
     },
     savedObjectType: MY_SAVED_OBJECT_TYPE,
     savedObjectName: 'Some saved object',

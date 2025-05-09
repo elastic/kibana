@@ -400,7 +400,7 @@ export class DiscoverPlugin
         container.addNewPanel({
           panelType: SEARCH_EMBEDDABLE_TYPE,
           initialState,
-        });
+        }, true);
       },
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {

@@ -27,7 +27,7 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
       container.addNewPanel({
         panelType: MAP_SAVED_OBJECT_TYPE,
         initialState: { savedObjectId: savedObject.id },
-      });
+      }, true);
     },
     savedObjectType: MAP_SAVED_OBJECT_TYPE,
     savedObjectName: i18n.translate('xpack.maps.mapSavedObjectLabel', {
