@@ -83,12 +83,14 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
       DataViewManagerScopeName.timeline
     );
     const experimentalBrowserFields = useBrowserFields(DataViewManagerScopeName.timeline);
-    const browserFields = useMemo(() => {
-      return newDataViewPickerEnabled ? experimentalBrowserFields : sourcererBrowserFields;
-    }, [experimentalBrowserFields, newDataViewPickerEnabled, sourcererBrowserFields]);
-    const dataViewSpec: DataViewSpec = useMemo(() => {
-      return newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec;
-    }, [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]);
+    const browserFields = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalBrowserFields : sourcererBrowserFields),
+      [experimentalBrowserFields, newDataViewPickerEnabled, sourcererBrowserFields]
+    );
+    const dataViewSpec: DataViewSpec = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+      [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+    );
 
     const { cases, uiSettings } = useKibana().services;
     const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);

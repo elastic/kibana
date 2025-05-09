@@ -96,13 +96,18 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
   const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
 
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
-    ? experimentalDataViewSpec
-    : oldSourcererDataViewSpec;
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataViewSpec.id ?? '' : oldDataViewId;
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  );
+  const dataViewSpec: DataViewSpec = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+  );
+  const dataViewId = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec.id ?? '' : oldDataViewId),
+    [experimentalDataViewSpec.id, newDataViewPickerEnabled, oldDataViewId]
+  );
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -170,7 +175,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       fields: timelineQueryFields,
       limit: itemsPerPage,
       filterQuery,
-      runtimeMappings: sourcererDataViewSpec.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: dataViewSpec.runtimeFieldMap as RunTimeMappings,
       skip: filterQuery === '',
       startDate: '',
       sort: timelineQuerySortField,

@@ -94,14 +94,22 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
   const experimentalDataViewId = experimentalDataViewSpec.id ?? null;
 
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataViewId : oldDataViewId;
-  const dataViewLoading = newDataViewPickerEnabled ? status !== 'ready' : oldSourcererLoading;
-  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
-    ? experimentalDataViewSpec
-    : oldSourcererDataViewSpec;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const dataViewId = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewId : oldDataViewId),
+    [experimentalDataViewId, newDataViewPickerEnabled, oldDataViewId]
+  );
+  const dataViewLoading = useMemo(
+    () => (newDataViewPickerEnabled ? status !== 'ready' : oldSourcererLoading),
+    [newDataViewPickerEnabled, oldSourcererLoading, status]
+  );
+  const dataViewSpec: DataViewSpec = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+  );
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  );
 
   const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
 
@@ -136,7 +144,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       indexNames: selectedPatterns,
       language: 'eql',
       limit: sampleSize,
-      runtimeMappings: sourcererDataViewSpec.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: dataViewSpec.runtimeFieldMap as RunTimeMappings,
       skip: !canQueryTimeline(),
       startDate: start,
       timerangeKind,

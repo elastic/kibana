@@ -47,13 +47,18 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
     selectedPatterns: oldSelectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
-  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
-    ? experimentalDataViewSpec
-    : oldSourcererDataViewSpec;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const browserFields = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),
+    [experimentalBrowserFields, newDataViewPickerEnabled, oldBrowserFields]
+  );
+  const dataViewSpec: DataViewSpec = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+  );
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  );
 
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
@@ -101,13 +106,13 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
       combineQueries({
         config: esQueryConfig,
         dataProviders,
-        dataViewSpec: sourcererDataViewSpec,
+        dataViewSpec,
         browserFields,
         filters: filters ? filters : [],
         kqlQuery,
         kqlMode,
       }),
-    [browserFields, dataProviders, esQueryConfig, filters, sourcererDataViewSpec, kqlMode, kqlQuery]
+    [browserFields, dataProviders, esQueryConfig, filters, dataViewSpec, kqlMode, kqlQuery]
   );
 
   const isBlankTimeline: boolean = useMemo(

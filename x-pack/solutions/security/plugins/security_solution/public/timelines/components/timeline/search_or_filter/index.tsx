@@ -82,9 +82,10 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
     const { newDataViewPickerEnabled } = useEnableExperimental();
 
-    const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
-      ? experimentalDataViewSpec
-      : oldSourcererDataViewSpec;
+    const dataViewSpec: DataViewSpec = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+      [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+    );
 
     const getIsDataProviderVisible = useMemo(
       () => timelineSelectors.dataProviderVisibilitySelector(),
@@ -105,7 +106,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       let dv: DataView;
       const createDataView = async () => {
         try {
-          dv = await data.dataViews.create(sourcererDataViewSpec);
+          dv = await data.dataViews.create(dataViewSpec);
           setDataView(dv);
         } catch (error) {
           addError(error, { title: i18n.ERROR_PROCESSING_INDEX_PATTERNS });
@@ -118,7 +119,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, filterQuery, addError, sourcererDataViewSpec, newDataViewPickerEnabled]);
+    }, [data.dataViews, filterQuery, addError, dataViewSpec, newDataViewPickerEnabled]);
 
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
 

@@ -122,10 +122,14 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
     const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
 
-    const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
-      ? experimentalDataViewSpec
-      : oldSourcererDataViewSpec;
-    const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+    const dataViewSpec: DataViewSpec = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+      [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+    );
+    const browserFields = useMemo(
+      () => (newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields),
+      [experimentalBrowserFields, newDataViewPickerEnabled, oldBrowserFields]
+    );
 
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
@@ -134,10 +138,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     });
     const queryBarFilters = useMemo(() => getNonDropAreaFilters(filters), [filters]);
 
-    const indexPattern = useMemo(
-      () => dataViewSpecToViewBase(sourcererDataViewSpec),
-      [sourcererDataViewSpec]
-    );
+    const indexPattern = useMemo(() => dataViewSpecToViewBase(dataViewSpec), [dataViewSpec]);
 
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)

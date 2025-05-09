@@ -76,15 +76,18 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   );
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
-  const indexPatternsLoading = newDataViewPickerEnabled
-    ? status !== 'ready'
-    : oldIndexPatternsLoading;
-  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
-    ? experimentalDataViewSpec
-    : oldSourcererDataViewSpec;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const indexPatternsLoading = useMemo(
+    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIndexPatternsLoading),
+    [newDataViewPickerEnabled, oldIndexPatternsLoading, status]
+  );
+  const dataViewSpec: DataViewSpec = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+  );
+  const selectedPatterns = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),
+    [experimentalSelectedPatterns, newDataViewPickerEnabled, oldSelectedPatterns]
+  );
 
   const initialState = useMemo(
     () => ({
@@ -177,14 +180,14 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   const dataView = useMemo(
     () => ({
-      ...sourcererDataViewSpec,
-      title: sourcererDataViewSpec.title ?? '',
-      fields: Object.values(sourcererDataViewSpec.fields || {}),
+      ...dataViewSpec,
+      title: dataViewSpec.title ?? '',
+      fields: Object.values(dataViewSpec.fields || {}),
     }),
-    [sourcererDataViewSpec]
+    [dataViewSpec]
   );
 
-  /* Force casting `sourcererDataViewSpec` to `DataViewBase` is required since EqlQueryEdit
+  /* Force casting `dataViewSpec` to `DataViewBase` is required since EqlQueryEdit
      accepts DataViewBase but `useSourcererDataView()` returns `DataViewSpec`.
 
      When using `UseField` with `EqlQueryBar` such casting isn't required by TS since

@@ -37,9 +37,9 @@ import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
-    [data-test-subj='searchSessionIndicator'] {
-        display: none;
-    }
+  [data-test-subj='searchSessionIndicator'] {
+    display: none;
+  }
 `;
 
 interface DiscoverTabContentProps {
@@ -69,9 +69,10 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const [oldDataViewSpec, setDataViewSpec] = useState<DataViewSpec | undefined>();
 
-  const dataViewSpec: DataViewSpec | undefined = newDataViewPickerEnabled
-    ? experimentalDataViewSpec
-    : oldDataViewSpec;
+  const dataViewSpec: DataViewSpec | undefined = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldDataViewSpec),
+    [experimentalDataViewSpec, newDataViewPickerEnabled, oldDataViewSpec]
+  );
 
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
 

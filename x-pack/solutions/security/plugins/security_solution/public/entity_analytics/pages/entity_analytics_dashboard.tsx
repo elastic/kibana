@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { ENTITY_ANALYTICS } from '../../app/translations';
@@ -39,15 +39,20 @@ const EntityAnalyticsComponent = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataView, status } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec();
 
-  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
-    ? dataViewSpec
-    : oldSourcererDataViewSpec;
-  const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
-    : oldIndicesExist;
-  const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
+  const dataViewSpec: DataViewSpec = useMemo(
+    () => (newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataViewSpec),
+    [experimentalDataViewSpec, newDataViewPickerEnabled, oldSourcererDataViewSpec]
+  );
+  const indicesExist = useMemo(
+    () => (newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist),
+    [dataView?.matchedIndices?.length, newDataViewPickerEnabled, oldIndicesExist]
+  );
+  const isSourcererLoading = useMemo(
+    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
+    [newDataViewPickerEnabled, oldIsSourcererLoading, status]
+  );
 
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const showEmptyPrompt = !indicesExist && !skipEmptyPrompt;
@@ -60,7 +65,7 @@ const EntityAnalyticsComponent = () => {
       ) : (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataViewSpec} />
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={dataViewSpec} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
