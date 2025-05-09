@@ -8,6 +8,7 @@
 import type { DynamicStructuredTool } from '@langchain/core/tools';
 import { KIBANA_CLIENT_TOOL } from './kibana_client_tool';
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import { getMemoizedKibanaClientTool } from './kibana_client_open_api';
 
 const assistantToolParams = {
   createLlmInstance: jest.fn().mockReturnValue({ bindTools: jest.fn().mockReturnValue({}) }),
@@ -66,6 +67,22 @@ describe('Kibana client tool', () => {
       const tool = (await KIBANA_CLIENT_TOOL.getTool(assistantToolParams)) as DynamicStructuredTool;
 
       expect(tool).not.toBeNull();
+    });
+
+    it('tool is cached', async () => {
+      getMemoizedKibanaClientTool.cache.clear?.()
+      
+      const loadTool1Start = Date.now();
+      await KIBANA_CLIENT_TOOL.getTool(assistantToolParams);
+      const loadTool1Duration = Date.now() - loadTool1Start;
+
+      const loadTool2Start = Date.now();
+      await KIBANA_CLIENT_TOOL.getTool(assistantToolParams);
+      const loadTool2Duration = Date.now() - loadTool2Start;
+
+      // The second load should be significantly faster than the first load
+      expect(loadTool1Duration).toBeGreaterThan(loadTool2Duration * 5);
+      expect(loadTool2Duration).toBeLessThan(500);
     });
   });
 });

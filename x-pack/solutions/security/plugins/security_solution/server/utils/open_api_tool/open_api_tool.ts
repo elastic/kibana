@@ -11,11 +11,37 @@ import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import type { SchemaObject } from 'oas/dist/types.cjs';
 import { z } from '@kbn/zod';
 import type { StructuredToolInterface } from '@langchain/core/tools';
-import { groupBy, isEmpty, memoize } from 'lodash';
+import { flatMap, groupBy, isEmpty, memoize } from 'lodash';
 import type { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
 import zodToJsonSchema from 'zod-to-json-schema';
-import { formatToolName, isOperation } from './utils';
+import { formatToolName, isOperation, zodObjectHasRequiredProperties } from './utils';
 import type { Operation } from './utils';
+
+export class OperationNode {
+  operationId: string;
+  constructor({ operationId }: { operationId: string }) {
+    this.operationId = operationId;
+  }
+}
+
+export class InternalNode {
+  name: string;
+  description: string;
+  children: Array<OperationNode | InternalNode>;
+  constructor({
+    name,
+    description,
+    children,
+  }: {
+    name: string;
+    description: string;
+    children: Array<OperationNode | InternalNode>;
+  }) {
+    this.name = name;
+    this.description = description;
+    this.children = children;
+  }
+}
 
 export abstract class OpenApiTool<T> {
   protected dereferencedOas: Oas;
@@ -62,8 +88,7 @@ export abstract class OpenApiTool<T> {
       return z
         .any()
         .describe(
-          `${
-            schema.description ? `${schema.description}\n\n` : ''
+          `${schema.description ? `${schema.description}\n\n` : ''
           }One of (oneOf) the following schemas:\n${JSON.stringify(minifiedJsonSchema)}`
         ); // Fallback to providing the schema as a description
     }
@@ -97,8 +122,7 @@ export abstract class OpenApiTool<T> {
       return z
         .any()
         .describe(
-          `${
-            schema.description ? `${schema.description}\n\n` : ''
+          `${schema.description ? `${schema.description}\n\n` : ''
           }Any of (anyOf) the following schemas:\n${JSON.stringify(minifiedJsonSchema)}`
         ); // Fallback to providing the schema as a description
     }
@@ -152,7 +176,7 @@ export abstract class OpenApiTool<T> {
     const schemaTypeToZod = Object.keys(schemaTypeToSchemaObject).reduce((total, next) => {
       const schema = schemaTypeToSchemaObject[next];
       const zodSchema = jsonSchemaToZodWithParserOverride(schema as JsonSchema);
-      if (this.zodHasRequiredProperties(zodSchema)) {
+      if (zodObjectHasRequiredProperties(zodSchema)) {
         return { ...total, [next]: zodSchema };
       }
       return { ...total, [next]: zodSchema.optional() };
@@ -161,82 +185,84 @@ export abstract class OpenApiTool<T> {
     return z.object(schemaTypeToZod);
   }
 
-  private zodHasRequiredProperties(schema: z.ZodTypeAny): boolean {
-    if (schema instanceof z.ZodObject) {
-      const shape = schema.shape;
-      for (const key in shape) {
-        if (Object.prototype.hasOwnProperty.call(shape, key)) {
-          const field = shape[key];
-          if (!field.isOptional()) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
 
-  // Simple implementation that groups tools by operation tags
-  async getTool(args: T) {
+  /**
+   * Simple structure that groups tools by operation tags. Override 
+   * this method to customize the tree structure.
+   */
+  protected async getOperationsStructure(): Promise<InternalNode> {
     const operations = this.getOperations();
-    const toolsAndOperations: Array<{
-      operation: Operation;
-      tool: Promise<StructuredToolInterface>;
-    }> = [];
 
-    for (const operation of operations) {
-      const tool = this.getToolForOperation({ operation, ...args });
-      toolsAndOperations.push({
-        operation,
-        tool,
-      });
-    }
+    const groupedTags = groupBy(
+      flatMap(operations, (operation) => {
+        return operation.getTags().map((tag) => ({
+          tag: tag.name,
+          operation,
+        }));
+      }),
+      'tag'
+    );
 
-    // Group tools by operation tags
-    const groupedToolsByOperationTags = groupBy(toolsAndOperations, (toolAndOperation) => {
-      return toolAndOperation.operation
-        .getTags()
-        .map((tag) => tag.name)
-        .join('_');
-    });
-
-    // Create internal node for each group
-    const tools = Object.entries(groupedToolsByOperationTags)
-      .filter(([tag, _]) => !!tag)
-      .map(async ([tag, internalToolsAndOperations]) => {
-        const internalNode = await this.getInternalNode({
-          ...args,
-          tools: Promise.all(
-            internalToolsAndOperations.map((toolAndOperation) => toolAndOperation.tool)
-          ),
+    const children = Object.entries(groupedTags)
+      .map(([tag, operationsArr]): InternalNode => {
+        return new InternalNode({
           name: formatToolName(`${tag}_agent`),
           description: [
             ...new Set(
-              internalToolsAndOperations
-                .flatMap((toolAndOperation) => toolAndOperation.operation.getTags())
+              operationsArr
+                .flatMap((operationArr) => operationArr.operation)
+                .flatMap((operation) => operation.getTags())
                 .filter((t) => t.name === tag)
                 .map((t) => t.description || t.name)
                 .filter((t) => !!t)
             ),
           ].join('\n'),
-        });
-        return internalNode;
-      });
+          children: operationsArr
+            .flatMap((operationArr) => operationArr.operation)
+            .map((operation) => new OperationNode({ operationId: operation.getOperationId() }))
+        })
+      })
 
-    const { name, description } = this.getRootToolDetails(args);
+    const { name, description } = this.getRootToolDetails();
 
-    // Create root tool
-    const rootTool = await this.getInternalNode({
-      ...args,
-      tools: Promise.all(tools),
+    const root = new InternalNode({
       name,
       description,
-    });
+      children,
+    })
 
-    return rootTool;
+    return root
   }
 
-  protected getRootToolDetails(args: T): {
+  async getTool(args: T) {
+    const helper = (node: InternalNode | OperationNode): Promise<StructuredToolInterface> => {
+      if (node instanceof OperationNode) {
+        const operation = this.dereferencedOas.getOperationById(node.operationId);
+        if (!operation) {
+          throw new Error(`Operation with ID ${node.operationId} not found`);
+        }
+        const tool = this.getToolForOperation({ operation, ...args });
+        return tool;
+      }
+      if (node instanceof InternalNode) {
+        const tools = node.children.map((child) => helper(child));
+        return this.getInternalNode({
+          ...args,
+          tools: Promise.all(tools),
+          name: node.name,
+          description: node.description,
+        });
+      }
+      throw new Error(`Unknown node type: ${node}`);
+    }
+
+    const treeStructure = await this.getOperationsStructure();
+
+    const root = await helper(treeStructure)
+    return root;
+  }
+
+  protected getRootToolDetails(): {
     name: string;
     description: string;
   } {

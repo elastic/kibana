@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { z } from 'zod';
 import type { OperationOrWebhook } from './utils';
-import { formatToolName, isOperation } from './utils';
+import { formatToolName, isOperation, zodObjectHasRequiredProperties } from './utils';
 
 describe('utils', () => {
   describe('isOperation', () => {
@@ -38,6 +39,23 @@ describe('utils', () => {
       ['tool-name ', 'tool_name_'],
     ])("formats tool name '%s' to '%s'", (input: string, expected: string) => {
       expect(formatToolName(input)).toEqual(expected);
+    });
+  });
+
+  describe('zodHasRequiredProperties', () => {
+    it.each([
+      [z.object({
+        name: z.string(),
+        age: z.number().optional(),
+      }), true],
+      [z.object(
+        {
+          name: z.string(),
+          age: z.number(),
+        },
+      ), true],
+    ])("check if zodHasRequiredProperties produces the correct result", (schema: z.ZodTypeAny, expected: boolean) => {
+      expect(zodObjectHasRequiredProperties(schema)).toEqual(expected);
     });
   });
 });

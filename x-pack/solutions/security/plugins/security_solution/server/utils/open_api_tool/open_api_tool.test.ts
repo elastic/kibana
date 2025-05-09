@@ -16,7 +16,7 @@ import path from 'node:path';
 import type { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
 
 class MockOpenApiTool extends OpenApiTool<{}> {
-  protected getRootToolDetails(args: {}): { name: string; description: string } {
+  protected getRootToolDetails(): { name: string; description: string } {
     return {
       name: 'root name',
       description: 'root tool description',
