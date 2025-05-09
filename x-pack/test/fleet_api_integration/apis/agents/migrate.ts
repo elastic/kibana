@@ -101,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
             enrollment_token: '1234',
             uri: 'https://example.com',
           })
-          .expect(200);
+          .expect(500);
       });
 
       it('should return a 500 is the agent is a fleet-agent', async () => {
