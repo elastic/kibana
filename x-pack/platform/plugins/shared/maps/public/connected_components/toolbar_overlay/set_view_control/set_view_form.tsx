@@ -66,7 +66,7 @@ export class SetViewForm extends Component<Props, State> {
   };
 
   _onCoordinateSystemChange = (optionId: string) => {
-    //this._closePopover();
+    this._closePopover();
     this.setState({
       coordinateSystem: optionId,
     });

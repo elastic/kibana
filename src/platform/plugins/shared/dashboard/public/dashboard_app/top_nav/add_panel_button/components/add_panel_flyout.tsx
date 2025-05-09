@@ -111,6 +111,7 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
                 <EuiFormRow css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}>
                   <EuiFieldSearch
                     compressed
+                    autoFocus
                     value={searchTerm}
                     onChange={(e) => {
                       setSearchTerm(e.target.value);
