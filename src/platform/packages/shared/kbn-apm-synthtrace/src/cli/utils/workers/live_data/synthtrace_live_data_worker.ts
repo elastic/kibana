@@ -12,7 +12,7 @@ import { bootstrap } from '../../bootstrap';
 import { indexData } from '../../index_data';
 import { loggerProxy } from '../../logger_proxy';
 import { StreamManager } from '../../stream_manager';
-import { BaseWorkerData } from '../type';
+import { BaseWorkerData } from '../types';
 
 export interface WorkerData extends Omit<BaseWorkerData, 'bucketFrom' | 'bucketTo'> {
   bucketSizeInMs: number;
@@ -22,7 +22,7 @@ const { file, runOptions, workerId, from, to, bucketSizeInMs } = workerData as W
 
 async function start() {
   const logger = loggerProxy;
-
+  logger.debug(`Worker ${workerId} started`);
   const streamManager = new StreamManager(logger);
 
   const { clients } = await bootstrap({

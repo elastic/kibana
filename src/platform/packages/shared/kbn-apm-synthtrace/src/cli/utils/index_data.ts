@@ -12,7 +12,7 @@ import { castArray } from 'lodash';
 import { Logger } from '../../lib/utils/create_logger';
 import { SynthtraceClients } from './get_clients';
 import { getScenario } from './get_scenario';
-import { BaseWorkerData } from './workers/type';
+import { BaseWorkerData } from './workers/types';
 import { StreamManager } from './stream_manager';
 import { startPerformanceLogger } from './performance_logger';
 

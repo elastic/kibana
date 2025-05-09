@@ -9,16 +9,16 @@
 
 import Path from 'path';
 import { once } from 'lodash';
-import { Worker } from 'worker_threads';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
 import { StreamManager } from './stream_manager';
 import { SynthtraceEsClient } from '../../lib/shared/base_client';
-import { WorkerData } from './workers/live_data/synthtrace_live_data_worker';
-import { LogLevel } from '../../lib/utils/create_logger';
 import { SynthtraceClients } from './get_clients';
 import { startPerformanceLogger } from './performance_logger';
+import { runWorker } from './workers/run_worker';
+import { logMessage } from './workers/log_message';
+import { WorkerData } from './workers/live_data/synthtrace_live_data_worker';
 
 export async function startLiveDataUpload({
   runOptions,
@@ -96,81 +96,47 @@ export async function startLiveDataUpload({
     );
   }
 
-  function runService({ file, workerIndex }: { file: string; workerIndex: number }) {
-    return new Promise((resolve, reject) => {
-      logger.debug(`Setting up Worker: ${workerIndex}`);
-      const workerData: WorkerData = {
+  async function onMessage(message: any) {
+    if ('status' in message && message.status === 'done') {
+      const { workerId, indicesToRefresh }: { workerId: string; indicesToRefresh: string[] } =
+        message;
+
+      if (!workersWaitingRefresh.has(workerId)) {
+        workersWaitingRefresh.set(workerId, indicesToRefresh.join(','));
+      }
+
+      if (workersWaitingRefresh.size === files.length) {
+        await refreshIndices();
+        logger.debug('Refreshing completed');
+
+        streamManager.trackedWorkers.forEach((trackedWorker) => {
+          trackedWorker.postMessage('continue');
+        });
+
+        workersWaitingRefresh.clear();
+      }
+    } else {
+      logMessage(logger, message);
+    }
+  }
+
+  const workerServices = files.map((file, index) =>
+    runWorker<WorkerData>({
+      logger,
+      streamManager,
+      workerIndex: index,
+      workerScriptPath: Path.join(__dirname, './workers/live_data/worker.js'),
+      workerData: {
         file,
         runOptions,
         bucketSizeInMs,
-        workerId: workerIndex.toString(),
+        workerId: index.toString(),
         from,
         to,
-      };
-      const worker = new Worker(Path.join(__dirname, './workers/live_data/worker.js'), {
-        workerData,
-      });
-
-      streamManager.trackWorker(worker);
-
-      worker.on('message', async (message) => {
-        if ('status' in message && message.status === 'done') {
-          const { workerId, indicesToRefresh }: { workerId: string; indicesToRefresh: string[] } =
-            message;
-
-          if (!workersWaitingRefresh.has(workerId)) {
-            workersWaitingRefresh.set(workerId, indicesToRefresh.join(','));
-          }
-
-          if (workersWaitingRefresh.size === files.length) {
-            await refreshIndices();
-            logger.debug('Refreshing completed');
-
-            streamManager.trackedWorkers.forEach((trackedWorker) => {
-              trackedWorker.postMessage('continue');
-            });
-
-            workersWaitingRefresh.clear();
-          }
-        } else {
-          const [logLevel, msg]: [string, string] = message;
-          switch (logLevel) {
-            case LogLevel.debug:
-              logger.debug(msg);
-              return;
-            case LogLevel.info:
-              logger.info(msg);
-              return;
-            case LogLevel.verbose:
-              logger.verbose(msg);
-              return;
-            case LogLevel.warn:
-              logger.warning(msg);
-              return;
-            case LogLevel.error:
-              logger.error(msg);
-              return;
-            default:
-              logger.info(msg);
-          }
-        }
-      });
-      worker.on('error', (message) => {
-        logger.error(message);
-        reject();
-      });
-      worker.on('exit', (code) => {
-        if (code === 2) reject(new Error(`Worker ${workerIndex} exited with error: ${code}`));
-        if (code === 1) {
-          logger.info(`Worker ${workerIndex} exited early because cancellation was requested`);
-        }
-        resolve(null);
-      });
-      worker.postMessage('start');
-    });
-  }
-
-  const workerServices = files.map((file, index) => runService({ file, workerIndex: index }));
+      },
+      onMessage,
+    })
+  );
 
   await Promise.race(workerServices);
 }
