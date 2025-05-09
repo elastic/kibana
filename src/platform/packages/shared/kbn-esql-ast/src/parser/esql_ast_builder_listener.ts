@@ -31,6 +31,7 @@ import {
   type StatsCommandContext,
   type TimeSeriesCommandContext,
   type WhereCommandContext,
+  RerankCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import type { ESQLAst } from '../types';
@@ -58,6 +59,7 @@ import {
   visitRenameClauses,
 } from './walkers';
 import { createTimeseriesCommand } from './factories/timeseries';
+import { createRerankCommand } from './factories/rerank';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -330,6 +332,21 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    */
   exitChangePointCommand(ctx: ChangePointCommandContext): void {
     const command = createChangePointCommand(ctx);
+
+    this.ast.push(command);
+  }
+
+  /**
+   * Exit a parse tree produced by `esql_parser.rerankCommand`.
+   *
+   * Parse the RERANK command:
+   *
+   * RERANK <query> ON <fields> WITH <referenceId>
+   *
+   * @param ctx the parse tree
+   */
+  exitRerankCommand(ctx: RerankCommandContext): void {
+    const command = createRerankCommand(ctx);
 
     this.ast.push(command);
   }
