@@ -130,7 +130,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`
         );
         expect(status).to.eql(200);
-        expect(rule.execution_status.status).to.eql('active');
+        expect(rule.execution_status.status).to.eql('ok');
       });
 
       await retry.try(async () => {
