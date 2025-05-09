@@ -19,7 +19,6 @@
       "inspector",
       "navigation",
       "urlForwarding",
-      "visualizations",
       "uiActions",
       "uiActionsEnhanced",
       "embeddable",
@@ -47,7 +46,8 @@
       "spaces",
       "serverless",
       "licensing",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "visualizations"
     ],
     "requiredBundles": [
       "unifiedSearch",
@@ -58,6 +58,7 @@
       "fieldFormats",
       "charts",
       "esqlDataGrid",
+      "visualizations",
       "esql"
     ],
     "extraPublicDirs": ["common/constants"]
