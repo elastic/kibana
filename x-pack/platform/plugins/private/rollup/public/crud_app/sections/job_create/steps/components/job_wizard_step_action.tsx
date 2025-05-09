@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export const homePath = '/app/elasticsearch/overview';
-export const appSearchPath = '/app/enterprise_search/app_search';
-export const workplaceSearchPath = '/app/enterprise_search/workplace_search';
+import { EuiFlexItem, EuiFlexItemProps } from '@elastic/eui';
+import React from 'react';
+
+export const JobWizardStepAction = (props: EuiFlexItemProps) => (
+  <EuiFlexItem grow={false} css={{ alignItems: 'flex-end' }} {...props} />
+);
