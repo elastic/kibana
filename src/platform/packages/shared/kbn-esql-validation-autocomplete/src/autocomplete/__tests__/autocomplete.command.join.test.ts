@@ -179,10 +179,10 @@ describe('autocomplete.suggest', () => {
       test('suggests pipe and comma after a field (no space)', async () => {
         const { suggest } = await setup();
 
-        const suggestions = await suggest('FROM index | LOOKUP JOIN join_index ON stringField/');
-        const labels = suggestions.map((s) => s.label).sort();
+        const suggestions = await suggest('FROM index | LOOKUP JOIN join_index ON keywordField/');
+        const labels = suggestions.map((s) => s.text).sort();
 
-        expect(labels).toEqual([',', '|']);
+        expect(labels).toEqual(['keywordField | ', 'keywordField, ']);
       });
     });
   });
