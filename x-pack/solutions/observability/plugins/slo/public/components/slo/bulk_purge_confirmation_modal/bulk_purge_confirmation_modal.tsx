@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, EuiDatePicker, EuiFormRow, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiCheckbox,
+  EuiConfirmModal,
+  EuiDatePicker,
+  EuiFormRow,
+  EuiRadioGroup,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
@@ -23,7 +31,10 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
 
   const [purgeDate, setPurgeDate] = React.useState<Moment | null>(moment());
   const [purgeType, setPurgeType] = React.useState<string>('fixed_age');
+  const [forcePurge, setForgePurge] = React.useState<boolean>(false);
   const [age, setAge] = React.useState('7d');
+
+  const basicCheckboxId = useGeneratedHtmlId({ prefix: 'basicCheckbox' });
 
   const purgeDisplayType =
     purgeType === 'fixed_age'
@@ -51,18 +62,18 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
       onCancel={onCancel}
       onConfirm={async () => {
         await bulkPurge({
-          list: items.map((item) => item.id),
+          list: items.map(({ id }) => id),
           purgePolicy:
             purgeType === 'fixed_age'
               ? {
-                  purgeType: purgeType as 'fixed_age',
+                  purgeType: 'fixed_age',
                   age,
                 }
               : {
-                  purgeType: purgeType as 'fixed_time',
+                  purgeType: 'fixed_time',
                   timestamp: purgeDate!.toISOString(),
                 },
-          force: false,
+          force: forcePurge,
         })
           .then(() => {
             onConfirm();
@@ -142,6 +153,19 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
           <EuiDatePicker showTimeSelect selected={purgeDate} onChange={setPurgeDate} />
         </EuiFormRow>
       )}
+
+      <EuiFormRow>
+        <EuiCheckbox
+          id={basicCheckboxId}
+          checked={forcePurge}
+          onChange={(e) => {
+            setForgePurge(e.target.checked);
+          }}
+          label={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.forcePurge', {
+            defaultMessage: 'Ignore purge restrictions',
+          })}
+        />
+      </EuiFormRow>
 
       <EuiSpacer size="m" />
 
