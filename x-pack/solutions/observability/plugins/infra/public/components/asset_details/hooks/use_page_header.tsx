@@ -119,15 +119,15 @@ const useFeatureFlagTabs = () => {
 
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
-      [ContentTabIds.OSQUERY]: featureFlags.osqueryEnabled,
-      [ContentTabIds.PROFILING]: isProfilingPluginEnabled,
+      [ContentTabIds.OSQUERY]: Boolean(featureFlags.osqueryEnabled),
+      [ContentTabIds.PROFILING]: Boolean(isProfilingPluginEnabled),
     }),
     [featureFlags.osqueryEnabled, isProfilingPluginEnabled]
   );
 
   const isTabEnabled = useCallback(
     (tabItem: Tab) => {
-      return Boolean(featureFlagControlledTabs[tabItem.id]) ?? true;
+      return featureFlagControlledTabs[tabItem.id] ?? true;
     },
     [featureFlagControlledTabs]
   );
