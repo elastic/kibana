@@ -73,6 +73,7 @@ export const getSearchEmbeddableFactory = ({
         solutionNavId,
       });
       const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
+      const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager();
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(runtimeState?.savedObjectId);
@@ -116,6 +117,7 @@ export const getSearchEmbeddableFactory = ({
         },
         discoverServices,
         stateManager: searchEmbeddable.stateManager,
+        scopedProfilesManager,
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });

@@ -129,6 +129,10 @@ export const DiscoverSessionView = ({
     });
   });
   const initializationState = useInternalStateSelector((state) => state.initializationState);
+  const scopedProfilesManager = useCurrentTabRuntimeState(
+    runtimeStateManager,
+    (tab) => tab.scopedProfilesManager$
+  );
   const currentDataView = useCurrentTabRuntimeState(
     runtimeStateManager,
     (tab) => tab.currentDataView$
@@ -204,14 +208,23 @@ export const DiscoverSessionView = ({
     );
   }
 
-  if (!currentStateContainer || !currentCustomizationService || !currentDataView) {
+  if (
+    !currentStateContainer ||
+    !currentCustomizationService ||
+    !scopedProfilesManager ||
+    !currentDataView
+  ) {
     return <BrandedLoadingIndicator />;
   }
 
   return (
     <DiscoverCustomizationProvider value={currentCustomizationService}>
       <DiscoverMainProvider value={currentStateContainer}>
-        <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+        <RuntimeStateProvider
+          scopedProfilesManager={scopedProfilesManager}
+          currentDataView={currentDataView}
+          adHocDataViews={adHocDataViews}
+        >
           <DiscoverMainApp stateContainer={currentStateContainer} />
         </RuntimeStateProvider>
       </DiscoverMainProvider>

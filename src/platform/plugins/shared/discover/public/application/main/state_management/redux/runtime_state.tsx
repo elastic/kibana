@@ -15,6 +15,7 @@ import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram'
 import { useCurrentTabContext } from './hooks';
 import type { DiscoverStateContainer } from '../discover_state';
 import type { ConnectedCustomizationService } from '../../../../customizations';
+import type { ProfilesManager, ScopedProfilesManager } from '../../../../context_awareness';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -24,6 +25,7 @@ interface TabRuntimeState {
   stateContainer?: DiscoverStateContainer;
   customizationService?: ConnectedCustomizationService;
   unifiedHistogramLayoutProps?: UnifiedHistogramPartialLayoutProps;
+  scopedProfilesManager: ScopedProfilesManager;
   currentDataView: DataView;
 }
 
@@ -44,11 +46,18 @@ export const createRuntimeStateManager = (): RuntimeStateManager => ({
   tabs: { byId: {} },
 });
 
-export const createTabRuntimeState = (): ReactiveTabRuntimeState => ({
+export const createTabRuntimeState = ({
+  profilesManager,
+}: {
+  profilesManager: ProfilesManager;
+}): ReactiveTabRuntimeState => ({
   stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
   customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(undefined),
   unifiedHistogramLayoutProps$: new BehaviorSubject<UnifiedHistogramPartialLayoutProps | undefined>(
     undefined
+  ),
+  scopedProfilesManager$: new BehaviorSubject<ScopedProfilesManager>(
+    profilesManager.createScopedProfilesManager()
   ),
   currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
 });
@@ -72,13 +81,14 @@ type CombinedRuntimeState = DiscoverRuntimeState & TabRuntimeState;
 const runtimeStateContext = createContext<CombinedRuntimeState | undefined>(undefined);
 
 export const RuntimeStateProvider = ({
+  scopedProfilesManager,
   currentDataView,
   adHocDataViews,
   children,
 }: PropsWithChildren<CombinedRuntimeState>) => {
   const runtimeState = useMemo<CombinedRuntimeState>(
-    () => ({ currentDataView, adHocDataViews }),
-    [adHocDataViews, currentDataView]
+    () => ({ scopedProfilesManager, currentDataView, adHocDataViews }),
+    [adHocDataViews, currentDataView, scopedProfilesManager]
   );
 
   return (
@@ -96,5 +106,6 @@ const useRuntimeStateContext = () => {
   return context;
 };
 
+export const useScopedProfilesManager = () => useRuntimeStateContext().scopedProfilesManager;
 export const useCurrentDataView = () => useRuntimeStateContext().currentDataView;
 export const useAdHocDataViews = () => useRuntimeStateContext().adHocDataViews;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,7 +27,8 @@ export interface DocUrlParams {
 }
 
 export const SingleDocRoute = () => {
-  const { timefilter, core, getScopedHistory } = useDiscoverServices();
+  const { timefilter, core, profilesManager, getScopedHistory } = useDiscoverServices();
+  const [scopedProfilesManager] = useState(() => profilesManager.createScopedProfilesManager());
   const { search } = useLocation();
   const { dataViewId, index } = useParams<DocUrlParams>();
 
@@ -99,7 +100,13 @@ export const SingleDocRoute = () => {
 
   return (
     <rootProfileState.AppWrapper>
-      <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
+      <Doc
+        id={id}
+        index={index}
+        dataView={dataView}
+        referrer={locationState?.referrer}
+        scopedProfilesManager={scopedProfilesManager}
+      />
     </rootProfileState.AppWrapper>
   );
 };

@@ -141,7 +141,11 @@ async function mountComponent(
       <InternalStateProvider store={stateContainer.internalState}>
         <ChartPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
           <DiscoverMainProvider value={stateContainer}>
-            <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
+            <RuntimeStateProvider
+              scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
+              currentDataView={dataView}
+              adHocDataViews={[]}
+            >
               <EuiProvider highContrastMode={false}>
                 <DiscoverLayout {...props} />
               </EuiProvider>

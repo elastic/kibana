@@ -38,7 +38,11 @@ describe('useTopNavLinks', () => {
     return (
       <KibanaContextProvider services={services}>
         <DiscoverMainProvider value={state}>
-          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+          <RuntimeStateProvider
+            scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
+            currentDataView={dataViewMock}
+            adHocDataViews={[]}
+          >
             {children}
           </RuntimeStateProvider>
         </DiscoverMainProvider>

@@ -10,7 +10,7 @@
 export * from './types';
 export * from './profiles';
 export { getMergedAccessor } from './composable_profile';
-export { ProfilesManager } from './profiles_manager';
+export { ProfilesManager, ScopedProfilesManager } from './profiles_manager';
 export {
   useProfileAccessor,
   useRootProfile,

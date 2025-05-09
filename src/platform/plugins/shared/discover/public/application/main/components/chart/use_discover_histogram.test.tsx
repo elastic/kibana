@@ -32,6 +32,7 @@ import {
   internalStateActions,
 } from '../../state_management/redux';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { discoverServiceMock } from '../../../../__mocks__/services';
 
 const mockData = dataPluginMock.createStartContract();
 let mockQueryState = {
@@ -114,7 +115,11 @@ describe('useDiscoverHistogram', () => {
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
       <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
         <DiscoverMainProvider value={stateContainer}>
-          <RuntimeStateProvider currentDataView={dataViewMockWithTimeField} adHocDataViews={[]}>
+          <RuntimeStateProvider
+            scopedProfilesManager={discoverServiceMock.profilesManager.createScopedProfilesManager()}
+            currentDataView={dataViewMockWithTimeField}
+            adHocDataViews={[]}
+          >
             {children}
           </RuntimeStateProvider>
         </DiscoverMainProvider>

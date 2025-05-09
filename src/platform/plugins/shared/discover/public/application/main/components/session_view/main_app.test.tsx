@@ -54,7 +54,11 @@ describe('DiscoverMainApp', () => {
             <KibanaContextProvider services={discoverServiceMock}>
               <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
                 <DiscoverMainProvider value={stateContainer}>
-                  <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+                  <RuntimeStateProvider
+                    scopedProfilesManager={discoverServiceMock.profilesManager.createScopedProfilesManager()}
+                    currentDataView={dataViewMock}
+                    adHocDataViews={[]}
+                  >
                     <DiscoverMainApp {...props} />
                   </RuntimeStateProvider>
                 </DiscoverMainProvider>

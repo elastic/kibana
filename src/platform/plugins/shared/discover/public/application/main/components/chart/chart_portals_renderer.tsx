@@ -84,6 +84,9 @@ const UnifiedHistogramGuard = ({
   const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const currentCustomizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
   const currentStateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
+  const currentScopedProfilesManager = useRuntimeState(
+    currentTabRuntimeState.scopedProfilesManager$
+  );
   const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
   const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
   const isInitialized = useRef(false);
@@ -92,6 +95,7 @@ const UnifiedHistogramGuard = ({
     (!isSelected && !isInitialized.current) ||
     !currentCustomizationService ||
     !currentStateContainer ||
+    !currentScopedProfilesManager ||
     !currentDataView ||
     !currentTabRuntimeState
   ) {
@@ -104,7 +108,11 @@ const UnifiedHistogramGuard = ({
     <CurrentTabProvider currentTabId={tabId}>
       <DiscoverCustomizationProvider value={currentCustomizationService}>
         <DiscoverMainProvider value={currentStateContainer}>
-          <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+          <RuntimeStateProvider
+            scopedProfilesManager={currentScopedProfilesManager}
+            currentDataView={currentDataView}
+            adHocDataViews={adHocDataViews}
+          >
             <UnifiedHistogramChartWrapper
               stateContainer={currentStateContainer}
               panelsToggle={panelsToggle}

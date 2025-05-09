@@ -18,14 +18,15 @@ const emptyDataView = buildDataViewMock({
   fields: fieldList(),
 });
 const { profilesManagerMock } = createContextAwarenessMocks();
+const scopedProfilesManager = profilesManagerMock.createScopedProfilesManager();
 
-profilesManagerMock.resolveDataSourceProfile({});
+scopedProfilesManager.resolveDataSourceProfile({});
 
 describe('getDefaultProfileState', () => {
   describe('getPreFetchState', () => {
     it('should return expected breakdownField', () => {
       let appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: false,
@@ -38,7 +39,7 @@ describe('getDefaultProfileState', () => {
         breakdownField: 'extension',
       });
       appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: false,
@@ -54,7 +55,7 @@ describe('getDefaultProfileState', () => {
   describe('getPostFetchState', () => {
     it('should return expected columns', () => {
       let appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: true,
@@ -80,7 +81,7 @@ describe('getDefaultProfileState', () => {
         },
       });
       appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: true,
@@ -109,7 +110,7 @@ describe('getDefaultProfileState', () => {
 
     it('should return expected rowHeight', () => {
       const appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: false,
@@ -128,7 +129,7 @@ describe('getDefaultProfileState', () => {
 
     it('should return undefined', () => {
       const appState = getDefaultProfileState({
-        profilesManager: profilesManagerMock,
+        scopedProfilesManager,
         resetDefaultProfileState: {
           resetId: 'test',
           columns: false,

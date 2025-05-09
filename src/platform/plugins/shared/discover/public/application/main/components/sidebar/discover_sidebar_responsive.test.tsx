@@ -211,7 +211,11 @@ async function mountComponent(
       <EuiProvider>
         <KibanaContextProvider services={mockedServices}>
           <DiscoverMainProvider value={stateContainer}>
-            <RuntimeStateProvider currentDataView={props.selectedDataView!} adHocDataViews={[]}>
+            <RuntimeStateProvider
+              scopedProfilesManager={mockedServices.profilesManager.createScopedProfilesManager()}
+              currentDataView={props.selectedDataView!}
+              adHocDataViews={[]}
+            >
               <DiscoverSidebarResponsive {...props} />{' '}
             </RuntimeStateProvider>
           </DiscoverMainProvider>

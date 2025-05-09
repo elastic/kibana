@@ -27,7 +27,7 @@ export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
 > =
   (params) =>
-  (dispatch, getState, { runtimeStateManager }) => {
+  (dispatch, getState, { runtimeStateManager, services: { profilesManager } }) => {
     const previousTabs = selectAllTabs(getState());
     const removedTabs = differenceBy(previousTabs, params.allTabs, (tab) => tab.id);
     const addedTabs = differenceBy(params.allTabs, previousTabs, (tab) => tab.id);
@@ -38,7 +38,7 @@ export const setTabs: InternalStateThunkActionCreator<
     }
 
     for (const tab of addedTabs) {
-      runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState();
+      runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState({ profilesManager });
     }
 
     dispatch(internalStateSlice.actions.setTabs(params));

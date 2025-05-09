@@ -165,7 +165,11 @@ const mountComponent = async ({
         <InternalStateProvider store={stateContainer.internalState}>
           <ChartPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
             <DiscoverMainProvider value={stateContainer}>
-              <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
+              <RuntimeStateProvider
+                scopedProfilesManager={services.profilesManager.createScopedProfilesManager()}
+                currentDataView={dataView}
+                adHocDataViews={[]}
+              >
                 <DiscoverHistogramLayout {...props} />
               </RuntimeStateProvider>
             </DiscoverMainProvider>

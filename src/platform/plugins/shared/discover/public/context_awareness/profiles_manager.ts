@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable max-classes-per-file */
+
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isEqual } from 'lodash';
@@ -72,15 +74,11 @@ export enum ContextualProfileLevel {
 }
 
 export class ProfilesManager {
-  private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
-  private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
-
   private rootProfile: AppliedProfile;
-  private dataSourceProfile: AppliedProfile;
   private prevRootProfileParams?: SerializedRootProfileParams;
-  private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
   private rootProfileAbortController?: AbortController;
-  private dataSourceProfileAbortController?: AbortController;
+
+  private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
 
   constructor(
     private readonly rootProfileService: RootProfileService,
@@ -89,18 +87,10 @@ export class ProfilesManager {
     private readonly ebtManager: DiscoverEBTManager
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
-    this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
     this.rootProfile = rootProfileService.getProfile({ context: this.rootContext$.getValue() });
-    this.dataSourceProfile = dataSourceProfileService.getProfile({
-      context: this.dataSourceContext$.getValue(),
-    });
 
     this.rootContext$.pipe(skip(1)).subscribe((context) => {
       this.rootProfile = rootProfileService.getProfile({ context });
-    });
-
-    this.dataSourceContext$.pipe(skip(1)).subscribe((context) => {
-      this.dataSourceProfile = dataSourceProfileService.getProfile({ context });
     });
   }
 
@@ -146,6 +136,45 @@ export class ProfilesManager {
       getRenderAppWrapper: this.rootProfile.getRenderAppWrapper,
       getDefaultAdHocDataViews: this.rootProfile.getDefaultAdHocDataViews,
     };
+  }
+
+  /**
+   * Creates a profiles manager instance scoped to a single tab with a shared root context
+   * @returns The scoped profiles manager
+   */
+  public createScopedProfilesManager() {
+    return new ScopedProfilesManager(
+      this.rootContext$,
+      () => this.rootProfile,
+      this.dataSourceProfileService,
+      this.documentProfileService,
+      this.ebtManager
+    );
+  }
+}
+
+export class ScopedProfilesManager {
+  private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
+
+  private dataSourceProfile: AppliedProfile;
+  private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
+  private dataSourceProfileAbortController?: AbortController;
+
+  constructor(
+    private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>,
+    private readonly getRootProfile: () => AppliedProfile,
+    private readonly dataSourceProfileService: DataSourceProfileService,
+    private readonly documentProfileService: DocumentProfileService,
+    private readonly ebtManager: DiscoverEBTManager
+  ) {
+    this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
+    this.dataSourceProfile = dataSourceProfileService.getProfile({
+      context: this.dataSourceContext$.getValue(),
+    });
+
+    this.dataSourceContext$.pipe(skip(1)).subscribe((context) => {
+      this.dataSourceProfile = dataSourceProfileService.getProfile({ context });
+    });
   }
 
   /**
@@ -236,7 +265,7 @@ export class ProfilesManager {
    */
   public getProfiles({ record }: GetProfilesOptions = {}) {
     return [
-      this.rootProfile,
+      this.getRootProfile(),
       this.dataSourceProfile,
       this.documentProfileService.getProfile({
         context: recordHasContext(record)
