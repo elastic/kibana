@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { faker } from '@faker-js/faker';
 import { render, screen } from '@testing-library/react';
 import { CustomIconModal } from './custom_icon_modal';
-import { faker } from '@faker-js/faker';
 
 jest.mock('../../../../../kibana_services', () => ({
   getUsageCollection: () => {
