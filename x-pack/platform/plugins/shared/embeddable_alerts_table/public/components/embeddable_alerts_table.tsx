@@ -19,7 +19,6 @@ import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/aler
 import { ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { GENERAL_CASES_OWNER } from '@kbn/cases-plugin/common';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import type { JsonObject } from '@kbn/utility-types';
 import {
@@ -159,10 +158,6 @@ export const EmbeddableAlertsTable = ({
       openLinksInNewTab={true}
       flyoutOwnsFocus={true}
       flyoutPagination={false}
-      casesConfiguration={{
-        featureId: 'alerts',
-        owner: [GENERAL_CASES_OWNER],
-      }}
       // Saves the configuration in memory in case we want to add a shared configuration saved in
       // the panel config in the future (and avoid localStorage migrations or deletions tasks)
       configurationStorage={inMemoryStorage}
