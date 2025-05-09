@@ -65,11 +65,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         let body: Awaited<ReturnType<typeof setupKbAsAdmin>>['body'];
 
         before(async () => {
-          // setup KB initially
-
           await deployTinyElserAndSetupKb(getService);
-
-          // setup KB with custom inference endpoint
           await createTinyElserInferenceEndpoint(getService, {
             inferenceId: CUSTOM_TINY_ELSER_INFERENCE_ID,
           });
@@ -120,7 +116,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await createTinyElserInferenceEndpoint(getService, {
           inferenceId: customInferenceId,
         });
-        await setupKnowledgeBase(observabilityAIAssistantAPIClient, customInferenceId);
+        await setupKnowledgeBase(getService, customInferenceId);
         await waitForKnowledgeBaseReady(getService);
       });
 
@@ -154,19 +150,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   function setupKbAsAdmin(inferenceId: string) {
-    return observabilityAIAssistantAPIClient.admin({
-      endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-      params: {
-        query: { inference_id: inferenceId },
-      },
-    });
+    return setupKnowledgeBase(getService, inferenceId);
   }
 
   function setupKbAsViewer(inferenceId: string) {
     return observabilityAIAssistantAPIClient.viewer({
       endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
       params: {
-        query: { inference_id: inferenceId },
+        query: { inference_id: inferenceId, wait_until_complete: true },
       },
     });
   }

@@ -50,9 +50,10 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
 const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
   params: t.type({
-    query: t.type({
-      inference_id: t.string,
-    }),
+    query: t.intersection([
+      t.type({ inference_id: t.string }),
+      t.partial({ wait_until_complete: toBooleanRt }),
+    ]),
   }),
   security: {
     authz: {
@@ -67,8 +68,9 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
     nextInferenceId: string;
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
-    const { inference_id: inferenceId } = resources.params.query;
-    return client.setupKnowledgeBase(inferenceId);
+    const { inference_id: inferenceId, wait_until_complete: waitUntilComplete } =
+      resources.params.query;
+    return client.setupKnowledgeBase(inferenceId, waitUntilComplete);
   },
 });
 

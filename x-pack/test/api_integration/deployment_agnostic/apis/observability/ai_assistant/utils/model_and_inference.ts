@@ -98,16 +98,9 @@ export function createTinyTextEmbeddingInferenceEndpoint(
 export async function deployTinyElserAndSetupKb(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-  const log = getService('log');
-
   await setupTinyElserModelAndInferenceEndpoint(getService);
 
-  log.debug(`Setting up knowledge base with inference endpoint "${TINY_ELSER_INFERENCE_ID}"`);
-  const { status, body } = await setupKnowledgeBase(
-    observabilityAIAssistantAPIClient,
-    TINY_ELSER_INFERENCE_ID
-  );
+  const { status, body } = await setupKnowledgeBase(getService, TINY_ELSER_INFERENCE_ID);
   await waitForKnowledgeBaseReady(getService);
 
   return { status, body };
