@@ -105,7 +105,7 @@ export class DeprecationsFactory {
                 defaultMessage: 'Unable to fetch deprecations info for plugin {domainId}.',
                 values: { domainId },
               }),
-              level: DeprecationLevel.CRITICAL,
+              level: DeprecationLevel.FETCH_ERROR,
               correctiveActions: {
                 manualSteps: [
                   i18n.translate(
