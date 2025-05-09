@@ -248,6 +248,8 @@ export const AzureInputVarFields = ({
                       onChange={(value) => {
                         onChange(field.id, value);
                       }}
+                      errors={invalid ? [invalidError] : []}
+                      forceShowErrors={invalid}
                       isEditPage={true}
                     />
                   </Suspense>

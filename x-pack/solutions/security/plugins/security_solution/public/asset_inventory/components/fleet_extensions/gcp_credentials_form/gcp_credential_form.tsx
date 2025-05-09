@@ -120,15 +120,7 @@ const GoogleCloudShellSetup = ({
     return fields.find((element) => element.id === id);
   };
   const projectIdFields = getFieldById('gcp.project_id');
-  const projectIdValueInvalid = fieldIsInvalid(projectIdFields?.value, hasInvalidRequiredVars);
-  const projectIdError = `${projectIdFields?.label} is required`;
-
   const organizationIdFields = getFieldById('gcp.organization_id');
-  const organizationIdValueInvalid = fieldIsInvalid(
-    organizationIdFields?.value,
-    hasInvalidRequiredVars
-  );
-  const organizationIdError = `${organizationIdFields?.label} is required`;
   return (
     <>
       <EuiText
@@ -180,12 +172,7 @@ const GoogleCloudShellSetup = ({
       <EuiSpacer size="l" />
       <EuiForm component="form">
         {organizationIdFields && accountType === GCP_ORGANIZATION_ACCOUNT && (
-          <EuiFormRow
-            fullWidth
-            label={gcpField.fields['gcp.organization_id'].label}
-            isInvalid={organizationIdValueInvalid}
-            error={organizationIdValueInvalid ? organizationIdError : undefined}
-          >
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
             <EuiFieldText
               disabled={disabled}
               data-test-subj={CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
@@ -193,17 +180,11 @@ const GoogleCloudShellSetup = ({
               fullWidth
               value={organizationIdFields.value || ''}
               onChange={(event) => onChange(organizationIdFields.id, event.target.value)}
-              isInvalid={organizationIdValueInvalid}
             />
           </EuiFormRow>
         )}
         {projectIdFields && (
-          <EuiFormRow
-            fullWidth
-            label={gcpField.fields['gcp.project_id'].label}
-            isInvalid={projectIdValueInvalid}
-            error={projectIdValueInvalid ? projectIdError : undefined}
-          >
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
             <EuiFieldText
               disabled={disabled}
               data-test-subj={CAI_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
@@ -211,7 +192,6 @@ const GoogleCloudShellSetup = ({
               fullWidth
               value={projectIdFields.value || ''}
               onChange={(event) => onChange(projectIdFields.id, event.target.value)}
-              isInvalid={projectIdValueInvalid}
             />
           </EuiFormRow>
         )}
