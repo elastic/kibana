@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-require('@kbn/babel-register').install();
-require('./manage_secrets').exportToEnvVars();
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
+export const ConfigSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+});
+
+export type ConfigType = TypeOf<typeof ConfigSchema>;
