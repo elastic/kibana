@@ -42,8 +42,7 @@ export async function exec(
     preferLocal: true,
     ...(bufferLogs
       ? {
-          stdio: ['ignore', 'ignore', 'ignore'],
-          all: true,
+          stdio: ['ignore', 'pipe', 'pipe'],
           buffer: false,
         }
       : { stdio: ['ignore', 'pipe', 'pipe'] }),
@@ -52,11 +51,15 @@ export async function exec(
   const logFn = (line: string) => log[level](line);
 
   if (bufferLogs) {
-    proc.all!.on('data', (chunk) => {
+    proc.stdout!.on('data', (chunk) => {
       build.pushToLogBuffer(chunk.toString());
     });
 
-    await proc.finally(() => {
+    proc.stderr!.on('data', (chunk) => {
+      build.pushToLogBuffer(chunk.toString());
+    });
+
+    proc.on('exit', () => {
       build.getLogBuffer().forEach(logFn);
     });
   } else {
