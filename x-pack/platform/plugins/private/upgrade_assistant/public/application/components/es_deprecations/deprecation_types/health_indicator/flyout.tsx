@@ -24,7 +24,7 @@ import type {
   EnrichedDeprecationInfo,
   HealthIndicatorAction,
 } from '../../../../../../common/types';
-import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../../../shared';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge, WarningLevels } from '../../../shared';
 
 export interface HealthIndicatorFlyoutProps {
   deprecation: EnrichedDeprecationInfo;
@@ -61,7 +61,7 @@ export const HealthIndicatorFlyout = ({ deprecation, closeFlyout }: HealthIndica
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge level={deprecation.level} isResolved={false} />
+        <DeprecationBadge level={deprecation.level as WarningLevels} isResolved={false} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="defaultDeprecationDetailsFlyoutTitle">{message}</h2>
