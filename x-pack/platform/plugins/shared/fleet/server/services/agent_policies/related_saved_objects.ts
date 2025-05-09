@@ -55,6 +55,10 @@ export async function fetchRelatedSavedObjects(
     }, []),
   ]);
 
+  logger.debug(
+    `Fetching outputs, download source and fleet server hosts for agent policy [${agentPolicy.id}]`
+  );
+
   const [outputs, downloadSource, fleetServerHosts] = await Promise.all([
     outputService.bulkGet(outputIds, { ignoreNotFound: true }),
     getDownloadSourceForAgentPolicy(soClient, agentPolicy),
@@ -83,6 +87,7 @@ export async function fetchRelatedSavedObjects(
       .concat(downloadSourceProxyId ? [downloadSourceProxyId] : [])
   );
 
+  logger.debug(`fetching list of fleet-server proxies`);
   const proxies = proxyIds.length ? await bulkGetFleetProxies(soClient, proxyIds) : [];
 
   let downloadSourceProxyUri: string | null = null;
@@ -94,7 +99,7 @@ export async function fetchRelatedSavedObjects(
     }
   }
 
-  logger.debug(`Returning related saved objects for policy ${agentPolicy.id}`);
+  logger.debug(`Returning related saved objects for policy [${agentPolicy.id}]`);
 
   return {
     outputs,

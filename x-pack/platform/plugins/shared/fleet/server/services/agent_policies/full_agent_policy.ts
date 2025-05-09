@@ -80,16 +80,17 @@ export async function getFullAgentPolicy(
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
 
   logger.debug(
-    `Getting full policy for agent policy [${id}] for space [${soClient.getCurrentNamespace()}]`
+    `Getting full policy for agent policy [${id}] using so scoped to [${soClient.getCurrentNamespace()}]`
   );
 
   const standalone = options?.standalone ?? false;
 
   let agentPolicy: AgentPolicy | null;
   if (options?.agentPolicy?.package_policies) {
-    logger.debug(`agent policy [${id}] was providing on input - no need to fetch it`);
+    logger.debug(`agent policy [${id}] was provided via options.agentPolicy - no need to fetch it`);
     agentPolicy = options.agentPolicy;
   } else {
+    logger.debug(`Fetching agent policy doc for [${id}]`);
     agentPolicy = await fetchAgentPolicy(soClient, id);
   }
 
@@ -97,6 +98,8 @@ export async function getFullAgentPolicy(
     logger.debug(`Agent policy [${id}] was not found. Exiting.`);
     return null;
   }
+
+  logger.debug(`fetching related saved objects for agent policy [${id}]`);
 
   const {
     outputs,
@@ -121,6 +124,10 @@ export async function getFullAgentPolicy(
     packageInfoCache.set(pkgToPkgKey(policy.package), {} as PackageInfo);
   }
 
+  logger.debug(
+    () => `fetching info for packages:${JSON.stringify(Array.from(packageInfoCache.keys()))}`
+  );
+
   // Fetch all package info concurrently
   await Promise.all(
     Array.from(packageInfoCache.keys()).map(async (pkgKey) => {
@@ -136,6 +143,8 @@ export async function getFullAgentPolicy(
     })
   );
   const bootstrapOutputConfig = generateFleetServerOutputSSLConfig(fleetServerHost);
+
+  logger.debug(() => `Fetching agent inputs for policy [${id}]`);
 
   const inputs = (
     await storedPackagePoliciesToAgentInputs(
@@ -250,7 +259,7 @@ export async function getFullAgentPolicy(
     {}
   );
   for (const [outputId, packagePolicies] of Object.entries(packagePoliciesByOutputId)) {
-    const dataPermissions = await storedPackagePoliciesToAgentPermissions(
+    const dataPermissions = storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
       agentPolicy.namespace,
       packagePolicies
@@ -318,6 +327,8 @@ export async function getFullAgentPolicy(
   // populate protection and signed properties
   const messageSigningService = appContextService.getMessageSigningService();
   if (options?.standalone !== true && messageSigningService && fullAgentPolicy.agent) {
+    logger.debug(`Retrieving message signing service and signing policy data`);
+
     const publicKey = await messageSigningService.getPublicKey();
     const tokenHash =
       (await appContextService
@@ -349,6 +360,8 @@ export async function getFullAgentPolicy(
       data: signedData.toString('base64'),
       signature,
     };
+
+    logger.debug(`Policy [${fullAgentPolicy.id}] was signed`);
   }
 
   if (agentPolicy.overrides) {

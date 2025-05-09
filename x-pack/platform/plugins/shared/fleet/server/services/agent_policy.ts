@@ -201,12 +201,13 @@ class AgentPolicyService {
       asyncDeploy: false,
     }
   ): Promise<AgentPolicy> {
-    const savedObjectType = await getAgentPolicySavedObjectType();
-
     const logger = this.getLogger('_update');
+
     logger.debug(`Starting update of agent policy ${id}`);
 
+    const savedObjectType = await getAgentPolicySavedObjectType();
     const existingAgentPolicy = await this.get(soClient, id, true, { spaceId: '*' });
+
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id,
@@ -232,6 +233,8 @@ class AgentPolicyService {
     }
 
     if (!options.skipValidation) {
+      logger.debug(`Validating agent policy [${id}] before update`);
+
       await validateOutputForPolicy(
         soClient,
         agentPolicy,
@@ -239,6 +242,7 @@ class AgentPolicyService {
         getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
+
     await soClient
       .update<AgentPolicySOAttributes>(
         savedObjectType,
@@ -252,17 +256,24 @@ class AgentPolicyService {
           updated_at: new Date().toISOString(),
           updated_by: user ? user.username : 'system',
         },
-        { namespace: existingAgentPolicy.space_ids?.at(0) }
+        {
+          namespace:
+            existingAgentPolicy.space_ids?.at(0) ??
+            existingAgentPolicy.space_ids?.at(0) ??
+            DEFAULT_SPACE_ID,
+        }
       )
       .catch(catchAndWrapError);
 
     const newAgentPolicy = await this.get(soClient, id, false, { spaceId: '*' });
 
+    logger.debug(`Agent policy SO was updated successfully`);
+
     newAgentPolicy!.package_policies = existingAgentPolicy.package_policies;
 
     if (options.bumpRevision || options.removeProtection) {
       // When using an un-scoped soClient (spaces turned off), the `getCurrentNamespace()` returns undefined,
-      // we fall back to the policy space id or the default space if thats the case
+      // we fall back to the policy space id or the default space if that's the case
       const soClientSpaceId =
         soClient.getCurrentNamespace() ?? existingAgentPolicy.space_ids?.at(0) ?? DEFAULT_SPACE_ID;
 
@@ -604,7 +615,10 @@ class AgentPolicyService {
     });
 
     logger.debug(
-      () => `Retrieving agent policies using soClient.bulkGet() with: ${JSON.stringify(objects)}`
+      () =>
+        `Retrieving agent policies soClient scoped to [${soClient.getCurrentNamespace()}] using .bulkGet() with: ${JSON.stringify(
+          objects
+        )}`
     );
 
     const bulkGetResponse = await soClient
@@ -1454,18 +1468,38 @@ class AgentPolicyService {
       });
     }
 
-    const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds);
-    const policiesMap = keyBy(policies, 'id');
+    // Retrieve the agent policies that were not included in the `agentPolicies` input argument
+    const policiesMap = keyBy(agentPolicies ?? [], 'id');
+    {
+      const idsToRetrieve = agentPolicyIds.filter((id) => !policiesMap[id]);
+
+      if (idsToRetrieve.length) {
+        logger.debug(`Retrieving agent policies: [${idsToRetrieve.join(', ')}]`);
+        (await agentPolicyService.getByIds(soClient, agentPolicyIds)).forEach((policy) => {
+          policiesMap[policy.id] = policy;
+        });
+      }
+    }
+
+    logger.debug(`Retrieving full agent policies`);
+
     const fullPolicies = await pMap(
       agentPolicyIds,
       // There are some potential performance concerns around using `getFullAgentPolicy` in this context, e.g.
       // re-fetching outputs, settings, and upgrade download source URI data for each policy. This could potentially
       // be a bottleneck in environments with several thousand agent policies being deployed here.
-      (agentPolicyId) =>
-        agentPolicyService
-          .getFullAgentPolicy(soClient, agentPolicyId, {
-            agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
-          })
+      (agentPolicyId) => {
+        const agentPolicy = policiesMap[agentPolicyId];
+
+        if (!agentPolicy) {
+          logger.warn(
+            `Unable to retrieve FULL agent policy for [${agentPolicyId}] - Deployment will not be done for this policy`
+          );
+          return null;
+        }
+
+        return agentPolicyService
+          .getFullAgentPolicy(soClient, agentPolicyId, { agentPolicy })
           .then((result) => {
             if (!result) {
               logger.debug(
@@ -1473,7 +1507,8 @@ class AgentPolicyService {
               );
             }
             return result;
-          }),
+          });
+      },
       {
         concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
       }
@@ -1503,13 +1538,12 @@ class AgentPolicyService {
       return acc;
     }, [] as FleetServerPolicy[]);
 
-    appContextService
-      .getLogger()
-      .debug(
+    logger.debug(
+      () =>
         `Deploying policies: ${fleetServerPolicies
           .map((pol) => `${pol.policy_id}:${pol.revision_idx}`)
           .join(', ')}`
-      );
+    );
 
     const fleetServerPoliciesBulkBody = fleetServerPolicies.flatMap((fleetServerPolicy) => [
       {
@@ -1523,11 +1557,15 @@ class AgentPolicyService {
       fleetServerPolicy,
     ]);
 
-    const bulkResponse = await esClient.bulk({
-      index: AGENT_POLICY_INDEX,
-      operations: fleetServerPoliciesBulkBody,
-      refresh: 'wait_for',
-    });
+    const bulkResponse = await esClient
+      .bulk({
+        index: AGENT_POLICY_INDEX,
+        operations: fleetServerPoliciesBulkBody,
+        refresh: 'wait_for',
+      })
+      .catch(catchAndWrapError);
+
+    logger.debug(`Bulk update against index [${AGENT_POLICY_INDEX}] with deployment updates done`);
 
     if (bulkResponse.errors) {
       const erroredDocuments = bulkResponse.items.reduce((acc, item) => {
@@ -1551,12 +1589,17 @@ class AgentPolicyService {
         !policy.schema_version || lt(policy.schema_version, FLEET_AGENT_POLICIES_SCHEMA_VERSION)
       );
     });
+
     await pMap(
       filteredFleetServerPolicies,
-      (fleetServerPolicy) =>
+      (fleetServerPolicy) => {
+        logger.debug(
+          `Updating agent policy id [${fleetServerPolicy.policy_id}] following successful deployment of fleet server policy`
+        );
+
         // There are some potential performance concerns around using `agentPolicyService.update` in this context.
         // This could potentially be a bottleneck in environments with several thousand agent policies being deployed here.
-        agentPolicyService.update(
+        return agentPolicyService.update(
           soClient,
           esClient,
           fleetServerPolicy.policy_id,
@@ -1564,7 +1607,8 @@ class AgentPolicyService {
             schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           },
           { force: true }
-        ),
+        );
+      },
       {
         concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
       }

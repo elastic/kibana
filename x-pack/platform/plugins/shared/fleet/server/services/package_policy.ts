@@ -20,6 +20,7 @@ import type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkUpdateObject,
   SavedObject,
+  SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
@@ -104,6 +105,8 @@ import {
 } from '../constants';
 
 import { inputNotAllowedInAgentless } from '../../common/services/agentless_policy_helper';
+
+import { getNamespacesForSoClient } from './utils/get_so_namespaces';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
@@ -773,7 +776,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     // We're using `getByIds()` here, instead of just `soClient.get()`, because when using an unscoped
     // SO client we are not able to use `*` in the `esClient.get()` `options.namespace`.
     const [packagePolicy] = await this.getByIDs(soClient, [id], {
-      ignoreMissing: true,
       spaceIds: options.spaceId ? [options.spaceId] : undefined,
     });
 
@@ -810,9 +812,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     logger.debug(
       () =>
-        `Finding all package policies for agent policy [${agentPolicyId}] for space [${
-          options.spaceIds ?? soClient.getCurrentNamespace()
-        }]`
+        `Finding all package policies for agent policy [${agentPolicyId}] for options.spaceIds [${
+          options.spaceIds
+        }] with soClient scoped to [${soClient.getCurrentNamespace()}]`
     );
 
     const savedObjectType = await getPackagePolicySavedObjectType();
@@ -825,7 +827,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         perPage: SO_SEARCH_LIMIT,
         namespaces: options.spaceIds,
       })
-      .catch(catchAndWrapError);
+      .catch((err) => {
+        logger.debug(
+          () =>
+            `Error encountered while attempting to get all package policies for agent policy [${agentPolicyId}]: ${err.message}`
+        );
+
+        return catchAndWrapError(err);
+      });
 
     if (!packagePolicySO) {
       logger.debug(
@@ -864,12 +873,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options: PackagePolicyClientGetByIdsOptions = {}
   ): Promise<PackagePolicy[]> {
     const savedObjectType = await getPackagePolicySavedObjectType();
+    const namespaces = options.spaceIds ?? [getNamespacesForSoClient(soClient)];
     const packagePolicySO = await soClient
       .bulkGet<PackagePolicySOAttributes>(
         ids.map((id) => ({
           id,
           type: savedObjectType,
-          namespaces: options.spaceIds,
+          namespaces,
         }))
       )
       .catch(catchAndWrapError);
@@ -1289,7 +1299,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       savedObjectsClient: soClient,
     });
 
-    const policiesToUpdate: Array<SavedObjectsBulkUpdateObject<PackagePolicySOAttributes>> = [];
+    const policyUpdatesBySpace: Record<
+      string,
+      Array<SavedObjectsBulkUpdateObject<PackagePolicySOAttributes>>
+    > = {};
     const failedPolicies: Array<{
       packagePolicy: NewPackagePolicyWithId;
       error: Error | SavedObjectError;
@@ -1422,11 +1435,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
         }
 
-        const policySpaceId = oldPackagePolicies
-          .find((preUpdatePolicy) => preUpdatePolicy.id === id)
-          ?.spaceIds?.at(0);
+        const policySpaceId =
+          oldPackagePolicies
+            .find((preUpdatePolicy) => preUpdatePolicy.id === id)
+            ?.spaceIds?.at(0) ?? DEFAULT_SPACE_ID;
 
-        policiesToUpdate.push({
+        if (!policyUpdatesBySpace[policySpaceId]) {
+          policyUpdatesBySpace[policySpaceId] = [];
+        }
+
+        policyUpdatesBySpace[policySpaceId].push({
           type: savedObjectType,
           id,
           attributes: {
@@ -1442,7 +1460,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             revision: oldPackagePolicy.revision + 1,
             updated_at: new Date().toISOString(),
             updated_by: options?.user?.username ?? 'system',
-            namespace: policySpaceId,
           },
           version,
         });
@@ -1465,17 +1482,42 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const { saved_objects: packagePolicySoBulkUpdateResponse } = await soClient
-      .bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate, { namespace: '*' })
-      .catch(catchAndWrapError);
+    // FIXME:PT add space enablement feature check
+    // FIXME:PT should we use pMap()?
+
+    const packagePolicySoBulkUpdateResponse: Array<
+      SavedObjectsUpdateResponse<PackagePolicySOAttributes>
+    > = [];
+
+    await Promise.all(
+      Object.entries(policyUpdatesBySpace).map(([updateSpaceId, spacePackagPolicyUpdates]) => {
+        logger.debug(
+          `Calling bulkUpdate for space [${updateSpaceId}] with [${spacePackagPolicyUpdates.length}] package policies`
+        );
+
+        // We use a scoped SO client here using the fleet app context services because each bulk update must be done
+        // with a properly scoped SO client. This should be safe, from an access standpoint since the code above
+        // used the SO client provided on input, which was used to `getById()` the package policies thus it has access.
+        return appContextService
+          .getInternalUserSOClientForSpaceId(updateSpaceId)
+          .bulkUpdate<PackagePolicySOAttributes>(spacePackagPolicyUpdates)
+          .catch(catchAndWrapError)
+          .then(({ saved_objects: updateResults }) => {
+            // For clarity and to help debug issues, we alter any error encountered an add info. about the space to it.
+            updateResults.forEach((updateResult) => {
+              if (updateResult.error) {
+                updateResult.error.message += ` (for space [${updateSpaceId}])`;
+              }
+            });
+
+            packagePolicySoBulkUpdateResponse.push(...updateResults);
+          });
+      })
+    );
 
     logger.debug(
       () =>
-        `SO Bulk update of package policy done. Results:\n${JSON.stringify(
-          packagePolicySoBulkUpdateResponse,
-          null,
-          2
-        )}`
+        `Bulk update of the package policies documents done. Continuing to trigger version bump on associated agnet policies`
     );
 
     for (const updatedPolicyResult of packagePolicySoBulkUpdateResponse) {
@@ -1487,7 +1529,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           failedPolicies.push({
             packagePolicy: packagePolicyUpdates.find((p) => p.id === updatedPolicyResult.id)!,
             error: new FleetError(
-              `Bulk update of pacakge policy [${updatedPolicyResult.id}] failed with ${updatedPolicyResult.error.message}`,
+              `Bulk update of package policy [${updatedPolicyResult.id}] failed with ${updatedPolicyResult.error.message}`,
               updatedPolicyResult.error
             ),
           });
@@ -1542,6 +1584,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         asyncDeploy: options?.asyncDeploy,
       });
     });
+
+    logger.debug(`bumping of revision for associated agent policies done`);
 
     const pkgVersions: Record<string, { name: string; version: string }> = {};
     packagePolicyUpdates.forEach(({ package: pkg }) => {
