@@ -277,7 +277,7 @@ tags:
     x-displayName: Upgrade assistant
   - externalDocs:
       description: Uptime monitoring
-      url: https://www.elastic.co/guide/en/observability/current/uptime-intro.html
+      url: https://www.elastic.co/docs/solutions/observability/uptime
     name: uptime
     x-displayName: Uptime
   - name: user session
