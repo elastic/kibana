@@ -239,6 +239,7 @@ export class StatusRuleExecutor {
   }
 
   getRange = (maxPeriod: number) => {
+    // Why is "from" initialized like this?
     let from = this.previousStartedAt
       ? moment(this.previousStartedAt).subtract(1, 'minute').toISOString()
       : 'now-2m';
@@ -248,6 +249,7 @@ export class StatusRuleExecutor {
       const numberOfChecks = condition.window.numberOfChecks;
       from = moment()
         .subtract(maxPeriod * numberOfChecks, 'milliseconds')
+        // Why are we subtracting 5 minutes here?
         .subtract(5, 'minutes')
         .toISOString();
     } else if (condition && 'time' in condition.window) {
