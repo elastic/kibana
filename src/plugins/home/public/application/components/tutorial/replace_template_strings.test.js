@@ -31,6 +31,9 @@ describe('replaceTemplateStrings', () => {
             base: 'https://www.elastic.co/guide/en/beats/metricbeat/current/index.html',
           },
           heartbeat: { base: 'https://www.elastic.co/guide/en/beats/heartbeat/current/index.html' },
+          functionbeat: {
+            base: 'https://www.elastic.co/guide/en/beats/functionbeat/current/index.html',
+          },
           winlogbeat: {
             base: 'https://www.elastic.co/guide/en/beats/winlogbeat/current/index.html',
           },
