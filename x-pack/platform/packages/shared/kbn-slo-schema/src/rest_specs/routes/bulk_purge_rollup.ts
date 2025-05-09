@@ -10,6 +10,7 @@ import { dateType, durationType } from '../../schema';
 
 const fixedAgePurgeVal = t.literal('fixed_age');
 const fixedTimePurgeVal = t.literal('fixed_time');
+const elapsedWindowPurgeVal = t.literal('elapsed_window');
 
 const fixedAgePurge = t.type({
   purgeType: fixedAgePurgeVal,
@@ -21,7 +22,12 @@ const fixedTimePurge = t.type({
   timestamp: dateType,
 });
 
-const bulkPurgePolicy = t.union([fixedAgePurge, fixedTimePurge]);
+const elapsedWindowPurge = t.type({
+  purgeType: elapsedWindowPurgeVal,
+  cycles: t.number,
+});
+
+const bulkPurgePolicy = t.union([fixedAgePurge, fixedTimePurge, elapsedWindowPurge]);
 
 const bulkPurgeRollupSchema = t.type({
   body: t.intersection([
@@ -37,6 +43,7 @@ const bulkPurgeRollupSchema = t.type({
 
 interface BulkPurgeRollupResponse {
   taskId?: DeleteByQueryResponse['task'];
+  taskIds?: Array<DeleteByQueryResponse['task']>;
 }
 
 type BulkPurgePolicyType = t.TypeOf<typeof bulkPurgePolicy>;
