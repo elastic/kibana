@@ -52,6 +52,8 @@ export const handleProcessingDateSuggestions = async ({
    */
   try {
     formats = await attemptSingleDetection({ scopedClusterClient, dates });
+
+    return { formats };
   } catch {
     // Noop, continue to the next step
     // We gracefully handle detection failures by returning an empty response.
