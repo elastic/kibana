@@ -12,8 +12,6 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type IndexApi from '@elastic/elasticsearch/lib/api/api';
 import type GetApi from '@elastic/elasticsearch/lib/api/api/get';
-import type { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
-import type { RuleMigrationsDataResourcesClient } from './rule_migrations_data_resources_client';
 
 describe('RuleMigrationsDataMigrationClient', () => {
   let ruleMigrationsDataMigrationClient: RuleMigrationsDataMigrationClient;
@@ -129,45 +127,25 @@ describe('RuleMigrationsDataMigrationClient', () => {
     });
   });
 
-  describe('delete', () => {
-    const mockedRulesClient = {
-      getIndexName: jest.fn().mockReturnValue('.mocked-rule-index'),
-      get: jest.fn().mockReturnValue({ total: 2, data: [{ id: 'rule1' }, { id: 'rule2' }] }),
-    } as unknown as jest.Mocked<RuleMigrationsDataRulesClient>;
-
-    const mockedResourcesClient = {
-      getIndexName: jest.fn().mockReturnValue('.mocked-resource-index'),
-      get: jest.fn().mockReturnValue([{ id: 'resource1' }, { id: 'resource2' }]),
-    } as unknown as jest.Mocked<RuleMigrationsDataResourcesClient>;
-
+  describe('prepareDelete', () => {
     beforeEach(() => jest.clearAllMocks());
 
     it('should delete the migration and associated rules and resources', async () => {
       const migrationId = 'testId';
       const index = '.kibana-siem-rule-migrations';
 
-      await ruleMigrationsDataMigrationClient.delete({
+      const operations = await ruleMigrationsDataMigrationClient.prepareDelete({
         id: migrationId,
-        rulesClient: mockedRulesClient,
-        resourcesClient: mockedResourcesClient,
       });
 
-      expect(mockedResourcesClient.getIndexName).toHaveBeenCalled();
-      expect(mockedResourcesClient.get).toHaveBeenCalledWith(migrationId);
-
-      expect(mockedRulesClient.getIndexName).toHaveBeenCalled();
-      expect(mockedRulesClient.get).toHaveBeenCalledWith(migrationId);
-
-      expect(esClient.asInternalUser.bulk).toHaveBeenCalledWith({
-        refresh: 'wait_for',
-        operations: [
-          { delete: { _id: migrationId, _index: index } },
-          { delete: { _id: 'rule1', _index: '.mocked-rule-index' } },
-          { delete: { _id: 'rule2', _index: '.mocked-rule-index' } },
-          { delete: { _id: 'resource1', _index: '.mocked-resource-index' } },
-          { delete: { _id: 'resource2', _index: '.mocked-resource-index' } },
-        ],
-      });
+      expect(operations).toMatchObject([
+        {
+          delete: {
+            _index: index,
+            _id: migrationId,
+          },
+        },
+      ]);
     });
   });
 });

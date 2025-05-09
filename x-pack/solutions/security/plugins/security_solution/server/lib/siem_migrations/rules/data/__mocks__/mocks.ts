@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleMigrationsDataClient } from '../rule_migrations_data_client';
 import type { RuleMigrationsDataIntegrationsClient } from '../rule_migrations_data_integrations_client';
 import type { RuleMigrationsDataLookupsClient } from '../rule_migrations_data_lookups_client';
 import type { RuleMigrationsDataMigrationClient } from '../rule_migrations_data_migration_client';
@@ -64,14 +65,16 @@ export const mockRuleMigrationsDataMigrationsClient = {
 } as unknown as jest.Mocked<RuleMigrationsDataMigrationClient>;
 
 // Rule migrations data client
-export const createRuleMigrationsDataClientMock = () => ({
-  rules: mockRuleMigrationsDataRulesClient,
-  resources: mockRuleMigrationsDataResourcesClient,
-  integrations: mockRuleMigrationsDataIntegrationsClient,
-  prebuiltRules: mockRuleMigrationsDataPrebuiltRulesClient,
-  lookups: mockRuleMigrationsDataLookupsClient,
-  migrations: mockRuleMigrationsDataMigrationsClient,
-});
+export const createRuleMigrationsDataClientMock = () =>
+  ({
+    rules: mockRuleMigrationsDataRulesClient,
+    resources: mockRuleMigrationsDataResourcesClient,
+    integrations: mockRuleMigrationsDataIntegrationsClient,
+    prebuiltRules: mockRuleMigrationsDataPrebuiltRulesClient,
+    lookups: mockRuleMigrationsDataLookupsClient,
+    migrations: mockRuleMigrationsDataMigrationsClient,
+    deleteMigration: jest.fn().mockResolvedValue(undefined),
+  } as unknown as jest.MockedObjectDeep<RuleMigrationsDataClient>);
 
 export const MockRuleMigrationsDataClient = jest
   .fn()

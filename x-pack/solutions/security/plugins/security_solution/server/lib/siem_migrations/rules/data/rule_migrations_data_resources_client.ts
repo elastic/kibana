@@ -6,7 +6,11 @@
  */
 
 import { sha256 } from 'js-sha256';
-import type { QueryDslQueryContainer, Duration } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  Duration,
+  BulkOperationContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   RuleMigrationResource,
   RuleMigrationResourceType,
@@ -155,5 +159,24 @@ export class RuleMigrationsDataResourcesClient extends RuleMigrationsDataBaseCli
       }
     }
     return { bool: { filter } };
+  }
+
+  /**
+   *
+   * Prepares bulk ES delete operations for the resources of a given migrationId.
+   *
+   */
+  async prepareDelete(migrationId: string): Promise<BulkOperationContainer[]> {
+    const index = await this.getIndexName();
+    const resourcesToBeDeleted = await this.get(migrationId);
+    const resourcesToBeDeletedDocIds = resourcesToBeDeleted.map((resource) => resource.id);
+    const resourcesDeleteOperations = resourcesToBeDeletedDocIds.map((docId) => ({
+      delete: {
+        _id: docId,
+        _index: index,
+      },
+    }));
+
+    return resourcesDeleteOperations;
   }
 }

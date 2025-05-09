@@ -14,6 +14,7 @@ import type {
   AggregationsStringTermsBucket,
   QueryDslQueryContainer,
   Duration,
+  BulkOperationContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { InternalUpdateRuleMigrationRule, StoredRuleMigration } from '../types';
@@ -414,5 +415,24 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
       filter.push(searchConditions.isNotUntranslatable());
     }
     return { bool: { filter } };
+  }
+
+  /**
+   *
+   * Prepares bulk ES delete operations for the rules based on migrationId.
+   *
+   * */
+  async prepareDelete(migrationId: string): Promise<BulkOperationContainer[]> {
+    const index = await this.getIndexName();
+    const rulesToBeDeleted = await this.get(migrationId);
+    const rulesToBeDeletedDocIds = rulesToBeDeleted.data.map((rule) => rule.id);
+
+    const rulesDeleteOperations = rulesToBeDeletedDocIds.map((docId) => ({
+      delete: {
+        _id: docId,
+        _index: index,
+      },
+    }));
+    return rulesDeleteOperations;
   }
 }

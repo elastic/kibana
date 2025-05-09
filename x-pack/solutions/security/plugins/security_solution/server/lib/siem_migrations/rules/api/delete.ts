@@ -44,14 +44,13 @@ export const registerSiemRuleMigrationsDeleteRoute = (
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
             await siemMigrationAuditLogger.logDeleteMigration({ migrationId });
 
-            // stop the migration task if running
-            await ruleMigrationsClient.task.stop(migrationId);
+            if (ruleMigrationsClient.task.isMigrationRunning(migrationId)) {
+              return res.conflict({
+                body: 'A running migration cannot be deleted. Please stop the migration first and try again',
+              });
+            }
 
-            await ruleMigrationsClient.data.migrations.delete({
-              id: migrationId,
-              rulesClient: ruleMigrationsClient.data.rules,
-              resourcesClient: ruleMigrationsClient.data.resources,
-            });
+            await ruleMigrationsClient.data.deleteMigration(migrationId);
 
             return res.ok();
           } catch (error) {

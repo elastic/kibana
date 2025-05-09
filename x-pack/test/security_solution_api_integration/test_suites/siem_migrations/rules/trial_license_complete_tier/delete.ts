@@ -77,6 +77,35 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('Error handling', () => {
+        it('should return 409 if migration is already running', async () => {
+          // start a migration
+          await ruleMigrationRoutes.addRulesToMigration({
+            migrationId,
+            payload: [splunkRuleWithResources],
+          });
+
+          const response = await ruleMigrationRoutes.start({
+            migrationId,
+            payload: {
+              connector_id: 'preconfigured-bedrock',
+            },
+          });
+
+          expect(response.body).toMatchObject({ started: true });
+
+          const deleteResponse = await ruleMigrationRoutes.delete({
+            migrationId,
+            expectStatusCode: 409,
+          });
+
+          expect(deleteResponse.body).toMatchObject({
+            statusCode: 409,
+            error: 'Conflict',
+            message:
+              'A running migration cannot be deleted. Please stop the migration first and try again',
+          });
+        });
+
         it('should return 404 if migration ID does not exist', async () => {
           const { body } = await ruleMigrationRoutes.delete({
             migrationId: 'non-existing-migration-id',
