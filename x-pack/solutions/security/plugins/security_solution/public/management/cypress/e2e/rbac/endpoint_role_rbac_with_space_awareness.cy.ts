@@ -99,10 +99,10 @@ describe(
 
           return features;
         })
-        // Using `include.members` here because in serverless, an additional privilege shows
-        // up in this list - `Endpoint exceptions`.
-        .should('include.members', [
+        .should('deep.equal', [
           'Endpoint ListAll',
+          'Automatic TroubleshootingNone',
+          'Endpoint ExceptionsAll',
           'Trusted ApplicationsNone',
           'Host Isolation ExceptionsNone',
           'BlocklistNone',
