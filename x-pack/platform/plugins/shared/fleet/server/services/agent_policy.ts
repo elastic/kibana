@@ -103,6 +103,8 @@ import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
 } from '../constants';
 
+import { getNamespaceForSoClient } from './utils/get_so_namespaces';
+
 import { appContextService } from '.';
 
 import { mapAgentPolicySavedObjectToAgentPolicy } from './agent_policies/utils';
@@ -598,28 +600,21 @@ class AgentPolicyService {
   ): Promise<AgentPolicy[]> {
     const logger = this.getLogger('getByIds');
     const savedObjectType = await getAgentPolicySavedObjectType();
+    const namespace = await getNamespaceForSoClient(soClient);
 
     const objects = ids.map((id) => {
       if (typeof id === 'string') {
-        return { ...options, id, type: savedObjectType };
+        return { ...options, id, type: savedObjectType, namespaces: [namespace] };
       }
       return {
         ...options,
         id: id.id,
-        namespaces:
-          savedObjectType === AGENT_POLICY_SAVED_OBJECT_TYPE && id.spaceId
-            ? [id.spaceId]
-            : undefined,
+        namespaces: [id.spaceId ?? namespace],
         type: savedObjectType,
       };
     });
 
-    logger.debug(
-      () =>
-        `Retrieving agent policies soClient scoped to [${soClient.getCurrentNamespace()}] using .bulkGet() with: ${JSON.stringify(
-          objects
-        )}`
-    );
+    logger.debug(() => `Retrieving agent policies with: ${JSON.stringify(objects)}`);
 
     const bulkGetResponse = await soClient
       .bulkGet<AgentPolicySOAttributes>(objects)

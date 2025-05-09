@@ -106,7 +106,7 @@ import {
 
 import { inputNotAllowedInAgentless } from '../../common/services/agentless_policy_helper';
 
-import { getNamespacesForSoClient } from './utils/get_so_namespaces';
+import { getNamespaceForSoClient } from './utils/get_so_namespaces';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
@@ -809,12 +809,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options: PackagePolicyClientFindAllForAgentPolicyOptions = {}
   ): Promise<PackagePolicy[]> {
     const logger = this.getLogger('findAllForAgentPolicy');
+    const namespaces = options.spaceIds ?? [await getNamespaceForSoClient(soClient)];
 
     logger.debug(
       () =>
-        `Finding all package policies for agent policy [${agentPolicyId}] for options.spaceIds [${
-          options.spaceIds
-        }] with soClient scoped to [${soClient.getCurrentNamespace()}]`
+        `Finding all package policies for agent policy [${agentPolicyId}] for spaceIds [${namespaces.join(
+          ', '
+        )}]`
     );
 
     const savedObjectType = await getPackagePolicySavedObjectType();
@@ -825,12 +826,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           agentPolicyId
         )}`,
         perPage: SO_SEARCH_LIMIT,
-        namespaces: options.spaceIds,
+        namespaces,
       })
       .catch((err) => {
         logger.debug(
           () =>
-            `Error encountered while attempting to get all package policies for agent policy [${agentPolicyId}]: ${err.message}`
+            `Error encountered while attempting to get all package policies for agent policy [${agentPolicyId}] for space [${namespaces.join(
+              ', '
+            )}]: ${err.message}`
         );
 
         return catchAndWrapError(err);
@@ -839,9 +842,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (!packagePolicySO) {
       logger.debug(
         () =>
-          `No package policies found for agent policy id [${agentPolicyId}]${
-            options.spaceIds ? ` in spaces [${options.spaceIds.join(', ')}]` : ''
-          }`
+          `No package policies found for agent policy id [${agentPolicyId}] in spaces [${namespaces.join(
+            ', '
+          )}`
       );
       return [];
     }
@@ -872,8 +875,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     ids: string[],
     options: PackagePolicyClientGetByIdsOptions = {}
   ): Promise<PackagePolicy[]> {
+    const logger = this.getLogger('getByIDs');
     const savedObjectType = await getPackagePolicySavedObjectType();
-    const namespaces = options.spaceIds ?? [getNamespacesForSoClient(soClient)];
+    const namespaces = options.spaceIds ?? [await getNamespaceForSoClient(soClient)];
+
+    logger.debug(
+      `Retrieving the following package policies using spaces ids [${namespaces.join(
+        ', '
+      )}]: [${ids.join(', ')}]`
+    );
+
     const packagePolicySO = await soClient
       .bulkGet<PackagePolicySOAttributes>(
         ids.map((id) => ({
@@ -911,6 +922,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     }
 
+    logger.debug(`returning [${packagePolicies.length}] package policies`);
+
     return packagePolicies;
   }
 
@@ -919,7 +932,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options: ListWithKuery & { spaceId?: string }
   ): Promise<ListResult<PackagePolicy>> {
     const savedObjectType = await getPackagePolicySavedObjectType();
-
+    const namespaces = [options?.spaceId ?? (await getNamespaceForSoClient(soClient))];
     const {
       page = 1,
       perPage = 20,
@@ -938,7 +951,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         perPage,
         fields,
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
-        namespaces: options.spaceId ? [options.spaceId] : undefined,
+        namespaces,
       })
       .catch(catchAndWrapError);
 
@@ -965,6 +978,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
   ): Promise<ListResult<string>> {
+    const namespaces = [await getNamespaceForSoClient(soClient)];
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
     const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicies = await soClient
@@ -976,6 +990,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         perPage,
         fields: ['name'],
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+        namespaces,
       })
       .catch(catchAndWrapError);
 
@@ -1258,12 +1273,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   }> {
     const logger = this.getLogger('bulkUpdate');
     const savedObjectType = await getPackagePolicySavedObjectType();
+    const namespaces = options.spaceIds ?? [await getNamespaceForSoClient(soClient)];
 
     logger.debug(
       () =>
-        `Processing [${packagePolicyUpdates.length}] updates for space [${
-          options.spaceIds ?? soClient.getCurrentNamespace()
-        }]`
+        `Processing [${packagePolicyUpdates.length}] updates for space [${namespaces?.join(', ')}]`
     );
 
     for (const packagePolicy of packagePolicyUpdates) {
