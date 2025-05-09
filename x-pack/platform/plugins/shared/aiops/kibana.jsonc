@@ -18,13 +18,13 @@
       "uiActions",
       "embeddable",
       "presentationUtil",
-      "dashboard",
       "fieldFormats",
       "unifiedSearch",
       "share"
     ],
     "optionalPlugins": [
       "cases",
+      "dashboard",
       "observabilityAIAssistant",
       "usageCollection",
       "lens"

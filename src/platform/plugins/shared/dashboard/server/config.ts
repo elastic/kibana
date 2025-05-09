@@ -11,6 +11,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   allowByValueEmbeddables: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

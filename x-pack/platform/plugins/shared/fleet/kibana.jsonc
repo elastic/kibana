@@ -27,12 +27,12 @@
       "taskManager",
       "files",
       "uiActions",
-      "dashboard",
       "fieldsMetadata",
       "logsDataAccess",
       "spaces"
     ],
     "optionalPlugins": [
+      "dashboard",
       "features",
       "cloud",
       "usageCollection",

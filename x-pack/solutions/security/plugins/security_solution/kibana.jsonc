@@ -21,7 +21,6 @@
       "cloud",
       "cloudSecurityPosture",
       "contentManagement",
-      "dashboard",
       "data",
       "dataViews",
       "ecsDataQualityDashboard",
@@ -60,6 +59,7 @@
       "telemetry"
     ],
     "optionalPlugins": [
+      "dashboard",
       "encryptedSavedObjects",
       "fleet",
       "ml",
@@ -79,6 +79,7 @@
       "serverless"
     ],
     "requiredBundles": [
+      "dashboard",
       "esUiShared",
       "fleet",
       "kibanaUtils",

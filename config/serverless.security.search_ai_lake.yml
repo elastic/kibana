@@ -9,6 +9,7 @@ xpack.lens.enabled: false
 
 ### Disable shared plugins
 visualizations.enabled: false
+dashboard.enabled: false
 
 ## Disable plugin features
 xpack.alerting.maintenanceWindow.enabled: false
@@ -40,31 +41,23 @@ xpack.features.overrides:
     privileges:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
-        ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
+        ## We do not need to compose siemV2 from dashboard, maps and visualizations because these functionalities are disabled in this tier
         - feature: "discover_v2"
-          privileges: [ "all" ]
-        - feature: "dashboard_v2"
           privileges: [ "all" ]
       read.composedOf:
         - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "dashboard_v2"
           privileges: [ "read" ]
   siem:
     privileges:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
-        ## We do not need to compose siemV2 from maps and visualizations because these functionalities are disabled in this tier
+        ## We do not need to compose siemV2 from dashboard, maps and visualizations because these functionalities are disabled in this tier
         - feature: "discover_v2"
-          privileges: [ "all" ]
-        - feature: "dashboard_v2"
           privileges: [ "all" ]
         - feature: "savedQueryManagement"
           privileges: [ "all" ]
       read.composedOf:
         - feature: "discover_v2"
-          privileges: [ "read" ]
-        - feature: "dashboard_v2"
           privileges: [ "read" ]
         - feature: "savedQueryManagement"
           privileges: [ "read" ]

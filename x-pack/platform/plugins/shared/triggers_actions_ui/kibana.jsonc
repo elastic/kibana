@@ -26,7 +26,6 @@
       "dataViewEditor",
       "alerting",
       "actions",
-      "dashboard",
       "licensing",
       "expressions",
       "controls",
@@ -35,6 +34,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "dashboard",
       "features",
       "home",
       "lens",
