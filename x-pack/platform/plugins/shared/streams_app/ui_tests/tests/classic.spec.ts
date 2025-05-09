@@ -6,10 +6,12 @@
  */
 
 import { test, expect } from '@kbn/scout';
+import * as testData from '../fixtures/constants';
 
 const DATA_STREAM_NAME = 'my-data-stream';
 test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ esClient, browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ kbnClient, esClient, browserAuth, pageObjects }) => {
+    await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD);
     await esClient.indices.putIndexTemplate({
       name: 'my-index-template',
       index_patterns: [`${DATA_STREAM_NAME}*`],
@@ -40,12 +42,12 @@ test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     await pageObjects.streams.goto();
   });
 
-  test.afterAll(async ({ esClient, apiServices }) => {
+  test.afterAll(async ({ kbnClient, esClient, apiServices }) => {
     await esClient.indices.deleteDataStream({ name: DATA_STREAM_NAME });
     await esClient.indices.deleteIndexTemplate({
       name: 'my-index-template',
     });
-    await apiServices.streams.disable();
+    await kbnClient.savedObjects.cleanStandardList();
   });
 
   test('full flow', async ({ page, esClient, pageObjects }) => {
@@ -73,5 +75,36 @@ test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     // await page.getByRole('button', { name: 'Save changes' }).click();
 
     // await expect(page.getByText("Stream's processors updated")).toBeVisible();
+
+    // Add dashboard
+    await pageObjects.streams.gotoStreamDashboard(DATA_STREAM_NAME);
+    await page.getByRole('button', { name: 'Add a dashboard' }).click();
+    await expect(
+      page
+        .getByTestId('streamsAppAddDashboardFlyoutDashboardsTable')
+        .getByRole('button', { name: 'Some Dashboard' })
+    ).toBeVisible();
+    // eslint-disable-next-line playwright/no-nth-methods
+    await page.getByRole('cell', { name: 'Select row' }).locator('div').first().click();
+    await page.getByRole('button', { name: 'Add dashboard' }).click();
+    await expect(
+      page
+        .getByTestId('streamsAppStreamDetailDashboardsTable')
+        .getByTestId('streamsAppDashboardColumnsLink')
+    ).toHaveText('Some Dashboard');
+
+    // remove dashboard
+    await page
+      .getByTestId('streamsAppStreamDetailDashboardsTable')
+      .getByRole('cell', { name: 'Select row' })
+      .locator('div')
+      // eslint-disable-next-line playwright/no-nth-methods
+      .first()
+      .click();
+
+    await page.getByRole('button', { name: 'Unlink selected' }).click();
+    await expect(
+      page.getByTestId('streamsAppStreamDetailDashboardsTable').getByText('No items found')
+    ).toBeVisible();
   });
 });
