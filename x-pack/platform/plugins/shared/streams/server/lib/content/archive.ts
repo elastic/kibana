@@ -13,11 +13,11 @@ import {
   ContentPackManifest,
   ContentPackSavedObject,
   SUPPORTED_SAVED_OBJECT_TYPE,
-  SupportedSavedObjectType,
   contentPackManifestSchema,
-  isDashboardFile,
+  getEntryTypeByFile,
+  isSupportedEntryType,
+  isSupportedFile,
   isSupportedReferenceType,
-  isSupportedSavedObjectType,
 } from '@kbn/content-packs-schema';
 import AdmZip from 'adm-zip';
 import path from 'path';
@@ -52,15 +52,25 @@ export async function generateArchive(manifest: ContentPackManifest, objects: Co
   const zip = new AdmZip();
   const rootDir = `${manifest.name}-${manifest.version}`;
 
-  objects.forEach((object: ContentPackEntry) => {
-    if (isSupportedSavedObjectType(object)) {
-      const subDir = SUPPORTED_SAVED_OBJECT_TYPE[object.type];
-      zip.addFile(
-        path.join(rootDir, 'kibana', subDir, `${object.id}.json`),
-        Buffer.from(JSON.stringify(object, null, 2))
-      );
-    }
-  });
+  objects
+    .filter((object) => isSupportedEntryType(object.type))
+    .forEach((object: ContentPackEntry) => {
+      const type = object.type;
+      switch (type) {
+        case 'dashboard':
+        case 'index-pattern':
+        case 'lens':
+          const subDir = SUPPORTED_SAVED_OBJECT_TYPE[object.type];
+          zip.addFile(
+            path.join(rootDir, 'kibana', subDir, `${object.id}.json`),
+            Buffer.from(JSON.stringify(object, null, 2))
+          );
+          return;
+
+        default:
+          exhaustiveMatchingGuard(type);
+      }
+    });
 
   zip.addFile(
     path.join(rootDir, 'manifest.yml'),
@@ -102,8 +112,22 @@ async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPack
   const entries = await Promise.all(
     zip
       .getEntries()
-      .filter((entry) => isDashboardFile(rootDir, entry.entryName))
-      .map((entry) => resolveDashboard(rootDir, zip, entry))
+      .filter((entry) => isSupportedFile(rootDir, entry.entryName))
+      .map((entry) => {
+        const type = getEntryTypeByFile(rootDir, entry.entryName);
+        switch (type) {
+          case 'lens':
+          case 'index-pattern':
+            // these are handled by their parent dashboard
+            return [];
+
+          case 'dashboard':
+            return resolveDashboard(rootDir, zip, entry);
+
+          default:
+            exhaustiveMatchingGuard(type);
+        }
+      })
   );
 
   return entries.flat();
@@ -132,7 +156,7 @@ async function resolveDashboard(
   }
 
   const includedReferences = compact(
-    (uniqReferences as Array<{ type: SupportedSavedObjectType; id: string }>).map((ref) =>
+    (uniqReferences as Array<{ type: ContentPackSavedObject['type']; id: string }>).map((ref) =>
       zip.getEntry(
         path.join(rootDir, 'kibana', SUPPORTED_SAVED_OBJECT_TYPE[ref.type], `${ref.id}.json`)
       )
@@ -156,4 +180,8 @@ function assertUncompressedSize(entry: AdmZip.IZipEntry) {
       `Object [${entry.entryName}] exceeds the limit of ${ARCHIVE_ENTRY_MAX_SIZE_BYTES} bytes`
     );
   }
+}
+
+function exhaustiveMatchingGuard(type: never): never {
+  throw new Error(`Content pack entry type [${type}] is not supported`);
 }

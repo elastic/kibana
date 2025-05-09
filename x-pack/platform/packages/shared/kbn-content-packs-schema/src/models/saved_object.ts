@@ -10,25 +10,18 @@ import type { SavedObject } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common/data_views';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import type { ContentPackEntry } from '.';
 
-export const SUPPORTED_SAVED_OBJECT_TYPE = {
+export const SUPPORTED_SAVED_OBJECT_TYPE: Record<ContentPackSavedObject['type'], string> = {
   dashboard: 'dashboard',
   'index-pattern': 'index_pattern',
   lens: 'lens',
 };
 
-export type SupportedSavedObjectType = keyof typeof SUPPORTED_SAVED_OBJECT_TYPE;
-
 export const isSupportedSavedObjectType = (
-  entry: SavedObject<unknown>
+  entry: SavedObject<unknown> | ContentPackEntry
 ): entry is ContentPackSavedObject => {
   return entry.type in SUPPORTED_SAVED_OBJECT_TYPE;
-};
-
-export const isSupportedSavedObjectFile = (filepath: string) => {
-  return Object.values(SUPPORTED_SAVED_OBJECT_TYPE).some(
-    (dir) => path.dirname(filepath) === path.join('kibana', dir)
-  );
 };
 
 export const isDashboardFile = (rootDir: string, filepath: string) => {
@@ -37,13 +30,14 @@ export const isDashboardFile = (rootDir: string, filepath: string) => {
 };
 
 export const isSupportedReferenceType = (type: string) => {
-  const referenceTypes: SupportedSavedObjectType[] = ['index-pattern', 'lens'];
+  const referenceTypes: ContentPackSavedObject['type'][] = ['index-pattern', 'lens'];
   return referenceTypes.some((refType) => refType === type);
 };
 
 export type ContentPackDashboard = SavedObject<DashboardAttributes> & { type: 'dashboard' };
 export type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs> & { type: 'index-pattern' };
 export type ContentPackLens = SavedObject<LensAttributes> & { type: 'lens' };
+
 export type ContentPackSavedObject = ContentPackDashboard | ContentPackDataView | ContentPackLens;
 
 export interface SavedObjectLink {

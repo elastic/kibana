@@ -13,6 +13,7 @@ import {
   ContentPackSavedObject,
   INDEX_PLACEHOLDER,
   findConfiguration,
+  isSupportedSavedObjectType,
 } from '@kbn/content-packs-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -87,7 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('puts placeholders for patterns matching the source stream', async () => {
         expect(contentPack.entries.length).to.eql(2);
-        contentPack.entries.forEach((entry) => {
+        contentPack.entries.filter(isSupportedSavedObjectType).forEach((entry) => {
           const { patterns } = findConfiguration(entry);
           expect(patterns).to.eql([INDEX_PLACEHOLDER]);
         });

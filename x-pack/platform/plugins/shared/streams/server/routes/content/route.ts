@@ -14,6 +14,7 @@ import {
   ContentPack,
   contentPackIncludedObjectsSchema,
   isIncludeAll,
+  isSupportedSavedObjectType,
 } from '@kbn/content-packs-schema';
 import type { SavedObject } from '@kbn/core/server';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
@@ -166,11 +167,12 @@ const importContentRoute = createServerRoute({
         throw err;
       });
 
-    const links = savedObjectLinks(contentPack.entries, storedContentPack);
+    const savedObjectEntries = contentPack.entries.filter(isSupportedSavedObjectType);
+    const links = savedObjectLinks(savedObjectEntries, storedContentPack);
     const savedObjects = prepareForImport({
       target: params.path.name,
       include: params.body.include,
-      savedObjects: contentPack.entries,
+      savedObjects: savedObjectEntries,
       links,
     });
 
