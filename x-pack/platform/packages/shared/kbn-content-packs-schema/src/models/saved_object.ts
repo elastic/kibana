@@ -32,7 +32,7 @@ export const isSupportedSavedObjectFile = (filepath: string) => {
 };
 
 export const isDashboardFile = (rootDir: string, filepath: string) => {
-  const subDir = SUPPORTED_SAVED_OBJECT_TYPE['dashboard'];
+  const subDir = SUPPORTED_SAVED_OBJECT_TYPE.dashboard;
   return path.dirname(filepath) === path.join(rootDir, 'kibana', subDir);
 };
 
