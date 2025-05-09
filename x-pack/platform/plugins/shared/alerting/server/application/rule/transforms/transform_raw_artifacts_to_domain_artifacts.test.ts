@@ -12,7 +12,7 @@ import { transformRawArtifactsToDomainArtifacts } from './transform_raw_artifact
 describe('transformRawArtifactsToDomainArtifacts', () => {
   it('should return default artifacts if rawArtifacts is undefined', () => {
     const result = transformRawArtifactsToDomainArtifacts('1', undefined, []);
-    expect(result).toEqual({ dashboards: [] });
+    expect(result).toEqual({ dashboards: [], investigation_guide: { blob: '' } });
   });
 
   it('should return artifacts with injected references', () => {
@@ -48,6 +48,7 @@ describe('transformRawArtifactsToDomainArtifacts', () => {
           id: 'dashboard_1',
         },
       ],
+      investigation_guide: { blob: '' },
     });
   });
 
@@ -55,7 +56,7 @@ describe('transformRawArtifactsToDomainArtifacts', () => {
     const rawArtifacts: RawRule['artifacts'] = {};
     const references: SavedObjectReference[] = [];
     const result = transformRawArtifactsToDomainArtifacts('1', rawArtifacts, references);
-    expect(result).toEqual({ dashboards: [] });
+    expect(result).toEqual({ dashboards: [], investigation_guide: { blob: '' } });
   });
 
   it('should return artifacts with injected references and empty dashboards array if no dashboards in rawArtifacts', () => {
@@ -68,7 +69,7 @@ describe('transformRawArtifactsToDomainArtifacts', () => {
       },
     ];
     const result = transformRawArtifactsToDomainArtifacts('1', rawArtifacts, references);
-    expect(result).toEqual({ dashboards: [] });
+    expect(result).toEqual({ dashboards: [], investigation_guide: { blob: '' } });
   });
 
   it('throws an error if no references found', () => {

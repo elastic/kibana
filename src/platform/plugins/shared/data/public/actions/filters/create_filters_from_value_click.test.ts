@@ -237,6 +237,44 @@ describe('createFiltersFromClickEvent', () => {
       expect(queryString).toBeUndefined();
     });
 
+    test('should support multiple filters', async () => {
+      dataPoints[0].table.columns[0] = {
+        name: 'columnA',
+        id: 'columnA',
+        meta: {
+          type: 'string',
+        },
+      };
+      dataPoints.push({
+        table: {
+          columns: [
+            {
+              name: 'columnB',
+              id: 'columnB',
+              meta: {
+                type: 'string',
+              },
+            },
+          ],
+          rows: [
+            {
+              columnB: '2048',
+            },
+          ],
+        },
+        column: 0,
+        row: 0,
+        value: 'test',
+      });
+      const queryString = await appendFilterToESQLQueryFromValueClickAction({
+        data: dataPoints,
+        query: { esql: 'from meow' },
+      });
+      expect(queryString).toEqual(`from meow
+| WHERE \`columnA\`=="2048"
+AND \`columnB\`=="2048"`);
+    });
+
     test('should return null if no aggregate query is present', async () => {
       dataPoints[0].table.columns[0] = {
         name: 'test',
