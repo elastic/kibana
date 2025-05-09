@@ -15,8 +15,6 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -93,47 +91,6 @@ export const RuleDetails = () => {
       });
     },
     [dispatch, formData.artifacts]
-  );
-
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          label={RULE_NAME_INPUT_TITLE}
-          isInvalid={!!baseErrors?.name?.length}
-          error={baseErrors?.name}
-        >
-          <EuiFieldText
-            fullWidth
-            value={name}
-            placeholder={RULE_NAME_INPUT_TITLE}
-            onChange={onNameChange}
-            data-test-subj="ruleDetailsNameInput"
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          label={RULE_TAG_INPUT_TITLE}
-          labelAppend={OptionalFieldLabel}
-          isInvalid={!!baseErrors?.tags?.length}
-          error={baseErrors?.tags}
-        >
-          <EuiComboBox
-            fullWidth
-            noSuggestions
-            placeholder={RULE_TAG_PLACEHOLDER}
-            data-test-subj="ruleDetailsTagsInput"
-            selectedOptions={tagsOptions}
-            onCreateOption={onAddTag}
-            onChange={onSetTag}
-            onBlur={onBlur}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 
   return (
