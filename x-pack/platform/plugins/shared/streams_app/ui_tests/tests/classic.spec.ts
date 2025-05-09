@@ -63,7 +63,6 @@ test.describe('Classic Streams', { tag: ['@ess', '@svlOblt'] }, () => {
     ).toBeVisible();
 
     // Update field extraction
-    // uncomment when fixed classic stream extract field is fixed
     await pageObjects.streams.gotoExtractFieldTab(DATA_STREAM_NAME);
     await page.getByText('Add a processor').click();
 
