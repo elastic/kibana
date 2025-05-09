@@ -564,7 +564,7 @@ export const CONFIRM_RULE_SAVE_MESSAGE_TEXT = i18n.translate(
 export const RULE_FORM_PAGE_RULE_DEFINITION_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinitionTitle',
   {
-    defaultMessage: 'Rule definition',
+    defaultMessage: 'Definition',
   }
 );
 
@@ -599,7 +599,7 @@ export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_DESCRIPTION = i18n.transl
 export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetailsTitle',
   {
-    defaultMessage: 'Rule details',
+    defaultMessage: 'Details',
   }
 );
 
