@@ -75,7 +75,7 @@ node scripts/genai/vault/retrieve_secrets.js --vault siem-team
 node scripts/genai/vault/upload_secrets.js --vault ci-prod
 ```
 
-Or you can get the raw write command and share it with them via https://p.elstc.co to make updating secrets a little easier:
+Or you can run the below command and paste the results into https://p.elstc.co and share the link with them to make updating secrets a little easier: 
 
 ```
 node scripts/genai/vault/get_command --format vault-write --vault ci-prod
