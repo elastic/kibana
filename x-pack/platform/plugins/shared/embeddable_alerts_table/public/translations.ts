@@ -73,7 +73,7 @@ export const ADD_ALERTS_TABLE_ACTION_LABEL = i18n.translate(
 );
 
 export const ALERTS_PANEL_LABEL = i18n.translate('xpack.embeddableAlertsTable.alertsPanelLabel', {
-  defaultMessage: 'Alerts panel',
+  defaultMessage: 'alerts panel',
 });
 
 export const CONFIG_EDITOR_ADD_TABLE_TITLE = i18n.translate(
