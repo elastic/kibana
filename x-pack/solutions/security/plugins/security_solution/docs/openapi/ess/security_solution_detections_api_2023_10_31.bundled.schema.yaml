@@ -4474,10 +4474,10 @@ components:
         - $ref: '#/components/schemas/BulkActionEditPayloadTags'
         - $ref: '#/components/schemas/BulkActionEditPayloadIndexPatterns'
         - $ref: '#/components/schemas/BulkActionEditPayloadInvestigationFields'
-        - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
         - $ref: '#/components/schemas/BulkActionEditPayloadTimeline'
         - $ref: '#/components/schemas/BulkActionEditPayloadRuleActions'
         - $ref: '#/components/schemas/BulkActionEditPayloadSchedule'
+        - $ref: '#/components/schemas/BulkActionEditPayloadAlertSuppression'
     BulkActionEditPayloadAddSetAlertSuppression:
       type: object
       properties:
