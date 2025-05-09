@@ -46,6 +46,7 @@
       "spaces",
       "serverless",
       "licensing",
+      "fieldsMetadata",
       "visualizations"
     ],
     "requiredBundles": [
@@ -58,7 +59,7 @@
       "charts",
       "esqlDataGrid",
       "visualizations",
-      "esql",
+      "esql"
     ],
     "extraPublicDirs": ["common/constants"]
   }
