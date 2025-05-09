@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { trace } from '@opentelemetry/api';
-
-export function getLangtraceTracer() {
-  return trace.getTracer('langtrace');
-}
+export const BAGGAGE_TRACKING_BEACON_KEY = 'kibana.inference.tracing';
+export const BAGGAGE_TRACKING_BEACON_VALUE = '1';

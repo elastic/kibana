@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-export function getLangtraceSpanAttributes() {
-  return {
-    'langtrace.sdk.name': '@langtrase/typescript-sdk',
-    'langtrace.service.type': 'llm',
-    'langtrace.service.version': 'unknown',
-    'langtrace.version': '2.1.0',
-  };
-}
+export const IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME = 'kibana.inference.root';
