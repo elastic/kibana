@@ -8,7 +8,8 @@
  */
 
 import { BehaviorSubject, map, merge } from 'rxjs';
-import { StateManager, WithAllKeys } from './types';
+import { StateComparators, StateManager, WithAllKeys } from './types';
+import { runComparator } from './state_comparators';
 
 type SubjectOf<StateType extends object> = BehaviorSubject<WithAllKeys<StateType>[keyof StateType]>;
 
@@ -66,19 +67,36 @@ export const initializeStateManager = <StateType extends object>(
   };
 
   /**
-   * Reinitializes the state of this state manager. Takes a partial state object that may be undefined.
+   * Reinitializes the state of this state manager.
    *
-   * This method resets ALL keys in this state, if a key is not present in the new state, it will be set to the default value.
+   * Resets ALL keys when comparators are not provided.
+   * Resets CHANGED keys when comparators are provided.
+   *
+   * if a key is not present in the new state, it will be set to the default value.
    */
-  const reinitializeState = (newState?: Partial<StateType>) => {
+  const reinitializeState = (
+    newState?: Partial<StateType>,
+    comparators?: StateComparators<StateType>
+  ) => {
+    const latestState = comparators ? getLatestState() : undefined;
     for (const [key, subject] of Object.entries<SubjectOf<StateType>>(
       keyToSubjectMap as { [key: string]: SubjectOf<StateType> }
     )) {
-      subject.next(newState?.[key as keyof StateType] ?? defaultState[key as keyof StateType]);
+      const shouldReset = comparators
+        ? !runComparator(
+            comparators[key as keyof StateType],
+            latestState,
+            newState,
+            latestState?.[key as keyof StateType] ?? defaultState[key as keyof StateType],
+            newState?.[key as keyof StateType] ?? defaultState[key as keyof StateType]
+          ) // reset CHANGED keys when comparators are provided
+        : true; // reset ALL keys when comparators are not provided
+
+      if (shouldReset) {
+        subject.next(newState?.[key as keyof StateType] ?? defaultState[key as keyof StateType]);
+      }
     }
   };
-
-  // SERIALIZED STATE ONLY TODO: Remember that the state manager DOES NOT contain comparators, because it's meant for Runtime state, and comparators should be written against serialized state.
 
   return {
     api,
