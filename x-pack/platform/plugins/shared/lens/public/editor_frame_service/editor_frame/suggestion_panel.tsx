@@ -25,6 +25,7 @@ import {
   euiFocusRing,
   useEuiFontSize,
   euiTextTruncate,
+  hexToRgb,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
@@ -606,6 +607,7 @@ export function SuggestionPanel({
       </h3>
     </EuiTitle>
   );
+  const rgbDanger = hexToRgb(euiTheme.colors.danger);
   return (
     <EuiAccordion
       id="lensSuggestionsPanel"
@@ -670,10 +672,10 @@ export function SuggestionPanel({
           padding-top: ${euiTheme.size.xs};
           mask-image: linear-gradient(
             to right,
-            rgba(255, 0, 0, 0.1) 0%,
-            rgb(255, 0, 0) 5px,
-            rgb(255, 0, 0) calc(100% - 5px),
-            rgba(255, 0, 0, 0.1) 100%
+            rgba(${rgbDanger.join(', ')}, 0.1) 0%,
+            ${euiTheme.colors.danger} 5px,
+            ${euiTheme.colors.danger} calc(100% - 5px),
+            rgba(${rgbDanger.join(', ')}, 0.1) 100%
           );
         `}
       >
