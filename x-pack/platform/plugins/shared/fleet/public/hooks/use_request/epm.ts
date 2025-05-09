@@ -36,8 +36,8 @@ import type {
   GetOneBulkOperationPackagesResponse,
   GetStatsResponse,
   BulkUninstallPackagesRequest,
-  DeletePackageInputAssetsRequest,
-  DeletePackageInputAssetsResponse,
+  DeletePackageDatastreamAssetsRequest,
+  DeletePackageDatastreamAssetsResponse,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -469,12 +469,12 @@ export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
   });
 };
 
-export const sendDeleteInputPackageAssets = (
-  { pkgName, pkgVersion }: DeletePackageInputAssetsRequest['params'],
-  query: DeletePackageInputAssetsRequest['query']
+export const sendDeletePackageDatastreamAssets = (
+  { pkgName, pkgVersion }: DeletePackageDatastreamAssetsRequest['params'],
+  query: DeletePackageDatastreamAssetsRequest['query']
 ) => {
-  return sendRequest<DeletePackageInputAssetsResponse>({
-    path: epmRouteService.getDeleteInputPackageAssets(pkgName, pkgVersion),
+  return sendRequest<DeletePackageDatastreamAssetsResponse>({
+    path: epmRouteService.getDeletePackageDatastreamAssets(pkgName, pkgVersion),
     method: 'delete',
     version: API_VERSIONS.public.v1,
     query,

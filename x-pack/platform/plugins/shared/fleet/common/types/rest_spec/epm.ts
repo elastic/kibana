@@ -233,7 +233,7 @@ export type GetInputsTemplatesResponse =
       inputs: any;
     };
 
-export interface DeletePackageInputAssetsRequest {
+export interface DeletePackageDatastreamAssetsRequest {
   params: {
     pkgName: string;
     pkgVersion: string;
@@ -243,6 +243,6 @@ export interface DeletePackageInputAssetsRequest {
   };
 }
 
-export interface DeletePackageInputAssetsResponse {
+export interface DeletePackageDatastreamAssetsResponse {
   success: boolean;
 }

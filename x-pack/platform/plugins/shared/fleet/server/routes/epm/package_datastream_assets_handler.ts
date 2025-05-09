@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
 import { appContextService, packagePolicyService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages/get';
-import type { DeletePackageInputAssetsRequestSchema, FleetRequestHandler } from '../../types';
+import type { DeletePackageDatastreamAssetsRequestSchema, FleetRequestHandler } from '../../types';
 import {
   checkExistingDataStreamsAreFromDifferentPackage,
   findDataStreamsFromDifferentPackages,
@@ -18,9 +18,9 @@ import {
   removeAssetsForInputPackagePolicy,
 } from '../../services/epm/packages/input_type_packages';
 
-export const deleteInputPackageAssetsHandler: FleetRequestHandler<
-  TypeOf<typeof DeletePackageInputAssetsRequestSchema.params>,
-  TypeOf<typeof DeletePackageInputAssetsRequestSchema.query>
+export const DeletePackageDatastreamAssetsHandler: FleetRequestHandler<
+  TypeOf<typeof DeletePackageDatastreamAssetsRequestSchema.params>,
+  TypeOf<typeof DeletePackageDatastreamAssetsRequestSchema.query>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;

@@ -19,7 +19,7 @@ import {
   useMultipleAgentPolicies,
   useLink,
   useDeletePackagePolicyMutation,
-  sendDeleteInputPackageAssets,
+  sendDeletePackageDatastreamAssets,
 } from '../hooks';
 import { AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy, PackagePolicyPackage } from '../types';
@@ -28,7 +28,7 @@ interface Props {
   agentPolicies?: AgentPolicy[];
   from?: 'fleet-policy-list' | undefined;
   showInputPackageWarning?: boolean;
-  packagePolicyPackage?: PackagePolicyPackage;
+  packagePolicyPackage: PackagePolicyPackage;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }
 
@@ -184,8 +184,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         onSuccessCallback.current(successfulResults.map((result) => result.id));
       }
 
-      if (showInputPackageWarning && packagePolicyPackage) {
-        const deleteAssetsResponse = await sendDeleteInputPackageAssets(
+      if (showInputPackageWarning) {
+        await sendDeletePackageDatastreamAssets(
           { pkgName: packagePolicyPackage.name, pkgVersion: packagePolicyPackage.version },
           { packagePolicyId: packagePolicies[0] }
         );

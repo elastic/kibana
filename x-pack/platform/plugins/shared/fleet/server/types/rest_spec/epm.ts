@@ -344,7 +344,7 @@ export const InstallKibanaAssetsResponseSchema = schema.object({
   success: schema.boolean(),
 });
 
-export const DeletePackageInputAssetsResponseSchema = schema.object({
+export const DeletePackageDatastreamAssetsResponseSchema = schema.object({
   success: schema.boolean(),
 });
 
@@ -668,7 +668,7 @@ export const DeleteKibanaAssetsRequestSchema = {
   }),
 };
 
-export const DeletePackageInputAssetsRequestSchema = {
+export const DeletePackageDatastreamAssetsRequestSchema = {
   params: schema.object({
     pkgName: schema.string(),
     pkgVersion: schema.string(),
