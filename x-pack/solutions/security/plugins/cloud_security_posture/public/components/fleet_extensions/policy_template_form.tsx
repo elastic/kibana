@@ -9,7 +9,6 @@ import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
-import semverGte from 'semver/functions/gte';
 import {
   EuiCallOut,
   EuiFieldText,
