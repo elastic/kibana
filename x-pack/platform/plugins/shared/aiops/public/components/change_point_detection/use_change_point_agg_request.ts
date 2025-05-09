@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -72,6 +72,8 @@ function getChangePointDetectionRequestBody(
               script: 'params.p_value <= 1',
             },
           },
+          // Note: This sorting only applies to buckets within a single request,
+          // not across all requests of the composite aggregation.
           sort: {
             bucket_sort: {
               sort: [{ 'change_point_request.p_value': { order: 'asc' } }],
@@ -127,7 +129,9 @@ export function useChangePointResults(
   const { splitFieldsOptions, metricFieldOptions } = useChangePointDetectionControlsContext();
   const { refreshTimestamp: refresh } = useReload();
 
-  const [results, setResults] = useState<ChangePointAnnotation[]>([]);
+  const [validChangePoints, setValidChangePoints] = useState<ChangePointAnnotation[]>([]);
+  const firstRawChangePoint = useRef<ChangePointAnnotation | null>(null);
+
   /**
    * null also means the fetching has been complete
    */
@@ -145,7 +149,8 @@ export function useChangePointResults(
 
   const reset = useCallback(() => {
     cancelRequest();
-    setResults([]);
+    setValidChangePoints([]);
+    firstRawChangePoint.current = null;
   }, [cancelRequest]);
 
   const fetchResults = useCallback(
@@ -153,7 +158,7 @@ export function useChangePointResults(
       try {
         // For split field with no cardinality, return empty results immediately
         if (!isSingleMetric && !totalAggPages) {
-          setResults([]);
+          setValidChangePoints([]);
           setProgress(null);
           return;
         }
@@ -214,7 +219,7 @@ export function useChangePointResults(
           return;
         }
 
-        let isFetchCompleted = !(
+        const isFetchCompleted = !(
           isDefined(result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm) &&
           pageNumber < totalAggPages
         );
@@ -231,7 +236,7 @@ export function useChangePointResults(
 
         // If there are no buckets on first page, it means there is no data for the selected time range
         if (pageNumber === 1 && hasNoBuckets) {
-          setResults([]);
+          setValidChangePoints([]);
           setProgress(null);
           return;
         }
@@ -240,7 +245,7 @@ export function useChangePointResults(
           isFetchCompleted ? null : Math.min(Math.round((pageNumber / totalAggPages) * 100), 100)
         );
 
-        const changePointAnnotations = buckets.map((v) => {
+        const currentRawChangePoints = buckets.map((v) => {
           const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
           const timeAsString = v.change_point_request.bucket?.key;
           const rawPValue = v.change_point_request.type[changePointType].p_value;
@@ -266,39 +271,40 @@ export function useChangePointResults(
           } as ChangePointAnnotation;
         });
 
+        // Store first raw change point from first request
+        if (pageNumber === 1 && !firstRawChangePoint.current && currentRawChangePoints.length > 0) {
+          firstRawChangePoint.current = currentRawChangePoints[0];
+        }
+
         // Filter for real change points
-        let groups = changePointAnnotations.filter(
+        let currentValidChangePoints = currentRawChangePoints.filter(
           (v) => v.kind === 'changePoint' && !EXCLUDED_CHANGE_POINT_TYPES.has(v.type)
         );
 
         if (Array.isArray(requestParams.changePointType)) {
-          groups = groups.filter(
+          currentValidChangePoints = currentValidChangePoints.filter(
             (v) => v.kind === 'changePoint' && requestParams.changePointType!.includes(v.type)
           );
         }
 
-        // If filtering removed all results but we have buckets,
-        // it means we have data but no change points
-        if (groups.length === 0 && changePointAnnotations.length > 0) {
-          const firstBucket = changePointAnnotations[0];
-          groups = [
-            {
-              ...firstBucket,
-              kind: 'noChangePoints',
-              label: 'No change points found',
-              p_value: null,
-              timestamp: null,
-            },
-          ];
+        setValidChangePoints((prev) => {
+          const hasNoValidChangePoints = prev.length === 0 && currentValidChangePoints.length === 0;
 
-          // Results are sorted by p_value, so we can stop fetching at this point,
-          // if we have no change points
-          isFetchCompleted = true;
-          setProgress(null);
-        }
+          // If there are no valid change points, and we have data, and the fetches are complete,
+          // return the first raw change point as no change points found
+          if (hasNoValidChangePoints && isFetchCompleted && firstRawChangePoint.current) {
+            return [
+              {
+                ...firstRawChangePoint.current,
+                kind: 'noChangePoints',
+                label: 'No change points found',
+                p_value: null,
+                timestamp: null,
+              },
+            ];
+          }
 
-        setResults((prev) => {
-          return (prev ?? []).concat(groups);
+          return (prev ?? []).concat(currentValidChangePoints);
         });
 
         if (
@@ -376,7 +382,7 @@ export function useChangePointResults(
   );
 
   return {
-    results,
+    results: validChangePoints,
     isLoading: progress !== null,
     reset,
     progress,
