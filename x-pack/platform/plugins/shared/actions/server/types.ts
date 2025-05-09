@@ -18,6 +18,7 @@ import type {
   IScopedClusterClient,
 } from '@kbn/core/server';
 import type { AnySchema } from 'joi';
+import type { checkServerIdentity } from 'tls';
 import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import type { ServiceParams } from './sub_action_framework/types';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -267,6 +268,8 @@ export interface SSLSettings {
   key?: Buffer;
   passphrase?: string;
   ca?: Buffer;
+  checkServerIdentity?: typeof checkServerIdentity;
+  rejectUnauthorized?: boolean;
 }
 
 export interface ConnectorToken extends SavedObjectAttributes {

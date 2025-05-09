@@ -32,19 +32,10 @@ export function getCustomAgents(
     sslOverrides?.verificationMode ?? generalSSLSettings.verificationMode,
     sslOverrides
   );
-  // the default for rejectUnauthorized is the global setting, which can
-  // be overridden (below) with a custom host setting
-  // Apply sslOverrides for cert, key, ca, and checkServerIdentity
-  const sslOptions: AgentOptions = {
-    ...agentSSLOptions,
-    cert: sslOverrides?.cert,
-    key: sslOverrides?.key,
-    ca: sslOverrides?.ca,
-    checkServerIdentity: sslOverrides?.checkServerIdentity,
-  };
+
   const defaultAgents = {
     httpAgent: undefined,
-    httpsAgent: new HttpsAgent(sslOptions),
+    httpsAgent: new HttpsAgent(agentSSLOptions),
   };
 
   // Get the current proxy settings, and custom host settings for this URL.
@@ -71,7 +62,8 @@ export function getCustomAgents(
     // This is where the global rejectUnauthorized is overridden by a custom host
     const customHostNodeSSLOptions = getNodeSSLOptions(
       logger,
-      sslSettingsFromConfig.verificationMode
+      sslSettingsFromConfig.verificationMode,
+      sslOverrides
     );
     if (customHostNodeSSLOptions.rejectUnauthorized !== undefined) {
       agentOptions.rejectUnauthorized = customHostNodeSSLOptions.rejectUnauthorized;
@@ -119,7 +111,8 @@ export function getCustomAgents(
 
   const proxyNodeSSLOptions = getNodeSSLOptions(
     logger,
-    proxySettings.proxySSLSettings.verificationMode
+    proxySettings.proxySSLSettings.verificationMode,
+    sslOverrides
   );
   // At this point, we are going to use a proxy, so we need new agents.
   // We will though, copy over the calculated ssl options from above, into
@@ -132,11 +125,6 @@ export function getCustomAgents(
     headers: proxySettings.proxyHeaders,
     // do not fail on invalid certs if value is false
     ...proxyNodeSSLOptions,
-    // Apply sslOverrides for proxy agent
-    cert: sslOverrides?.cert,
-    key: sslOverrides?.key,
-    ca: sslOverrides?.ca,
-    checkServerIdentity: sslOverrides?.checkServerIdentity,
   }) as unknown as HttpsAgent;
   // vsCode wasn't convinced HttpsProxyAgent is an https.Agent, so we convinced it
 
