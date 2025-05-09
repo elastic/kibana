@@ -13,14 +13,7 @@ import { getIsDarkMode } from '../../../../../kibana_services';
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
-  const styles = useMemo(
-    () =>
-      css({
-        margin: `0 ${euiTheme.size.xs}`,
-      }),
-    [euiTheme]
-  );
-  return styles;
+  return useMemo(() => css({ margin: `0 ${euiTheme.size.xs}` }), [euiTheme]);
 };
 
 export const PrependButton = ({ value, svg }: { value: string; svg: string }) => {

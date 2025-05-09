@@ -271,7 +271,6 @@ export class CustomIconModal extends Component<Props, State> {
               showInput
               showLabels
               compressed
-              className="mapsCutoffRange"
               onChange={this._handleCutoffChange}
             />
           </EuiFormRow>

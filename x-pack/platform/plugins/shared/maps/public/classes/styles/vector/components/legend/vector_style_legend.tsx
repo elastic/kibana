@@ -38,11 +38,10 @@ export function VectorStyleLegend({
   const legendRows = [];
 
   const { euiTheme } = useEuiTheme();
-  const { spacerStyles } = useMemo(() => {
-    return {
-      spacerStyles: css({ '&:not(:last-child)': { marginBottom: euiTheme.size.s } }),
-    };
-  }, [euiTheme]);
+  const spacerStyles = useMemo(
+    () => css({ '&:not(:last-child)': { marginBottom: euiTheme.size.s } }),
+    [euiTheme]
+  );
 
   for (let i = 0; i < styles.length; i++) {
     const styleMetaDataRequest = styles[i].isDynamic()

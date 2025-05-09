@@ -67,7 +67,5 @@ export function Category({
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
-
-  const styles = useMemo(() => css({ width: euiTheme.size.l }), [euiTheme]);
-  return styles;
+  return useMemo(() => css({ width: euiTheme.size.l }), [euiTheme]);
 };

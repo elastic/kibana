@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
+import { render, screen } from '@testing-library/react';
 import { CustomIconModal } from './custom_icon_modal';
+import { faker } from '@faker-js/faker';
 
 jest.mock('../../../../../kibana_services', () => ({
   getUsageCollection: () => {
@@ -17,6 +17,44 @@ jest.mock('../../../../../kibana_services', () => ({
     };
   },
 }));
+jest.mock('@kbn/mapbox-gl', () => {
+  const zoomTo = jest.fn();
+  const setCenter = jest.fn();
+  const fitBounds = jest.fn();
+  return {
+    maplibregl: {
+      mocks: {
+        zoomTo,
+        setCenter,
+        fitBounds,
+      },
+      setRTLTextPlugin: jest.fn(),
+      Map: jest.fn().mockImplementation(() => ({
+        on: jest.fn(),
+        getLayer: () => '',
+        removeLayer: jest.fn(),
+        once: (eventName: string, handler: Function) => handler(),
+        remove: () => jest.fn(),
+        getCanvas: () => ({ clientWidth: 512, clientHeight: 512 }),
+        getCenter: () => ({ lat: 20, lng: 20 }),
+        getZoom: () => 3,
+        zoomTo,
+        setCenter,
+        fitBounds,
+        addControl: jest.fn(),
+        addLayer: jest.fn(),
+        dragRotate: {
+          disable: jest.fn(),
+        },
+        touchZoomRotate: {
+          disableRotation: jest.fn(),
+        },
+      })),
+      MapboxOptions: jest.fn(),
+      NavigationControl: jest.fn(),
+    },
+  };
+});
 
 const defaultProps = {
   cutoff: 0.25,
@@ -27,13 +65,35 @@ const defaultProps = {
 };
 
 test('should render an empty custom icon modal', () => {
-  const component = shallow(<CustomIconModal {...defaultProps} />);
+  render(<CustomIconModal {...defaultProps} />);
+  const header = screen.getByRole('heading', { name: 'Custom Icon' });
+  expect(header).toHaveTextContent('Custom Icon');
+  expect(screen.getByRole('dialog')).toHaveTextContent(`Select or drag and drop an SVG icon`);
 
-  expect(component).toMatchSnapshot();
+  // Check if modal dialog is present
+  const dialog = screen.getByRole('dialog');
+  expect(dialog).toBeInTheDocument();
+
+  // Check for file picker prompt text
+  expect(screen.getByText(/select or drag and drop an svg icon/i)).toBeInTheDocument();
+
+  // Check for help text
+  expect(
+    screen.getByText(/SVGs without sharp corners and intricate details work best/i)
+  ).toBeInTheDocument();
+
+  // Check for disabled Save button
+  const saveButton = screen.getByRole('button', { name: /save/i });
+  expect(saveButton).toBeDisabled();
+
+  // Check for Cancel button
+  const cancelButton = screen.getByRole('button', { name: /cancel/i });
+  expect(cancelButton).toBeInTheDocument();
 });
 
 test('should render a custom icon modal with an existing icon', () => {
-  const component = shallow(
+  const customTitle = faker.string.alpha(10);
+  render(
     <CustomIconModal
       {...defaultProps}
       cutoff={0.3}
@@ -42,9 +102,26 @@ test('should render a custom icon modal with an existing icon', () => {
       radius={0.15}
       svg='<svg width="200" height="250" xmlns="http://www.w3.org/2000/svg"><path stroke="#000" fill="transparent" stroke-width="5" d="M10 10h30v30H10z"/></svg>'
       symbolId="__kbn__custom_icon_sdf__foobar"
-      title="Edit custom icon"
+      title={customTitle}
     />
   );
 
-  expect(component).toMatchSnapshot();
+  // Modal header has custom title
+  expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent(customTitle);
+
+  // Name input has pre-filled value
+  expect(screen.getByTestId('mapsCustomIconForm-label')).toHaveValue('square');
+
+  // Save button should not be disabled
+  expect(screen.getByRole('button', { name: 'Save' })).not.toBeDisabled();
+
+  // Advanced options accordion is rendered
+  expect(screen.getByText('Advanced options')).toBeInTheDocument();
+
+  // Reset button in advanced options
+  expect(screen.getByText('Reset')).toBeInTheDocument();
+
+  // Optional: Check range inputs by label or value
+  expect(screen.getByLabelText('Alpha threshold')).toBeInTheDocument();
+  expect(screen.getByLabelText('Radius')).toBeInTheDocument();
 });
