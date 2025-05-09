@@ -8,6 +8,7 @@
  */
 
 import { render } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import React, { FC, PropsWithChildren } from 'react';
 import { apm } from '@elastic/apm-rum';
 
@@ -50,12 +51,12 @@ describe('<KibanaErrorBoundary>', () => {
         <ChunkLoadErrorComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    await userEvent.click(await findByTestId('clickForErrorBtn'));
 
     expect(await findByText(strings.page.callout.recoverable.title())).toBeVisible();
     expect(await findByText(strings.page.callout.recoverable.pageReloadButton())).toBeVisible();
 
-    (await findByTestId('errorBoundaryRecoverablePromptReloadBtn')).click();
+    await userEvent.click(await findByTestId('errorBoundaryRecoverablePromptReloadBtn'));
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
@@ -68,14 +69,14 @@ describe('<KibanaErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    await userEvent.click(await findByTestId('clickForErrorBtn'));
 
     expect(await findByText(strings.page.callout.fatal.title())).toBeVisible();
     expect(await findByText(strings.page.callout.fatal.body())).toBeVisible();
     expect(await findByText(strings.page.callout.fatal.showDetailsButton())).toBeVisible();
     expect(await findByText(strings.page.callout.fatal.pageReloadButton())).toBeVisible();
 
-    (await findByTestId('errorBoundaryFatalPromptReloadBtn')).click();
+    await userEvent.click(await findByTestId('errorBoundaryFatalPromptReloadBtn'));
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
@@ -91,7 +92,7 @@ describe('<KibanaErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    await userEvent.click(await findByTestId('clickForErrorBtn'));
 
     expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
     expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
@@ -111,7 +112,7 @@ describe('<KibanaErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    await userEvent.click(await findByTestId('clickForErrorBtn'));
 
     expect(
       mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack.includes('at BadComponent')
@@ -129,7 +130,7 @@ describe('<KibanaErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    await userEvent.click(await findByTestId('clickForErrorBtn'));
 
     expect(apm.captureError).toHaveBeenCalledTimes(1);
     expect(apm.captureError).toHaveBeenCalledWith(
