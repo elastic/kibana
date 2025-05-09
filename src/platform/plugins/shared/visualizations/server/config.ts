@@ -7,17 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  readOnly: offeringBasedSchema({
-    serverless: schema.boolean({ defaultValue: false }),
-  }),
 });
-
-export type TableConfig = TypeOf<typeof configSchema>;
-
-export interface TablePublicConfig {
-  readOnly?: boolean;
-}
