@@ -26,6 +26,8 @@ export interface Config {
   privateKeyFile?: string | string[];
   privateKeyData?: string;
   verificationMode?: 'full' | 'certificate' | 'none';
+  caFile?: string | string[];
+  caData?: string;
 }
 
 export interface InternalConfig {

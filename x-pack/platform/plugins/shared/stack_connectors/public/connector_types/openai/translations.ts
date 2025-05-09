@@ -192,3 +192,13 @@ export const USAGE_DASHBOARD_LINK = (apiProvider: string, connectorName: string)
 export const PKI_MODE_LABEL = i18n.translate('xpack.stackConnectors.genAi.pkiModeLabel', {
   defaultMessage: 'Enable PKI Authentication',
 });
+
+export const CA_FILE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.caFileLabel',
+  { defaultMessage: 'CA Certificate File Path' }
+);
+
+export const CA_DATA_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.genAi.caDataLabel',
+  { defaultMessage: 'CA Certificate Data' }
+);

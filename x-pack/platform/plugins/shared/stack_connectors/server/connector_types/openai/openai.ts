@@ -51,11 +51,11 @@ import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   getAxiosOptions,
   getAzureApiVersionParameter,
-  getKeyAndCert,
   getRequestWithStreamOption,
   pipeStreamingResponse,
   sanitizeRequest,
   validatePKICertificates,
+  getPKISSLOverrides,
 } from './lib/utils';
 
 export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
@@ -64,12 +64,18 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private key: string;
   private openAI: OpenAI;
   private headers: Record<string, string>;
-  private hasPKI: boolean;
+  private configAny: Config & {
+    certificateFile?: string | string[];
+    certificateData?: string;
+    privateKeyFile?: string | string[];
+    privateKeyData?: string;
+    caFile?: string | string[];
+    caData?: string;
+    verificationMode?: 'full' | 'certificate' | 'none';
+  };
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
-    this.hasPKI = false;
-
     this.url = this.config.apiUrl;
     this.provider = this.config.apiProvider;
     this.key = this.secrets.apiKey;
@@ -81,51 +87,65 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       ...('projectId' in this.config ? { 'OpenAI-Project': this.config.projectId } : {}),
     };
 
+    // Assign configAny for dynamic property access
+    this.configAny = this.config as Config & {
+      certificateFile?: string | string[];
+      certificateData?: string;
+      privateKeyFile?: string | string[];
+      privateKeyData?: string;
+      caFile?: string | string[];
+      caData?: string;
+      verificationMode?: 'full' | 'certificate' | 'none';
+    };
+ 
     try {
       if (
         this.provider === OpenAiProviderType.Other &&
-        ('certificateFile' in this.config ||
-          'certificateData' in this.config ||
-          'privateKeyFile' in this.config ||
-          'privateKeyData' in this.config)
+        (this.configAny.certificateFile ||
+          this.configAny.certificateData ||
+          this.configAny.privateKeyFile ||
+          this.configAny.privateKeyData)
       ) {
         // Validate PKI configuration
         if (
           !validatePKICertificates(
-            this.config.certificateFile,
-            this.config.certificateData,
-            this.config.privateKeyFile,
-            this.config.privateKeyData
+            this.logger,
+            this.configAny.certificateFile,
+            this.configAny.certificateData,
+            this.configAny.privateKeyFile,
+            this.configAny.privateKeyData
           )
         ) {
           throw new Error('Invalid or inaccessible PKI certificates');
         }
-        const { cert, key } = getKeyAndCert({
-          certificateFile: this.config.certificateFile,
-          certificateData: this.config.certificateData,
-          privateKeyFile: this.config.privateKeyFile,
-          privateKeyData: this.config.privateKeyData,
-          logger: this.logger,
-        });
-
+        const sslOverrides = getPKISSLOverrides(
+          this.logger,
+          this.configAny.certificateFile,
+          this.configAny.certificateData,
+          this.configAny.privateKeyFile,
+          this.configAny.privateKeyData,
+          this.configAny.caFile,
+          this.configAny.caData,
+          this.configAny.verificationMode
+        );
         const httpsAgent = new https.Agent({
-          cert,
-          key,
-          rejectUnauthorized: this.config.verificationMode === 'none',
-          checkServerIdentity:
-            this.config.verificationMode === 'certificate' ||
-            this.config.verificationMode === 'none'
-              ? () => undefined
-              : undefined,
+          ...sslOverrides,
         });
-        this.hasPKI = true;
-
-        this.openAI = new OpenAI({
-          apiKey: this.key,
-          baseURL: removeEndpointFromUrl(this.url),
-          defaultHeaders: this.headers,
-          httpAgent: httpsAgent,
-        });
+        try {
+          this.openAI = new OpenAI({
+            apiKey: this.key,
+            baseURL: removeEndpointFromUrl(this.url),
+            defaultHeaders: this.headers,
+            httpAgent: httpsAgent,
+          });
+        } catch (error) {
+          this.logger.error(`Error initializing OpenAI client: ${error.message}`);
+          this.logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
+          if (error.cause) {
+            this.logger.error(`Error cause: ${JSON.stringify(error.cause, null, 2)}`);
+          }
+          throw error;
+        }
       } else {
         this.openAI =
           this.config.apiProvider === OpenAiProviderType.AzureAi
@@ -151,6 +171,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
     this.registerSubActions();
   }
+
 
   private registerSubActions() {
     this.registerSubAction({
@@ -214,48 +235,73 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     }
     return `API Error: ${error.response?.statusText}${errorMessage ? ` - ${errorMessage}` : ''}`;
   }
+
   /**
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
    */
-
   public async runApi(
     { body, signal, timeout }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
-    if (this.provider === OpenAiProviderType.Other && this.hasPKI) {
+    if (
+      this.provider === OpenAiProviderType.Other &&
+      (this.configAny.certificateFile ||
+        this.configAny.certificateData ||
+        this.configAny.privateKeyFile ||
+        this.configAny.privateKeyData)
+    ) {
+      const sanitizedBody = sanitizeRequest(
+        this.provider, this.url, body, ...('defaultModel' in this.configAny ? [this.configAny.defaultModel] : [])
+      );
+      const axiosOptions = getAxiosOptions(this.provider, this.key, false);
+      let sslOverrides: Record<string, any> | undefined;
+      if (
+        this.configAny.certificateFile ||
+        this.configAny.certificateData ||
+        this.configAny.privateKeyFile ||
+        this.configAny.privateKeyData
+      ) {
+        sslOverrides = getPKISSLOverrides(
+          this.logger,
+          this.configAny.certificateFile,
+          this.configAny.certificateData,
+          this.configAny.privateKeyFile,
+          this.configAny.privateKeyData,
+          this.configAny.caFile,
+          this.configAny.caData,
+          this.configAny.verificationMode
+        );
+      }
       try {
-        const sanitizedBody = JSON.parse(body);
-        const axiosOptions = getAxiosOptions(this.provider, this.key, false);
         const response = await this.request(
           {
             url: this.url,
             method: 'post',
             responseSchema: RunActionResponseSchema,
-            data: {
-              ...sanitizedBody,
-              model:
-                sanitizedBody.model ??
-                ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
-            },
+            data: sanitizedBody,
             signal,
             timeout: timeout ?? DEFAULT_TIMEOUT_MS,
             ...axiosOptions,
             headers: {
               ...this.headers,
               ...axiosOptions.headers,
-            },
+            }, 
+            sslOverrides,
           },
           connectorUsageCollector
         );
-        this.logger.debug(`PKI OpenAI Response (runApi): ${JSON.stringify(response)}`);
+
         return response.data;
       } catch (error) {
-        this.logger.error(`OpenAI API Error: ${error.message}`);
-        this.logger.error(`Error details: ${JSON.stringify(error, null, 2)}`);
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
           throw new Error(
             `Certificate error: ${error.message}. Please check if your PKI certificates are valid or adjust SSL verification mode.`
+          );
+        }
+        if (error.code === 'ERR_TLS_CERT_ALTNAME_INVALID' || error.code === 'ERR_TLS_HANDSHAKE') {
+          throw new Error(
+            `TLS handshake failed: ${error.message}. Verify server certificate hostname and CA configuration.`
           );
         }
         throw error;
@@ -265,7 +311,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.provider,
         this.url,
         body,
-        ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
+        ...('defaultModel' in this.configAny ? [this.configAny.defaultModel] : [])
       );
       const axiosOptions = getAxiosOptions(this.provider, this.key, false);
       const response = await this.request(
@@ -288,42 +334,77 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     }
   }
 
-  public async streamApi(
+  /**
+   *  responsible for making a POST request to a specified URL with a given request body.
+   *  The method can handle both regular API requests and streaming requests based on the stream parameter.
+   *  It uses helper functions getRequestWithStreamOption and getAxiosOptions to prepare the request body and headers respectively.
+   *  The response is then processed based on whether it is a streaming response or a regular response.
+   * @param body request body for the API request
+   * @param stream flag indicating whether it is a streaming request or not
+   */
+   public async streamApi(
     { body, stream, signal, timeout }: StreamActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
-    if (this.provider === OpenAiProviderType.Other && this.hasPKI) {
+    if (
+      this.provider === OpenAiProviderType.Other &&
+      (this.configAny.certificateFile ||
+        this.configAny.certificateData ||
+        this.configAny.privateKeyFile ||
+        this.configAny.privateKeyData)
+    ) {
+      const executeBody = getRequestWithStreamOption(
+        this.provider, this.url, body, stream, ...('defaultModel' in this.configAny ? [this.configAny.defaultModel] : [])
+      );
+      const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
+      let sslOverrides: Record<string, any> | undefined;
+      if (
+        this.configAny.certificateFile ||
+        this.configAny.certificateData ||
+        this.configAny.privateKeyFile ||
+        this.configAny.privateKeyData
+      ) {
+        sslOverrides = getPKISSLOverrides(
+          this.logger,
+          this.configAny.certificateFile,
+          this.configAny.certificateData,
+          this.configAny.privateKeyFile,
+          this.configAny.privateKeyData,
+          this.configAny.caFile,
+          this.configAny.caData,
+          this.configAny.verificationMode
+        );
+      }
       try {
-        const sanitizedBody = JSON.parse(body);
-        const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
         const response = await this.request(
           {
             url: this.url,
             method: 'post',
             responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
-            data: {
-              ...sanitizedBody,
-              model:
-                sanitizedBody.model ??
-                ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
-              stream,
-            },
+            data: executeBody,
             signal,
             timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+            responseType: stream ? 'stream' : undefined,
             ...axiosOptions,
             headers: {
               ...this.headers,
               ...axiosOptions.headers,
-            },
+            }, 
+            sslOverrides,
           },
           connectorUsageCollector
         );
-        this.logger.debug(`PKI OpenAI Streaming Response (streamApi): ${JSON.stringify(response)}`);
+
         return stream ? pipeStreamingResponse(response) : response.data;
       } catch (error) {
         if (error.code === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE') {
           throw new Error(
             `Certificate error: ${error.message}. Please check if your PKI certificates are valid or adjust SSL verification mode.`
+          );
+        }
+        if (error.code === 'ERR_TLS_CERT_ALTNAME_INVALID' || error.code === 'ERR_TLS_HANDSHAKE') {
+          throw new Error(
+            `TLS handshake failed: ${error.message}. Verify server certificate hostname and CA configuration.`
           );
         }
         throw error;
@@ -334,7 +415,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         this.url,
         body,
         stream,
-        ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
+        ...('defaultModel' in this.configAny ? [this.configAny.defaultModel] : [])
       );
       const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
       const response = await this.request(
@@ -357,6 +438,11 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     }
   }
 
+  /**
+   *  retrieves a dashboard from the Kibana server and checks if the
+   *  user has the necessary privileges to access it.
+   * @param dashboardId The ID of the dashboard to retrieve.
+   */
   public async getDashboard({
     dashboardId,
   }: DashboardActionParams): Promise<DashboardActionResponse> {
@@ -388,6 +474,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     return { available: response.success };
   }
 
+  /**
+   * Streamed security solution AI Assistant requests (non-langchain)
+   * Responsible for invoking the streamApi method with the provided body and
+   * stream parameters set to true. It then returns a ReadableStream, meant to be
+   * returned directly to the client for streaming
+   * @param body - the OpenAI Invoke request body
+   */
   public async invokeStream(
     body: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
@@ -398,13 +491,22 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         body: JSON.stringify(rest),
         stream: true,
         signal,
-        timeout,
+        timeout, // do not default if not provided
       },
       connectorUsageCollector
     )) as unknown as IncomingMessage;
     return res.pipe(new PassThrough());
   }
 
+  /**
+   * Streamed security solution AI Assistant requests (langchain)
+   * Uses the official OpenAI Node library, which handles Server-sent events for you.
+   * @param body - the OpenAI Invoke request body
+   * @returns {
+   *  consumerStream: Stream<ChatCompletionChunk>; the result to be read/transformed on the server and sent to the client via Server Sent Events
+   *  tokenCountStream: Stream<ChatCompletionChunk>; the result for token counting stream
+   * }
+   */
   public async invokeAsyncIterator(
     body: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
@@ -421,21 +523,31 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         messages,
         model:
           rest.model ??
-          ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+          ('defaultModel' in this.configAny ? this.configAny.defaultModel : DEFAULT_OPENAI_MODEL),
       };
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);
       const stream = await this.openAI.chat.completions.create(requestBody, {
         signal,
-        timeout,
+        timeout, // do not default if not provided
       });
+      // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
       const teed = stream.tee();
       return { consumerStream: teed[0], tokenCountStream: teed[1] };
+      // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);
       throw new Error(errorMessage);
     }
   }
 
+  /**
+   * Non-streamed security solution AI Assistant requests
+   * Responsible for invoking the runApi method with the provided body.
+   * It then formats the response into a string
+   * To use function calling, call the run subaction directly
+   * @param body - the OpenAI chat completion request body
+   * @returns an object with the response string and the usage object
+   */
   public async invokeAI(
     body: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector

@@ -9,7 +9,6 @@ import type { AxiosResponse, ResponseType } from 'axios';
 import type { IncomingMessage } from 'http';
 import fs from 'fs';
 import https from 'https';
-import type { Logger } from '@kbn/logging';
 import { OpenAiProviderType } from '../../../../common/openai/constants';
 import type { Config } from '../../../../common/openai/types';
 import {
@@ -24,6 +23,7 @@ import {
   sanitizeRequest as otherOpenAiSanitizeRequest,
   getRequestWithStreamOption as otherOpenAiGetRequestWithStreamOption,
 } from './other_openai_utils';
+import type { Logger } from '@kbn/logging';
 
 export const sanitizeRequest = (
   provider: string,
@@ -89,16 +89,10 @@ export const getAxiosOptions = (
   provider: string,
   apiKey: string,
   stream: boolean,
-  config?: Config
+  config?: Config,
+  logger?: Logger
 ): { headers: Record<string, string>; httpsAgent?: https.Agent; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
-  const configAny = config as Config & {
-    certificateFile?: string | string[];
-    certificateData?: string;
-    privateKeyFile?: string | string[];
-    privateKeyData?: string;
-    verificationMode?: 'full' | 'certificate' | 'none';
-  };
 
   switch (provider) {
     case OpenAiProviderType.OpenAi:
@@ -114,58 +108,65 @@ export const getAxiosOptions = (
     case OpenAiProviderType.Other:
       if (
         config &&
-        (configAny.certificateFile ||
-          configAny.certificateData ||
-          configAny.privateKeyFile ||
-          configAny.privateKeyData)
+        (config.certificateFile ||
+          config.certificateData ||
+          config.privateKeyFile ||
+          config.privateKeyData)
       ) {
-        if (!configAny.certificateFile && !configAny.certificateData) {
-          throw new Error('Either certificate file or certificate data must be provided for PKI');
+        let cert, key, ca;
+        try {
+          if (config.certificateFile) {
+            cert = fs.readFileSync(
+              Array.isArray(config.certificateFile)
+                ? config.certificateFile[0]
+                : config.certificateFile,
+              'utf8'
+            );
+          } else {
+            cert = config.certificateData!;
+          }
+        } catch (e) {
+          logger?.error(`Failed to read client certificate: ${e.message}`);
+          throw new Error(`Failed to read client certificate: ${e.message}`);
         }
-        if (!configAny.privateKeyFile && !configAny.privateKeyData) {
-          throw new Error('Either private key file or private key data must be provided for PKI');
+        try {
+          if (config.privateKeyFile) {
+            key = fs.readFileSync(
+              Array.isArray(config.privateKeyFile)
+                ? config.privateKeyFile[0]
+                : config.privateKeyFile,
+              'utf8'
+            );
+          } else {
+            key = config.privateKeyData!;
+          }
+        } catch (e) {
+          logger?.error(`Failed to read private key: ${e.message}`);
+          throw new Error(`Failed to read private key: ${e.message}`);
         }
-
-        let cert: string | Buffer;
-        let key: string | Buffer;
-
-        if (configAny.certificateFile) {
-          cert = fs.readFileSync(
-            Array.isArray(configAny.certificateFile)
-              ? configAny.certificateFile[0]
-              : configAny.certificateFile
-          );
-        } else {
-          cert = configAny.certificateData!;
+        try {
+          if (config.caFile) {
+            ca = fs.readFileSync(
+              Array.isArray(config.caFile) ? config.caFile[0] : config.caFile,
+              'utf8'
+            );
+          } else if (config.caData) {
+            ca = config.caData;
+          }
+        } catch (e) {
+          logger?.error(`Failed to read CA certificate: ${e.message}`);
+          throw new Error(`Failed to read CA certificate: ${e.message}`);
         }
-
-        if (configAny.privateKeyFile) {
-          key = fs.readFileSync(
-            Array.isArray(configAny.privateKeyFile)
-              ? configAny.privateKeyFile[0]
-              : configAny.privateKeyFile
-          );
-        } else {
-          key = configAny.privateKeyData!;
-        }
-
-        if (!cert.toString().includes('-----BEGIN CERTIFICATE-----')) {
-          throw new Error('Invalid certificate format: Must be PEM-encoded');
-        }
-        if (!key.toString().includes('-----BEGIN PRIVATE KEY-----')) {
-          throw new Error('Invalid private key format: Must be PEM-encoded');
-        }
-
         const httpsAgent = new https.Agent({
           cert,
           key,
-          rejectUnauthorized: configAny.verificationMode === 'none',
+          ...(ca ? { ca } : {}),
+          rejectUnauthorized: config.verificationMode !== 'none',
           checkServerIdentity:
-            configAny.verificationMode === 'certificate' || configAny.verificationMode === 'none'
+            config.verificationMode === 'certificate' || config.verificationMode === 'none'
               ? () => undefined
               : undefined,
         });
-
         return {
           headers: { ['content-type']: 'application/json', Accept: 'application/json' },
           httpsAgent,
@@ -196,6 +197,7 @@ export const getAzureApiVersionParameter = (url: string): string | undefined => 
 };
 
 export const validatePKICertificates = (
+  logger: Logger,
   certificateFile?: string | string[],
   certificateData?: string,
   privateKeyFile?: string | string[],
@@ -228,8 +230,63 @@ export const validatePKICertificates = (
 
     return true;
   } catch (error) {
+    logger.error(`Error validating PKI certificates: ${error.message}`);
     return false;
   }
+};
+
+export const getPKISSLOverrides = (
+  logger: Logger,
+  certificateFile?: string | string[],
+  certificateData?: string,
+  privateKeyFile?: string | string[],
+  privateKeyData?: string,
+  caFile?: string | string[],
+  caData?: string,
+  verificationMode?: 'full' | 'certificate' | 'none'
+): Record<string, any> => {
+  let cert: string;
+  let key: string;
+  let ca: string | undefined;
+
+  if (certificateFile) {
+    cert = fs.readFileSync(
+      Array.isArray(certificateFile) ? certificateFile[0] : certificateFile,
+      'utf8'
+    );
+  } else if (certificateData) {
+    cert = formatPEMContent(certificateData, 'CERTIFICATE', logger);
+  } else {
+    throw new Error('No certificate file or data provided');
+  }
+
+  if (privateKeyFile) {
+    key = fs.readFileSync(
+      Array.isArray(privateKeyFile) ? privateKeyFile[0] : privateKeyFile,
+      'utf8'
+    );
+  } else if (privateKeyData) {
+    key = formatPEMContent(privateKeyData, 'PRIVATE KEY', logger);
+  } else {
+    throw new Error('No private key file or data provided');
+  }
+
+  if (caFile) {
+    ca = fs.readFileSync(Array.isArray(caFile) ? caFile[0] : caFile, 'utf8');
+  } else if (caData) {
+    ca = formatPEMContent(caData, 'CERTIFICATE', logger);
+  }
+
+  return {
+    cert,
+    key,
+    ca,
+    rejectUnauthorized: verificationMode !== 'none',
+    checkServerIdentity:
+      verificationMode === 'certificate' || verificationMode === 'none'
+        ? () => undefined
+        : undefined,
+  };
 };
 
 export function formatPEMContent(
@@ -238,13 +295,7 @@ export function formatPEMContent(
   logger: Logger
 ): string {
   if (!pemContent) return pemContent;
-  if (
-    pemContent.includes('\n') &&
-    pemContent.startsWith(`-----BEGIN ${type}-----`) &&
-    pemContent.endsWith(`-----END ${type}-----`)
-  ) {
-    return pemContent; // Skip reformatting if already valid
-  }
+
   // Normalize input by replacing all whitespace with a single space
   const normalizedContent = pemContent.replace(/\s+/g, ' ').trim();
 
@@ -254,7 +305,6 @@ export function formatPEMContent(
 
   // Verify header and footer
   if (!normalizedContent.startsWith(header) || !normalizedContent.endsWith(footer)) {
-    logger.debug(`Invalid PEM format for ${type}: Missing header or footer`);
     return pemContent;
   }
 
@@ -272,38 +322,3 @@ export function formatPEMContent(
   // Assemble formatted PEM with newlines
   return `${header}\n${formattedBase64}\n${footer}`;
 }
-
-export const getKeyAndCert = ({
-  certificateFile,
-  certificateData,
-  privateKeyFile,
-  privateKeyData,
-  logger,
-}: {
-  certificateFile?: string | string[];
-  certificateData?: string;
-  privateKeyFile?: string | string[];
-  privateKeyData?: string;
-  logger: Logger;
-}) => {
-  const readFile = (file: string | string[]) =>
-    fs.readFileSync(Array.isArray(file) ? file[0] : file, 'utf8');
-
-  const cert = certificateFile
-    ? readFile(certificateFile)
-    : certificateData
-    ? formatPEMContent(certificateData, 'CERTIFICATE', logger)
-    : (() => {
-        throw new Error('No certificate file or data provided');
-      })();
-
-  const key = privateKeyFile
-    ? readFile(privateKeyFile)
-    : privateKeyData
-    ? formatPEMContent(privateKeyData, 'PRIVATE KEY', logger)
-    : (() => {
-        throw new Error('No private key file or data provided');
-      })();
-
-  return { cert, key };
-};

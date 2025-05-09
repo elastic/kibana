@@ -34,11 +34,17 @@ export function getCustomAgents(
   );
   // the default for rejectUnauthorized is the global setting, which can
   // be overridden (below) with a custom host setting
+  // Apply sslOverrides for cert, key, ca, and checkServerIdentity
+  const sslOptions: AgentOptions = {
+    ...agentSSLOptions,
+    cert: sslOverrides?.cert,
+    key: sslOverrides?.key,
+    ca: sslOverrides?.ca,
+    checkServerIdentity: sslOverrides?.checkServerIdentity,
+  };
   const defaultAgents = {
     httpAgent: undefined,
-    httpsAgent: new HttpsAgent({
-      ...agentSSLOptions,
-    }),
+    httpsAgent: new HttpsAgent(sslOptions),
   };
 
   // Get the current proxy settings, and custom host settings for this URL.
@@ -126,6 +132,11 @@ export function getCustomAgents(
     headers: proxySettings.proxyHeaders,
     // do not fail on invalid certs if value is false
     ...proxyNodeSSLOptions,
+    // Apply sslOverrides for proxy agent
+    cert: sslOverrides?.cert,
+    key: sslOverrides?.key,
+    ca: sslOverrides?.ca,
+    checkServerIdentity: sslOverrides?.checkServerIdentity,
   }) as unknown as HttpsAgent;
   // vsCode wasn't convinced HttpsProxyAgent is an https.Agent, so we convinced it
 

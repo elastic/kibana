@@ -265,6 +265,42 @@ export const pkiConfig: ConfigFieldSchema[] = [
       ),
     },
   },
+  {
+    id: 'caFile',
+    label: 'CA Certificate File Path',
+    isRequired: false,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Path to the CA certificate file (PEM) used to verify the server certificate."
+        id="xpack.stackConnectors.components.genAi.caFileDocumentation"
+      />
+    ),
+    euiFieldProps: {
+      append: (
+        <EuiText size="xs" color="subdued">
+          {i18n.OPTIONAL_LABEL}
+        </EuiText>
+      ),
+    },
+  },
+  {
+    id: 'caData',
+    label: 'CA Certificate Data',
+    isRequired: false,
+    helpText: (
+      <FormattedMessage
+        defaultMessage="Raw CA certificate content (PEM) used to verify the server certificate."
+        id="xpack.stackConnectors.components.genAi.caDataDocumentation"
+      />
+    ),
+    euiFieldProps: {
+      append: (
+        <EuiText size="xs" color="subdued">
+          {i18n.OPTIONAL_LABEL}
+        </EuiText>
+      ),
+    },
+  },
 ];
 
 export const openAiSecrets: SecretsFieldSchema[] = [
