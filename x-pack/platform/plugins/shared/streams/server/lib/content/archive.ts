@@ -23,6 +23,7 @@ import AdmZip from 'adm-zip';
 import path from 'path';
 import { Readable } from 'stream';
 import { compact, pick, uniqBy } from 'lodash';
+import { InvalidContentPackError } from './error';
 
 const ARCHIVE_ENTRY_MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1MB
 
@@ -34,7 +35,7 @@ export async function parseArchive(archive: Readable): Promise<ContentPack> {
       try {
         resolve(new AdmZip(Buffer.concat(bufs)));
       } catch (err) {
-        reject(new Error('Invalid content pack format'));
+        reject(new InvalidContentPackError('Invalid content pack format'));
       }
     });
     archive.on('error', (error) => reject(error));
@@ -82,14 +83,14 @@ async function readEntry(entry: AdmZip.IZipEntry): Promise<Buffer> {
 async function extractManifest(zip: AdmZip): Promise<ContentPackManifest> {
   const entry = zip.getEntry('manifest.yml');
   if (!entry) {
-    throw new Error('Missing content pack manifest');
+    throw new InvalidContentPackError('Missing content pack manifest');
   }
 
   const { data: manifest, success } = contentPackManifestSchema.safeParse(
     YAML.parse((await readEntry(entry)).toString())
   );
   if (!success) {
-    throw new Error('Invalid content pack manifest format');
+    throw new InvalidContentPackError('Invalid content pack manifest format');
   }
 
   return manifest;
@@ -121,7 +122,7 @@ async function resolveDashboard(
 
   const uniqReferences = uniqBy(dashboard.references, (ref) => ref.id);
   if (uniqReferences.some(({ type }) => !isSupportedReferenceType(type))) {
-    throw new Error(
+    throw new InvalidContentPackError(
       `Dashboard [${
         dashboard.id
       }] references saved object types not supported by content packs: ${uniqReferences.filter(
@@ -149,7 +150,7 @@ async function resolveDashboard(
 
 function assertUncompressedSize(entry: AdmZip.IZipEntry) {
   if (entry.header.size > ARCHIVE_ENTRY_MAX_SIZE_BYTES) {
-    throw new Error(
+    throw new InvalidContentPackError(
       `Object [${entry.entryName}] exceeds the limit of ${ARCHIVE_ENTRY_MAX_SIZE_BYTES} bytes`
     );
   }
