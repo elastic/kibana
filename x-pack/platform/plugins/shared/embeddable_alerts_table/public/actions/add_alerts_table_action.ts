@@ -6,26 +6,21 @@
  */
 
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { getKey as getInternalRuleTypesQueryKey } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { openConfigEditor } from '../components/open_config_editor';
 import { ADD_ALERTS_TABLE_ACTION_ID, EMBEDDABLE_ALERTS_TABLE_ID } from '../constants';
 import { ADD_ALERTS_TABLE_ACTION_LABEL } from '../translations';
-import { queryClient } from '../query_client';
+import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
 
 const checkRuleTypesPermissions = async (http: CoreStart['http']) => {
   try {
+    const ruleTypes = await getInternalRuleTypesWithCache(http);
     // If the user can access at least one rule type (with any authorizedConsumer, in any app) then
     // they can create alerts visualizations
-    const ruleTypes = await getInternalRuleTypes({ http });
-    // We cannot use the `useGetInternalRuleTypesQuery` hook since this check happens outside
-    // of React but we can set the query data in the client to avoid duplicated requests
-    queryClient.setQueryData(getInternalRuleTypesQueryKey(), ruleTypes);
     return Boolean(ruleTypes.length);
   } catch (error) {
     return false;
@@ -53,7 +48,7 @@ export const getAddAlertsTableAction = (
       await embeddable.addNewPanel(
         {
           panelType: EMBEDDABLE_ALERTS_TABLE_ID,
-          initialState: { tableConfig },
+          serializedState: { rawState: { tableConfig } },
         },
         true
       );

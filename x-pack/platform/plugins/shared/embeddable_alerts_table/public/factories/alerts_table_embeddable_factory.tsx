@@ -21,6 +21,8 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/solutions';
+import { getInternalRuleTypesWithCache } from '../utils/get_internal_rule_types_with_cache';
 import { ALERTS_PANEL_LABEL } from '../translations';
 import type {
   EmbeddableAlertsTableApi,
@@ -47,9 +49,8 @@ export const getAlertsTableEmbeddableFactory = (
       ...deps,
     };
 
-    const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(
-      initialState.rawState.tableConfig
-    );
+    const currentTableConfig = initialState.rawState.tableConfig;
+    const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(currentTableConfig);
 
     const serializeState = () => ({
       rawState: {
@@ -62,9 +63,11 @@ export const getAlertsTableEmbeddableFactory = (
     const unsavedChangesApi = initializeUnsavedChanges({
       uuid,
       parentApi,
-      anyStateChange$: merge(timeRangeManager.anyStateChange$, titleManager.anyStateChange$).pipe(
-        map(() => undefined)
-      ),
+      anyStateChange$: merge(
+        timeRangeManager.anyStateChange$,
+        titleManager.anyStateChange$,
+        tableConfig$
+      ).pipe(map(() => undefined)),
       serializeState,
       getComparators: () => ({
         ...titleComparators,
@@ -77,13 +80,24 @@ export const getAlertsTableEmbeddableFactory = (
       },
     });
 
+    const ruleTypes = await getInternalRuleTypesWithCache(coreServices.http);
+    const ruleTypeIdsForSolution =
+      !ruleTypes || !currentTableConfig?.solution
+        ? []
+        : getRuleTypeIdsForSolution(ruleTypes, currentTableConfig.solution);
+
     const api = finalizeApi({
       ...timeRangeManager.api,
       ...titleManager.api,
       ...unsavedChangesApi,
       dataLoading$: queryLoading$,
       serializeState,
-      isEditingEnabled: () => true,
+      isEditingEnabled: () => {
+        // Users cannot edit panels based on a solution they cannot access.
+        // The first condition ensures panels are editable even if the table configuration is
+        // unexpectedly undefined or incomplete
+        return !currentTableConfig?.solution || ruleTypeIdsForSolution.length > 0;
+      },
       getTypeDisplayName: () => ALERTS_PANEL_LABEL,
       onEdit: async () => {
         try {
