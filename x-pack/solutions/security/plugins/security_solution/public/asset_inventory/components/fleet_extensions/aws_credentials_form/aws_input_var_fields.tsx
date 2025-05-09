@@ -73,8 +73,6 @@ export const AwsInputVarFields = ({
                       onChange={(value) => {
                         onChange(field.id, value);
                       }}
-                      errors={invalid ? [invalidError] : []}
-                      forceShowErrors={invalid}
                       isEditPage={true}
                       data-test-subj={field.dataTestSubj}
                     />
