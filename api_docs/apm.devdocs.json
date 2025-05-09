@@ -2291,8 +2291,6 @@
           "TypeC",
           "<{ useSpanName: ",
           "Type",
-          "<boolean, boolean, unknown>; enableServiceTransactionMetrics: ",
-          "Type",
           "<boolean, boolean, unknown>; enableContinuousRollups: ",
           "Type",
           "<boolean, boolean, unknown>; }>, ",
