@@ -39,7 +39,6 @@ export const zodObjectHasRequiredProperties = (schema: z.ZodTypeAny): boolean =>
         }
       }
     }
-    return false;
   }
-  throw new Error('Unsupported schema type');
+  return false;
 };
