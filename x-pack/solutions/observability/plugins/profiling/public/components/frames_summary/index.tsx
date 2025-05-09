@@ -9,7 +9,6 @@ import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -95,7 +94,6 @@ export function FramesSummary({
         },
       }) as string,
       baseValue: totalSamplesDiff.label || '0%',
-      baseIcon: totalSamplesDiff.icon,
       baseColor: totalSamplesDiff.color,
       titleHint: ESTIMATED_VALUE_LABEL,
       hidden: isEmpty(comparisonValue),
@@ -107,7 +105,6 @@ export function FramesSummary({
       }) as string,
       baseValue: co2EmissionDiff.baseValue,
       comparisonValue: co2EmissionDiff.comparisonValue,
-      comparisonIcon: co2EmissionDiff.icon,
       comparisonColor: co2EmissionDiff.color,
       comparisonPerc: co2EmissionDiff.label,
       titleHint: ESTIMATED_VALUE_LABEL,
@@ -119,7 +116,6 @@ export function FramesSummary({
       }) as string,
       baseValue: costImpactDiff.baseValue,
       comparisonValue: costImpactDiff.comparisonValue,
-      comparisonIcon: costImpactDiff.icon,
       comparisonColor: costImpactDiff.color,
       comparisonPerc: costImpactDiff.label,
       titleHint: ESTIMATED_VALUE_LABEL,
@@ -131,7 +127,6 @@ export function FramesSummary({
       }) as string,
       baseValue: totalSamplesDiff.baseValue,
       comparisonValue: totalSamplesDiff.comparisonValue,
-      comparisonIcon: totalSamplesDiff.icon,
       comparisonColor: totalSamplesDiff.color,
       comparisonPerc: totalSamplesDiff.label,
       titleHint: ESTIMATED_VALUE_LABEL,
@@ -173,11 +168,6 @@ export function FramesSummary({
               {data[0].title}
             </EuiText>
           </EuiFlexItem>
-          {data[0].baseIcon && (
-            <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-              <EuiIcon type={data[0].baseIcon} color={data[0].baseColor} size="s" />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem grow={false}>
             <EuiTextColor style={{ fontWeight: 'bold' }} color={data[0].baseColor}>
               {data[0].baseValue}

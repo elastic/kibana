@@ -11,6 +11,7 @@ import { AnnotationDomainType, LineAnnotation } from '@elastic/charts';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { cloneDeep } from 'lodash';
 import { AnnotationIcon } from '.';
 import { AnnotationTooltip } from './annotation_tooltip';
 import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
@@ -34,7 +35,7 @@ export function NewLineAnnotation({
 
   return (
     <ObsLineAnnotation
-      annotation={{
+      annotation={cloneDeep({
         ...values,
         annotation: {
           ...values.annotation,
@@ -42,7 +43,7 @@ export function NewLineAnnotation({
           type: annotationType,
         },
         ...(slo ? { slo: { id: slo.id, instanceId: slo.instanceId } } : {}),
-      }}
+      })}
     />
   );
 }

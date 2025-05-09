@@ -14,11 +14,11 @@ import {
 import { render } from '@testing-library/react';
 import { mockedAlertSummaryResponse, mockedChartProps } from '../../../mock/alert_summary_widget';
 import { ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ, TOTAL_ALERT_COUNT_DATA_TEST_SUBJ } from './constants';
-import { LIGHT_THEME } from '@elastic/charts';
+import { AMSTERDAM_LIGHT_THEME } from '@elastic/charts';
 import { DependencyProps } from '../types';
 
 const dependencyProps: DependencyProps = {
-  baseTheme: LIGHT_THEME,
+  baseTheme: AMSTERDAM_LIGHT_THEME,
   sparklineTheme: {},
 };
 
