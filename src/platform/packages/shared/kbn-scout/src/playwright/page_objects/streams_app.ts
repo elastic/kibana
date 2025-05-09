@@ -23,12 +23,21 @@ export class StreamsApp {
       .click();
   }
 
-  async gotoManageStream(stream: string) {
+  async gotoStream(stream: string) {
     const last = await this.page.getByTestId('breadcrumb last').textContent();
     if (last !== 'Streams') {
       await this.gotoStreamsFromBreadcrumb();
     }
     await this.page.getByRole('link', { name: stream, exact: true }).click();
+  }
+
+  async gotoStreamDashboard(stream: string) {
+    await this.gotoStream(stream);
+    await this.page.getByRole('tab', { name: 'Dashboards' }).click();
+  }
+
+  async gotoManageStream(stream: string) {
+    this.gotoStream(stream);
     await this.page.getByRole('link', { name: 'Manage stream' }).click();
   }
 
