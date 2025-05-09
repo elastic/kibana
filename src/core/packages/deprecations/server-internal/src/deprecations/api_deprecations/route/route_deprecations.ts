@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core-deprecations-common';
 import _ from 'lodash';
 import type { PostValidationMetadata } from '@kbn/core-http-server';
-import { RouteDeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-http-common';
 import {
   getApiDeprecationMessage,
   getApiDeprecationsManualSteps,
@@ -42,7 +42,7 @@ export const buildApiRouteDeprecationDetails = ({
     throw new Error(`Expecing deprecated to be defined for route ${apiId}`);
   }
 
-  const deprecationLevel = routeDeprecationOptions.severity || RouteDeprecationSeverity.WARNING;
+  const deprecationLevel = routeDeprecationOptions.severity || DeprecationSeverity.WARNING;
 
   return {
     apiId,

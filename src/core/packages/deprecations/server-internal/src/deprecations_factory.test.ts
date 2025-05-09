@@ -11,7 +11,7 @@ import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import { DeprecationsFactory, DeprecationsFactoryConfig } from './deprecations_factory';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
-import { RouteDeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-http-common';
 
 describe('DeprecationsFactory', () => {
   let logger: ReturnType<typeof loggerMock.create>;
@@ -202,7 +202,7 @@ describe('DeprecationsFactory', () => {
           configPath: 'mockPlugin.foo',
           title: 'mockPlugin.foo is deprecated',
           message: 'mockPlugin.foo is deprecated and will be removed in a future Kibana version',
-          level: RouteDeprecationSeverity.CRITICAL,
+          level: DeprecationSeverity.CRITICAL,
           deprecationType: 'config',
           correctiveActions: {
             manualSteps: ['come on', 'do something'],
@@ -212,7 +212,7 @@ describe('DeprecationsFactory', () => {
           configPath: 'mockPlugin.bar',
           title: 'mockPlugin.bar is deprecated',
           message: 'mockPlugin.bar is deprecated and will be removed in a future Kibana version',
-          level: RouteDeprecationSeverity.CRITICAL,
+          level: DeprecationSeverity.CRITICAL,
           deprecationType: 'config',
           correctiveActions: {
             manualSteps: ['come on', 'do something'],
@@ -225,7 +225,7 @@ describe('DeprecationsFactory', () => {
           title: 'anotherMockPlugin.foo is deprecated',
           message:
             'anotherMockPlugin.foo is deprecated and will be removed in a future Kibana version',
-          level: RouteDeprecationSeverity.CRITICAL,
+          level: DeprecationSeverity.CRITICAL,
           deprecationType: 'config',
           correctiveActions: {
             manualSteps: ['come on', 'do something'],
@@ -236,7 +236,7 @@ describe('DeprecationsFactory', () => {
           title: 'anotherMockPlugin.bar is deprecated',
           message:
             'anotherMockPlugin.bar is deprecated and will be removed in a future Kibana version',
-          level: RouteDeprecationSeverity.CRITICAL,
+          level: DeprecationSeverity.CRITICAL,
           deprecationType: 'config',
           correctiveActions: {
             manualSteps: ['come on', 'do something'],
@@ -281,7 +281,7 @@ describe('DeprecationsFactory', () => {
           configPath: 'mockPlugin.foo',
           title: 'mockPlugin.foo is deprecated',
           message: 'mockPlugin.foo is deprecated and will be removed in a future Kibana version',
-          level: RouteDeprecationSeverity.CRITICAL,
+          level: DeprecationSeverity.CRITICAL,
           deprecationType: 'config',
           correctiveActions: {
             manualSteps: ['come on', 'do something'],
@@ -291,7 +291,7 @@ describe('DeprecationsFactory', () => {
           configPath: 'mockPlugin.bar',
           title: 'mockPlugin.bar is deprecated',
           message: 'mockPlugin.bar is deprecated and will be removed in a future Kibana version',
-          level: RouteDeprecationSeverity.CRITICAL,
+          level: DeprecationSeverity.CRITICAL,
           deprecationType: 'config',
           correctiveActions: {
             manualSteps: ['come on', 'do something'],
@@ -362,7 +362,7 @@ describe('DeprecationsFactory', () => {
           configPath: 'test.foo',
           title: 'test.foo is deprecated',
           message: 'test.foo is deprecated and will be removed in a future Kibana version',
-          level: RouteDeprecationSeverity.CRITICAL,
+          level: DeprecationSeverity.CRITICAL,
           deprecationType: 'config',
           correctiveActions: {
             manualSteps: ['come on', 'do something'],
@@ -372,7 +372,7 @@ describe('DeprecationsFactory', () => {
           configPath: 'test.bar',
           title: 'test.bar is deprecated',
           message: 'test.bar is deprecated and will be removed in a future Kibana version',
-          level: RouteDeprecationSeverity.CRITICAL,
+          level: DeprecationSeverity.CRITICAL,
           deprecationType: 'config',
           correctiveActions: {
             manualSteps: ['come on', 'do something'],

@@ -12,7 +12,7 @@ import type { Logger } from '@kbn/logging';
 import {
   type DomainDeprecationDetails,
   type DeprecationsDetails,
-  DeprecationLevel,
+  DeprecationSeverityOrError,
 } from '@kbn/core-deprecations-common';
 import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import { DeprecationsRegistry } from './deprecations_registry';
@@ -105,7 +105,7 @@ export class DeprecationsFactory {
                 defaultMessage: 'Unable to fetch deprecations info for plugin {domainId}.',
                 values: { domainId },
               }),
-              level: DeprecationLevel.FETCH_ERROR,
+              level: DeprecationSeverityOrError.FETCH_ERROR,
               correctiveActions: {
                 manualSteps: [
                   i18n.translate(

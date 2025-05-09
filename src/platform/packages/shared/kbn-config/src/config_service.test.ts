@@ -9,7 +9,7 @@
 
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { first, map, take } from 'rxjs';
-import { RouteDeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-http-common';
 
 import {
   mockApplyDeprecations,
@@ -492,13 +492,13 @@ test('logs deprecation warning during validation', async () => {
     const addDeprecation = createAddDeprecation!('');
     addDeprecation({
       configPath: 'test1',
-      level: RouteDeprecationSeverity.WARNING,
+      level: DeprecationSeverity.WARNING,
       message: 'some deprecation message',
       correctiveActions: { manualSteps: ['do X'] },
     });
     addDeprecation({
       configPath: 'test2',
-      level: RouteDeprecationSeverity.WARNING,
+      level: DeprecationSeverity.WARNING,
       message: 'another deprecation message',
       correctiveActions: { manualSteps: ['do Y'] },
     });
@@ -568,14 +568,14 @@ test('does not log warnings for silent deprecations during validation', async ()
       const addDeprecation = createAddDeprecation!('');
       addDeprecation({
         configPath: 'test1',
-        level: RouteDeprecationSeverity.WARNING,
+        level: DeprecationSeverity.WARNING,
         message: 'some deprecation message',
         correctiveActions: { manualSteps: ['do X'] },
         silent: true,
       });
       addDeprecation({
         configPath: 'test2',
-        level: RouteDeprecationSeverity.WARNING,
+        level: DeprecationSeverity.WARNING,
         message: 'another deprecation message',
         correctiveActions: { manualSteps: ['do Y'] },
       });
@@ -585,7 +585,7 @@ test('does not log warnings for silent deprecations during validation', async ()
       const addDeprecation = createAddDeprecation!('');
       addDeprecation({
         configPath: 'silent',
-        level: RouteDeprecationSeverity.WARNING,
+        level: DeprecationSeverity.WARNING,
         message: 'I am silent',
         silent: true,
         correctiveActions: { manualSteps: ['do Z'] },
@@ -664,7 +664,7 @@ describe('getHandledDeprecatedConfigs', () => {
     const configService = new ConfigService(rawConfig, defaultEnv, logger);
 
     configService.addDeprecationProvider('base', ({ unused }) => [
-      unused('unused', { level: RouteDeprecationSeverity.WARNING }),
+      unused('unused', { level: DeprecationSeverity.WARNING }),
     ]);
 
     mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
@@ -672,7 +672,7 @@ describe('getHandledDeprecatedConfigs', () => {
         const addDeprecation = createAddDeprecation!(deprecation.path);
         addDeprecation({
           configPath: 'test1',
-          level: RouteDeprecationSeverity.WARNING,
+          level: DeprecationSeverity.WARNING,
           message: `some deprecation message`,
           documentationUrl: 'some-url',
           correctiveActions: { manualSteps: ['do X'] },

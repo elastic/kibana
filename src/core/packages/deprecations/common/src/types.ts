@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RouteDeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-http-common';
 
 export interface DeprecationDetailsMessage {
   type: 'markdown' | 'text';
   content: string;
 }
 
-enum DeprecationLevelFetchError {
+enum DeprecationFetchError {
   FETCH_ERROR = 'fetch_error',
 }
 
-export type DeprecationLevel = RouteDeprecationSeverity | DeprecationLevelFetchError;
+export type DeprecationSeverityOrError = DeprecationSeverity | DeprecationFetchError;
 
-export const DeprecationLevel = {
-  ...RouteDeprecationSeverity,
-  ...DeprecationLevelFetchError,
+export const DeprecationSeverityOrError = {
+  ...DeprecationSeverity,
+  ...DeprecationFetchError,
 } as const;
 
 /**
@@ -47,7 +47,7 @@ export interface BaseDeprecationDetails {
    * - critical: needs to be addressed before upgrade.
    * - fetch_error: Deprecations service failed to grab the deprecation details for the domain.
    */
-  level: DeprecationLevel;
+  level: DeprecationSeverityOrError;
   /**
    * (optional) Used to identify between different deprecation types.
    * Example use case: in Upgrade Assistant, we may want to allow the user to sort by

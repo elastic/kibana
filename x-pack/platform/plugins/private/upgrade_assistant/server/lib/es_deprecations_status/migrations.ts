@@ -30,6 +30,10 @@ interface EsDeprecations extends MigrationDeprecationsResponse {
   templates: Record<string, MigrationDeprecationsDeprecation[]>;
   ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
+
+// todo this is accurate to the ES side of things.
+// do these stay on on the server or do they get transfered to the client?
+// perhaps none and info are filtered out
 type DeprecationLevel = 'none' | 'info' | 'warning' | 'critical';
 
 export interface BaseDeprecation {

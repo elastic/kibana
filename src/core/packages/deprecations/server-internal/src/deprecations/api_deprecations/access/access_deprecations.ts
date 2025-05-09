@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core-deprecations-common';
 
 import type { PostValidationMetadata } from '@kbn/core-http-server';
-import { RouteDeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-http-common';
 import type { BuildApiDeprecationDetailsParams } from '../types';
 import {
   getApiDeprecationMessage,
@@ -39,7 +39,7 @@ export const buildApiAccessDeprecationDetails = ({
   const { apiId, apiTotalCalls, totalMarkedAsResolved } = apiUsageStats;
   const { routeVersion, routePath, routeDeprecationOptions, routeMethod } = deprecatedApiDetails;
 
-  const deprecationLevel = routeDeprecationOptions?.severity || RouteDeprecationSeverity.WARNING;
+  const deprecationLevel = routeDeprecationOptions?.severity || DeprecationSeverity.WARNING;
 
   return {
     apiId,
