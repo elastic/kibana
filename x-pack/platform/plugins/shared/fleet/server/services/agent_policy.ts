@@ -256,7 +256,7 @@ class AgentPolicyService {
       )
       .catch(catchAndWrapError);
 
-    const newAgentPolicy = await this.get(soClient, id, false, { spaceId: '*' });
+    const newAgentPolicy = await this.get(soClient, id, false);
 
     logger.debug(`Agent policy SO was updated successfully`);
 
@@ -554,14 +554,7 @@ class AgentPolicyService {
         }]`
     );
 
-    const [agentPolicy] = await this.getByIds(soClient, [{ id, spaceId: options.spaceId }], {
-      ignoreMissing: true,
-    });
-
-    if (!agentPolicy) {
-      logger.debug(`Agent policy id [${id}] was not found. Returning 'null'`);
-      return null;
-    }
+    const [agentPolicy] = await this.getByIds(soClient, [{ id, spaceId: options.spaceId }]);
 
     if (withPackagePolicies) {
       logger.debug(() => `retrieving package policies for agent policy ${agentPolicy.id}`);

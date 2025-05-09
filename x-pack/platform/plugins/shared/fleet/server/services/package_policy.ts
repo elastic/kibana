@@ -1012,6 +1012,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicyUpdate: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
   ): Promise<PackagePolicy> {
+    const logger = this.getLogger('update');
+
+    logger.debug(
+      () =>
+        `Updating package policy [${id}] with soClient scoped to [${soClient.getCurrentNamespace()}]`
+    );
+
     const savedObjectType = await getPackagePolicySavedObjectType();
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
@@ -1019,7 +1026,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       name: packagePolicyUpdate.name,
       savedObjectType,
     });
-    const logger = this.getLogger('update');
 
     this.keepPolicyIdInSync(packagePolicyUpdate);
     await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
@@ -1242,15 +1248,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
 
-    logger.debug(`Package policy ${id} update completed`);
-
     // Run external post-update callbacks and return
-    return packagePolicyService.runExternalCallbacks(
+    const response = packagePolicyService.runExternalCallbacks(
       'packagePolicyPostUpdate',
       newPolicy,
       soClient,
       esClient
     );
+
+    logger.debug(`Package policy ${id} update completed`);
+    return response;
   }
 
   public async bulkUpdate(
@@ -1491,9 +1498,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    // FIXME:PT add space enablement feature check
-    // FIXME:PT should we use pMap()?
-
     const packagePolicySoBulkUpdateResponse: Array<
       SavedObjectsUpdateResponse<PackagePolicySOAttributes>
     > = [];
@@ -1505,6 +1509,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             ', '
           )}`
       );
+
+      // FIXME:PT should we use pMap()?
 
       await Promise.all(
         Object.entries(policyUpdatesBySpace).map(([updateSpaceId, spacePackagPolicyUpdates]) => {
