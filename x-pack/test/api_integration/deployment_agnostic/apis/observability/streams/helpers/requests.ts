@@ -191,6 +191,7 @@ export async function importContent(
         body: {
           include: JSON.stringify(body.include),
           content: body.content,
+          filename: 'content_pack.zip',
         },
       },
       file: { key: 'content', filename: 'content_pack.zip' },
