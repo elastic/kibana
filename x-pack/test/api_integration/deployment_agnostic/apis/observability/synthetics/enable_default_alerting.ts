@@ -276,6 +276,7 @@ const defaultAlertRules = {
     apiKeyCreatedByUser: true,
     artifacts: {
       dashboards: [],
+      investigation_guide: { blob: '' },
     },
     createdBy: 'any',
     updatedBy: 'any',
@@ -311,6 +312,7 @@ const defaultAlertRules = {
     apiKeyCreatedByUser: true,
     artifacts: {
       dashboards: [],
+      investigation_guide: { blob: '' },
     },
     createdBy: 'elastic_admin',
     updatedBy: 'elastic_admin',

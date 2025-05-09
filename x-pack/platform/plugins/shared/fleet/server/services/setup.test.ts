@@ -8,6 +8,7 @@
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { LockAcquisitionError } from '@kbn/lock-manager';
 
 import type { Logger } from '@kbn/core/server';
 
@@ -20,10 +21,14 @@ import { appContextService } from './app_context';
 import { getInstallations } from './epm/packages';
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig } from './preconfiguration/delete_unenrolled_agent_setting';
-import { setupFleet } from './setup';
+import { _runSetupWithLock, setupFleet } from './setup';
 import { isPackageInstalled } from './epm/packages/install';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
-import { createOrUpdateFleetSyncedIntegrationsIndex } from './setup/fleet_synced_integrations';
+import {
+  createCCSIndexPatterns,
+  createOrUpdateFleetSyncedIntegrationsIndex,
+} from './setup/fleet_synced_integrations';
+import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 
 jest.mock('./app_context');
 jest.mock('./preconfiguration');
@@ -48,6 +53,7 @@ jest.mock('./backfill_agentless');
 jest.mock('./epm/packages/install');
 jest.mock('./setup/upgrade_agent_policy_schema_version');
 jest.mock('./setup/fleet_synced_integrations');
+jest.mock('./epm/kibana/assets/saved_objects');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
@@ -102,6 +108,8 @@ describe('setupFleet', () => {
     (isPackageInstalled as jest.Mock).mockResolvedValue(true);
     (upgradeAgentPolicySchemaVersion as jest.Mock).mockResolvedValue(undefined);
     (createOrUpdateFleetSyncedIntegrationsIndex as jest.Mock).mockResolvedValue(undefined);
+    (createCCSIndexPatterns as jest.Mock).mockResolvedValue(undefined);
+    (getSpaceAwareSaveobjectsClients as jest.Mock).mockReturnValue({});
   });
 
   afterEach(async () => {
@@ -141,69 +149,6 @@ describe('setupFleet', () => {
     });
   });
 
-  it('should create and delete lock if not exists', async () => {
-    const soClient = getMockedSoClient();
-
-    soClient.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
-
-    const result = await setupFleet(soClient, esClient, { useLock: true });
-
-    expect(result).toEqual({
-      isInitialized: true,
-      nonFatalErrors: [],
-    });
-    expect(soClient.create).toHaveBeenCalledWith('fleet-setup-lock', expect.anything(), {
-      id: 'fleet-setup-lock',
-    });
-    expect(soClient.delete).toHaveBeenCalledWith('fleet-setup-lock', 'fleet-setup-lock', {
-      refresh: true,
-    });
-  });
-
-  it('should return not initialized if lock exists', async () => {
-    const soClient = getMockedSoClient();
-
-    const result = await setupFleet(soClient, esClient, { useLock: true });
-
-    expect(result).toEqual({
-      isInitialized: false,
-      nonFatalErrors: [],
-    });
-    expect(soClient.create).not.toHaveBeenCalled();
-    expect(soClient.delete).not.toHaveBeenCalled();
-  });
-
-  it('should return not initialized if lock could not be created', async () => {
-    const soClient = getMockedSoClient();
-
-    soClient.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
-    soClient.create.mockRejectedValue({ isBoom: true, output: { statusCode: 409 } } as any);
-    const result = await setupFleet(soClient, esClient, { useLock: true });
-
-    expect(result).toEqual({
-      isInitialized: false,
-      nonFatalErrors: [],
-    });
-    expect(soClient.delete).not.toHaveBeenCalled();
-  });
-
-  it('should delete previous lock if created more than 1 hour ago', async () => {
-    const soClient = getMockedSoClient();
-
-    soClient.get.mockResolvedValue({
-      attributes: { started_at: new Date(Date.now() - 60 * 60 * 1000 - 1000).toISOString() },
-    } as any);
-
-    const result = await setupFleet(soClient, esClient, { useLock: true });
-
-    expect(result).toEqual({
-      isInitialized: true,
-      nonFatalErrors: [],
-    });
-    expect(soClient.create).toHaveBeenCalled();
-    expect(soClient.delete).toHaveBeenCalledTimes(2);
-  });
-
   it('should return non fatal errors when generateKeyPair result has errors', async () => {
     const soClient = getMockedSoClient();
 
@@ -226,5 +171,44 @@ describe('setupFleet', () => {
         },
       ],
     });
+  });
+});
+
+describe('_runSetupWithLock', () => {
+  let mockedWithLock: jest.Mock<any, any, any>;
+  beforeEach(() => {
+    mockedWithLock = jest.fn();
+    mockedAppContextService.getLockManagerService.mockReturnValue({
+      withLock: mockedWithLock as any,
+    } as any);
+  });
+  it('should retry on lock acquisition error', async () => {
+    mockedWithLock
+      .mockImplementationOnce(async () => {
+        throw new LockAcquisitionError('test');
+      })
+      .mockImplementationOnce(async (id, fn) => {
+        return fn();
+      });
+
+    const setupFn = jest.fn();
+    await _runSetupWithLock(setupFn);
+
+    expect(setupFn).toHaveBeenCalled();
+    expect(mockedWithLock).toHaveBeenCalledTimes(2);
+  });
+
+  it('should not retry on setupFn error', async () => {
+    mockedWithLock.mockImplementation(async (id, fn) => {
+      return fn();
+    });
+
+    const setupFn = jest.fn();
+    setupFn.mockRejectedValue(new Error('test'));
+
+    await expect(_runSetupWithLock(setupFn)).rejects.toThrow(/test/);
+
+    expect(setupFn).toHaveBeenCalled();
+    expect(mockedWithLock).toHaveBeenCalledTimes(1);
   });
 });
