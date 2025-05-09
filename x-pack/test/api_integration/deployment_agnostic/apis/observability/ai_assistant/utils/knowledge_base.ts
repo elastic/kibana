@@ -75,7 +75,7 @@ export async function setupKnowledgeBase(
   const statusResult = await getKnowledgeBaseStatus(observabilityAIAssistantAPIClient);
 
   log.debug(
-    `Setting up knowledge base with inference endpoint = "${TINY_ELSER_INFERENCE_ID}", concreteWriteIndex = ${statusResult.body.concreteWriteIndex}, currentInferenceId = ${statusResult.body.currentInferenceId} ${statusResult.body.isReIndexing}`
+    `Setting up knowledge base with inference endpoint = "${TINY_ELSER_INFERENCE_ID}", concreteWriteIndex = ${statusResult.body.concreteWriteIndex}, currentInferenceId = ${statusResult.body.currentInferenceId}, isReIndexing = ${statusResult.body.isReIndexing}`
   );
   return observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',

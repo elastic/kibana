@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
 
-  describe.only('recall', function () {
+  describe('recall', function () {
     before(async () => {
       await deployTinyElserAndSetupKb(getService);
       await addSampleDocsToInternalKb(getService, technicalSampleDocs);
@@ -40,7 +40,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('GET /internal/observability_ai_assistant/functions/recall', () => {
-      it.only('produces unique scores for each doc', async () => {
+      it('produces unique scores for each doc', async () => {
         const entries = await recall('What happened during the database outage?');
         const uniqueScores = uniq(entries.map(({ esScore }) => esScore));
         expect(uniqueScores.length).to.be.greaterThan(1);
