@@ -6,21 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Writer } from 'mustache';
+import Mustache from 'mustache';
 import { getServices } from '../../kibana_services';
 
 const TEMPLATE_TAGS = ['{', '}'];
 
-// Can not use 'Mustache' since its a global object
-const mustacheWriter = new Writer();
-// do not html escape output
-mustacheWriter.escapedValue = function escapedValue(token, context) {
-  const value = context.lookup(token[1]);
-  if (value != null) {
-    return value;
-  }
-};
-
+// replace template strings without the default mustache escaping
 export function replaceTemplateStrings(text, params = {}) {
   const { tutorialService, kibanaVersion, docLinks } = getServices();
 
@@ -37,7 +28,7 @@ export function replaceTemplateStrings(text, params = {}) {
           filebeat: docLinks.links.filebeat.base,
           metricbeat: docLinks.links.metricbeat.base,
           heartbeat: docLinks.links.heartbeat.base,
-          functionbeat: docLinks.links.functionbeat.base,
+          // functionbeat: docLinks.links.functionbeat.base,
           winlogbeat: docLinks.links.winlogbeat.base,
           auditbeat: docLinks.links.auditbeat.base,
         },
@@ -50,6 +41,10 @@ export function replaceTemplateStrings(text, params = {}) {
     },
     params: params,
   };
-  mustacheWriter.parse(text, TEMPLATE_TAGS);
-  return mustacheWriter.render(text, variables);
+
+  const config = {
+    tags: TEMPLATE_TAGS,
+    escape: (s) => s,
+  };
+  return Mustache.render(text, variables, undefined, config);
 }
