@@ -31,7 +31,7 @@ describe('SecurityLabsTool', () => {
   });
 
   describe('DynamicStructuredTool', () => {
-    it('includes citations fallback', async () => {
+    it('includes citations', async () => {
       getKnowledgeBaseDocumentEntries.mockResolvedValue([
         new Document({
           id: '123',
