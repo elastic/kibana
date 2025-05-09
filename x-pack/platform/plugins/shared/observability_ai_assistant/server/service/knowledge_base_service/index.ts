@@ -431,7 +431,9 @@ export class KnowledgeBaseService {
         refresh: 'wait_for',
       });
 
-      this.dependencies.logger.debug(`Entry added to knowledge base`);
+      this.dependencies.logger.debug(
+        `Entry added to knowledge base. title = "${doc.title}", user = "${user?.name}, namespace = "${namespace}"`
+      );
     } catch (error) {
       this.dependencies.logger.error(`Failed to add entry to knowledge base ${error}`);
       if (isInferenceEndpointMissingOrUnavailable(error)) {
