@@ -27,7 +27,7 @@ import { InvalidContentPackError } from './error';
 
 const ARCHIVE_ENTRY_MAX_SIZE_BYTES = 1 * 1024 * 1024; // 1MB
 
-export async function parseArchive(archive: Readable): Promise<ContentPack> {
+export async function parseArchive(filename: string, archive: Readable): Promise<ContentPack> {
   const zip: AdmZip = await new Promise((resolve, reject) => {
     const bufs: Buffer[] = [];
     archive.on('data', (chunk: Buffer) => bufs.push(chunk));
@@ -41,8 +41,9 @@ export async function parseArchive(archive: Readable): Promise<ContentPack> {
     archive.on('error', (error) => reject(error));
   });
 
-  const manifest = await extractManifest(zip);
-  const entries = await extractEntries(zip);
+  const rootDir = path.parse(filename).name;
+  const manifest = await extractManifest(rootDir, zip);
+  const entries = await extractEntries(rootDir, zip);
 
   return { ...manifest, entries };
 }
@@ -53,9 +54,9 @@ export async function generateArchive(manifest: ContentPackManifest, objects: Co
 
   objects.forEach((object: ContentPackEntry) => {
     if (isSupportedSavedObjectType(object)) {
-      const dir = SUPPORTED_SAVED_OBJECT_TYPE[object.type];
+      const subDir = SUPPORTED_SAVED_OBJECT_TYPE[object.type];
       zip.addFile(
-        path.join(rootDir, 'kibana', dir, `${object.id}.json`),
+        path.join(rootDir, 'kibana', subDir, `${object.id}.json`),
         Buffer.from(JSON.stringify(object, null, 2))
       );
     }
@@ -80,10 +81,11 @@ async function readEntry(entry: AdmZip.IZipEntry): Promise<Buffer> {
   return buf;
 }
 
-async function extractManifest(zip: AdmZip): Promise<ContentPackManifest> {
-  const entry = zip.getEntry('manifest.yml');
+async function extractManifest(rootDir: string, zip: AdmZip): Promise<ContentPackManifest> {
+  const manifestPath = `${rootDir}/manifest.yml`;
+  const entry = zip.getEntry(manifestPath);
   if (!entry) {
-    throw new InvalidContentPackError('Missing content pack manifest');
+    throw new InvalidContentPackError(`Expected manifest at [${manifestPath}]`);
   }
 
   const { data: manifest, success } = contentPackManifestSchema.safeParse(
@@ -96,21 +98,19 @@ async function extractManifest(zip: AdmZip): Promise<ContentPackManifest> {
   return manifest;
 }
 
-async function extractEntries(zip: AdmZip): Promise<ContentPackEntry[]> {
+async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPackEntry[]> {
   const entries = await Promise.all(
     zip
       .getEntries()
-      .filter((entry) => {
-        const filepath = path.join(...entry.entryName.split(path.sep).slice(1));
-        return isDashboardFile(filepath);
-      })
-      .map((entry) => resolveDashboard(zip, entry))
+      .filter((entry) => isDashboardFile(rootDir, entry.entryName))
+      .map((entry) => resolveDashboard(rootDir, zip, entry))
   );
 
   return entries.flat();
 }
 
 async function resolveDashboard(
+  rootDir: string,
   zip: AdmZip,
   dashboardEntry: AdmZip.IZipEntry
 ): Promise<ContentPackSavedObject[]> {
@@ -133,7 +133,9 @@ async function resolveDashboard(
 
   const includedReferences = compact(
     (uniqReferences as Array<{ type: SupportedSavedObjectType; id: string }>).map((ref) =>
-      zip.getEntry(path.join('kibana', SUPPORTED_SAVED_OBJECT_TYPE[ref.type], `${ref.id}.json`))
+      zip.getEntry(
+        path.join(rootDir, 'kibana', SUPPORTED_SAVED_OBJECT_TYPE[ref.type], `${ref.id}.json`)
+      )
     )
   );
 

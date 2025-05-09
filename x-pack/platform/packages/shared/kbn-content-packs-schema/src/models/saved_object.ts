@@ -31,9 +31,9 @@ export const isSupportedSavedObjectFile = (filepath: string) => {
   );
 };
 
-export const isDashboardFile = (filepath: string) => {
-  const dir = SUPPORTED_SAVED_OBJECT_TYPE.dashboard;
-  return path.dirname(filepath) === path.join('kibana', dir);
+export const isDashboardFile = (rootDir: string, filepath: string) => {
+  const subDir = SUPPORTED_SAVED_OBJECT_TYPE['dashboard'];
+  return path.dirname(filepath) === path.join(rootDir, 'kibana', subDir);
 };
 
 export const isSupportedReferenceType = (type: string) => {

@@ -107,7 +107,7 @@ const exportContentRoute = createServerRoute({
     return response.ok({
       body: archive,
       headers: {
-        'Content-Disposition': `attachment; filename="${params.body.name}.zip"`,
+        'Content-Disposition': `attachment; filename="${params.body.name}-${params.body.version}.zip"`,
         'Content-Type': 'application/zip',
       },
     });
@@ -135,6 +135,7 @@ const importContentRoute = createServerRoute({
         .string()
         .transform((value) => contentPackIncludedObjectsSchema.parse(JSON.parse(value))),
       content: z.instanceof(Readable),
+      filename: z.string(),
     }),
   }),
   security: {
@@ -150,7 +151,7 @@ const importContentRoute = createServerRoute({
 
     await streamsClient.ensureStream(params.path.name);
 
-    const contentPack = await parseArchive(params.body.content);
+    const contentPack = await parseArchive(params.body.filename, params.body.content);
     const storedContentPack = await contentClient
       .getStoredContentPack(params.path.name, contentPack.name)
       .catch((err) => {
@@ -230,6 +231,7 @@ const previewContentRoute = createServerRoute({
     }),
     body: z.object({
       content: z.instanceof(Readable),
+      filename: z.string(),
     }),
   }),
   security: {
@@ -241,7 +243,7 @@ const previewContentRoute = createServerRoute({
     const { streamsClient } = await getScopedClients({ request });
     await streamsClient.ensureStream(params.path.name);
 
-    return await parseArchive(params.body.content);
+    return await parseArchive(params.body.filename, params.body.content);
   },
 });
 
