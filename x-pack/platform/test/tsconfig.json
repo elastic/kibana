@@ -74,5 +74,6 @@
     "@kbn/core",
     "@kbn/entities-schema",
     "@kbn/data-forge",
+    "@kbn/entityManager-plugin",
   ]
 }
