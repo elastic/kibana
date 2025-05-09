@@ -106,7 +106,6 @@ export const WaterfallBarChart = ({
           showLegend={false}
           rotation={90}
           theme={{ tooltip: { maxWidth: 500 } }}
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
           baseTheme={baseChartTheme}
           onProjectionClick={handleProjectionClick}
           onElementClick={handleElementClick}

@@ -1,6 +1,11 @@
 post:
   summary: Create an APM agent key
-  description: Create a new agent key for APM.
+  description: >
+    Create a new agent key for APM.
+
+    The user creating an APM agent API key must have at least the `manage_own_api_key` cluster privilege and the APM application-level privileges that it wishes to grant.
+
+    After it is created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.
   operationId: createAgentKey
   tags:
     - APM agent keys
@@ -13,6 +18,9 @@ post:
       application/json:
         schema:
           $ref: '../components/schemas/agent_keys_object.yaml'
+        examples:
+          createAgentKeyRequest1:
+            $ref: '../components/examples/agent_keys_object_post_request1.yaml'
   responses:
     "200":
       description: Agent key created successfully
@@ -20,6 +28,9 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/agent_keys_response.yaml'
+          examples:
+            createAgentKeyResponse1:
+              $ref: '../components/examples/agent_keys_object_post_200_response1.yaml'
     '400':
       description: Bad Request response
       content:

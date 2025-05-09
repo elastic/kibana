@@ -6,4 +6,4 @@
  */
 
 export { listClientsTools } from './list_clients_tools';
-export { getLCTools, toLangchainTool } from './to_langchain_tool';
+export { toLangchainTool } from './to_langchain_tool';

@@ -9,102 +9,99 @@
 
 import { ParserRuleContext, TerminalNode } from 'antlr4';
 import {
-  default as esql_parser,
   ArithmeticBinaryContext,
   ArithmeticUnaryContext,
   BooleanArrayLiteralContext,
   BooleanDefaultContext,
-  type BooleanExpressionContext,
   BooleanLiteralContext,
-  InputParameterContext,
   BooleanValueContext,
   ComparisonContext,
-  type ComparisonOperatorContext,
-  type ConstantContext,
   ConstantDefaultContext,
   DecimalLiteralContext,
   DereferenceContext,
-  type DropCommandContext,
-  type EnrichCommandContext,
-  type FieldContext,
-  type FieldsContext,
-  type AggFieldsContext,
+  EntryExpressionContext,
   FunctionContext,
+  InlineCastContext,
+  InlinestatsCommandContext,
+  InputParameterContext,
   IntegerLiteralContext,
   IsNullContext,
-  type KeepCommandContext,
   LogicalBinaryContext,
   LogicalInContext,
   LogicalNotContext,
+  MapExpressionContext,
+  MatchBooleanExpressionContext,
+  MatchExpressionContext,
   MetadataContext,
   MvExpandCommandContext,
   NullLiteralContext,
   NumericArrayLiteralContext,
   NumericValueContext,
-  type OperatorExpressionContext,
   OperatorExpressionDefaultContext,
-  type OrderExpressionContext,
   ParenthesizedExpressionContext,
-  type PrimaryExpressionContext,
   QualifiedIntegerLiteralContext,
   RegexBooleanExpressionContext,
-  type RenameClauseContext,
-  type StatsCommandContext,
   StringArrayLiteralContext,
   StringContext,
   StringLiteralContext,
-  type ValueExpressionContext,
   ValueExpressionDefaultContext,
-  InlineCastContext,
-  InlinestatsCommandContext,
-  MatchExpressionContext,
-  MatchBooleanExpressionContext,
-  MapExpressionContext,
-  EntryExpressionContext,
+  default as esql_parser,
+  type AggFieldsContext,
+  type BooleanExpressionContext,
+  type ComparisonOperatorContext,
+  type ConstantContext,
+  type DropCommandContext,
+  type EnrichCommandContext,
+  type FieldContext,
+  type FieldsContext,
+  type KeepCommandContext,
+  type OperatorExpressionContext,
+  type PrimaryExpressionContext,
+  type RenameClauseContext,
+  type StatsCommandContext,
+  type ValueExpressionContext,
 } from '../antlr/esql_parser';
 import {
-  createColumn,
-  createOption,
-  nonNullable,
-  createFunction,
-  createLiteral,
-  createTimeUnit,
-  createFakeMultiplyLiteral,
-  createList,
-  createNumericLiteral,
   computeLocationExtends,
+  createBinaryExpression,
+  createColumn,
   createColumnStar,
-  wrapIdentifierAsArray,
+  createFakeMultiplyLiteral,
+  createFunction,
+  createFunctionCall,
+  createInlineCast,
+  createList,
+  createLiteral,
+  createLiteralString,
+  createNumericLiteral,
+  createOption,
+  createParam,
   createPolicy,
   createSetting,
-  textExistsAndIsValid,
-  createInlineCast,
+  createTimeUnit,
   createUnknownItem,
-  createOrderExpression,
-  createFunctionCall,
-  createParam,
-  createLiteralString,
-  createBinaryExpression,
+  nonNullable,
+  textExistsAndIsValid,
+  wrapIdentifierAsArray,
 } from './factories';
 
+import { Builder } from '../builder';
 import {
-  ESQLLiteral,
-  ESQLColumn,
-  ESQLFunction,
-  ESQLCommandOption,
-  ESQLAstItem,
+  ESQLAstExpression,
   ESQLAstField,
-  ESQLInlineCast,
-  ESQLOrderExpression,
+  ESQLAstItem,
   ESQLBinaryExpression,
-  InlineCastingType,
+  ESQLColumn,
+  ESQLCommandOption,
+  ESQLFunction,
+  ESQLInlineCast,
+  ESQLLiteral,
   ESQLMap,
   ESQLMapEntry,
   ESQLStringLiteral,
-  ESQLAstExpression,
+  InlineCastingType,
 } from '../types';
 import { firstItem, lastItem } from '../visitor/utils';
-import { Builder } from '../builder';
 import { getPosition } from './helpers';
 
 function terminalNodeToParserRuleContext(node: TerminalNode): ParserRuleContext {
@@ -666,44 +663,4 @@ export function visitByOption(
   const lastArg = lastItem(option.args);
   if (lastArg) option.location.max = lastArg.location.max;
   return [option];
-}
-
-const visitOrderExpression = (ctx: OrderExpressionContext): ESQLOrderExpression | ESQLAstItem => {
-  const arg = collectBooleanExpression(ctx.booleanExpression())[0];
-
-  let order: ESQLOrderExpression['order'] = '';
-  let nulls: ESQLOrderExpression['nulls'] = '';
-
-  const ordering = ctx._ordering?.text?.toUpperCase();
-
-  if (ordering) order = ordering as ESQLOrderExpression['order'];
-
-  const nullOrdering = ctx._nullOrdering?.text?.toUpperCase();
-
-  switch (nullOrdering) {
-    case 'LAST':
-      nulls = 'NULLS LAST';
-      break;
-    case 'FIRST':
-      nulls = 'NULLS FIRST';
-      break;
-  }
-
-  if (!order && !nulls) {
-    return arg;
-  }
-
-  return createOrderExpression(ctx, arg as ESQLColumn, order, nulls);
-};
-
-export function visitOrderExpressions(
-  ctx: OrderExpressionContext[]
-): Array<ESQLOrderExpression | ESQLAstItem> {
-  const ast: Array<ESQLOrderExpression | ESQLAstItem> = [];
-
-  for (const orderCtx of ctx) {
-    ast.push(visitOrderExpression(orderCtx));
-  }
-
-  return ast;
 }

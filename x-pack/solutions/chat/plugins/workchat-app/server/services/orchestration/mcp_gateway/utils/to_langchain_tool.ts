@@ -12,19 +12,6 @@ import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import { GatewayTool } from '../types';
 import { McpGatewaySession } from '../session';
 
-export async function getLCTools({
-  session,
-  logger,
-}: {
-  session: McpGatewaySession;
-  logger: Logger;
-}): Promise<StructuredTool[]> {
-  const tools = await session.listTools();
-  return tools.map((tool) => {
-    return toLangchainTool({ tool, logger, session });
-  });
-}
-
 export function toLangchainTool({
   tool,
   session,

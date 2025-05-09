@@ -8,6 +8,7 @@
 import type { Observable } from 'rxjs';
 
 import type { CoreStart, AppMountParameters, AppLeaveHandler } from '@kbn/core/public';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { DataPublicPluginStart, DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
@@ -78,11 +79,7 @@ import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrappe
 import type { AssetInventory } from './asset_inventory';
 import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
-import type { NavigationLink } from './common/links';
 import type { EntityAnalytics } from './entity_analytics';
-import type { Assets } from './assets';
-import type { Investigations } from './investigations';
-import type { MachineLearning } from './machine_learning';
 import type { SiemMigrations } from './siem_migrations';
 import type { Configurations } from './configurations';
 
@@ -215,12 +212,11 @@ export interface PluginSetup {
 }
 
 export interface PluginStart {
-  getNavLinks$: () => Observable<NavigationLink[]>;
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
   setOnboardingSettings: OnboardingService['setSettings'];
-  setIsSolutionNavigationEnabled: (isSolutionNavigationEnabled: boolean) => void;
+  setSolutionNavigationTree: (navigationTree: NavigationTreeDefinition | null) => void;
 }
 
 export type InspectResponse = Inspect & { response: string[] };
@@ -243,9 +239,6 @@ export interface SubPlugins {
   threatIntelligence: ThreatIntelligence;
   timelines: Timelines;
   entityAnalytics: EntityAnalytics;
-  assets: Assets;
-  investigations: Investigations;
-  machineLearning: MachineLearning;
   siemMigrations: SiemMigrations;
   configurations: Configurations;
 }
@@ -267,9 +260,6 @@ export interface StartedSubPlugins {
   threatIntelligence: ReturnType<ThreatIntelligence['start']>;
   timelines: ReturnType<Timelines['start']>;
   entityAnalytics: ReturnType<EntityAnalytics['start']>;
-  assets: ReturnType<Assets['start']>;
-  investigations: ReturnType<Investigations['start']>;
-  machineLearning: ReturnType<MachineLearning['start']>;
   siemMigrations: ReturnType<SiemMigrations['start']>;
   configurations: ReturnType<Configurations['start']>;
 }

@@ -7,8 +7,8 @@
 
 import React, { FC, PropsWithChildren } from 'react';
 import { css } from '@emotion/react';
-import { Option, none, some, fold, isSome } from 'fp-ts/lib/Option';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { Option, none, some, fold, isSome } from 'fp-ts/Option';
+import { pipe } from 'fp-ts/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiLink, EuiSpacer, useEuiTheme, EuiThemeComputed } from '@elastic/eui';

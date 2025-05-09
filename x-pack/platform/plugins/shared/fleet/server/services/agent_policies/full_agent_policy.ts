@@ -308,7 +308,7 @@ export async function getFullAgentPolicy(
 
   // populate protection and signed properties
   const messageSigningService = appContextService.getMessageSigningService();
-  if (messageSigningService && fullAgentPolicy.agent) {
+  if (options?.standalone !== true && messageSigningService && fullAgentPolicy.agent) {
     const publicKey = await messageSigningService.getPublicKey();
     const tokenHash =
       (await appContextService
@@ -345,6 +345,11 @@ export async function getFullAgentPolicy(
   if (agentPolicy.overrides) {
     return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
   }
+  if (options?.standalone) {
+    delete fullAgentPolicy.agent?.protection;
+    delete fullAgentPolicy.signed;
+  }
+
   return fullAgentPolicy;
 }
 
@@ -574,11 +579,14 @@ export function transformOutputToFullPolicyOutput(
     ...(!isShipperDisabled ? generalShipperData : {}),
     ...(ca_sha256 ? { ca_sha256 } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
-    ...((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl
-      ? { ssl }
-      : {}),
     ...(secrets ? { secrets } : {}),
   };
+  if ((output.type === outputType.Kafka || output.type === outputType.Logstash) && ssl) {
+    newOutput.ssl = {
+      ...newOutput.ssl,
+      ...ssl,
+    };
+  }
 
   if (proxy) {
     newOutput.proxy_url = proxy.url;
@@ -616,9 +624,8 @@ export function transformOutputToFullPolicyOutput(
 
   if (output.type === outputType.RemoteElasticsearch) {
     newOutput.service_token = output.service_token;
-    newOutput.kibana_api_key = output.kibana_api_key;
-    newOutput.kibana_url = output.kibana_url;
     newOutput.sync_integrations = output.sync_integrations;
+    newOutput.sync_uninstalled_integrations = output.sync_uninstalled_integrations;
   }
 
   if (outputTypeSupportPresets(output.type)) {

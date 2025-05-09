@@ -19,6 +19,14 @@ import {
 export class StatefulAuthProvider implements AuthProvider {
   private readonly rolesDefinitionPath = resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
 
+  isServerless() {
+    return false;
+  }
+
+  getProjectType() {
+    return undefined;
+  }
+
   getSupportedRoleDescriptors() {
     const roleDescriptors = new Map<string, any>(
       Object.entries(
@@ -39,8 +47,9 @@ export class StatefulAuthProvider implements AuthProvider {
     return true;
   }
 
+  // For compatibility with the Scout test framework we use the same name for the custom role
   getCustomRole() {
-    return 'customRole';
+    return 'custom_role_worker_1';
   }
 
   getRolesDefinitionPath() {

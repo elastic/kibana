@@ -33,6 +33,7 @@
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/task-manager-plugin",
+    "@kbn/event-log-plugin",
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/config-schema",
@@ -59,6 +60,8 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/alerting-plugin",
     "@kbn/rule-data-utils",
+    "@kbn/alerting-types",
+    "@kbn/zod-helpers",
   ],
   "exclude": [
     "target/**/*",

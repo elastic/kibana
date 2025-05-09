@@ -7,16 +7,23 @@
 
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { HomeAgentSection } from './home_agent_section';
-import { HomeIntegrationSection } from './home_integration_section';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { HomeChatSection } from './home_chat_section';
+import { HomeAssistantsSection } from './home_assistants_section';
+import { HomeConversationHistorySection } from './home_conversation_history';
 
 export const WorkChatHomeView: React.FC<{}> = () => {
   return (
-    <KibanaPageTemplate panelled>
-      <KibanaPageTemplate.Header pageTitle="WorkChat" />
-
-      <HomeAgentSection />
-      <HomeIntegrationSection />
+    <KibanaPageTemplate data-test-subj="workChatHomePage">
+      <KibanaPageTemplate.Section flex-direction="column" restrictWidth={800} paddingSize="xl">
+        <EuiSpacer size="xl" />
+        <HomeChatSection />
+        <EuiSpacer size="xl" />
+        <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+          <HomeAssistantsSection />
+          <HomeConversationHistorySection />
+        </EuiFlexGroup>
+      </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 };

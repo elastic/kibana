@@ -21,8 +21,8 @@ export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[])
     } else {
       const newBreadcrumbs = [
         {
-          text: i18n.translate('xpack.searchIndices.breadcrumbs.content.label', {
-            defaultMessage: 'Content',
+          text: i18n.translate('xpack.searchIndices.breadcrumbs.data.label', {
+            defaultMessage: 'Data',
           }),
         },
         ...breadcrumbs,

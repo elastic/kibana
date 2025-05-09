@@ -45,6 +45,7 @@ interface UpdateButtonProps extends Pick<PackageInfo, 'name' | 'title' | 'versio
   isUpgradingPackagePolicies?: boolean;
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  isDisabled?: boolean;
 }
 
 /*
@@ -77,6 +78,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   title,
   version,
   startServices,
+  isDisabled = false,
 }) => {
   const history = useHistory();
   const { getPath } = useLink();
@@ -324,7 +326,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
               upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate
             }
             data-test-subj="updatePackageBtn"
-            isDisabled={!canUpgradePackages}
+            isDisabled={isDisabled || !canUpgradePackages}
           >
             <FormattedMessage
               id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"

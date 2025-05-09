@@ -12,7 +12,7 @@ import {
   EuiFlexGroup,
   EuiPanel,
 } from '@elastic/eui';
-import { useStoreEntityTypes } from '../../../hooks/use_enabled_entity_types';
+import { useEntityAnalyticsTypes } from '../../../hooks/use_enabled_entity_types';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
 import { EntitiesList } from '../entities_list';
 import { useEntityStoreStatus } from '../hooks/use_entity_store';
@@ -25,7 +25,7 @@ import { EntityStoreErrorCallout } from './entity_store_error_callout';
 const EntityStoreDashboardPanelsComponent = () => {
   const riskEngineStatus = useRiskEngineStatus();
   const storeStatusQuery = useEntityStoreStatus({});
-  const entityTypes = useStoreEntityTypes();
+  const entityTypes = useEntityAnalyticsTypes();
 
   const callouts = (storeStatusQuery.data?.engines ?? [])
     .filter((engine) => engine.status === 'error')

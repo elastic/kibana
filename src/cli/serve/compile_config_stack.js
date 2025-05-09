@@ -25,10 +25,16 @@ const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security', 'chat'];
 
 /**
  * Collects paths to configurations to be included in the final configuration stack.
- * @param {{configOverrides?: string[], devConfig?: boolean, dev?: boolean, serverless?: string | true}} options Options impacting the outgoing config list
+ * @param {{configOverrides?: string[], devConfig?: boolean, dev?: boolean, serverless?: string | true, securityProductTier?: ServerlessSecurityTier}} options Options impacting the outgoing config list
  * @returns List of paths to configurations to be merged, from left to right.
  */
-export function compileConfigStack({ configOverrides, devConfig, dev, serverless }) {
+export function compileConfigStack({
+  configOverrides,
+  devConfig,
+  dev,
+  serverless,
+  securityProductTier,
+}) {
   const cliConfigs = configOverrides || [];
   const envConfigs = getEnvConfigs();
   const defaultConfig = getConfigPath();
@@ -56,7 +62,7 @@ export function compileConfigStack({ configOverrides, devConfig, dev, serverless
   // Security specific configs
   if (serverlessMode === 'security') {
     // Security specific tier configs
-    const serverlessSecurityTier = getSecurityTierFromCfg(configs);
+    const serverlessSecurityTier = securityProductTier || getSecurityTierFromCfg(configs);
     if (serverlessSecurityTier) {
       configs.push(resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.yml`));
       if (dev && devConfig !== false) {

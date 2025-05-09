@@ -84,6 +84,7 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
       'rpm_x86_64',
       'deb_aarch64',
       'deb_x86_64',
+      'windows_msi',
     ] as PLATFORM_TYPE[]
   ).reduce((acc, platform) => {
     acc[platform] = getInstallCommandForPlatform({

@@ -64,19 +64,21 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
     if (!mlCapabilities.canCreateJob) return;
 
     getStartServices().then((startServices) => {
-      const locator = startServices[2].locator;
-      if (!locator) return;
-      locator.getUrl({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB }).then((url) => {
-        if (mounted) {
-          setNewJobUrl(url);
-        }
-      });
+      const { managementLocator } = startServices[2];
+      if (!managementLocator) return;
+      managementLocator
+        .getUrl({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB }, 'anomaly_detection')
+        .then(({ url }) => {
+          if (mounted) {
+            setNewJobUrl(url);
+          }
+        });
     });
 
     return () => {
       mounted = false;
     };
-  }, [getStartServices, mlCapabilities]);
+  }, [mlCapabilities, getStartServices]);
 
   const mlHttpService = useMemo(() => new HttpService(http!), [http]);
   const adJobsApiService = useMemo(() => jobsApiProvider(mlHttpService), [mlHttpService]);

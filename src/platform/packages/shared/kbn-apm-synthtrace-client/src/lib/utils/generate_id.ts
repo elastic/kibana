@@ -72,3 +72,7 @@ export function generateLongIdWithSeed(seed: string) {
 export const setIdGeneratorStrategy = (strategy: IdGeneratorStrategyType) => {
   idGeneratorStategy = strategy;
 };
+
+export const resetSequentialGenerator = () => {
+  seq = 0;
+};

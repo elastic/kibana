@@ -17,7 +17,9 @@ const KEY_FIELDS: Array<keyof ApmOtelFields> = [
   'resource.attributes.deployment.environment',
   'resource.attributes.service.name',
   'attributes.transaction.type',
+  'resource.attributes.telemetry.sdk.name',
   'resource.attributes.telemetry.sdk.language',
+  'scope.attributes.service.framework.name',
 ];
 
 const METRICSET_NAME = 'service_transaction';

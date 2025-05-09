@@ -1,0 +1,7 @@
+# summary: 
+description: Run `POST /api/apm/agent_keys` to create an APM agent API key with the specified privileges.
+value: >
+    {
+        "name": "apm-key",
+        "privileges": ["event:write", "config_agent:read"]
+    }

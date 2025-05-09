@@ -15,9 +15,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 const mockRetrieverInitialize = jest.fn().mockResolvedValue(undefined);
 jest.mock('./retrievers', () => ({
   ...jest.requireActual('./retrievers'),
-  RuleMigrationsRetriever: jest
-    .fn()
-    .mockImplementation(() => ({ initialize: mockRetrieverInitialize })),
+  RuleMigrationsRetriever: jest.fn().mockImplementation(() => ({
+    initialize: mockRetrieverInitialize,
+    resources: {
+      getResources: jest.fn(() => ({})),
+    },
+  })),
 }));
 
 const mockCreateModel = jest.fn(() => ({ model: 'test-model' }));

@@ -6,7 +6,6 @@
  */
 
 import { findSloDefinitionsParamsSchema } from '@kbn/slo-schema';
-import { KibanaSavedObjectsSLORepository } from '../../services';
 import { FindSLODefinitions } from '../../services/find_slo_definitions';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -20,11 +19,9 @@ export const findSloDefinitionsRoute = createSloServerRoute({
     },
   },
   params: findSloDefinitionsParamsSchema,
-  handler: async ({ context, params, logger, plugins }) => {
+  handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-
-    const soClient = (await context.core).savedObjects.client;
-    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+    const { repository } = await getScopedClients({ request, logger });
     const findSloDefinitions = new FindSLODefinitions(repository);
 
     return await findSloDefinitions.execute(params?.query ?? {});

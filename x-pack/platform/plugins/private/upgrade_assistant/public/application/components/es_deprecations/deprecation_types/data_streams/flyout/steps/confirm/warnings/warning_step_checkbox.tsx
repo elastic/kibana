@@ -30,7 +30,7 @@ export const WarningCheckbox: React.FunctionComponent<{
   <>
     <EuiText>
       <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} data-test-subj="migrationWarningCheckbox">
           <EuiCheckbox
             id={warningId}
             label={<strong>{label}</strong>}
@@ -70,4 +70,7 @@ export interface WarningCheckboxProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   docLinks: DocLinksStart['links'];
   id: string;
+  meta?: {
+    oldestIncompatibleDocTimestamp?: number;
+  };
 }

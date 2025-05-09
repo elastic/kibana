@@ -9,16 +9,22 @@
 
 export type ESQLAst = ESQLAstCommand[];
 
-export type ESQLAstCommand = ESQLCommand | ESQLAstTimeseriesCommand | ESQLAstJoinCommand;
+export type ESQLAstCommand =
+  | ESQLCommand
+  | ESQLAstTimeseriesCommand
+  | ESQLAstJoinCommand
+  | ESQLAstChangePointCommand
+  | ESQLAstRerankCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
 /**
  * Represents an *expression* in the AST.
  */
-export type ESQLAstExpression = ESQLSingleAstItem | ESQLAstQueryExpression;
+export type ESQLAstExpression = ESQLSingleAstItem;
 
 export type ESQLSingleAstItem =
+  | ESQLAstQueryExpression
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
@@ -34,7 +40,7 @@ export type ESQLSingleAstItem =
   | ESQLMap
   | ESQLMapEntry;
 
-export type ESQLAstField = ESQLFunction | ESQLColumn;
+export type ESQLAstField = ESQLFunction | ESQLColumn | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
@@ -104,6 +110,14 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
     pvalue: ESQLColumn;
   };
 }
+
+export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
+  query: ESQLLiteral;
+  fields: ESQLAstField[];
+  inferenceId: ESQLIdentifierOrParam;
+}
+
+export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
@@ -487,13 +501,6 @@ export interface ESQLMessage {
   location: ESQLLocation;
   code: string;
 }
-
-export type AstProviderFn = (text: string | undefined) =>
-  | Promise<{
-      ast: ESQLAst;
-      errors: EditorError[];
-    }>
-  | { ast: ESQLAst; errors: EditorError[] };
 
 export interface EditorError {
   startLineNumber: number;

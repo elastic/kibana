@@ -67,6 +67,8 @@ exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Error DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
+exports[`Error ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
+
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
 exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -178,10 +180,6 @@ exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Error LABEL_TYPE 1`] = `undefined`;
 
-exports[`Error LINKS_SPAN_ID 1`] = `undefined`;
-
-exports[`Error LINKS_TRACE_ID 1`] = `undefined`;
-
 exports[`Error LOG_LEVEL 1`] = `undefined`;
 
 exports[`Error METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
@@ -245,6 +243,12 @@ exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 exports[`Error OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
+
+exports[`Error OTEL_SPAN_LINKS 1`] = `undefined`;
+
+exports[`Error OTEL_SPAN_LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Error OTEL_SPAN_LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Error PARENT_ID 1`] = `"parentId"`;
 
@@ -344,8 +348,6 @@ exports[`Error TIMESTAMP_US 1`] = `1337`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
-exports[`Error TRANSACTION_MARKS_AGENT 1`] = `undefined`;
-
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
@@ -355,6 +357,8 @@ exports[`Error TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
 exports[`Error TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Error TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
 
@@ -459,6 +463,8 @@ exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Span DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
+exports[`Span ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
+
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 
 exports[`Span ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -557,10 +563,6 @@ exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Span LABEL_TYPE 1`] = `undefined`;
 
-exports[`Span LINKS_SPAN_ID 1`] = `undefined`;
-
-exports[`Span LINKS_TRACE_ID 1`] = `undefined`;
-
 exports[`Span LOG_LEVEL 1`] = `undefined`;
 
 exports[`Span METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
@@ -624,6 +626,12 @@ exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 exports[`Span OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
+
+exports[`Span OTEL_SPAN_LINKS 1`] = `undefined`;
+
+exports[`Span OTEL_SPAN_LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Span OTEL_SPAN_LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Span PARENT_ID 1`] = `"parentId"`;
 
@@ -719,8 +727,6 @@ exports[`Span TIMESTAMP_US 1`] = `1337`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
-exports[`Span TRANSACTION_MARKS_AGENT 1`] = `undefined`;
-
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
@@ -730,6 +736,8 @@ exports[`Span TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
 exports[`Span TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Span TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
 
@@ -837,6 +845,8 @@ exports[`Transaction DATA_STEAM_TYPE 1`] = `undefined`;
 exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Transaction DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
+
+exports[`Transaction ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
 
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 
@@ -946,10 +956,6 @@ exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Transaction LABEL_TYPE 1`] = `undefined`;
 
-exports[`Transaction LINKS_SPAN_ID 1`] = `undefined`;
-
-exports[`Transaction LINKS_TRACE_ID 1`] = `undefined`;
-
 exports[`Transaction LOG_LEVEL 1`] = `undefined`;
 
 exports[`Transaction METRIC_CGROUP_MEMORY_LIMIT_BYTES 1`] = `undefined`;
@@ -1013,6 +1019,12 @@ exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 exports[`Transaction OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
+
+exports[`Transaction OTEL_SPAN_LINKS 1`] = `undefined`;
+
+exports[`Transaction OTEL_SPAN_LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Transaction OTEL_SPAN_LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Transaction PARENT_ID 1`] = `"parentId"`;
 
@@ -1112,8 +1124,6 @@ exports[`Transaction TIMESTAMP_US 1`] = `1337`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 
-exports[`Transaction TRANSACTION_MARKS_AGENT 1`] = `undefined`;
-
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 
 exports[`Transaction TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
@@ -1123,6 +1133,8 @@ exports[`Transaction TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
 exports[`Transaction TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Transaction TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
 

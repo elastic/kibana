@@ -39,7 +39,6 @@ export function useCustomCards(
     history,
     `/otel-kubernetes/${location.search}`
   );
-  const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: firehoseUrl } = reactRouterNavigate(history, `/firehose/${location.search}`);
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
@@ -392,23 +391,6 @@ export function useCustomCards(
       version: '',
       integration: '',
       isCollectionCard: false,
-    },
-    {
-      id: 'custom-logs',
-      type: 'virtual',
-      title: 'Stream log files',
-      description: 'Stream any logs into Elastic in a simple way and explore their data',
-      name: 'custom-logs-virtual',
-      categories: ['observability'],
-      icons: [
-        {
-          type: 'eui',
-          src: 'filebeatApp',
-        },
-      ],
-      url: customLogsUrl,
-      version: '',
-      integration: '',
     },
     /**
      * The new Firehose card should only be visible on Cloud

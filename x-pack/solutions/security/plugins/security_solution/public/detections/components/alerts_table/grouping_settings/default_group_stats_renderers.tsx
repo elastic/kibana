@@ -13,19 +13,19 @@ import { DEFAULT_GROUP_STATS_RENDERER } from '../alerts_grouping';
 import type { AlertsGroupingAggregation } from './types';
 import * as i18n from '../translations';
 
-export const getUsersBadge = (bucket: RawBucket<AlertsGroupingAggregation>) => ({
+export const getUsersBadge = (bucket: RawBucket<AlertsGroupingAggregation>): GroupStatsItem => ({
   title: i18n.STATS_GROUP_USERS,
   badge: {
     value: bucket.usersCountAggregation?.value ?? 0,
   },
 });
-export const getHostsBadge = (bucket: RawBucket<AlertsGroupingAggregation>) => ({
+export const getHostsBadge = (bucket: RawBucket<AlertsGroupingAggregation>): GroupStatsItem => ({
   title: i18n.STATS_GROUP_HOSTS,
   badge: {
     value: bucket.hostsCountAggregation?.value ?? 0,
   },
 });
-export const getRulesBadge = (bucket: RawBucket<AlertsGroupingAggregation>) => ({
+export const getRulesBadge = (bucket: RawBucket<AlertsGroupingAggregation>): GroupStatsItem => ({
   title: i18n.STATS_GROUP_RULES,
   badge: {
     value: bucket.rulesCountAggregation?.value ?? 0,
@@ -57,7 +57,6 @@ export const Severity = memo(({ severities }: SingleSeverityProps) => {
         <span className="smallDot">
           <EuiIcon type="dot" color="#da8b45" />
         </span>
-
         <span>
           <EuiIcon type="dot" color="#e7664c" />
         </span>
@@ -137,17 +136,20 @@ export const defaultGroupStatsRenderer = (
   selectedGroup: string,
   bucket: RawBucket<AlertsGroupingAggregation>
 ): GroupStatsItem[] => {
-  const severityStat: GroupStatsItem[] = getSeverityComponent(bucket);
+  const severityComponent: GroupStatsItem[] = getSeverityComponent(bucket);
   const defaultBadges: GroupStatsItem[] = DEFAULT_GROUP_STATS_RENDERER(selectedGroup, bucket);
+  const usersBadge: GroupStatsItem = getUsersBadge(bucket);
+  const hostsBadge: GroupStatsItem = getHostsBadge(bucket);
+  const rulesBadge: GroupStatsItem = getRulesBadge(bucket);
 
   switch (selectedGroup) {
     case 'kibana.alert.rule.name':
-      return [...severityStat, getUsersBadge(bucket), getHostsBadge(bucket), ...defaultBadges];
+      return [...severityComponent, usersBadge, hostsBadge, ...defaultBadges];
     case 'host.name':
-      return [...severityStat, getUsersBadge(bucket), getRulesBadge(bucket), ...defaultBadges];
+      return [...severityComponent, usersBadge, rulesBadge, ...defaultBadges];
     case 'user.name':
     case 'source.ip':
-      return [...severityStat, getHostsBadge(bucket), getRulesBadge(bucket), ...defaultBadges];
+      return [...severityComponent, hostsBadge, rulesBadge, ...defaultBadges];
   }
-  return [...severityStat, getRulesBadge(bucket), ...defaultBadges];
+  return [...severityComponent, rulesBadge, ...defaultBadges];
 };

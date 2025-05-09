@@ -6,7 +6,6 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { thresholdExecutor } from './threshold';
@@ -48,14 +47,12 @@ describe('threshold_executor', () => {
   sharedParams.ruleExecutionLogger = ruleExecutionLogger;
   beforeEach(() => {
     ruleServices = createPersistenceExecutorOptionsMock();
-    ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        ...sampleEmptyAggsSearchResults(),
-        aggregations: {
-          thresholdTerms: { buckets: [] },
-        },
-      })
-    );
+    ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      ...sampleEmptyAggsSearchResults(),
+      aggregations: {
+        thresholdTerms: { buckets: [] },
+      },
+    });
     mockScheduledNotificationResponseAction = jest.fn();
   });
 

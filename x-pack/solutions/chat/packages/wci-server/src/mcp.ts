@@ -10,6 +10,10 @@ import type { Client as McpBaseClient } from '@modelcontextprotocol/sdk/client/i
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { MaybePromise } from '@kbn/utility-types';
 
+/**
+ * Internal representation of an MCP tool.
+ * Mostly used to abstract the underlying MCP implementation we're using for "internal" servers
+ */
 export interface McpServerTool<RunInput extends ZodRawShape = ZodRawShape> {
   name: string;
   description: string;

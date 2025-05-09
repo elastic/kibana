@@ -40,6 +40,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await PageObjects.error.expectForbidden();
         });
 
+        it('should not allow access to the ML sections in Stack Management', async () => {
+          await ml.testExecution.logTestStep(
+            'should not load the ML stack management overview page'
+          );
+          // Management ML sections are not registered and don't show up at all in the side nav when user does not have authorization.
+          await ml.navigation.assertStackManagementMlSectionNotExist();
+        });
+
         it('should not display the ML entry in Kibana app menu', async () => {
           await ml.testExecution.logTestStep('should open the Kibana app menu');
           await ml.navigation.navigateToKibanaHome();
@@ -47,13 +55,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('should not display the ML nav link');
           await ml.navigation.assertKibanaNavMLEntryNotExists();
-        });
-
-        it('should not allow access to the Stack Management ML page', async () => {
-          await ml.testExecution.logTestStep(
-            'should load the stack management with the ML menu item being absent'
-          );
-          await ml.navigation.navigateToStackManagement({ expectMlLink: false });
         });
       });
     }

@@ -10,6 +10,8 @@
 import { Fields } from '../../entity';
 import type { ApmFields } from '../apm_fields';
 
+export type SpanKind = 'Internal' | 'Server' | 'Client' | 'Consumer' | 'Producer';
+
 interface ErrorAttributes {
   'attributes.exception.message': string;
   'attributes.exception.handled': boolean;
@@ -30,6 +32,7 @@ type AttributesKeys = Pick<
   | 'transaction.duration.us'
   | 'transaction.result'
   | 'transaction.sampled'
+  | 'span.id'
   | 'span.name'
   | 'span.type'
   | 'span.subtype'
@@ -56,9 +59,9 @@ type ResourceAttributesKeys = Pick<
   | 'agent.name'
   | 'agent.version'
   | 'service.name'
+  | 'service.node.name'
   | 'host.name'
   | 'container.id'
-  | 'kubernetes.pod.name'
   | 'cloud.provider'
   | 'cloud.region'
   | 'cloud.availability_zone'
@@ -75,9 +78,11 @@ type ResourceAttributesKeys = Pick<
   | 'faas.version'
 >;
 
-type Attributes = {
+export type ApmOtelAttributes = {
   [K in keyof AttributesKeys as `attributes.${K}`]: ApmFields[K];
 } & ErrorAttributes & {
+    'attributes.db.statement': string;
+    'attributes.db.system': string;
     'attributes.network.peer.address': string;
     'attributes.network.peer.port': number;
     'attributes.network.type': string;
@@ -96,6 +101,9 @@ type Attributes = {
     'attributes.http.url': string;
     'attributes.span.kind': string;
     'attributes.method': string;
+    'attributes.messaging.system': string;
+    'attributes.messaging.operation': string;
+    'attributes.messaging.destination.name': string;
     'attributes.status.code': number;
     'attributes.url.path': string;
     'attributes.url.scheme': string;
@@ -130,6 +138,7 @@ type ResourceAttributes = {
   'resource.attributes.os.type': string;
   'resource.attributes.os.description': string;
   'resource.attributes.host.arch': string;
+  'resource.attributes.k8s.pod.name': string;
 };
 
 export type ApmOtelFields = Fields &
@@ -148,24 +157,16 @@ export type ApmOtelFields = Fields &
       parent_span_id: string;
       trace_id: string;
       span_id: string;
-      kind: 'Internal' | 'Server' | 'Client' | 'Consumer' | 'Producer';
+      kind: SpanKind;
       dropped_attributes_count: number;
       dropped_events_count: number;
       dropped_links_count: number;
       duration: number;
-      links: [
-        {
-          span_id: string;
-          trace_id: string;
-        }
-      ];
-    } & Attributes &
+      links: Array<{
+        span_id: string;
+        trace_id: string;
+      }>;
+    } & ApmOtelAttributes &
       MetricsAttributes &
       ResourceAttributes
   >;
-
-export type OtelSpanParams = {
-  spanName: string;
-  spanType: string;
-  spanSubtype?: string;
-} & ApmOtelFields;

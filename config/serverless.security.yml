@@ -1,18 +1,13 @@
 # Security Project config
 
+# Make sure the plugins belonging to this project type are loaded
+plugins.allowlistPluginGroups: ['platform', 'security']
+
+# Ess plugins
+xpack.securitySolutionEss.enabled: false
+
 ## Disable plugins
-xpack.search.enabled: false
-xpack.apm.enabled: false
-xpack.infra.enabled: false
-xpack.observabilityLogsExplorer.enabled: false
-xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
-xpack.searchNotebooks.enabled: false
-xpack.searchPlayground.enabled: false
-xpack.searchInferenceEndpoints.enabled: false
-xpack.inventory.enabled: false
-xpack.searchIndices.enabled: false
-xpack.searchSynonyms.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -23,8 +18,6 @@ xpack.features.overrides:
   dashboard_v2.hidden: true
   visualize.hidden: true
   visualize_v2.hidden: true
-  maps.hidden: true
-  maps_v2.hidden: true
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"
@@ -142,9 +135,6 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # Unsupported in serverless
     'cloud_defend',
-
-    # Search connectors
-    'elastic_connectors',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:

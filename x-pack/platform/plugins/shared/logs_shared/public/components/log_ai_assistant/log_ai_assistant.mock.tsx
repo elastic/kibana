@@ -7,4 +7,4 @@
 
 import React from 'react';
 
-export const createLogAIAssistantMock = () => jest.fn().mockReturnValue(<div />);
+export const createLogAIAssistantMock = () => jest.fn(() => <div />);

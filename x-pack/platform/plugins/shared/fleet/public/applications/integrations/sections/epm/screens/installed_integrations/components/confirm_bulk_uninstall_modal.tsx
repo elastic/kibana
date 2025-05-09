@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
 
@@ -18,23 +19,43 @@ export const ConfirmBulkUninstallModal: React.FunctionComponent<{
 }> = ({ onClose, onConfirm, selectedItems }) => {
   const [isLoading, setIsLoading] = useState(false);
 
+  const isSingleItem = selectedItems.length === 1;
+
   return (
     <EuiConfirmModal
-      title={i18n.translate('xpack.fleet.installedIntegrations.bulkUninstallModal.title', {
-        defaultMessage: 'Uninstall {countIntegrations} integrations ',
-        values: {
-          countIntegrations: selectedItems.length,
-        },
-      })}
+      title={
+        isSingleItem
+          ? i18n.translate('xpack.fleet.installedIntegrations.bulkUninstallModal.singleTitle', {
+              defaultMessage: 'Uninstall {integrationName} ',
+              values: {
+                integrationName: selectedItems[0].title,
+              },
+            })
+          : i18n.translate('xpack.fleet.installedIntegrations.bulkUninstallModal.title', {
+              defaultMessage: 'Uninstall {countIntegrations} integrations ',
+              values: {
+                countIntegrations: selectedItems.length,
+              },
+            })
+      }
       confirmButtonText={i18n.translate(
         'xpack.fleet.installedIntegrations.bulkUninstallModal.confirmButton',
-        { defaultMessage: 'Uninstall integrations' }
+        {
+          defaultMessage: 'Uninstall {itemsCount, plural, one {integration} other {integrations}} ',
+          values: { itemsCount: selectedItems.length },
+        }
       )}
       buttonColor="danger"
-      cancelButtonText={i18n.translate(
-        'xpack.fleet.installedIntegrations.bulkUninstallModal.cancelButton',
-        { defaultMessage: 'Review and edit selection' }
-      )}
+      cancelButtonText={
+        isSingleItem
+          ? i18n.translate(
+              'xpack.fleet.installedIntegrations.bulkUninstallModal.cancelSingleButton',
+              { defaultMessage: 'Cancel' }
+            )
+          : i18n.translate('xpack.fleet.installedIntegrations.bulkUninstallModal.cancelButton', {
+              defaultMessage: 'Review and edit selection',
+            })
+      }
       onCancel={onClose}
       isLoading={isLoading}
       onConfirm={async () => {
@@ -53,14 +74,19 @@ export const ConfirmBulkUninstallModal: React.FunctionComponent<{
         title={i18n.translate('xpack.fleet.installedIntegrations.bulkUninstallModal.calloutTitle', {
           defaultMessage: 'This action cannot be undone.',
         })}
-        content={i18n.translate(
-          'xpack.fleet.installedIntegrations.bulkUninstallModal.calloutContent',
-          {
-            defaultMessage:
-              'All Kibana and Elasticsearch assets created by these integrations will be also removed. Review and edit your selection if needed.',
-          }
+      >
+        {isSingleItem ? (
+          <FormattedMessage
+            id="xpack.fleet.installedIntegrations.bulkUninstallModal.calloutContentSingleItem"
+            defaultMessage="All Kibana and Elasticsearch assets created by this integration will be also removed."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.installedIntegrations.bulkUninstallModal.calloutContent"
+            defaultMessage="All Kibana and Elasticsearch assets created by these integrations will be also removed. Review and edit your selection if needed."
+          />
         )}
-      />
+      </EuiCallOut>
     </EuiConfirmModal>
   );
 };

@@ -29,6 +29,7 @@ describe('ExceptionListHeader', () => {
       onCancel: jest.fn(),
     });
   });
+
   it('should render the List Header with name, default description and disabled actions because of the ReadOnly mode', () => {
     const wrapper = render(
       <ExceptionListHeader
@@ -45,7 +46,6 @@ describe('ExceptionListHeader', () => {
         backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
-    expect(wrapper.container).toMatchSnapshot();
     fireEvent.click(wrapper.getByTestId('RightSideMenuItemsMenuActionsItems'));
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsButtonIcon')).toBeDisabled();
     expect(wrapper.getByTestId('DescriptionText')).toHaveTextContent(
@@ -59,6 +59,7 @@ describe('ExceptionListHeader', () => {
       i18n.EXCEPTION_LIST_HEADER_BREADCRUMB
     );
   });
+
   it('should render the List Header with name, default description and disabled actions because user can not edit details', () => {
     const wrapper = render(
       <ExceptionListHeader
@@ -76,15 +77,16 @@ describe('ExceptionListHeader', () => {
         backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
+
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsButtonIcon')).toBeEnabled();
     fireEvent.click(wrapper.getByTestId('RightSideMenuItemsMenuActionsButtonIcon'));
-    expect(wrapper.container).toMatchSnapshot();
 
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem1')).toBeEnabled();
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem2')).toBeDisabled();
     expect(wrapper.queryByTestId('RightSideMenuItemsMenuActionsActionItem3')).toBeDisabled();
     expect(wrapper.queryByTestId('EditTitleIcon')).not.toBeInTheDocument();
   });
+
   it('should render the List Header with name, default description and  actions', () => {
     const wrapper = render(
       <ExceptionListHeader
@@ -101,14 +103,15 @@ describe('ExceptionListHeader', () => {
         backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
-    expect(wrapper.container).toMatchSnapshot();
     fireEvent.click(wrapper.getByTestId('RightSideMenuItemsContainer'));
+
     expect(wrapper.getByTestId('DescriptionText')).toHaveTextContent(
       i18n.EXCEPTION_LIST_HEADER_DESCRIPTION
     );
     expect(wrapper.queryByTestId('TitleEditIcon')).toBeInTheDocument();
     expect(wrapper.queryByTestId('DescriptionEditIcon')).toBeInTheDocument();
   });
+
   it('should render edit modal', () => {
     (useExceptionListHeaderMock as jest.Mock).mockReturnValue({
       isModalVisible: true,
@@ -132,9 +135,10 @@ describe('ExceptionListHeader', () => {
         backOptions={{ pageId: '', path: '', onNavigate }}
       />
     );
-    expect(wrapper.container).toMatchSnapshot();
+
     expect(wrapper.getByTestId('EditModal')).toBeInTheDocument();
   });
+
   it('should go back the page path when back button is clicked', () => {
     (useExceptionListHeaderMock as jest.Mock).mockReturnValue({
       isModalVisible: true,

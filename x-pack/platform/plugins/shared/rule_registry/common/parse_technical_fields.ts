@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { pick } from 'lodash';
 import type { TechnicalRuleFieldMap } from './assets/field_maps/technical_rule_field_map';

@@ -82,7 +82,7 @@ export const renderApp = (
   const store = getContext().store;
   const indexMappingComponent = indexManagementPlugin?.getIndexMappingComponent({ history });
 
-  const connectorTypes = plugins.searchConnectors?.getConnectorTypes() || [];
+  const connectorTypes = plugins.contentConnectors?.getConnectorTypes() || [];
 
   const unmountKibanaLogic = mountKibanaLogic({
     application,

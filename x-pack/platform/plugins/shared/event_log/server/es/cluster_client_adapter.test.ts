@@ -379,13 +379,11 @@ describe('setLegacyIndexTemplateToHidden', () => {
     await clusterClientAdapter.setLegacyIndexTemplateToHidden('foo-bar-template', currentTemplate);
     expect(clusterClient.indices.putTemplate).toHaveBeenCalledWith({
       name: 'foo-bar-template',
-      body: {
-        order: 0,
-        index_patterns: ['foo-bar-*'],
-        settings: { index: { number_of_shards: '1' }, 'index.hidden': true },
-        mappings: { dynamic: false, properties: {} },
-        aliases: {},
-      },
+      order: 0,
+      index_patterns: ['foo-bar-*'],
+      settings: { index: { number_of_shards: '1' }, 'index.hidden': true },
+      mappings: { dynamic: false, properties: {} },
+      aliases: {},
     });
   });
 
@@ -659,7 +657,8 @@ describe('updateConcreteIndices', () => {
     });
     expect(clusterClient.indices.putMapping).toHaveBeenCalledWith({
       index: 'foo',
-      body: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      dynamic: false,
+      properties: { '@timestamp': { type: 'date' } },
     });
   });
 
@@ -720,7 +719,8 @@ describe('updateConcreteIndices', () => {
 
     expect(clusterClient.indices.putMapping).toHaveBeenCalledWith({
       index: 'foo',
-      body: { dynamic: false, properties: { '@timestamp': { type: 'date' } } },
+      dynamic: false,
+      properties: { '@timestamp': { type: 'date' } },
     });
     expect(logger.error).toHaveBeenCalledWith(
       `Error updating index mappings for foo: failed to put mappings`

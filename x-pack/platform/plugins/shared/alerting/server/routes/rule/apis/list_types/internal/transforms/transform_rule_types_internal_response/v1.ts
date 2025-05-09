@@ -27,9 +27,7 @@ export const transformRuleTypesInternalResponse = (
         ? { does_set_recovery_context: ruleType.doesSetRecoveryContext }
         : {}),
       enabled_in_license: ruleType.enabledInLicense,
-      ...(ruleType.fieldsForAAD ? { fieldsForAAD: ruleType.fieldsForAAD } : {}),
       has_alerts_mappings: ruleType.hasAlertsMappings,
-      has_fields_for_a_a_d: ruleType.hasFieldsForAAD,
       id: ruleType.id,
       is_exportable: ruleType.isExportable,
       minimum_license_required: ruleType.minimumLicenseRequired,

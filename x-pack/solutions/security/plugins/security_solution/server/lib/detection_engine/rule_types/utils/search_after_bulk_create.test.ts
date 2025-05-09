@@ -18,8 +18,6 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSearchListItemResponseMock } from '@kbn/lists-plugin/common/schemas/response/search_list_item_schema.mock';
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-
 import type { CommonAlertFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
   ALERT_RULE_CATEGORY,
@@ -88,9 +86,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('should return success with number of searches less than max signals', async () => {
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -106,9 +102,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -124,9 +118,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -142,9 +134,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -160,9 +150,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        sampleDocSearchResultsNoSortIdNoHits()
-      )
+      sampleDocSearchResultsNoSortIdNoHits()
     );
 
     const exceptionItem = getExceptionListItemSchemaMock();
@@ -195,9 +183,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('should return success with number of searches less than max signals with gap', async () => {
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
     );
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
       createdAlerts: [
@@ -212,9 +198,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -230,9 +214,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -248,9 +230,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        sampleDocSearchResultsNoSortIdNoHits()
-      )
+      sampleDocSearchResultsNoSortIdNoHits()
     );
 
     const exceptionItem = getExceptionListItemSchemaMock();
@@ -283,9 +263,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('should return success when no search results are in the allowlist', async () => {
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3))
-      )
+      repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -316,9 +294,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        sampleDocSearchResultsNoSortIdNoHits()
-      )
+      sampleDocSearchResultsNoSortIdNoHits()
     );
 
     const exceptionItem = getExceptionListItemSchemaMock();
@@ -357,20 +333,14 @@ describe('searchAfterAndBulkCreate', () => {
     listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
     ruleServices.scopedClusterClient.asCurrentUser.search
       .mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
-            '1.1.1.1',
-            '2.2.2.2',
-            '2.2.2.2',
-            '2.2.2.2',
-          ])
-        )
+        repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3), [
+          '1.1.1.1',
+          '2.2.2.2',
+          '2.2.2.2',
+          '2.2.2.2',
+        ])
       )
-      .mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          sampleDocSearchResultsNoSortIdNoHits()
-        )
-      );
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
 
     const exceptionItem = getExceptionListItemSchemaMock();
     exceptionItem.entries = [
@@ -428,22 +398,16 @@ describe('searchAfterAndBulkCreate', () => {
     });
     ruleServices.scopedClusterClient.asCurrentUser.search
       .mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          repeatedSearchResultsWithSortId(
-            4,
-            4,
-            someGuids.slice(0, 3),
-            ['1.1.1.1', '2.2.2.2', '2.2.2.2', '2.2.2.2'],
-            // this is the case we are testing, if we receive an empty string for one of the sort ids.
-            ['', '2222222222222']
-          )
+        repeatedSearchResultsWithSortId(
+          4,
+          4,
+          someGuids.slice(0, 3),
+          ['1.1.1.1', '2.2.2.2', '2.2.2.2', '2.2.2.2'],
+          // this is the case we are testing, if we receive an empty string for one of the sort ids.
+          ['', '2222222222222']
         )
       )
-      .mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise(
-          sampleDocSearchResultsNoSortIdNoHits()
-        )
-      );
+      .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
 
     const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams,
@@ -467,14 +431,12 @@ describe('searchAfterAndBulkCreate', () => {
 
     listClient.searchListItemByValues = jest.fn().mockResolvedValue(searchListItems);
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithNoSortId(4, 4, someGuids.slice(0, 3), [
-          '1.1.1.1',
-          '2.2.2.2',
-          '2.2.2.2',
-          '2.2.2.2',
-        ])
-      )
+      repeatedSearchResultsWithNoSortId(4, 4, someGuids.slice(0, 3), [
+        '1.1.1.1',
+        '2.2.2.2',
+        '2.2.2.2',
+        '2.2.2.2',
+      ])
     );
 
     const exceptionItem = getExceptionListItemSchemaMock();
@@ -506,9 +468,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('should return success when no sortId present but search results are in the allowlist', async () => {
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithNoSortId(4, 4, someGuids.slice(0, 3))
-      )
+      repeatedSearchResultsWithNoSortId(4, 4, someGuids.slice(0, 3))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -567,9 +527,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   test('should return success when no exceptions list provided', async () => {
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3))
-      )
+      repeatedSearchResultsWithSortId(4, 4, someGuids.slice(0, 3))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -600,9 +558,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        sampleDocSearchResultsNoSortIdNoHits()
-      )
+      sampleDocSearchResultsNoSortIdNoHits()
     );
 
     listClient.searchListItemByValues = jest.fn(({ value }) =>
@@ -639,7 +595,7 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
+      sampleEmptyDocSearchResults()
     );
     listClient.searchListItemByValues = jest.fn(({ value }) =>
       Promise.resolve(
@@ -723,9 +679,7 @@ describe('searchAfterAndBulkCreate', () => {
       ],
     };
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -748,9 +702,7 @@ describe('searchAfterAndBulkCreate', () => {
     ruleServices.scopedClusterClient.asCurrentUser.bulk.mockResponseOnce(bulkItem); // adds the response with errors we are testing
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -766,9 +718,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -784,9 +734,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(9, 12))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -802,9 +750,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        sampleDocSearchResultsNoSortIdNoHits()
-      )
+      sampleDocSearchResultsNoSortIdNoHits()
     );
     const { success, createdSignalsCount, errors } = await searchAfterAndBulkCreate({
       sharedParams,
@@ -821,9 +767,7 @@ describe('searchAfterAndBulkCreate', () => {
 
   it('invokes the enrichment callback with signal search results', async () => {
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -839,9 +783,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(3, 6))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -857,9 +799,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
-      )
+      repeatedSearchResultsWithSortId(4, 1, someGuids.slice(6, 9))
     );
 
     ruleServices.alertWithPersistence.mockResolvedValueOnce({
@@ -875,9 +815,7 @@ describe('searchAfterAndBulkCreate', () => {
     });
 
     ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(
-        sampleDocSearchResultsNoSortIdNoHits()
-      )
+      sampleDocSearchResultsNoSortIdNoHits()
     );
 
     const mockEnrichment = jest.fn((a) => a);

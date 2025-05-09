@@ -12,6 +12,8 @@ import { ServerlessAuthProvider } from './serverless/auth_provider';
 import { StatefulAuthProvider } from './stateful/auth_provider';
 
 export interface AuthProvider {
+  isServerless(): boolean;
+  getProjectType(): string | undefined;
   getSupportedRoleDescriptors(): Map<string, any>;
   getDefaultRole(): string;
   isCustomRoleEnabled(): boolean;

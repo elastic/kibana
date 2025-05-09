@@ -6,12 +6,9 @@
  */
 
 import {
-  StreamGetResponse,
-  WiredStreamGetResponse,
+  Streams,
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
-  isGroupStreamDefinition,
-  isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { partition } from 'lodash';
@@ -34,7 +31,7 @@ export async function readStream({
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
-}): Promise<StreamGetResponse> {
+}): Promise<Streams.all.GetResponse> {
   const [streamDefinition, dashboardsAndQueries] = await Promise.all([
     streamsClient.getStream(name),
     await assetClient.getAssetLinks(name, ['dashboard', 'query']),
@@ -50,7 +47,7 @@ export async function readStream({
     return query.query;
   });
 
-  if (isGroupStreamDefinition(streamDefinition)) {
+  if (Streams.GroupStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
       dashboards,
@@ -59,7 +56,7 @@ export async function readStream({
   }
 
   // These queries are only relavant for IngestStreams
-  const [ancestors, dataStream] = await Promise.all([
+  const [ancestors, dataStream, privileges] = await Promise.all([
     streamsClient.getAncestors(name),
     streamsClient.getDataStream(name).catch((e) => {
       if (e.statusCode === 404) {
@@ -67,28 +64,31 @@ export async function readStream({
       }
       throw e;
     }),
+    streamsClient.getPrivileges(name),
   ]);
 
-  if (isUnwiredStreamDefinition(streamDefinition)) {
+  if (Streams.UnwiredStream.Definition.is(streamDefinition)) {
     return {
       stream: streamDefinition,
-      elasticsearch_assets: dataStream
-        ? await getUnmanagedElasticsearchAssets({
-            dataStream,
-            scopedClusterClient,
-          })
-        : undefined,
+      privileges,
+      elasticsearch_assets:
+        dataStream && privileges.manage
+          ? await getUnmanagedElasticsearchAssets({
+              dataStream,
+              scopedClusterClient,
+            })
+          : undefined,
       data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
       queries,
-      inherited_fields: {},
-    };
+    } satisfies Streams.UnwiredStream.GetResponse;
   }
 
-  const body: WiredStreamGetResponse = {
+  const body: Streams.WiredStream.GetResponse = {
     stream: streamDefinition,
     dashboards,
+    privileges,
     queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     inherited_fields: getInheritedFieldsFromAncestors(ancestors),

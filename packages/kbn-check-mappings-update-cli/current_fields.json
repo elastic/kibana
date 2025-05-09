@@ -21,6 +21,9 @@
     "actions.actionTypeId",
     "actions.group",
     "alertTypeId",
+    "artifacts",
+    "artifacts.investigation_guide",
+    "artifacts.investigation_guide.blob",
     "consumer",
     "createdAt",
     "createdBy",
@@ -819,6 +822,13 @@
     "state",
     "type"
   ],
+  "onechat_workflow": [
+    "access_control",
+    "access_control.public",
+    "categories",
+    "user_id",
+    "workflow_id"
+  ],
   "osquery-manager-usage-metric": [
     "count",
     "errors"
@@ -873,6 +883,9 @@
   "policy-settings-protection-updates-note": [
     "note"
   ],
+  "privilege-monitoring-status": [
+    "status"
+  ],
   "product-doc-install-status": [
     "index_name",
     "installation_status",
@@ -917,6 +930,9 @@
     "username"
   ],
   "search-telemetry": [],
+  "search_playground": [
+    "name"
+  ],
   "security-ai-prompt": [
     "description",
     "model",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type CoreSetup, type Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
