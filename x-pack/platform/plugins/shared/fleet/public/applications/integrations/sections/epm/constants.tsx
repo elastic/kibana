@@ -92,6 +92,9 @@ export const AssetTitleMap: Record<
   osquery_saved_query: i18n.translate('xpack.fleet.epm.assetTitles.osquerySavedQuery', {
     defaultMessage: 'Osquery saved queries',
   }),
+  slo: i18n.translate('xpack.fleet.epm.assetTitles.slo', {
+    defaultMessage: 'SLOs',
+  }),
 
   // ES
   ilm_policy: i18n.translate('xpack.fleet.epm.assetTitles.ilmPolicies', {
