@@ -11,7 +11,7 @@ import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
 import { DimensionType } from '@kbn/expressions-plugin/common';
 import { last } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { AlertRuleFromVisAction } from '.';
+import { AlertRuleFromVisAction } from './alert_rule_from_vis_ui_action';
 
 const ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract> = {
   has: jest.fn(),
