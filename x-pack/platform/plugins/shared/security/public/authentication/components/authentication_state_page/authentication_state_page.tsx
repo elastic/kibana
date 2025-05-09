@@ -34,7 +34,7 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
       <header css={css({ position: 'relative', padding: euiTheme.size.xl, zIndex: 10 })}>
         <div
           css={css({
-            maxWidth: '600px',
+            // maxWidth: '600px',
             textAlign: 'center',
           })}
         >
