@@ -59,19 +59,19 @@ async function reIndexKnowledgeBase({
     `Re-indexing knowledge base from "${currentWriteIndexName}" to index "${nextWriteIndexName}"...`
   );
 
-  const reindexResponse = await esClient.asInternalUser.reindex({
-    source: { index: currentWriteIndexName },
-    dest: { index: nextWriteIndexName },
-    refresh: true,
-    wait_for_completion: false,
-  });
-
   // Point write index alias to the new index
   await updateKnowledgeBaseWriteIndexAlias({
     esClient,
     logger,
     nextWriteIndexName,
     currentWriteIndexName,
+  });
+
+  const reindexResponse = await esClient.asInternalUser.reindex({
+    source: { index: currentWriteIndexName },
+    dest: { index: nextWriteIndexName },
+    refresh: true,
+    wait_for_completion: false,
   });
 
   const taskId = reindexResponse.task?.toString();
@@ -192,9 +192,6 @@ export async function isReIndexInProgress({
     lmService.getLock(KB_REINDEXING_LOCK_ID),
     getActiveReindexingTaskId(esClient),
   ]);
-
-  logger.debug(`Lock: ${!!lock}`);
-  logger.debug(`ES re-indexing task: ${!!activeReindexingTask}`);
 
   return lock !== undefined || activeReindexingTask !== undefined;
 }
