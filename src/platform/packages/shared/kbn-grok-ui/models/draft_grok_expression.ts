@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, debounceTime } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { GrokCollection, GrokPattern } from './grok_collection_and_pattern';
 
 export class DraftGrokExpression {
@@ -21,14 +21,12 @@ export class DraftGrokExpression {
     this.grokPattern = new GrokPattern(expression || '', 'DRAFT_GROK_EXPRESSION', collection);
     this.grokPattern.resolvePattern();
     this.expression$ = new BehaviorSubject<string>(expression);
-    this.expression$.pipe(debounceTime(300)).subscribe(() => {
-      this.grokPattern.updatePattern(this.expression);
-      this.grokPattern.resolvePattern(true);
-    });
   }
 
   public updateExpression = (expression: string) => {
     this.expression = expression;
+    this.grokPattern.updatePattern(this.expression);
+    this.grokPattern.resolvePattern(true);
     this.expression$.next(this.expression);
   };
 

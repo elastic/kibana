@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, EuiToolTip } from '@elastic/eui';
+import { combineLatest, debounceTime } from 'rxjs';
 import { DraftGrokExpression, FieldDefinition, GrokCollection } from '../models';
 import { colourToClassName } from './utils';
 import { semanticNameLabel, patternNameLabel, typeNameLabel } from './constants';
@@ -28,9 +29,20 @@ export const Sample = ({
 }) => {
   const eui = useEuiTheme();
 
+  const [processedSample, setProcessedSample] = useState<ReactNode>(sample);
+
   const colourPaletteStyles = useMemo(() => {
     return grokCollection.getColourPaletteStyles();
   }, [grokCollection]);
+
+  useEffect(() => {
+    const subscription = combineLatest(draftGrokExpressions.map((draft) => draft.getExpression$()))
+      .pipe(debounceTime(300))
+      .subscribe(() => {
+        setProcessedSample(renderProcessedSample(draftGrokExpressions, sample));
+      });
+    return () => subscription.unsubscribe();
+  }, [draftGrokExpressions, sample]);
 
   return (
     <>
@@ -43,7 +55,7 @@ export const Sample = ({
           white-space: pre-wrap;
         `}
       >
-        {renderProcessedSample(draftGrokExpressions, sample)}
+        {processedSample}
       </div>
     </>
   );
