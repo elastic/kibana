@@ -702,14 +702,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       defaultSetupTechnology,
     });
 
-    const agentlessByDefaultVersion = '1.13.0';
-    const showAgentlessByDefaultPackageVersion = semverGte(
-      packageInfo.version,
-      agentlessByDefaultVersion
-    );
     const shouldRenderAgentlessSelector =
-      (!isEditPage && isAgentlessAvailable && showAgentlessByDefaultPackageVersion) ||
-      (isEditPage && isAgentlessEnabled && showAgentlessByDefaultPackageVersion);
+      (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
 
     const getDefaultCloudCredentialsType = (
       isAgentless: boolean,
@@ -780,7 +774,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         const inputVars = getPostureInputHiddenVars(
           inputType,
           packageInfo,
-          inputType === CLOUDBEAT_AWS && showAgentlessByDefaultPackageVersion
+          inputType === CLOUDBEAT_AWS && isAgentlessAvailable
             ? SetupTechnology.AGENTLESS
             : SetupTechnology.AGENT_BASED,
           showCloudConnectors
@@ -788,13 +782,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
       },
-      [
-        packageInfo,
-        newPolicy,
-        updatePolicy,
-        showCloudConnectors,
-        showAgentlessByDefaultPackageVersion,
-      ]
+      [packageInfo, newPolicy, updatePolicy, isAgentlessAvailable, showCloudConnectors]
     );
 
     // search for non null fields of the validation?.vars object
