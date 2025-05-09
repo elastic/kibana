@@ -85,7 +85,7 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
     >
       {i18n.translate('xpack.slo.bulkPurgeConfirmationModal.descriptionText', {
         defaultMessage:
-          'This will purge rollup data for {count} SLOs according to the policy provided below.',
+          'Rollup data for {count} SLOs will be purged according to the policy provided below.',
         values: { count: items.length },
       })}
       <EuiSpacer size="m" />
