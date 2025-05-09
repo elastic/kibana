@@ -196,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
           'searchQueryRules',
           'searchPlayground',
           'siem',
+          'siemV2',
           'siemV3',
           'slo',
           'securitySolutionAssistant',
