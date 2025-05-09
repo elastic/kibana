@@ -148,7 +148,6 @@ ROW a = ROUND(1.23, 0)
 The \`SHOW <item>\` source command returns information about the deployment and its capabilities:
 
 * Use \`SHOW INFO\` to return the deployment's version, build date and hash.
-* Use \`SHOW FUNCTIONS\` to return a list of all supported functions and a synopsis of each function.
             `,
             ignoreTag: true,
             description:
