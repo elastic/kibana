@@ -30,7 +30,7 @@ export const isDashboardFile = (rootDir: string, filepath: string) => {
 };
 
 export const isSupportedReferenceType = (type: string) => {
-  const referenceTypes: ContentPackSavedObject['type'][] = ['index-pattern', 'lens'];
+  const referenceTypes: Array<ContentPackSavedObject['type']> = ['index-pattern', 'lens'];
   return referenceTypes.some((refType) => refType === type);
 };
 
