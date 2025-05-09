@@ -233,16 +233,14 @@ export class ModelsProvider {
       resultItems.map((model) => [model.model_id, model])
     );
 
-    const rawModels = await this._client.asCurrentUser.ml.getTrainedModels({
-      size: 1000,
-    });
+    const [rawModels, forDownload] = await Promise.all([
+      this._client.asCurrentUser.ml.getTrainedModels({
+        size: 1000,
+      }),
+      this.getModelDownloads(),
+    ]);
 
     const allExistingModelIds = new Set(rawModels.trained_model_configs.map((m) => m.model_id));
-
-    /**
-     * Fetches model definitions available for download
-     */
-    const forDownload = await this.getModelDownloads();
 
     const notDownloaded: TrainedModelUIItem[] = forDownload
       .filter(({ model_id: modelId, hidden, recommended, supported, disclaimer, techPreview }) => {
