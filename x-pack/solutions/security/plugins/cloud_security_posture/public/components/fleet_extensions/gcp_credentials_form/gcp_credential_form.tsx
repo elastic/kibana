@@ -728,6 +728,7 @@ export const GcpInputVarFields = ({
               label={gcpField.fields['gcp.credentials.json'].label}
               isInvalid={credentialJSONFieldsInvalid}
               error={credentialJSONFieldsInvalid ? credentialJSONError : undefined}
+              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL}
             >
               <Suspense fallback={<EuiLoadingSpinner size="l" />}>
                 <LazyPackagePolicyInputVarField
