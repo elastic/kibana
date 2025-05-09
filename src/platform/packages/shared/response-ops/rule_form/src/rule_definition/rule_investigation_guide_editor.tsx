@@ -16,6 +16,8 @@ interface Props {
   value: string;
 }
 
+export const INVESTIGATION_GUIDE_DEFAULT_HEIGHT = 265;
+
 export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
   return (
     <EuiMarkdownEditor
@@ -27,7 +29,7 @@ export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
       })}
       value={value}
       onChange={(blob) => setRuleParams({ investigation_guide: { blob } })}
-      height={200}
+      height={INVESTIGATION_GUIDE_DEFAULT_HEIGHT}
       data-test-subj="investigationGuideEditor"
       initialViewMode="editing"
     />
