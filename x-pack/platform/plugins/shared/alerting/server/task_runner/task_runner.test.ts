@@ -421,69 +421,68 @@ describe('Task Runner', () => {
     });
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
-      mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-      await taskRunner.run();
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(enqueueFunction).toHaveBeenCalledWith(
-        generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
-      );
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+    expect(enqueueFunction).toHaveBeenCalledTimes(1);
+    expect(enqueueFunction).toHaveBeenCalledWith(
+      generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
+    );
 
-      expect(logger.debug).toHaveBeenCalledTimes(6);
-      expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-        tags: ['1', 'test'],
-      });
-      expect(logger.debug).nthCalledWith(
-        2,
-        `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        3,
-        'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        4,
-        'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}',
-        { tags: ['1', 'test'] }
-      );
-      expect(logger.debug).nthCalledWith(
-        5,
-        'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
-        { tags: ['1', 'test'] }
-      );
+    expect(logger.debug).toHaveBeenCalledTimes(6);
+    expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
+      tags: ['1', 'test'],
+    });
+    expect(logger.debug).nthCalledWith(
+      2,
+      `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      3,
+      'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"active"}',
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      4,
+      'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":1,"new":1,"recovered":0,"ignored":0}}',
+      { tags: ['1', 'test'] }
+    );
+    expect(logger.debug).nthCalledWith(
+      5,
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}',
+      { tags: ['1', 'test'] }
+    );
 
-      testAlertingEventLogCalls({
-        activeAlerts: 1,
-        generatedActions: 1,
-        newAlerts: 1,
-        triggeredActions: 1,
-        status: 'active',
-        logAlert: 2,
-        logAction: 1,
-      });
-      expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-        1,
-        generateAlertOpts({
-          action: EVENT_LOG_ACTIONS.newInstance,
-          group: 'default',
-          state: { start: DATE_1970, duration: '0' },
-        })
-      );
-      expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-        2,
-        generateAlertOpts({
-          action: EVENT_LOG_ACTIONS.activeInstance,
-          group: 'default',
-          state: { start: DATE_1970, duration: '0' },
-        })
-      );
-      expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts());
+    testAlertingEventLogCalls({
+      activeAlerts: 1,
+      generatedActions: 1,
+      newAlerts: 1,
+      triggeredActions: 1,
+      status: 'active',
+      logAlert: 2,
+      logAction: 1,
+    });
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      1,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.newInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+      })
+    );
+    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
+      2,
+      generateAlertOpts({
+        action: EVENT_LOG_ACTIONS.activeInstance,
+        group: 'default',
+        state: { start: DATE_1970, duration: '0' },
+      })
+    );
+    expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts());
 
-      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-    }
-  );
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
+  });
 
   test('actionsPlugin.execute is skipped if muteAll is true', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
