@@ -780,7 +780,6 @@ const expectAssetsInstalled = ({
         },
         {
           id: '5d12ad91-0624-5dce-800d-b1f9a7732f7c',
-          path: 'all_assets-0.1.0/kibana/security_ai_prompt/sample_security_ai_prompts.json',
           type: 'epm-packages-assets',
         },
         {
