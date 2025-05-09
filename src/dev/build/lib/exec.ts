@@ -9,6 +9,7 @@
 
 import execa from 'execa';
 import chalk from 'chalk';
+import { fromEvent, merge, map, toArray, takeUntil } from 'rxjs';
 import { ToolingLog, LogLevel } from '@kbn/tooling-log';
 
 import { watchStdioForLine } from './watch_stdio_for_line';
@@ -51,21 +52,19 @@ export async function exec(
   const logFn = (line: string) => log[level](line);
 
   if (bufferLogs) {
-    proc.stdout!.on('data', (chunk) => {
-      build.pushToLogBuffer(chunk.toString());
-    });
+    const stdout$ = fromEvent<Buffer>(proc.stdout!, 'data').pipe(map((chunk) => chunk.toString()));
+    const stderr$ = fromEvent<Buffer>(proc.stderr!, 'data').pipe(map((chunk) => chunk.toString()));
+    const close$ = fromEvent(proc, 'close');
 
-    proc.stderr!.on('data', (chunk) => {
-      build.pushToLogBuffer(chunk.toString());
-    });
-
-    await new Promise<void>((resolve, reject) => {
-      proc.on('close', () => {
+    await merge(stdout$, stderr$)
+      .pipe(takeUntil(close$), toArray())
+      .toPromise()
+      .then((logs) => {
         build.getLogBuffer().forEach(logFn);
-        resolve();
+        if (logs?.length) {
+          logs.forEach((logLine) => logFn(logLine));
+        }
       });
-      proc.on('error', reject);
-    });
   } else {
     await watchStdioForLine(proc, logFn, exitAfter);
   }
