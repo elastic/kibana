@@ -23,7 +23,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const logger = getService('log');
   const esClient = getService('es');
-  const retryService = getService('retry');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const alertingApi = getService('alertingApi');
 
