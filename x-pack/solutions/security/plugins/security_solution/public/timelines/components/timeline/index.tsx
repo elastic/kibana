@@ -18,10 +18,11 @@ import { timelineDefaults } from '../../store/defaults';
 import type { CellValueElementProps } from './cell_rendering';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { TimelineModalHeader } from '../modal/header';
-import type { TimelineId, RowRenderer } from '../../../../common/types/timeline';
+import type { RowRenderer, TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import type { State } from '../../../common/store';
+import { sourcererSelectors } from '../../../common/store';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
 import { TabsContent } from './tabs';
@@ -29,7 +30,6 @@ import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';
 import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
-import { sourcererSelectors } from '../../../common/store';
 import { defaultUdtHeaders } from './body/column_headers/default_headers';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
@@ -106,10 +106,10 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const experimentalDataView = useDataViewSpec(SourcererScopeName.timeline);
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
 
   const selectedDataViewId = newDataViewPickerEnabled
-    ? experimentalDataView.dataViewSpec?.id ?? ''
+    ? experimentalDataViewSpec?.id ?? ''
     : selectedDataViewIdSourcerer;
 
   const selectedPatterns = newDataViewPickerEnabled

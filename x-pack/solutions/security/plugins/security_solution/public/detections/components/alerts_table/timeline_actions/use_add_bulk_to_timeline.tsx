@@ -13,11 +13,12 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import {
   dataTableActions,
-  TableId,
-  tableDefaults,
   dataTableSelectors,
+  tableDefaults,
+  TableId,
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
@@ -74,22 +75,24 @@ export const useAddBulkToTimelineAction = ({
   const [disableActionOnSelectAll, setDisabledActionOnSelectAll] = useState(false);
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataViewSpec: experimentalDataView } = useDataViewSpec(scopeId);
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(scopeId);
   const experimentalBrowserFields = useBrowserFields(scopeId);
   const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
 
   const {
     browserFields: oldBrowserFields,
     dataViewId: oldDataViewId,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns: oldSelectedPatterns,
   } = useSourcererDataView(scopeId);
 
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataViewSpec.id ?? '' : oldDataViewId;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
-  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
+  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
+    ? experimentalDataViewSpec
+    : oldSourcererDataViewSpec;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
@@ -121,13 +124,13 @@ export const useAddBulkToTimelineAction = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders: [],
-      dataViewSpec: sourcererDataView,
+      dataViewSpec: sourcererDataViewSpec,
       filters: combinedFilters,
       kqlQuery: { query: '', language: 'kuery' },
       browserFields,
       kqlMode: 'filter',
     });
-  }, [esQueryConfig, sourcererDataView, combinedFilters, browserFields]);
+  }, [esQueryConfig, sourcererDataViewSpec, combinedFilters, browserFields]);
 
   const filterQuery = useMemo(() => {
     if (!combinedQuery) return '';
@@ -145,7 +148,7 @@ export const useAddBulkToTimelineAction = ({
     sort: timelineQuerySortField,
     indexNames: selectedPatterns,
     filterQuery,
-    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings: sourcererDataViewSpec.runtimeFieldMap as RunTimeMappings,
     limit: Math.min(BULK_ADD_TO_TIMELINE_LIMIT, totalCount),
     timerangeKind: 'absolute',
   });

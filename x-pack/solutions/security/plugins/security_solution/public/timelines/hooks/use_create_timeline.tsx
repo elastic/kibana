@@ -59,10 +59,12 @@ export const useCreateTimeline = ({
   ) ?? { id: '', patternList: [] };
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
-  const { dataViewSpec: experimentalDataView } = useDataViewSpec(DataViewManagerScopeName.default);
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(
+    DataViewManagerScopeName.default
+  );
   const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.default);
 
-  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataViewSpec.id ?? '' : oldDataViewId;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;

@@ -16,6 +16,7 @@ import { InPortal } from 'react-reverse-portal';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -84,18 +85,20 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     dataViewId: oldDataViewId,
     loading: oldSourcererLoading,
     selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const { dataViewSpec: experimentalDataView, status } = useDataViewSpec(
+  const { dataViewSpec: experimentalDataViewSpec, status } = useDataViewSpec(
     SourcererScopeName.timeline
   );
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const experimentalDataViewId = experimentalDataView.id ?? null;
+  const experimentalDataViewId = experimentalDataViewSpec.id ?? null;
 
   const dataViewId = newDataViewPickerEnabled ? experimentalDataViewId : oldDataViewId;
   const dataViewLoading = newDataViewPickerEnabled ? status !== 'ready' : oldSourcererLoading;
-  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
+  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
+    ? experimentalDataViewSpec
+    : oldSourcererDataViewSpec;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
@@ -133,7 +136,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       indexNames: selectedPatterns,
       language: 'eql',
       limit: sampleSize,
-      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: sourcererDataViewSpec.runtimeFieldMap as RunTimeMappings,
       skip: !canQueryTimeline(),
       startDate: start,
       timerangeKind,

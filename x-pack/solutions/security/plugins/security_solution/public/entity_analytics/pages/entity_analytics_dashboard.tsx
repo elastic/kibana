@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
@@ -32,7 +33,7 @@ const EntityAnalyticsComponent = () => {
   const {
     indicesExist: oldIndicesExist,
     loading: oldIsSourcererLoading,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -40,7 +41,9 @@ const EntityAnalyticsComponent = () => {
   const { dataView, status } = useDataView();
   const { dataViewSpec } = useDataViewSpec();
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
+    ? dataViewSpec
+    : oldSourcererDataViewSpec;
   const indicesExist = newDataViewPickerEnabled
     ? !!dataView?.matchedIndices?.length
     : oldIndicesExist;
@@ -57,7 +60,7 @@ const EntityAnalyticsComponent = () => {
       ) : (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataViewSpec} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">

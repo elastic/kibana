@@ -11,6 +11,7 @@ import { EuiOutsideClickDetector } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
 
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
 import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 import type { EqlOptions } from '../../../../../../common/search_strategy';
@@ -64,13 +65,13 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   const {
     loading: oldIndexPatternsLoading,
-    sourcererDataView: oldSourcererDataView,
+    sourcererDataView: oldSourcererDataViewSpec,
     selectedPatterns: oldSelectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataViewSpec: experimentalDataView, status } = useDataViewSpec(
+  const { dataViewSpec: experimentalDataViewSpec, status } = useDataViewSpec(
     SourcererScopeName.timeline
   );
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
@@ -78,7 +79,9 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   const indexPatternsLoading = newDataViewPickerEnabled
     ? status !== 'ready'
     : oldIndexPatternsLoading;
-  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
+  const sourcererDataViewSpec: DataViewSpec = newDataViewPickerEnabled
+    ? experimentalDataViewSpec
+    : oldSourcererDataViewSpec;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
@@ -174,14 +177,14 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   const dataView = useMemo(
     () => ({
-      ...sourcererDataView,
-      title: sourcererDataView.title ?? '',
-      fields: Object.values(sourcererDataView.fields || {}),
+      ...sourcererDataViewSpec,
+      title: sourcererDataViewSpec.title ?? '',
+      fields: Object.values(sourcererDataViewSpec.fields || {}),
     }),
-    [sourcererDataView]
+    [sourcererDataViewSpec]
   );
 
-  /* Force casting `sourcererDataView` to `DataViewBase` is required since EqlQueryEdit
+  /* Force casting `sourcererDataViewSpec` to `DataViewBase` is required since EqlQueryEdit
      accepts DataViewBase but `useSourcererDataView()` returns `DataViewSpec`.
 
      When using `UseField` with `EqlQueryBar` such casting isn't required by TS since
