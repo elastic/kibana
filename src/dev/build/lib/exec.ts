@@ -59,8 +59,12 @@ export async function exec(
       build.pushToLogBuffer(chunk.toString());
     });
 
-    proc.on('exit', () => {
-      build.getLogBuffer().forEach(logFn);
+    await new Promise<void>((resolve, reject) => {
+      proc.on('close', () => {
+        build.getLogBuffer().forEach(logFn);
+        resolve();
+      });
+      proc.on('error', reject);
     });
   } else {
     await watchStdioForLine(proc, logFn, exitAfter);
