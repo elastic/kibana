@@ -189,8 +189,8 @@ function loadViewUnderlyingDataArgs(
     activeData,
     capabilities: {
       canSaveDashboards: Boolean(capabilities.dashboard_v2?.showWriteControls),
-      canSaveVisualizations: Boolean(capabilities.visualize_v2.save),
-      canOpenVisualizations: Boolean(capabilities.visualize_v2.show),
+      canSaveVisualizations: Boolean(capabilities.visualize_v2?.save),
+      canOpenVisualizations: Boolean(capabilities.visualize_v2?.show),
       navLinks: capabilities.navLinks,
       discover_v2: capabilities.discover_v2,
     },

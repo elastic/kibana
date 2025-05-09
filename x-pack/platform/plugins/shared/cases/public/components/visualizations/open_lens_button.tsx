@@ -15,12 +15,10 @@ import type { LensProps } from './types';
 type Props = LensProps & { attachmentId: string };
 
 const OpenLensButtonComponent: React.FC<Props> = ({ attachmentId, attributes, timeRange }) => {
-  const {
-    lens: { navigateToPrefilledEditor, canUseEditor },
-  } = useKibana().services;
+  const { lens } = useKibana().services;
 
   const onClick = useCallback(() => {
-    navigateToPrefilledEditor(
+    lens?.navigateToPrefilledEditor(
       {
         id: attachmentId,
         timeRange,
@@ -30,9 +28,9 @@ const OpenLensButtonComponent: React.FC<Props> = ({ attachmentId, attributes, ti
         openInNewTab: true,
       }
     );
-  }, [attachmentId, attributes, navigateToPrefilledEditor, timeRange]);
+  }, [attachmentId, attributes, lens, timeRange]);
 
-  const hasLensPermissions = canUseEditor();
+  const hasLensPermissions = lens?.canUseEditor();
   const isESQLQuery = isOfAggregateQueryType(attributes.state.query);
 
   if (!hasLensPermissions || isESQLQuery) {

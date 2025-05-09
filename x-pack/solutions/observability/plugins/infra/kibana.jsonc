@@ -23,7 +23,6 @@
       "embeddable",
       "features",
       "fieldFormats",
-      "lens",
       "logsShared",
       "metricsDataAccess",
       "observability",
@@ -42,6 +41,7 @@
       "fieldsMetadata"
     ],
     "optionalPlugins": [
+      "lens",
       "spaces",
       "ml",
       "home",

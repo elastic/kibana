@@ -14,7 +14,6 @@
     "requiredPlugins": [
       "charts",
       "data",
-      "lens",
       "licensing",
       "uiActions",
       "embeddable",
@@ -27,7 +26,8 @@
     "optionalPlugins": [
       "cases",
       "observabilityAIAssistant",
-      "usageCollection"
+      "usageCollection",
+      "lens"
     ],
     "requiredBundles": [
       "dataViews",
