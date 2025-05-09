@@ -18,7 +18,7 @@ import { Document } from 'langchain/document';
 
 describe('SecurityLabsTool', () => {
   const contentReferencesStore = newContentReferencesStoreMock();
-  const getKnowledgeBaseDocumentEntries = jest.fn()
+  const getKnowledgeBaseDocumentEntries = jest.fn();
   const kbDataClient = { getKnowledgeBaseDocumentEntries };
   const defaultArgs = {
     isEnabledKnowledgeBase: true,
@@ -34,7 +34,7 @@ describe('SecurityLabsTool', () => {
     it('includes citations fallback', async () => {
       getKnowledgeBaseDocumentEntries.mockResolvedValue([
         new Document({
-          id: "123",
+          id: '123',
           pageContent: `---
 title: "An Elastic approach to large-scale dynamic malware analysis"
 slug: "an-elastic-approach-to-large-scale-dynamic-malware-analysis"
@@ -49,7 +49,7 @@ category:
 ## Introduction
 
 In previous publications,`,
-        })
+        }),
       ]);
 
       const tool = SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
@@ -76,9 +76,9 @@ In previous publications,`,
     it('includes citations fallback', async () => {
       getKnowledgeBaseDocumentEntries.mockResolvedValue([
         new Document({
-          id: "123",
+          id: '123',
           pageContent: `hello world`,
-        })
+        }),
       ]);
       const tool = SECURITY_LABS_KNOWLEDGE_BASE_TOOL.getTool(defaultArgs) as DynamicStructuredTool;
 
