@@ -256,6 +256,11 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   flyoutOwnsFocus?: boolean;
   /**
+   * If false, hides the pagination in the alert details flyout
+   * @default true
+   */
+  flyoutPagination?: boolean;
+  /**
    * Timestamp of the last data refetch request
    */
   lastReloadRequestTime?: number;
@@ -372,6 +377,7 @@ export type RenderContext<AC extends AdditionalContext> = {
     | 'casesConfiguration'
     | 'openLinksInNewTab'
     | 'flyoutOwnsFocus'
+    | 'flyoutPagination'
   >,
   'columns' | 'openLinksInNewTab'
 > &

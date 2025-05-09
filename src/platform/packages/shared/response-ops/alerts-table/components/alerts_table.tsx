@@ -198,6 +198,7 @@ const AlertsTableContent = typedForwardRef(
       renderFlyoutBody,
       renderFlyoutFooter,
       flyoutOwnsFocus = false,
+      flyoutPagination = true,
       renderAdditionalToolbarControls: AdditionalToolbarControlsComponent,
       lastReloadRequestTime,
       configurationStorage = new Storage(window.localStorage),
@@ -483,6 +484,7 @@ const AlertsTableContent = typedForwardRef(
           renderFlyoutBody,
           renderFlyoutFooter,
           flyoutOwnsFocus,
+          flyoutPagination,
           openLinksInNewTab,
           services: memoizedServices,
         } as RenderContext<AC>),
@@ -515,6 +517,7 @@ const AlertsTableContent = typedForwardRef(
         renderFlyoutBody,
         renderFlyoutFooter,
         flyoutOwnsFocus,
+        flyoutPagination,
         openLinksInNewTab,
         memoizedServices,
       ]
