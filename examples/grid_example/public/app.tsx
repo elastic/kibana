@@ -343,6 +343,15 @@ const customLayoutStyles = ({ euiTheme }: UseEuiTheme) => {
     '.kbnGridSection--blocked': {
       zIndex: 1,
       backgroundColor: `${transparentize(euiTheme.colors.backgroundBaseSubdued, 0.5)}`,
+      // the oulines of panels extend past 100% by 1px on each side, so adjust for that
+      marginLeft: '-1px',
+      marginTop: '-1px',
+      width: `calc(100% + 2px)`,
+      height: `calc(100% + 2px)`,
+    },
+
+    '&:has(.kbnGridSection--blocked) .kbnGridSection--dragHandle': {
+      cursor: 'not-allowed !important',
     },
   });
 };

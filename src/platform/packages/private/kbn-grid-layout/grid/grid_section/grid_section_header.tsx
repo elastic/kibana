@@ -250,7 +250,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                     <EuiButtonIcon
                       iconType="move"
                       color="text"
-                      className="kbnGridLayout--moveRowIcon"
+                      className="kbnGridSection--dragHandle"
                       aria-label={i18n.translate('kbnGridLayout.row.moveRow', {
                         defaultMessage: 'Move section',
                       })}
@@ -300,7 +300,7 @@ const styles = {
       '.kbnGridLayout--panelCount': {
         textWrapMode: 'nowrap', // prevent panel count from wrapping
       },
-      '.kbnGridLayout--moveRowIcon': {
+      '.kbnGridSection--dragHandle': {
         cursor: 'move',
         touchAction: 'none',
         '&:active, &:hover, &:focus': {
@@ -311,23 +311,23 @@ const styles = {
 
       // these styles hide the delete + move actions by default and only show them on hover
       [`.kbnGridLayout--deleteRowIcon,
-        .kbnGridLayout--moveRowIcon`]: {
+        .kbnGridSection--dragHandle`]: {
         opacity: '0',
         [`${euiCanAnimate}`]: {
           transition: `opacity ${euiTheme.animation.extraFast} ease-in`,
         },
       },
       [`&:hover .kbnGridLayout--deleteRowIcon, 
-        &:hover .kbnGridLayout--moveRowIcon,
+        &:hover .kbnGridSection--dragHandle,
         &:has(:focus-visible) .kbnGridLayout--deleteRowIcon,
-        &:has(:focus-visible) .kbnGridLayout--moveRowIcon`]: {
+        &:has(:focus-visible) .kbnGridSection--dragHandle`]: {
         opacity: 1,
       },
 
       // these styles ensure that dragged rows are rendered **above** everything else + the move icon stays visible
       '&.kbnGridSectionHeader--active': {
         zIndex: euiTheme.levels.modal,
-        '.kbnGridLayout--moveRowIcon': {
+        '.kbnGridSection--dragHandle': {
           cursor: 'move',
           opacity: 1,
           pointerEvents: 'auto',
