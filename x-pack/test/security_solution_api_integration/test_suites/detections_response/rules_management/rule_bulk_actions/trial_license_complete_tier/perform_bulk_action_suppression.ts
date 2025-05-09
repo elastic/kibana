@@ -22,11 +22,8 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
-  const es = getService('es');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const utils = getService('securitySolutionUtils');
 
   const postBulkAction = () =>
     supertest
@@ -53,14 +50,22 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('add_alert_suppression action', () => {
       it('should add suppression fields to a rule', async () => {
         const ruleId = 'ruleId';
-        const existingSuppression = { group_by: ['field1'], duration: { value: 5, unit: 'm' } };
+        const existingSuppression = {
+          group_by: ['field1'],
+          duration: { value: 5, unit: 'm' as const },
+          missing_fields_strategy: 'suppress' as const,
+        };
         const suppressionToAdd = {
           group_by: ['field2'],
-          suppression_config: { duration: { value: 10, unit: 'm' } },
+          suppression_config: {
+            duration: { value: 10, unit: 'm' },
+            missing_fields_strategy: 'suppress',
+          },
         };
         const resultingSuppression = {
           group_by: ['field1', 'field2'],
           duration: { value: 10, unit: 'm' },
+          missing_fields_strategy: 'suppress',
         };
 
         await createRule(supertest, log, {
@@ -99,9 +104,52 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
       });
 
+      it('should add suppression fields to a rule without configured suppression', async () => {
+        const ruleId = 'ruleId';
+        const suppressionToAdd = {
+          group_by: ['field2'],
+        };
+        const resultingSuppression = {
+          group_by: ['field2'],
+          missing_fields_strategy: 'suppress',
+        };
+
+        await createRule(supertest, log, getSimpleRule(ruleId));
+
+        const { body: bulkEditResponse } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
+              {
+                type: BulkActionEditTypeEnum.add_alert_suppression,
+                value: suppressionToAdd,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(bulkEditResponse.attributes.summary).toEqual({
+          failed: 0,
+          skipped: 0,
+          succeeded: 1,
+          total: 1,
+        });
+
+        // Check that the updated rule is returned with the response
+        expect(bulkEditResponse.attributes.results.updated[0].alert_suppression).toEqual(
+          resultingSuppression
+        );
+
+        // Check that the updates have been persisted
+        const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+        expect(updatedRule.alert_suppression).toEqual(resultingSuppression);
+      });
+
       it('should skip threshold rule if duration is not set in action', async () => {
         const ruleId = 'ruleId';
-        const existingSuppression = { duration: { value: 5, unit: 'm' } };
+        const existingSuppression = { duration: { value: 5, unit: 'm' as const } };
         const suppressionToAdd = {
           group_by: ['field2'],
         };
@@ -142,10 +190,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should update threshold rule if duration is set in action', async () => {
         const ruleId = 'ruleId';
-        const existingSuppression = { duration: { value: 5, unit: 'm' } };
+        const existingSuppression = { duration: { value: 5, unit: 'm' as const } };
         const suppressionToAdd = {
           group_by: ['field2'],
-          suppression_config: { duration: { value: 1, unit: 'h' } },
+          suppression_config: { duration: { value: 1, unit: 'h' as const } },
+          missing_fields_strategy: 'suppress' as const,
         };
         const resultingSuppression = {
           duration: { value: 1, unit: 'h' },
@@ -193,13 +242,21 @@ export default ({ getService }: FtrProviderContext): void => {
         const ruleId = 'ruleId';
         const existingSuppression = {
           group_by: ['field1', 'field2'],
-          duration: { value: 5, unit: 'm' },
+          duration: { value: 5, unit: 'm' as const },
+          missing_fields_strategy: 'suppress' as const,
         };
         const suppressionToDelete = {
           group_by: ['field2'],
-          suppression_config: { duration: { value: 5, unit: 'm' } },
+          suppression_config: {
+            duration: { value: 5, unit: 'm' },
+            missing_fields_strategy: 'suppress',
+          },
         };
-        const resultingSuppression = { group_by: ['field1'], duration: { value: 5, unit: 'm' } };
+        const resultingSuppression = {
+          group_by: ['field1'],
+          duration: { value: 5, unit: 'm' },
+          missing_fields_strategy: 'suppress',
+        };
 
         await createRule(supertest, log, {
           ...getSimpleRule(ruleId),
@@ -241,12 +298,23 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('set_alert_suppression action', () => {
       it('should overwrite suppression fields in a rule', async () => {
         const ruleId = 'ruleId';
-        const existingSuppression = { group_by: ['field1'], duration: { value: 5, unit: 'm' } };
+        const existingSuppression = {
+          group_by: ['field1'],
+          duration: { value: 5, unit: 'm' as const },
+          missing_fields_strategy: 'suppress' as const,
+        };
         const suppressionToSet = {
           group_by: ['field2'],
-          suppression_config: { duration: { value: 10, unit: 'm' } },
+          suppression_config: {
+            duration: { value: 10, unit: 'm' },
+            missing_fields_strategy: 'doNotSuppress',
+          },
         };
-        const resultingSuppression = { group_by: ['field2'], duration: { value: 10, unit: 'm' } };
+        const resultingSuppression = {
+          group_by: ['field2'],
+          duration: { value: 10, unit: 'm' },
+          missing_fields_strategy: 'doNotSuppress',
+        };
 
         await createRule(supertest, log, {
           ...getSimpleRule(ruleId),
@@ -286,7 +354,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should skip threshold rule if duration is not set in action', async () => {
         const ruleId = 'thresholdRuleId';
-        const existingSuppression = { duration: { value: 5, unit: 'm' } };
+        const existingSuppression = { duration: { value: 5, unit: 'm' as const } };
         const suppressionToSet = { group_by: ['field2'] };
 
         await createRule(supertest, log, {
