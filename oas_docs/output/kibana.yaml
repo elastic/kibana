@@ -24,7 +24,7 @@ info:
     GET kbn:/api/data_views
     ```
 
-    For more information about the console, refer to [Run API requests](https://www.elastic.co/guide/en/kibana/current/console-kibana.html).
+    For more information about the console, refer to [Run API requests](https://www.elastic.co/docs/explore-analyze/query-filter/tools/console).
 
     NOTE: Access to internal Kibana API endpoints will be restricted in Kibana version 9.0. Please move any integrations to publicly documented APIs.
 
@@ -124,7 +124,7 @@ tags:
     description: Manage the roles that grant Elasticsearch and Kibana privileges.
     externalDocs:
       description: Kibana role management
-      url: https://www.elastic.co/guide/en/kibana/master/kibana-role-management.html
+      url: https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/defining-roles
   - description: |
       Export sets of saved objects that you want to import into Kibana, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
 
@@ -132,8 +132,8 @@ tags:
       For example, use:
 
       * [Data views](../group/endpoint-data-views)
-      * [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)
-      * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
+      * [Spaces](../group/endpoint-spaces)
+      * [Short URLs](../group/endpoint-short-url)
 
       Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions
     name: saved objects
@@ -247,13 +247,13 @@ tags:
     x-displayName: Spaces
     description: Manage your Kibana spaces.
     externalDocs:
-      url: https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html
+      url: https://www.elastic.co/docs/deploy-manage/manage-spaces
       description: Space overview
   - name: synthetics
     x-displayName: Synthetics
     externalDocs:
       description: Synthetic monitoring
-      url: https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html
+      url: https://www.elastic.co/docs/solutions/observability/synthetics
   - name: system
     x-displayName: System
     description: |
@@ -272,7 +272,7 @@ tags:
     x-displayName: Upgrade assistant
   - externalDocs:
       description: Uptime monitoring
-      url: https://www.elastic.co/guide/en/observability/current/uptime-intro.html
+      url: https://www.elastic.co/docs/solutions/observability/uptime
     name: uptime
     x-displayName: Uptime
   - name: user session
@@ -447,6 +447,7 @@ paths:
                     - $ref: '#/components/schemas/gemini_secrets'
                     - $ref: '#/components/schemas/resilient_secrets'
                     - $ref: '#/components/schemas/jira_secrets'
+                    - $ref: '#/components/schemas/defender_secrets'
                     - $ref: '#/components/schemas/teams_secrets'
                     - $ref: '#/components/schemas/genai_secrets'
                     - $ref: '#/components/schemas/opsgenie_secrets'
@@ -564,6 +565,7 @@ paths:
                     - $ref: '#/components/schemas/resilient_config'
                     - $ref: '#/components/schemas/index_config'
                     - $ref: '#/components/schemas/jira_config'
+                    - $ref: '#/components/schemas/defender_config'
                     - $ref: '#/components/schemas/genai_azure_config'
                     - $ref: '#/components/schemas/genai_openai_config'
                     - $ref: '#/components/schemas/opsgenie_config'
@@ -691,6 +693,8 @@ paths:
                     - $ref: '#/components/schemas/run_closeincident'
                     - $ref: '#/components/schemas/run_createalert'
                     - $ref: '#/components/schemas/run_fieldsbyissuetype'
+                    - $ref: '#/components/schemas/run_getagentdetails'
+                    - $ref: '#/components/schemas/run_getagents'
                     - $ref: '#/components/schemas/run_getchoices'
                     - $ref: '#/components/schemas/run_getfields'
                     - $ref: '#/components/schemas/run_getincident'
@@ -69749,6 +69753,30 @@ components:
         projectKey:
           description: The Jira project key.
           type: string
+    defender_config:
+      title: Connector request properties for a Microsoft Defender for Endpoint connector
+      required:
+        - apiUrl
+        - projectKey
+      description: Defines properties for connectors when type is `.microsoft_defender_endpoint`.
+      type: object
+      properties:
+        apiUrl:
+          type: string
+          description: |
+            The URL of the Microsoft Defender for Endpoint API. If you are using the `xpack.actions.allowedHosts` setting, make sure the hostname is added to the allowed hosts.
+        clientId:
+          type: string
+          description: The application (client) identifier for your app in the Azure portal.
+        oAuthScope:
+          type: string
+          description: The OAuth scopes or permission sets for the Microsoft Defender for Endpoint API.
+        oAuthServerUrl:
+          type: string
+          description: The OAuth server URL where authentication is sent and received for the Microsoft Defender for Endpoint API.
+        tenantId:
+          description: The tenant identifier for your app in the Azure portal.
+          type: string
     genai_azure_config:
       title: Connector request properties for an OpenAI connector that uses Azure OpenAI
       description: |
@@ -70581,6 +70609,16 @@ components:
           description: |
             A password for HTTP basic authentication. It is applicable only when `usesBasic` is `true`.
           type: string
+    defender_secrets:
+      title: Connector secrets properties for a Microsoft Defender for Endpoint connector
+      required:
+        - clientSecret
+      description: Defines secrets for connectors when type is `..microsoft_defender_endpoint`.
+      type: object
+      properties:
+        clientSecret:
+          description: The client secret for your app in the Azure portal.
+          type: string
     run_acknowledge_resolve_pagerduty:
       title: PagerDuty connector parameters
       description: Test an action that acknowledges or resolves a PagerDuty alert.
@@ -71017,6 +71055,42 @@ components:
               type: string
               description: The Jira issue type identifier.
               example: 10024
+    run_getagentdetails:
+      title: The getAgentDetails subaction
+      type: object
+      required:
+        - subAction
+        - subActionParams
+      description: The `getAgentDetails` subaction for CrowdStrike connectors.
+      properties:
+        subAction:
+          type: string
+          description: The action to test.
+          enum:
+            - getAgentDetails
+        subActionParams:
+          type: object
+          description: The set of configuration properties for the action.
+          required:
+            - ids
+          properties:
+            ids:
+              type: array
+              description: An array of CrowdStrike agent identifiers.
+              items:
+                type: string
+    run_getagents:
+      title: The getAgents subaction
+      type: object
+      required:
+        - subAction
+      description: The `getAgents` subaction for SentinelOne connectors.
+      properties:
+        subAction:
+          type: string
+          description: The action to test.
+          enum:
+            - getAgents
     run_getchoices:
       title: The getChoices subaction
       type: object
@@ -72467,4 +72541,4 @@ x-topics:
 
       If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
 
-      To learn more, check out [Spaces](https://www.elastic.co/guide/en/kibana/master/xpack-spaces.html).
+      To learn more, check out [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces).
