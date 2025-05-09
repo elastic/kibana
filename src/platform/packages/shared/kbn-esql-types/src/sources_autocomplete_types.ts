@@ -6,11 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-// ToDo: Move to esql-types package
-export interface IndicesAutocompleteResult {
-  indices: IndexAutocompleteItem[];
-}
-
 export interface IndicesAutocompleteResult {
   indices: IndexAutocompleteItem[];
 }

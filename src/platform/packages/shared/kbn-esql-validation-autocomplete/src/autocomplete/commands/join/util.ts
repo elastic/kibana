@@ -9,9 +9,9 @@
 
 import { ESQLCommand } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
+import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
 import { SuggestionRawDefinition } from '../../types';
-import type { JoinIndexAutocompleteItem } from '../../../validation/types';
 
 const REGEX =
   /^(?<type>\w+((?<after_type>\s+((?<mnemonic>(JOIN|JOI|JO|J)((?<after_mnemonic>\s+((?<index>\S+((?<after_index>\s+(?<as>(AS|A))?(?<after_as>\s+(((?<alias>\S+)?(?<after_alias>\s+)?)?))?((?<on>(ON|O)((?<after_on>\s+(?<cond>[^\s])?)?))?))?))?))?))?))?))?/i;
@@ -66,7 +66,7 @@ export const getPosition = (text: string, command: ESQLCommand): JoinCommandPosi
 };
 
 export const joinIndicesToSuggestions = (
-  indices: JoinIndexAutocompleteItem[]
+  indices: IndexAutocompleteItem[]
 ): SuggestionRawDefinition[] => {
   const mainSuggestions: SuggestionRawDefinition[] = [];
   const aliasSuggestions: SuggestionRawDefinition[] = [];

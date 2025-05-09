@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLFieldWithMetadata, IndexAutocompleteItem } from '../validation/types';
+import type { ESQLControlVariable, IndexAutocompleteItem } from '@kbn/esql-types';
+import type { ESQLFieldWithMetadata } from '../validation/types';
 
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;

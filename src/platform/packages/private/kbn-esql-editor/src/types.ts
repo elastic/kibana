@@ -18,7 +18,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, IndicesAutocompleteResult } from '@kbn/esql-types';
 
 export interface ControlsContext {
   /** The editor supports the creation of controls,
@@ -84,17 +84,6 @@ export interface ESQLEditorProps {
   controlsContext?: ControlsContext;
   /** The available ESQL variables from the page context this editor was opened in */
   esqlVariables?: ESQLControlVariable[];
-}
-
-// ToDo: move this to the esql-types package
-export interface IndicesAutocompleteResult {
-  indices: IndexAutocompleteItem[];
-}
-// ToDo: move this to the esql-types package
-export interface IndexAutocompleteItem {
-  name: string;
-  mode: 'lookup' | 'time_series' | string;
-  aliases: string[];
 }
 
 interface ESQLVariableService {

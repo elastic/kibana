@@ -8,7 +8,8 @@
  */
 
 import { camelCase } from 'lodash';
-import { ESQLFieldWithMetadata, IndexAutocompleteItem } from '../validation/types';
+import type { IndexAutocompleteItem } from '@kbn/esql-types';
+import { ESQLFieldWithMetadata } from '../validation/types';
 import { fieldTypes } from '../definitions/types';
 import { ESQLCallbacks } from '../shared/types';
 

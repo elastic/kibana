@@ -16,6 +16,7 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { IndicesAutocompleteResult } from '@kbn/esql-types';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   esqlControlTrigger,
@@ -27,7 +28,6 @@ import {
 } from './triggers/update_esql_query/update_esql_query_trigger';
 import { ACTION_UPDATE_ESQL_QUERY, ACTION_CREATE_ESQL_CONTROL } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
-import { IndicesAutocompleteResult } from '../common';
 import { cacheNonParametrizedAsyncFunction } from './util/cache';
 import { EsqlVariablesService } from './variables_service';
 
