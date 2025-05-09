@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { EditorFrame, EditorFrameProps } from './editor_frame';
@@ -193,7 +193,10 @@ describe('editor_frame', () => {
       expect(queryDataPanel()).not.toBeInTheDocument();
       expect(queryLayerPanel()).not.toBeInTheDocument();
 
-      simulateLoadingDatasource();
+      act(() => {
+        simulateLoadingDatasource();
+      });
+
       expect(mockVisualization.getConfiguration).toHaveBeenCalledWith(
         expect.objectContaining({ state: 'initialState' })
       );
@@ -215,14 +218,16 @@ describe('editor_frame', () => {
       const { store } = renderEditorFrame();
       const updatedState = 'updatedVisState';
 
-      store.dispatch(
-        setState({
-          visualization: {
-            activeId: mockVisualization.id,
-            state: updatedState,
-          },
-        })
-      );
+      act(() => {
+        store.dispatch(
+          setState({
+            visualization: {
+              activeId: mockVisualization.id,
+              state: updatedState,
+            },
+          })
+        );
+      });
 
       // multiple calls due to some expression gen code that rely on it
       expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
@@ -245,7 +250,9 @@ describe('editor_frame', () => {
         title: 'shazm',
       };
 
-      setDatasourceState(updatedState);
+      act(() => {
+        setDatasourceState(updatedState);
+      });
 
       expect(mockDatasource.DataPanelComponent).toHaveBeenCalledTimes(1);
       expect(mockDatasource.DataPanelComponent).toHaveBeenLastCalledWith(
@@ -275,7 +282,9 @@ describe('editor_frame', () => {
       const setDatasourceState = (mockDatasource.DataPanelComponent as jest.Mock).mock.calls[0][0]
         .setState;
 
-      setDatasourceState('newState');
+      act(() => {
+        setDatasourceState('newState');
+      });
 
       // some expression rely on it as dependency
       expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
