@@ -123,8 +123,9 @@ export class SpacesGridPage extends Component<Props, State> {
 
     this.setState({ loading: true });
 
-    const spacesFiltered = this.state.spaces.filter((space) =>
-      space.name.toLowerCase().includes(text)
+    const spacesFiltered = this.state.spaces.filter(
+      (space) =>
+        space.name.toLowerCase().includes(text) || space.description?.toLowerCase().includes(text)
     );
 
     this.setState({
