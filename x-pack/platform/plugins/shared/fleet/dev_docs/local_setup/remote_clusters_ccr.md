@@ -176,3 +176,17 @@ GET fleet-synced-integrations/_search
 ```
 GET remote1:metrics-*/_search
 ```
+
+## Cloud testing
+
+- Create 2 deployments in https://console.qa.cld.elstc.co called main and remote
+- Manage the deployments and add `xpack.fleet.enableExperimental: ['enableSyncIntegrationsOnRemote']` to kibana configuration to enable the feature flag
+
+- On remote cluster:
+  - Go to Stack Management / Remote Clusters
+  - Add a remote cluster, use the proxy address of the main cluster (Find in manage deployment UI / Security / Proxy address at the bottom)  
+  - Add a follower index in Cross Cluster Replication, leader index: `fleet-synced-integrations`, follower index: `fleet-synced-integrations-ccr-main`
+  - Resume replication
+- On main cluster:
+  - Add a remote elasticsearch output to point to the remote cluster, fill out required fields (hosts, service_token) and enable sync integrations (fill kibana url and API key)
+  - Monitor the integration sync status by clicking on the status badge in the outputs table

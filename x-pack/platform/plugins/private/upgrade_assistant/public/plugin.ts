@@ -36,6 +36,8 @@ export class UpgradeAssistantUIPlugin
         currentMajor: kibanaVersion.major,
         prevMajor: kibanaVersion.major - 1,
         nextMajor: kibanaVersion.major + 1,
+        currentMinor: kibanaVersion.minor,
+        currentPatch: kibanaVersion.patch,
       };
 
       const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {

@@ -30,6 +30,7 @@ import { setFieldFormats } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { ReportingCore } from '..';
 
 import type { ReportingInternalSetup, ReportingInternalStart } from '../core';
@@ -76,13 +77,19 @@ export const createMockPluginStart = async (
     data: dataPluginMock.createStartContract(),
     fieldFormats: () => Promise.resolve(fieldFormatsMock),
     store: await createMockReportingStore(config),
+    notifications: notificationsMock.createStart(),
     taskManager: {
       schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
       ensureScheduled: jest.fn(),
     },
     licensing: {
       ...licensingMock.createStart(),
-      license$: new BehaviorSubject({ isAvailable: true, isActive: true, type: 'basic' }),
+      license$: new BehaviorSubject({
+        isAvailable: true,
+        isActive: true,
+        type: 'basic',
+        getFeature: () => true,
+      }),
     },
     securityService: coreStartMock.security, // we need authc from core.security start
     logger,

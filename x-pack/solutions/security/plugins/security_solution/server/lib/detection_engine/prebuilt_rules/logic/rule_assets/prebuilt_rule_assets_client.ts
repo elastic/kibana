@@ -75,10 +75,14 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchLatestVersions: (ruleIds: string[] = []): Promise<RuleVersionSpecifier[]> => {
+    fetchLatestVersions: (ruleIds?: string[]): Promise<RuleVersionSpecifier[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
+        if (ruleIds && ruleIds.length === 0) {
+          return [];
+        }
+
         const filter = ruleIds
-          .map((ruleId) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: ${ruleId}`)
+          ?.map((ruleId) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: ${ruleId}`)
           .join(' OR ');
 
         const findResult = await savedObjectsClient.find<

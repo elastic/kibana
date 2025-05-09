@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IngestStreamUpsertRequest, WiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -181,6 +181,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
+      });
+
+      it('fails to fork logs to logs.nginx when already forked', async () => {
+        const body = {
+          stream: {
+            name: 'logs.nginx',
+          },
+          if: {
+            field: 'log.logger',
+            operator: 'eq' as const,
+            value: 'nginx',
+          },
+        };
+        const response = await forkStream(apiClient, 'logs', body, 409);
+        expect(response).to.have.property('message', 'Child stream logs.nginx already exists');
       });
 
       it('Index an Nginx access log message, should goto logs.nginx', async () => {
@@ -358,10 +373,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should allow to update field type to incompatible type', async () => {
-        const body: IngestStreamUpsertRequest = {
+        const body: Streams.WiredStream.UpsertRequest = {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],
@@ -383,6 +399,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             ...body,
             stream: {
+              description: '',
               ingest: {
                 ...body.stream.ingest,
                 wired: {
@@ -401,10 +418,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should not allow to update field type to system', async () => {
-        const body: IngestStreamUpsertRequest = {
+        const body: Streams.WiredStream.UpsertRequest = {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],
@@ -453,7 +471,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(deleteResponse.status).to.eql(200);
 
         const streamResponse = await getStream(apiClient, 'logs.nginx');
-        expect((streamResponse.stream as WiredStreamDefinition).ingest.wired.routing).to.eql([
+        expect(
+          (streamResponse.stream as Streams.WiredStream.Definition).ingest.wired.routing
+        ).to.eql([
           {
             destination: 'logs.nginx.error',
             if: {

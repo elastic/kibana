@@ -8,6 +8,8 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { escapeRegExp } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
@@ -137,21 +139,48 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     changeState((prevState) => addTab(prevState, newItem, maxItemsCount));
   }, [changeState, createItem, maxItemsCount]);
 
+  const onDuplicate = useCallback(
+    (item: TabItem) => {
+      const newItem = createItem();
+      const copyLabel = i18n.translate('unifiedTabs.copyLabel', { defaultMessage: 'copy' });
+      const escapedCopyLabel = escapeRegExp(copyLabel);
+      const baseRegex = new RegExp(`\\s*\\(${escapedCopyLabel}\\)( \\d+)?$`);
+      const baseLabel = item.label.replace(baseRegex, '');
+      const escapedBaseLabel = escapeRegExp(baseLabel);
+
+      // Find all existing copies to determine next number
+      const copyRegex = new RegExp(`^${escapedBaseLabel}\\s*\\(${escapedCopyLabel}\\)( \\d+)?$`);
+      const copyNumberRegex = new RegExp(`\\(${escapedCopyLabel}\\) (\\d+)$`);
+      const copies = state.items
+        .filter((tab) => copyRegex.test(tab.label))
+        .map((tab) => {
+          const match = tab.label.match(copyNumberRegex);
+          return match && match[1] ? Number(match[1]) : 1; // match[1] is the number after (copy)
+        });
+
+      // Determine the next copy number
+      const nextNumber = copies.length > 0 ? Math.max(...copies) + 1 : null;
+
+      newItem.label = nextNumber
+        ? `${baseLabel} (${copyLabel}) ${nextNumber}`
+        : `${baseLabel} (${copyLabel})`;
+
+      tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
+      changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
+    },
+    [changeState, createItem, maxItemsCount, state.items]
+  );
+
   const getTabMenuItems = useMemo(() => {
     return getTabMenuItemsFn({
       tabsState: state,
       maxItemsCount,
-      onDuplicate: (item) => {
-        const newItem = createItem();
-        newItem.label = `${item.label} (copy)`;
-        tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
-        changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
-      },
+      onDuplicate,
       onCloseOtherTabs: (item) => changeState((prevState) => closeOtherTabs(prevState, item)),
       onCloseTabsToTheRight: (item) =>
         changeState((prevState) => closeTabsToTheRight(prevState, item)),
     });
-  }, [changeState, createItem, state, maxItemsCount]);
+  }, [state, maxItemsCount, onDuplicate, changeState]);
 
   return (
     <EuiFlexGroup

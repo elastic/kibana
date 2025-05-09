@@ -45,6 +45,8 @@
     "@kbn/fleet-plugin",
     "@kbn/content-packs-schema",
     "@kbn/cloud-plugin",
-    "@kbn/es-types"
+    "@kbn/es-types",
+    "@kbn/features-plugin",
+    "@kbn/i18n"
   ]
 }

@@ -30,7 +30,6 @@ import {
   RunnableSequence,
   RunnableLambda,
 } from '@langchain/core/runnables';
-import type { Logger } from '@kbn/logging';
 import {
   InferenceConnector,
   ChatCompleteAPI,
@@ -60,7 +59,6 @@ import {
 export interface InferenceChatModelParams extends BaseChatModelParams {
   connector: InferenceConnector;
   chatComplete: ChatCompleteAPI;
-  logger: Logger;
   functionCallingMode?: FunctionCallingMode;
   temperature?: number;
   model?: string;
@@ -106,7 +104,6 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     super(args);
     this.chatComplete = args.chatComplete;
     this.connector = args.connector;
-    this.logger = args.logger;
 
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;

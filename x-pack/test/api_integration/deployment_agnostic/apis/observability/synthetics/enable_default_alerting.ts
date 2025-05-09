@@ -274,6 +274,10 @@ const defaultAlertRules = {
     throttle: null,
     apiKeyOwner: 'any',
     apiKeyCreatedByUser: true,
+    artifacts: {
+      dashboards: [],
+      investigation_guide: { blob: '' },
+    },
     createdBy: 'any',
     updatedBy: 'any',
     muteAll: false,
@@ -306,6 +310,10 @@ const defaultAlertRules = {
     throttle: null,
     apiKeyOwner: 'elastic_admin',
     apiKeyCreatedByUser: true,
+    artifacts: {
+      dashboards: [],
+      investigation_guide: { blob: '' },
+    },
     createdBy: 'elastic_admin',
     updatedBy: 'elastic_admin',
     muteAll: false,

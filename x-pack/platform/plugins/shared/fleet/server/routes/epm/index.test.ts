@@ -35,6 +35,7 @@ import type {
   InstallableSavedObject,
   PackageInfo,
   AssetsGroupedByServiceByType,
+  UpdateCustomIntegrationResponse,
 } from '../../../common/types';
 
 import {
@@ -68,6 +69,7 @@ import {
   reauthorizeTransformsHandler,
   getDataStreamsHandler,
   getInputsHandler,
+  updateCustomIntegrationHandler,
 } from './handlers';
 
 import { installPackageKibanaAssetsHandler } from './kibana_assets_handler';
@@ -90,6 +92,7 @@ jest.mock('./handlers', () => ({
   reauthorizeTransformsHandler: jest.fn(),
   getDataStreamsHandler: jest.fn(),
   createCustomIntegrationHandler: jest.fn(),
+  updateCustomIntegrationHandler: jest.fn(),
   getInputsHandler: jest.fn(),
 }));
 
@@ -730,5 +733,23 @@ describe('schema validation', () => {
     });
     const validationResp = ReauthorizeTransformResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('update custom integration should return valid response', async () => {
+    const expectedResponse: UpdateCustomIntegrationResponse = {
+      id: 'test-integration',
+      result: {
+        version: '1.0.1',
+        status: 'installed',
+      },
+    };
+    (updateCustomIntegrationHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
+    await updateCustomIntegrationHandler(context, {} as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
   });
 });

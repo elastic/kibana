@@ -51,6 +51,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/core-security-common",
+    "@kbn/core-http-server-utils",
+    "@kbn/notifications-plugin",
   ],
   "exclude": [
     "target/**/*",

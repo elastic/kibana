@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { Observable } from 'rxjs';
 import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
@@ -77,3 +76,49 @@ export interface IToasts {
   addDanger: (toastOrTitle: ToastInput, options?: any) => Toast;
   addError: (error: Error, options: ErrorToastOptions) => Toast;
 }
+
+/**
+ * Specifies the internal state of {@link NotificationCoordinatorPublicApi}.
+ */
+export interface NotificationCoordinatorState {
+  locked: boolean;
+  controller: string | null;
+}
+
+/**
+ * @public
+ * @description This is the public API for the notification coordinator.
+ * It allows to opt in to coordination of notifications and acquiring/releasing locks on the notifications displayed to the user.
+ */
+export interface NotificationCoordinatorPublicApi {
+  /**
+   * Method that opts in a some observable to the notification coordination.
+   */
+  optInToCoordination: <
+    T extends Array<{
+      id: string;
+    }>
+  >(
+    $: Observable<T>,
+    cond: (coordinatorState: NotificationCoordinatorState) => boolean
+  ) => Observable<T>;
+  /**
+   * Acquires a lock for the registrar bounded to this method.
+   */
+  acquireLock: () => void;
+  /**
+   * Releases the lock for the registrar bounded to this method.
+   */
+  releaseLock: () => void;
+  /**
+   * Observable that emits the current state of the notification coordinator.
+   */
+  lock$: Observable<NotificationCoordinatorState>;
+}
+
+/**
+ * @public
+ * @description notification coordinator function,
+ * that returns an instance that of the notification coordinator that will be bound to the registrar value provided.
+ */
+export type NotificationCoordinator = (registrar: string) => NotificationCoordinatorPublicApi;

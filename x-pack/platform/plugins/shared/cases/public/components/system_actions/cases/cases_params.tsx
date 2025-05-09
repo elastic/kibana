@@ -18,6 +18,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiComboBox,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import * as i18n from './translations';
@@ -94,6 +95,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   const timeWindowUnit = Object.values(TIME_UNITS).includes(parsedTimeWindowUnit as TIME_UNITS)
     ? parsedTimeWindowUnit
     : DEFAULT_TIME_WINDOW[1];
+
+  const timeWindowSizeAsNumber = parseInt(timeWindowSize, 10);
+
+  const showTimeWindowWarning =
+    timeWindowUnit === 'm' && timeWindowSizeAsNumber >= 5 && timeWindowSizeAsNumber <= 20;
 
   useEffect(() => {
     if (!actionParams.subAction) {
@@ -232,6 +238,16 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
+      <EuiSpacer size="s" />
+      {showTimeWindowWarning && (
+        <EuiCallOut
+          data-test-subj="show-time-window-warning"
+          title={i18n.TIME_WINDOW_WARNING}
+          color="warning"
+          iconType="alert"
+          size="s"
+        />
+      )}
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>

@@ -104,5 +104,6 @@ export const transformUpdateBody = <Params extends RuleParams = never>({
     ...(updateBody.flapping !== undefined
       ? { flapping: transformUpdateBodyFlapping(updateBody.flapping) }
       : {}),
+    ...(updateBody.artifacts ? { artifacts: updateBody.artifacts } : {}),
   };
 };
