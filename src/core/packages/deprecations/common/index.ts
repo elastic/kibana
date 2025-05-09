@@ -17,3 +17,5 @@ export type {
   DomainDeprecationDetails,
   DeprecationsGetResponse,
 } from './src/types';
+
+export { DeprecationLevel } from './src/types';

@@ -8,6 +8,7 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
+import { DeprecationLevel } from '@kbn/core-deprecations-common';
 
 const i18nTexts = {
   criticalBadgeLabel: i18n.translate('xpack.upgradeAssistant.deprecationBadge.criticalBadgeLabel', {
@@ -22,7 +23,7 @@ const i18nTexts = {
 };
 
 interface Props {
-  level: 'none' | 'info' | 'warning' | 'critical' | 'fetch_error';
+  level: DeprecationLevel;
   isResolved?: boolean;
 }
 
@@ -35,7 +36,7 @@ export const DeprecationBadge: FunctionComponent<Props> = ({ level, isResolved }
     );
   }
 
-  if (level === 'critical') {
+  if (level === DeprecationLevel.CRITICAL) {
     return (
       <EuiBadge color="danger" data-test-subj="criticalDeprecationBadge">
         {i18nTexts.criticalBadgeLabel}
