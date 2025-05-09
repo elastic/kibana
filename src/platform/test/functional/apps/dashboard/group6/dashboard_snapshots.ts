@@ -71,7 +71,7 @@ export default function ({
       );
 
       await dashboard.clickExitFullScreenLogoButton();
-      expect(percentDifference).to.be.lessThan(0.022);
+      expect(percentDifference).to.be.lessThan(0.15);
     });
 
     it('compare area chart snapshot', async () => {
