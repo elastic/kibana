@@ -16,6 +16,9 @@ import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { SendEmailOptions } from './send_email';
 import type { Attachment } from '.';
 
+const SMALL_ATTACHMENT_LIMIT = 3000000; // 3mb
+const ATTACHMENT_CHUNK_SIZE = 2000000; // 2mb
+
 export async function sendEmailGraphApi(
   sendEmailOptions: SendEmailGraphApiOptions,
   logger: Logger,
@@ -23,10 +26,52 @@ export async function sendEmailGraphApi(
   connectorUsageCollector: ConnectorUsageCollector,
   axiosInstance?: AxiosInstance
 ): Promise<AxiosResponse> {
-  const { options, headers, messageHTML, attachments } = sendEmailOptions;
-
   // Create a new axios instance if one is not provided
   axiosInstance = axiosInstance ?? axios.create();
+
+  const { attachments } = sendEmailOptions;
+  if (attachments) {
+    return sendEmailWithAttachments({
+      sendEmailOptions,
+      logger,
+      configurationUtilities,
+      connectorUsageCollector,
+      axiosInstance,
+    });
+  }
+
+  return sendEmail({
+    sendEmailOptions,
+    logger,
+    configurationUtilities,
+    connectorUsageCollector,
+    axiosInstance,
+  });
+}
+
+interface SendEmailGraphApiOptions {
+  options: SendEmailOptions;
+  headers: Record<string, string>;
+  messageHTML: string;
+  attachments?: Attachment[];
+}
+
+interface SendEmailParams {
+  sendEmailOptions: SendEmailGraphApiOptions;
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
+  connectorUsageCollector: ConnectorUsageCollector;
+  axiosInstance: AxiosInstance;
+}
+
+async function sendEmail({
+  sendEmailOptions,
+  logger,
+  configurationUtilities,
+  connectorUsageCollector,
+  axiosInstance,
+}: SendEmailParams): Promise<AxiosResponse> {
+  const { options, headers, messageHTML } = sendEmailOptions;
 
   // POST /users/{id | userPrincipalName}/sendMail
   const res = await request({
@@ -36,7 +81,7 @@ export async function sendEmailGraphApi(
     }/sendMail`,
     method: 'post',
     logger,
-    data: getMessage(options, messageHTML, attachments),
+    data: getMessage(options, messageHTML),
     headers,
     configurationUtilities,
     validateStatus: () => true,
@@ -47,23 +92,47 @@ export async function sendEmailGraphApi(
   }
   const errString = stringify(res.data);
   logger.warn(
-    `error thrown sending Microsoft Exchange email for clientID: ${sendEmailOptions.options.transport.clientId}: ${errString}`
+    `error thrown sending Microsoft Exchange email for clientID: ${options.transport.clientId}: ${errString}`
   );
   throw new Error(errString);
 }
 
-interface SendEmailGraphApiOptions {
-  options: SendEmailOptions;
-  headers: Record<string, string>;
-  messageHTML: string;
-  attachments?: Attachment[];
+async function sendEmailWithAttachments(params: SendEmailParams): Promise<AxiosResponse> {
+  const emailId = await createDraft(params);
+  const attachments = params.sendEmailOptions.attachments ?? [];
+  for (const attachment of attachments) {
+    const size = Buffer.byteLength(attachment.content);
+    if (size < SMALL_ATTACHMENT_LIMIT) {
+      // If attachment is smaller than the limit, add the attachment to the draft email
+      await addAttachment(emailId, attachment, params);
+    } else {
+      // If attachment is larger than the limit,
+      // create an upload session and upload attachment in chunks to the draft email
+      const buffer = Buffer.from(attachment.content, attachment.encoding as BufferEncoding);
+      const bufferSize = buffer.length;
+      const uploadUrl = await createUploadSession(emailId, attachment.filename, bufferSize, params);
+
+      const chunks = getAttachmentChunks(buffer, bufferSize);
+      let start = 0;
+      for (let index = 0; index < chunks.length; index++) {
+        const chunk = chunks[index];
+        const end = start + chunk.length - 1;
+        const headers = {
+          'Content-Type': 'application/octet-stream',
+          'Content-Length': `${chunk.length}`,
+          'Content-Range': `bytes ${start}-${end}/${bufferSize}`,
+        };
+        await uploadAttachmentChunk(uploadUrl, chunk, headers, params);
+        start = start + chunk.length;
+      }
+      await closeUploadSession(uploadUrl, params);
+    }
+  }
+
+  return sendDraft(emailId, params);
 }
 
-function getMessage(
-  emailOptions: SendEmailOptions,
-  messageHTML: string,
-  attachments?: Attachment[]
-) {
+function getMessage(emailOptions: SendEmailOptions, messageHTML: string) {
   const { routing, content } = emailOptions;
   const { to, cc, bcc } = routing;
   const { subject } = content;
@@ -89,16 +158,257 @@ function getMessage(
           address: bccAddr,
         },
       })),
-      ...(attachments
-        ? {
-            attachments: attachments.map((attachment) => ({
-              '@odata.type': '#microsoft.graph.fileAttachment',
-              name: attachment.filename,
-              contentType: attachment.contentType,
-              contentBytes: attachment.content,
-            })),
-          }
-        : {}),
     },
   };
+}
+
+function getAttachmentChunks(buffer: Buffer, size: number): Buffer[] {
+  const chunks: Buffer[] = [];
+  let start = 0;
+  while (start < size) {
+    const end = Math.min(start + ATTACHMENT_CHUNK_SIZE, size);
+    const chunk = buffer.subarray(start, end);
+    chunks.push(chunk);
+    start = end;
+  }
+  return chunks;
+}
+
+async function createDraft({
+  sendEmailOptions,
+  logger,
+  configurationUtilities,
+  connectorUsageCollector,
+  axiosInstance,
+}: SendEmailParams): Promise<string> {
+  const { options, headers, messageHTML } = sendEmailOptions;
+
+  // POST /users/{id | userPrincipalName}/messages
+  const { message } = getMessage(options, messageHTML);
+  const res = await request({
+    axios: axiosInstance,
+    url: `${configurationUtilities.getMicrosoftGraphApiUrl()}/users/${
+      options.routing.from
+    }/messages`,
+    method: 'post',
+    logger,
+    data: message,
+    headers,
+    configurationUtilities,
+    validateStatus: () => true,
+    connectorUsageCollector,
+  });
+
+  if (res.status !== 201) {
+    const errString = stringify(res.data);
+    logger.warn(
+      `error thrown creating Microsoft Exchange email with attachments for clientID: ${options.transport.clientId}: ${errString}`
+    );
+    throw new Error(errString);
+  }
+  return res.data.id;
+}
+
+async function sendDraft(
+  emailId: string,
+  {
+    sendEmailOptions,
+    logger,
+    configurationUtilities,
+    connectorUsageCollector,
+    axiosInstance,
+  }: SendEmailParams
+): Promise<AxiosResponse> {
+  const { options, headers } = sendEmailOptions;
+
+  // POST /users/{id | userPrincipalName}/messages/{emailId}/send
+  const res = await request({
+    axios: axiosInstance,
+    url: `${configurationUtilities.getMicrosoftGraphApiUrl()}/users/${
+      options.routing.from
+    }/messages/${emailId}/send`,
+    method: 'post',
+    logger,
+    data: {},
+    headers,
+    configurationUtilities,
+    validateStatus: () => true,
+    connectorUsageCollector,
+  });
+  if (res.status === 202) {
+    return res.data;
+  }
+  const errString = stringify(res.data);
+  logger.warn(
+    `error thrown sending Microsoft Exchange email with attachments for clientID: ${options.transport.clientId}: ${errString}`
+  );
+  throw new Error(errString);
+}
+
+async function createUploadSession(
+  emailId: string,
+  name: string,
+  size: number,
+  {
+    sendEmailOptions,
+    logger,
+    configurationUtilities,
+    connectorUsageCollector,
+    axiosInstance,
+  }: SendEmailParams
+): Promise<string> {
+  const { options, headers } = sendEmailOptions;
+
+  // POST /users/{id | userPrincipalName}/messages/{emailId}/attachments/createUploadSession
+  const res = await request({
+    axios: axiosInstance,
+    url: `${configurationUtilities.getMicrosoftGraphApiUrl()}/users/${
+      options.routing.from
+    }/messages/${emailId}/attachments/createUploadSession`,
+    method: 'post',
+    logger,
+    data: {
+      AttachmentItem: {
+        attachmentType: 'file',
+        name,
+        size,
+      },
+    },
+    headers,
+    configurationUtilities,
+    validateStatus: () => true,
+    connectorUsageCollector,
+  });
+  if (res.status !== 201) {
+    const errString = stringify(res.data);
+    logger.warn(
+      `error thrown creating Microsoft Exchange attachment upload session for clientID: ${options.transport.clientId}: ${errString}`
+    );
+    throw new Error(errString);
+  }
+  return res.data.uploadUrl;
+}
+
+async function closeUploadSession(
+  uploadUrl: string,
+  {
+    sendEmailOptions,
+    logger,
+    configurationUtilities,
+    connectorUsageCollector,
+    axiosInstance,
+  }: SendEmailParams
+): Promise<AxiosResponse> {
+  const { options } = sendEmailOptions;
+
+  const res = await request({
+    axios: axiosInstance,
+    url: uploadUrl,
+    method: 'delete',
+    logger,
+    configurationUtilities,
+    validateStatus: () => true,
+    connectorUsageCollector,
+  });
+  if (res.status === 204) {
+    return res.data;
+  }
+  const errString = stringify(`${res.status} ${res.statusText}`);
+  logger.warn(
+    `error thrown closing Microsoft Exchange attachment upload session for clientID: ${options.transport.clientId}: ${errString}`
+  );
+  throw new Error(errString);
+}
+
+async function addAttachment(
+  emailId: string,
+  attachment: Attachment,
+  {
+    sendEmailOptions,
+    logger,
+    configurationUtilities,
+    connectorUsageCollector,
+    axiosInstance,
+  }: SendEmailParams
+): Promise<AxiosResponse> {
+  const { options, headers } = sendEmailOptions;
+  const responseSettings = configurationUtilities.getResponseSettings();
+
+  // POST /users/{id | userPrincipalName}/messages/{emailId}/attachments
+  const res = await request({
+    axios: axiosInstance,
+    url: `${configurationUtilities.getMicrosoftGraphApiUrl()}/users/${
+      options.routing.from
+    }/messages/${emailId}/attachments`,
+    method: 'post',
+    logger,
+    data: {
+      '@odata.type': '#microsoft.graph.fileAttachment',
+      name: attachment.filename,
+      contentType: attachment.contentType,
+      contentBytes: attachment.content,
+    },
+    headers,
+    configurationUtilities: {
+      ...configurationUtilities,
+      // override maxContentLength config for requests with attachments
+      getResponseSettings: () => ({
+        ...responseSettings,
+        maxContentLength: SMALL_ATTACHMENT_LIMIT,
+      }),
+    },
+    validateStatus: () => true,
+    connectorUsageCollector,
+  });
+  if (res.status === 201) {
+    return res.data;
+  }
+  const errString = stringify(res.data);
+  logger.warn(
+    `error thrown adding attachment to Microsoft Exchange email for clientID: ${options.transport.clientId}: ${errString}`
+  );
+  throw new Error(errString);
+}
+
+async function uploadAttachmentChunk(
+  uploadUrl: string,
+  chunk: Buffer,
+  headers: Record<string, string>,
+  {
+    sendEmailOptions,
+    logger,
+    configurationUtilities,
+    connectorUsageCollector,
+    axiosInstance,
+  }: SendEmailParams
+): Promise<void> {
+  const { options } = sendEmailOptions;
+  const responseSettings = configurationUtilities.getResponseSettings();
+
+  const res = await request({
+    axios: axiosInstance,
+    url: uploadUrl,
+    method: 'put',
+    logger,
+    data: chunk,
+    headers,
+    configurationUtilities: {
+      ...configurationUtilities,
+      // Override maxContentLength config for requests with attachments
+      getResponseSettings: () => ({
+        ...responseSettings,
+        maxContentLength: SMALL_ATTACHMENT_LIMIT,
+      }),
+    },
+    validateStatus: () => true,
+    connectorUsageCollector,
+  });
+
+  if (res.status !== 200 && res.status !== 201) {
+    const errString = stringify(res.data);
+    logger.warn(
+      `error thrown uploading attachment to Microsoft Exchange email for clientID: ${options.transport.clientId}: ${errString}`
+    );
+    throw new Error(errString);
+  }
 }
