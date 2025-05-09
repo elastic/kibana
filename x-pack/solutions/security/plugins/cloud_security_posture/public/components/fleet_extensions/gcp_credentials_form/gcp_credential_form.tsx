@@ -711,8 +711,6 @@ export const GcpInputVarFields = ({
                   onChange={(value) => {
                     onChange(credentialJSONFields.id, value);
                   }}
-                  errors={credentialJSONFieldsInvalid ? [credentialJSONError] : []}
-                  forceShowErrors={false}
                   isEditPage={isEditPage}
                 />
               </Suspense>
