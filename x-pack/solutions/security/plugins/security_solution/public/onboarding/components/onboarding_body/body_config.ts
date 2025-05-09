@@ -42,12 +42,6 @@ export const defaultBodyConfig: OnboardingGroupConfig[] = [
     // TODO: Add attackDiscoveryCardConfig when it is ready (https://github.com/elastic/kibana/issues/189487)
     cards: [assistantCardConfig],
   },
-  {
-    title: i18n.translate('xpack.securitySolution.onboarding.customizeLLM.title', {
-      defaultMessage: 'Customize your LLM',
-    }),
-    cards: [assistantCardConfig],
-  },
 ];
 
 export const siemMigrationsBodyConfig: OnboardingGroupConfig[] = [
