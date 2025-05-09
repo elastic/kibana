@@ -9,7 +9,7 @@ import { Streams } from '../models/streams';
 import { createIsNarrowSchema } from '../shared/type_guards';
 
 export const isRootStreamDefinition = createIsNarrowSchema(
-  Streams.WiredStream.Definition.right,
+  Streams.all.Definition.right,
   Streams.WiredStream.Definition.right.refine((stream) => {
     return stream.name.split('.').length === 1;
   })
