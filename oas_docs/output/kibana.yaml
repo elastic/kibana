@@ -54550,11 +54550,14 @@ paths:
               type: object
               properties:
                 content: {}
+                filename:
+                  type: string
                 include:
                   type: string
               required:
                 - include
                 - content
+                - filename
       responses: {}
       summary: Import content into a stream
       tags:
