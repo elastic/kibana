@@ -29,61 +29,66 @@ const preventDefault = (e: Event) => e.preventDefault();
 const disableScroll = () => window.addEventListener('wheel', preventDefault, { passive: false });
 const enableScroll = () => window.removeEventListener('wheel', preventDefault);
 
-const handleStart = (e: UserKeyboardEvent, onStart: EventHandler, onBlur?: EventHandler) => {
-  e.stopPropagation();
-  e.preventDefault();
-  onStart(e);
-  disableScroll();
-
-  const handleBlur = (blurEvent: Event) => {
-    onBlur?.(blurEvent as UserInteractionEvent);
-    enableScroll();
-  };
-
-  e.target?.addEventListener('blur', handleBlur, { once: true });
-};
-
-const handleMove = (e: UserKeyboardEvent, onMove: EventHandler) => {
-  e.stopPropagation();
-  e.preventDefault();
-  onMove(e);
-};
-
-const handleEnd = (e: UserKeyboardEvent, onEnd: EventHandler, shouldScrollToEnd: boolean) => {
-  e.preventDefault();
-  enableScroll();
-  onEnd(e);
-};
-
-const handleCancel = (e: UserKeyboardEvent, onCancel: EventHandler, shouldScrollToEnd: boolean) => {
-  enableScroll();
-  onCancel(e);
-};
-
 export const startKeyboardInteraction = ({
   e,
-  isEventActive,
   onStart,
   onMove,
   onEnd,
   onCancel,
   onBlur,
-  shouldScrollToEnd = false,
 }: {
   e: UserKeyboardEvent;
-  isEventActive: boolean;
-  shouldScrollToEnd?: boolean;
   onMove: EventHandler;
   onStart: EventHandler;
   onEnd: EventHandler;
   onCancel: EventHandler;
   onBlur?: EventHandler;
 }) => {
-  if (!isEventActive) {
-    if (isStartKey(e)) handleStart(e, onStart, onBlur);
+  const handleStart = (ev: UserKeyboardEvent) => {
+    ev.stopPropagation();
+    ev.preventDefault();
+    onStart(ev);
+    disableScroll();
+
+    const handleBlur = (blurEvent: Event) => {
+      onBlur?.(blurEvent as UserInteractionEvent);
+      enableScroll();
+    };
+
+    /**
+     * TODO: Blur is firing on re-render, so use `onClick` instead
+     * This should be fixed by https://github.com/elastic/kibana/issues/220309
+     */
+    document.addEventListener('click', handleBlur, { once: true });
+  };
+
+  const handleMove = (ev: UserKeyboardEvent) => {
+    ev.stopPropagation();
+    ev.preventDefault();
+    onMove(ev);
+  };
+
+  const handleEnd = (ev: UserKeyboardEvent) => {
+    document.removeEventListener('keydown', handleKeyPress);
+    ev.preventDefault();
+    enableScroll();
+    onEnd(ev);
+  };
+
+  const handleCancel = (ev: UserKeyboardEvent) => {
+    enableScroll();
+    onCancel(ev);
+  };
+
+  const handleKeyPress = (ev: UserKeyboardEvent) => {
+    if (isMoveKey(ev)) handleMove(ev);
+    else if (isEndKey(ev)) handleEnd(ev);
+    else if (isCancelKey(ev)) handleCancel(ev);
+  };
+
+  if (isStartKey(e)) {
+    handleStart(e);
+    document.addEventListener('keydown', handleKeyPress);
     return;
   }
-  if (isMoveKey(e)) handleMove(e, onMove);
-  if (isEndKey(e)) handleEnd(e, onEnd, shouldScrollToEnd);
-  if (isCancelKey(e)) handleCancel(e, onCancel, shouldScrollToEnd);
 };

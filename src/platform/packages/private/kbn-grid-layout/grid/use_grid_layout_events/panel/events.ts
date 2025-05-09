@@ -97,7 +97,12 @@ export const useGridLayoutPanelEvents = ({
 
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
-      if (!isLayoutInteractive(gridLayoutStateManager)) return;
+      if (
+        !isLayoutInteractive(gridLayoutStateManager) ||
+        gridLayoutStateManager.activePanelEvent$.getValue() // interaction has already happened, so don't start again
+      ) {
+        return;
+      }
       if (isMouseEvent(e)) {
         startMouseInteraction({
           e,
@@ -113,20 +118,17 @@ export const useGridLayoutPanelEvents = ({
           onEnd,
         });
       } else if (isKeyboardEvent(e)) {
-        const isEventActive = gridLayoutStateManager.activePanelEvent$.value !== undefined;
         startKeyboardInteraction({
           e,
-          isEventActive,
           onStart,
           onMove,
           onEnd,
           onBlur,
           onCancel,
-          shouldScrollToEnd: interactionType === 'resize',
         });
       }
     },
-    [gridLayoutStateManager, interactionType, onStart, onMove, onEnd, onBlur, onCancel]
+    [gridLayoutStateManager, onStart, onMove, onEnd, onBlur, onCancel]
   );
 
   return { startDrag: startInteraction };

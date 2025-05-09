@@ -44,7 +44,12 @@ export const useGridLayoutRowEvents = ({ sectionId }: { sectionId: string }) => 
   );
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
-      if (!isLayoutInteractive(gridLayoutStateManager)) return;
+      if (
+        !isLayoutInteractive(gridLayoutStateManager) ||
+        gridLayoutStateManager.activeRowEvent$.getValue() // interaction has already happened, so don't start again
+      ) {
+        return;
+      }
       const onStart = () => {
         startingPointer.current = getSensorPosition(e);
         startAction(e, gridLayoutStateManager, sectionId);
@@ -83,10 +88,8 @@ export const useGridLayoutRowEvents = ({ sectionId }: { sectionId: string }) => 
           onEnd,
         });
       } else if (isKeyboardEvent(e)) {
-        const isEventActive = gridLayoutStateManager.activeRowEvent$.value !== undefined;
         startKeyboardInteraction({
           e,
-          isEventActive,
           onStart,
           onMove,
           onEnd,

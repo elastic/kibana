@@ -56,12 +56,17 @@ export const cancelAction = ({
   gridLayout$,
   headerRefs,
 }: GridLayoutStateManager) => {
-  const event = activeRowEvent$.getValue();
-  activeRowEvent$.next(undefined);
+  /**
+   * start by setting the layout back to the starting one, **then** trigger the end of the event;
+   * note that the order is important here because of how we derive `layoutUpdated$`
+   */
   if (startingLayout) {
     gridLayout$.next(startingLayout);
     startingLayout = undefined;
   }
+
+  const event = activeRowEvent$.getValue();
+  activeRowEvent$.next(undefined);
   if (!event) return;
   headerRefs.current[event.id]?.scrollIntoView({
     behavior: 'smooth',
@@ -94,7 +99,7 @@ export const moveAction = (
     let currentTargetSection;
     Object.entries(gridSectionElements).forEach(([id, section]) => {
       const { top, bottom } = section?.getBoundingClientRect() ?? { top: 0, bottom: 0 };
-      if (activeRowRect.top >= top && activeRowRect.bottom <= bottom) {
+      if (activeRowRect.bottom >= top && activeRowRect.top <= bottom) {
         currentTargetSection = id;
       }
     });
