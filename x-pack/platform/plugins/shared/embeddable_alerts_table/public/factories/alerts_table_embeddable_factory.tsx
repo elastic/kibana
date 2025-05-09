@@ -6,25 +6,26 @@
  */
 
 import React from 'react';
-import deepEqual from 'react-fast-compare';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import {
-  initializeTimeRange,
+  initializeTimeRangeManager,
   initializeTitleManager,
+  timeRangeComparators,
+  titleComparators,
   useFetchContext,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { CONFIG_EDITOR_EDIT_TABLE_TITLE } from '../translations';
 import type {
   EmbeddableAlertsTableApi,
   EmbeddableAlertsTableConfig,
   EmbeddableAlertsTablePublicStartDependencies,
-  EmbeddableAlertsTableRuntimeState,
   EmbeddableAlertsTableSerializedState,
 } from '../types';
 import { openConfigEditor } from '../components/open_config_editor';
@@ -35,59 +36,68 @@ import { queryClient } from '../query_client';
 export const getAlertsTableEmbeddableFactory = (
   coreServices: CoreStart,
   deps: EmbeddableAlertsTablePublicStartDependencies
-): ReactEmbeddableFactory<
-  EmbeddableAlertsTableSerializedState,
-  EmbeddableAlertsTableRuntimeState,
-  EmbeddableAlertsTableApi
-> => ({
+): EmbeddableFactory<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
   type: EMBEDDABLE_ALERTS_TABLE_ID,
-  deserializeState: (state) => {
-    return state.rawState;
-  },
-  buildEmbeddable: async (state, buildApi, uuid) => {
-    const timeRange = initializeTimeRange(state);
-    const titleManager = initializeTitleManager(state);
+  buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    const timeRangeManager = initializeTimeRangeManager(initialState?.rawState);
+    const titleManager = initializeTitleManager(initialState?.rawState ?? {});
     const queryLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const services = {
       ...coreServices,
       ...deps,
     };
-    const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(state.tableConfig);
-    const api = buildApi(
-      {
-        ...timeRange.api,
-        ...titleManager.api,
-        dataLoading$: queryLoading$,
-        isEditingEnabled: () => true,
-        onEdit: async () => {
-          try {
-            const newTableConfig = await openConfigEditor({
-              coreServices,
-              parentApi: api.parentApi as PresentationContainer,
-              initialConfig: tableConfig$.getValue(),
-            });
-            tableConfig$.next(newTableConfig);
-          } catch {
-            // The user closed without saving
-          }
-        },
-        getTypeDisplayName: () => CONFIG_EDITOR_EDIT_TABLE_TITLE,
-        serializeState: () => {
-          return {
-            rawState: {
-              ...titleManager.serialize(),
-              ...timeRange.serialize(),
-              tableConfig: tableConfig$.getValue(),
-            },
-          };
-        },
-      },
-      {
-        ...titleManager.comparators,
-        ...timeRange.comparators,
-        tableConfig: [tableConfig$, (value) => tableConfig$.next(value), (a, b) => deepEqual(a, b)],
-      }
+
+    const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(
+      initialState.rawState.tableConfig
     );
+
+    const serializeState = () => ({
+      rawState: {
+        ...titleManager.getLatestState(),
+        ...timeRangeManager.getLatestState(),
+        tableConfig: tableConfig$.getValue(),
+      },
+    });
+
+    const unsavedChangesApi = initializeUnsavedChanges({
+      uuid,
+      parentApi,
+      anyStateChange$: merge(timeRangeManager.anyStateChange$, titleManager.anyStateChange$).pipe(
+        map(() => undefined)
+      ),
+      serializeState,
+      getComparators: () => ({
+        ...titleComparators,
+        ...timeRangeComparators,
+        tableConfig: 'deepEquality',
+      }),
+      onReset: (lastSaved) => {
+        titleManager.reinitializeState(lastSaved?.rawState);
+        timeRangeManager.reinitializeState(lastSaved?.rawState);
+      },
+    });
+
+    const api = finalizeApi({
+      ...timeRangeManager.api,
+      ...titleManager.api,
+      ...unsavedChangesApi,
+      dataLoading$: queryLoading$,
+      serializeState,
+      isEditingEnabled: () => true,
+      getTypeDisplayName: () => CONFIG_EDITOR_EDIT_TABLE_TITLE,
+      onEdit: async () => {
+        try {
+          const newTableConfig = await openConfigEditor({
+            coreServices,
+            parentApi: api.parentApi as PresentationContainer,
+            initialConfig: tableConfig$.getValue(),
+          });
+          tableConfig$.next(newTableConfig);
+        } catch {
+          // The user closed without saving
+        }
+      },
+    });
 
     return {
       api,

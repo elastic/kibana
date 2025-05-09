@@ -38,28 +38,31 @@ describe('getEmbeddableAlertsTableFactory', () => {
   );
 
   it('should render AlertsTable with the correct props', async () => {
-    const { Component } = await factory.buildEmbeddable(
-      {
-        timeRange: {
-          from: '2025-01-01T00:00:00.000Z',
-          to: '2025-01-01T01:00:00.000Z',
-        },
-        title: 'Test embeddable alerts table',
-        tableConfig: {
-          solution: 'observability',
-          query: {
-            type: 'alertsFilters',
-            filters: [{ filter: {} }],
+    const { Component } = await factory.buildEmbeddable({
+      initialState: {
+        rawState: {
+          timeRange: {
+            from: '2025-01-01T00:00:00.000Z',
+            to: '2025-01-01T01:00:00.000Z',
+          },
+          title: 'Test embeddable alerts table',
+          tableConfig: {
+            solution: 'observability',
+            query: {
+              type: 'alertsFilters',
+              filters: [{ filter: {} }],
+            },
           },
         },
       },
-      (apiRegistration) => ({ ...(apiRegistration as any), parentApi: mockPresentationContainer }),
-      UUID,
-      // These are unused by our factory
-      {} as any,
-      () => ({} as any),
-      {} as any
-    );
+      finalizeApi: (apiRegistration) => ({
+        ...(apiRegistration as any),
+        parentApi: mockPresentationContainer,
+      }),
+      uuid: UUID,
+      // parentApi is unused by our factory
+      parentApi: {} as any,
+    });
 
     render(<Component />);
     expect(mockEmbeddableAlertsTable).toHaveBeenCalledWith(

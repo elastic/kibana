@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { MachineLearningProvider } from '../../../../../services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 import { setupKnowledgeBase, waitForKnowledgeBaseReady } from './knowledge_base';
 
@@ -24,24 +23,36 @@ export const TINY_ELSER_INFERENCE_ID = 'pt_tiny_elser_inference_id';
 export const TINY_TEXT_EMBEDDING_INFERENCE_ID = 'pt_tiny_text_embedding_inference_id';
 
 export async function importModel(
-  ml: ReturnType<typeof MachineLearningProvider>,
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
   {
     modelId,
   }: {
     modelId: typeof TINY_ELSER_MODEL_ID | typeof TINY_TEXT_EMBEDDING_MODEL_ID;
   }
 ) {
+  const ml = getService('ml');
+  const log = getService('log');
+
   const config = ml.api.getTrainedModelConfig(modelId);
   await ml.api.assureMlStatsIndexExists();
-  await ml.api.importTrainedModel(modelId, modelId, config);
+
+  try {
+    await ml.api.importTrainedModel(modelId, modelId, config);
+  } catch (error) {
+    if (error.message.includes('resource_already_exists_exception')) {
+      log.info(`Model "${modelId}" is already imported. Skipping import.`);
+      return;
+    }
+
+    log.error(`Could not import model "${modelId}": ${error}`);
+    throw error;
+  }
 }
 
 export async function setupTinyElserModelAndInferenceEndpoint(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
-  const ml = getService('ml');
-
-  await importModel(ml, { modelId: TINY_ELSER_MODEL_ID });
+  await importModel(getService, { modelId: TINY_ELSER_MODEL_ID });
   await createTinyElserInferenceEndpoint(getService, { inferenceId: TINY_ELSER_INFERENCE_ID });
 }
 
@@ -88,8 +99,11 @@ export async function deployTinyElserAndSetupKb(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+  const log = getService('log');
 
   await setupTinyElserModelAndInferenceEndpoint(getService);
+
+  log.debug(`Setting up knowledge base with inference endpoint "${TINY_ELSER_INFERENCE_ID}"`);
   const { status, body } = await setupKnowledgeBase(
     observabilityAIAssistantAPIClient,
     TINY_ELSER_INFERENCE_ID
@@ -115,10 +129,12 @@ export async function deleteInferenceEndpoint(
     log.info(`Inference endpoint "${inferenceId}" deleted.`);
   } catch (e) {
     if (e.message.includes('resource_not_found_exception')) {
-      log.debug(`Inference endpoint "${inferenceId}" was already deleted.`);
-    } else {
-      log.error(`Could not delete inference endpoint "${inferenceId}": ${e}`);
+      log.debug(`Inference endpoint "${inferenceId}" was already deleted. Skipping deletion.`);
+      return;
     }
+
+    log.error(`Could not delete inference endpoint "${inferenceId}": ${e}`);
+    throw e;
   }
 }
 
@@ -152,9 +168,18 @@ export async function createInferenceEndpoint({
 
     log.info(`Inference endpoint ${inferenceId} created.`);
     return res;
-  } catch (e) {
-    log.error(`Error creating inference endpoint "${inferenceId}": ${e}`);
-    throw e;
+  } catch (error) {
+    if (
+      error instanceof errors.ResponseError &&
+      (error.body?.error?.type === 'resource_not_found_exception' ||
+        error.body?.error?.type === 'status_exception')
+    ) {
+      log.debug(`Inference endpoint "${inferenceId}" already exists. Skipping creation.`);
+      return;
+    }
+
+    log.error(`Error creating inference endpoint "${inferenceId}": ${error}`);
+    throw error;
   }
 }
 

@@ -12,7 +12,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { ESQLVariableType, ESQLControlVariable, ESQLControlState } from '@kbn/esql-types';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { monaco } from '@kbn/monaco';
 import { untilPluginStartServicesReady } from '../../kibana_services';
@@ -29,8 +30,12 @@ interface Context {
   initialState?: ESQLControlState;
 }
 
-export async function isActionCompatible(queryString: string) {
-  return Boolean(queryString && queryString.trim().length > 0);
+function isESQLVariableType(value: string): value is ESQLVariableType {
+  return Object.values(ESQLVariableType).includes(value as ESQLVariableType);
+}
+
+export async function isActionCompatible(core: CoreStart, variableType: ESQLVariableType) {
+  return core.uiSettings.get(ENABLE_ESQL) && isESQLVariableType(variableType);
 }
 
 const Fallback = () => <Fragment />;
@@ -46,7 +51,7 @@ export async function executeAction({
   cursorPosition,
   initialState,
 }: Context) {
-  const isCompatibleAction = await isActionCompatible(queryString);
+  const isCompatibleAction = await isActionCompatible(core, variableType);
   if (!isCompatibleAction) {
     throw new IncompatibleActionError();
   }

@@ -50,8 +50,6 @@ export type EmbeddableAlertsTableSerializedState = SerializedTitles &
     tableConfig: EmbeddableAlertsTableConfig;
   };
 
-export type EmbeddableAlertsTableRuntimeState = EmbeddableAlertsTableSerializedState;
-
 export type EmbeddableAlertsTableApi = DefaultEmbeddableApi<EmbeddableAlertsTableSerializedState> &
   PublishesDataLoading &
   HasEditCapabilities &
