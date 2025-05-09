@@ -18,16 +18,16 @@ export const ManageIntegrationsCallout = React.memo(
   ({ installedIntegrationsCount }: { installedIntegrationsCount: number }) => {
     const { href: integrationUrl, onClick: onAddIntegrationClicked } = useAddIntegrationsUrl();
     const {
-      telemetry: { trackLinkClick },
+      telemetry: { reportLinkClick },
     } = useIntegrationContext();
 
     const onClick = useCallback(
       (e: React.MouseEvent<HTMLAnchorElement>) => {
         e.preventDefault();
-        trackLinkClick?.(TELEMETRY_MANAGE_INTEGRATIONS);
+        reportLinkClick?.(TELEMETRY_MANAGE_INTEGRATIONS);
         onAddIntegrationClicked(e);
       },
-      [onAddIntegrationClicked, trackLinkClick]
+      [onAddIntegrationClicked, reportLinkClick]
     );
 
     if (!installedIntegrationsCount) {

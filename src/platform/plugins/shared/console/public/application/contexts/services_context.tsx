@@ -21,7 +21,7 @@ interface ContextServices {
   history: History;
   storage: Storage;
   settings: Settings;
-  notifications: NotificationsSetup;
+  notifications: Pick<NotificationsSetup, 'toasts'>;
   objectStorageClient: ObjectStorageClient;
   trackUiMetric: MetricsTracker;
   esHostService: EsHostService;

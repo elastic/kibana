@@ -7,6 +7,8 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 import { useLocation } from 'react-router-dom';
 
 import { SecurityPageName } from '../../../../../common/constants';
@@ -19,6 +21,11 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import type { Props } from '.';
 import { AlertsTreemapPanel } from '.';
 import { mockAlertSearchResponse } from './alerts_treemap/lib/mocks/mock_alert_search_response';
+
+jest.mock('../../../../common/components/cell_actions', () => ({
+  ...jest.requireActual('../../../../common/components/cell_actions'),
+  SecurityCellActions: jest.fn(() => <div data-test-subj="cell-actions-component" />),
+}));
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';

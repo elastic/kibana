@@ -243,6 +243,17 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.reactuse",
+            "type": "string",
+            "tags": [],
+            "label": "'react-use'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.styledcomponents",
             "type": "string",
             "tags": [],
@@ -487,6 +498,22 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [
+              "// cache some used methods of the react-use library"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.rxjs",
             "type": "string",
             "tags": [],
@@ -616,17 +643,6 @@
             "type": "string",
             "tags": [],
             "label": "'lodash/fp'",
-            "description": [],
-            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.fflate",
-            "type": "string",
-            "tags": [],
-            "label": "fflate",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,

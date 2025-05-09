@@ -895,6 +895,7 @@ export function Detail() {
           setIsEditOpen={setIsEditOpen}
           integration={integration}
           services={services}
+          existingCategories={packageInfo?.categories ?? []}
           onComplete={(urlParts) => {
             const path = getPath('integration_details_overview', urlParts);
             history.push(path);

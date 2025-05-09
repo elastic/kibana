@@ -39,10 +39,11 @@ export function createStatusOverviewPanelAction(
           title: i18n.translate('xpack.synthetics.editSyntheticsOverviewEmbeddableTitle.title', {
             defaultMessage: 'Create monitor stats',
           }),
+          type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
         });
         embeddable.addNewPanel({
           panelType: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-          initialState,
+          serializedState: { rawState: initialState },
         });
       } catch (e) {
         return Promise.reject();

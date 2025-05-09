@@ -12,17 +12,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { setStubKibanaServices } from '@kbn/presentation-panel-plugin/public/mocks';
 import { EuiThemeProvider } from '@elastic/eui';
-import { getLinksEmbeddableFactory } from './links_embeddable';
+import { deserializeState, getLinksEmbeddableFactory } from './links_embeddable';
 import { Link } from '../../common/content_management';
 import { CONTENT_ID } from '../../common';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import {
-  LinksApi,
-  LinksParentApi,
-  LinksRuntimeState,
-  LinksSerializedState,
-  ResolvedLink,
-} from '../types';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { LinksApi, LinksParentApi, LinksSerializedState, ResolvedLink } from '../types';
 import { linksClient } from '../content_management';
 import { getMockLinksParentApi } from '../mocks';
 
@@ -148,7 +142,7 @@ const renderEmbeddable = (
 ) => {
   return render(
     <EuiThemeProvider>
-      <ReactEmbeddableRenderer<LinksSerializedState, LinksRuntimeState, LinksApi>
+      <EmbeddableRenderer<LinksSerializedState, LinksApi>
         type={CONTENT_ID}
         onApiAvailable={jest.fn()}
         getParentApi={jest.fn().mockReturnValue(parent)}
@@ -178,8 +172,8 @@ describe('getLinksEmbeddableFactory', () => {
     } as LinksSerializedState;
 
     const expectedRuntimeState = {
-      defaultPanelTitle: 'links 001',
-      defaultPanelDescription: 'some links',
+      defaultTitle: 'links 001',
+      defaultDescription: 'some links',
       layout: 'vertical',
       links: getResolvedLinks(),
       description: 'just a few links',
@@ -195,7 +189,7 @@ describe('getLinksEmbeddableFactory', () => {
     });
 
     test('deserializeState', async () => {
-      const deserializedState = await factory.deserializeState({
+      const deserializedState = await deserializeState({
         rawState,
         references: [], // no references passed because the panel is by reference
       });
@@ -266,8 +260,8 @@ describe('getLinksEmbeddableFactory', () => {
     } as LinksSerializedState;
 
     const expectedRuntimeState = {
-      defaultPanelTitle: undefined,
-      defaultPanelDescription: undefined,
+      defaultTitle: undefined,
+      defaultDescription: undefined,
       layout: 'horizontal',
       links: getResolvedLinks(),
       description: 'just a few links',
@@ -283,7 +277,7 @@ describe('getLinksEmbeddableFactory', () => {
     });
 
     test('deserializeState', async () => {
-      const deserializedState = await factory.deserializeState({
+      const deserializedState = await deserializeState({
         rawState,
         references,
       });
