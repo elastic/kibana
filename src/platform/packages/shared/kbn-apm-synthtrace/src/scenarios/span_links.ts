@@ -12,6 +12,7 @@ import { Readable } from 'stream';
 import {
   apm,
   ApmFields,
+  ApmSynthtracePipelineSchema,
   generateLongId,
   generateShortId,
   Serializable,
@@ -19,6 +20,7 @@ import {
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
+import { parseApmScenarioOpts } from './helpers/apm_scenario_ops_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -26,7 +28,7 @@ function generateExternalSpanLinks() {
   // randomly creates external span links 0 - 10
   return Array(Math.floor(Math.random() * 11))
     .fill(0)
-    .map(() => ({ span: { id: generateLongId() }, trace: { id: generateShortId() } }));
+    .map(() => ({ span: { id: generateShortId() }, trace: { id: generateLongId() } }));
 }
 
 function getSpanLinksFromEvents(events: ApmFields[]) {
@@ -38,8 +40,12 @@ function getSpanLinksFromEvents(events: ApmFields[]) {
   );
 }
 
-const scenario: Scenario<ApmFields> = async ({ logger }) => {
+const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
+  const { pipeline = ApmSynthtracePipelineSchema.Default } = parseApmScenarioOpts(scenarioOpts);
   return {
+    bootstrap: async ({ apmEsClient }) => {
+      apmEsClient.pipeline(apmEsClient.getPipeline(pipeline));
+    },
     generate: ({ range, clients: { apmEsClient } }) => {
       const producerTimestamps = range.ratePerMinute(1);
       const producerConsumerTimestamps = range.ratePerMinute(1);

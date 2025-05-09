@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR } from '@kbn/deeplinks-observability/locators';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import type { SpanLinkDetails } from '../../../../common/span_links';
 import { asDuration } from '../../../../common/utils/formatters';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -41,6 +43,18 @@ export function SpanLinksTable({ items }: Props) {
     '/traces/explorer/waterfall'
   );
   const [idActionMenuOpen, setIdActionMenuOpen] = useState<string | undefined>();
+  const {
+    share: {
+      url: { locators },
+    },
+  } = useApmPluginContext();
+
+  const apmLinkToTransactionByTraceIdLocator = locators.get<{
+    traceId: string;
+    rangeFrom: string;
+    rangeTo: string;
+    waterfallItemId: string;
+  }>(TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR);
 
   const columns: Array<EuiBasicTableColumn<SpanLinkDetails>> = [
     {
@@ -101,7 +115,7 @@ export function SpanLinksTable({ items }: Props) {
       }),
       sortable: true,
       render: (_, { spanId, traceId, details }) => {
-        if (details && details.transactionId) {
+        if (details) {
           return (
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -110,10 +124,19 @@ export function SpanLinksTable({ items }: Props) {
               <EuiFlexItem>
                 <EuiLink
                   data-test-subj="apmColumnsLink"
-                  href={router.link('/link-to/transaction/{transactionId}', {
-                    path: { transactionId: details.transactionId },
-                    query: { waterfallItemId: spanId },
-                  })}
+                  href={
+                    details.transactionId
+                      ? router.link('/link-to/transaction/{transactionId}', {
+                          path: { transactionId: details.transactionId },
+                          query: { waterfallItemId: spanId },
+                        })
+                      : apmLinkToTransactionByTraceIdLocator?.getRedirectUrl({
+                          traceId,
+                          rangeFrom,
+                          rangeTo,
+                          waterfallItemId: spanId,
+                        })
+                  }
                 >
                   {details.spanName}
                 </EuiLink>

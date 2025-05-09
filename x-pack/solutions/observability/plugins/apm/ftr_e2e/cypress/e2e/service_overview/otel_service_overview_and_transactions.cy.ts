@@ -6,6 +6,7 @@
  */
 
 import url from 'url';
+import { ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
 import { synthtrace } from '../../../synthtrace';
 import { sendotlp } from '../../fixtures/synthtrace/sendotlp';
 import { checkA11y } from '../../support/commands';
@@ -27,7 +28,7 @@ describe('Service Overview', () => {
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
       }),
-      'otelToApm'
+      ApmSynthtracePipelineSchema.Otel
     );
   });
 

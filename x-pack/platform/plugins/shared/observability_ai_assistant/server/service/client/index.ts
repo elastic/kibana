@@ -713,7 +713,6 @@ export class ObservabilityAIAssistantClient {
           core,
           logger,
           esClient,
-          inferenceId: nextInferenceId,
         });
         await populateMissingSemanticTextFieldWithLock({
           core,
@@ -737,21 +736,18 @@ export class ObservabilityAIAssistantClient {
   };
 
   warmupKbModel = (inferenceId: string) => {
-    return waitForKbModel({
-      core: this.dependencies.core,
-      esClient: this.dependencies.esClient,
-      logger: this.dependencies.logger,
-      config: this.dependencies.config,
-      inferenceId,
-    });
+    const { esClient, logger } = this.dependencies;
+
+    logger.debug(`Warming up model for for inference ID: ${inferenceId}`);
+    warmupModel({ esClient, logger, inferenceId }).catch(() => {});
+    return;
   };
 
-  reIndexKnowledgeBaseWithLock = (inferenceId: string) => {
+  reIndexKnowledgeBaseWithLock = () => {
     return reIndexKnowledgeBaseWithLock({
       core: this.dependencies.core,
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
-      inferenceId,
     });
   };
 
