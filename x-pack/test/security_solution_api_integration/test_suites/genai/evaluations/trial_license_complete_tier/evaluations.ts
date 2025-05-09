@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
           const evalPayload: PostEvaluateBody = {
             ...defaultEvalPayload,
             graphs: ['DefaultAttackDiscoveryGraph'],
-            datasetName: 'Attack Discovery: Episode 1',
+            datasetName: 'Eval AD: All Scenarios',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
           await supertest
