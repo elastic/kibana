@@ -325,9 +325,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
   );
 };
 
-const dscDocsPageCss = css`
-  ${kibanaFullBodyHeightCss(54)}; // 54px is the action bar height
-`;
+const dscDocsPageCss = kibanaFullBodyHeightCss('54px'); // 54px is the action bar height
 
 const dscDocsContentCss = css`
   display: flex;

@@ -34,7 +34,6 @@ import {
   IKbnUrlStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
-import { css } from '@emotion/react';
 import {
   getData,
   getExecutionContextService,
@@ -64,6 +63,7 @@ import {
 } from '../saved_map';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
 import { RefreshConfig as MapRefreshConfig, ParsedMapStateJSON } from '../saved_map';
+import { mapFullScreenStyles, mapsPluginStyles, reactMapsRootStyles } from './map_app_styles';
 
 export interface Props {
   savedMap: SavedMap;
@@ -582,26 +582,12 @@ export class MapApp extends React.Component<Props, State> {
     return (
       <div
         id="maps-plugin"
-        css={css`
-          ${kibanaFullBodyHeightCss()}
-          display: flex;
-          flex-direction: column;
-          width: 100%;
-          overflow: hidden;
-
-          ${this.props.isFullScreen ? 'height: 100vh !important;' : ''}
-        `}
+        css={[kibanaFullBodyHeightCss(), mapsPluginStyles]}
+        style={this.props.isFullScreen ? mapFullScreenStyles : undefined}
       >
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
-        <div
-          id="react-maps-root"
-          css={css`
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-          `}
-        >
+        <div id="react-maps-root" css={reactMapsRootStyles}>
           {this._renderLegacyUrlConflict()}
           <MapContainer
             addFilters={this._addFilter}

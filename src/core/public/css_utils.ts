@@ -19,11 +19,9 @@ import bg_bottom_branded_dark from './styles/core_app/images/bg_bottom_branded_d
 // The `--kbnAppHeadersOffset` CSS variable is automatically updated by
 // styles/rendering/_base.scss, based on whether the Kibana chrome has a
 // header banner, app menu, and is visible or hidden
-export const kibanaFullBodyHeightCss = (additionalOffset = 0) => css`
-  height: calc(
-    100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) - ${additionalOffset}px
-  );
-`;
+export const kibanaFullBodyHeightCss = (additionalOffset = '0px') => ({
+  height: `calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)) - ${additionalOffset})`,
+});
 
 export const fullScreenGraphicsMixinStyles = (euiZLevel: number, euiTheme: UseEuiTheme) => {
   const lightOrDarkTheme = (lightSvg: any, darkSvg: any) => {

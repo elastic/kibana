@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { css } from '@emotion/react';
+import { getPainlessLabRightPaneStyles, painlessLabRightPaneTabsStyles } from '../../../styles';
 import { Response } from '../../types';
 import { OutputTab } from './output_tab';
 import { ParametersTab } from './parameters_tab';
@@ -51,25 +51,9 @@ export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) =>
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div
-      css={css`
-        background-color: ${euiTheme.colors.emptyShade};
-        padding: ${euiTheme.size.s};
-        border-left: ${euiTheme.border.thin};
-        height: 100%;
-      `}
-    >
+    <div css={getPainlessLabRightPaneStyles(euiTheme)}>
       <EuiTabbedContent
-        css={css`
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-
-          [role='tabpanel'] {
-            height: 100%;
-            overflow-y: auto;
-          }
-        `}
+        css={painlessLabRightPaneTabsStyles}
         data-test-subj={isLoading ? `painlessTabs-loading` : `painlessTabs-loaded`}
         size="s"
         tabs={[

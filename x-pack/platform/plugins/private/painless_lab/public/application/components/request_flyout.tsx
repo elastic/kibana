@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
+import { getPainlessLabBottomBarPlaceholderStyles } from '../../styles';
 import { Links } from '../../links';
 
 interface Props {
@@ -104,11 +104,7 @@ export const RequestFlyout: FunctionComponent<Props> = ({
           ]}
         />
 
-        <div
-          css={css`
-            height: calc(${useEuiTheme().euiTheme.size.base} * 3);
-          `}
-        />
+        <div css={getPainlessLabBottomBarPlaceholderStyles(useEuiTheme().euiTheme)} />
       </EuiFlyoutBody>
     </EuiFlyout>
   );
