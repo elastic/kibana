@@ -145,9 +145,7 @@ ROW a = ROUND(1.23, 0)
         <Markdown
           markdownContent={i18n.translate('languageDocumentation.documentationESQL.show.markdown', {
             defaultMessage: `### SHOW
-The \`SHOW <item>\` source command returns information about the deployment and its capabilities:
-
-* Use \`SHOW INFO\` to return the deployment's version, build date and hash.
+The \`SHOW INFO\` source command returns the deployment's version, build date and hash.
             `,
             ignoreTag: true,
             description:
