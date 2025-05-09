@@ -17,9 +17,10 @@ import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { updateVisualizationState, LensAppState } from '../../../state_management';
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { LensInspector } from '../../../lens_inspector_service';
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import { SettingsMenu } from '../../../app_plugin/settings_menu';
+import userEvent from '@testing-library/user-event';
 
 describe('workspace_panel_wrapper', () => {
   let mockVisualization: jest.Mocked<Visualization>;
@@ -62,9 +63,9 @@ describe('workspace_panel_wrapper', () => {
       return screen.queryByTestId('lnsApplyChanges__toolbar');
     };
 
-    const toggleAutoApply = () => {
+    const toggleAutoApply = async () => {
       const autoApplyToggle = screen.getByTestId('lnsToggleAutoApply');
-      autoApplyToggle.click();
+      await userEvent.click(autoApplyToggle);
     };
 
     const isAutoApplyOn = () => {
@@ -125,41 +126,53 @@ describe('workspace_panel_wrapper', () => {
   describe('auto-apply controls', () => {
     it('shows and hides apply-changes button depending on whether auto-apply is enabled', async () => {
       const { toggleAutoApply, getApplyChangesToolbar } = renderWorkspacePanelWrapper();
-      toggleAutoApply();
+      await toggleAutoApply();
       expect(getApplyChangesToolbar()).toBeInTheDocument();
-      toggleAutoApply();
+      await toggleAutoApply();
       expect(getApplyChangesToolbar()).not.toBeInTheDocument();
-      toggleAutoApply();
+      await toggleAutoApply();
       expect(getApplyChangesToolbar()).toBeInTheDocument();
     });
 
-    it('apply-changes button applies changes', () => {
+    it('apply-changes button applies changes', async () => {
       const { store, toggleAutoApply, getApplyChangesToolbar, editVisualization } =
         renderWorkspacePanelWrapper();
-      toggleAutoApply();
+      await toggleAutoApply();
       expect(getApplyChangesToolbar()).toBeDisabled();
 
       // make a change
-      editVisualization();
+      act(() => {
+        editVisualization();
+      });
+
       // // simulate workspace panel behavior
-      store.dispatch(setChangesApplied(false));
+      act(() => {
+        store.dispatch(setChangesApplied(false));
+      });
 
       expect(getApplyChangesToolbar()).not.toBeDisabled();
 
       // // simulate workspace panel behavior
-      store.dispatch(setChangesApplied(true));
+      act(() => {
+        store.dispatch(setChangesApplied(true));
+      });
       expect(getApplyChangesToolbar()).toBeDisabled();
     });
 
-    it('enabling auto apply while having unapplied changes works', () => {
+    it('enabling auto apply while having unapplied changes works', async () => {
       const { store, toggleAutoApply, getApplyChangesToolbar, editVisualization } =
         renderWorkspacePanelWrapper();
-      toggleAutoApply();
-      editVisualization();
+      await toggleAutoApply();
+      act(() => {
+        editVisualization();
+      });
+
       // simulate workspace panel behavior
-      store.dispatch(setChangesApplied(false));
+      act(() => {
+        store.dispatch(setChangesApplied(false));
+      });
       expect(getApplyChangesToolbar()).not.toBeDisabled();
-      toggleAutoApply();
+      await toggleAutoApply();
       expect(getApplyChangesToolbar()).not.toBeInTheDocument();
     });
   });

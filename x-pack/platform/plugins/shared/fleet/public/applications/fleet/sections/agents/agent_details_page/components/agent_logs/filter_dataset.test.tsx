@@ -5,11 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { render, act, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { DatasetFilter } from './filter_dataset';
+import userEvent from '@testing-library/user-event';
 
 const renderComponent = (props: React.ComponentProps<typeof DatasetFilter>) => {
   return render(
@@ -49,10 +50,8 @@ describe('DatasetFilter', () => {
     onToggleDataset: () => {},
   });
 
-  it('Renders all statuses', () => {
-    act(() => {
-      fireEvent.click(getByRole('button'));
-    });
+  it('Renders all statuses', async () => {
+    await userEvent.click(getByRole('button'));
 
     expect(getByText('elastic_agent')).toBeInTheDocument();
     expect(getByText('elastic_agent.filebeat')).toBeInTheDocument();
