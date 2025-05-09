@@ -8,7 +8,7 @@ source .buildkite/scripts/common/util.sh
 function build_ready() {
   build_state=$(buildkite-agent step get "state" --step "build")
 
-  if [[ "$build_state" == "finished" || "$build_state" == "ready" ]]; then
+  if [[ "$build_state" == "finished" || "$build_state" == "ready" || "$build_state" == "ignored" ]]; then
     echo "Build is ready, continuing..."
   else
     echo "Build is not ready, current state: $build_state"

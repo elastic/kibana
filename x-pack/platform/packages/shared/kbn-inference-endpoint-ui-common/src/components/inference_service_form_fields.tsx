@@ -126,13 +126,19 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const newConfig = { ...(config.providerConfig ?? {}) };
       const newSecrets = { ...(secrets?.providerSecrets ?? {}) };
       Object.keys(config.providerConfig ?? {}).forEach((k) => {
-        if (!newProvider?.configurations[k].supported_task_types.includes(taskType)) {
+        if (
+          newProvider?.configurations[k]?.supported_task_types &&
+          !newProvider?.configurations[k].supported_task_types.includes(taskType)
+        ) {
           delete newConfig[k];
         }
       });
       if (secrets && secrets?.providerSecrets) {
         Object.keys(secrets.providerSecrets).forEach((k) => {
-          if (!newProvider?.configurations[k].supported_task_types.includes(taskType)) {
+          if (
+            newProvider?.configurations[k]?.supported_task_types &&
+            !newProvider?.configurations[k].supported_task_types.includes(taskType)
+          ) {
             delete newSecrets[k];
           }
         });

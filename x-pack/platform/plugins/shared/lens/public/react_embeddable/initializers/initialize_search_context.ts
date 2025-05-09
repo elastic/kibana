@@ -9,27 +9,38 @@ import { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import {
   PublishesUnifiedSearch,
   StateComparators,
-  getUnchangingComparator,
-  initializeTimeRange,
+  initializeTimeRangeManager,
+  timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { noop } from 'lodash';
 import {
   PublishesSearchSession,
   apiPublishesSearchSession,
 } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { buildObservableVariable } from '../helper';
+import { BehaviorSubject, Observable, merge, map, distinctUntilChanged } from 'rxjs';
+import { isEqual } from 'lodash';
 import {
   LensEmbeddableStartServices,
   LensInternalApi,
   LensRuntimeState,
+  LensSerializedState,
   LensUnifiedSearchContext,
 } from '../types';
 
+export const searchContextComparators: StateComparators<LensUnifiedSearchContext> = {
+  ...timeRangeComparators,
+  query: 'skip',
+  filters: 'skip',
+  timeslice: 'skip',
+  searchSessionId: 'skip',
+  lastReloadRequestTime: 'skip',
+};
+
 export interface SearchContextConfig {
   api: PublishesUnifiedSearch & PublishesSearchSession;
-  comparators: StateComparators<LensUnifiedSearchContext>;
-  serialize: () => LensUnifiedSearchContext;
+  anyStateChange$: Observable<void>;
   cleanup: () => void;
+  getLatestState: () => LensUnifiedSearchContext;
+  reinitializeState: (lastSaved?: LensSerializedState) => void;
 }
 
 export function initializeSearchContext(
@@ -38,26 +49,40 @@ export function initializeSearchContext(
   parentApi: unknown,
   { injectFilterReferences }: LensEmbeddableStartServices
 ): SearchContextConfig {
-  const [searchSessionId$] = buildObservableVariable<string | undefined>(
-    apiPublishesSearchSession(parentApi) ? parentApi.searchSessionId$ : undefined
-  );
+  const searchSessionId$ = apiPublishesSearchSession(parentApi)
+    ? parentApi.searchSessionId$
+    : new BehaviorSubject<string | undefined>(undefined);
 
   const attributes = internalApi.attributes$.getValue();
 
-  const [lastReloadRequestTime] = buildObservableVariable<number | undefined>(undefined);
+  const lastReloadRequestTime$ = new BehaviorSubject<number | undefined>(undefined);
 
   // Make sure the panel access the filters with the correct references
-  const [filters$] = buildObservableVariable<Filter[] | undefined>(
+  const filters$ = new BehaviorSubject<Filter[] | undefined>(
     injectFilterReferences(attributes.state.filters, attributes.references)
   );
 
-  const [query$] = buildObservableVariable<Query | AggregateQuery | undefined>(
-    attributes.state.query
-  );
+  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(attributes.state.query);
 
-  const [timeslice$] = buildObservableVariable<[number, number] | undefined>(undefined);
+  const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
 
-  const timeRange = initializeTimeRange(initialState);
+  const timeRangeManager = initializeTimeRangeManager(initialState);
+
+  const subscriptions = [
+    internalApi.attributes$
+      .pipe(
+        map((attrs) => attrs.state.query),
+        distinctUntilChanged(isEqual)
+      )
+      .subscribe(query$),
+    internalApi.attributes$
+      .pipe(
+        map((attrs) => attrs.state.filters),
+        distinctUntilChanged(isEqual)
+      )
+      .subscribe(filters$),
+  ];
+
   return {
     api: {
       searchSessionId$,
@@ -65,27 +90,22 @@ export function initializeSearchContext(
       query$,
       timeslice$,
       isCompatibleWithUnifiedSearch: () => true,
-      ...timeRange.api,
+      ...timeRangeManager.api,
     },
-    comparators: {
-      query: getUnchangingComparator<LensUnifiedSearchContext, 'query'>(),
-      filters: getUnchangingComparator<LensUnifiedSearchContext, 'filters'>(),
-      timeslice: getUnchangingComparator<LensUnifiedSearchContext, 'timeslice'>(),
-      searchSessionId: getUnchangingComparator<LensUnifiedSearchContext, 'searchSessionId'>(),
-      lastReloadRequestTime: getUnchangingComparator<
-        LensUnifiedSearchContext,
-        'lastReloadRequestTime'
-      >(),
-      ...timeRange.comparators,
+    anyStateChange$: merge(timeRangeManager.anyStateChange$),
+    cleanup: () => {
+      subscriptions.forEach((sub) => sub.unsubscribe());
     },
-    cleanup: noop,
-    serialize: () => ({
+    getLatestState: () => ({
       searchSessionId: searchSessionId$.getValue(),
       filters: filters$.getValue(),
       query: query$.getValue(),
       timeslice: timeslice$.getValue(),
-      lastReloadRequestTime: lastReloadRequestTime.getValue(),
-      ...timeRange.serialize(),
+      lastReloadRequestTime: lastReloadRequestTime$.getValue(),
+      ...timeRangeManager.getLatestState(),
     }),
+    reinitializeState: (lastSaved?: LensSerializedState) => {
+      timeRangeManager.reinitializeState(lastSaved);
+    },
   };
 }

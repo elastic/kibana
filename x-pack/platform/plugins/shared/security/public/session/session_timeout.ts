@@ -11,7 +11,7 @@ import { BehaviorSubject, skip, tap, throttleTime } from 'rxjs';
 import type {
   HttpFetchOptionsWithPath,
   HttpSetup,
-  NotificationsSetup,
+  NotificationsStart,
   Toast,
 } from '@kbn/core/public';
 
@@ -59,7 +59,7 @@ export class SessionTimeout {
 
   constructor(
     private startServices: StartServices,
-    private notifications: NotificationsSetup,
+    private notifications: NotificationsStart,
     private sessionExpired: Pick<SessionExpired, 'logout'>,
     private http: HttpSetup,
     private tenant: string

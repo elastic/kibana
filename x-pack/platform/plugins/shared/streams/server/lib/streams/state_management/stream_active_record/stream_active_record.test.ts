@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { StreamActiveRecord } from './stream_active_record';
 
 describe('StreamActiveRecord', () => {
@@ -15,7 +15,7 @@ describe('StreamActiveRecord', () => {
   const cascadingDelete = { type: 'delete', name: 'cascade' };
 
   class TestStream extends StreamActiveRecord<any> {
-    clone(): StreamActiveRecord<StreamDefinition> {
+    clone(): StreamActiveRecord<Streams.all.Definition> {
       return new TestStream(this.definition, this.dependencies);
     }
 
@@ -123,7 +123,8 @@ describe('StreamActiveRecord', () => {
 
     const validationResult = await stream.validate(stateMock, stateMock);
 
-    expect(validationResult).toEqual({ isValid: false, errors: ['test_error'] });
+    expect(validationResult.isValid).toEqual(false);
+    expect(validationResult.errors.map((error) => error.message)).toEqual(['test_error']);
   });
 
   it('calls doDetermineCreateActions hook on stream that was added to the state', async () => {

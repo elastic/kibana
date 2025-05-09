@@ -20,7 +20,9 @@ import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { useAttackDiscoveryBulk } from '../../../../../../use_attack_discovery_bulk';
 import { isAttackDiscoveryAlert } from '../../../../../../utils/is_attack_discovery_alert';
+import { useKibanaFeatureFlags } from '../../../../../../use_kibana_feature_flags';
 import * as i18n from './translations';
 
 const LIST_PROPS = {
@@ -37,6 +39,7 @@ interface SharedBadgeOptionData {
 }
 
 const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onBadgeButtonClick = useCallback(() => {
@@ -69,7 +72,6 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
       data: {
         description: i18n.ONLY_VISIBLE_TO_YOU,
       },
-      disabled: true,
       'data-test-subj': 'notShared',
       label: i18n.NOT_SHARED,
     },
@@ -78,11 +80,16 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
       data: {
         description: i18n.VISIBLE_TO_YOUR_TEAM,
       },
-      disabled: true,
       'data-test-subj': 'shared',
       label: i18n.SHARED,
     },
   ]);
+
+  const selectedLabel = useMemo(() => {
+    const firstSelected = items.find((item) => item.checked === 'on');
+
+    return firstSelected != null ? firstSelected.label : items[0].label;
+  }, [items]);
 
   const renderOption = useCallback(
     (option: EuiSelectableOption<SharedBadgeOptionData>) => (
@@ -128,15 +135,29 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
         onClick={onBadgeButtonClick}
         onClickAriaLabel={i18n.SELECT_VISIBILITY_ARIA_LABEL}
       >
-        {isShared ? i18n.SHARED : i18n.NOT_SHARED}
+        {selectedLabel}
       </EuiBadge>
     ),
-    [isShared, onBadgeButtonClick]
+    [onBadgeButtonClick, selectedLabel]
   );
 
+  const { mutateAsync: attackDiscoveryBulk } = useAttackDiscoveryBulk();
+
   const onSelectableChange = useCallback(
-    (newOptions: EuiSelectableOption[]) => setItems(newOptions),
-    [setItems]
+    async (newOptions: EuiSelectableOption[]) => {
+      setItems(newOptions);
+
+      if (isAttackDiscoveryAlert(attackDiscovery)) {
+        const visibility = newOptions[0].checked === 'on' ? 'not_shared' : 'shared';
+
+        await attackDiscoveryBulk({
+          attackDiscoveryAlertsEnabled,
+          ids: [attackDiscovery.id],
+          visibility,
+        });
+      }
+    },
+    [attackDiscovery, attackDiscoveryAlertsEnabled, attackDiscoveryBulk]
   );
 
   return (

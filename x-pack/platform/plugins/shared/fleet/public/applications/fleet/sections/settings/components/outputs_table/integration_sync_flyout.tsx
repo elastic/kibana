@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -23,6 +24,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { GetRemoteSyncedIntegrationsStatusResponse } from '../../../../../../../common/types';
+
+import { useStartServices } from '../../../../hooks';
 
 import { IntegrationStatus } from './integration_status';
 
@@ -34,6 +37,7 @@ interface Props {
 
 export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
   ({ onClose, syncedIntegrationsStatus, outputName }) => {
+    const { docLinks } = useStartServices();
     return (
       <EuiFlyout onClose={onClose}>
         <EuiFlyoutHeader hasBorder>
@@ -49,9 +53,20 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
           <EuiText color="subdued" size="s" data-test-subj="integrationSyncFlyoutHeaderText">
             <FormattedMessage
               id="xpack.fleet.integrationSyncFlyout.headerText"
-              defaultMessage="You're viewing sync activity for {outputName}. Check overall progress and view individual sync statuses from custom assets."
+              defaultMessage="You're viewing sync activity for {outputName}. Check overall progress and view individual sync statuses from custom assets. {documentationLink}."
               values={{
                 outputName,
+                documentationLink: (
+                  <EuiLink
+                    href={`${docLinks.links.fleet.remoteESOoutput}#automatic-integrations-synchronization`}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.integrationSyncFlyout.documentationLink"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
+                ),
               }}
             />
           </EuiText>
