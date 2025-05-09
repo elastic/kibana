@@ -24,15 +24,14 @@ export class RuleMigrationIndexMigrator {
     });
 
     const spaceList = Object.keys(rulesIndicesAcrossSpaces).map((index) => {
-      const indexPatternPrefix = rulesIndexPattern.replace('-*', '');
-      return index.replace(`${indexPatternPrefix}-`, '');
+      const indexPatternPrefix = rulesIndexPattern.replace('*', '');
+      return index.replace(`${indexPatternPrefix}`, '');
     });
 
     return spaceList;
   }
 
   async run() {
-    this.logger.info('\n\n\nStarting index migration for rule migrations\n\n\n');
     const allSpaces = await this.getSpaceListForMigrations();
     if (allSpaces.length === 0) {
       this.logger.info('No spaces or index found for rule migration');
