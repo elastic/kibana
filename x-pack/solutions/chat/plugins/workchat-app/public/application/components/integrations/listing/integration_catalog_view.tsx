@@ -158,7 +158,7 @@ export const IntegrationCatalogView: React.FC = () => {
   `;
 
   return (
-    <KibanaPageTemplate data-test-subj="integrationsCatalogPage">
+    <KibanaPageTemplate data-test-subj="toolsCatalogPage">
       <IntegrationListView tab={'catalog'} />
       <EuiHorizontalRule margin="none" css={{ height: 2 }} />
       <KibanaPageTemplate.Section>
@@ -192,7 +192,7 @@ export const IntegrationCatalogView: React.FC = () => {
                   description={cardData.description}
                   paddingSize="l"
                   onClick={() => {
-                    return navigateToWorkchatUrl(`${appPaths.integrations.create}?type=${type}`);
+                    return navigateToWorkchatUrl(`${appPaths.tools.create}?type=${type}`);
                   }}
                 />
               </EuiFlexItem>
