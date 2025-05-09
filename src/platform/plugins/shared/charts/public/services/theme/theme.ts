@@ -11,11 +11,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
-import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
+import { AMSTERDAM_DARK_THEME, AMSTERDAM_LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 
 export class ThemeService {
   /** Returns default charts theme */
-  public readonly chartsDefaultBaseTheme = LIGHT_THEME;
+  public readonly chartsDefaultBaseTheme = AMSTERDAM_LIGHT_THEME;
 
   private theme$?: Observable<CoreTheme>;
   private _chartsBaseTheme$ = new BehaviorSubject(this.chartsDefaultBaseTheme);
@@ -103,7 +103,7 @@ export class ThemeService {
   public init(theme: CoreSetup['theme']) {
     this.theme$ = theme.theme$;
     this.theme$.subscribe(({ darkMode }) => {
-      this._chartsBaseTheme$.next(darkMode ? DARK_THEME : LIGHT_THEME);
+      this._chartsBaseTheme$.next(darkMode ? AMSTERDAM_DARK_THEME : AMSTERDAM_LIGHT_THEME);
     });
   }
 }
