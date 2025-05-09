@@ -18,20 +18,12 @@ import type {
   InvokeAIActionResponseSchema,
 } from './schema';
 
-export type Config = TypeOf<typeof ConfigSchema> & {
-  certificateFile?: string | string[];
-  certificateData?: string;
-  privateKeyFile?: string | string[];
-  privateKeyData?: string;
-  verificationMode?: 'full' | 'certificate' | 'none';
-  caFile?: string | string[];
-  caData?: string;
-};
+export type Config = TypeOf<typeof ConfigSchema>;
 export type Secrets = TypeOf<typeof SecretsSchema>;
 export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
+export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
+export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
 export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
 export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
 export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
 export type StreamActionParams = TypeOf<typeof StreamActionParamsSchema>;
-export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
-export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;

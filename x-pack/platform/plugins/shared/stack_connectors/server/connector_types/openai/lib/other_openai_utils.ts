@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/logging';
 import fs from 'fs';
 import type { SSLSettings } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import type { Config } from '../../../../common/openai/types';
 
 /**
  * Sanitizes the Other (OpenAI Compatible Service) request body to set stream to false
@@ -129,7 +130,7 @@ export const getPKISSLOverrides = ({
       fs.readFileSync(Array.isArray(certificateFile) ? certificateFile[0] : certificateFile, 'utf8')
     );
   } else if (certificateData) {
-    cert = Buffer.from(formatPEMContent(certificateData, 'CERTIFICATE', logger));
+    cert = Buffer.from(formatPEMContent(certificateData, 'CERTIFICATE'));
   } else {
     throw new Error('No certificate file or data provided');
   }
@@ -194,5 +195,47 @@ export const pkiErrorHandler = (error: AxiosError): string | undefined => {
   }
   if (error.code === 'ERR_TLS_CERT_ALTNAME_INVALID' || error.code === 'ERR_TLS_HANDSHAKE') {
     return `TLS handshake failed: ${error.message}. Verify server certificate hostname and CA configuration.`;
+  }
+};
+
+export const pkiConfigValidator = (configObject: Config): void => {
+  // Ensure certificate pair is provided
+  if (!configObject.certificateFile && !configObject.certificateData) {
+    throw new Error('Either certificate file or certificate data must be provided for PKI');
+  }
+  if (!configObject.privateKeyFile && !configObject.privateKeyData) {
+    throw new Error('Either private key file or private key data must be provided for PKI');
+  }
+
+  // Validate file extensions for file paths
+  if (configObject.certificateFile) {
+    const certFile = Array.isArray(configObject.certificateFile)
+      ? configObject.certificateFile[0]
+      : configObject.certificateFile;
+    if (!certFile.endsWith('.pem')) {
+      throw new Error('Certificate file must end with .pem');
+    }
+  }
+  if (configObject.privateKeyFile) {
+    const keyFile = Array.isArray(configObject.privateKeyFile)
+      ? configObject.privateKeyFile[0]
+      : configObject.privateKeyFile;
+    if (!keyFile.endsWith('.pem')) {
+      throw new Error('Private key file must end with .pem');
+    }
+  }
+
+  // Validate PEM format for raw data
+  if (
+    configObject.certificateData &&
+    !configObject.certificateData.includes('-----BEGIN CERTIFICATE-----')
+  ) {
+    throw new Error('Certificate data must be PEM-encoded');
+  }
+  if (
+    configObject.privateKeyData &&
+    !configObject.privateKeyData.includes('-----BEGIN PRIVATE KEY-----')
+  ) {
+    throw new Error('Private key data must be PEM-encoded');
   }
 };

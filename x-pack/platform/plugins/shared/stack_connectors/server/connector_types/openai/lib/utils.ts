@@ -87,7 +87,6 @@ export const getAxiosOptions = (
   stream: boolean
 ): { headers: Record<string, string>; responseType?: ResponseType } => {
   const responseType = stream ? { responseType: 'stream' as ResponseType } : {};
-
   switch (provider) {
     case OpenAiProviderType.OpenAi:
     case OpenAiProviderType.Other:

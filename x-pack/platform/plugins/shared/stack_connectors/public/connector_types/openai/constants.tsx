@@ -118,6 +118,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
       />
     ),
     euiFieldProps: {
+      autocomplete: 'new-password',
       autoComplete: 'new-password',
       onFocus: (event: React.FocusEvent<HTMLInputElement>) => {
         event.target.setAttribute('autocomplete', 'new-password');

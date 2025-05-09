@@ -81,10 +81,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     try {
       if (
         this.provider === OpenAiProviderType.Other &&
-        (this.config.certificateFile ||
-          this.config.certificateData ||
-          this.config.privateKeyFile ||
-          this.config.privateKeyData)
+        (('certificateFile' in this.config && this.config.certificateFile) ||
+          ('certificateData' in this.config && this.config.certificateData) ||
+          ('privateKeyFile' in this.config && this.config.privateKeyFile) ||
+          ('privateKeyData' in this.config && this.config.privateKeyData))
       ) {
         this.sslOverrides = getPKISSLOverrides({
           logger: this.logger,
@@ -200,7 +200,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     }
     return `API Error: ${error.response?.statusText}${errorMessage ? ` - ${errorMessage}` : ''}`;
   }
-
   /**
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
@@ -346,6 +345,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<PassThrough> {
     const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
+
     const res = (await this.streamApi(
       {
         body: JSON.stringify(rest),
@@ -355,6 +355,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       },
       connectorUsageCollector
     )) as unknown as IncomingMessage;
+
     return res.pipe(new PassThrough());
   }
 
@@ -385,6 +386,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           rest.model ??
           ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
       };
+
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);
       const stream = await this.openAI.chat.completions.create(requestBody, {
         signal,

@@ -107,6 +107,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           secretsFormSchema={openAiSecrets}
         />
       )}
+      {/* ^v These are intentionally not if/else because of the way the `config.defaultValue` renders */}
       {config != null && config.apiProvider === OpenAiProviderType.AzureAi && (
         <SimpleConnectorForm
           isEdit={isEdit}
@@ -212,6 +213,8 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                           label: i18nAuth.KEY_LABEL,
                         }}
                         component={TextField}
+                        // This is needed because when you delete
+                        // a row and add a new one, the stale values will appear
                         readDefaultValueOnForm={!item.isNew}
                         componentProps={{
                           euiFieldProps: { readOnly, ['data-test-subj']: 'openAIHeadersKeyInput' },
@@ -238,7 +241,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
                         onClick={() => removeItem(item.id)}
                         iconType="minusInCircle"
                         aria-label={i18nAuth.DELETE_BUTTON}
-                        style={{ marginTop: '28px' }}
+                        css={{ marginTop: '28px' }}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

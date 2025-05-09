@@ -16,6 +16,7 @@ import {
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
+import { pkiConfigValidator } from './lib/other_openai_utils';
 import {
   OPENAI_CONNECTOR_ID,
   OPENAI_TITLE,
@@ -70,45 +71,7 @@ export const configValidator = (configObject: Config, validatorServices: Validat
         configObject.privateKeyFile ||
         configObject.privateKeyData)
     ) {
-      // Ensure certificate pair is provided
-      if (!configObject.certificateFile && !configObject.certificateData) {
-        throw new Error('Either certificate file or certificate data must be provided for PKI');
-      }
-      if (!configObject.privateKeyFile && !configObject.privateKeyData) {
-        throw new Error('Either private key file or private key data must be provided for PKI');
-      }
-
-      // Validate file extensions for file paths
-      if (configObject.certificateFile) {
-        const certFile = Array.isArray(configObject.certificateFile)
-          ? configObject.certificateFile[0]
-          : configObject.certificateFile;
-        if (!certFile.endsWith('.pem')) {
-          throw new Error('Certificate file must end with .pem');
-        }
-      }
-      if (configObject.privateKeyFile) {
-        const keyFile = Array.isArray(configObject.privateKeyFile)
-          ? configObject.privateKeyFile[0]
-          : configObject.privateKeyFile;
-        if (!keyFile.endsWith('.pem')) {
-          throw new Error('Private key file must end with .pem');
-        }
-      }
-
-      // Validate PEM format for raw data
-      if (
-        configObject.certificateData &&
-        !configObject.certificateData.includes('-----BEGIN CERTIFICATE-----')
-      ) {
-        throw new Error('Certificate data must be PEM-encoded');
-      }
-      if (
-        configObject.privateKeyData &&
-        !configObject.privateKeyData.includes('-----BEGIN PRIVATE KEY-----')
-      ) {
-        throw new Error('Private key data must be PEM-encoded');
-      }
+      pkiConfigValidator(configObject);
     }
 
     return configObject;

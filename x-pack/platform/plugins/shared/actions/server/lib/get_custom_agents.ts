@@ -32,10 +32,13 @@ export function getCustomAgents(
     sslOverrides?.verificationMode ?? generalSSLSettings.verificationMode,
     sslOverrides
   );
-
+  // the default for rejectUnauthorized is the global setting, which can
+  // be overridden (below) with a custom host setting
   const defaultAgents = {
     httpAgent: undefined,
-    httpsAgent: new HttpsAgent(agentSSLOptions),
+    httpsAgent: new HttpsAgent({
+      ...agentSSLOptions,
+    }),
   };
 
   // Get the current proxy settings, and custom host settings for this URL.
