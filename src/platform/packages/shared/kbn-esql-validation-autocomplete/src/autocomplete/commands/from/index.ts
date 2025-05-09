@@ -229,11 +229,3 @@ async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string
 
   return suggestions;
 }
-
-function removeQuoteFromSource(suggestions: SuggestionRawDefinition[]) {
-  return suggestions.map((d) => ({
-    ...d,
-    // "text" -> text
-    text: d.text.startsWith('"') && d.text.endsWith('"') ? d.text.slice(1, -1) : d.text,
-  }));
-}
