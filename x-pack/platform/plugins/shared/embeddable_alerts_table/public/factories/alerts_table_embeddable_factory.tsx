@@ -21,7 +21,7 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { CONFIG_EDITOR_EDIT_TABLE_TITLE } from '../translations';
+import { ALERTS_PANEL_LABEL } from '../translations';
 import type {
   EmbeddableAlertsTableApi,
   EmbeddableAlertsTableConfig,
@@ -84,7 +84,7 @@ export const getAlertsTableEmbeddableFactory = (
       dataLoading$: queryLoading$,
       serializeState,
       isEditingEnabled: () => true,
-      getTypeDisplayName: () => CONFIG_EDITOR_EDIT_TABLE_TITLE,
+      getTypeDisplayName: () => ALERTS_PANEL_LABEL,
       onEdit: async () => {
         try {
           const newTableConfig = await openConfigEditor({
