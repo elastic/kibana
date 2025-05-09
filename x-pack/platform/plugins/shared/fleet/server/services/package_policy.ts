@@ -226,13 +226,7 @@ function normalizeKuery(savedObjectType: string, kuery: string) {
 
 class PackagePolicyClientImpl implements PackagePolicyClient {
   protected getLogger(...childContextPaths: string[]): Logger {
-    const defaultLogger = appContextService.getLogger().get('PackagePolicyClient');
-
-    if (childContextPaths.length > 0) {
-      return defaultLogger.get(...childContextPaths);
-    }
-
-    return defaultLogger;
+    return appContextService.getLogger().get('PackagePolicyClient', ...childContextPaths);
   }
 
   public async create(
@@ -1272,6 +1266,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }>;
   }> {
     const logger = this.getLogger('bulkUpdate');
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
     const savedObjectType = await getPackagePolicySavedObjectType();
     const namespaces = options.spaceIds ?? [await getNamespaceForSoClient(soClient)];
 
@@ -1503,35 +1498,55 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       SavedObjectsUpdateResponse<PackagePolicySOAttributes>
     > = [];
 
-    await Promise.all(
-      Object.entries(policyUpdatesBySpace).map(([updateSpaceId, spacePackagPolicyUpdates]) => {
-        logger.debug(
-          `Calling bulkUpdate for space [${updateSpaceId}] with [${spacePackagPolicyUpdates.length}] package policies`
-        );
+    if (isSpacesEnabled) {
+      logger.debug(
+        () =>
+          `Sending bulk updates per space for space ids: ${Object.keys(policyUpdatesBySpace).join(
+            ', '
+          )}`
+      );
 
-        // We use a scoped SO client here using the fleet app context services because each bulk update must be done
-        // with a properly scoped SO client. This should be safe, from an access standpoint since the code above
-        // used the SO client provided on input, which was used to `getById()` the package policies thus it has access.
-        return appContextService
-          .getInternalUserSOClientForSpaceId(updateSpaceId)
-          .bulkUpdate<PackagePolicySOAttributes>(spacePackagPolicyUpdates)
-          .catch(catchAndWrapError)
-          .then(({ saved_objects: updateResults }) => {
-            // For clarity and to help debug issues, we alter any error encountered an add info. about the space to it.
-            updateResults.forEach((updateResult) => {
-              if (updateResult.error) {
-                updateResult.error.message += ` (for space [${updateSpaceId}])`;
-              }
+      await Promise.all(
+        Object.entries(policyUpdatesBySpace).map(([updateSpaceId, spacePackagPolicyUpdates]) => {
+          logger.debug(
+            `Calling bulkUpdate for space [${updateSpaceId}] with [${spacePackagPolicyUpdates.length}] package policies`
+          );
+
+          // We use a scoped SO client here using the fleet app context services because each bulk update must be done
+          // with a properly scoped SO client. This should be safe, from an access standpoint since the code above
+          // used the SO client provided on input, which was used to `getById()` the package policies thus it has access.
+          return appContextService
+            .getInternalUserSOClientForSpaceId(updateSpaceId)
+            .bulkUpdate<PackagePolicySOAttributes>(spacePackagPolicyUpdates)
+            .catch(catchAndWrapError)
+            .then(({ saved_objects: updateResults }) => {
+              // For clarity and to help debug issues, we alter any error encountered an add info. about the space to it.
+              updateResults.forEach((updateResult) => {
+                if (updateResult.error) {
+                  updateResult.error.message += ` (for space [${updateSpaceId}])`;
+                }
+              });
+
+              packagePolicySoBulkUpdateResponse.push(...updateResults);
             });
+        })
+      );
+    } else {
+      const updates = Object.values(policyUpdatesBySpace).flat();
 
-            packagePolicySoBulkUpdateResponse.push(...updateResults);
-          });
-      })
-    );
+      logger.debug(() => `Calling SO bulkUpdate with [${updates.length}] updates`);
+
+      await soClient
+        .bulkUpdate<PackagePolicySOAttributes>(updates)
+        .catch(catchAndWrapError)
+        .then(({ saved_objects: updateResults }) => {
+          packagePolicySoBulkUpdateResponse.push(...updateResults);
+        });
+    }
 
     logger.debug(
       () =>
-        `Bulk update of the package policies documents done. Continuing to trigger version bump on associated agnet policies`
+        `Bulk update of the package policies SO documents done. Continuing to trigger version bump on associated agent policies`
     );
 
     for (const updatedPolicyResult of packagePolicySoBulkUpdateResponse) {
@@ -2272,6 +2287,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     { perPage = 1000, kuery, spaceIds }: PackagePolicyClientFetchAllItemIdsOptions = {}
   ): Promise<AsyncIterable<string[]>> {
     const savedObjectType = await getPackagePolicySavedObjectType();
+    const namespaces = spaceIds ?? [await getNamespaceForSoClient(soClient)];
 
     return createSoFindIterable<{}>({
       soClient,
@@ -2282,7 +2298,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         sortOrder: 'asc',
         fields: [],
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
-        namespaces: spaceIds,
+        namespaces,
       },
       resultsMapper: (data) => {
         return data.saved_objects.map((packagePolicySO) => packagePolicySO.id);
@@ -2301,6 +2317,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }: PackagePolicyClientFetchAllItemsOptions = {}
   ): Promise<AsyncIterable<PackagePolicy[]>> {
     const savedObjectType = await getPackagePolicySavedObjectType();
+    const namespaces = spaceIds ?? [await getNamespaceForSoClient(soClient)];
 
     return createSoFindIterable<PackagePolicySOAttributes>({
       soClient,
@@ -2310,7 +2327,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         sortOrder,
         perPage,
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
-        namespaces: spaceIds,
+        namespaces,
       },
       resultsMapper(data) {
         return data.saved_objects.map((packagePolicySO) => {

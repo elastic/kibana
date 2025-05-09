@@ -165,13 +165,7 @@ export async function getAgentPolicySavedObjectType() {
 
 class AgentPolicyService {
   protected getLogger(...childContextPaths: string[]): Logger {
-    const defaultLogger = appContextService.getLogger().get('AgentPolicyService');
-
-    if (childContextPaths.length > 0) {
-      return defaultLogger.get(...childContextPaths);
-    }
-
-    return defaultLogger;
+    return appContextService.getLogger().get('AgentPolicyService', ...childContextPaths);
   }
 
   private triggerAgentPolicyUpdatedEvent = async (
@@ -208,7 +202,7 @@ class AgentPolicyService {
     logger.debug(`Starting update of agent policy ${id}`);
 
     const savedObjectType = await getAgentPolicySavedObjectType();
-    const existingAgentPolicy = await this.get(soClient, id, true, { spaceId: '*' });
+    const existingAgentPolicy = await this.get(soClient, id, true);
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
@@ -258,12 +252,7 @@ class AgentPolicyService {
           updated_at: new Date().toISOString(),
           updated_by: user ? user.username : 'system',
         },
-        {
-          namespace:
-            existingAgentPolicy.space_ids?.at(0) ??
-            existingAgentPolicy.space_ids?.at(0) ??
-            DEFAULT_SPACE_ID,
-        }
+        { namespace: existingAgentPolicy.space_ids?.at(0) ?? DEFAULT_SPACE_ID }
       )
       .catch(catchAndWrapError);
 
@@ -307,7 +296,7 @@ class AgentPolicyService {
     );
 
     if (options.returnUpdatedPolicy !== false) {
-      return (await this.get(soClient, id, false, { spaceId: '*' })) as AgentPolicy;
+      return (await this.get(soClient, id, false)) as AgentPolicy;
     }
     return newAgentPolicy as AgentPolicy;
   }
@@ -577,7 +566,7 @@ class AgentPolicyService {
     if (withPackagePolicies) {
       logger.debug(() => `retrieving package policies for agent policy ${agentPolicy.id}`);
       agentPolicy.package_policies =
-        (await packagePolicyService.findAllForAgentPolicy(soClient, id, { spaceIds: ['*'] })) || [];
+        (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
     }
 
     return agentPolicy;
@@ -1469,7 +1458,7 @@ class AgentPolicyService {
       const idsToRetrieve = agentPolicyIds.filter((id) => !policiesMap[id]);
 
       if (idsToRetrieve.length) {
-        logger.debug(`Retrieving agent policies: [${idsToRetrieve.join(', ')}]`);
+        logger.debug(() => `Retrieving agent policies: [${idsToRetrieve.join(', ')}]`);
         (await agentPolicyService.getByIds(soClient, agentPolicyIds)).forEach((policy) => {
           policiesMap[policy.id] = policy;
         });

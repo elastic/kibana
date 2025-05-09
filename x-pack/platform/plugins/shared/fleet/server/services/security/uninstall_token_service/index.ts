@@ -193,13 +193,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   protected getLogger(...childContextPaths: string[]): Logger {
-    const defaultLogger = appContextService.getLogger().get('UninstallTokenService');
-
-    if (childContextPaths.length > 0) {
-      return defaultLogger.get(...childContextPaths);
-    }
-
-    return defaultLogger;
+    return appContextService.getLogger().get('UninstallTokenService', ...childContextPaths);
   }
 
   public scoped(spaceId?: string) {
@@ -317,13 +311,9 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
   }
 
   private async getPolicyIdNameDictionary(policyIds: string[]): Promise<Record<string, string>> {
-    const agentPolicies = await agentPolicyService.getByIds(
-      this.soClient,
-      policyIds.map((id) => ({ id, spaceId: '*' })),
-      {
-        ignoreMissing: true,
-      }
-    );
+    const agentPolicies = await agentPolicyService.getByIds(this.soClient, policyIds, {
+      ignoreMissing: true,
+    });
 
     const warnings: string[] = [];
 
