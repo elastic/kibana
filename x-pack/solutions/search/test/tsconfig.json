@@ -19,14 +19,8 @@
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/test",
-    "@kbn/expect",
     "@kbn/core-http-common",
     "@kbn/scout-info",
-    "@kbn/security-plugin",
-    "@kbn/ftr-common-functional-services",
-    "@kbn/ml-plugin",
-    "@kbn/fleet-plugin",
-    "@kbn/logs-shared-plugin",
-    "@kbn/infra-plugin",
+    "@kbn/test-suites-xpack-platform",
   ]
 }
