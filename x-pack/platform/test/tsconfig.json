@@ -72,5 +72,7 @@
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/utils",
     "@kbn/core",
+    "@kbn/entities-schema",
+    "@kbn/data-forge",
   ]
 }

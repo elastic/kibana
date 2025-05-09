@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsAggregate,
+  SearchResponse,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { type Client } from '@elastic/elasticsearch';
 import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../ftr_provider_context';
