@@ -157,7 +157,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return observabilityAIAssistantAPIClient.viewer({
       endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
       params: {
-        query: { inference_id: inferenceId },
+        query: { inference_id: inferenceId, wait_until_complete: true },
       },
     });
   }

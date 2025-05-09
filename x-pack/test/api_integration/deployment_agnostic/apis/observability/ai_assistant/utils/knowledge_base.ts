@@ -80,7 +80,7 @@ export async function setupKnowledgeBase(
   return observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
     params: {
-      query: { inference_id: inferenceId },
+      query: { inference_id: inferenceId, wait_until_complete: true },
     },
   });
 }
