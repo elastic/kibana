@@ -989,7 +989,7 @@ export async function getCurrentQueryAvailableFields(
   previousPipeFields: ESQLFieldWithMetadata[]
 ) {
   const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
-  previousPipeFields?.forEach((field) => cacheCopy.set(field.name, field));
+  previousPipeFields.forEach((field) => cacheCopy.set(field.name, field));
   const lastCommand = commands[commands.length - 1];
   const commandDef = getCommandDefinition(lastCommand.name);
 
