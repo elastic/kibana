@@ -28,7 +28,6 @@ describe('usePluginConfig()', () => {
         metricThresholdAlertRuleEnabled: true,
         logThresholdAlertRuleEnabled: true,
         alertsAndRulesDropdownEnabled: true,
-        profilingEnabled: false,
         ruleFormV2Enabled: false,
       },
     };

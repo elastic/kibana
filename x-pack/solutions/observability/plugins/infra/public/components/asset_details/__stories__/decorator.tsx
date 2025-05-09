@@ -218,7 +218,6 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
       metricThresholdAlertRuleEnabled: true,
       logThresholdAlertRuleEnabled: true,
       alertsAndRulesDropdownEnabled: true,
-      profilingEnabled: false,
       ruleFormV2Enabled: false,
     },
   };

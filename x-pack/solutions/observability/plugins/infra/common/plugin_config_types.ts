@@ -34,7 +34,6 @@ export interface InfraConfig {
     metricThresholdAlertRuleEnabled: boolean;
     logThresholdAlertRuleEnabled: boolean;
     alertsAndRulesDropdownEnabled: boolean;
-    profilingEnabled: boolean;
     ruleFormV2Enabled: boolean;
   };
 }

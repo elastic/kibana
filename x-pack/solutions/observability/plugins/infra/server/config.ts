@@ -76,7 +76,6 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
        * plugins. Enable both with `xpack.profiling.enabled: true` before
        * enabling this feature flag.
        */
-      profilingEnabled: schema.boolean({ defaultValue: false }),
       ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
