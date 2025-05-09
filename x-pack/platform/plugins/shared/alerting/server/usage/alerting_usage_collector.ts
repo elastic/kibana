@@ -39,7 +39,6 @@ const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
   // Rules
   rule_snooze_status: { type: 'long' },
   rule_mute_status: { type: 'long' },
-  rule_disable_status: { type: 'long' },
   // Security Solution
   siem__signals: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
   siem__notifications: { type: 'long' }, // eslint-disable-line @typescript-eslint/naming-convention
@@ -184,7 +183,6 @@ export function createAlertingUsageCollector(
             max: 0,
           },
           count_active_by_type: {},
-          count_inactive_by_type: {},
           count_by_type: {},
           count_rules_namespaces: 0,
           count_rules_executions_per_day: 0,
@@ -325,7 +323,6 @@ export function createAlertingUsageCollector(
       count_alerts_by_rule_type: byTypeSchema,
       count_rules_snoozed_by_type: byTypeSchema,
       count_rules_muted_by_type: byTypeSchema,
-      count_inactive_by_type: byTypeSchema,
     },
   });
 }

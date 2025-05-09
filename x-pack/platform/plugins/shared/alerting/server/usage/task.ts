@@ -149,14 +149,6 @@ export function telemetryTaskRunner(
                 totalAlertsCountAggregations.errorMessage,
               ].filter((message) => message !== undefined);
 
-              const disabledCountPerType = Object.keys(totalCountAggregations.count_by_type).reduce(
-                (acc, key) => ({
-                  ...acc,
-                  [key]: totalCountAggregations.count_by_type[key] - totalInUse.countByType[key],
-                }),
-                {}
-              );
-
               const updatedState: LatestTaskStateSchema = {
                 has_errors: hasErrors,
                 ...(errorMessages.length > 0 && { error_messages: errorMessages }),
@@ -169,7 +161,6 @@ export function telemetryTaskRunner(
                 schedule_time_number_s: totalCountAggregations.schedule_time_number_s,
                 connectors_per_alert: totalCountAggregations.connectors_per_alert,
                 count_active_by_type: totalInUse.countByType,
-                count_inactive_by_type: disabledCountPerType,
                 count_active_total: totalInUse.countTotal,
                 count_disabled_total: totalCountAggregations.count_total - totalInUse.countTotal,
                 count_rules_by_execution_status:
