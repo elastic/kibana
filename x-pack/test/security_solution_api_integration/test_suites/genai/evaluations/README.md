@@ -65,14 +65,14 @@ Modify `x-pack/test/security_solution_api_integration/scripts/genai/vault/config
 Then, run the following command to upload the secrets back to the `siem-team` vault:
 
 ```
-node upload_secrets --vault siem-team
+node scripts/genai/vault/upload_secrets --vault siem-team
 ```
 
 Then finally, you must contact @elastic/kibana-operations and have them upload the secrets to the `ci-prod` vault. For this you can either have them run the following commands:
 
 ```
-node retrieve_secrets.js --vault siem-team
-node upload_secrets.js --vault ci-prod
+node scripts/genai/vault/retrieve_secrets.js --vault siem-team
+node scripts/genai/vault/upload_secrets.js --vault ci-prod
 ```
 
 Or you can get the raw write command and share it with them via https://p.elstc.co to make updating secrets a little easier:
