@@ -14,9 +14,8 @@ exports[`Fleet - getTemplateInputs should work for input package 1`] = `
           elasticsearch:
             dynamic_dataset: true
             dynamic_namespace: true
-        # data_stream:
-        #  dataset: <DATA_STREAM.DATASET>
-        #    # Dataset name: Set the name for your dataset. Changing the dataset will send the data to a different index. You can't use \`-\` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
+          # dataset: <DATA_STREAM.DATASET>
+          #  # Dataset name: Set the name for your dataset. Changing the dataset will send the data to a different index. You can't use \`-\` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
         # paths:
         #  - <PATHS> # Log file path: Path to log files to be collected
         # exclude_files:
@@ -78,9 +77,9 @@ exports[`Fleet - getTemplateInputs should work for package with dynamic ids 1`] 
           - container:
               stream: all
               format: docker
-        # condition: <CONDITION> # Condition: Condition to filter when to apply this datastream. Refer to [Docker provider](https://www.elastic.co/guide/en/fleet/current/docker-provider.html) to find the available keys and to [Conditions](https://www.elastic.co/guide/en/fleet/current/dynamic-input-configuration.html#conditions) on how to use the available keys in conditions.
         data_stream:
           dataset: docker.container_logs
           type: logs
+        # condition: <CONDITION> # Condition: Condition to filter when to apply this datastream. Refer to [Docker provider](https://www.elastic.co/guide/en/fleet/current/docker-provider.html) to find the available keys and to [Conditions](https://www.elastic.co/guide/en/fleet/current/dynamic-input-configuration.html#conditions) on how to use the available keys in conditions.
 "
 `;
