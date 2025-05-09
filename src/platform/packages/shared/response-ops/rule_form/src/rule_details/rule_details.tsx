@@ -7,28 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiDescribedFormGroup,
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  RULE_DETAILS_TITLE,
-  RULE_DETAILS_DESCRIPTION,
-  RULE_NAME_INPUT_TITLE,
-  RULE_TAG_INPUT_TITLE,
-  RULE_TAG_PLACEHOLDER,
-} from '../translations';
+import { RULE_NAME_INPUT_TITLE, RULE_TAG_INPUT_TITLE, RULE_TAG_PLACEHOLDER } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { InvestigationGuideEditor } from '../rule_definition/rule_investigation_guide_editor';
+
+export const RULE_DETAIL_MIN_ROW_WIDTH = 600;
 
 export const RuleDetails = () => {
   const { formData, baseErrors } = useRuleFormState();
@@ -93,78 +89,86 @@ export const RuleDetails = () => {
     [dispatch, formData.artifacts]
   );
 
+  const {
+    ref,
+    size: { width },
+  } = useContainerRef();
+
   return (
     <>
-      <EuiDescribedFormGroup
-        fullWidth
-        title={<h3>{RULE_DETAILS_TITLE}</h3>}
-        description={
-          <EuiText size="s">
-            <p>{RULE_DETAILS_DESCRIPTION}</p>
-          </EuiText>
-        }
-        data-test-subj="ruleDetails"
-      >
-        <EuiFormRow
-          fullWidth
-          label={RULE_NAME_INPUT_TITLE}
-          isInvalid={!!baseErrors?.name?.length}
-          error={baseErrors?.name}
-        >
-          <EuiFieldText
+      <EuiFlexGroup ref={ref} direction={width > RULE_DETAIL_MIN_ROW_WIDTH ? 'row' : 'column'}>
+        <EuiFlexItem>
+          <EuiFormRow
+            data-test-subj="ruleDetails"
             fullWidth
-            value={name}
-            placeholder={RULE_NAME_INPUT_TITLE}
-            onChange={onNameChange}
-            data-test-subj="ruleDetailsNameInput"
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          label={RULE_TAG_INPUT_TITLE}
-          labelAppend={OptionalFieldLabel}
-          isInvalid={!!baseErrors?.tags?.length}
-          error={baseErrors?.tags}
-        >
-          <EuiComboBox
+            label={RULE_NAME_INPUT_TITLE}
+            isInvalid={!!baseErrors?.name?.length}
+            error={baseErrors?.name}
+          >
+            <EuiFieldText
+              fullWidth
+              value={name}
+              placeholder={RULE_NAME_INPUT_TITLE}
+              onChange={onNameChange}
+              data-test-subj="ruleDetailsNameInput"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
             fullWidth
-            noSuggestions
-            placeholder={RULE_TAG_PLACEHOLDER}
-            data-test-subj="ruleDetailsTagsInput"
-            selectedOptions={tagsOptions}
-            onCreateOption={onAddTag}
-            onChange={onSetTag}
-            onBlur={onBlur}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
+            label={RULE_TAG_INPUT_TITLE}
+            labelAppend={OptionalFieldLabel}
+            isInvalid={!!baseErrors?.tags?.length}
+            error={baseErrors?.tags}
+          >
+            <EuiComboBox
+              fullWidth
+              noSuggestions
+              placeholder={RULE_TAG_PLACEHOLDER}
+              data-test-subj="ruleDetailsTagsInput"
+              selectedOptions={tagsOptions}
+              onCreateOption={onAddTag}
+              onChange={onSetTag}
+              onBlur={onBlur}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+      <EuiFormRow
         fullWidth
-        title={<h3>Investigation Guide</h3>}
-        description={
-          <EuiText size="s">
-            <p>
-              <FormattedMessage
-                id="responseOpsRuleForm.investigationGuide.editor.title.tooltip"
-                defaultMessage="Include a guide or useful information for addressing alerts created by this rule."
-              />
-            </p>
-          </EuiText>
-        }
+        label={i18n.translate('responseOpsRuleForm.investigationGuide.editor.title', {
+          defaultMessage: 'Investigation Guide',
+        })}
+        labelAppend={OptionalFieldLabel}
       >
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('responseOpsRuleForm.investigationGuide.editor.title', {
-            defaultMessage: 'Investigation Guide',
-          })}
-          labelAppend={OptionalFieldLabel}
-        >
-          <InvestigationGuideEditor
-            setRuleParams={onSetArtifacts}
-            value={formData.artifacts?.investigation_guide?.blob ?? ''}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+        <InvestigationGuideEditor
+          setRuleParams={onSetArtifacts}
+          value={formData.artifacts?.investigation_guide?.blob ?? ''}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="xxl" />
     </>
   );
 };
+
+function useContainerRef() {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setSize({ width, height });
+    });
+
+    observer.observe(ref.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, size };
+}
