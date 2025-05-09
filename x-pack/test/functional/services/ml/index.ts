@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { MachineLearningAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/api';
+import { MachineLearningCommonAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/common_api';
+import { MachineLearningCommonConfigsProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/common_config';
+import { MachineLearningSecurityCommonProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/security_common';
+import { MachineLearningTestExecutionProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/test_execution';
+import { MachineLearningTestResourcesProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/test_resources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { MachineLearningAnomaliesTableProvider } from './anomalies_table';
 import { MachineLearningAnomalyExplorerProvider } from './anomaly_explorer';
-import { MachineLearningAPIProvider } from './api';
-import { MachineLearningCommonAPIProvider } from './common_api';
-import { MachineLearningCommonConfigsProvider } from './common_config';
 import { MachineLearningCommonUIProvider } from './common_ui';
 import { MachineLearningCommonDataGridProvider } from './common_data_grid';
 import { MachineLearningCustomUrlsProvider } from './custom_urls';
@@ -43,15 +46,12 @@ import { MachineLearningLensVisualizationsProvider } from './lens_visualizations
 import { MachineLearningNavigationProvider } from './navigation';
 import { MachineLearningSuppliedConfigurationsProvider } from './supplied_configurations';
 import { MachineLearningOverviewPageProvider } from './overview_page';
-import { MachineLearningSecurityCommonProvider } from './security_common';
 import { MachineLearningSecurityUIProvider } from './security_ui';
 import { MachineLearningSettingsProvider } from './settings';
 import { MachineLearningSettingsCalendarProvider } from './settings_calendar';
 import { MachineLearningSettingsFilterListProvider } from './settings_filter_list';
 import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';
 import { MachineLearningStackManagementJobsProvider } from './stack_management_jobs';
-import { MachineLearningTestExecutionProvider } from './test_execution';
-import { MachineLearningTestResourcesProvider } from './test_resources';
 import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
 import { MachineLearningAlertingProvider } from './alerting';
 import { SwimLaneProvider } from './swim_lane';
