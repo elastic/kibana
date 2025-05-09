@@ -14,7 +14,6 @@ import type {
   InferenceTaskType,
   IngestDocument,
   MlGetTrainedModelsRequest,
-  MlGetTrainedModelsResponse,
   TasksTaskInfo,
   TransformGetTransformTransformSummary,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -229,13 +228,14 @@ export class ModelsProvider {
   /**
    * Merges the list of models with the list of models available for download.
    */
-  async includeModelDownloads(
-    resultItems: TrainedModelUIItem[],
-    rawModels: MlGetTrainedModelsResponse
-  ): Promise<TrainedModelUIItem[]> {
+  async includeModelDownloads(resultItems: TrainedModelUIItem[]): Promise<TrainedModelUIItem[]> {
     const idMap = new Map<string, TrainedModelUIItem>(
       resultItems.map((model) => [model.model_id, model])
     );
+
+    const rawModels = await this._client.asCurrentUser.ml.getTrainedModels({
+      size: 1000,
+    });
 
     const allExistingModelIds = new Set(rawModels.trained_model_configs.map((m) => m.model_id));
 
@@ -395,10 +395,6 @@ export class ModelsProvider {
   ): Promise<TrainedModelUIItem[]> {
     const { trainedModelsSpaces } = checksFactory(this._client, mlSavedObjectService);
 
-    const rawModels = await this._client.asCurrentUser.ml.getTrainedModels({
-      size: 1000,
-    });
-
     const [models, spaces] = await Promise.all([
       this._mlClient.getTrainedModels({
         size: 1000,
@@ -438,7 +434,7 @@ export class ModelsProvider {
     resultItems = await this.assignModelStats(formattedModels);
 
     if (this._enabledFeatures.nlp) {
-      resultItems = await this.includeModelDownloads(resultItems, rawModels);
+      resultItems = await this.includeModelDownloads(resultItems);
     }
 
     const existingModels = resultItems.filter(isExistingModel);
