@@ -37,7 +37,7 @@ export function useBulkPurgeRollupData() {
         });
       } catch (error) {
         return Promise.reject(
-          i18n.translate('xpack.slo.bulkDelete.errorMessage', {
+          i18n.translate('xpack.slo.bulkPurge.errorMessage', {
             defaultMessage:
               'Failed to bulk purge of rollup data for {count} SLOs, something went wrong: {error}',
             values: { error: String(error), count: list.length },
@@ -48,7 +48,7 @@ export function useBulkPurgeRollupData() {
     {
       onError: (error, { list }) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate('xpack.slo.bulkDelete.errorNotification', {
+          title: i18n.translate('xpack.slo.bulkPurge.errorNotification', {
             defaultMessage: 'Failed to schedule bulk purge of rollup data for {count} SLOs',
             values: { count: list.length },
           }),
@@ -57,7 +57,7 @@ export function useBulkPurgeRollupData() {
       onSuccess: (_, { list }) => {
         queryClient.invalidateQueries({ queryKey: ['slo', 'definitions'], exact: false });
         toasts.addSuccess(
-          i18n.translate('xpack.slo.bulkDelete.successNotification', {
+          i18n.translate('xpack.slo.bulkPurge.successNotification', {
             defaultMessage: 'Bulk purge of rollup data for {count} SLOs scheduled',
             values: { count: list.length },
           })
