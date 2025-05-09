@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { i18n } from '@kbn/i18n';
 import {
   ESQLSingleAstItem,
   Walker,
@@ -19,7 +19,7 @@ import {
   ESQLAstQueryExpression,
   BasicPrettyPrinter,
 } from '@kbn/esql-ast';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType, IndexAutocompleteItem } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import { logicalOperators } from '../definitions/all_operators';
 import {
@@ -1116,3 +1116,46 @@ export async function additionalSourcesSuggestions(
   );
   return suggestionsToAdd;
 }
+
+export const specialIndicesToSuggestions = (
+  indices: IndexAutocompleteItem[]
+): SuggestionRawDefinition[] => {
+  const mainSuggestions: SuggestionRawDefinition[] = [];
+  const aliasSuggestions: SuggestionRawDefinition[] = [];
+
+  for (const index of indices) {
+    mainSuggestions.push({
+      label: index.name,
+      text: index.name + ' ',
+      kind: 'Issue',
+      detail: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.specialIndexes.indexType.index',
+        {
+          defaultMessage: 'Index',
+        }
+      ),
+      sortText: '0-INDEX-' + index.name,
+      command: TRIGGER_SUGGESTION_COMMAND,
+    });
+
+    if (index.aliases) {
+      for (const alias of index.aliases) {
+        aliasSuggestions.push({
+          label: alias,
+          text: alias + ' $0',
+          kind: 'Issue',
+          detail: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.autocomplete.specialIndexes.indexType.alias',
+            {
+              defaultMessage: 'Alias',
+            }
+          ),
+          sortText: '1-ALIAS-' + alias,
+          command: TRIGGER_SUGGESTION_COMMAND,
+        });
+      }
+    }
+  }
+
+  return [...mainSuggestions, ...aliasSuggestions];
+};

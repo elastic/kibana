@@ -11,7 +11,7 @@ import type { SuggestionRawDefinition } from '../../types';
 import {
   getOverlapRange,
   removeQuoteForSuggestedSources,
-  getSourceSuggestions,
+  specialIndicesToSuggestions,
   additionalSourcesSuggestions,
 } from '../../helper';
 import { CommandSuggestParams } from '../../../definitions/types';
@@ -22,6 +22,7 @@ import { metadataSuggestion, getMetadataSuggestions } from '../metadata';
 export async function suggest({
   innerText,
   command,
+  callbacks,
   getSources,
   getSourcesFromQuery,
 }: CommandSuggestParams<'ts'>): Promise<SuggestionRawDefinition[]> {
@@ -50,8 +51,11 @@ export async function suggest({
 
   // TS /
   if (indexes.length === 0) {
-    // ToDo: change to get sources from another function
-    addSuggestionsBasedOnQuote(getSourceSuggestions(await getSources()));
+    const timeseriesIndices = await callbacks?.getTimeseriesIndices?.();
+    if (!timeseriesIndices) {
+      return [];
+    }
+    return specialIndicesToSuggestions(timeseriesIndices.indices);
   }
   // TS something /
   else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {

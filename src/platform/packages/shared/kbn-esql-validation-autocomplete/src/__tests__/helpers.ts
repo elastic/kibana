@@ -72,6 +72,24 @@ export const joinIndices: IndexAutocompleteItem[] = [
   },
 ];
 
+export const timeseriesIndices: IndexAutocompleteItem[] = [
+  {
+    name: 'timeseries_index',
+    mode: 'time_series',
+    aliases: [],
+  },
+  {
+    name: 'timeseries_index_with_alias',
+    mode: 'time_series',
+    aliases: ['timeseries_index_alias_1', 'timeseries_index_alias_2'],
+  },
+  {
+    name: 'time_series_index',
+    mode: 'time_series',
+    aliases: [],
+  },
+];
+
 export function getCallbackMocks(): ESQLCallbacks {
   return {
     getColumnsFor: jest.fn(async ({ query } = {}) => {
@@ -100,5 +118,6 @@ export function getCallbackMocks(): ESQLCallbacks {
     ),
     getPolicies: jest.fn(async () => policies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
+    getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
   };
 }
