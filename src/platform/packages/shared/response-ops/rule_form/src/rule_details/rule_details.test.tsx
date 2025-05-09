@@ -8,9 +8,15 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDetails } from './rule_details';
+
+const render = (toRender: React.ReactElement) =>
+  rtlRender(toRender, {
+    wrapper: ({ children }) => <IntlProvider>{children}</IntlProvider>,
+  });
 
 const mockOnChange = jest.fn();
 
