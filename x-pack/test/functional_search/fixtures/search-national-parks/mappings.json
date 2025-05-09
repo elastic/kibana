@@ -1,0 +1,71 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "search-national-parks",
+    "mappings": {
+      "properties": {
+        "acres": {
+          "type": "float"
+        },
+        "date_established": {
+          "type": "date"
+        },
+        "description": {
+          "inference_id": ".multilingual-e5-small-elasticsearch",
+          "model_settings": {
+            "dimensions": 384,
+            "element_type": "float",
+            "service": "elasticsearch",
+            "similarity": "cosine",
+            "task_type": "text_embedding"
+          },
+          "search_inference_id": ".multilingual-e5-small-elasticsearch",
+          "type": "semantic_text"
+        },
+        "id": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "location": {
+          "type": "geo_point"
+        },
+        "nps_link": {
+          "type": "text"
+        },
+        "square_km": {
+          "type": "float"
+        },
+        "states": {
+          "type": "text"
+        },
+        "title": {
+          "inference_id": ".elser-2-elasticsearch",
+          "model_settings": {
+            "service": "elasticsearch",
+            "task_type": "sparse_embedding"
+          },
+          "type": "semantic_text"
+        },
+        "visitors": {
+          "type": "float"
+        },
+        "world_heritage_site": {
+          "type": "boolean"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
