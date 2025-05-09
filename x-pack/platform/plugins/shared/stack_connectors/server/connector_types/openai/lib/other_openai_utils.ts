@@ -51,49 +51,71 @@ export const getRequestWithStreamOption = (
 };
 
 // PKI utils
-const validatePKICertificates = ({
-  certificateFile,
-  certificateData,
-  privateKeyFile,
-  privateKeyData,
-  logger,
-}: {
+interface SSLOverridesInput {
   logger: Logger;
   certificateFile?: string | string[];
   certificateData?: string;
   privateKeyFile?: string | string[];
   privateKeyData?: string;
-}): void => {
-  try {
-    // Check file paths if provided
-    if (certificateFile) {
-      const certPath = Array.isArray(certificateFile) ? certificateFile[0] : certificateFile;
-      if (!fs.existsSync(certPath)) {
-        throw new Error(`Certificate file not found: ${certPath}`);
-      }
-      fs.accessSync(certPath, fs.constants.R_OK);
-    }
-    if (privateKeyFile) {
-      const keyPath = Array.isArray(privateKeyFile) ? privateKeyFile[0] : privateKeyFile;
-      if (!fs.existsSync(keyPath)) {
-        throw new Error(`Private key file not found: ${keyPath}`);
-      }
-      fs.accessSync(keyPath, fs.constants.R_OK);
-    }
+  caFile?: string | string[];
+  caData?: string;
+  verificationMode?: 'full' | 'certificate' | 'none';
+}
 
-    // Check PEM format for data if provided
-    if (certificateData && !certificateData.includes('-----BEGIN CERTIFICATE-----')) {
-      throw new Error('Missing BEGIN CERTIFICATE header');
-    }
-    if (privateKeyData && !privateKeyData.includes('-----BEGIN PRIVATE KEY-----')) {
-      throw new Error('Missing BEGIN PRIVATE KEY header');
-    }
-  } catch (error) {
-    logger.error(`Error validating PKI certificates: ${error.message}`);
-    throw new Error('Invalid or inaccessible PKI certificates', error.message);
+const getFilePath = (file?: string | string[]) => (Array.isArray(file) ? file[0] : file);
+
+const validateFile = (path: string, description: string) => {
+  if (!fs.existsSync(path)) {
+    throw new Error(`${description} not found: ${path}`);
+  }
+  fs.accessSync(path, fs.constants.R_OK);
+};
+
+const validateCertOrKey = (
+  data: string | undefined,
+  type: 'CERTIFICATE' | 'PRIVATE KEY',
+  description: string
+) => {
+  if (data && !data.includes(`-----BEGIN ${type}-----`)) {
+    throw new Error(`Invalid PEM format for ${description}: Missing BEGIN ${type} header`);
   }
 };
 
+const validatePKICertificates = ({
+  certificateFile,
+  certificateData,
+  privateKeyFile,
+  privateKeyData,
+  caFile,
+  caData,
+  logger,
+}: SSLOverridesInput): void => {
+  try {
+    if (certificateFile) validateFile(getFilePath(certificateFile), 'Certificate file');
+    if (privateKeyFile) validateFile(getFilePath(privateKeyFile), 'Private key file');
+    if (caFile) validateFile(getFilePath(caFile), 'CA file');
+
+    if (certificateData) validateCertOrKey(certificateData, 'CERTIFICATE', 'Certificate data');
+    if (privateKeyData) validateCertOrKey(privateKeyData, 'PRIVATE KEY', 'Private key data');
+    if (caData) validateCertOrKey(caData, 'CERTIFICATE', 'CA certificate data');
+  } catch (error) {
+    logger.error(`Error validating PKI certificates: ${error.message}`);
+    throw new Error(`Invalid or inaccessible PKI certificates: ${error.message}`);
+  }
+};
+
+const loadBuffer = (
+  file?: string | string[],
+  data?: string,
+  type?: 'CERTIFICATE' | 'PRIVATE KEY'
+) => {
+  if (file) {
+    return Buffer.from(fs.readFileSync(getFilePath(file), 'utf8'));
+  } else if (data) {
+    return Buffer.from(formatPEMContent(data, type!));
+  }
+  throw new Error(`No ${type?.toLowerCase()} file or data provided`);
+};
 export const getPKISSLOverrides = ({
   logger,
   certificateFile,
@@ -103,17 +125,7 @@ export const getPKISSLOverrides = ({
   caFile,
   caData,
   verificationMode,
-}: {
-  logger: Logger;
-  certificateFile?: string | string[];
-  certificateData?: string;
-  privateKeyFile?: string | string[];
-  privateKeyData?: string;
-  caFile?: string | string[];
-  caData?: string;
-  verificationMode?: 'full' | 'certificate' | 'none';
-}): SSLSettings => {
-  // Validate PKI configuration
+}: SSLOverridesInput): SSLSettings => {
   validatePKICertificates({
     logger,
     certificateFile,
@@ -121,71 +133,36 @@ export const getPKISSLOverrides = ({
     privateKeyFile,
     privateKeyData,
   });
-  let cert: Buffer;
-  let key: Buffer;
-  let ca: Buffer | undefined;
 
-  if (certificateFile) {
-    cert = Buffer.from(
-      fs.readFileSync(Array.isArray(certificateFile) ? certificateFile[0] : certificateFile, 'utf8')
-    );
-  } else if (certificateData) {
-    cert = Buffer.from(formatPEMContent(certificateData, 'CERTIFICATE'));
-  } else {
-    throw new Error('No certificate file or data provided');
-  }
+  const cert = loadBuffer(certificateFile, certificateData, 'CERTIFICATE');
+  const key = loadBuffer(privateKeyFile, privateKeyData, 'PRIVATE KEY');
+  const ca = caFile
+    ? Buffer.from(fs.readFileSync(getFilePath(caFile), 'utf8'))
+    : caData
+    ? Buffer.from(formatPEMContent(caData, 'CERTIFICATE'))
+    : undefined;
 
-  if (privateKeyFile) {
-    key = Buffer.from(
-      fs.readFileSync(Array.isArray(privateKeyFile) ? privateKeyFile[0] : privateKeyFile, 'utf8')
-    );
-  } else if (privateKeyData) {
-    key = Buffer.from(formatPEMContent(privateKeyData, 'PRIVATE KEY'));
-  } else {
-    throw new Error('No private key file or data provided');
-  }
-
-  if (caFile) {
-    ca = Buffer.from(fs.readFileSync(Array.isArray(caFile) ? caFile[0] : caFile, 'utf8'));
-  } else if (caData) {
-    ca = Buffer.from(formatPEMContent(caData, 'CERTIFICATE'));
-  }
-
-  return {
-    cert,
-    key,
-    ca,
-    verificationMode,
-  };
+  return { cert, key, ca, verificationMode };
 };
 
 function formatPEMContent(pemContent: string, type: 'CERTIFICATE' | 'PRIVATE KEY'): string {
   if (!pemContent) return pemContent;
 
-  // Normalize input by replacing all whitespace with a single space
-  const normalizedContent = pemContent.replace(/\s+/g, ' ').trim();
-
-  // Define header and footer
   const header = `-----BEGIN ${type}-----`;
   const footer = `-----END ${type}-----`;
 
-  // Verify header and footer
+  const normalizedContent = pemContent.replace(/\s+/g, ' ').trim();
+
   if (!normalizedContent.startsWith(header) || !normalizedContent.endsWith(footer)) {
     return pemContent;
   }
 
-  // Extract base64 content between header and footer
   const base64Content = normalizedContent
     .slice(header.length, normalizedContent.length - footer.length)
-    .trim();
+    .replace(/\s+/g, '');
 
-  // Remove all whitespace from base64 content
-  const cleanBase64 = base64Content.replace(/\s+/g, '');
+  const formattedBase64 = base64Content.match(/.{1,64}/g)?.join('\n') || base64Content;
 
-  // Split into 64-character lines
-  const formattedBase64 = cleanBase64.match(/.{1,64}/g)?.join('\n') || cleanBase64;
-
-  // Assemble formatted PEM with newlines
   return `${header}\n${formattedBase64}\n${footer}`;
 }
 
