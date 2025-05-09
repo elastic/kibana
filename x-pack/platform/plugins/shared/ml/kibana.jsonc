@@ -51,6 +51,7 @@
     "requiredBundles": [
       "cases",
       "charts",
+      "dashboard",
       "esUiShared",
       "fieldFormats",
       "kibanaReact",
