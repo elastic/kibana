@@ -16,32 +16,8 @@ import type { LlmType } from '@kbn/elastic-assistant-plugin/server/types';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { formatToolName, isOperation, zodObjectHasRequiredProperties } from './utils';
 import type { Operation } from './utils';
-
-export class OperationNode {
-  operationId: string;
-  constructor({ operationId }: { operationId: string }) {
-    this.operationId = operationId;
-  }
-}
-
-export class InternalNode {
-  name: string;
-  description: string;
-  children: Array<OperationNode | InternalNode>;
-  constructor({
-    name,
-    description,
-    children,
-  }: {
-    name: string;
-    description: string;
-    children: Array<OperationNode | InternalNode>;
-  }) {
-    this.name = name;
-    this.description = description;
-    this.children = children;
-  }
-}
+import { InternalNode } from './open_api_tool_structure/internal_node';
+import { OperationNode } from './open_api_tool_structure/operation_node';
 
 export abstract class OpenApiTool<T> {
   protected dereferencedOas: Oas;
