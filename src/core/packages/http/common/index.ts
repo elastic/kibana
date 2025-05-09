@@ -16,4 +16,5 @@ export {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
   KIBANA_BUILD_NR_HEADER,
+  RouteDeprecationSeverity,
 } from './src/constants';

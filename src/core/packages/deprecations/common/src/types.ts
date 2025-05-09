@@ -7,16 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { RouteDeprecationSeverity } from '@kbn/core-http-common';
+
 export interface DeprecationDetailsMessage {
   type: 'markdown' | 'text';
   content: string;
 }
 
-export enum DeprecationLevel {
-  WARNING = 'warning',
-  CRITICAL = 'critical',
+enum DeprecationLevelFetchError {
   FETCH_ERROR = 'fetch_error',
 }
+
+export type DeprecationLevel = RouteDeprecationSeverity | DeprecationLevelFetchError;
+
+export const DeprecationLevel = {
+  ...RouteDeprecationSeverity,
+  ...DeprecationLevelFetchError,
+} as const;
 
 /**
  * Base properties shared by all types of deprecations

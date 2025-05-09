@@ -124,7 +124,6 @@ export type {
   RouteSecurity,
   RouteSecurityGetter,
   InternalRouteSecurity,
-  RouteDeprecationInfo,
   PostValidationMetadata,
   AnyKibanaRequest,
 } from './src/router';
