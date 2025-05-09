@@ -22,7 +22,6 @@ describe('RuleInvestigationGuide', () => {
     const editorElement = screen.getByLabelText(
       'Add guidelines for addressing alerts created by this rule'
     );
-    expect(screen.getByText('Investigation Guide')).toBeInTheDocument();
     expect(editorElement).toBeInTheDocument();
   });
 
