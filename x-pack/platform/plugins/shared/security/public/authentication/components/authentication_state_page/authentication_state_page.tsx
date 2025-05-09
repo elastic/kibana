@@ -25,18 +25,21 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
   const euiBottomShadowM = useEuiShadow('m');
 
   return (
-    <div
-      css={[
-        fullScreenGraphicsMixinStyles(Number(euiTheme.levels.toast), theme),
-        props.cssStyles || '',
-      ]}
-    >
+    <div css={[fullScreenGraphicsMixinStyles(Number(euiTheme.levels.toast), theme)]}>
       <header css={css({ position: 'relative', padding: euiTheme.size.xl, zIndex: 10 })}>
         <div
-          css={css({
-            // maxWidth: '600px',
-            textAlign: 'center',
-          })}
+          css={[
+            css({
+              position: 'relative',
+              margin: 'auto',
+              maxWidth: '460px',
+              paddingLeft: euiTheme.size.xl,
+              paddingRight: euiTheme.size.xl,
+              zIndex: 10,
+              textAlign: 'center',
+            }),
+            props.cssStyles,
+          ]}
         >
           <EuiSpacer size="xxl" />
           <span
@@ -59,15 +62,18 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
         </div>
       </header>
       <div
-        css={css({
-          position: 'relative',
-          margin: 'auto',
-          maxWidth: '460px',
-          paddingLeft: euiTheme.size.xl,
-          paddingRight: euiTheme.size.xl,
-          zIndex: 10,
-          textAlign: 'center',
-        })}
+        css={[
+          css({
+            position: 'relative',
+            margin: 'auto',
+            maxWidth: '460px',
+            paddingLeft: euiTheme.size.xl,
+            paddingRight: euiTheme.size.xl,
+            zIndex: 10,
+            textAlign: 'center',
+          }),
+          props.cssStyles,
+        ]}
       >
         {props.children}
       </div>

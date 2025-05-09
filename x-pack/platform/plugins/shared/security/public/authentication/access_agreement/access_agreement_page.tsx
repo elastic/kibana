@@ -133,6 +133,9 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
 
   return (
     <AuthenticationStatePage
+      cssStyles={css({
+        maxWidth: '600px',
+      })}
       title={
         <FormattedMessage
           id="xpack.security.accessAgreement.title"
