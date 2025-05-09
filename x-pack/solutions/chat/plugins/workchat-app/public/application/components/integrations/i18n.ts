@@ -84,10 +84,7 @@ export const toolLabels = {
     }),
     deleteModalTitle: i18n.translate('workchatApp.integrations.editView.deleteModalTitle', {
       defaultMessage: 'Delete tool',
-    }),
-    deleteMessage: i18n.translate('workchatApp.integrations.editView.deleteMessage', {
-      defaultMessage: 'Are you sure you want to delete this tool?',
-    }),
+    })
   },
   listView: {
     addToolLabel: i18n.translate('workchatApp.integrations.listView.addTool', {
