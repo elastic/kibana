@@ -108,7 +108,7 @@ export const getAlertsTableEmbeddableFactory = (
           });
           tableConfig$.next(newTableConfig);
         } catch {
-          // The user closed without saving
+          // The user closed without saving, discard the edits
         }
       },
     });
