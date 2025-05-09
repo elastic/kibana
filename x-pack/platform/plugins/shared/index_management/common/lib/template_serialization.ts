@@ -20,12 +20,13 @@ import {
   STANDARD_INDEX_MODE,
   LOGSDB_INDEX_MODE,
 } from '../constants';
+import { DataStreamOptions } from '../types/data_streams';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
 export function serializeTemplate(
   templateDeserialized: TemplateDeserialized,
-  dataStreamOptions?: object | undefined
+  dataStreamOptions?: DataStreamOptions
 ): TemplateSerialized {
   const {
     version,

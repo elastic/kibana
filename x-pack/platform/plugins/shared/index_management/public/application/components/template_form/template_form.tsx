@@ -129,7 +129,7 @@ export const TemplateForm = ({
   };
 
   const {
-    template: { settings, mappings, aliases } = {},
+    template: { settings, mappings, aliases, data_stream_options: dataStreamOptions } = {},
     composedOf,
     _kbnMeta,
     ...logistics
@@ -360,7 +360,10 @@ export const TemplateForm = ({
         </FormWizardStep>
 
         <FormWizardStep id={wizardSections.review.id} label={wizardSections.review.label}>
-          <StepReviewContainer getTemplateData={buildTemplateObject(indexTemplate)} />
+          <StepReviewContainer
+            getTemplateData={buildTemplateObject(indexTemplate)}
+            dataStreamOptions={dataStreamOptions}
+          />
         </FormWizardStep>
       </FormWizard>
     </>

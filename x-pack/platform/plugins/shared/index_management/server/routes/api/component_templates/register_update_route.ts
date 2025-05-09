@@ -8,6 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import type { estypes } from '@elastic/elasticsearch';
 
+import { DataStreamOptions } from '../../../../common/types/data_streams';
+import { serializeComponentTemplate } from '../../../../common/lib';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
 import { componentTemplateSchema } from './schema_validation';
@@ -37,7 +39,6 @@ export const registerUpdateRoute = ({
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { name } = request.params;
-      const { template, version, _meta, deprecated } = request.body;
 
       try {
         // Verify component exists; ES will throw 404 if not
@@ -49,7 +50,8 @@ export const registerUpdateRoute = ({
           method: 'GET',
           path: `/_component_template/${name}`,
         });
-        // TBD: Replace with the following when the client includes data_stream_options in ClusterComponentTemplateSummary
+        // TODO: Replace with the following when the client includes data_stream_options in ClusterComponentTemplateSummary
+        // https://github.com/elastic/kibana/issues/220614
         // const existingComponentTemplate = await client.asCurrentUser.cluster.getComponentTemplate({
         //   name,
         // });
@@ -57,19 +59,15 @@ export const registerUpdateRoute = ({
           existingComponentTemplate?.component_templates?.[0]?.component_template?.template
             ?.data_stream_options ?? undefined;
 
-        // If the existing component template contains data stream options, we need to persist them.
-        // Otherwise, they will be lost when the component template is updated.
-        const updatedTemplate = {
-          ...template,
-          ...(existingDataStreamOptions && { data_stream_options: existingDataStreamOptions }),
-        };
+        const serializedComponentTemplate = serializeComponentTemplate(
+          request.body,
+          existingDataStreamOptions as DataStreamOptions | undefined
+        );
 
         const responseBody = await client.asCurrentUser.cluster.putComponentTemplate({
           name,
-          template: updatedTemplate as estypes.IndicesIndexState,
-          version,
-          _meta,
-          deprecated,
+          ...serializedComponentTemplate,
+          template: serializedComponentTemplate.template as estypes.IndicesIndexState,
         });
 
         return response.ok({ body: responseBody });

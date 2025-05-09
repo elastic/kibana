@@ -7,6 +7,7 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { DataStreamOptions } from '../../../../common/types/data_streams';
 import { serializeTemplate, serializeLegacyTemplate } from '../../../../common/lib';
 import { TemplateDeserialized, LegacyTemplateSerialized } from '../../../../common';
 
@@ -35,7 +36,7 @@ export const saveTemplate = async ({
   template: TemplateDeserialized;
   client: IScopedClusterClient;
   isLegacy?: boolean;
-  dataStreamOptions?: object | undefined;
+  dataStreamOptions?: DataStreamOptions;
 }) => {
   const serializedTemplate = isLegacy
     ? serializeLegacyTemplate(template)
@@ -66,7 +67,7 @@ export const getTemplateDataStreamOptions = async ({
   name: string;
   client: IScopedClusterClient;
   isLegacy?: boolean;
-}) => {
+}): Promise<DataStreamOptions | undefined> => {
   if (isLegacy) {
     return undefined;
   }
@@ -78,13 +79,13 @@ export const getTemplateDataStreamOptions = async ({
     method: 'GET',
     path: `/_index_template/${name}`,
   });
-  // TBD: Replace with the following when the client includes data_stream_options in IndicesIndexTemplateSummary
+  // TODO: Replace with the following when the client includes data_stream_options in IndicesIndexTemplateSummary
+  // https://github.com/elastic/kibana/issues/220614
   // const existingTemplate = await client.asCurrentUser.indices.getIndexTemplate({
   //   name,
   // });
 
-  return (
-    existingTemplate?.index_templates?.[0]?.index_template?.template?.data_stream_options ??
-    undefined
-  );
+  return existingTemplate?.index_templates?.[0]?.index_template?.template?.data_stream_options as
+    | DataStreamOptions
+    | undefined;
 };
