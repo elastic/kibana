@@ -27,7 +27,11 @@ interface StartServiceArgs {
   license?: ILicense | null;
 }
 
-export const createStartServicesMock = ({ license }: StartServiceArgs = {}): StartServices => {
+type StartServicesWithRequiredLens = StartServices & Required<Pick<StartServices, 'lens'>>;
+
+export const createStartServicesMock = ({
+  license,
+}: StartServiceArgs = {}): StartServicesWithRequiredLens => {
   const licensingPluginMock = licensingMock.createStart();
   const triggersActionsUi = triggersActionsUiMock.createStart();
 
@@ -48,7 +52,7 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
       license != null
         ? { ...licensingPluginMock, license$: new BehaviorSubject(license) }
         : licensingPluginMock,
-  } as unknown as StartServices;
+  } as unknown as StartServicesWithRequiredLens;
 
   services.application.currentAppId$ = new BehaviorSubject<string>('testAppId');
   services.application.applications$ = new BehaviorSubject<Map<string, PublicAppInfo>>(
