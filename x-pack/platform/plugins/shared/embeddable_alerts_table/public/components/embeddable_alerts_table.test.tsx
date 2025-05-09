@@ -14,7 +14,6 @@ import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { PERSISTED_TABLE_CONFIG_KEY_PREFIX } from '../constants';
 import { EmbeddableAlertsTable } from './embeddable_alerts_table';
-import { GENERAL_CASES_OWNER } from '@kbn/cases-plugin/common';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 
 const queryClient = new QueryClient({
@@ -162,13 +161,10 @@ describe('EmbeddableAlertsTable', () => {
           showKeyboardShortcuts: false,
           showDisplaySelector: false,
         },
-        casesConfiguration: {
-          featureId: 'alerts',
-          owner: [GENERAL_CASES_OWNER],
-        },
         emptyStateHeight: 'flex',
         emptyStateVariant: 'transparent',
         flyoutOwnsFocus: true,
+        flyoutPagination: false,
         openLinksInNewTab: true,
         browserFields: {},
       }),
@@ -270,13 +266,10 @@ describe('EmbeddableAlertsTable', () => {
           showKeyboardShortcuts: false,
           showDisplaySelector: false,
         },
-        casesConfiguration: {
-          featureId: 'alerts',
-          owner: [GENERAL_CASES_OWNER],
-        },
         emptyStateHeight: 'flex',
         emptyStateVariant: 'transparent',
         flyoutOwnsFocus: true,
+        flyoutPagination: false,
         openLinksInNewTab: true,
         browserFields: {},
       }),
