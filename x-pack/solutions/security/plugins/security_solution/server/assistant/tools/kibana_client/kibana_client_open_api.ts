@@ -118,7 +118,7 @@ as much information as possible in the input.\n\
 1. This function should not be called in parallel.\
 2. As input you can provide a task that involves multiple steps e.g. do X and then do Y. The function able \
 to split the task into multiple steps and call the API for each step.\
-'
+',
     };
   }
 

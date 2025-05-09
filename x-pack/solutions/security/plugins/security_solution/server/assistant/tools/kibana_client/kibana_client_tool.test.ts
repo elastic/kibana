@@ -70,8 +70,8 @@ describe('Kibana client tool', () => {
     });
 
     it('tool is cached', async () => {
-      getMemoizedKibanaClientTool.cache.clear?.()
-      
+      getMemoizedKibanaClientTool.cache.clear?.();
+
       const loadTool1Start = Date.now();
       await KIBANA_CLIENT_TOOL.getTool(assistantToolParams);
       const loadTool1Duration = Date.now() - loadTool1Start;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import type { OperationOrWebhook } from './utils';
 import { formatToolName, isOperation, zodObjectHasRequiredProperties } from './utils';
 
@@ -44,18 +44,25 @@ describe('utils', () => {
 
   describe('zodHasRequiredProperties', () => {
     it.each([
-      [z.object({
-        name: z.string(),
-        age: z.number().optional(),
-      }), true],
-      [z.object(
-        {
+      [
+        z.object({
+          name: z.string(),
+          age: z.number().optional(),
+        }),
+        true,
+      ],
+      [
+        z.object({
           name: z.string(),
           age: z.number(),
-        },
-      ), true],
-    ])("check if zodHasRequiredProperties produces the correct result", (schema: z.ZodTypeAny, expected: boolean) => {
-      expect(zodObjectHasRequiredProperties(schema)).toEqual(expected);
-    });
+        }),
+        true,
+      ],
+    ])(
+      'check if zodHasRequiredProperties produces the correct result',
+      (schema: z.ZodTypeAny, expected: boolean) => {
+        expect(zodObjectHasRequiredProperties(schema)).toEqual(expected);
+      }
+    );
   });
 });

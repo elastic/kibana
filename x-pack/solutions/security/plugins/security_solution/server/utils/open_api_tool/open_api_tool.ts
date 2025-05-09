@@ -88,7 +88,8 @@ export abstract class OpenApiTool<T> {
       return z
         .any()
         .describe(
-          `${schema.description ? `${schema.description}\n\n` : ''
+          `${
+            schema.description ? `${schema.description}\n\n` : ''
           }One of (oneOf) the following schemas:\n${JSON.stringify(minifiedJsonSchema)}`
         ); // Fallback to providing the schema as a description
     }
@@ -122,7 +123,8 @@ export abstract class OpenApiTool<T> {
       return z
         .any()
         .describe(
-          `${schema.description ? `${schema.description}\n\n` : ''
+          `${
+            schema.description ? `${schema.description}\n\n` : ''
           }Any of (anyOf) the following schemas:\n${JSON.stringify(minifiedJsonSchema)}`
         ); // Fallback to providing the schema as a description
     }
@@ -185,9 +187,8 @@ export abstract class OpenApiTool<T> {
     return z.object(schemaTypeToZod);
   }
 
-
   /**
-   * Simple structure that groups tools by operation tags. Override 
+   * Simple structure that groups tools by operation tags. Override
    * this method to customize the tree structure.
    */
   protected async getOperationsStructure(): Promise<InternalNode> {
@@ -203,25 +204,24 @@ export abstract class OpenApiTool<T> {
       'tag'
     );
 
-    const children = Object.entries(groupedTags)
-      .map(([tag, operationsArr]): InternalNode => {
-        return new InternalNode({
-          name: formatToolName(`${tag}_agent`),
-          description: [
-            ...new Set(
-              operationsArr
-                .flatMap((operationArr) => operationArr.operation)
-                .flatMap((operation) => operation.getTags())
-                .filter((t) => t.name === tag)
-                .map((t) => t.description || t.name)
-                .filter((t) => !!t)
-            ),
-          ].join('\n'),
-          children: operationsArr
-            .flatMap((operationArr) => operationArr.operation)
-            .map((operation) => new OperationNode({ operationId: operation.getOperationId() }))
-        })
-      })
+    const children = Object.entries(groupedTags).map(([tag, operationsArr]): InternalNode => {
+      return new InternalNode({
+        name: formatToolName(`${tag}_agent`),
+        description: [
+          ...new Set(
+            operationsArr
+              .flatMap((operationArr) => operationArr.operation)
+              .flatMap((operation) => operation.getTags())
+              .filter((t) => t.name === tag)
+              .map((t) => t.description || t.name)
+              .filter((t) => !!t)
+          ),
+        ].join('\n'),
+        children: operationsArr
+          .flatMap((operationArr) => operationArr.operation)
+          .map((operation) => new OperationNode({ operationId: operation.getOperationId() })),
+      });
+    });
 
     const { name, description } = this.getRootToolDetails();
 
@@ -229,9 +229,9 @@ export abstract class OpenApiTool<T> {
       name,
       description,
       children,
-    })
+    });
 
-    return root
+    return root;
   }
 
   async getTool(args: T) {
@@ -254,11 +254,11 @@ export abstract class OpenApiTool<T> {
         });
       }
       throw new Error(`Unknown node type: ${node}`);
-    }
+    };
 
     const treeStructure = await this.getOperationsStructure();
 
-    const root = await helper(treeStructure)
+    const root = await helper(treeStructure);
     return root;
   }
 
