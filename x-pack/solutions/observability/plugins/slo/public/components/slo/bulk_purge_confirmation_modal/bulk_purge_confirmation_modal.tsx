@@ -83,6 +83,12 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
           });
       }}
     >
+      {i18n.translate('xpack.slo.bulkPurgeConfirmationModal.descriptionText', {
+        defaultMessage:
+          'This will purge rollup data for {count} SLOs according to the policy provided below.',
+        values: { count: items.length },
+      })}
+      <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.purgeTypeLabel', {
           defaultMessage: 'Purge type',
@@ -111,7 +117,6 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
           name="radio group"
         />
       </EuiFormRow>
-
       {purgeType === 'fixed_age' ? (
         <EuiFormRow
           label={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.purgeAgeLabel', {
@@ -153,7 +158,6 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
           <EuiDatePicker showTimeSelect selected={purgeDate} onChange={setPurgeDate} />
         </EuiFormRow>
       )}
-
       <EuiFormRow>
         <EuiCheckbox
           id={basicCheckboxId}
@@ -162,18 +166,10 @@ export function SloBulkPurgeConfirmationModal({ items, onCancel, onConfirm }: Pr
             setForgePurge(e.target.checked);
           }}
           label={i18n.translate('xpack.slo.bulkPurgeConfirmationModal.forcePurge', {
-            defaultMessage: 'Ignore purge restrictions',
+            defaultMessage: 'Ignore purge policy restrictions',
           })}
         />
       </EuiFormRow>
-
-      <EuiSpacer size="m" />
-
-      {i18n.translate('xpack.slo.bulkPurgeConfirmationModal.descriptionText', {
-        defaultMessage:
-          'This will purge rollup data for {count} SLOs according to the {type} provided.',
-        values: { count: items.length, type: purgeDisplayType },
-      })}
     </EuiConfirmModal>
   );
 }
