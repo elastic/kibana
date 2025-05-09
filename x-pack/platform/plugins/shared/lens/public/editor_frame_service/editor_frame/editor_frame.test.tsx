@@ -230,7 +230,7 @@ describe('editor_frame', () => {
       });
 
       // multiple calls due to some expression gen code that rely on it
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(7);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(8);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,

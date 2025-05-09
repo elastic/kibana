@@ -277,6 +277,7 @@ describe('context variables', () => {
             createMockedIndexPattern(),
             { fromDate: new Date().toISOString(), toDate: new Date().toISOString() },
             {},
+            100,
             100
           )
         ).toHaveLength(0);

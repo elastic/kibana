@@ -54,6 +54,7 @@ jest.mock('../dimension_panel/reference_editor', () => ({
   ReferenceEditor: () => null,
 }));
 const TARGET_BAR_COUNT = 100;
+const MAX_BAR_COUNT = 100;
 
 const CoreStartMock = createCoreStartMock();
 CoreStartMock.uiSettings.get.mockReturnValue(TARGET_BAR_COUNT);
@@ -3288,7 +3289,8 @@ describe('state_helpers', () => {
           toDate: '2022-11-03T00:00:00.000Z',
         },
         operationDefinitionMap,
-        TARGET_BAR_COUNT
+        TARGET_BAR_COUNT,
+        MAX_BAR_COUNT
       );
     });
   });
