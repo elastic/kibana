@@ -8,7 +8,13 @@
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
 import { BaseMessage } from '@langchain/core/messages';
-import { ContentReferencesStore, contentReferenceString, DocumentEntry, knowledgeBaseReference, removeContentReferences } from '@kbn/elastic-assistant-common';
+import {
+  ContentReferencesStore,
+  contentReferenceString,
+  DocumentEntry,
+  knowledgeBaseReference,
+  removeContentReferences,
+} from '@kbn/elastic-assistant-common';
 import { INCLUDE_CITATIONS } from '../../../../prompt/prompts';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getPrompt, promptDictionary } from '../../../../prompt';
@@ -49,7 +55,8 @@ export async function runAgent({
 }: RunAgentParams): Promise<Partial<AgentState>> {
   logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
-  const knowledgeHistory: DocumentEntry[] = await kbDataClient?.getRequiredKnowledgeBaseDocumentEntries() ?? [];
+  const knowledgeHistory: DocumentEntry[] =
+    (await kbDataClient?.getRequiredKnowledgeBaseDocumentEntries()) ?? [];
   const citedKnowledgeHistory = knowledgeHistory.map(enrichDocument(contentReferencesStore));
 
   const userPrompt =
@@ -99,7 +106,6 @@ const sanitizeChatHistory = (messages: BaseMessage[]): BaseMessage[] => {
   });
 };
 
-
 const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
   return (document: DocumentEntry): DocumentEntry => {
     if (document.id == null) {
@@ -111,7 +117,7 @@ const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
     );
     return {
       ...document,
-      text: `${contentReferenceString(reference)}\n${document.text}`
+      text: `${contentReferenceString(reference)}\n${document.text}`,
     };
   };
-}
+};
