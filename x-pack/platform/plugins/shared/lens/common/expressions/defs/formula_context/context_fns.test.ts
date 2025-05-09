@@ -5,27 +5,53 @@
  * 2.0.
  */
 
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { formulaIntervalFn, formulaNowFn, formulaTimeRangeFn } from './context_fns';
+import { faker } from '@faker-js/faker';
 
 describe('interval', () => {
-  it('should return 0 if no time range available', () => {
+  const getDatatable = (): Datatable => ({
+    type: 'datatable',
+    columns: [{ id: 'dateHistogram', name: 'Date', meta: { type: 'date' } }],
+    rows: faker.date.betweens({ from: '2025-01-01', to: '2025-12-31', count: 12 }).map((date) => ({
+      dateHistogram: +date,
+    })),
+  });
+  it('should not add any new interval column if no timeRange is passed', () => {
+    const datatable = getDatatable();
     // (not sure if this case is actually possible)
-    const result = formulaIntervalFn.fn(undefined, { targetBars: 100 }, {
-      getSearchContext: () => ({
-        /* no time range */
-      }),
-    } as ExecutionContext<Adapters>);
-    expect(result).toEqual(0);
+    const result = formulaIntervalFn.fn(
+      datatable,
+      { id: 'intervalColumn', dateHistogramColumn: 'dateHistogram' },
+      {
+        getSearchContext: () => ({
+          /* no time range */
+        }),
+      } as ExecutionContext<Adapters>
+    );
+    expect(result).toEqual(datatable);
   });
 
-  it('should return 0 if no targetBars is passed', () => {
+  it('should not add any new interval column if no dateHistogramColumn is passed', () => {
+    const datatable = getDatatable();
+    // (not sure if this case is actually possible)
+    const result = formulaIntervalFn.fn(datatable, { id: 'intervalColumn' }, {
+      getSearchContext: () => ({
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      }),
+    } as ExecutionContext<Adapters>);
+    expect(result).toEqual(datatable);
+  });
+
+  it('should return a valid value > 0 if both timeRange and targetBars is passed', () => {
+    const datatable = getDatatable();
     const result = formulaIntervalFn.fn(
-      undefined,
-      {
-        /* no targetBars */
-      },
+      datatable,
+      { id: 'intervalColumn', dateHistogramColumn: 'dateHistogram' },
       {
         getSearchContext: () => ({
           timeRange: {
@@ -35,19 +61,16 @@ describe('interval', () => {
         }),
       } as ExecutionContext<Adapters>
     );
-    expect(result).toEqual(0);
-  });
-
-  it('should return a valid value > 0 if both timeRange and targetBars is passed', () => {
-    const result = formulaIntervalFn.fn(undefined, { targetBars: 100 }, {
-      getSearchContext: () => ({
-        timeRange: {
-          from: 'now-15m',
-          to: 'now',
-        },
-      }),
-    } as ExecutionContext<Adapters>);
-    expect(result).toEqual(10000);
+    expect(result).toEqual(
+      expect.objectContaining({
+        columns: expect.arrayContaining([expect.objectContaining({ id: 'intervalColumn' })]),
+        rows: expect.arrayContaining([
+          expect.objectContaining({
+            intervalColumn: expect.any(Number),
+          }),
+        ]),
+      })
+    );
   });
 });
 

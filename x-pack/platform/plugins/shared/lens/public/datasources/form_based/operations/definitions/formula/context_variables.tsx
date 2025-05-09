@@ -6,9 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { partition } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
 import {
   buildExpressionFunction,
   buildExpression,
@@ -25,17 +23,12 @@ import type {
   GenericIndexPatternColumn,
 } from '../../../../..';
 import type { DateRange } from '../../../../../../common/types';
-import type {
-  FieldBasedOperationErrorMessage,
-  GenericOperationDefinition,
-  OperationDefinition,
-} from '..';
+import type { FieldBasedOperationErrorMessage, OperationDefinition } from '..';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../../../types';
 import {
   INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL,
   INTERVAL_OP_MISSING_TIME_RANGE,
-  INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
   TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
   TIMERANGE_OP_MISSING_TIME_RANGE,
 } from '../../../../../user_messages_ids';
@@ -44,16 +37,14 @@ import {
 // TODO: split layer_helpers util into pure/non-pure functions to avoid issues with tests
 export function getColumnOrder(layer: FormBasedLayer): string[] {
   const entries = Object.entries(layer.columns);
+  const idToIndex = new Map<string, number>(layer.columnOrder.map((id, index) => [id, index]));
   entries.sort(([idA], [idB]) => {
-    const indexA = layer.columnOrder.indexOf(idA);
-    const indexB = layer.columnOrder.indexOf(idB);
+    const indexA = idToIndex.get(idA) ?? -1;
+    const indexB = idToIndex.get(idB) ?? -1;
     if (indexA > -1 && indexB > -1) {
       return indexA - indexB;
-    } else if (indexA > -1) {
-      return -1;
-    } else {
-      return 1;
     }
+    return indexA > -1 ? -1 : 1;
   });
 
   const [aggregations, metrics] = partition(entries, ([, col]) => col.isBucketed);
@@ -72,8 +63,8 @@ export function isColumnOfType<C extends GenericIndexPatternColumn>(
 export interface ContextValues {
   dateRange?: DateRange;
   now?: Date;
-  targetBars?: number;
   dateHistogramColumn?: string;
+  columnId: string;
 }
 
 export interface TimeRangeIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
@@ -144,22 +135,9 @@ function getIntervalErrorMessages(
   layer: FormBasedLayer,
   columnId: string,
   indexPattern: IndexPattern,
-  dateRange?: DateRange | undefined,
-  operationDefinitionMap?: Record<string, GenericOperationDefinition> | undefined,
-  targetBars?: number
+  dateRange?: DateRange | undefined
 ): FieldBasedOperationErrorMessage[] {
   const errors: FieldBasedOperationErrorMessage[] = [];
-  if (!targetBars) {
-    errors.push({
-      uniqueId: INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET,
-      message: i18n.translate('xpack.lens.indexPattern.interval.noTargetBars', {
-        defaultMessage: `Missing "{uiSettingVar}" value`,
-        values: {
-          uiSettingVar: UI_SETTINGS.HISTOGRAM_BAR_TARGET,
-        },
-      }),
-    });
-  }
   if (!dateRange) {
     errors.push({
       uniqueId: INTERVAL_OP_MISSING_TIME_RANGE,
@@ -189,13 +167,14 @@ export const intervalOperation = createContextValueBasedOperation<IntervalIndexP
   description: i18n.translate('xpack.lens.formula.interval.help', {
     defaultMessage: 'The specified minimum interval for the date histogram, in milliseconds (ms).',
   }),
-  getExpressionFunction: ({ targetBars, dateHistogramColumn }: ContextValues) =>
+  getExpressionFunction: ({ dateHistogramColumn, columnId }: ContextValues) =>
     buildExpressionFunction<ExpressionFunctionFormulaInterval>('formula_interval', {
-      targetBars,
-      id: uuidv4(),
+      id: columnId,
       dateHistogramColumn,
     }),
+
   getErrorMessage: getIntervalErrorMessages,
+  options: { unwrapExpressionFunction: true },
 });
 
 export type ConstantsIndexPatternColumn =
@@ -209,12 +188,14 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
   getExpressionFunction,
   getErrorMessage,
   description,
+  options,
 }: {
   label: string;
   type: ColumnType['operationType'];
   description: string;
   getExpressionFunction: (context: ContextValues) => ReturnType<typeof buildExpressionFunction>;
   getErrorMessage: OperationDefinition<ColumnType, 'managedReference'>['getErrorMessage'];
+  options?: { unwrapExpressionFunction?: boolean };
 }): OperationDefinition<ColumnType, 'managedReference'> {
   return {
     type,
@@ -251,15 +232,21 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
         Object.entries(layer.columns).find(([id, c]) =>
           isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', c)
         ) || [];
-      return [
-        buildExpressionFunction<ExpressionFunctionDefinitions['math_column']>('mathColumn', {
-          id: columnId,
-          name: column.label,
-          expression: buildExpression([
-            getExpressionFunction({ ...context, dateHistogramColumn: dateHistogramColumnId }),
-          ]),
-        }).toAst(),
-      ];
+
+      const expressionFunction = getExpressionFunction({
+        ...context,
+        dateHistogramColumn: dateHistogramColumnId,
+        columnId,
+      });
+      // Interval operation doesn't need to be wrapped in a math column function
+      const finalExpressionFunction = options?.unwrapExpressionFunction
+        ? expressionFunction
+        : buildExpressionFunction<ExpressionFunctionDefinitions['math_column']>('mathColumn', {
+            id: columnId,
+            name: column.label,
+            expression: buildExpression([expressionFunction]),
+          });
+      return [finalExpressionFunction.toAst()];
     },
     createCopy(layers, source, target) {
       const currentColumn = layers[source.layerId].columns[source.columnId] as ColumnType;

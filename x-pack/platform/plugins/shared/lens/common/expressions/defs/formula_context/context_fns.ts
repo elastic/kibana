@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAbsoluteTimeRange, calcAutoIntervalNear } from '@kbn/data-plugin/common';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
@@ -46,7 +46,6 @@ export type ExpressionFunctionFormulaInterval = ExpressionFunctionDefinition<
   'formula_interval',
   Datatable,
   {
-    targetBars?: number;
     dateHistogramColumn?: string;
     id: string;
   },
@@ -61,12 +60,6 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
   }),
 
   args: {
-    targetBars: {
-      types: ['number'],
-      help: i18n.translate('xpack.lens.formula.interval.targetBars.help', {
-        defaultMessage: 'The target number of bars for the date histogram.',
-      }),
-    },
     id: {
       types: ['string'],
       help: i18n.translate('xpack.lens.formula.interval.id.help', {
@@ -79,39 +72,30 @@ export const formulaIntervalFn: ExpressionFunctionFormulaInterval = {
       help: i18n.translate('xpack.lens.formula.interval.dateHistogramColumn.help', {
         defaultMessage: 'The date histogram column id to use for the interval calculation.',
       }),
+      required: true,
     },
   },
 
   fn(input, args, { getSearchContext }) {
     const { timeRange, now } = getSearchContext();
-    if (input?.rows) {
-      const endRange = timeRange
-        ? moment(
-            getAbsoluteTimeRange(timeRange, now != null ? { forceNow: new Date(now) } : {}).to
-          ).valueOf()
-        : 0;
-      const fixedInterval =
-        timeRange && args.targetBars
-          ? calcAutoIntervalNear(
-              args.targetBars,
-              getTimeRangeAsNumber(timeRange, now)
-            ).asMilliseconds()
-          : 0;
+    if (timeRange && input?.rows && args.dateHistogramColumn) {
+      const endRange = moment(
+        getAbsoluteTimeRange(timeRange, now != null ? { forceNow: new Date(now) } : {}).to
+      ).valueOf();
       const dateHistogramId = args.dateHistogramColumn;
-      const intervalFn = dateHistogramId
-        ? (i: number) => {
-            return (
-              (input.rows[i + 1]?.[dateHistogramId] ?? endRange) - input.rows[i][dateHistogramId]
-            );
-          }
-        : () => fixedInterval;
-      input.rows.forEach((row, i) => {
-        const interval = intervalFn(i);
-        row[args.id] = interval;
-        return row;
-      });
-      input.columns.push({ id: args.id, name: 'Formula interval', meta: { type: 'number' } });
-      return input;
+      return {
+        ...input,
+        columns: [
+          ...input.columns,
+          { id: args.id, name: 'Formula interval', meta: { type: 'number' } },
+        ],
+        rows: input.rows.map((row, i) => {
+          const interval =
+            (input.rows[i + 1]?.[dateHistogramId!] ?? endRange) - input.rows[i][dateHistogramId!];
+          row[args.id] = interval;
+          return row;
+        }),
+      };
     }
     return input;
   },

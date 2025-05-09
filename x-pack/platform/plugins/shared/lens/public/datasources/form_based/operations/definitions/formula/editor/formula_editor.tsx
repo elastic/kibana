@@ -30,7 +30,6 @@ import {
 import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useDebounceWithOptions } from '../../../../../../shared_components';
 import { ParamEditorProps } from '../..';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
@@ -356,8 +355,7 @@ export function FormulaEditor({
                   id,
                   indexPattern,
                   dateRange,
-                  visibleOperationsMap,
-                  uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
+                  visibleOperationsMap
                 );
                 if (messages.length) {
                   const startPosition = offsetToRowColumn(text, locations[id].min);
