@@ -56,7 +56,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     before(async () => {
       await importModel(getService, { modelId: TINY_ELSER_MODEL_ID });
       await createTinyElserInferenceEndpoint(getService, { inferenceId: TINY_ELSER_INFERENCE_ID });
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient, TINY_ELSER_INFERENCE_ID);
+      await setupKnowledgeBase(getService, TINY_ELSER_INFERENCE_ID);
       await waitForKnowledgeBaseReady(getService);
 
       // ingest documents
@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await createTinyTextEmbeddingInferenceEndpoint(getService, {
         inferenceId: TINY_TEXT_EMBEDDING_INFERENCE_ID,
       });
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient, TINY_TEXT_EMBEDDING_INFERENCE_ID);
+      await setupKnowledgeBase(getService, TINY_TEXT_EMBEDDING_INFERENCE_ID);
 
       await waitForKnowledgeBaseIndex(getService, '.kibana-observability-ai-assistant-kb-000002');
       await waitForKnowledgeBaseReady(getService);
