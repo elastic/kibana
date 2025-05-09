@@ -10,9 +10,7 @@ permissions:
 
 jobs:
   matches_label:
-    if: |
-      contains(github.event.issue.labels.*.name, 'trigger-chromium-build') 
-      && (github.event.issue.author_association == 'MEMBER' || github.event.issue.author_association == 'COLLABORATOR')
+    if: ${{ contains(github.event.issue.labels.*.name, 'trigger-chromium-build') && contains(fromJSON('["MEMBER", "COLLABORATOR"]'), github.event.issue.author_association) }}
     runs-on: ubuntu-latest
     outputs:
       version_bump_config: ${{ steps.extract_version_bump_config.outputs.result }}
