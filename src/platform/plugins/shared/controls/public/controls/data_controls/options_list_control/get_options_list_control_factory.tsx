@@ -331,9 +331,6 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         ...selectionsManager.api,
         ...temporaryStateManager.api,
         loadMoreSubject,
-        totalCardinality$: temporaryStateManager.api.totalCardinality$,
-        availableOptions$: temporaryStateManager.api.availableOptions$,
-        invalidSelections$: temporaryStateManager.api.invalidSelections$,
         deselectOption: (key: string | undefined) => {
           const field = api.field$.getValue();
           if (!key || !field) {
