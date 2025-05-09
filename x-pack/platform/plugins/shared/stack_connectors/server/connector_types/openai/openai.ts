@@ -200,6 +200,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     }
     return `API Error: ${error.response?.statusText}${errorMessage ? ` - ${errorMessage}` : ''}`;
   }
+
   /**
    * responsible for making a POST request to the external API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.
@@ -266,6 +267,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       stream,
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
+
     const axiosOptions = getAxiosOptions(this.provider, this.key, stream);
     try {
       const response = await this.request(
