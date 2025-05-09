@@ -62,6 +62,7 @@ import {
   BulkUninstallPackagesRequestSchema,
   CustomIntegrationRequestSchema,
   DeletePackageInputAssetsRequestSchema,
+  DeletePackageInputAssetsResponseSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -864,7 +865,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           request: DeletePackageInputAssetsRequestSchema,
           response: {
             200: {
-              body: () => InstallKibanaAssetsResponseSchema, // TODO verify
+              body: () => DeletePackageInputAssetsResponseSchema,
             },
             400: {
               body: genericErrorResponse,

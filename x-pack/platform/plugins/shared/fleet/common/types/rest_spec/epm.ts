@@ -232,3 +232,17 @@ export type GetInputsTemplatesResponse =
   | {
       inputs: any;
     };
+
+export interface DeletePackageInputAssetsRequest {
+  params: {
+    pkgName: string;
+    pkgVersion: string;
+  };
+  query: {
+    packagePolicyId: string;
+  };
+}
+
+export interface DeletePackageInputAssetsResponse {
+  success: boolean;
+}

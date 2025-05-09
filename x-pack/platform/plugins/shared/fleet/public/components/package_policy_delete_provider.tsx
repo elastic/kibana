@@ -19,13 +19,16 @@ import {
   useMultipleAgentPolicies,
   useLink,
   useDeletePackagePolicyMutation,
+  sendDeleteInputPackageAssets,
 } from '../hooks';
 import { AGENTS_PREFIX } from '../../common/constants';
-import type { AgentPolicy } from '../types';
+import type { AgentPolicy, PackagePolicyPackage } from '../types';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
   from?: 'fleet-policy-list' | undefined;
+  showInputPackageWarning?: boolean;
+  packagePolicyPackage?: PackagePolicyPackage;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }
 
@@ -40,6 +43,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   agentPolicies,
   from,
   children,
+  showInputPackageWarning,
+  packagePolicyPackage,
 }) => {
   const { notifications } = useStartServices();
   const {
@@ -56,7 +61,6 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const { mutateAsync: deletePackagePolicyMutationAsync } = useDeletePackagePolicyMutation();
-
   const isShared = useMemo(() => {
     if (agentPolicies?.length !== 1) {
       return false;
@@ -122,7 +126,6 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
 
   const deletePackagePolicies = useCallback(async () => {
     setIsLoading(true);
-
     try {
       const data = await deletePackagePolicyMutationAsync({ packagePolicyIds: packagePolicies });
       const successfulResults = data?.filter((result) => result.success) || [];
@@ -180,6 +183,13 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       if (onSuccessCallback.current) {
         onSuccessCallback.current(successfulResults.map((result) => result.id));
       }
+
+      if (showInputPackageWarning && packagePolicyPackage) {
+        const deleteAssetsResponse = await sendDeleteInputPackageAssets(
+          { pkgName: packagePolicyPackage.name, pkgVersion: packagePolicyPackage.version },
+          { packagePolicyId: packagePolicies[0] }
+        );
+      }
     } catch (e) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.fleet.deletePackagePolicy.fatalErrorNotificationTitle', {
@@ -189,14 +199,16 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     }
     closeModal();
   }, [
-    closeModal,
     packagePolicies,
-    notifications.toasts,
-    agentPolicies,
+    closeModal,
     deletePackagePolicyMutationAsync,
-    getPath,
-    history,
+    showInputPackageWarning,
+    packagePolicyPackage,
+    agentPolicies,
+    notifications.toasts,
     from,
+    history,
+    getPath,
   ]);
 
   const renderModal = () => {
@@ -251,6 +263,22 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         confirmButtonDisabled={isLoading || isLoadingAgentsCount}
       >
+        {showInputPackageWarning && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="alert"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.deletePackagePolicy.confirmModal.inputPackage.message"
+                  defaultMessage="This action will also remove the installed assets"
+                />
+              }
+              data-test-subj="InputPackageCallOut"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {(hasMultipleAgentPolicies || isShared) && (
           <>
             <EuiCallOut

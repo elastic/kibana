@@ -145,6 +145,12 @@ export const epmRouteService = {
   getUpdateCustomIntegrationsPath: (pkgName: string) => {
     return EPM_API_ROUTES.UPDATE_CUSTOM_INTEGRATIONS_PATTERN.replace('{pkgName}', pkgName);
   },
+  getDeleteInputPackageAssets: (pkgName: string, pkgVersion: string) => {
+    return EPM_API_ROUTES.INPUT_PACKAGES_PATTERN.replace('{pkgName}', pkgName).replace(
+      '{pkgVersion}',
+      pkgVersion
+    );
+  },
 };
 
 export const packagePolicyRouteService = {
