@@ -295,7 +295,6 @@ describe('logs_explorer_url_schema', () => {
     });
 
     it('should handle undefined display options', () => {
-      // @ts-expect-error
       const result = getDiscoverColumnsWithFallbackFieldsFromDisplayOptions(undefined);
       expect(result).toEqual(undefined);
     });

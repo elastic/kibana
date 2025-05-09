@@ -58,7 +58,6 @@ export const DiscoverRedirect = ({
       : hydrateDataSourceSelection(DEFAULT_ALL_SELECTION);
 
     const discoverParams: DiscoverAppLocatorParams = {
-      indexPatternId: dataViewSpec.id,
       timeRange: parsedState.time,
       refreshInterval: parsedState.refreshInterval,
       filters: getDiscoverFiltersFromState(dataViewSpec.id, parsedState.filters),
@@ -72,6 +71,19 @@ export const DiscoverRedirect = ({
         rowsPerPage: parsedState.grid?.rows?.rowsPerPage,
       },
     };
+
+    if (parsedState.dataSourceSelection) {
+      if (
+        parsedState.dataSourceSelection.selectionType === 'single' ||
+        parsedState.dataSourceSelection.selectionType === 'unresolved'
+      ) {
+        discoverParams.dataViewSpec = dataViewSpec;
+      } else {
+        discoverParams.dataViewId = dataViewSpec.id;
+      }
+    } else {
+      discoverParams.dataViewId = dataViewSpec.id;
+    }
 
     discover.locator?.navigate(discoverParams);
   } else {

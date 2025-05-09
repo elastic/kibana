@@ -11,8 +11,8 @@ import { SMART_FALLBACK_FIELDS } from '@kbn/discover-utils';
 import { ExistsFilter, Filter, PhrasesFilter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
-import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src/data_types/logs/utils';
-import type {
+
+import {
   Column,
   DataSourceSelectionPlain,
   DataViewSelectionPayload,
@@ -50,9 +50,9 @@ export const hydrateDataSourceSelection = (
   dataSourceSelection: DataSourceSelectionPlain
 ): DataViewSpecWithId => {
   if (dataSourceSelection.selectionType === 'all') {
-    return getAllLogsDataViewSpec({
-      allLogsIndexPattern: 'logs-*,dataset-logs-*-*',
-    });
+    return {
+      id: 'discover-observability-solution-all-logs',
+    };
   } else if (dataSourceSelection.selectionType === 'single' && dataSourceSelection.selection) {
     const selection = dataSourceSelection.selection as SingleDatasetSelectionPayload;
     return {
@@ -134,8 +134,8 @@ const convertToPublicState = (schema: UrlSchemaV2): LogsExplorerPublicState => (
 });
 
 export const getDiscoverColumnsWithFallbackFieldsFromDisplayOptions = (
-  displayOptions: DisplayOptions
-): DiscoverAppState['columns'] =>
+  displayOptions: DisplayOptions | undefined
+): DiscoverAppState['columns'] | undefined =>
   displayOptions?.grid.columns?.flatMap((column) => {
     if (column.type === 'document-field' && column.field) {
       return column.field;
