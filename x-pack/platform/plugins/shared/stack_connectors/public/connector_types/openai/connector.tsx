@@ -59,7 +59,16 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
   const hasPKI = __internal__ != null ? __internal__.hasPKI : false;
-  const hasPKIDefaultValue = !!getFieldDefaultValue<boolean | undefined>('__internal__.hasPKI');
+  const hasPKIDefaultValue = useMemo(
+    () =>
+      !!getFieldDefaultValue<boolean | undefined>('config.certificateFile') ||
+      !!getFieldDefaultValue<boolean | undefined>('config.certificateData') ||
+      !!getFieldDefaultValue<boolean | undefined>('config.privateKeyFile') ||
+      !!getFieldDefaultValue<boolean | undefined>('config.privateKeyData') ||
+      !!getFieldDefaultValue<boolean | undefined>('config.caFile') ||
+      !!getFieldDefaultValue<boolean | undefined>('config.caData'),
+    [getFieldDefaultValue]
+  );
 
   const selectedProviderDefaultValue = useMemo(
     () =>
