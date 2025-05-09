@@ -786,6 +786,7 @@ x-pack/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-
 x-pack/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget @elastic/response-ops
 src/platform/test/plugin_functional/plugins/saved_object_export_transforms @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/saved_object_import_warnings @elastic/kibana-core
+x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
 src/platform/plugins/shared/saved_objects_finder @elastic/kibana-data-discovery
 src/platform/test/plugin_functional/plugins/saved_objects_hidden_from_http_apis_type @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/saved_objects_hidden_type @elastic/kibana-core
@@ -994,7 +995,6 @@ src/platform/test
 x-pack/test
 x-pack/performance @elastic/appex-qa
 x-pack/platform/test
-x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
 x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
@@ -2708,6 +2708,13 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 ## These rules are always last so they take ultimate priority over everything else
 ####
 
+####
+## These rules are always last so they take ultimate priority over everything else
+####
+
+# See https://github.com/elastic/kibana/pull/199404
+# Prevent backport assignments
+* @kibanamachine
 ####
 ## These rules are always last so they take ultimate priority over everything else
 ####
