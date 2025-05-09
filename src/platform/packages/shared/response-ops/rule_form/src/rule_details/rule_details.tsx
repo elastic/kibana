@@ -167,7 +167,7 @@ function useContainerRef() {
 
     observer.observe(ref.current);
 
-    return () => observer.disconnect();
+    return observer.disconnect;
   }, []);
 
   return { ref, size };
