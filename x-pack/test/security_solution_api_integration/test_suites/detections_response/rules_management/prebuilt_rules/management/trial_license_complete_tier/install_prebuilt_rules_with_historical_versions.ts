@@ -106,7 +106,6 @@ export default ({ getService }: FtrProviderContext): void => {
         await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
           createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
         ]);
-        console;
         await installPrebuiltRulesAndTimelines(es, supertest);
 
         // create connector/action
