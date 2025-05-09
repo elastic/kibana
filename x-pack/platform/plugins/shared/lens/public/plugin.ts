@@ -409,7 +409,7 @@ export class LensPlugin {
           container.addNewPanel({
             panelType: LENS_EMBEDDABLE_TYPE,
             initialState: state,
-          });
+          }, true);
         },
         savedObjectType: LENS_EMBEDDABLE_TYPE,
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {

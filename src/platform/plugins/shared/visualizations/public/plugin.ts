@@ -415,7 +415,7 @@ export class VisualizationsPlugin
         container.addNewPanel<VisualizeSerializedState>({
           panelType: VISUALIZE_EMBEDDABLE_TYPE,
           initialState,
-        });
+        }, true);
       },
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
       savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
