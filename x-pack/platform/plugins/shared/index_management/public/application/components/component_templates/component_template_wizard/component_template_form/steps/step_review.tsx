@@ -60,8 +60,6 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
   ({ dataStreams, canRollover, componentTemplate, dataStreamOptions }) => {
     const { name } = componentTemplate;
 
-    console.log('dataStreamOptions', dataStreamOptions);
-
     const serializedComponentTemplate = serializeComponentTemplate(
       stripEmptyFields(componentTemplate, {
         types: ['string'],
