@@ -36,34 +36,6 @@ export const DateFormatsField = ({ onGenerate }: { onGenerate?: () => void }) =>
 
   const { invalid, error } = fieldState;
   const { ref, ...inputProps } = field;
-  //   async ({ signal }) => {
-  //     const dates = previewDocuments.map((doc) => doc[fieldName]).filter(Boolean);
-
-  //     // Short-circuit if the formats is touched by the user, formats are already set, or no date sampels are available
-  //     if (isTouched || !isEmpty(field.value) || isEmpty(dates)) return;
-
-  //     const suggestions = await streamsRepositoryClient.fetch(
-  //       'POST /internal/streams/{name}/processing/_suggestions/date',
-  //       {
-  //         signal,
-  //         params: {
-  //           path: {
-  //             name: definitionName,
-  //           },
-  //           body: {
-  //             dates: dates as [string, ...string[]], // At least one date is required by the API
-  //           },
-  //         },
-  //       }
-  //     );
-
-  //     if (!isEmpty(suggestions.formats)) {
-  //       field.onChange(suggestions.formats);
-  //       // form.setValue('formats', suggestions.formats);
-  //     }
-  //   },
-  //   [definitionName, field, fieldName, isTouched, previewDocuments, streamsRepositoryClient]
-  // );
 
   return (
     <EuiFormRow
