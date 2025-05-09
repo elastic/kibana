@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, type RenderResult } from '@testing-library/react';
+import { act, fireEvent, render, waitFor, type RenderResult } from '@testing-library/react';
 import { TestProvider } from '../../../../../mocks/test_provider';
 import { parseNDJSON, parseJSONArray, SampleLogsInput } from './sample_logs_input';
 import { ActionsProvider } from '../../state';
@@ -22,7 +22,7 @@ const changeFile = async (input: HTMLElement, file: File) => {
   await act(async () => {
     fireEvent.change(input, { target: { files: [file] } });
   });
-  expect(input).toHaveAttribute('data-loading', 'false');
+  await waitFor(() => expect(input).toHaveAttribute('data-loading', 'false'));
 };
 
 const simpleNDJSON = `{"message":"test message 1"}\n{"message":"test message 2"}`;

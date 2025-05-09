@@ -656,9 +656,11 @@ async function typeInCustomComboBoxOption({
   optionText: string;
 }) {
   await showEuiComboBoxOptions(comboBoxToggleButton);
+  await act(async () => {
+    fireEvent.change(document.activeElement as HTMLInputElement, { target: { value: optionText } });
+  });
 
   return act(async () => {
-    fireEvent.change(document.activeElement as HTMLInputElement, { target: { value: optionText } });
     fireEvent.keyDown(document.activeElement as HTMLInputElement, { key: 'Enter' });
   });
 }
