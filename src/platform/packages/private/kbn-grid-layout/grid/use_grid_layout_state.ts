@@ -12,15 +12,13 @@ import { cloneDeep, pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import {
   BehaviorSubject,
+  Observable,
   combineLatest,
   debounceTime,
   distinctUntilChanged,
   filter,
   map,
   merge,
-  pairwise,
-  startWith,
-  withLatestFrom,
 } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
@@ -37,7 +35,7 @@ import {
   RuntimeGridSettings,
 } from './types';
 import { getGridLayout, getOrderedLayout } from './utils/conversions';
-import { isOrderedLayoutEqual } from './utils/equality_checks';
+import { isLayoutEqual } from './utils/equality_checks';
 import { shouldShowMobileView } from './utils/mobile_view';
 
 export const useGridLayoutState = ({
@@ -110,20 +108,16 @@ export const useGridLayoutState = ({
     const activePanelEvent$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);
 
-    const panelDropped$ = merge(activePanelEvent$, activeRowEvent$).pipe(
-      pairwise(),
-      map(([hasEventBefore, hasEventAfter]) => {
-        return Boolean(hasEventBefore) && !Boolean(hasEventAfter);
-      }),
-      filter((eventEnded) => eventEnded)
-    );
-    const layoutUpdated$ = panelDropped$.pipe(
-      startWith(true),
-      withLatestFrom(gridLayout$),
-      distinctUntilChanged(([, before], [, after]) => {
-        return isOrderedLayoutEqual(before, after);
-      }),
-      map(([, updatedLayout]) => getGridLayout(updatedLayout))
+    const layoutUpdated$: Observable<GridLayoutData> = combineLatest([
+      gridLayout$,
+      merge(activePanelEvent$, activeRowEvent$),
+    ]).pipe(
+      // if an interaction event is happening, then ignore any "draft" layout changes
+      filter(([_, event]) => !Boolean(event)),
+      // once no interaction event, convert to the grid data format
+      map(([newLayout]) => getGridLayout(newLayout)),
+      // only emit if the layout has changed
+      distinctUntilChanged(isLayoutEqual)
     );
 
     return {
