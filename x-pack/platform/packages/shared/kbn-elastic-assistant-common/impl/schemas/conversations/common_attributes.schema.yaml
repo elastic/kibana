@@ -99,6 +99,25 @@ components:
               description: ID of the Alert
               type: string
 
+    HrefContentReference:
+      description: References an external URL
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'href'
+          properties:
+            type: 
+              type: string
+              enum: [Href]
+            label:
+              description: Label of the query
+              type: string
+            href:
+              description: URL to the external resource
+              type: string
+
     SecurityAlertsPageContentReference:
       description: References the security alerts page
       allOf:
@@ -139,6 +158,7 @@ components:
         - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
         - $ref: '#/components/schemas/ProductDocumentationContentReference'
         - $ref: '#/components/schemas/EsqlContentReference'
+        - $ref: '#/components/schemas/HrefContentReference'
           additionalProperties: false
 
     ContentReferences:
@@ -150,6 +170,7 @@ components:
           - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
           - $ref: '#/components/schemas/ProductDocumentationContentReference'
           - $ref: '#/components/schemas/EsqlContentReference'
+          - $ref: '#/components/schemas/HrefContentReference'
             additionalProperties: false
       type: object
 
