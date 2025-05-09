@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
 
   const start = moment().subtract(30, 'minutes').valueOf();
-  const end = moment().valueOf();
+  const end = moment().add(30, 'minutes').valueOf();
 
   describe('observability logs getDocViewer ', function () {
     before(async () => {

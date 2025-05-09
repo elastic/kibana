@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
 
   const start = moment().subtract(30, 'minutes').valueOf();
-  const end = moment().valueOf();
+  const end = moment().add(30, 'minutes').valueOf();
 
   const searchQuery = 'error.stack_trace : * and _ignored : *';
 
