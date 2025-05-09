@@ -42,9 +42,9 @@ export const FeatureTableCell = ({ feature, hasSubFeturePrivileges }: Props) => 
     <EuiFlexGroup
       css={
         !hasSubFeturePrivileges &&
-        css({
-          marginLeft: `calc(${euiTheme.size.l} + ${euiTheme.size.xs})`,
-        })
+        css`
+          margin-left: calc(${euiTheme.size.l} + ${euiTheme.size.xs});
+        `
       }
       direction="column"
       gutterSize="none"

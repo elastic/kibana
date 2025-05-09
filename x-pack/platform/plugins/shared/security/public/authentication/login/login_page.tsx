@@ -152,19 +152,22 @@ export class LoginPage extends Component<Props, State> {
         : allowLogin && layout === 'form';
 
     const loginWelcomeStyle = (euiTheme: EuiThemeComputed) =>
-      css({
-        position: 'relative',
-        margin: 'auto',
-        maxWidth: '460px',
-        paddingLeft: euiTheme.size.xl,
-        paddingRight: euiTheme.size.xl,
-        zIndex: 10,
-        textAlign: 'center',
-      });
+      css`
+        position: relative;
+        margin: auto;
+        max-width: 460px;
+        padding-left: ${euiTheme.size.xl};
+        padding-right: ${euiTheme.size.xl};
+        z-index: 10;
+        text-align: center;
+      `;
 
     const contentHeaderStyles = (euiTheme: EuiThemeComputed) => [
       loginWelcomeStyle(euiTheme),
-      !loginIsSupported && css({ maxWidth: '700px' }),
+      !loginIsSupported &&
+        css`
+          max-width: 700px;
+        `,
     ];
 
     const customLogo = this.state.customBranding?.logo;
@@ -178,23 +181,19 @@ export class LoginPage extends Component<Props, State> {
     return (
       <Container>
         <header
-          css={({ euiTheme }) =>
-            css({
-              marginTop: `calc(${euiTheme.size.xxl} * 3)`,
-              position: 'relative',
-              padding: euiTheme.size.base,
-              zIndex: 10,
-            })
-          }
+          css={({ euiTheme }) => css`
+            margin-top: calc(${euiTheme.size.xxl} * 3);
+            position: relative;
+            padding: ${euiTheme.size.base};
+            z-index: 10;
+          `}
         >
           <div css={({ euiTheme }) => contentHeaderStyles(euiTheme)}>
             <span
-              css={({ euiTheme }) =>
-                css({
-                  marginBottom: euiTheme.size.xl,
-                  display: 'inline-block',
-                })
-              }
+              css={({ euiTheme }) => css`
+                margin-bottom: ${euiTheme.size.xl};
+                display: inline-block;
+              `}
               style={logoStyle}
             >
               {logo}

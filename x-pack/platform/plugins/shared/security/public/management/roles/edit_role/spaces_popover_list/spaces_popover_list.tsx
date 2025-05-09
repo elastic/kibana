@@ -44,7 +44,13 @@ const EmptyButton: FC<ButtonProps> = ({ onButtonClick, buttonText }) => {
   const { fontSize } = useEuiFontSize('xs');
   return (
     <EuiButtonEmpty size={'xs'} onClick={onButtonClick}>
-      <span css={() => css({ fontSize })}>{buttonText}</span>
+      <span
+        css={css`
+          font-size: ${fontSize};
+        `}
+      >
+        {buttonText}
+      </span>
     </EuiButtonEmpty>
   );
 };

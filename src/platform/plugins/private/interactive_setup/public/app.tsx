@@ -60,19 +60,19 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
   return (
     <div css={fullScreenGraphicsMixinStyles(Number(euiTheme.levels.navigation), theme)}>
       <header
-        css={css({
-          position: 'relative',
-          zIndex: 10,
-          padding: euiTheme.size.xl,
-          textAlign: 'center',
-        })}
+        css={css`
+          position: relative;
+          z-index: 10;
+          padding: ${euiTheme.size.xl};
+          text-align: center;
+        `}
       >
         <EuiSpacer size="xxl" />
         <span
           css={css`
             margin-bottom: ${euiTheme.size.xl};
-            display: 'inline-block';
-            ${euiShadowM}
+            display: inline-block;
+            ${euiShadowM};
           `}
         >
           <EuiIcon type="logoElastic" size="xxl" />
@@ -88,15 +88,15 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
         <EuiSpacer size="xl" />
       </header>
       <div
-        css={css({
-          position: 'relative',
-          zIndex: 10,
-          margin: 'auto',
-          marginBottom: euiTheme.size.xl,
-          maxWidth: `calc(${euiTheme.breakpoint.s} - ${euiTheme.size.xl})`,
-          paddingLeft: euiTheme.size.xl,
-          paddingRight: euiTheme.size.xl,
-        })}
+        css={css`
+          position: 'relative';
+          zindex: 10;
+          margin: 'auto';
+          marginbottom: euiTheme.size.xl;
+          maxwidth: calc(${euiTheme.breakpoint.s} - ${euiTheme.size.xl});
+          paddingleft: euiTheme.size.xl;
+          paddingright: euiTheme.size.xl;
+        `}
       >
         <EuiPanel paddingSize="l">
           <div hidden={page !== 'token'}>

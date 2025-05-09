@@ -80,9 +80,9 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
       <EuiPanel paddingSize="none">
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem
-            css={css({
-              overFlowY: 'hidden',
-            })}
+            css={css`
+              overflow-y: hidden;
+            `}
           >
             <div
               css={({ euiTheme }) =>
@@ -100,12 +100,16 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
           </EuiFlexItem>
           <EuiFlexItem
             css={({ euiTheme }) =>
-              css({
-                padding: `${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l}`,
-              })
+              css`
+                padding: ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
+              `
             }
           >
-            <div css={css({ textAlign: 'left' })}>
+            <div
+              css={css`
+                text-align: left;
+              `}
+            >
               <EuiButton
                 fill
                 type="submit"
@@ -133,9 +137,9 @@ export function AccessAgreementPage({ http, fatalErrors, notifications }: Props)
 
   return (
     <AuthenticationStatePage
-      cssStyles={css({
-        maxWidth: '600px',
-      })}
+      cssStyles={css`
+        max-width: 600px;
+      `}
       title={
         <FormattedMessage
           id="xpack.security.accessAgreement.title"

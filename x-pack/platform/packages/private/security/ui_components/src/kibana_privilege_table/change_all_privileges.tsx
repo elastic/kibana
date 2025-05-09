@@ -78,7 +78,9 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
     const button = (
       <EuiLink
         onClick={this.onButtonClick}
-        css={({ euiTheme }) => css({ marginLeft: euiTheme.size.s })}
+        css={({ euiTheme }) => css`
+          margin-left: ${euiTheme.size.s};
+        `}
         data-test-subj="changeAllPrivilegesButton"
       >
         <EuiText size="xs">

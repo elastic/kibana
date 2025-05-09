@@ -243,7 +243,9 @@ export class FeatureTable extends Component<Props, State> {
               <EuiPanel
                 color="subdued"
                 paddingSize="s"
-                css={({ euiTheme }) => css({ marginLeft: euiTheme.size.l + euiTheme.size.xs })}
+                css={({ euiTheme }) => css`
+                  margin-left: calc(${euiTheme.size.l} + ${euiTheme.size.xs});
+                `}
               >
                 <FeatureTableExpandedRow
                   feature={feature}

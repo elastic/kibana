@@ -62,10 +62,11 @@ export class CollapsiblePanel extends Component<React.PropsWithChildren<Props>, 
                 <Fragment>
                   <EuiIcon
                     type={this.props.iconType}
-                    size={'xl'}
-                    css={({ euiTheme }) =>
-                      css({ marginRight: euiTheme.size.s, verticalAlign: 'text-bottom' })
-                    }
+                    size="xl"
+                    css={({ euiTheme }) => css`
+                      margin-right: ${euiTheme.size.s};
+                      vertical-align: text-bottom;
+                    `}
                   />{' '}
                 </Fragment>
               )}

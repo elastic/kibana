@@ -26,27 +26,31 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
 
   return (
     <div css={[fullScreenGraphicsMixinStyles(Number(euiTheme.levels.toast), theme)]}>
-      <header css={css({ position: 'relative', padding: euiTheme.size.xl, zIndex: 10 })}>
+      <header
+        css={css`
+          position: relative;
+          padding: ${euiTheme.size.xl};
+          z-index: 10;
+        `}
+      >
         <div
-          css={[
-            css({
-              position: 'relative',
-              margin: 'auto',
-              maxWidth: '460px',
-              paddingLeft: euiTheme.size.xl,
-              paddingRight: euiTheme.size.xl,
-              zIndex: 10,
-              textAlign: 'center',
-            }),
-            props.cssStyles,
-          ]}
+          css={css`
+            position: relative;
+            margin: auto;
+            max-width: 460px;
+            padding-left: ${euiTheme.size.xl};
+            padding-right: ${euiTheme.size.xl};
+            z-index: 10;
+            text-align: center;
+            ${props.cssStyles || ''}
+          `}
         >
           <EuiSpacer size="xxl" />
           <span
             css={css`
               margin-bottom: ${euiTheme.size.xl};
               display: inline-block;
-              ${euiBottomShadowM}
+              ${euiBottomShadowM};
             `}
           >
             {props.logo ? (
@@ -62,18 +66,16 @@ export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => 
         </div>
       </header>
       <div
-        css={[
-          css({
-            position: 'relative',
-            margin: 'auto',
-            maxWidth: '460px',
-            paddingLeft: euiTheme.size.xl,
-            paddingRight: euiTheme.size.xl,
-            zIndex: 10,
-            textAlign: 'center',
-          }),
-          props.cssStyles,
-        ]}
+        css={css`
+          position: relative;
+          margin: auto;
+          max-width: 460px;
+          padding-left: ${euiTheme.size.xl};
+          padding-right: ${euiTheme.size.xl};
+          z-index: 10;
+          text-align: center;
+          ${props.cssStyles || ''}
+        `}
       >
         {props.children}
       </div>
