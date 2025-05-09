@@ -53,7 +53,7 @@ describe('EsqlService', () => {
 
     expect(item1).toMatchObject({
       name: 'ts_index1',
-      mode: 'ts',
+      mode: 'time_series',
       aliases: [],
     });
 
@@ -61,7 +61,7 @@ describe('EsqlService', () => {
 
     expect(item2).toMatchObject({
       name: 'ts_index2',
-      mode: 'ts',
+      mode: 'time_series',
       aliases: ['ts_index2_alias1', 'ts_index2_alias2'],
     });
   });
