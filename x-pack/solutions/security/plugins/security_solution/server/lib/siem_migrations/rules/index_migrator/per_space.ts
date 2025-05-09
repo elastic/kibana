@@ -10,7 +10,7 @@ import type {
   AggregationsMinAggregate,
   AggregationsStringTermsAggregate,
   AggregationsStringTermsBucket,
-} from 'elasticsearch-8.x/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Adapters, StoredSiemMigration } from '../types';
 import { processResponseHits } from '../../common';
 

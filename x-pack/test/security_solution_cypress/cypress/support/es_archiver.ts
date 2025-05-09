@@ -12,6 +12,12 @@ import { createEsClientForTesting, KbnClient, systemIndicesSuperuser } from '@kb
 import { ToolingLog } from '@kbn/tooling-log';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
+interface ClientOptions {
+  url: string;
+  username: string;
+  password: string;
+}
+
 function createKibanaUrlWithAuth({ url, username, password }: ClientOptions) {
   const clientUrl = new URL(url);
   clientUrl.username = username;

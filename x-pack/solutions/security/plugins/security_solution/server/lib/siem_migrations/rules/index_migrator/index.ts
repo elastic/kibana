@@ -34,7 +34,7 @@ export class RuleMigrationIndexMigrator {
   async run() {
     const allSpaces = await this.getSpaceListForMigrations();
     if (allSpaces.length === 0) {
-      this.logger.info('No spaces or index found for rule migration');
+      this.logger.info('No spaces or index found for index migration');
       return;
     }
     this.logger.info('Starting index migration for rule migrations');

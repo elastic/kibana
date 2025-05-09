@@ -25,7 +25,7 @@ describe('RuleResourceRetriever', () => {
   beforeEach(() => {
     mockDataClient = {
       resources: { searchBatches: jest.fn().mockReturnValue({ next: jest.fn(() => []) }) },
-    } as unknown as RuleMigrationsDataClient;
+    } as unknown as jest.Mocked<RuleMigrationsDataClient>;
 
     retriever = new RuleResourceRetriever('mockMigrationId', mockDataClient);
 
