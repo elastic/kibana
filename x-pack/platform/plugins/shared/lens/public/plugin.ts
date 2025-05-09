@@ -399,15 +399,18 @@ export class LensPlugin {
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
-          container.addNewPanel({
-            panelType: LENS_EMBEDDABLE_TYPE,
-            serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
+          container.addNewPanel(
+            {
+              panelType: LENS_EMBEDDABLE_TYPE,
+              serializedState: {
+                rawState: {
+                  savedObjectId: savedObject.id,
+                },
+                references: savedObject.references,
               },
-              references: savedObject.references,
             },
-          });
+            true
+          );
         },
         savedObjectType: LENS_EMBEDDABLE_TYPE,
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {
