@@ -97,10 +97,7 @@ export const useGridLayoutPanelEvents = ({
 
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
-      if (
-        !isLayoutInteractive(gridLayoutStateManager) ||
-        gridLayoutStateManager.activePanelEvent$.getValue() // interaction has already happened, so don't start again
-      ) {
+      if (!isLayoutInteractive(gridLayoutStateManager)) {
         return;
       }
       if (isMouseEvent(e)) {
@@ -118,6 +115,7 @@ export const useGridLayoutPanelEvents = ({
           onEnd,
         });
       } else if (isKeyboardEvent(e)) {
+        if (gridLayoutStateManager.activePanelEvent$.getValue()) return; // interaction has already happened, so don't start again
         startKeyboardInteraction({
           e,
           onStart,

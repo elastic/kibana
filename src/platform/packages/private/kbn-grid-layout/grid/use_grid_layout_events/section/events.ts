@@ -44,10 +44,7 @@ export const useGridLayoutRowEvents = ({ sectionId }: { sectionId: string }) => 
   );
   const startInteraction = useCallback(
     (e: UserInteractionEvent) => {
-      if (
-        !isLayoutInteractive(gridLayoutStateManager) ||
-        gridLayoutStateManager.activeRowEvent$.getValue() // interaction has already happened, so don't start again
-      ) {
+      if (!isLayoutInteractive(gridLayoutStateManager)) {
         return;
       }
       const onStart = () => {
@@ -88,6 +85,7 @@ export const useGridLayoutRowEvents = ({ sectionId }: { sectionId: string }) => 
           onEnd,
         });
       } else if (isKeyboardEvent(e)) {
+        if (gridLayoutStateManager.activePanelEvent$.getValue()) return; // interaction has already happened, so don't start again
         startKeyboardInteraction({
           e,
           onStart,

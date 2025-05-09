@@ -154,8 +154,8 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
         map((panel) => panel.sectionId),
         distinctUntilChanged()
       )
-      .subscribe((currentRow) => {
-        setSectionId(currentRow);
+      .subscribe((currentSection) => {
+        setSectionId(currentSection);
       });
 
     return () => {
