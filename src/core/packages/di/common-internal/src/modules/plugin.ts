@@ -20,10 +20,42 @@ import { Global, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 
 type ScopeFactory = (id?: PluginOpaqueId) => Container;
 
+/**
+ * Current context to resolve the global services.
+ *
+ * Some short-lived services, such as the current request, cannot be bound in the global scope, and hence, they are placed in a child container.
+ * The `Context` service holds a reference to the child container and is used to resolve global services within the current context, making short-lived services available.
+ */
 const Context = Symbol('Context') as ServiceIdentifier<Container>;
+
+/**
+ * Current plugin scope identifier.
+ *
+ * This service is used to determine the current plugin scope identifier when resolving global services.
+ * When the request originates from the forked context, it will be used to resolve the requested global service within the corresponding plugin scope of the forked context.
+ */
 const Id = Symbol('Id') as ServiceIdentifier<PluginOpaqueId>;
+
+/**
+ * Reference to the parent container.
+ *
+ * This is a workaround as there is no built-in way to resolve the parent container.
+ */
 const Parent = Symbol('Parent') as ServiceIdentifier<Container>;
+
+/**
+ * Plugin scope factory.
+ *
+ * The factory creates a new container for the plugin dependencies.
+ * Services registered in this scope are not visible outside unless they are explicitely exposed using the `Global` symbol.
+ */
 export const Scope = Symbol.for('Scope') as ServiceIdentifier<ScopeFactory>;
+
+/**
+ * Isolated child context factory.
+ *
+ * This factory creates an intermediate or temporary child container to handle HTTP requests or other short-lived operations.
+ */
 export const Fork = Symbol.for('Fork') as ServiceIdentifier<ScopeFactory>;
 
 export class PluginModule extends ContainerModule {
