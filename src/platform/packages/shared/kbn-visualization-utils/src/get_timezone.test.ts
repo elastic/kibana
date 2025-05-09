@@ -33,6 +33,15 @@ describe('getTimeZone', () => {
     ).toEqual('America/New_York');
   });
 
+  it('returns local time zone when uiSettings returns Browser as non default', () => {
+    expect(
+      getTimeZone({
+        get: () => 'Browser',
+        isDefault: () => false,
+      } as unknown as IUiSettingsClient)
+    ).toEqual('America/New_York');
+  });
+
   it('returns timezone defined on uiSettings', () => {
     const timezone = 'America/Toronto';
     expect(
