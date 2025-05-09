@@ -8,7 +8,7 @@
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { APP_NOT_FOUND_PAGE } from '../../../screens/ai_soc';
-import { VISUALIZE_URL, MAPS_URL, LENS_URL } from '../../../urls/navigation';
+import { VISUALIZE_URL, MAPS_URL, LENS_URL, DASHBOARD_URL } from '../../../urls/navigation';
 
 describe('Disabled features', { tags: '@serverless' }, () => {
   beforeEach(() => {
@@ -25,6 +25,10 @@ describe('Disabled features', { tags: '@serverless' }, () => {
   });
   it('lens app should not be available', () => {
     visit(LENS_URL);
+    cy.get(APP_NOT_FOUND_PAGE).should('exist');
+  });
+  it('lens app should not be available', () => {
+    visit(DASHBOARD_URL);
     cy.get(APP_NOT_FOUND_PAGE).should('exist');
   });
 });
