@@ -416,7 +416,7 @@ export class KnowledgeBaseService {
     }
 
     try {
-      await this.dependencies.esClient.asInternalUser.index<
+      const indexResult = await this.dependencies.esClient.asInternalUser.index<
         Omit<KnowledgeBaseEntry, 'id'> & { namespace: string }
       >({
         index: resourceNames.writeIndexAlias.kb,
@@ -431,7 +431,9 @@ export class KnowledgeBaseService {
         refresh: 'wait_for',
       });
 
-      this.dependencies.logger.debug(`Entry added to knowledge base`);
+      this.dependencies.logger.debug(
+        `Entry added to knowledge base. title = "${doc.title}", user = "${user?.name}, namespace = "${namespace}", index = ${indexResult._index}, id = ${indexResult._id}`
+      );
     } catch (error) {
       this.dependencies.logger.error(`Failed to add entry to knowledge base ${error}`);
       if (isInferenceEndpointMissingOrUnavailable(error)) {
