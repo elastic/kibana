@@ -1888,6 +1888,8 @@
       "@kbn/shared-ux-file-upload/*": ["src/platform/packages/shared/shared-ux/file/file_upload/impl/*"],
       "@kbn/shared-ux-file-util": ["src/platform/packages/shared/shared-ux/file/util"],
       "@kbn/shared-ux-file-util/*": ["src/platform/packages/shared/shared-ux/file/util/*"],
+      "@kbn/shared-ux-flyout": ["src/platform/packages/shared/shared-ux/flyout"],
+      "@kbn/shared-ux-flyout/*": ["src/platform/packages/shared/shared-ux/flyout/*"],
       "@kbn/shared-ux-link-redirect-app": ["src/platform/packages/shared/shared-ux/link/redirect_app/impl"],
       "@kbn/shared-ux-link-redirect-app/*": ["src/platform/packages/shared/shared-ux/link/redirect_app/impl/*"],
       "@kbn/shared-ux-link-redirect-app-mocks": ["src/platform/packages/shared/shared-ux/link/redirect_app/mocks"],

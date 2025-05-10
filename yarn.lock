@@ -7557,6 +7557,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-flyout@link:src/platform/packages/shared/shared-ux/flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-link-redirect-app-mocks@link:src/platform/packages/shared/shared-ux/link/redirect_app/mocks":
   version "0.0.0"
   uid ""
