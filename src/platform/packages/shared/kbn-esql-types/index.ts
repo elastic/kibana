@@ -19,3 +19,8 @@ export {
   apiPublishesESQLVariable,
   apiPublishesESQLVariables,
 } from './src/variables_types';
+
+export {
+  type IndicesAutocompleteResult,
+  type IndexAutocompleteItem,
+} from './src/sources_autocomplete_types';
