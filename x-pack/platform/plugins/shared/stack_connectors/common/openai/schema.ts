@@ -60,11 +60,6 @@ export const ConfigSchema = schema.oneOf([
     ),
     caData: schema.maybe(schema.string({ minLength: 1 })),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    __internal__: schema.maybe(
-      schema.object({
-        hasPKI: schema.boolean({ defaultValue: false }),
-      })
-    ),
   }),
 ]);
 
