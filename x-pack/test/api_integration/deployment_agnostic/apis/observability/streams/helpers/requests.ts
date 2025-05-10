@@ -181,6 +181,7 @@ export async function importContent(
   body: {
     include: ContentPackIncludedObjects;
     content: Readable;
+    filename: string;
   },
   expectStatusCode: number = 200
 ) {
@@ -191,10 +192,10 @@ export async function importContent(
         body: {
           include: JSON.stringify(body.include),
           content: body.content,
-          filename: 'content_pack.zip',
+          filename: body.filename,
         },
       },
-      file: { key: 'content', filename: 'content_pack.zip' },
+      file: { key: 'content', filename: body.filename },
     })
     .expect(expectStatusCode)
     .then((response) => response.body);

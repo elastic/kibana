@@ -116,6 +116,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await importContent(apiClient, 'logs.importstream', {
           include: { all: {} },
           content: Readable.from(archive),
+          filename: 'logs-content_pack-1.0.0.zip',
         });
 
         expect(response.errors.length).to.be(0);
@@ -130,6 +131,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await importContent(apiClient, 'logs.importstream', {
           include: { all: {} },
           content: Readable.from(archive),
+          filename: 'logs-content_pack-1.0.0.zip',
         });
 
         expect(response.errors.length).to.be(0);
