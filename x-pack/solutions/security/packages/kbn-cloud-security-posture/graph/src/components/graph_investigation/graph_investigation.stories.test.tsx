@@ -50,7 +50,11 @@ const renderStory = (args: Partial<GraphInvestigationProps> = {}) => {
   return render(
     <IntlProvider locale="en">
       <Investigation {...args} />
-    </IntlProvider>
+    </IntlProvider>,
+    {
+      // TODO: Fails in concurrent mode
+      legacyRoot: true,
+    }
   );
 };
 
