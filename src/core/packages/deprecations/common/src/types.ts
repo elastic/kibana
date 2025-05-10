@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DeprecationSeverity } from '@kbn/core-http-common';
-
 export interface DeprecationDetailsMessage {
   type: 'markdown' | 'text';
   content: string;
+}
+
+export enum DeprecationSeverity {
+  NONE = 'none',
+  INFO = 'info',
+  WARNING = 'warning',
+  CRITICAL = 'critical',
 }
 
 enum DeprecationFetchError {

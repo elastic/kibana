@@ -11,7 +11,7 @@ import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
 import { ConfigDeprecationProvider } from '@kbn/config';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
   unused('enabled', { level: DeprecationSeverity.WARNING }),

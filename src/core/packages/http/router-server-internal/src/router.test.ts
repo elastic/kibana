@@ -15,7 +15,7 @@ import { createFooValidation } from './router.test.util';
 import { Router, type RouterOptions } from './router';
 import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
 import { getEnvOptions, createTestEnv } from '@kbn/config-mocks';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 const mockResponse = {
   code: jest.fn().mockImplementation(() => mockResponse),

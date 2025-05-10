@@ -13,7 +13,7 @@ import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
 import { schema, offeringBasedSchema, ByteSizeValue, type TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { ConfigDeprecationProvider } from '@kbn/config';
 import type {
   IElasticsearchConfig,

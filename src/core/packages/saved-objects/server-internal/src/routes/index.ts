@@ -16,7 +16,7 @@ import type {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { RouteDeprecationInfo } from '@kbn/core-http-server';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { InternalSavedObjectsRequestHandlerContext } from '../internal_types';
 import { registerGetRoute } from './get';
 import { registerResolveRoute } from './resolve';

@@ -8,7 +8,7 @@
  */
 
 import type { ConfigDeprecationProvider, ConfigDeprecation } from '@kbn/config';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 const rewriteBasePathDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (settings.server?.basePath && !settings.server?.rewriteBasePath) {

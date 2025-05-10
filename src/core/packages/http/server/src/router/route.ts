@@ -9,7 +9,7 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import type { DeepPartial } from '@kbn/utility-types';
-import type { DeprecationSeverity } from '@kbn/core-http-common';
+import type { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { RouteValidator } from './route_validator';
 
 /**

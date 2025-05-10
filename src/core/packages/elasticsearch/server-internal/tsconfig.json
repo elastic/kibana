@@ -34,7 +34,7 @@
     "@kbn/config-mocks",
     "@kbn/core-execution-context-server-mocks",
     "@kbn/core-http-server-mocks",
-    "@kbn/core-http-common",
+    "@kbn/core-deprecations-common",
   ],
   "exclude": [
     "target/**/*",

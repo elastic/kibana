@@ -15,7 +15,7 @@ import { IHttpConfig, SslConfig, sslSchema, TLS_V1_2, TLS_V1_3 } from '@kbn/serv
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
 import type { HttpProtocol, ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';

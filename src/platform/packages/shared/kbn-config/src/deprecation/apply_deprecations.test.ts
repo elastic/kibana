@@ -11,7 +11,7 @@ import type { DocLinks } from '@kbn/doc-links';
 import { applyDeprecations } from './apply_deprecations';
 import { ConfigDeprecation, ConfigDeprecationContext, ConfigDeprecationWithContext } from './types';
 import { configDeprecationFactory as deprecations } from './deprecation_factory';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 describe('applyDeprecations', () => {
   const context: ConfigDeprecationContext = {

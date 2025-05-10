@@ -8,7 +8,7 @@
  */
 
 import type { RouteDeprecationInfo } from '@kbn/core-http-server';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import { getWarningHeaderMessageFromRouteDeprecation } from './get_warning_header_message';
 
 describe('getWarningHeaderMessageFromRouteDeprecation', () => {

@@ -11,7 +11,7 @@ import { registerConfigDeprecationsInfo } from './config_deprecations';
 import { mockDeprecationsRegistry, mockDeprecationsFactory } from '../mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 describe('#registerConfigDeprecationsInfo', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;

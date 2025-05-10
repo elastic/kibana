@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ApiDeprecationDetails,
-  DomainDeprecationDetails,
+import {
+  type ApiDeprecationDetails,
+  type DomainDeprecationDetails,
+  DeprecationSeverity,
 } from '@kbn/core-deprecations-common';
 
 import type { PostValidationMetadata } from '@kbn/core-http-server';
-import { DeprecationSeverity } from '@kbn/core-http-common';
 import type { BuildApiDeprecationDetailsParams } from '../types';
 import {
   getApiDeprecationMessage,

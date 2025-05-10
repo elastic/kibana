@@ -20,6 +20,6 @@
     "@kbn/zod",
     "@kbn/zod-helpers",
     "@kbn/utility-types",
-    "@kbn/core-http-common",
+    "@kbn/core-deprecations-common",
   ]
 }

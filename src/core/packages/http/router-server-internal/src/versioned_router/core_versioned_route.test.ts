@@ -22,7 +22,7 @@ import { isConfigSchema } from '@kbn/config-schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getEnvOptions, createTestEnv } from '@kbn/config-mocks';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 const notDevOptions = getEnvOptions();
 notDevOptions.cliArgs.dev = false;

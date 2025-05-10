@@ -16,7 +16,7 @@ import { RouteValidator } from './validator';
 import { schema } from '@kbn/config-schema';
 import { Router } from './router';
 import { RouteAccess } from '@kbn/core-http-server';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import { createRequest } from './versioned_router/core_versioned_route.test.util';
 import { kibanaResponseFactory } from './response';
 

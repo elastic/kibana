@@ -10,7 +10,7 @@
 import { DeprecatedConfigDetails } from './types';
 import { createMockedContext } from '../internal_mocks';
 import { configDeprecationFactory } from './deprecation_factory';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 describe('DeprecationFactory', () => {
   const { deprecate, deprecateFromRoot, rename, renameFromRoot, unused, unusedFromRoot } =

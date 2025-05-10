@@ -11,7 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { omit } from 'lodash';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { CorrectiveAction, EnrichedDeprecationInfo } from '../../../common/types';
 import {
   convertFeaturesToIndicesArray,

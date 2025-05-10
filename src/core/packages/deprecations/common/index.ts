@@ -18,4 +18,4 @@ export type {
   DeprecationsGetResponse,
 } from './src/types';
 
-export { DeprecationSeverityOrError } from './src/types';
+export { DeprecationSeverity, DeprecationSeverityOrError } from './src/types';

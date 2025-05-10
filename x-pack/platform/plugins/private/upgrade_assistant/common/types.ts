@@ -8,7 +8,7 @@
 import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { SavedObject } from '@kbn/core/types';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import type { DataStreamsAction } from './data_stream_types';
 
 export * from './data_stream_types';

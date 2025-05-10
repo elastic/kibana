@@ -9,7 +9,7 @@
 
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { first, map, take } from 'rxjs';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 import {
   mockApplyDeprecations,

@@ -9,7 +9,7 @@
 
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { DocLinks } from '@kbn/doc-links';
-import type { DeprecationSeverity } from '@kbn/core-http-common';
+import type { DeprecationSeverity } from '@kbn/core-deprecations-common';
 
 /**
  * Config deprecation hook used when invoking a {@link ConfigDeprecation}

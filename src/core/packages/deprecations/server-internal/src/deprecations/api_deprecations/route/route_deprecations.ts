@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core-deprecations-common';
 import _ from 'lodash';
 import type { PostValidationMetadata } from '@kbn/core-http-server';
-import { DeprecationSeverity } from '@kbn/core-http-common';
+import { DeprecationSeverity } from '@kbn/core-deprecations-common';
 import {
   getApiDeprecationMessage,
   getApiDeprecationsManualSteps,
