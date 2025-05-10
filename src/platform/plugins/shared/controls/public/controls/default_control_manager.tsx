@@ -10,6 +10,7 @@
 import { StateComparators } from '@kbn/presentation-publishing';
 
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
+import { BehaviorSubject } from 'rxjs';
 import {
   DEFAULT_CONTROL_GROW,
   type DefaultControlState,
@@ -19,30 +20,31 @@ import type { ControlApiInitialization, DefaultControlApi } from './types';
 
 export type ControlApi = ControlApiInitialization<DefaultControlApi>;
 
-export const defaultControlComparators: StateComparators<
-  DefaultControlState & {
-    dataLoading?: boolean;
-    blockingError?: Error;
-  }
-> = {
-  blockingError: 'skip',
-  dataLoading: 'skip',
+export const defaultControlComparators: StateComparators<DefaultControlState> = {
   grow: 'referenceEquality',
   width: 'referenceEquality',
 };
 
 export const defaultControlDefaultValues = {
-  blockingError: undefined,
-  dataLoading: false,
   grow: DEFAULT_CONTROL_GROW,
   width: DEFAULT_CONTROL_WIDTH,
 };
 
 export const initializeDefaultControlManager = (state: DefaultControlState) => {
-  return initializeStateManager<
-    DefaultControlState & {
-      dataLoading?: boolean;
-      blockingError?: Error;
-    }
-  >(state, defaultControlDefaultValues);
+  const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+  const stateManager = initializeStateManager<DefaultControlState>(
+    state,
+    defaultControlDefaultValues
+  );
+  return {
+    ...stateManager,
+    api: {
+      ...stateManager.api,
+      dataLoading$,
+      blockingError$,
+      setBlockingError: (error: Error | undefined) => blockingError$.next(error),
+      setDataLoading: (loading: boolean | undefined) => dataLoading$.next(loading),
+    },
+  };
 };

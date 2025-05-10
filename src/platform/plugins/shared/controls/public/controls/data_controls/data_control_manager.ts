@@ -39,12 +39,7 @@ import { openDataControlEditor } from './open_data_control_editor';
 import { getReferenceName } from './reference_name_utils';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
 
-export const defaultDataControlComparators: StateComparators<
-  DefaultDataControlState & {
-    dataLoading?: boolean;
-    blockingError?: Error;
-  }
-> = {
+export const defaultDataControlComparators: StateComparators<DefaultDataControlState> = {
   ...defaultControlComparators,
   title: 'referenceEquality',
   dataViewId: 'referenceEquality',
@@ -71,17 +66,21 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
   getLatestState: () => DefaultDataControlState;
   reinitializeState: (lastState?: DefaultDataControlState) => void;
 } => {
-  const dataControlManager = initializeStateManager<
-    DefaultDataControlState & {
-      dataLoading?: boolean;
-      blockingError?: Error;
-    }
-  >(state, {
+  const dataControlManager = initializeStateManager<DefaultDataControlState>(state, {
     ...defaultControlDefaultValues,
     dataViewId: '',
     fieldName: '',
     title: undefined,
   });
+
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+  function setBlockingError(error: Error | undefined) {
+    blockingError$.next(error);
+  }
+  const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+  function setDataLoading(loading: boolean | undefined) {
+    dataLoading$.next(loading);
+  }
 
   const defaultTitle$ = new BehaviorSubject<string | undefined>(undefined);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
@@ -96,8 +95,8 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     .pipe(
       tap(() => {
         filtersReady$.next(false);
-        if (dataControlManager.api.blockingError$.value) {
-          dataControlManager.api.setBlockingError(undefined);
+        if (blockingError$.value) {
+          setBlockingError(undefined);
         }
       }),
       switchMap(async (currentDataViewId) => {
@@ -112,7 +111,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     )
     .subscribe(({ dataView, error }) => {
       if (error) {
-        dataControlManager.api.setBlockingError(error);
+        setBlockingError(error);
       }
       dataViews$.next(dataView ? [dataView] : undefined);
     });
@@ -133,7 +132,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
 
       const field = dataView.getFieldByName(nextFieldName);
       if (!field) {
-        dataControlManager.api.setBlockingError(
+        setBlockingError(
           new Error(
             i18n.translate('controls.dataControl.fieldNotFound', {
               defaultMessage: 'Could not locate field: {fieldName}',
@@ -141,8 +140,8 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
             })
           )
         );
-      } else if (dataControlManager.api.blockingError$.value) {
-        dataControlManager.api.setBlockingError(undefined);
+      } else if (blockingError$.value) {
+        setBlockingError(undefined);
       }
 
       field$.next(field);
@@ -193,6 +192,10 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
   return {
     api: {
       ...dataControlManager.api,
+      dataLoading$,
+      blockingError$,
+      setBlockingError,
+      setDataLoading,
       defaultTitle$,
       dataViews$,
       field$,
@@ -202,7 +205,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       isEditingEnabled: () => true,
       untilFiltersReady: async () => {
         return new Promise((resolve) => {
-          combineLatest([dataControlManager.api.blockingError$, filtersReady$])
+          combineLatest([blockingError$, filtersReady$])
             .pipe(
               first(([blockingError, filtersReady]) => filtersReady || blockingError !== undefined)
             )
