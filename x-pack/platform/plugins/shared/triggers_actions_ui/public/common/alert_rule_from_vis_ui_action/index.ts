@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-require('@kbn/babel-register').install();
-require('./manage_secrets').exportToEnvVars();
+export * from './alert_rule_from_vis_ui_action';
