@@ -9,7 +9,7 @@ applies_to:
 
 # OpenAI connector and action [openai-action-type]
 
-The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST request to an OpenAI provider, either OpenAI or Azure OpenAI.
+The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST request to an OpenAI provider, either OpenAI, Azure OpenAI, or Other (OpenAI-compatible service).
 
 ## Create connectors in {{kib}} [define-gen-ai-ui]
 
@@ -34,16 +34,43 @@ Name
 :   The name of the connector.
 
 OpenAI provider
-:   The OpenAI API provider, either OpenAI or Azure OpenAI.
+:   The OpenAI API provider, either OpenAI, Azure OpenAI, or Other (OpenAI-compatible service).
 
 URL
 :   The OpenAI request URL.
 
 Default model
-:   (optional) The default model to use for requests. This option is available only when the provider is `OpenAI`.
+:   The default model to use for requests. This is required when the provider is `Other` and optional when the provider is `OpenAI`.
 
 API key
-:   The OpenAI or Azure OpenAI API key for authentication.
+:   The OpenAI, Azure OpenAI, or Other provider API key for authentication.
+
+PKI Authentication (Other provider only)
+:   When using the Other provider type, you can configure PKI authentication with the following options:
+
+    Certificate file
+    :   Path to the PKI certificate file (.pem) or array of paths.
+
+    Certificate data
+    :   PEM-encoded certificate content.
+
+    Private key file
+    :   Path to the PKI private key file (.pem) or array of paths.
+
+    Private key data
+    :   PEM-encoded private key content.
+
+    CA file
+    :   Path to the CA certificate file (.pem) or array of paths.
+
+    CA data
+    :   PEM-encoded CA certificate content.
+
+    Verification mode
+    :   SSL verification mode for PKI authentication. Options are:
+        - `full`: Verify the server's certificate and hostname (default)
+        - `certificate`: Verify only the server's certificate
+        - `none`: Skip verification
 
 ## Test connectors [gen-ai-action-configuration]
 
