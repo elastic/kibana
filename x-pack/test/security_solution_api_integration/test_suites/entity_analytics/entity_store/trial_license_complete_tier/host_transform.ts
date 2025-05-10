@@ -137,7 +137,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('Should successfully collect all expected fields', async () => {
-        const HOST_NAME: string = 'host-transform-test-ip';
+        const HOST_NAME: string = 'host-transform-test-all-fields';
         const testDocs: hostTransformTestDocuments = {
           name: HOST_NAME,
           domain: ['example.com', 'sub.example.com'],
