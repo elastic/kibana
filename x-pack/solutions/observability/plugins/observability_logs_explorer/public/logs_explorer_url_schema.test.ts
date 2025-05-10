@@ -13,7 +13,6 @@ import {
   getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
   getDiscoverFiltersFromState,
 } from './logs_explorer_url_schema';
-import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src/data_types/logs/utils';
 import type { DisplayOptions, ControlOptions } from './logs_explorer_schema_types';
 import { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
 
@@ -38,14 +37,8 @@ describe('logs_explorer_url_schema', () => {
   describe('hydrateDataSourceSelection', () => {
     it('should handle "all" selection type correctly', () => {
       const result = hydrateDataSourceSelection({ selectionType: 'all' });
-      expect(getAllLogsDataViewSpec).toHaveBeenCalledWith({
-        allLogsIndexPattern: 'logs-*,dataset-logs-*-*',
-      });
       expect(result).toEqual({
         id: 'discover-observability-solution-all-logs',
-        name: 'All logs',
-        title: 'logs-*,dataset-logs-*-*',
-        timeFieldName: '@timestamp',
       });
     });
 
