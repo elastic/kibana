@@ -72,3 +72,6 @@ xpack.features.overrides:
 xpack.fleet.agentless.isDefault: true
 xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations'
 xpack.fleet.prereleaseEnabledByDefault: true
+
+# Pin the prebuilt rules package version to the version that contains promotion rules
+xpack.securitySolution.prebuiltRulesPackageVersion: '9.0.5-beta.1'
