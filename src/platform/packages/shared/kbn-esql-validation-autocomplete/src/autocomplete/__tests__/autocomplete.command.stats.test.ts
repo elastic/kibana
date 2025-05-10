@@ -300,10 +300,7 @@ describe('autocomplete.suggest', () => {
 
             await assertSuggestions(
               `FROM a | STATS AVG(longField) WHERE ${expression} /`,
-              suggestions
-                .map(({ text }) => text)
-                // match operator not yet supported, see https://github.com/elastic/elasticsearch/issues/116261
-                .filter((text) => text !== ': $0')
+              suggestions.map(({ text }) => text)
             );
           });
 
