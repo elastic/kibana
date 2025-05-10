@@ -1117,6 +1117,7 @@ export async function additionalSourcesSuggestions(
   return suggestionsToAdd;
 }
 
+// Treating lookup and time_series mode indices
 export const specialIndicesToSuggestions = (
   indices: IndexAutocompleteItem[]
 ): SuggestionRawDefinition[] => {
