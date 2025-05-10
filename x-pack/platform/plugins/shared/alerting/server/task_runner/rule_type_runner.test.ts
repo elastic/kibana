@@ -1355,9 +1355,8 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -1431,9 +1430,8 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         alertDelay: 0,
         ruleRunMetricsStore,
       });
@@ -1489,9 +1487,8 @@ describe('RuleTypeRunner', () => {
         `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`
       );
       expect(ruleRunMetricsStore.setSearchMetrics).toHaveBeenCalled();
-      expect(alertsClient.processAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineFlappingAlerts).toHaveBeenCalledWith();
-      expect(alertsClient.determineDelayedAlerts).toHaveBeenCalledWith({
+      expect(alertsClient.processAlerts).toHaveBeenCalledWith({
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         alertDelay: 0,
         ruleRunMetricsStore,
       });
