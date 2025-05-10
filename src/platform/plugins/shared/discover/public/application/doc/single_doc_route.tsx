@@ -28,7 +28,6 @@ export interface DocUrlParams {
 
 export const SingleDocRoute = () => {
   const { timefilter, core, profilesManager, getScopedHistory } = useDiscoverServices();
-  const [scopedProfilesManager] = useState(() => profilesManager.createScopedProfilesManager());
   const { search } = useLocation();
   const { dataViewId, index } = useParams<DocUrlParams>();
 
@@ -54,7 +53,7 @@ export const SingleDocRoute = () => {
   const { dataView, error } = useDataView({
     index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
   });
-
+  const [scopedProfilesManager] = useState(() => profilesManager.createScopedProfilesManager());
   const rootProfileState = useRootProfile();
 
   if (error) {

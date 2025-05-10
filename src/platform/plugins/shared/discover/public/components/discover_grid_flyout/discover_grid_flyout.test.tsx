@@ -500,10 +500,11 @@ describe('Discover flyout', function () {
             _source: { date: '2020-20-01T12:12:12.124', name: 'test2', extension: 'jpg' },
           },
         ];
+        const scopedProfilesManager = services.profilesManager.createScopedProfilesManager();
         const records = buildDataTableRecordList({
           records: hits as EsHitRecord[],
           dataView: dataViewMock,
-          processRecord: (record) => services.profilesManager.resolveDocumentProfile({ record }),
+          processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
         });
         const { component } = await mountComponent({ records, services });
         const title = findTestSubject(component, 'docViewerRowDetailsTitle');

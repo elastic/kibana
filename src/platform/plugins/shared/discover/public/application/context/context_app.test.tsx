@@ -15,7 +15,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { mockTopNavMenu } from './__mocks__/top_nav_menu';
 import { ContextAppContent } from './context_app_content';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { ContextApp } from './context_app';
+import { ContextApp, type ContextAppProps } from './context_app';
 import type { DiscoverServices } from '../../build_services';
 import { dataViewsMock } from '../../__mocks__/data_views';
 import { act } from 'react-dom/test-utils';
@@ -23,7 +23,6 @@ import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { HistoryLocationState } from '../../build_services';
 import { createSearchSessionMock } from '../../__mocks__/search_session';
 import { createDiscoverServicesMock } from '../../__mocks__/services';
 
@@ -78,10 +77,10 @@ describe('ContextApp test', () => {
     uiActions: discoverServices.uiActions,
   } as unknown as DiscoverServices;
 
-  const defaultProps = {
+  const defaultProps: ContextAppProps = {
     dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
-    locationState: {} as HistoryLocationState,
+    scopedProfilesManager: discoverServices.profilesManager.createScopedProfilesManager(),
   };
 
   const topNavProps = {

@@ -46,13 +46,14 @@ rootProfileServiceMock.registerProvider(rootProfileProviderMock);
 dataSourceProfileServiceMock.registerProvider(dataSourceProfileProviderMock);
 documentProfileServiceMock.registerProvider(documentProfileProviderMock);
 
-const record = profilesManagerMock.resolveDocumentProfile({ record: contextRecordMock });
-const record2 = profilesManagerMock.resolveDocumentProfile({ record: contextRecordMock2 });
+const scopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager();
+const record = scopedProfilesManager.resolveDocumentProfile({ record: contextRecordMock });
+const record2 = scopedProfilesManager.resolveDocumentProfile({ record: contextRecordMock2 });
 
 discoverServiceMock.profilesManager = profilesManagerMock;
 
-const getProfilesSpy = jest.spyOn(discoverServiceMock.profilesManager, 'getProfiles');
-const getProfiles$Spy = jest.spyOn(discoverServiceMock.profilesManager, 'getProfiles$');
+const getProfilesSpy = jest.spyOn(scopedProfilesManager, 'getProfiles');
+const getProfiles$Spy = jest.spyOn(scopedProfilesManager, 'getProfiles$');
 
 const render = () => {
   return renderHook((props) => useProfiles(props), {
@@ -67,7 +68,7 @@ describe('useProfiles', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     await profilesManagerMock.resolveRootProfile({});
-    await profilesManagerMock.resolveDataSourceProfile({});
+    await scopedProfilesManager.resolveDataSourceProfile({});
   });
 
   it('should return profiles', () => {

@@ -31,7 +31,9 @@ import {
 } from '../types';
 import { createContextAwarenessMocks } from '../__mocks__';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { ScopedProfilesManager } from '../profiles_manager';
 
+let mockScopedProfilesManager: ScopedProfilesManager;
 let mockUuid = 0;
 
 jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => (++mockUuid).toString() }));
@@ -86,6 +88,7 @@ describe('useAdditionalCellActions', () => {
 
   beforeEach(() => {
     discoverServiceMock.profilesManager = createContextAwarenessMocks().profilesManagerMock;
+    mockScopedProfilesManager = discoverServiceMock.profilesManager.createScopedProfilesManager();
   });
 
   afterEach(() => {
@@ -108,7 +111,7 @@ describe('useAdditionalCellActions', () => {
     expect(result.current.instanceId).toEqual('1');
     expect(mockActions).toHaveLength(1);
     expect(mockTriggerActions[DISCOVER_CELL_ACTIONS_TRIGGER.id]).toEqual(['root-action-2']);
-    await act(() => discoverServiceMock.profilesManager.resolveDataSourceProfile({}));
+    await act(() => mockScopedProfilesManager.resolveDataSourceProfile({}));
     rerender(initialProps);
     expect(result.current.instanceId).toEqual('3');
     expect(mockActions).toHaveLength(2);

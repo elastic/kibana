@@ -28,6 +28,7 @@ import {
   getTieBreakerFieldName,
   getEsQuerySort,
 } from '../../../../common/utils/sorting/get_es_query_sort';
+import type { ScopedProfilesManager } from '../../../context_awareness';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
@@ -37,9 +38,15 @@ export interface ContextAppFetchProps {
   anchorId: string;
   dataView: DataView;
   appState: AppState;
+  scopedProfilesManager: ScopedProfilesManager;
 }
 
-export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppFetchProps) {
+export function useContextAppFetch({
+  anchorId,
+  dataView,
+  appState,
+  scopedProfilesManager,
+}: ContextAppFetchProps) {
   const services = useDiscoverServices();
   const { uiSettings: config, data, toastNotifications, filterManager } = services;
 
@@ -83,7 +90,14 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
         tieBreakerFieldName,
         isTimeNanosBased: dataView.isTimeNanosBased(),
       });
-      const result = await fetchAnchor(anchorId, dataView, searchSource, sort, services);
+      const result = await fetchAnchor(
+        anchorId,
+        dataView,
+        searchSource,
+        sort,
+        services,
+        scopedProfilesManager
+      );
       setState({
         anchor: result.anchorRow,
         anchorInterceptedWarnings: result.interceptedWarnings,
@@ -98,13 +112,14 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
       });
     }
   }, [
-    services,
     tieBreakerFieldName,
     setState,
     toastNotifications,
     dataView,
     anchorId,
     searchSource,
+    services,
+    scopedProfilesManager,
   ]);
 
   const fetchSurroundingRows = useCallback(
@@ -132,7 +147,8 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
               count,
               filters,
               data,
-              services
+              services,
+              scopedProfilesManager
             )
           : { rows: [], interceptedWarnings: undefined };
         setState({
@@ -149,15 +165,17 @@ export function useContextAppFetch({ anchorId, dataView, appState }: ContextAppF
       }
     },
     [
-      services,
       filterManager,
-      appState,
+      appState.predecessorCount,
+      appState.successorCount,
       fetchedState.anchor,
-      tieBreakerFieldName,
       setState,
       dataView,
-      toastNotifications,
+      tieBreakerFieldName,
       data,
+      services,
+      scopedProfilesManager,
+      toastNotifications,
     ]
   );
 
