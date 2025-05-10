@@ -20,7 +20,7 @@
     "@kbn/i18n",
     "@kbn/doc-links",
     "@kbn/repo-packages",
-    "@kbn/core-http-deprecations",
+    "@kbn/core-deprecations-common",
   ],
   "exclude": [
     "target/**/*",
