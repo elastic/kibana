@@ -360,6 +360,10 @@ export default function (providerContext: FtrProviderContext) {
             type: 'ml-module',
           },
           {
+            id: 'sample_security_ai_prompt',
+            type: 'security-ai-prompt',
+          },
+          {
             id: 'sample_security_rule',
             type: 'security-rule',
           },
@@ -374,10 +378,6 @@ export default function (providerContext: FtrProviderContext) {
           {
             id: 'sample_osquery_saved_query',
             type: 'osquery-saved-query',
-          },
-          {
-            id: 'sample_security_ai_prompt',
-            type: 'security-ai-prompt',
           },
           {
             id: 'sample_tag',
