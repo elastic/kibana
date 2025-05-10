@@ -511,12 +511,14 @@ export const ESQLEditor = memo(function ESQLEditor({
         return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
+      getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
     };
     return callbacks;
   }, [
     fieldsMetadata,
     license,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
+    kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
     dataSourcesCache,
     fixedQuery,
     memoizedSources,
