@@ -37,7 +37,6 @@ import { animalSampleDocs } from '../utils/sample_docs';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
-  const ml = getService('ml');
   const log = getService('log');
   const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
