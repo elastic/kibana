@@ -55,6 +55,33 @@ export async function importModel(
   }
 }
 
+export async function startModelDeployment(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  {
+    modelId,
+  }: {
+    modelId: typeof TINY_ELSER_MODEL_ID | typeof TINY_TEXT_EMBEDDING_MODEL_ID;
+  }
+) {
+  const ml = getService('ml');
+  const log = getService('log');
+
+  try {
+    await ml.api.startTrainedModelDeploymentES(modelId);
+  } catch (error) {
+    if (
+      error.message.includes(
+        'Could not start model deployment because an existing deployment with the same id'
+      )
+    ) {
+      log.info(`Model "${modelId}" is already started. Skipping starting deployment.`);
+      return;
+    }
+
+    throw error;
+  }
+}
+
 export async function setupTinyElserModelAndInferenceEndpoint(
   getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
