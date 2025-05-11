@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import { DataStreamsResponseBodySchemaBody } from '@kbn/data-usage-plugin/common/rest_types';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '@kbn/data-usage-plugin/common';
-import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
+import { SupertestWithRoleScopeType } from '../../../../services';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
   const roleScopedSupertest = getService('roleScopedSupertest');
   const retry = getService('retry');
-  let supertestAdminWithCookieCredentials: SupertestWithRoleScope;
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
   const testDataStreamName = 'test-data-stream';
   describe(`GET ${DATA_USAGE_DATA_STREAMS_API_ROUTE}`, function () {
     this.tags(['skipMKI']);
