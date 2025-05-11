@@ -18,30 +18,87 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
+import { useCancellableSearch } from '@kbn/ml-cancellable-search';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataTableRecord } from '@kbn/discover-utils';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { FC } from 'react';
-import React, { lazy, useState } from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import { CellActionsProvider } from '@kbn/cell-actions';
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { DataTableRecord } from '@kbn/discover-utils';
-import { EditLookupIndexFlyoutDeps } from '../types';
+import type { FC } from 'react';
+import React, { lazy, useCallback, useEffect, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
+import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
 
 export interface FlyoutContentProps {
   deps: EditLookupIndexFlyoutDeps;
-  props: any;
+  props: EditLookupIndexContentContext;
 }
 
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
 
+interface IndexInfo {
+  exists: boolean;
+  canEdit: boolean;
+}
+
 export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
-  console.log(deps, '______deps______');
+  const isMounted = useMountedState();
+
+  const { runRequest, cancelRequest } = useCancellableSearch(deps.data);
 
   const [columns, setColumns] = useState<DatatableColumn[]>([]);
   const [rows, setRows] = useState<DataTableRecord[]>([]);
+  const [dataView, setDataView] = useState<DataView>();
+
+  // Index
+  const [indexInfo, setIndexInfp] = useState<IndexInfo>();
 
   const { coreStart, ...restDeps } = deps;
+
+  useEffect(
+    function resolveDataView() {
+      deps.data.dataViews
+        .create({
+          title: props.indexName,
+          name: props.indexName,
+          // timeFieldName,
+        })
+        .then((dv) => {
+          if (isMounted()) {
+            setDataView(dv);
+          }
+        });
+    },
+    [deps.data.dataViews, isMounted, props.indexName]
+  );
+
+  const fetchRows = useCallback(async () => {
+    cancelRequest();
+    const { rawResponse } = await runRequest(
+      {
+        params: {
+          index: props.indexName,
+        },
+      },
+      { searchStrategy: ESQL_SEARCH_STRATEGY }
+    );
+    setRows(rawResponse.hits.hits);
+  }, [cancelRequest, props.indexName, runRequest]);
+
+  useEffect(
+    function fetchIndexInfo() {
+      // TODO
+      // - check if the user has read/write access to the index
+      // - fetch index settings, e.g. if it is open/closed, etc
+      fetchRows();
+    },
+    [fetchRows]
+  );
+
+  if (!dataView) return null;
 
   return (
     <KibanaContextProvider
@@ -53,7 +110,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
       <>
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h3>test</h3>
+            <h3>{props.indexName}</h3>
           </EuiTitle>
         </EuiFlyoutHeader>
 
@@ -67,6 +124,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
               core={deps.coreStart}
               share={deps.share}
               {...props}
+              dataView={dataView}
               columns={columns}
               rows={rows}
             />
