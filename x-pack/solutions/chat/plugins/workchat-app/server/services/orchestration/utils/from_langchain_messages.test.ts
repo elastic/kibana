@@ -9,6 +9,16 @@ import { AIMessage, HumanMessage, BaseMessage, MessageType } from '@langchain/co
 import { messageFromLangchain } from './from_langchain_messages';
 import { ConversationEventType } from '../../../../common/conversation_events';
 
+jest.mock('../../../utils/app_logger', () => {
+  return {
+    AppLogger: {
+      getInstance: jest.fn().mockReturnValue({
+        debug: jest.fn(),
+      }),
+    },
+  };
+});
+
 describe('messageFromLangchain', () => {
   it('should convert an AI message with string content', () => {
     const message = new AIMessage({

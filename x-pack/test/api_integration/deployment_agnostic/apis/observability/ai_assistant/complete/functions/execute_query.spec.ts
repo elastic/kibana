@@ -25,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const synthtrace = getService('synthtrace');
 
   describe('execute_query', function () {
-    this.tags(['failsOnMKI']);
+    this.tags(['skipCloud']);
     let llmProxy: LlmProxy;
     let connectorId: string;
 
@@ -86,7 +86,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             }),
         });
 
-        void llmProxy.interceptConversation('Hello from user');
+        void llmProxy.interceptWithResponse('Hello from user');
 
         ({ messageAddedEvents } = await chatComplete({
           userPrompt: 'Please retrieve the most recent Apache log messages',

@@ -15,8 +15,6 @@ import {
   type ESQLCommand,
   type ESQLFunction,
   type ESQLMessage,
-  type ESQLAstRenameExpression,
-  Walker,
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import {
@@ -55,6 +53,7 @@ import {
   fieldsSuggestionsAfter as fieldsSuggestionsAfterFork,
 } from '../autocomplete/commands/fork';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForTimeseries } from '../autocomplete/commands/timeseries';
 import {
   suggest as suggestForGrok,
   fieldsSuggestionsAfter as fieldsSuggestionsAfterGrok,
@@ -244,7 +243,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: '',
     examples: ['TS index', 'TS index, index2'],
-    suggest: () => [],
+    suggest: suggestForTimeseries,
   },
   {
     name: 'stats',
@@ -301,35 +300,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: 'RENAME old_name1 AS new_name1[, ..., old_nameN AS new_nameN]',
     examples: ['… | RENAME old AS new', '… | RENAME old AS new, a AS b'],
     suggest: suggestForRename,
-    validate: (command: ESQLCommand<'rename'>) => {
-      const messages: ESQLMessage[] = [];
-
-      const renameExpressions = Walker.findAll(command, (node) => {
-        return node.type === 'option' && node.name === 'as';
-      }) as ESQLAstRenameExpression[];
-
-      for (const expression of renameExpressions) {
-        const [column] = expression.args;
-        if (!isColumnItem(column)) {
-          continue;
-        }
-
-        if (hasWildcard(column.name)) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'wildcardNotSupportedForCommand',
-              values: {
-                command: 'RENAME',
-                value: column.name,
-              },
-              locations: column.location,
-            })
-          );
-        }
-      }
-
-      return messages;
-    },
     fieldsSuggestionsAfter: fieldsSuggestionsAfterRename,
   },
   {
@@ -640,11 +610,11 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       const valueArg = command.args[0];
       if (isColumnItem(valueArg)) {
         const columnName = valueArg.name;
-        // look up for columns in variables and existing fields
+        // look up for columns in userDefinedColumns and existing fields
         let valueColumnType: string | undefined;
-        const variableRef = references.variables.get(columnName);
-        if (variableRef) {
-          valueColumnType = variableRef.find((v) => v.name === columnName)?.type;
+        const userDefinedColumnRef = references.userDefinedColumns.get(columnName);
+        if (userDefinedColumnRef) {
+          valueColumnType = userDefinedColumnRef.find((v) => v.name === columnName)?.type;
         } else {
           const fieldRef = references.fields.get(columnName);
           valueColumnType = fieldRef?.type;
@@ -689,10 +659,10 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // validate AS
       const asArg = command.args.find((arg) => isOptionItem(arg) && arg.name === 'as');
       if (asArg && isOptionItem(asArg)) {
-        // populate variable references to prevent the common check from failing with unknown column
+        // populate userDefinedColumns references to prevent the common check from failing with unknown column
         asArg.args.forEach((arg, index) => {
           if (isColumnItem(arg)) {
-            references.variables.set(arg.name, [
+            references.userDefinedColumns.set(arg.name, [
               { name: arg.name, location: arg.location, type: index === 0 ? 'keyword' : 'long' },
             ]);
           }

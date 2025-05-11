@@ -19,22 +19,27 @@ export function environmentQuery(
   }
 
   if (!environment || environment === ENVIRONMENT_NOT_DEFINED.value) {
-    return [{ term: { [field]: ENVIRONMENT_NOT_DEFINED.value } }];
-  }
-
-  return [{ term: { [field]: environment } }];
-}
-
-export function environmentQueryAnnotations(
-  environment: string | undefined,
-  field: string = SERVICE_ENVIRONMENT
-): QueryDslQueryContainer[] {
-  if (!environment || environment === ENVIRONMENT_ALL.value) {
-    return [];
-  }
-
-  if (environment === ENVIRONMENT_NOT_DEFINED.value) {
-    return [{ bool: { must_not: { exists: { field } } } }];
+    return [
+      {
+        bool: {
+          should: [
+            {
+              term: { [field]: ENVIRONMENT_NOT_DEFINED.value },
+            },
+            {
+              bool: {
+                must_not: [
+                  {
+                    exists: { field },
+                  },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    ];
   }
 
   return [{ term: { [field]: environment } }];
