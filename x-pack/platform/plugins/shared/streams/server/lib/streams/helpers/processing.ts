@@ -24,22 +24,25 @@ export function formatToIngestProcessors(
       const advancedJsonProcessorConfig = config as AdvancedJsonProcessorConfig;
 
       // advanced_json processor is a special case, since it has nested Elasticsearch-level processors and doesn't support if
-      return advancedJsonProcessorConfig.processors.map(
-        (nestedProcessor) =>
-          ({
-            ...nestedProcessor,
-            tag: advancedJsonProcessorConfig.tag ?? nestedProcessor.tag,
+      return advancedJsonProcessorConfig.processors.map((nestedProcessor) => {
+        const nestedType = Object.keys(nestedProcessor)[0];
+        const nestedConfig = nestedProcessor[nestedType] as Record<string, unknown>;
+        return {
+          [nestedType]: {
+            ...nestedConfig,
+            tag: advancedJsonProcessorConfig.tag ?? nestedConfig.tag,
             ignore_failure:
-              advancedJsonProcessorConfig.ignore_failure ?? nestedProcessor.ignore_failure,
-            on_failure: [
-              ...(advancedJsonProcessorConfig.on_failure || []),
-              ...((nestedProcessor.on_failure as unknown[]) || []),
-            ],
-            if: advancedJsonProcessorConfig.if
-              ? conditionToPainless(advancedJsonProcessorConfig.if)
-              : nestedProcessor.if,
-          } as IngestProcessorContainer)
-      );
+              nestedConfig.ignore_failure ?? advancedJsonProcessorConfig.ignore_failure,
+            on_failure: nestedConfig.on_failure
+              ? [
+                  ...(nestedConfig.on_failure as []),
+                  ...(advancedJsonProcessorConfig.on_failure as []),
+                ]
+              : advancedJsonProcessorConfig.on_failure,
+            ...('if' in config && config.if ? { if: conditionToPainless(config.if) } : {}),
+          },
+        } as IngestProcessorContainer;
+      });
     }
 
     return [

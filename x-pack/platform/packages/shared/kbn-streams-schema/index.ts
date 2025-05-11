@@ -36,6 +36,8 @@ export {
   type DissectProcessorDefinition,
   type GrokProcessorConfig,
   type GrokProcessorDefinition,
+  type AdvancedJsonProcessorConfig,
+  type AdvancedJsonProcessorDefinition,
   getProcessorConfig,
   getProcessorType,
   processorWithIdDefinitionSchema,

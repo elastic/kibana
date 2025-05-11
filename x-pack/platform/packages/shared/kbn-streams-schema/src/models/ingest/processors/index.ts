@@ -41,7 +41,7 @@ export const advancedJsonProcessorDefinitionSchema = z.strictObject({
   advanced_json: z.intersection(
     processorBaseSchema,
     z.object({
-      processors: z.array(z.record(z.unknown())),
+      processors: z.array(z.record(z.string(), z.unknown())),
       tag: z.optional(z.string()),
       on_failure: z.optional(z.array(z.record(z.unknown()))),
     })
@@ -337,6 +337,7 @@ export const processorDefinitionSchema: z.ZodType<ProcessorDefinition> = z.union
   dateProcessorDefinitionSchema,
   dissectProcessorDefinitionSchema,
   grokProcessorDefinitionSchema,
+  advancedJsonProcessorDefinitionSchema,
   kvProcessorDefinitionSchema,
   geoIpProcessorDefinitionSchema,
   renameProcessorDefinitionSchema,
@@ -349,6 +350,7 @@ export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithI
   dateProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   dissectProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   grokProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
+  advancedJsonProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   kvProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   geoIpProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   renameProcessorDefinitionSchema.merge(z.object({ id: z.string() })),

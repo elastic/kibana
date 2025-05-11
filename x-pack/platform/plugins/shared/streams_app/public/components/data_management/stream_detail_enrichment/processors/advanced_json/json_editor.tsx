@@ -12,22 +12,21 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { ProcessorFormState } from '../../types';
 
-export const GrokPatternDefinition = () => {
-  const { field, fieldState } = useController<ProcessorFormState, 'pattern_definitions'>({
-    name: 'pattern_definitions',
+export const JsonEditor = () => {
+  const { field, fieldState } = useController<ProcessorFormState, 'processors'>({
+    name: 'processors',
   });
 
   return (
     <EuiFormRow
       label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokPatternDefinitionsLabel',
-        { defaultMessage: 'Pattern definitions' }
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsLabel',
+        { defaultMessage: 'Ingest pipeline processors' }
       )}
       helpText={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokPatternDefinitionsHelpText',
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsHelpText',
         {
-          defaultMessage:
-            'A map of pattern-name and pattern tuples defining custom patterns. Patterns matching existing names will override the pre-existing definition.',
+          defaultMessage: 'A JSON-encoded array of ingest pipeline processors',
         }
       )}
       isInvalid={fieldState.invalid}
@@ -39,8 +38,8 @@ export const GrokPatternDefinition = () => {
         languageId="xjson"
         height={200}
         aria-label={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokPatternDefinitionsAriaLabel',
-          { defaultMessage: 'Pattern definitions editor' }
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.ingestPipelineProcessorsAriaLabel',
+          { defaultMessage: 'Ingest pipeline processors editor' }
         )}
       />
     </EuiFormRow>

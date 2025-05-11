@@ -24,7 +24,7 @@ import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useMemo, useCallback } from 'react';
-import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
+import { useForm, SubmitHandler, FormProvider, useWatch, DeepPartial } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { DiscardPromptOptions, useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { DissectProcessorForm } from './dissect';
@@ -53,6 +53,7 @@ import { DateProcessorForm } from './date';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import { ConfigDrivenProcessorType } from './config_driven/types';
 import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
+import { AdvancedJsonProcessorForm } from './advanced_json';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();
@@ -79,7 +80,7 @@ export function AddProcessorPanel() {
   const initialDefaultValues = useMemo(() => defaultValuesGetter(), [defaultValuesGetter]);
 
   const methods = useForm<ProcessorFormState>({
-    defaultValues: initialDefaultValues,
+    defaultValues: initialDefaultValues as DeepPartial<ProcessorFormState>,
     mode: 'onChange',
   });
 
@@ -189,6 +190,7 @@ export function AddProcessorPanel() {
             {type === 'date' && <DateProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
+            {type === 'advanced_json' && <AdvancedJsonProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
             )}
@@ -243,7 +245,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
   );
 
   const methods = useForm<ProcessorFormState>({
-    defaultValues,
+    defaultValues: defaultValues as DeepPartial<ProcessorFormState>,
     mode: 'onChange',
   });
 
@@ -393,6 +395,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
             {type === 'date' && <DateProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
+            {type === 'advanced_json' && <AdvancedJsonProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
             )}

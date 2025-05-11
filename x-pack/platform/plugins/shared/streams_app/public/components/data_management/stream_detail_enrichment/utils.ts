@@ -23,6 +23,7 @@ import {
   ProcessorFormState,
   WithUIAttributes,
   DateFormState,
+  AdvancedJsonFormState,
 } from './types';
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
@@ -97,6 +98,15 @@ const defaultDissectProcessorFormState: (sampleDocs: FlattenRecord[]) => Dissect
   if: ALWAYS_CONDITION,
 });
 
+const defaultAdvancedJsonProcessorFormState: (
+  sampleDocs: FlattenRecord[]
+) => AdvancedJsonFormState = (sampleDocs: FlattenRecord[]) => ({
+  type: 'advanced_json',
+  processors: [],
+  ignore_failure: true,
+  if: ALWAYS_CONDITION,
+});
+
 const defaultGrokProcessorFormState: (sampleDocs: FlattenRecord[]) => GrokFormState = (
   sampleDocs: FlattenRecord[]
 ) => ({
@@ -123,6 +133,7 @@ const defaultProcessorFormStateByType: Record<
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
   grok: defaultGrokProcessorFormState,
+  advanced_json: defaultAdvancedJsonProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -151,6 +162,15 @@ export const getFormStateFrom = (
     return structuredClone({
       ...dissect,
       type: 'dissect',
+    });
+  }
+
+  if (isAdvancedJsonProcessor(processor)) {
+    const { advanced_json } = processor;
+
+    return structuredClone({
+      ...advanced_json,
+      type: 'advanced_json',
     });
   }
 
@@ -203,6 +223,18 @@ export const convertFormStateToProcessor = (formState: ProcessorFormState): Proc
     };
   }
 
+  if (formState.type === 'advanced_json') {
+    const { processors, ignore_failure } = formState;
+
+    return {
+      advanced_json: {
+        if: formState.if,
+        processors,
+        ignore_failure,
+      },
+    };
+  }
+
   if (formState.type === 'date') {
     const { field, formats, locale, ignore_failure, target_field, timezone, output_format } =
       formState;
@@ -239,6 +271,7 @@ const createProcessorGuardByType =
 
 export const isDateProcessor = createProcessorGuardByType('date');
 export const isDissectProcessor = createProcessorGuardByType('dissect');
+export const isAdvancedJsonProcessor = createProcessorGuardByType('advanced_json');
 export const isGrokProcessor = createProcessorGuardByType('grok');
 
 const createId = htmlIdGenerator();

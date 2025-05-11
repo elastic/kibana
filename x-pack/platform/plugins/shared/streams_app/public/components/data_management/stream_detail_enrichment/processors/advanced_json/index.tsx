@@ -7,27 +7,21 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { GrokPatternDefinition } from './grok_pattern_definition';
-import { GrokPatternsEditor } from './grok_patterns_editor';
-import { ProcessorFieldSelector } from '../processor_field_selector';
+import { JsonEditor } from './json_editor';
 import { OptionalFieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
-import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
+import { IgnoreFailureToggle } from '../ignore_toggles';
 
-export const GrokProcessorForm = () => {
+export const AdvancedJsonProcessorForm = () => {
   return (
     <>
-      <ProcessorFieldSelector />
-      <GrokPatternsEditor />
+      <JsonEditor />
       <EuiSpacer size="m" />
       <OptionalFieldsAccordion>
-        <GrokPatternDefinition />
-        <EuiSpacer size="m" />
         <ProcessorConditionEditor />
       </OptionalFieldsAccordion>
       <EuiSpacer size="m" />
       <IgnoreFailureToggle />
-      <IgnoreMissingToggle />
     </>
   );
 };
