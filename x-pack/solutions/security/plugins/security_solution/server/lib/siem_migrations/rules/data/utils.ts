@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-export const isStringValidJSON = (str: string): boolean => {
+/**
+ *
+ * Probes esClient error to see if it is a not found error
+ *
+ */
+export const isNotFoundError = (error: Error) => {
   try {
-    JSON.parse(str);
-    return true;
+    const message = JSON.parse(error.message);
+    if (Object.hasOwn(message, 'found') && message.found === false) {
+      return true;
+    }
   } catch (e) {
     return false;
   }
+
+  return false;
 };

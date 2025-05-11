@@ -9,7 +9,7 @@ import { v4 as uuidV4 } from 'uuid';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { StoredSiemMigration } from '../types';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
-import { isStringValidJSON } from './utils';
+import { isNotFoundError } from './utils';
 
 export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseClient {
   async create(): Promise<string> {
@@ -48,18 +48,10 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         index,
         id,
       })
-      .then((document) => {
-        return this.processHit(document);
-      })
+      .then(this.processHit)
       .catch((error) => {
-        if (isStringValidJSON(error.message)) {
-          const message = JSON.parse(error.message);
-          if (Object.hasOwn(message, 'found') && message.found === false) {
-            return undefined;
-          } else {
-            this.logger.error(`Error getting migration ${id}: ${error}`);
-            throw error;
-          }
+        if (isNotFoundError(error)) {
+          return undefined;
         }
         this.logger.error(`Error getting migration ${id}: ${error}`);
         throw error;
