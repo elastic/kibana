@@ -605,7 +605,13 @@ export class LensVisService {
 
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL ${TIMESTAMP_COLUMN}=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by ${TIMESTAMP_COLUMN}${breakdown}${sortBy}`
+      `${
+        breakdownColumn
+          ? `| EVAL \`${breakdownColumn.name}\` = COALESCE( \`${breakdownColumn.name}\`, "<missing>")`
+          : ''
+      } | EVAL ${TIMESTAMP_COLUMN}=DATE_TRUNC(${queryInterval}, ${
+        dataView.timeFieldName
+      }) | stats results = count(*) by ${TIMESTAMP_COLUMN}${breakdown}${sortBy}`
     );
   };
 
