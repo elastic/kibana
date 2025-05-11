@@ -40,7 +40,12 @@ export async function importModel(
   try {
     await ml.api.importTrainedModel(modelId, modelId, config);
   } catch (error) {
-    if (error.message.includes('resource_already_exists_exception')) {
+    if (
+      error.message.includes('resource_already_exists_exception') ||
+      error.message.includes(
+        'the model id is the same as the deployment id of a current model deployment'
+      )
+    ) {
       log.info(`Model "${modelId}" is already imported. Skipping import.`);
       return;
     }
