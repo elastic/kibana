@@ -12,6 +12,7 @@ import {
   EuiToolTip,
   EuiToolTipProps,
   EuiButtonEmptyProps,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -61,23 +62,25 @@ export const EditRoutingRuleControls = ({
   const hasPrivileges = routingSnapshot.context.definition.privileges.manage;
 
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
       <RemoveButton
         onDelete={removeRule}
         isDisabled={!canRemoveRoutingRule}
         relatedStreams={relatedStreams}
         streamName={routingRuleName}
       />
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-        <CancelButton isDisabled={isUpdating} onClick={cancelChanges} />
-        <PrivilegesTooltip hasPrivileges={hasPrivileges}>
-          <UpdateButton
-            isLoading={isUpdating}
-            isDisabled={!canUpdateRouting}
-            onClick={saveChanges}
-          />
-        </PrivilegesTooltip>
-      </EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center">
+          <CancelButton isDisabled={isUpdating} onClick={cancelChanges} />
+          <PrivilegesTooltip hasPrivileges={hasPrivileges}>
+            <UpdateButton
+              isLoading={isUpdating}
+              isDisabled={!canUpdateRouting}
+              onClick={saveChanges}
+            />
+          </PrivilegesTooltip>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
