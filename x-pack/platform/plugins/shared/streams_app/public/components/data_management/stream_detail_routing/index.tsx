@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiResizableContainer,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { Streams } from '@kbn/streams-schema';
@@ -99,6 +100,7 @@ export function StreamDetailRoutingImpl() {
   });
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
+  const isVerticalLayout = useIsWithinBreakpoints(['xs', 's']);
 
   return (
     <EuiFlexItem
@@ -125,7 +127,7 @@ export function StreamDetailRoutingImpl() {
           `}
           paddingSize="xs"
         >
-          <EuiResizableContainer>
+          <EuiResizableContainer direction={isVerticalLayout ? 'vertical' : 'horizontal'}>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel

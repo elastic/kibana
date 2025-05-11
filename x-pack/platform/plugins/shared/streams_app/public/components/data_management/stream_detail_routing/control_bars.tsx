@@ -34,7 +34,7 @@ export const AddRoutingRuleControls = () => {
   const hasPrivileges = routingSnapshot.context.definition.privileges.manage;
 
   return (
-    <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+    <EuiFlexGroup justifyContent="flexEnd" alignItems="center" wrap responsive={false}>
       <CancelButton isDisabled={isForking} onClick={cancelChanges} />
       <PrivilegesTooltip hasPrivileges={hasPrivileges}>
         <SaveButton isLoading={isForking} isDisabled={!canForkRouting} onClick={forkStream} />
@@ -70,7 +70,7 @@ export const EditRoutingRuleControls = ({
         streamName={routingRuleName}
       />
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center">
+        <EuiFlexGroup alignItems="center" wrap>
           <CancelButton isDisabled={isUpdating} onClick={cancelChanges} />
           <PrivilegesTooltip hasPrivileges={hasPrivileges}>
             <UpdateButton
