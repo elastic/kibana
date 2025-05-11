@@ -257,6 +257,8 @@ export class DiscoverPlugin
           data: plugins.data,
           coreStart: core,
           share: plugins.share,
+          uiActions: plugins.uiActions,
+          fieldFormats: plugins.fieldFormats,
         });
       }
     );

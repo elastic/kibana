@@ -33,7 +33,7 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { type ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
@@ -547,7 +547,13 @@ export const ESQLEditor = memo(function ESQLEditor({
     [esqlCallbacks, onQueryUpdate]
   );
 
-  useCreateLookupIndexCommand(editor1.current!, query, onIndexCreated);
+  const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useCreateLookupIndexCommand(
+    editor1,
+    editorModel,
+    esqlCallbacks?.getJoinIndices,
+    query,
+    onIndexCreated
+  );
 
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
@@ -760,6 +766,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const editorPanel = (
     <>
+      <Global styles={lookupIndexBadgeStyle} />
       {Boolean(editorIsInline) && !hideRunQueryButton && (
         <EuiFlexGroup
           gutterSize="none"
@@ -837,7 +844,14 @@ export const ESQLEditor = memo(function ESQLEditor({
                     const model = editor.getModel();
                     if (model) {
                       editorModel.current = model;
+                      // TODO add decorator here
+                      addLookupIndicesDecorator();
                     }
+
+                    monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
+                      wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
+                    });
+
                     // this is fixing a bug between the EUIPopover and the monaco editor
                     // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon

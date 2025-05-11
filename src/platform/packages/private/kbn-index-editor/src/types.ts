@@ -10,6 +10,8 @@
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export interface EditLookupIndexContentContext {
   indexName?: string;
@@ -21,4 +23,13 @@ export interface EditLookupIndexFlyoutDeps {
   coreStart: CoreStart;
   share: SharePluginStart;
   data: DataPublicPluginStart;
+  uiActions: UiActionsStart;
+  fieldFormats: FieldFormatsStart;
+}
+
+export interface KibanaContextExtra {
+  share: SharePluginStart;
+  data: DataPublicPluginStart;
+  uiActions: UiActionsStart;
+  fieldFormats: FieldFormatsStart;
 }

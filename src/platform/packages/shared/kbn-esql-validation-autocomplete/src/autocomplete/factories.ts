@@ -549,7 +549,8 @@ export function getControlSuggestion(
 export function getLookupIndexCreateSuggestion(indexName?: string): SuggestionRawDefinition {
   return {
     label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndex', {
-      defaultMessage: 'Create lookup index',
+      defaultMessage: 'Create lookup index "{indexName}"',
+      values: { indexName },
     }),
     text: '',
     kind: 'Issue',

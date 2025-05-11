@@ -21,18 +21,33 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { FC } from 'react';
-import React from 'react';
+import React, { lazy, useState } from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { CellActionsProvider } from '@kbn/cell-actions';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { DataTableRecord } from '@kbn/discover-utils';
 import { EditLookupIndexFlyoutDeps } from '../types';
 
 export interface FlyoutContentProps {
   deps: EditLookupIndexFlyoutDeps;
+  props: any;
 }
 
-export const FlyoutContent: FC<FlyoutContentProps> = ({ deps }) => {
+const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));
+
+export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
+  console.log(deps, '______deps______');
+
+  const [columns, setColumns] = useState<DatatableColumn[]>([]);
+  const [rows, setRows] = useState<DataTableRecord[]>([]);
+
+  const { coreStart, ...restDeps } = deps;
+
   return (
     <KibanaContextProvider
       services={{
-        ...deps,
+        ...coreStart,
+        ...restDeps,
       }}
     >
       <>
@@ -43,9 +58,19 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps }) => {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <div>
-            <span>Table content here</span>
-          </div>
+          <CellActionsProvider
+            getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}
+          >
+            <DataGridLazy
+              data={deps.data}
+              fieldFormats={deps.fieldFormats}
+              core={deps.coreStart}
+              share={deps.share}
+              {...props}
+              columns={columns}
+              rows={rows}
+            />
+          </CellActionsProvider>
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>

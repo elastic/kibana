@@ -145,7 +145,6 @@ export const suggest: CommandSuggestFunction<'join'> = async ({
     case 'index': {
       const indexNameInput = commandText.split(' ').pop() ?? '';
       const isCreateCommandEnabled = (await callbacks?.getCurrentAppId?.()) === 'discover';
-      console.log(isCreateCommandEnabled, '______isCreateCommandEnabled______');
 
       const joinIndices = await callbacks?.getJoinIndices?.();
       const suggestions: SuggestionRawDefinition[] = [];
