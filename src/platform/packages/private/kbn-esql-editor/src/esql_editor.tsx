@@ -547,13 +547,14 @@ export const ESQLEditor = memo(function ESQLEditor({
     [esqlCallbacks, onQueryUpdate]
   );
 
-  const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useCreateLookupIndexCommand(
-    editor1,
-    editorModel,
-    esqlCallbacks?.getJoinIndices,
-    query,
-    onIndexCreated
-  );
+  const { lookupIndexBadgeStyle, lookupIndexLabelClickHandler, addLookupIndicesDecorator } =
+    useCreateLookupIndexCommand(
+      editor1,
+      editorModel,
+      esqlCallbacks?.getJoinIndices,
+      query,
+      onIndexCreated
+    );
 
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
@@ -857,13 +858,14 @@ export const ESQLEditor = memo(function ESQLEditor({
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
                     // and the user needs to click again the editor.
                     // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    editor.onMouseDown(() => {
+                    editor.onMouseDown(async (e) => {
                       setTimeout(() => {
                         editor.focus();
                       }, 100);
                       if (datePickerOpenStatusRef.current) {
                         setPopoverPosition({});
                       }
+                      await lookupIndexLabelClickHandler(e);
                     });
 
                     editor.onDidFocusEditorText(() => {

@@ -11,7 +11,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { EditLookupIndexContentContext } from '@kbn/index-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { type ESQLSource, parse } from '@kbn/esql-ast';
@@ -70,6 +70,7 @@ export const useLookupIndexCommand = (
   onIndexCreated: (resultQuery: string) => void
 ) => {
   const { euiTheme } = useEuiTheme();
+  const inQueryLookupIndices = useRef<string[]>([]);
 
   const lookupIndexAddBadgeClassName = 'lookupIndexAddBadge';
   const lookupIndexEditBadgeClassName = 'lookupIndexEditBadge';
@@ -114,23 +115,26 @@ export const useLookupIndexCommand = (
   const kibana = useKibana<ESQLEditorDeps>();
   const { uiActions, docLinks } = kibana.services;
 
-  const inQueryLookupIndices = useMemo<string[]>(() => {
-    const indexNames: string[] = [];
+  useEffect(
+    function parseIndicesOnChange() {
+      const indexNames: string[] = [];
 
-    // parse esql query and find lookup indices in the query, traversing the AST
-    const { root } = parse(query.esql);
-    // find all join commands
-    root.commands.forEach((command) => {
-      if (command.name === 'join') {
-        const indexName = command.args.find<ESQLSource>(isESQLSourceItem);
-        if (indexName) {
-          indexNames.push(indexName.name);
+      // parse esql query and find lookup indices in the query, traversing the AST
+      const { root } = parse(query.esql);
+      // find all join commands
+      root.commands.forEach((command) => {
+        if (command.name === 'join') {
+          const indexName = command.args.find<ESQLSource>(isESQLSourceItem);
+          if (indexName) {
+            indexNames.push(indexName.name);
+          }
         }
-      }
-    });
+      });
 
-    return indexNames;
-  }, [query.esql]);
+      inQueryLookupIndices.current = indexNames;
+    },
+    [query.esql]
+  );
 
   const onUploadComplete = useCallback(
     (results: any) => {
@@ -150,13 +154,19 @@ export const useLookupIndexCommand = (
   // @ts-ignore
   const lookupIndexDocsUrl = docLinks?.links.apis.createIndex;
 
-  monaco.editor.registerCommand('esql.lookup_index.create', async (_, initialIndexName) => {
-    await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
-      initialIndexName,
-      onUploadComplete,
-      onClose: () => {},
-      onSave: () => {},
-    } as EditLookupIndexContentContext);
+  const openFlyout = useCallback(
+    async (indexName: string) => {
+      await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
+        indexName,
+        onClose: () => {},
+        onSave: () => {},
+      } as EditLookupIndexContentContext);
+    },
+    [uiActions]
+  );
+
+  monaco.editor.registerCommand('esql.lookup_index.create', async (_, indexName) => {
+    await openFlyout(indexName);
   });
 
   const addLookupIndicesDecorator = useCallback(() => {
@@ -169,7 +179,7 @@ export const useLookupIndexCommand = (
 
     getLookupIndices().then(({ indices: existingIndices }) => {
       // TODO extract aliases as well
-      const lookupIndices: string[] = inQueryLookupIndices;
+      const lookupIndices: string[] = inQueryLookupIndices.current;
 
       // TODO parse the query and find the lookup indices in the query that do not exist
 
@@ -213,5 +223,29 @@ export const useLookupIndexCommand = (
     [query.esql, addLookupIndicesDecorator]
   );
 
-  return { addLookupIndicesDecorator, lookupIndexBadgeStyle };
+  /**
+   * the onClick handler is set only once, hence the reference has to be stable.
+   */
+  const lookupIndexLabelClickHandler = useCallback(
+    async (e: monaco.editor.IEditorMouseEvent) => {
+      const mousePosition = e.target.position;
+      if (!mousePosition) return;
+
+      const currentWord = editorModel.current?.getWordAtPosition(mousePosition);
+      const clickedIndexName = inQueryLookupIndices.current.find((v) =>
+        currentWord?.word.includes(v)
+      );
+
+      if (clickedIndexName) {
+        await openFlyout(clickedIndexName);
+      }
+    },
+    [editorModel, inQueryLookupIndices, openFlyout]
+  );
+
+  return {
+    addLookupIndicesDecorator,
+    lookupIndexBadgeStyle,
+    lookupIndexLabelClickHandler,
+  };
 };
