@@ -20,7 +20,7 @@ describe('Timeseries', () => {
         {
           type: 'command',
           name: 'ts',
-          sources: [
+          args: [
             {
               type: 'source',
               name: 'foo',
@@ -40,7 +40,7 @@ describe('Timeseries', () => {
         {
           type: 'command',
           name: 'ts',
-          sources: [
+          args: [
             {
               type: 'source',
               name: 'foo',
