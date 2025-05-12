@@ -22,7 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { CollapsibleSection, GridSectionData } from '../types';
+import { CollapsibleSection } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { useGridLayoutRowEvents } from '../use_grid_layout_events';
 import { deleteRow } from '../utils/section_management';
