@@ -64,7 +64,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     it('has an index created in 8.18', async () => {
       await retry.try(async () => {
         const indexVersion = await getKbIndexCreatedVersion(es);
-        expect(indexVersion).to.be('8.18.0');
+        expect(indexVersion).to.contain('8.18.0'); // should match both '8.18.0-8.18.1' and '8.18.0': https://github.com/elastic/kibana/issues/220599
       });
     });
 
