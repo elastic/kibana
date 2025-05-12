@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public/utils/get_connectors_management_href';
+import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
