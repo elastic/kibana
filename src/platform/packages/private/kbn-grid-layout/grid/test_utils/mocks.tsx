@@ -16,9 +16,10 @@ import {
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
+  OrderedLayout,
   RuntimeGridSettings,
 } from '../types';
-import { getSampleLayout } from './sample_layout';
+import { getSampleOrderedLayout } from './sample_layout';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
@@ -38,7 +39,7 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
     layoutRef: { current: {} },
     expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
     isMobileView$: new BehaviorSubject<boolean>(false),
-    gridLayout$: new BehaviorSubject<GridLayoutData>(getSampleLayout()),
+    gridLayout$: new BehaviorSubject<OrderedLayout>(getSampleOrderedLayout()),
     proposedGridLayout$: new BehaviorSubject<GridLayoutData | undefined>(undefined),
     runtimeSettings$: new BehaviorSubject<RuntimeGridSettings>({
       ...gridSettings,

@@ -11,7 +11,7 @@ import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 
 import { GridLayoutStateManager, GridSectionData, OrderedLayout } from '../../types';
-import { getPanelKeysInOrder } from '../../utils/resolve_grid_section';
+import { getPanelKeysInOrder, getSectionsInOrder } from '../../utils/resolve_grid_section';
 import { resolveSections } from '../../utils/section_management';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
@@ -113,7 +113,6 @@ export const moveAction = (
         return { id, middle: top + height / 2 };
       })
       .sort(({ middle: middleA }, { middle: middleB }) => middleA - middleB);
-
     const ordersAreEqual = sortedRows.every(
       (section, index) => currentLayout[section.id].order === index
     );
@@ -144,62 +143,61 @@ export const moveAction = (
     let mainSectionCount = 0;
     const firstSectionOrder = currentLayout[targetSectionId].order;
     const anotherLayout: OrderedLayout = {};
-    Object.entries(currentLayout)
-      .sort(([idA, { order: orderA }], [idB, { order: orderB }]) => orderA - orderB)
-      .forEach(([id, section]) => {
-        if (id === currentActiveRowEvent.id) return;
+    getSectionsInOrder(currentLayout).forEach((section) => {
+      const { id } = section;
+      if (id === currentActiveRowEvent.id) return;
 
-        if (section.order < firstSectionOrder) {
-          anotherLayout[id] = section;
-        } else if (section.order === firstSectionOrder) {
-          // split this section into 2 - one main section above the dragged section, and one below
-          const topSectionPanels: GridSectionData['panels'] = {};
-          const bottomSectionPanels: GridSectionData['panels'] = {};
-          let startingRow: number;
-          getPanelKeysInOrder(section.panels).forEach((panelId) => {
-            const panel = section.panels[panelId];
-            if (panel.row < targetRow) {
-              topSectionPanels[panel.id] = panel;
-            } else {
-              if (startingRow === undefined) {
-                startingRow = panel.row;
-              }
-              bottomSectionPanels[panel.id] = { ...panel, row: panel.row - startingRow };
+      if (section.order < firstSectionOrder) {
+        anotherLayout[id] = section;
+      } else if (section.order === firstSectionOrder) {
+        // split this section into 2 - one main section above the dragged section, and one below
+        const topSectionPanels: GridSectionData['panels'] = {};
+        const bottomSectionPanels: GridSectionData['panels'] = {};
+        let startingRow: number;
+        getPanelKeysInOrder(section.panels).forEach((panelId) => {
+          const panel = section.panels[panelId];
+          if (panel.row < targetRow) {
+            topSectionPanels[panel.id] = panel;
+          } else {
+            if (startingRow === undefined) {
+              startingRow = panel.row;
             }
-          });
-
-          if (Object.keys(topSectionPanels).length > 0) {
-            anotherLayout[`main-${mainSectionCount}`] = {
-              id: `main-${mainSectionCount}`,
-              isMainSection: true,
-              order,
-              panels: topSectionPanels,
-            };
-            order++;
-            mainSectionCount++;
+            bottomSectionPanels[panel.id] = { ...panel, row: panel.row - startingRow };
           }
-          anotherLayout[currentActiveRowEvent.id] = {
-            ...currentLayout[currentActiveRowEvent.id],
+        });
+
+        if (Object.keys(topSectionPanels).length > 0) {
+          anotherLayout[`main-${mainSectionCount}`] = {
+            id: `main-${mainSectionCount}`,
+            isMainSection: true,
             order,
+            panels: topSectionPanels,
           };
           order++;
-
-          if (Object.keys(bottomSectionPanels).length > 0) {
-            anotherLayout[`main-${mainSectionCount}`] = {
-              id: `main-${mainSectionCount}`,
-              isMainSection: true,
-              order,
-              panels: bottomSectionPanels,
-            };
-          }
-        } else {
-          // push each other rows down
-          const sectionId = section.isMainSection ? `main-${mainSectionCount}` : id;
-          anotherLayout[sectionId] = { ...section, id: sectionId, order };
+          mainSectionCount++;
         }
+        anotherLayout[currentActiveRowEvent.id] = {
+          ...currentLayout[currentActiveRowEvent.id],
+          order,
+        };
         order++;
-        if (section.isMainSection) mainSectionCount++;
-      });
+
+        if (Object.keys(bottomSectionPanels).length > 0) {
+          anotherLayout[`main-${mainSectionCount}`] = {
+            id: `main-${mainSectionCount}`,
+            isMainSection: true,
+            order,
+            panels: bottomSectionPanels,
+          };
+        }
+      } else {
+        // push each other rows down
+        const sectionId = section.isMainSection ? `main-${mainSectionCount}` : id;
+        anotherLayout[sectionId] = { ...section, id: sectionId, order };
+      }
+      order++;
+      if (section.isMainSection) mainSectionCount++;
+    });
 
     const finalLayout = resolveSections(anotherLayout);
     if (!deepEqual(currentLayout, finalLayout))

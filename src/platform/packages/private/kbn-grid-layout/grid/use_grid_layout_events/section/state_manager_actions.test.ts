@@ -8,7 +8,9 @@
  */
 
 import { getGridLayoutStateManagerMock } from '../../test_utils/mocks';
-import { getRowKeysInOrder } from '../../utils/resolve_grid_section';
+import { getSampleOrderedLayout } from '../../test_utils/sample_layout';
+import { CollapsibleSection } from '../../types';
+import { getSectionsInOrder } from '../../utils/resolve_grid_section';
 import { moveAction } from './state_manager_actions';
 
 describe('row state manager actions', () => {
@@ -16,6 +18,13 @@ describe('row state manager actions', () => {
 
   describe('move action', () => {
     beforeAll(() => {
+      gridLayoutStateManager.gridLayout$.next({
+        ...gridLayoutStateManager.gridLayout$.getValue(),
+        second: {
+          ...gridLayoutStateManager.gridLayout$.getValue().second,
+          isCollapsed: true,
+        } as CollapsibleSection,
+      });
       gridLayoutStateManager.activeRowEvent$.next({
         id: 'second',
         startingPosition: {
@@ -27,34 +36,24 @@ describe('row state manager actions', () => {
           left: 0,
         },
         sensorType: 'mouse',
+        targetSection: undefined,
       });
       gridLayoutStateManager.sectionRefs.current = {
-        first: {} as any as HTMLDivElement,
-        second: {} as any as HTMLDivElement,
-        third: {} as any as HTMLDivElement,
-      };
-      gridLayoutStateManager.headerRefs.current = {
-        second: {} as any as HTMLDivElement,
-        third: {} as any as HTMLDivElement,
-      };
-    });
-
-    it('adjusts row order based on positioning of row refs', () => {
-      const currentRowOrder = getRowKeysInOrder(gridLayoutStateManager.gridLayout$.getValue());
-      expect(currentRowOrder).toEqual(['first', 'second', 'third']);
-
-      gridLayoutStateManager.sectionRefs.current = {
-        second: {
-          getBoundingClientRect: jest.fn().mockReturnValue({ top: 100, height: 100 }),
+        'main-0': {
+          getBoundingClientRect: jest.fn().mockReturnValue({ top: 0, height: 100, bottom: 100 }),
         } as any as HTMLDivElement,
         third: {
-          getBoundingClientRect: jest.fn().mockReturnValue({ top: 25, height: 100 }),
+          getBoundingClientRect: jest.fn().mockReturnValue({ top: 200, height: 100, bottom: 300 }),
         } as any as HTMLDivElement,
       };
-      moveAction(gridLayoutStateManager, { clientX: 0, clientY: 0 }, { clientX: 0, clientY: 0 });
-
-      const newRowOrder = getRowKeysInOrder(gridLayoutStateManager.proposedGridLayout$.getValue()!);
-      expect(newRowOrder).toEqual(['first', 'third', 'second']);
+      gridLayoutStateManager.headerRefs.current = {
+        second: {
+          getBoundingClientRect: jest.fn().mockReturnValue({ top: 100, height: 50, bottom: 150 }),
+        } as any as HTMLDivElement,
+        third: {
+          getBoundingClientRect: jest.fn().mockReturnValue({ top: 150, height: 50, bottom: 200 }),
+        } as any as HTMLDivElement,
+      };
     });
 
     it('calculates translate based on old and new mouse position', () => {
@@ -63,17 +62,112 @@ describe('row state manager actions', () => {
         { clientX: 20, clientY: 150 },
         { clientX: 100, clientY: 10 }
       );
-      expect(gridLayoutStateManager.activeRowEvent$.getValue()).toEqual({
-        id: 'second',
-        startingPosition: {
-          top: 100,
-          left: 100,
-        },
-        translate: {
-          top: -140,
-          left: 80,
-        },
-        sensorType: 'mouse',
+      expect(gridLayoutStateManager.activeRowEvent$.getValue()).toEqual(
+        expect.objectContaining({
+          id: 'second',
+          startingPosition: {
+            top: 100,
+            left: 100,
+          },
+          translate: {
+            top: -140,
+            left: 80,
+          },
+        })
+      );
+      gridLayoutStateManager.gridLayout$.next(getSampleOrderedLayout());
+    });
+
+    describe('re-ordering sections', () => {
+      beforeAll(() => {
+        const currentRowOrder = getSectionsInOrder(
+          gridLayoutStateManager.gridLayout$.getValue()
+        ).map(({ id }) => id);
+        expect(currentRowOrder).toEqual(['main-0', 'second', 'third']);
+      });
+
+      it('no target section id', () => {
+        // "move" the second section up so that it overlaps with nothing
+        gridLayoutStateManager.headerRefs.current.second = {
+          getBoundingClientRect: jest.fn().mockReturnValue({ top: -100, height: 50, bottom: -50 }),
+        } as any as HTMLDivElement;
+        moveAction(gridLayoutStateManager, { clientX: 0, clientY: 0 }, { clientX: 0, clientY: 0 });
+
+        // second section gets dropped at the top
+        const newRowOrder = getSectionsInOrder(gridLayoutStateManager.gridLayout$.getValue()).map(
+          ({ id }) => id
+        );
+        expect(newRowOrder).toEqual(['second', 'main-0', 'third']);
+      });
+
+      it('targeting a non-main section', () => {
+        // "move" the second section so that it overlaps the third section
+        gridLayoutStateManager.headerRefs.current.second = {
+          getBoundingClientRect: jest.fn().mockReturnValue({ top: 260, height: 50, bottom: 310 }),
+        } as any as HTMLDivElement;
+        moveAction(gridLayoutStateManager, { clientX: 0, clientY: 0 }, { clientX: 0, clientY: 0 });
+
+        // second section gets dropped after the third section
+        const newRowOrder = getSectionsInOrder(gridLayoutStateManager.gridLayout$.getValue()).map(
+          ({ id }) => id
+        );
+        expect(newRowOrder).toEqual(['main-0', 'third', 'second']);
+      });
+
+      it('targeting a main section', () => {
+        // "move" the second section so that it overlaps the first main section
+        gridLayoutStateManager.headerRefs.current.second = {
+          getBoundingClientRect: jest.fn().mockReturnValue({ top: 50, height: 50, bottom: 100 }),
+        } as any as HTMLDivElement;
+        moveAction(gridLayoutStateManager, { clientX: 0, clientY: 0 }, { clientX: 0, clientY: 0 });
+
+        // second section gets dropped between panels and creates a new section
+        const newRowOrder = getSectionsInOrder(gridLayoutStateManager.gridLayout$.getValue()).map(
+          ({ id }) => id
+        );
+        expect(newRowOrder).toEqual(['main-0', 'second', 'main-1', 'third']);
+        expect(gridLayoutStateManager.gridLayout$.getValue()).toEqual({
+          'main-0': expect.objectContaining({
+            order: 0,
+            panels: {
+              panel1: expect.objectContaining({
+                row: 0,
+              }),
+              panel5: expect.objectContaining({
+                row: 0,
+              }),
+            },
+          }),
+          second: expect.objectContaining({
+            order: 1,
+          }),
+          'main-1': expect.objectContaining({
+            order: 2,
+            panels: {
+              panel2: expect.objectContaining({
+                row: 0,
+              }),
+              panel3: expect.objectContaining({
+                row: 0,
+              }),
+              panel4: expect.objectContaining({
+                row: 4,
+              }),
+              panel6: expect.objectContaining({
+                row: 0,
+              }),
+              panel7: expect.objectContaining({
+                row: 0,
+              }),
+              panel8: expect.objectContaining({
+                row: 2,
+              }),
+            },
+          }),
+          third: expect.objectContaining({
+            order: 3,
+          }),
+        });
       });
     });
   });

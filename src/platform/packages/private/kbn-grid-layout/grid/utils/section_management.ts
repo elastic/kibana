@@ -9,7 +9,7 @@
 import { cloneDeep } from 'lodash';
 
 import { GridSectionData, OrderedLayout } from '../types';
-import { resolveGridSection } from './resolve_grid_section';
+import { getSectionsInOrder, resolveGridSection } from './resolve_grid_section';
 
 /**
  * Move the panels in the `startingSection` to the bottom of the `newSection` and resolve the resulting panels
@@ -50,9 +50,7 @@ export const deleteRow = (layout: OrderedLayout, sectionId: string) => {
  * @returns Updated layout with `main` sections combined + section orders resolved
  */
 export const resolveSections = (layout: OrderedLayout) => {
-  const sortedSections = Object.values(layout).sort(
-    (sectionA, sectionB) => sectionA.order - sectionB.order
-  );
+  const sortedSections = getSectionsInOrder(layout);
   const resolvedLayout: OrderedLayout = {};
   let mainSectionCount = 0;
   for (let i = 0; i < sortedSections.length; i++) {

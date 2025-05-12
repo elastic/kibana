@@ -25,7 +25,11 @@ import {
 import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
-import { getPanelKeysInOrder, resolveGridSection } from './utils/resolve_grid_section';
+import {
+  getPanelKeysInOrder,
+  getSectionsInOrder,
+  resolveGridSection,
+} from './utils/resolve_grid_section';
 import { getOrderedLayout } from './utils/conversions';
 import { isOrderedLayoutEqual } from './utils/equality_checks';
 
@@ -103,49 +107,42 @@ export const GridLayout = ({
       const currentElementsInOrder: GridLayoutElementsInOrder = [];
       let gridTemplateString = '';
 
-      Object.values(sections)
-        .sort((a, b) => {
-          return a.order - b.order;
-        })
-        .forEach((section) => {
-          const { id } = section;
-          const isMainSection = 'isMainSection' in section && section.isMainSection;
+      getSectionsInOrder(sections).forEach((section) => {
+        const { id } = section;
+        const isMainSection = 'isMainSection' in section && section.isMainSection;
 
-          /** Header */
-          if (!isMainSection) {
-            currentElementsInOrder.push({ type: 'header', id });
-            gridTemplateString += `auto `;
-          }
+        /** Header */
+        if (!isMainSection) {
+          currentElementsInOrder.push({ type: 'header', id });
+          gridTemplateString += `auto `;
+        }
 
-          /** Panels */
-          gridTemplateString += `[start-${id}] `;
-          if (
-            Object.keys(section.panels).length &&
-            (section.isMainSection || !section.isCollapsed)
-          ) {
-            let maxRow = 0;
-            getPanelKeysInOrder(section.panels).forEach((panelId) => {
-              const panel = section.panels[panelId];
-              maxRow = Math.max(maxRow, panel.row + panel.height);
-              currentElementsInOrder.push({
-                type: 'panel',
-                id: panel.id,
-              });
-            });
-            gridTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
+        /** Panels */
+        gridTemplateString += `[start-${id}] `;
+        if (Object.keys(section.panels).length && (section.isMainSection || !section.isCollapsed)) {
+          let maxRow = 0;
+          getPanelKeysInOrder(section.panels).forEach((panelId) => {
+            const panel = section.panels[panelId];
+            maxRow = Math.max(maxRow, panel.row + panel.height);
             currentElementsInOrder.push({
-              type: 'wrapper',
-              id,
+              type: 'panel',
+              id: panel.id,
             });
-          }
-          gridTemplateString += `[end-${section.id}] `;
+          });
+          gridTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
+          currentElementsInOrder.push({
+            type: 'wrapper',
+            id,
+          });
+        }
+        gridTemplateString += `[end-${section.id}] `;
 
-          /** Footer */
-          if (!isMainSection) {
-            currentElementsInOrder.push({ type: 'footer', id });
-            gridTemplateString += `auto `;
-          }
-        });
+        /** Footer */
+        if (!isMainSection) {
+          currentElementsInOrder.push({ type: 'footer', id });
+          gridTemplateString += `auto `;
+        }
+      });
 
       setElementsInOrder(currentElementsInOrder);
       gridTemplateString = gridTemplateString.replaceAll('] [', ' ');

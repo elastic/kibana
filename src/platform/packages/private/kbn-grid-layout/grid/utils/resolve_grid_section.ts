@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutData, GridLayoutWidget, GridPanelData, GridSectionData } from '../types';
+import {
+  GridLayoutData,
+  GridLayoutWidget,
+  GridPanelData,
+  GridSectionData,
+  OrderedLayout,
+} from '../types';
 
 const collides = (panelA: GridPanelData, panelB: GridPanelData) => {
   if (panelA.id === panelB.id) return false; // same panel
@@ -87,6 +93,12 @@ export const getPanelKeysInOrder = (
     const panelB = panels[panelKeyB];
 
     return comparePanel(panelA, panelB, draggedId);
+  });
+};
+
+export const getSectionsInOrder = (layout: OrderedLayout) => {
+  return Object.values(layout).sort(({ order: orderA }, { order: orderB }) => {
+    return orderA - orderB;
   });
 };
 

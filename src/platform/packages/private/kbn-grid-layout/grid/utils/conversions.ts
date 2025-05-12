@@ -10,41 +10,35 @@
 import { cloneDeep } from 'lodash';
 
 import { GridLayoutData, GridPanelData, GridSectionData, OrderedLayout } from '../types';
-import { getLayoutInOrder } from './resolve_grid_section';
+import { getLayoutInOrder, getSectionsInOrder } from './resolve_grid_section';
 
 export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
   let gridLayout: GridLayoutData = {};
   let mainRow = 0;
-  Object.values(layout)
-    .sort(({ order: orderA }, { order: orderB }) => {
-      return orderA - orderB;
-    })
-    .forEach((section) => {
-      const panels: { [key: string]: GridPanelData & { type?: 'panel' } } = cloneDeep(
-        section.panels
-      );
-      if (section.isMainSection) {
-        const panelValues = Object.values(panels);
-        const maxRow =
-          panelValues.length > 0
-            ? Math.max(...panelValues.map(({ row, height }) => row + height))
-            : 0;
-        panelValues.forEach((panel: GridPanelData & { type?: 'panel' }) => {
-          panel.row += mainRow;
-          panel.type = 'panel';
-        });
-        gridLayout = { ...gridLayout, ...panels } as GridLayoutData;
-        mainRow += maxRow;
-      } else {
-        const { order, isMainSection, ...rest } = section;
-        gridLayout[section.id] = {
-          ...rest,
-          type: 'section',
-          row: mainRow,
-        };
-        mainRow++;
-      }
-    });
+  getSectionsInOrder(layout).forEach((section) => {
+    const panels: { [key: string]: GridPanelData & { type?: 'panel' } } = cloneDeep(section.panels);
+    if (section.isMainSection) {
+      const panelValues = Object.values(panels);
+      const maxRow =
+        panelValues.length > 0
+          ? Math.max(...panelValues.map(({ row, height }) => row + height))
+          : 0;
+      panelValues.forEach((panel: GridPanelData & { type?: 'panel' }) => {
+        panel.row += mainRow;
+        panel.type = 'panel';
+      });
+      gridLayout = { ...gridLayout, ...panels } as GridLayoutData;
+      mainRow += maxRow;
+    } else {
+      const { order, isMainSection, ...rest } = section;
+      gridLayout[section.id] = {
+        ...rest,
+        type: 'section',
+        row: mainRow,
+      };
+      mainRow++;
+    }
+  });
   return gridLayout;
 };
 
