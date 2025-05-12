@@ -78,21 +78,21 @@ export const useAddBulkToTimelineAction = ({
   const experimentalBrowserFields = useBrowserFields(scopeId);
   const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
 
-  let {
-    browserFields,
-    dataViewId,
-    sourcererDataView,
+  const {
+    browserFields: oldBrowserFields,
+    dataViewId: oldDataViewId,
+    sourcererDataView: oldSourcererDataView,
     // important to get selectedPatterns from useSourcererDataView
     // in order to include the exclude filters in the search that are not stored in the timeline
-    selectedPatterns,
+    selectedPatterns: oldSelectedPatterns,
   } = useSourcererDataView(scopeId);
 
-  if (newDataViewPickerEnabled) {
-    dataViewId = experimentalDataView.id ?? '';
-    browserFields = experimentalBrowserFields;
-    sourcererDataView = experimentalDataView;
-    selectedPatterns = experimentalSelectedPatterns;
-  }
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const dispatch = useDispatch();
   const { uiSettings } = useKibana().services;

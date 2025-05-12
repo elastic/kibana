@@ -53,6 +53,7 @@ export type {
   GetGlobalExecutionKPIParams,
   GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
+export type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
 export type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
 
 export interface RulesClientContext {
@@ -190,6 +191,11 @@ interface DashboardItem {
   refId: string;
 }
 
+interface InvestigationGuide {
+  blob: string;
+}
+
 export interface DenormalizedArtifacts {
   dashboards?: DashboardItem[];
+  investigation_guide?: InvestigationGuide;
 }

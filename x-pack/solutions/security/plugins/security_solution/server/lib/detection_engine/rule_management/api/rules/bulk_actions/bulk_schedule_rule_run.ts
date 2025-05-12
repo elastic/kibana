@@ -61,8 +61,7 @@ export const bulkScheduleBackfill = async ({
   // Then if it's not a dry run, we schedule backfill for the rules that passed the validation
   const params: ScheduleBackfillParams = validatedRules.map(({ id }) => ({
     ruleId: id,
-    start: runPayload.start_date,
-    end: runPayload.end_date,
+    ranges: [{ start: runPayload.start_date, end: runPayload.end_date }],
   }));
 
   // Perform actual schedule using the rulesClient

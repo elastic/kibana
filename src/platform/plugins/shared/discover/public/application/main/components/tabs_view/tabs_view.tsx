@@ -12,7 +12,6 @@ import React, { useState } from 'react';
 import { pick } from 'lodash';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
-  CurrentTabProvider,
   createTabItem,
   internalStateActions,
   selectAllTabs,
@@ -34,17 +33,10 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
     <UnifiedTabs
       services={services}
       initialItems={initialItems}
-      onChanged={(updateState) => {
-        const updateTabsAction = internalStateActions.updateTabs(updateState);
-        return dispatch(updateTabsAction);
-      }}
+      onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
       createItem={() => createTabItem(allTabs)}
       getPreviewData={getPreviewData}
-      renderContent={() => (
-        <CurrentTabProvider currentTabId={currentTabId}>
-          <DiscoverSessionView key={currentTabId} {...props} />
-        </CurrentTabProvider>
-      )}
+      renderContent={() => <DiscoverSessionView key={currentTabId} {...props} />}
     />
   );
 };

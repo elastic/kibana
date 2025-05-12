@@ -23,6 +23,7 @@ import illustration from '../../../common/images/integrations_light.png';
 import { TEST_SUBJ_ONBOARDING_NO_DATA_FOUND } from '../../constants';
 import { SecurityIntegrations } from '../../../common/lib/integrations/components';
 import { IntegrationContextProvider } from '../../../common/lib/integrations/hooks/integration_context';
+import { INTEGRATION_TABS } from '../../../common/lib/integrations/configs/integration_tabs_configs';
 
 export const NoDataFound = () => {
   const spaceId = useSpaceId();
@@ -51,7 +52,7 @@ export const NoDataFound = () => {
               <p>
                 <FormattedMessage
                   id="xpack.securitySolution.onboarding.startOnboardingAssetsDescription"
-                  defaultMessage="It looks like there's no asset data available yet. To get started, connect your organization's data sources—such as identity providers, cloud service providers, and other IT systems—to populate your inventory with the we discover assets."
+                  defaultMessage="It looks like there's no asset data available yet. To get started, connect your organization's data sources—such as identity providers, cloud service providers, and other IT systems—to populate your asset inventory."
                 />
               </p>
             </EuiText>
@@ -68,7 +69,7 @@ export const NoDataFound = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <IntegrationContextProvider spaceId={spaceId}>
+        <IntegrationContextProvider spaceId={spaceId} integrationTabs={INTEGRATION_TABS}>
           <SecurityIntegrations />
         </IntegrationContextProvider>
       </EuiPanel>
