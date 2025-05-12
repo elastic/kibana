@@ -68,7 +68,7 @@ export async function generateArchive(manifest: ContentPackManifest, objects: Co
           return;
 
         default:
-          exhaustiveMatchingGuard(type);
+          missingEntryTypeImpl(type);
       }
     });
 
@@ -125,7 +125,7 @@ async function extractEntries(rootDir: string, zip: AdmZip): Promise<ContentPack
             return resolveDashboard(rootDir, zip, entry);
 
           default:
-            exhaustiveMatchingGuard(type);
+            missingEntryTypeImpl(type);
         }
       })
   );
@@ -182,6 +182,6 @@ function assertUncompressedSize(entry: AdmZip.IZipEntry) {
   }
 }
 
-function exhaustiveMatchingGuard(type: never): never {
-  throw new Error(`Content pack entry type [${type}] is not supported`);
+function missingEntryTypeImpl(type: never): never {
+  throw new Error(`Content pack entry type [${type}] is not implemented`);
 }
