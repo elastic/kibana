@@ -115,3 +115,5 @@ export const plugin: PluginInitializer<
   ObservabilityAIAssistantPluginStartDependencies
 > = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>
   new ObservabilityAIAssistantPlugin(pluginInitializerContext);
+
+export { getConnectorsManagementHref } from './utils/get_connectors_management_href';

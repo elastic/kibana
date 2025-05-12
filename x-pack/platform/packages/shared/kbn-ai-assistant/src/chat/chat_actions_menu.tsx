@@ -16,6 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { ConnectorSelectorBase } from '@kbn/observability-ai-assistant-plugin/public';
+import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public/utils/get_connectors_management_href';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
 import { useKnowledgeBase } from '../hooks';
@@ -30,12 +31,6 @@ export function ChatActionsMenu({
   const { application, http } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();
   const [isOpen, setIsOpen] = useState(false);
-
-  const handleNavigateToConnectors = () => {
-    application?.navigateToApp('management', {
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-    });
-  };
 
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);
@@ -143,7 +138,7 @@ export function ChatActionsMenu({
                   flush="left"
                   size="xs"
                   data-test-subj="settingsTabGoToConnectorsButton"
-                  onClick={handleNavigateToConnectors}
+                  href={getConnectorsManagementHref(http!)}
                 >
                   {i18n.translate('xpack.aiAssistant.settingsPage.goToConnectorsButtonLabel', {
                     defaultMessage: 'Manage connectors',

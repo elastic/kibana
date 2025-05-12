@@ -10,6 +10,7 @@ import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiButtonEmpty } f
 import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 import { useKibana } from '../../hooks/use_kibana';
+import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 
 export function ActionsMenu({
   connectors,
@@ -18,7 +19,7 @@ export function ActionsMenu({
   connectors: UseGenAIConnectorsResult;
   onEditPrompt: () => void;
 }) {
-  const { application } = useKibana().services;
+  const { http } = useKibana().services;
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
@@ -27,12 +28,6 @@ export function ActionsMenu({
 
   const closePopover = () => {
     setPopover(false);
-  };
-
-  const handleNavigateToConnectors = () => {
-    application?.navigateToApp('management', {
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-    });
   };
 
   const panels = [
@@ -74,7 +69,7 @@ export function ActionsMenu({
       content: (
         <EuiPanel>
           <ConnectorSelectorBase {...connectors} />
-          <EuiButtonEmpty flush="left" size="xs" onClick={handleNavigateToConnectors}>
+          <EuiButtonEmpty flush="left" size="xs" href={getConnectorsManagementHref(http!)}>
             {i18n.translate(
               'xpack.observabilityAiAssistant.insight.actions.connector.manageConnectors',
               {
