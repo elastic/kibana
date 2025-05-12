@@ -29,21 +29,24 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
 
   public async get(): Promise<T | null> {
     try {
+      // console.log(this.request.headers.cookie)
+
       const session = await this.server.auth.test('security-cookie', this.request);
+
       // A browser can send several cookies, if it's not an array, just return the session value
-      if (!Array.isArray(session)) {
+      if (!Array.isArray(session.credentials)) {
         return session.credentials as T;
       }
 
       // If we have an array with one value, we're good also
-      if (session.length === 1) {
-        return session[0] as T;
+      if (session.credentials.length === 1) {
+        return session.credentials[0] as T;
       }
 
       // If we have more than one session, return the first one if they are all the same
-      if (session.length > 1) {
-        const [firstSession] = session;
-        const allEqual = session.every((s) => {
+      if (session.credentials.length > 1) {
+        const [firstSession] = session.credentials;
+        const allEqual = session.credentials.every((s) => {
           return JSON.stringify(s) === JSON.stringify(firstSession);
         });
         if (allEqual) {
@@ -55,7 +58,9 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
       // and won't be authing the user because we don't know which session identifies
       // the actual user. There's potential to change this behavior to ensure all valid sessions
       // identify the same user, or choose one valid one, but this is the safest option.
-      this.log.warn(`Found ${session.length} auth sessions when we were only expecting 1.`);
+      this.log.warn(
+        `Found ${session.credentials.length} auth sessions when we were only expecting 1.`
+      );
       return null;
     } catch (error) {
       this.log.debug(String(error));
