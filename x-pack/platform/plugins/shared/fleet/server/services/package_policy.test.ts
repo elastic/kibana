@@ -214,7 +214,7 @@ type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePoli
 
 const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
   mockAgentPolicyService.get.mockImplementation(
-    (_soClient: SavedObjectsClientContract, id: string, _force = false, _errorMessage?: string) => {
+    (_soClient: SavedObjectsClientContract, id: string, _force = false, _options) => {
       return Promise.resolve({
         id,
         name: 'Test Agent Policy',

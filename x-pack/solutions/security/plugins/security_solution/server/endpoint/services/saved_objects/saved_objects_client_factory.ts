@@ -100,17 +100,7 @@ export class SavedObjectsClientFactory {
    * **WARNING:** Use with care!
    */
   createInternalUnscopedSoClient(readonly: boolean = true): SavedObjectsClientContract {
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-      isFakeRequest: true,
-    } as unknown as KibanaRequest;
-
-    const soClient = this.savedObjectsServiceStart.getScopedClient(fakeRequest, {
+    const soClient = this.savedObjectsServiceStart.getScopedClient(this.createFakeHttpRequest(), {
       excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
       // Internal/hidden SO types that we want to give access to
       includedHiddenTypes: [
