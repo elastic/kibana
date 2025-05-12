@@ -986,7 +986,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       perPage,
     };
 
-    logger.debug(`Returning [${response.items.length} of ${response.total}] found`);
+    logger.debug(
+      `Query matched [${response.total}] package policies - returning page [${page}] with [${response.items.length}] polices`
+    );
 
     return response;
   }

@@ -119,12 +119,19 @@ export class TelemetryConfigWatcher {
         return;
       }
 
+      this.logger.debug(
+        () => `Processing page [${response.page}] with [${response.items.length}] policy(s)`
+      );
+
       const updates: UpdatePackagePolicy[] = [];
       for (const policy of response.items as PolicyData[]) {
         const updatePolicy = getPolicyDataForUpdate(policy);
         const policyConfig = updatePolicy.inputs[0].config.policy.value;
 
         if (isTelemetryEnabled !== policyConfig.global_telemetry_enabled) {
+          this.logger.debug(
+            `Endpoint policy [${policy.id}] needs update to global telemetry enabled setting (currently set to [${policyConfig.global_telemetry_enabled}])`
+          );
           policyConfig.global_telemetry_enabled = isTelemetryEnabled;
 
           updates.push({ ...updatePolicy, id: policy.id });
