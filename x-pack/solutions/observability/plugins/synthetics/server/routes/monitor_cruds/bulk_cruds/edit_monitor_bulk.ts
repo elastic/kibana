@@ -119,7 +119,6 @@ export const syncEditedMonitorBulk = async ({
       editedMonitors: editedMonitorSavedObjects?.saved_objects,
     };
   } catch (e) {
-    server.logger.error(`Unable to update Synthetics monitors, error: ${e.message}`, { error: e });
     await rollbackCompletely({ routeContext, monitorsToUpdate });
     throw e;
   }
@@ -141,7 +140,7 @@ export const rollbackCompletely = async ({
       })),
     });
   } catch (e) {
-    server.logger.error(`Unable to rollback Synthetics monitors edit, error: ${e.message}`, {
+    server.logger.error(`Unable to rollback Synthetics monitors edit`, {
       error: e,
     });
   }
@@ -192,9 +191,6 @@ export const rollbackFailedUpdates = async ({
     }
     return failedConfigs;
   } catch (e) {
-    server.logger.error(
-      `Unable to rollback Synthetics monitor failed updates, error: ${e.message}`,
-      { error: e }
-    );
+    server.logger.error(`Unable to rollback Synthetics monitor failed updates`, { error: e });
   }
 };
