@@ -33,8 +33,7 @@ export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) =
       // remove reference on unmount
       delete gridLayoutStateManager.sectionRefs.current[sectionId];
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [sectionId, gridLayoutStateManager]);
 
   useEffect(
     () => {

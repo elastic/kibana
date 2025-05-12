@@ -28,11 +28,12 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
   const { gridLayoutStateManager, useCustomDragHandle, renderPanelContents } =
     useGridLayoutContext();
   const panel$ = useGridPanelState({ panelId });
-  const [sectionId, setSectionId] = useState<string>(panel$.getValue().sectionId);
+  const [sectionId, setSectionId] = useState<string | undefined>(panel$.getValue()?.sectionId);
   const dragHandleApi = useDragHandleApi({ panelId, sectionId });
 
   const initialStyles = useMemo(() => {
     const initialPanel = panel$.getValue();
+    if (!initialPanel) return;
     return css`
       position: relative;
       height: calc(
@@ -69,9 +70,10 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
     ])
       .pipe(skip(1))
       .subscribe(([activePanel, currentPanel]) => {
+        if (!currentPanel) return;
         const ref = gridLayoutStateManager.panelRefs.current[currentPanel.id];
-        const isPanelActive = activePanel?.id === currentPanel?.id;
-        if (!ref || !currentPanel) return;
+        const isPanelActive = activePanel?.id === currentPanel.id;
+        if (!ref) return;
 
         if (isPanelActive) {
           ref.classList.add('kbnGridPanel--active');
@@ -138,6 +140,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
     const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
       (expandedPanelId) => {
         const panel = panel$.getValue();
+        if (!panel) return;
         const ref = gridLayoutStateManager.panelRefs.current[panel.id];
         if (!ref) return;
         if (expandedPanelId && expandedPanelId === panel.id) {
@@ -151,7 +154,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
     const sectionIdSubscription = panel$
       .pipe(
         skip(1),
-        map((panel) => panel.sectionId),
+        map((panel) => panel?.sectionId),
         distinctUntilChanged()
       )
       .subscribe((currentSection) => {

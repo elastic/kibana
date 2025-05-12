@@ -23,7 +23,7 @@ export const useDragHandleApi = ({
   sectionId,
 }: {
   panelId: string;
-  sectionId: string;
+  sectionId?: string;
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
 

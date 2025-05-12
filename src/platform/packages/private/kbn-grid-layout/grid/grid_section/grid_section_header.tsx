@@ -57,8 +57,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       // remove reference on unmount
       delete gridLayoutStateManager.headerRefs.current[sectionId];
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [sectionId, gridLayoutStateManager]);
 
   useEffect(() => {
     /**
@@ -174,13 +173,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     gridLayoutStateManager.gridLayout$.next(newLayout);
   }, [gridLayoutStateManager, sectionId]);
 
-  const setRef = useCallback(
-    (element: HTMLDivElement | null) => {
-      gridLayoutStateManager.headerRefs.current[sectionId] = element;
-    },
-    [gridLayoutStateManager, sectionId]
-  );
-
   return (
     <>
       <EuiFlexGroup
@@ -195,7 +187,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
           ).isCollapsed,
         })}
         data-test-subj={`kbnGridSectionHeader-${sectionId}`}
-        ref={setRef}
+        ref={(element: HTMLDivElement | null) => {
+          gridLayoutStateManager.headerRefs.current[sectionId] = element;
+        }}
       >
         <GridSectionTitle
           sectionId={sectionId}

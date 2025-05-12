@@ -280,22 +280,16 @@ export const GridExample = ({
           </EuiFlexGroup>
           <EuiSpacer size="m" />
 
-          {/*
-            Wrap grid layout in span that removes the extra padding that EuiPageTemplate adds
-            in order to make it look more similar to Dashboard
-          */}
-          <span css={css({ marginLeft: '-24px', marginRight: '-24px' })}>
-            <GridLayout
-              accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
-              expandedPanelId={expandedPanelId}
-              layout={currentLayout}
-              gridSettings={gridSettings}
-              renderPanelContents={renderPanelContents}
-              onLayoutChange={onLayoutChange}
-              css={[layoutStyles, customLayoutStyles]}
-              useCustomDragHandle={true}
-            />
-          </span>
+          <GridLayout
+            accessMode={viewMode === 'view' ? 'VIEW' : 'EDIT'}
+            expandedPanelId={expandedPanelId}
+            layout={currentLayout}
+            gridSettings={gridSettings}
+            renderPanelContents={renderPanelContents}
+            onLayoutChange={onLayoutChange}
+            css={[layoutStyles, customLayoutStyles]}
+            useCustomDragHandle={true}
+          />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
     </KibanaRenderContextProvider>
@@ -313,6 +307,10 @@ export const renderGridExampleApp = (
 
 const customLayoutStyles = ({ euiTheme }: UseEuiTheme) => {
   return css({
+    // removes the extra padding that EuiPageTemplate adds in order to make it look more similar to Dashboard
+    marginLeft: '-24px',
+    marginRight: '-24px',
+
     // styling for what the grid row header looks like when being dragged
     '.kbnGridSectionHeader--active': {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
