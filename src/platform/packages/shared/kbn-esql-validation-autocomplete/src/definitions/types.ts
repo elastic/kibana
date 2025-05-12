@@ -16,7 +16,7 @@ import type {
 } from '@kbn/esql-ast';
 import { ESQLControlVariable } from '@kbn/esql-types';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLPolicy, ReferenceMaps, ESQLRealField } from '../validation/types';
+import type { ESQLPolicy, ReferenceMaps, ESQLFieldWithMetadata } from '../validation/types';
 import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 
 /**
@@ -316,14 +316,14 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   columnExists: (column: string) => boolean;
   /**
-   * Gets the name that should be used for the next variable.
+   * Gets the name that should be used for the next userDefinedColumn.
    *
    * @param extraFieldNames — names that should be recognized as columns
    * but that won't be found in the current table from Elasticsearch. This is currently only
    * used to recognize enrichment fields from a policy in the ENRICH command.
    * @returns
    */
-  getSuggestedVariableName: (extraFieldNames?: string[]) => string;
+  getSuggestedUserDefinedColumnName: (extraFieldNames?: string[]) => string;
   /**
    * Examine the AST to determine the type of an expression.
    * @param expression
@@ -427,9 +427,9 @@ export interface CommandDefinition<CommandName extends string> {
    */
   fieldsSuggestionsAfter?: (
     lastCommand: ESQLAstCommand,
-    previousCommandFields: ESQLRealField[],
-    userDefinedColumns: ESQLRealField[]
-  ) => ESQLRealField[];
+    previousCommandFields: ESQLFieldWithMetadata[],
+    userDefinedColumns: ESQLFieldWithMetadata[]
+  ) => ESQLFieldWithMetadata[];
 }
 
 export interface CommandTypeDefinition {

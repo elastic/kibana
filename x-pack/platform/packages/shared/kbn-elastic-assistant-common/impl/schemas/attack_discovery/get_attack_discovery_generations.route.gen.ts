@@ -21,7 +21,7 @@ export type GetAttackDiscoveryGenerationsRequestQuery = z.infer<
 >;
 export const GetAttackDiscoveryGenerationsRequestQuery = z.object({
   /**
-   * Optional relative or absolute end time for filtering generations
+   * Relative or absolute end time for filtering generations
    */
   end: z.string().optional(),
   /**
@@ -29,7 +29,7 @@ export const GetAttackDiscoveryGenerationsRequestQuery = z.object({
    */
   size: z.coerce.number(),
   /**
-   * Optional relative or absolute start time for filtering generations
+   * Relative or absolute start time for filtering generations
    */
   start: z.string().optional(),
 });

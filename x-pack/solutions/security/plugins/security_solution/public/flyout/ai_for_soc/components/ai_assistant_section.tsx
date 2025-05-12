@@ -7,11 +7,12 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { Conversations, SuggestedPrompts } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
+import { SuggestedPrompts } from './suggested_prompts';
 import { getField } from '../../document_details/shared/utils';
 import { useAIForSOCDetailsContext } from '../context';
+import { Conversations } from './conversations';
 
 export const AI_ASSISTANT_SECTION_TEST_ID = 'ai-for-soc-alert-flyout-ai-assistant-section';
 export const SUGGESTED_PROMPTS_SECTION_TEST_ID =
@@ -51,7 +52,7 @@ export const AIAssistantSection = memo(({ getPromptContext }: AIAssistantSection
           <h2>{AI_ASSISTANT}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <Conversations id={eventId} />
+        <Conversations alertId={eventId} />
       </EuiFlexItem>
       <EuiFlexItem data-test-subj={SUGGESTED_PROMPTS_SECTION_TEST_ID}>
         <EuiTitle size="xxs">

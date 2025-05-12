@@ -9,7 +9,7 @@ import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
-import { IngestStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
@@ -19,7 +19,7 @@ import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../types';
 import { convertToFieldDefinitionConfig } from '../utils';
 
 interface SamplePreviewTableProps {
-  stream: IngestStreamDefinition;
+  stream: Streams.ingest.all.Definition;
   nextField: SchemaField;
   onValidate?: (isValid: boolean) => void;
 }

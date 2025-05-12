@@ -118,8 +118,6 @@ const externals = {
   '@hello-pangea/dnd': '__kbnSharedDeps__.HelloPangeaDnd',
   lodash: '__kbnSharedDeps__.Lodash',
   'lodash/fp': '__kbnSharedDeps__.LodashFp',
-  fflate: '__kbnSharedDeps__.Fflate',
-
   /**
    * runtime deps which don't need to be copied across all bundles
    */

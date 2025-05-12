@@ -446,7 +446,13 @@
             "description": [],
             "signature": [
               "(node: ",
-              "ESQLAstBaseItem",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstBaseItem",
+                "text": "ESQLAstBaseItem"
+              },
               "<string>, formatted: string) => string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/basic_pretty_printer.ts",
@@ -461,7 +467,13 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "ESQLAstBaseItem",
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLAstBaseItem",
+                    "text": "ESQLAstBaseItem"
+                  },
                   "<string>"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/basic_pretty_printer.ts",
@@ -2920,7 +2932,13 @@
             "description": [],
             "signature": [
               "(indent: string, node: ",
-              "ESQLAstBaseItem",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstBaseItem",
+                "text": "ESQLAstBaseItem"
+              },
               "<string>) => string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/wrapping_pretty_printer.ts",
@@ -2950,7 +2968,13 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "ESQLAstBaseItem",
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLAstBaseItem",
+                    "text": "ESQLAstBaseItem"
+                  },
                   "<string>"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/wrapping_pretty_printer.ts",
@@ -2970,7 +2994,13 @@
             "description": [],
             "signature": [
               "({ indent, suffix }: Input, node: ",
-              "ESQLAstBaseItem",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLAstBaseItem",
+                "text": "ESQLAstBaseItem"
+              },
               "<string>, txt: string, indented?: boolean) => { txt: string; indented: boolean; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/wrapping_pretty_printer.ts",
@@ -3000,7 +3030,13 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "ESQLAstBaseItem",
+                  {
+                    "pluginId": "@kbn/esql-ast",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlAstPluginApi",
+                    "section": "def-common.ESQLAstBaseItem",
+                    "text": "ESQLAstBaseItem"
+                  },
                   "<string>"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/wrapping_pretty_printer.ts",
@@ -4159,6 +4195,204 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLAstBaseItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLAstBaseItem",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstBaseItem",
+            "text": "ESQLAstBaseItem"
+          },
+          "<Name>"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstBaseItem.name",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "Name"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstBaseItem.text",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstBaseItem.location",
+            "type": "Object",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLLocation",
+                "text": "ESQLLocation"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstBaseItem.incomplete",
+            "type": "boolean",
+            "tags": [],
+            "label": "incomplete",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstBaseItem.formatting",
+            "type": "Object",
+            "tags": [],
+            "label": "formatting",
+            "description": [],
+            "signature": [
+              "ESQLAstNodeFormatting",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLAstChangePointCommand",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLAstChangePointCommand",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstChangePointCommand",
+            "text": "ESQLAstChangePointCommand"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommand",
+            "text": "ESQLCommand"
+          },
+          "<\"change_point\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstChangePointCommand.value",
+            "type": "Object",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLColumn",
+                "text": "ESQLColumn"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstChangePointCommand.key",
+            "type": "Object",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLColumn",
+                "text": "ESQLColumn"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstChangePointCommand.target",
+            "type": "Object",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              "{ type: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLColumn",
+                "text": "ESQLColumn"
+              },
+              "; pvalue: ",
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLColumn",
+                "text": "ESQLColumn"
+              },
+              "; } | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ESQLAstJoinCommand",
         "type": "Interface",
         "tags": [],
@@ -4219,7 +4453,13 @@
             "text": "ESQLAstQueryExpression"
           },
           " extends ",
-          "ESQLAstBaseItem",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstBaseItem",
+            "text": "ESQLAstBaseItem"
+          },
           "<\"\">"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
@@ -4256,6 +4496,53 @@
                 "text": "ESQLAstCommand"
               },
               "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLAstRenameExpression",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLAstRenameExpression",
+        "description": [
+          "\nRight now rename expressions (\"clauses\") are parsed as options in the\nRENAME command."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstRenameExpression",
+            "text": "ESQLAstRenameExpression"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommandOption",
+            "text": "ESQLCommandOption"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstRenameExpression.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"as\""
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,
@@ -4333,7 +4620,13 @@
             "text": "ESQLColumn"
           },
           " extends ",
-          "ESQLAstBaseItem",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstBaseItem",
+            "text": "ESQLAstBaseItem"
+          },
           "<string>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
@@ -4428,7 +4721,13 @@
             "text": "ESQLCommand"
           },
           "<Name> extends ",
-          "ESQLAstBaseItem",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstBaseItem",
+            "text": "ESQLAstBaseItem"
+          },
           "<Name>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
@@ -4505,7 +4804,13 @@
             "text": "ESQLCommandMode"
           },
           " extends ",
-          "ESQLAstBaseItem",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstBaseItem",
+            "text": "ESQLAstBaseItem"
+          },
           "<string>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
@@ -4545,7 +4850,13 @@
             "text": "ESQLCommandOption"
           },
           " extends ",
-          "ESQLAstBaseItem",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstBaseItem",
+            "text": "ESQLAstBaseItem"
+          },
           "<string>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
@@ -4606,7 +4917,13 @@
             "text": "ESQLFunction"
           },
           "<Subtype, Name> extends ",
-          "ESQLAstBaseItem",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstBaseItem",
+            "text": "ESQLAstBaseItem"
+          },
           "<Name>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
@@ -4710,7 +5027,13 @@
             "text": "ESQLInlineCast"
           },
           "<ValueType> extends ",
-          "ESQLAstBaseItem",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstBaseItem",
+            "text": "ESQLAstBaseItem"
+          },
           "<string>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
@@ -4884,7 +5207,13 @@
             "text": "ESQLParamLiteral"
           },
           "<ParamType, ParamKind> extends ",
-          "ESQLAstBaseItem",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstBaseItem",
+            "text": "ESQLAstBaseItem"
+          },
           "<string>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
@@ -4980,7 +5309,13 @@
             "text": "ESQLSource"
           },
           " extends ",
-          "ESQLAstBaseItem",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstBaseItem",
+            "text": "ESQLAstBaseItem"
+          },
           "<string>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
@@ -5085,7 +5420,13 @@
             "text": "ESQLTimeInterval"
           },
           " extends ",
-          "ESQLAstBaseItem",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstBaseItem",
+            "text": "ESQLAstBaseItem"
+          },
           "<string>"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
