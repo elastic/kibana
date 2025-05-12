@@ -57,9 +57,9 @@ import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
   DataTableColumnsMeta,
-  CustomCellRenderer,
   CustomGridColumnsConfiguration,
   DataGridPaginationMode,
+  GetCustomCellRenderer,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -391,9 +391,9 @@ export interface UnifiedDataTableProps {
    **/
   visibleCellActions?: number;
   /**
-   * An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering.
+   * An optional function to provide a custom renderer for data grid cells
    */
-  externalCustomRenderers?: CustomCellRenderer;
+  getCustomCellRenderer?: GetCustomCellRenderer;
   /**
    * An optional prop to provide awareness of additional field groups when paired with the Unified Field List.
    */
@@ -502,7 +502,7 @@ export const UnifiedDataTable = ({
   maxDocFieldsDisplayed = 50,
   externalAdditionalControls,
   rowsPerPageOptions,
-  externalCustomRenderers,
+  getCustomCellRenderer,
   additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
@@ -744,7 +744,7 @@ export const UnifiedDataTable = ({
         closePopover: () => dataGridRef.current?.closeCellPopover(),
         fieldFormats,
         maxEntries: maxDocFieldsDisplayed,
-        externalCustomRenderers,
+        getCustomCellRenderer,
         isPlainRecord,
         isCompressed: dataGridDensity === DataGridDensity.COMPACT,
         columnsMeta,
@@ -753,9 +753,9 @@ export const UnifiedDataTable = ({
       dataView,
       displayedRows,
       shouldShowFieldHandler,
-      maxDocFieldsDisplayed,
       fieldFormats,
-      externalCustomRenderers,
+      maxDocFieldsDisplayed,
+      getCustomCellRenderer,
       isPlainRecord,
       dataGridDensity,
       columnsMeta,

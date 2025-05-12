@@ -13,7 +13,11 @@ import type {
   UnifiedDataTableProps,
   UnifiedDataTableSettingsColumn,
 } from '@kbn/unified-data-table';
-import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
+import {
+  UnifiedDataTable,
+  DataLoadingState,
+  getCellRendererFromColumnMap,
+} from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   EuiDataGridControlColumn,
@@ -235,15 +239,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [dispatch, timelineId]
     );
 
-    const customColumnRenderers = useMemo(
-      () =>
-        getFormattedFields({
-          dataTableRows: tableRows,
-          scopeId: 'timeline',
-          headers: columns,
-        }),
-      [columns, tableRows]
-    );
+    const getCustomCellRenderer = useMemo(() => {
+      const cellRenderers = getFormattedFields({
+        dataTableRows: tableRows,
+        scopeId: 'timeline',
+        headers: columns,
+      });
+      return getCellRendererFromColumnMap(cellRenderers);
+    }, [columns, tableRows]);
 
     const handleFetchMoreRecords = useCallback(() => {
       onFetchMoreRecords();
@@ -417,7 +420,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
             services={dataGridServices}
             visibleCellActions={3}
-            externalCustomRenderers={customColumnRenderers}
+            getCustomCellRenderer={getCustomCellRenderer}
             renderDocumentView={EmptyComponent}
             rowsPerPageOptions={itemsPerPageOptions}
             showFullScreenButton={false}

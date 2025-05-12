@@ -36,6 +36,7 @@ import {
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
+  getCellRendererFromColumnMap,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -349,9 +350,10 @@ function DiscoverDocumentsComponent({
   const additionalFieldGroups = useAdditionalFieldGroups();
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
-  const cellRenderers = useMemo(() => {
+  const getCustomCellRenderer = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => customCellRenderer ?? {});
-    return getCellRenderers(cellRendererParams);
+    const cellRenderers = getCellRenderers(cellRendererParams);
+    return getCellRendererFromColumnMap(cellRenderers);
   }, [cellRendererParams, customCellRenderer, getCellRenderersAccessor]);
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
@@ -467,7 +469,7 @@ function DiscoverDocumentsComponent({
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
-            externalCustomRenderers={cellRenderers}
+            getCustomCellRenderer={getCustomCellRenderer}
             customGridColumnsConfiguration={customGridColumnsConfiguration}
             rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             additionalFieldGroups={additionalFieldGroups}

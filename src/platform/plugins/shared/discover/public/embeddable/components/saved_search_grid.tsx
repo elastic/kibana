@@ -19,6 +19,7 @@ import {
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
+  getCellRendererFromColumnMap,
 } from '@kbn/unified-data-table';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../components/discover_grid';
@@ -110,9 +111,9 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
-  const cellRenderers = useMemo(() => {
+  const getCustomCellRenderer = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    return getCellRenderers({
+    const cellRenderers = getCellRenderers({
       actions: { addFilter: props.onFilter },
       dataView: props.dataView,
       density:
@@ -124,6 +125,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         configRowHeight: props.configRowHeight,
       }),
     });
+    return getCellRendererFromColumnMap(cellRenderers);
   }, [
     getCellRenderersAccessor,
     props.onFilter,
@@ -151,7 +153,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
         renderCustomToolbar={renderCustomToolbarWithElements}
-        externalCustomRenderers={cellRenderers}
+        getCustomCellRenderer={getCustomCellRenderer}
         enableComparisonMode
         showColumnTokens
         showFullScreenButton={false}

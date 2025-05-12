@@ -31,6 +31,15 @@ import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { ProfilesManager } from '../../../../context_awareness';
 import { CurrentTabProvider, internalStateActions } from '../../state_management/redux';
+import { getCellRendererFromColumnMap } from '@kbn/unified-data-table';
+
+jest.mock('@kbn/unified-data-table', () => {
+  const actual = jest.requireActual('@kbn/unified-data-table');
+  return {
+    ...actual,
+    getCellRendererFromColumnMap: jest.fn(actual.getCellRendererFromColumnMap),
+  };
+});
 
 const customisationService = createCustomizationService();
 
@@ -158,7 +167,7 @@ describe('Discover documents layout', () => {
     expect(discoverGridComponent.prop('rowAdditionalLeadingControls')).toBe(
       customization.rowAdditionalLeadingControls
     );
-    expect(discoverGridComponent.prop('externalCustomRenderers')).toBeDefined();
+    expect(discoverGridComponent.prop('getCustomCellRenderer')).toBeDefined();
     expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toBeDefined();
   });
 
@@ -172,10 +181,13 @@ describe('Discover documents layout', () => {
       const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
       const discoverGridComponent = component.find(DiscoverGrid);
       expect(discoverGridComponent.exists()).toBeTruthy();
-      expect(Object.keys(discoverGridComponent.prop('externalCustomRenderers')!)).toEqual([
-        '_source',
-        'rootProfile',
-      ]);
+      expect(getCellRendererFromColumnMap).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          _source: expect.any(Function),
+          rootProfile: expect.any(Function),
+        })
+      );
+      expect(discoverGridComponent.prop('getCustomCellRenderer')).toEqual(expect.any(Function));
     });
   });
 });

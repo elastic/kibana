@@ -9,7 +9,7 @@
 
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type {
-  CustomCellRenderer,
+  CellRendererColumnMap,
   DataGridDensity,
   UnifiedDataTableProps,
   DataGridPaginationMode,
@@ -312,7 +312,7 @@ export interface Profile {
    * Gets a map of column names to custom cell renderers to use in the data grid
    * @returns The custom cell renderers to use in the data grid
    */
-  getCellRenderers: (params: CellRenderersExtensionParams) => CustomCellRenderer;
+  getCellRenderers: (params: CellRenderersExtensionParams) => CellRendererColumnMap;
 
   /**
    * Gets a row indicator provider, allowing rows in the data grid to be given coloured highlights

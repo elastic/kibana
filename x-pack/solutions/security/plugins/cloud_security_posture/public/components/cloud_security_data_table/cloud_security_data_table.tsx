@@ -10,6 +10,7 @@ import {
   DataGridDensity,
   UnifiedDataTableSettings,
   UnifiedDataTableSettingsColumn,
+  getCellRendererFromColumnMap,
   useColumns,
 } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
@@ -240,11 +241,12 @@ export const CloudSecurityDataTable = ({
         : undefined,
     [dataView, filterManager, setUrlQuery]
   );
-  const externalCustomRenderers = useMemo(() => {
+  const getCustomCellRenderer = useMemo(() => {
     if (!customCellRenderer) {
       return undefined;
     }
-    return customCellRenderer(rows);
+    const cellRenderers = customCellRenderer(rows);
+    return getCellRendererFromColumnMap(cellRenderers);
   }, [customCellRenderer, rows]);
 
   const { expandedDoc, onExpandDocClick } = useExpandableFlyoutCsp();
@@ -353,7 +355,7 @@ export const CloudSecurityDataTable = ({
           settings={settings}
           onFetchMoreRecords={loadMore}
           externalControlColumns={externalControlColumns}
-          externalCustomRenderers={externalCustomRenderers}
+          getCustomCellRenderer={getCustomCellRenderer}
           externalAdditionalControls={externalAdditionalControls}
           gridStyleOverride={gridStyle}
           rowLineHeightOverride="24px"

@@ -47,7 +47,7 @@ import {
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CELL_CLASS } from '../utils/get_render_cell_value';
+import { CELL_CLASS, getCellRendererFromColumnMap } from '../utils/get_render_cell_value';
 import { defaultTimeColumnWidth } from '../constants';
 import { useColumns } from '../hooks/use_data_grid_columns';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
@@ -912,18 +912,18 @@ describe('UnifiedDataTable', () => {
     );
   });
 
-  describe('externalCustomRenderers', () => {
+  describe('getCustomCellRenderer', () => {
     it(
       'should render only host column with the custom renderer, message should be rendered with the default cell renderer',
       async () => {
         const component = await getComponent({
           ...getProps(),
           columns: ['message', 'host'],
-          externalCustomRenderers: {
+          getCustomCellRenderer: getCellRendererFromColumnMap({
             host: (props: EuiDataGridCellValueElementProps) => (
               <div data-test-subj={`test-renderer-${props.columnId}`}>{props.columnId}</div>
             ),
-          },
+          }),
         });
 
         expect(findTestSubject(component, 'test-renderer-host').exists()).toBeTruthy();

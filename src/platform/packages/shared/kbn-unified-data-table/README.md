@@ -3,14 +3,15 @@
 This package contains components and services for the unified data table UI (as used in Discover).
 
 ## UnifiedDataTable Component
+
 Props description:
 | Property | Type | Description |
-| :---   | :--- | :--- |
+| :--- | :--- | :--- |
 | **ariaLabelledBy** | string | Determines which element labels the grid for ARIA. |
 | **className** | (optional) string | Optional class name to apply. |
 | **columns** | string[] | Determines ids of the columns which are displayed. |
-| **expandedDoc** | (optional) DataTableRecord  | If set, the given document is displayed in a flyout. |
-| **enableInTableSearch** | (optional) boolean  | Set to true to allow users to search inside the table. |
+| **expandedDoc** | (optional) DataTableRecord | If set, the given document is displayed in a flyout. |
+| **enableInTableSearch** | (optional) boolean | Set to true to allow users to search inside the table. |
 | **dataView** | DataView | The used data view. |
 | **loadingState** | DataLoadingState | Determines if data is currently loaded. |
 | **onFilter** | DocViewFilterFn | Function to add a filter in the grid cell or document flyout. |
@@ -48,12 +49,13 @@ Props description:
 | **rowsPerPageOptions** | (optional)number[] | Optional list of number type values to set custom UnifiedDataTable paging options to display the records per page. |
 | **renderCustomGridBody** | (optional)(args: EuiDataGridCustomBodyProps) => React.ReactNode; | An optional function called to completely customize and control the rendering of EuiDataGrid's body and cell placement. |
 | **visibleCellActions** | (optional)number | An optional value for a custom number of the visible cell actions in the table. By default is up to 3. |
-| **externalCustomRenderers** | (optional)Record<string,(props: EuiDataGridCellValueElementProps) => React.ReactNode>; | An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering. |
+| **getCustomCellRenderer** | (optional)(props: DataGridCellValueElementProps) => FunctionComponent<DataGridCellValueElementProps> | undefined; | An optional function to provide a custom renderer for data grid cells. |
 | **consumer** | (optional)string | Name of the UnifiedDataTable consumer component or application. |
 | **componentsTourSteps** | (optional)Record<string,string> | Optional key/value pairs to set guided onboarding steps ids for a data table components included to guided tour. |~~~~
 | **onUpdateDataGridDensity** | (optional)(DataGridDensity) => void; | Optional callback when the data grid density configuration is modified. |
 
-*Required **services** list:
+\*Required **services** list:
+
 ```
     theme: ThemeServiceStart;
     fieldFormats: FieldFormatsStart;
@@ -109,7 +111,7 @@ Usage example:
       onUpdateRowsPerPage={(rowHeight: number) => {
         // Do the state update with the new number of the rows per page
       }
-      onFieldEdited={() => 
+      onFieldEdited={() =>
         // Callback to execute on edit runtime field. Refetch data.
       }
       cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
@@ -123,10 +125,10 @@ Usage example:
         data: dataPluginContract,
       }}
       visibleCellActions={3}
-      externalCustomRenderers={{
-        // Set the record style definition for the specific fields rendering Record<string,(props: EuiDataGridCellValueElementProps) => React.ReactNode>
+      getCustomCellRenderer={(props: DataGridCellValueElementProps) => {
+        // An optional function to provide a custom renderer for data grid cells
       }}
-      renderDocumentView={() => 
+      renderDocumentView={() =>
         // Implement similar callback to render the Document flyout
           const renderDetailsPanel = useCallback(
                 () => (
@@ -161,14 +163,15 @@ Usage example:
 ```
 
 ## JsonCodeEditorCommon Component
+
 Props description:
 | Property | Type | Description |
-| :---   | :--- | :--- |
-| **width** | (optional) string or number  | Editor component width. |
-| **height** | (optional) string or number  | Editor component height. |
-| **hasLineNumbers** | (optional) boolean  | Define if the editor component has line numbers style. |
-| **hideCopyButton** | (optional) boolean  | Show/hide setting for Copy button. |
-| **onEditorDidMount** | (editor: monaco.editor.IStandaloneCodeEditor) => void  | Do some logic to update the state with the edotor component value. |
+| :--- | :--- | :--- |
+| **width** | (optional) string or number | Editor component width. |
+| **height** | (optional) string or number | Editor component height. |
+| **hasLineNumbers** | (optional) boolean | Define if the editor component has line numbers style. |
+| **hideCopyButton** | (optional) boolean | Show/hide setting for Copy button. |
+| **onEditorDidMount** | (editor: monaco.editor.IStandaloneCodeEditor) => void | Do some logic to update the state with the edotor component value. |
 
 Usage example:
 
@@ -185,15 +188,15 @@ Usage example:
 
 ## Utils
 
-* `getRowsPerPageOptions(currentRowsPerPage)` - gets list of the table defaults for perPage options.
+- `getRowsPerPageOptions(currentRowsPerPage)` - gets list of the table defaults for perPage options.
 
-* `getDisplayedColumns(currentRowsPerPage)` - gets list of the table columns with the logic to define the empty list with _source column.
+- `getDisplayedColumns(currentRowsPerPage)` - gets list of the table columns with the logic to define the empty list with \_source column.
 
-* `popularizeField(...)` - helper function to define the dataView persistance and save indexPattern update capabilities.
+- `popularizeField(...)` - helper function to define the dataView persistance and save indexPattern update capabilities.
 
 ## Hooks
 
-* `useColumns(...)` - this hook define the state update for the columns event handlers and allows to use them for external components outside the UnifiedDataTable.
+- `useColumns(...)` - this hook define the state update for the columns event handlers and allows to use them for external components outside the UnifiedDataTable.
 
 An example of using hooks for defining event handlers for columns management with setting the consumer specific setAppState:
 

@@ -15,7 +15,8 @@ import {
   useColumns,
   type UnifiedDataTableSettings,
   type UnifiedDataTableSettingsColumn,
-  type CustomCellRenderer,
+  type CellRendererColumnMap,
+  getCellRendererFromColumnMap,
 } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
@@ -91,7 +92,7 @@ const columnHeaders: Record<string, string> = {
   ),
 } as const;
 
-const customCellRenderer = (rows: DataTableRecord[]): CustomCellRenderer => ({
+const customCellRenderer = (rows: DataTableRecord[]): CellRendererColumnMap => ({
   [ASSET_FIELDS.ENTITY_RISK]: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const risk = rows[rowIndex].flattened[ASSET_FIELDS.ENTITY_RISK] as number;
     return <RiskBadge risk={risk} />;
@@ -308,7 +309,10 @@ export const AssetInventoryDataTable = ({
     setPersistedSettings(newGrid);
   };
 
-  const externalCustomRenderers = useMemo(() => customCellRenderer(rows), [rows]);
+  const getCustomCellRenderer = useMemo(() => {
+    const cellRenderers = customCellRenderer(rows);
+    return getCellRendererFromColumnMap(cellRenderers);
+  }, [rows]);
 
   const onResetColumns = () => {
     setLocalStorageColumns(defaultColumns.map((c) => c.id));
@@ -372,7 +376,7 @@ export const AssetInventoryDataTable = ({
             showTimeCol={false}
             settings={settings}
             onFetchMoreRecords={loadMore}
-            externalCustomRenderers={externalCustomRenderers}
+            getCustomCellRenderer={getCustomCellRenderer}
             externalAdditionalControls={externalAdditionalControls}
             gridStyleOverride={gridStyle}
             rowLineHeightOverride="24px"

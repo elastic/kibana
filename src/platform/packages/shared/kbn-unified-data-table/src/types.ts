@@ -46,7 +46,14 @@ export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   isCompressed?: boolean;
 };
 
-export type CustomCellRenderer = Record<string, FunctionComponent<DataGridCellValueElementProps>>;
+export type CellRendererColumnMap = Record<
+  string,
+  FunctionComponent<DataGridCellValueElementProps>
+>;
+
+export type GetCustomCellRenderer = (
+  props: DataGridCellValueElementProps
+) => FunctionComponent<DataGridCellValueElementProps> | undefined;
 
 export interface CustomGridColumnProps {
   column: EuiDataGridColumn;
