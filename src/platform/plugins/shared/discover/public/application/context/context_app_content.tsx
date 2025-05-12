@@ -29,12 +29,7 @@ import {
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import {
-  DataLoadingState,
-  getCellRendererFromColumnMap,
-  getDataGridDensity,
-  getRowHeight,
-} from '@kbn/unified-data-table';
+import { DataLoadingState, getDataGridDensity, getRowHeight } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import useObservable from 'react-use/lib/useObservable';
@@ -53,7 +48,7 @@ import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,
-  useProfileAccessor,
+  useCustomCellRenderers,
 } from '../../context_awareness';
 import { createDataSource } from '../../../common/data_sources';
 
@@ -177,10 +172,8 @@ export function ContextAppContent({
   );
 
   const configRowHeight = services.uiSettings.get(ROW_HEIGHT_OPTION);
-  const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
-  const getCustomCellRenderer = useMemo(() => {
-    const getCellRenderers = getCellRenderersAccessor(() => ({}));
-    const cellRenderers = getCellRenderers({
+  const cellRendererParams = useMemo(
+    () => ({
       actions: { addFilter },
       dataView,
       density: getDataGridDensity(services.storage, 'discover'),
@@ -189,9 +182,10 @@ export function ContextAppContent({
         consumer: 'discover',
         configRowHeight,
       }),
-    });
-    return getCellRendererFromColumnMap(cellRenderers);
-  }, [addFilter, configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
+    }),
+    [addFilter, configRowHeight, dataView, services.storage]
+  );
+  const getCustomCellRenderer = useCustomCellRenderers(cellRendererParams);
 
   const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
   const { filters } = useQuerySubscriber({ data: services.data });

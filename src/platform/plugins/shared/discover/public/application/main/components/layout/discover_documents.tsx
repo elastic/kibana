@@ -36,7 +36,6 @@ import {
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
-  getCellRendererFromColumnMap,
 } from '@kbn/unified-data-table';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -74,7 +73,7 @@ import type { CellRenderersExtensionParams } from '../../../../context_awareness
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,
-  useProfileAccessor,
+  useCustomCellRenderers,
 } from '../../../../context_awareness';
 import {
   internalStateActions,
@@ -348,14 +347,7 @@ function DiscoverDocumentsComponent({
   const { customCellRenderer, customGridColumnsConfiguration } =
     useContextualGridCustomisations(cellRendererParams) || {};
   const additionalFieldGroups = useAdditionalFieldGroups();
-
-  const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
-  const getCustomCellRenderer = useMemo(() => {
-    const getCellRenderers = getCellRenderersAccessor(() => customCellRenderer ?? {});
-    const cellRenderers = getCellRenderers(cellRendererParams);
-    return getCellRendererFromColumnMap(cellRenderers);
-  }, [cellRendererParams, customCellRenderer, getCellRenderersAccessor]);
-
+  const getCustomCellRenderer = useCustomCellRenderers(cellRendererParams, customCellRenderer);
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
   const callouts = useMemo(
