@@ -803,11 +803,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options: PackagePolicyClientFindAllForAgentPolicyOptions = {}
   ): Promise<PackagePolicy[]> {
     const logger = this.getLogger('findAllForAgentPolicy');
-    const namespaces = options.spaceIds ?? [await getNamespaceForSoClient(soClient)];
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+    const namespaces = isSpacesEnabled
+      ? options.spaceIds ?? [await getNamespaceForSoClient(soClient)]
+      : undefined;
 
     logger.debug(
       () =>
-        `Finding all package policies for agent policy [${agentPolicyId}] for spaceIds [${namespaces.join(
+        `Finding all package policies for agent policy [${agentPolicyId}] for spaceIds [${namespaces?.join(
           ', '
         )}]`
     );
@@ -825,7 +828,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .catch((err) => {
         logger.debug(
           () =>
-            `Error encountered while attempting to get all package policies for agent policy [${agentPolicyId}] for space [${namespaces.join(
+            `Error encountered while attempting to get all package policies for agent policy [${agentPolicyId}] for space [${namespaces?.join(
               ', '
             )}]: ${err.message}`
         );
@@ -836,7 +839,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (!packagePolicySO) {
       logger.debug(
         () =>
-          `No package policies found for agent policy id [${agentPolicyId}] in spaces [${namespaces.join(
+          `No package policies found for agent policy id [${agentPolicyId}] in spaces [${namespaces?.join(
             ', '
           )}`
       );
@@ -871,10 +874,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<PackagePolicy[]> {
     const logger = this.getLogger('getByIDs');
     const savedObjectType = await getPackagePolicySavedObjectType();
-    const namespaces = options.spaceIds ?? [await getNamespaceForSoClient(soClient)];
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+    const namespaces = isSpacesEnabled
+      ? options.spaceIds ?? [await getNamespaceForSoClient(soClient)]
+      : undefined;
 
     logger.debug(
-      `Retrieving the following package policies using spaces ids [${namespaces.join(
+      `Retrieving the following package policies using spaces ids [${namespaces?.join(
         ', '
       )}]: [${ids.join(', ')}]`
     );
@@ -926,7 +932,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options: ListWithKuery & { spaceId?: string }
   ): Promise<ListResult<PackagePolicy>> {
     const savedObjectType = await getPackagePolicySavedObjectType();
-    const namespaces = [options?.spaceId ?? (await getNamespaceForSoClient(soClient))];
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+    const namespaces = isSpacesEnabled
+      ? [options?.spaceId ?? (await getNamespaceForSoClient(soClient))]
+      : undefined;
     const {
       page = 1,
       perPage = 20,
@@ -972,7 +981,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     options: ListWithKuery
   ): Promise<ListResult<string>> {
-    const namespaces = [await getNamespaceForSoClient(soClient)];
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+    const namespaces = isSpacesEnabled ? [await getNamespaceForSoClient(soClient)] : undefined;
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
     const savedObjectType = await getPackagePolicySavedObjectType();
     const packagePolicies = await soClient
@@ -1275,7 +1285,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const logger = this.getLogger('bulkUpdate');
     const isSpacesEnabled = await isSpaceAwarenessEnabled();
     const savedObjectType = await getPackagePolicySavedObjectType();
-    const namespaces = options.spaceIds ?? [await getNamespaceForSoClient(soClient)];
+    const namespaces = isSpacesEnabled
+      ? options.spaceIds ?? [await getNamespaceForSoClient(soClient)]
+      : undefined;
 
     logger.debug(
       () =>
@@ -2293,7 +2305,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     { perPage = 1000, kuery, spaceIds }: PackagePolicyClientFetchAllItemIdsOptions = {}
   ): Promise<AsyncIterable<string[]>> {
     const savedObjectType = await getPackagePolicySavedObjectType();
-    const namespaces = spaceIds ?? [await getNamespaceForSoClient(soClient)];
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+    const namespaces = isSpacesEnabled
+      ? spaceIds ?? [await getNamespaceForSoClient(soClient)]
+      : undefined;
 
     return createSoFindIterable<{}>({
       soClient,
@@ -2323,7 +2338,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }: PackagePolicyClientFetchAllItemsOptions = {}
   ): Promise<AsyncIterable<PackagePolicy[]>> {
     const savedObjectType = await getPackagePolicySavedObjectType();
-    const namespaces = spaceIds ?? [await getNamespaceForSoClient(soClient)];
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+    const namespaces = isSpacesEnabled
+      ? spaceIds ?? [await getNamespaceForSoClient(soClient)]
+      : undefined;
 
     return createSoFindIterable<PackagePolicySOAttributes>({
       soClient,

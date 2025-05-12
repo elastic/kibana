@@ -28,7 +28,7 @@ export async function fetchRelatedSavedObjects(
     () =>
       `getting related saved objects for policy [${
         agentPolicy.id
-      }] for space [${soClient.getCurrentNamespace()}]`
+      }] with soClient scoped to [${soClient.getCurrentNamespace()}]`
   );
 
   const [defaultDataOutputId, defaultMonitoringOutputId] = await Promise.all([

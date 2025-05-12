@@ -133,7 +133,6 @@ import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_ser
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
-import { SavedObjectsClientFactory } from './endpoint/services/saved_objects';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -609,11 +608,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
-
-    const internalUnScoppedSoClient = new SavedObjectsClientFactory(
-      core.savedObjects,
-      core.http
-    ).createInternalUnscopedSoClient(false);
 
     const manifestManager = new ManifestManager({
       savedObjectsClient,

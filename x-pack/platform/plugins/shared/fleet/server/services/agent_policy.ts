@@ -201,6 +201,7 @@ class AgentPolicyService {
 
     logger.debug(`Starting update of agent policy ${id}`);
 
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
     const savedObjectType = await getAgentPolicySavedObjectType();
     const existingAgentPolicy = await this.get(soClient, id, true);
 
@@ -252,7 +253,11 @@ class AgentPolicyService {
           updated_at: new Date().toISOString(),
           updated_by: user ? user.username : 'system',
         },
-        { namespace: existingAgentPolicy.space_ids?.at(0) ?? DEFAULT_SPACE_ID }
+        {
+          namespace: isSpacesEnabled
+            ? existingAgentPolicy.space_ids?.at(0) ?? DEFAULT_SPACE_ID
+            : undefined,
+        }
       )
       .catch(catchAndWrapError);
 
@@ -265,8 +270,9 @@ class AgentPolicyService {
     if (options.bumpRevision || options.removeProtection) {
       // When using an un-scoped soClient (spaces turned off), the `getCurrentNamespace()` returns undefined,
       // we fall back to the policy space id or the default space if that's the case
-      const soClientSpaceId =
-        soClient.getCurrentNamespace() ?? existingAgentPolicy.space_ids?.at(0) ?? DEFAULT_SPACE_ID;
+      const soClientSpaceId = isSpacesEnabled
+        ? soClient.getCurrentNamespace() ?? existingAgentPolicy.space_ids?.at(0) ?? DEFAULT_SPACE_ID
+        : undefined;
 
       if (!options.asyncDeploy) {
         logger.debug(
@@ -582,16 +588,24 @@ class AgentPolicyService {
   ): Promise<AgentPolicy[]> {
     const logger = this.getLogger('getByIds');
     const savedObjectType = await getAgentPolicySavedObjectType();
-    const namespace = await getNamespaceForSoClient(soClient);
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+    const namespace = isSpacesEnabled ? await getNamespaceForSoClient(soClient) : undefined;
 
     const objects = ids.map((id) => {
       if (typeof id === 'string') {
-        return { ...options, id, type: savedObjectType, namespaces: [namespace] };
+        return {
+          ...options,
+          id,
+          type: savedObjectType,
+          namespaces: isSpacesEnabled && namespace ? [namespace] : undefined,
+        };
       }
+
       return {
         ...options,
         id: id.id,
-        namespaces: [id.spaceId ?? namespace],
+        namespaces:
+          isSpacesEnabled && (id.spaceId || namespace) ? [(id.spaceId ?? namespace)!] : undefined,
         type: savedObjectType,
       };
     });

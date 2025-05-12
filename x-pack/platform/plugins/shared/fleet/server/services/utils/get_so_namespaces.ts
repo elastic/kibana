@@ -7,8 +7,6 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 
 /**
@@ -22,12 +20,11 @@ import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 export const getNamespaceForSoClient = async (
   soClient: SavedObjectsClientContract
 ): Promise<string> => {
-  const isSpacesEnabled = await isSpaceAwarenessEnabled();
-  const soClientNamespace = soClient.getCurrentNamespace();
-
-  if (!isSpacesEnabled) {
-    return soClientNamespace ?? DEFAULT_SPACE_ID;
+  if (!(await isSpaceAwarenessEnabled())) {
+    return '';
   }
+
+  const soClientNamespace = soClient.getCurrentNamespace();
 
   // Internal un-scoped soClient do not have a namespace set - in these cases we set the namespace to `*`
   // so that searches are done across all spaces.
