@@ -55,6 +55,7 @@ export const GridSectionTitle = React.memo(
         .pipe(
           map((gridLayout) => {
             const section = gridLayout[sectionId];
+            if (!section) return '';
             return section.isMainSection ? '' : section.title;
           }),
           distinctUntilChanged()

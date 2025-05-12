@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep, pick } from 'lodash';
+import { pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import {
   BehaviorSubject,
@@ -37,6 +37,7 @@ import {
 import { getGridLayout, getOrderedLayout } from './utils/conversions';
 import { isLayoutEqual } from './utils/equality_checks';
 import { shouldShowMobileView } from './utils/mobile_view';
+import { resolveGridSection } from './utils/resolve_grid_section';
 
 export const useGridLayoutState = ({
   layout,
@@ -97,13 +98,11 @@ export const useGridLayoutState = ({
   }, [gridSettings, runtimeSettings$]);
 
   const gridLayoutStateManager = useMemo(() => {
-    const resolvedLayout = cloneDeep(layout);
-    // resolve GRID LAYOUT
-    // Object.values(resolvedLayout).forEach((row) => {
-    //   resolvedLayout[row.id] = resolveGridRow(row);
-    // });
-
-    const gridLayout$ = new BehaviorSubject<OrderedLayout>(getOrderedLayout(resolvedLayout));
+    const orderedLayout = getOrderedLayout(layout);
+    Object.entries(orderedLayout).forEach(([sectionId, row]) => {
+      orderedLayout[sectionId].panels = resolveGridSection(row.panels);
+    });
+    const gridLayout$ = new BehaviorSubject<OrderedLayout>(orderedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const activePanelEvent$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);

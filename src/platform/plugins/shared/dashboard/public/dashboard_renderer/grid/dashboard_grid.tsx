@@ -14,7 +14,6 @@ import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
 import { arePanelLayoutsEqual } from '../../dashboard_api/are_panel_layouts_equal';
 import { DashboardLayout } from '../../dashboard_api/types';
@@ -39,7 +38,6 @@ export const DashboardGrid = ({
   const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
   const { euiTheme } = useEuiTheme();
-  const firstRowId = useRef(uuidv4());
 
   const [expandedPanelId, layout, useMargins, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.expandedPanelId$,

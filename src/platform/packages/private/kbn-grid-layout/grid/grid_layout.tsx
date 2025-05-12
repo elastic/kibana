@@ -88,8 +88,7 @@ export const GridLayout = ({
 
   useEffect(() => {
     /**
-     * This subscription calls the passed `onLayoutChange` callback when the layout changes;
-     * if the row IDs have changed, it also sets `sectionIdsInOrder` to trigger a re-render
+     * This subscription calls the passed `onLayoutChange` callback when the layout changes
      */
     const onLayoutChangeSubscription = gridLayoutStateManager.layoutUpdated$.subscribe(
       (newLayout) => {
@@ -103,16 +102,19 @@ export const GridLayout = ({
   }, [onLayoutChange]);
 
   useEffect(() => {
+    /**
+     * This subscription is responsible for setting both the rendered elements and the
+     * `gridTemplateString` that controls how the grid layout is rendered
+     */
     const renderSubscription = gridLayoutStateManager.gridLayout$.subscribe((sections) => {
       const currentElementsInOrder: GridLayoutElementsInOrder = [];
       let gridTemplateString = '';
 
       getSectionsInOrder(sections).forEach((section) => {
         const { id } = section;
-        const isMainSection = 'isMainSection' in section && section.isMainSection;
 
         /** Header */
-        if (!isMainSection) {
+        if (!section.isMainSection) {
           currentElementsInOrder.push({ type: 'header', id });
           gridTemplateString += `auto `;
         }
@@ -138,7 +140,7 @@ export const GridLayout = ({
         gridTemplateString += `[end-${section.id}] `;
 
         /** Footer */
-        if (!isMainSection) {
+        if (!section.isMainSection) {
           currentElementsInOrder.push({ type: 'footer', id });
           gridTemplateString += `auto `;
         }
@@ -198,13 +200,7 @@ export const GridLayout = ({
             setDimensionsRef(divElement);
           }}
           className={classNames('kbnGrid', className)}
-          css={[
-            styles.grid,
-            styles.layoutPadding,
-            styles.hasActivePanel,
-            styles.singleColumn,
-            styles.hasExpandedPanel,
-          ]}
+          css={[styles.layout, styles.hasActivePanel, styles.singleColumn, styles.hasExpandedPanel]}
         >
           {elementsInOrder.map((element) => {
             switch (element.type) {
@@ -227,14 +223,10 @@ export const GridLayout = ({
 };
 
 const styles = {
-  layoutPadding: css({
-    padding: 'calc(var(--kbnGridGutterSize) * 1px)',
-  }),
-  grid: css({
-    position: 'relative',
-    justifyItems: 'stretch',
+  layout: css({
     display: 'grid',
     gap: 'calc(var(--kbnGridGutterSize) * 1px)',
+    padding: 'calc(var(--kbnGridGutterSize) * 1px)',
     gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
     gridTemplateColumns: `repeat(
           var(--kbnGridColumnCount),
@@ -253,13 +245,11 @@ const styles = {
   }),
   singleColumn: css({
     '&.kbnGrid--mobileView': {
-      '.kbnGridSection': {
-        gridTemplateColumns: '100%',
-        gridTemplateRows: 'auto',
-        gridAutoFlow: 'row',
-        gridAutoRows: 'auto',
-      },
-      '.kbnGridPanel': {
+      gridTemplateColumns: '100%',
+      gridTemplateRows: 'auto',
+      gridAutoFlow: 'row',
+      gridAutoRows: 'auto',
+      '.kbnGridPanel, .kbnGridSectionHeader': {
         gridArea: 'unset !important',
       },
     },

@@ -125,14 +125,14 @@ describe('GridLayout', () => {
         'kbnGridSectionHeader--active'
       );
 
-      const rowHandle = screen.getByTestId(`kbnGridSectionHeader-second--dragHandle`);
-      mouseStartDragging(rowHandle);
+      const sectionHandle = screen.getByTestId(`kbnGridSectionHeader-second--dragHandle`);
+      mouseStartDragging(sectionHandle);
       mouseMoveTo({ clientX: 256, clientY: 128 });
       expect(screen.getByTestId('kbnGridSectionHeader-second')).toHaveClass(
         'kbnGridSectionHeader--active'
       );
 
-      mouseDrop(rowHandle);
+      mouseDrop(sectionHandle);
       expect(screen.getByTestId('kbnGridSectionHeader-second')).not.toHaveClass(
         'kbnGridSectionHeader--active'
       );
