@@ -54,10 +54,13 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                   defaultMessage: 'Select or create a new metadata field',
                 }
               )}
-              options={[{ label: 'Field 1' }, { label: 'Field 2' }, { label: 'Field 3' }]}
-              selectedOptions={metadataField ? [{ label: metadataField }] : []}
+              options={criteria.metadata ? [{ label: criteria.metadata }] : []}
+              selectedOptions={criteria.metadata ? [{ label: criteria.metadata }] : []}
               onCreateOption={(newOption) => {
-                // Logic to create a new option
+                onChange({
+                  ...criteria,
+                  metadata: newOption,
+                });
               }}
               customOptionText={i18n.translate(
                 'xpack.search.queryRulesetDetail.queryRuleFlyout.createNewMetadata',
@@ -174,9 +177,12 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                       },
                     ]}
                     onChange={(e) => {
-                      // Logic to handle operator change
+                      onChange({
+                        ...criteria,
+                        type: e.target.value as QueryRulesQueryRuleCriteria['type'],
+                      });
                     }}
-                    value={operator}
+                    value={criteria.type}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -200,9 +206,20 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                       }
                     )}
                     selectedOptions={criteria?.values?.map((value) => ({ label: value }))}
-                    options={[{ label: 'Value 1' }, { label: 'Value 2' }, { label: 'Value 3' }]}
+                    options={
+                      criteria?.values ? criteria.values.map((value) => ({ label: value })) : []
+                    }
                     onCreateOption={(newOption) => {
-                      // Logic to create a new option
+                      onChange({
+                        ...criteria,
+                        values: [...(criteria.values || []), newOption],
+                      });
+                    }}
+                    onChange={(selectedOptions) => {
+                      onChange({
+                        ...criteria,
+                        values: selectedOptions.map((option) => option.label),
+                      });
                     }}
                     customOptionText={i18n.translate(
                       'xpack.search.queryRulesetDetail.queryRuleFlyout.createNewMetadataValue',
@@ -222,6 +239,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
             data-test-subj="searchQueryRulesQueryRuleMetadataEditorButton"
             iconType="minusInCircle"
             color="danger"
+            onClick={onRemove}
             aria-label={i18n.translate(
               'xpack.search.queryRulesetDetail.queryRuleFlyout.removeCriteriaButton',
               {

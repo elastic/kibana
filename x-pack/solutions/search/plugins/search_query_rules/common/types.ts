@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  QueryRulesQueryRule,
+  QueryRulesQueryRuleCriteria,
+} from '@elastic/elasticsearch/lib/api/types';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchQueryRulesPluginSetup {}
 
@@ -17,3 +22,7 @@ export interface AppPluginSetupDependencies {}
 export interface SearchQueryRulesConfigType {
   enabled: boolean;
 }
+
+export type SearchQueryRulesQueryRule = Omit<QueryRulesQueryRule, 'criteria'> & {
+  criteria: QueryRulesQueryRuleCriteria[];
+};

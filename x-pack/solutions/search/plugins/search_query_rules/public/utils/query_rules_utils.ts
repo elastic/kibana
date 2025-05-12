@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 
 export const isPermissionError = (error: { body: KibanaServerError }) => {
@@ -21,3 +22,7 @@ export const formatRulesetName = (rawName: string) =>
     .replace(/[^a-zA-Z0-9]+/g, '-') // Replace all special/non-alphanumerical characters with dashes
     .replace(/^[-]+|[-]+$/g, '') // Strip all leading and trailing dashes
     .toLowerCase();
+
+export const isCriteriaAlways = (criteria: QueryRulesQueryRuleCriteria[]) => {
+  return criteria.length === 1 && criteria[0].type === 'always';
+};

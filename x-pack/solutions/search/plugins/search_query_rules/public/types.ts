@@ -9,6 +9,8 @@ import { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
+import { SearchQueryRulesQueryRule } from '../common/types';
 
 export * from '../common/types';
 export interface AppPluginStartDependencies {
@@ -19,3 +21,12 @@ export interface AppPluginStartDependencies {
 }
 
 export type AppServicesContext = CoreStart & AppPluginStartDependencies;
+
+export interface QueryRuleEditorForm {
+  mode: 'create' | 'edit';
+  ruleId: SearchQueryRulesQueryRule['rule_id'];
+  rulesetId: QueryRulesQueryRuleset['ruleset_id'];
+  criteria: SearchQueryRulesQueryRule['criteria'];
+  type: SearchQueryRulesQueryRule['type'];
+  actions: SearchQueryRulesQueryRule['actions'];
+}

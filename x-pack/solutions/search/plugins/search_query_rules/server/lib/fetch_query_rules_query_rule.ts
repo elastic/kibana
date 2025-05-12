@@ -7,15 +7,20 @@
 
 import { QueryRulesQueryRule, QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { SearchQueryRulesQueryRule } from '../types';
 
 export const fetchQueryRulesQueryRule = async (
   client: ElasticsearchClient,
   rulesetId: QueryRulesQueryRuleset['ruleset_id'],
   ruleId: QueryRulesQueryRule['rule_id']
-): Promise<QueryRulesQueryRule> => {
+): Promise<SearchQueryRulesQueryRule> => {
   const result = await client.queryRules.getRule({
     ruleset_id: rulesetId,
     rule_id: ruleId,
   });
-  return result;
+
+  return {
+    ...result,
+    criteria: !Array.isArray(result.criteria) ? [result.criteria] : result.criteria,
+  };
 };
