@@ -76,7 +76,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     );
   }
 
-  describe.only('Content packs', () => {
+  describe('Content packs', () => {
     let contentPack: ContentPack;
 
     before(async () => {
