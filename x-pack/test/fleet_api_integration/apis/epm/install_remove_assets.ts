@@ -279,6 +279,17 @@ export default function (providerContext: FtrProviderContext) {
           resOsquerySavedQuery = err;
         }
         expect(resOsquerySavedQuery.response.data.statusCode).equal(404);
+        let securityAiPrompt;
+        try {
+          securityAiPrompt = await kibanaServer.savedObjects.get({
+            type: 'security-ai-prompt',
+            id: 'sample_security_ai_prompt',
+          });
+        } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
+          securityAiPrompt = err;
+        }
+        expect(securityAiPrompt.response.data.statusCode).equal(404);
       });
       it('should have removed the saved object', async function () {
         let res;
@@ -483,6 +494,12 @@ const expectAssetsInstalled = ({
       type: 'csp-rule-template',
       id: 'sample_csp_rule_template',
     });
+    const resSecurityAiPrompt = await kibanaServer.savedObjects.get({
+      type: 'security-ai-prompt',
+      id: 'sample_security_ai_prompt',
+    });
+    expect(resSecurityAiPrompt.id).equal('sample_security_ai_prompt');
+    expect(resSecurityAiPrompt.managed).be(true);
     expect(resCloudSecurityPostureRuleTemplate.id).equal('sample_csp_rule_template');
     expect(resCloudSecurityPostureRuleTemplate.managed).be(true);
     const resTag = await kibanaServer.savedObjects.get({
@@ -579,6 +596,10 @@ const expectAssetsInstalled = ({
         {
           id: 'sample_search',
           type: 'search',
+        },
+        {
+          id: 'sample_security_ai_prompt',
+          type: 'security-ai-prompt',
         },
         {
           id: 'sample_security_rule',
@@ -755,6 +776,10 @@ const expectAssetsInstalled = ({
         },
         {
           id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58',
+          type: 'epm-packages-assets',
+        },
+        {
+          id: '5d12ad91-0624-5dce-800d-b1f9a7732f7c',
           type: 'epm-packages-assets',
         },
         {

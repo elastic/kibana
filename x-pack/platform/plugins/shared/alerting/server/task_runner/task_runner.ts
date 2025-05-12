@@ -206,7 +206,6 @@ export class TaskRunner<
       AlertData
     >({
       context: this.context,
-      logger: this.logger,
       task: this.taskInstance,
       timer: this.timer,
     });
@@ -315,6 +314,7 @@ export class TaskRunner<
     const ruleTypeRunnerContext = {
       alertingEventLogger: this.alertingEventLogger,
       flappingSettings,
+      logger: this.logger,
       maintenanceWindowsService: this.context.maintenanceWindowsService,
       namespace: this.context.spaceIdToNamespace(spaceId),
       queryDelaySec: queryDelaySettings.delay,
