@@ -51,6 +51,11 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   const [isPreviewImageModalVisible, setIsPreviewImageModalVisible] = useState(false);
 
+  const [isPinHovered, setIsPinHovered] = useState(false);
+  const [isPinFocused, setIsPinFocused] = useState(false);
+
+  const showPinIcon = isPinHovered || isPinFocused || isPinned;
+
   const classes = classnames('indexPatternFieldEditor__previewFieldList__item', {
     'indexPatternFieldEditor__previewFieldList__item--highlighted': isFromScript,
     'indexPatternFieldEditor__previewFieldList__item--pinned': isPinned,
@@ -184,8 +189,12 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
               onClick={() => {
                 toggleIsPinned(key);
               }}
+              onMouseEnter={() => setIsPinHovered(true)}
+              onMouseLeave={() => setIsPinHovered(false)}
+              onFocus={() => setIsPinFocused(true)}
+              onBlur={() => setIsPinFocused(false)}
               color="text"
-              iconType="pinFilled"
+              iconType={showPinIcon ? 'pinFilled' : 'empty'}
               data-test-subj="pinFieldButton"
               aria-label={i18n.translate(
                 'indexPatternFieldEditor.fieldPreview.pinFieldButtonLabel',
@@ -193,7 +202,6 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
                   defaultMessage: 'Pin field',
                 }
               )}
-              className="indexPatternFieldEditor__previewFieldList__item__actionsBtn"
             />
           )}
         </EuiFlexItem>

@@ -28,18 +28,6 @@ $previewShowMoreHeight: 40px; /* [2] */
       flex-basis: 24px !important;
     }
 
-    &__actionsBtn {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    &--pinned, &:hover, &:focus-within {
-      .indexPatternFieldEditor__previewFieldList__item__actionsBtn {
-        opacity: 1;
-        pointer-events: auto;
-      }
-    }
-
     &__value .euiToolTipAnchor {
       width: 100%; /* [3] */
     }
