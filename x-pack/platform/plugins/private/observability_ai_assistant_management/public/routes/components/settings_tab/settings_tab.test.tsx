@@ -6,43 +6,63 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
 import { render } from '../../../helpers/test_helper';
 import { SettingsTab } from './settings_tab';
 import { useAppContext } from '../../../hooks/use_app_context';
+import { useKibana } from '../../../hooks/use_kibana';
 
 jest.mock('../../../hooks/use_app_context');
+jest.mock('../../../hooks/use_kibana');
 
 const useAppContextMock = useAppContext as jest.Mock;
-
-const getUrlForAppMock = jest.fn();
+const useKibanaMock = useKibana as jest.Mock;
 
 describe('SettingsTab', () => {
-  useAppContextMock.mockReturnValue({ config: { spacesEnabled: true, visibilityEnabled: true } });
+  const getUrlForAppMock = jest.fn();
+  const prependMock = jest.fn();
 
-  it('should offer a way to configure Observability AI Assistant visibility in apps', () => {
-    const { getAllByTestId } = render(<SettingsTab />, {
-      coreStart: {
-        application: { getUrlForApp: getUrlForAppMock },
+  beforeEach(() => {
+    useAppContextMock.mockReturnValue({
+      config: { spacesEnabled: true, visibilityEnabled: true },
+    });
+
+    useKibanaMock.mockReturnValue({
+      services: {
+        application: {
+          getUrlForApp: getUrlForAppMock,
+          capabilities: {
+            advancedSettings: { save: true },
+          },
+        },
+        http: {
+          basePath: { prepend: prependMock },
+        },
+        productDocBase: undefined,
       },
     });
 
-    fireEvent.click(getAllByTestId('settingsTabGoToSpacesButton')[0]);
-
-    expect(getUrlForAppMock).toBeCalledWith('management', { path: '/kibana/spaces' });
+    getUrlForAppMock.mockReset();
+    prependMock.mockReset();
   });
 
-  it('should offer a way to configure Gen AI connectors', () => {
-    const { getByTestId } = render(<SettingsTab />, {
-      coreStart: {
-        application: { getUrlForApp: getUrlForAppMock },
-      },
-    });
+  it('should render a “Go to spaces” button with the correct href', () => {
+    const expectedSpacesUrl = '/app/management/kibana/spaces';
+    getUrlForAppMock.mockReturnValue(expectedSpacesUrl);
 
-    fireEvent.click(getByTestId('settingsTabGoToConnectorsButton'));
+    const { getAllByTestId } = render(<SettingsTab />);
+    const [firstSpacesButton] = getAllByTestId('settingsTabGoToSpacesButton');
 
-    expect(getUrlForAppMock).toBeCalledWith('management', {
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-    });
+    expect(firstSpacesButton).toHaveAttribute('href', expectedSpacesUrl);
+  });
+
+  it('should render a “Manage connectors” button with the correct href', () => {
+    const expectedConnectorsUrl =
+      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors';
+    prependMock.mockReturnValue(expectedConnectorsUrl);
+
+    const { getByTestId } = render(<SettingsTab />);
+    const connectorsButton = getByTestId('settingsTabGoToConnectorsButton');
+
+    expect(connectorsButton).toHaveAttribute('href', expectedConnectorsUrl);
   });
 });
