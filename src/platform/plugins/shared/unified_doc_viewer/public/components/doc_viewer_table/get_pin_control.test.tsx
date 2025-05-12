@@ -9,54 +9,73 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FieldRow } from './field_row';
 import { getPinColumnControl } from './get_pin_control';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildFieldRowMock } from './field_row.mocks';
+import { userEvent } from '@testing-library/user-event';
+
+const rows: FieldRow[] = [
+  buildFieldRowMock({
+    name: 'message',
+  }),
+];
+
+const setup = () => {
+  const user = userEvent.setup();
+
+  const onTogglePinned = jest.fn();
+  const control = getPinColumnControl({ rows, onTogglePinned });
+  const Cell = control.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
+  render(
+    <Cell
+      rowIndex={0}
+      columnId="test"
+      setCellProps={jest.fn()}
+      colIndex={0}
+      isDetails={false}
+      isExpanded={false}
+      isExpandable={false}
+    />
+  );
+
+  return { user, onTogglePinned };
+};
 
 describe('getPinControl', () => {
-  const rows: FieldRow[] = [
-    new FieldRow({
-      name: 'message',
-      flattenedValue: 'flattenedField',
-      hit: buildDataTableRecord(
-        {
-          _ignored: [],
-          _index: 'test',
-          _id: '1',
-          _source: {
-            message: 'test',
-          },
-        },
-        dataView
-      ),
-      dataView,
-      fieldFormats: {} as FieldFormatsStart,
-      isPinned: false,
-      columnsMeta: undefined,
-    }),
-  ];
+  describe('when the pin is clicked', () => {
+    it('should call onTogglePinned with keyboard event as false', async () => {
+      const { onTogglePinned, user } = setup();
 
-  it('should render correctly', () => {
-    const onTogglePinned = jest.fn();
-    const control = getPinColumnControl({ rows, onTogglePinned });
-    const Cell = control.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
-    render(
-      <Cell
-        rowIndex={0}
-        columnId="test"
-        setCellProps={jest.fn()}
-        colIndex={0}
-        isDetails={false}
-        isExpanded={false}
-        isExpandable={false}
-      />
-    );
+      await user.click(screen.getByRole('button', { name: 'Pin field' }));
 
-    screen.getByTestId('unifiedDocViewer_pinControlButton_message').click();
+      expect(onTogglePinned).toHaveBeenCalledWith('message', { isKeyboardEvent: false });
+    });
+  });
 
-    expect(onTogglePinned).toHaveBeenCalledWith('message');
+  describe('when the pin is focused', () => {
+    describe('and Enter is pressed', () => {
+      it('should call onTogglePinned with keyboard event as true', async () => {
+        const { onTogglePinned, user } = setup();
+
+        const button = screen.getByRole('button', { name: 'Pin field' });
+        button.focus();
+        await user.keyboard('{enter}');
+
+        expect(onTogglePinned).toHaveBeenCalledWith('message', { isKeyboardEvent: true });
+      });
+    });
+
+    describe('and Enter is not pressed', () => {
+      it('should not call onTogglePinned', async () => {
+        const { onTogglePinned, user } = setup();
+
+        const button = screen.getByRole('button', { name: 'Pin field' });
+        button.focus();
+        await user.keyboard('A');
+
+        expect(onTogglePinned).not.toHaveBeenCalled();
+      });
+    });
   });
 });

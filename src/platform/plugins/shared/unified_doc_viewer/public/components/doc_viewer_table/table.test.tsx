@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen, act, fireEvent } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -80,6 +81,18 @@ const dataView = createStubDataView({
 });
 const hit = buildDataTableRecord(generateEsHits(dataView, 1)[0], dataView);
 
+const setupComponent = (props: Partial<React.ComponentProps<typeof DocViewerTable>> = {}) => {
+  const user = userEvent.setup();
+
+  render(
+    <IntlProvider locale="en">
+      <DocViewerTable dataView={dataView} hit={hit} columns={[]} {...props} />
+    </IntlProvider>
+  );
+
+  return { user };
+};
+
 describe('DocViewerTable', () => {
   afterEach(() => {
     storage.clear();
@@ -87,11 +100,7 @@ describe('DocViewerTable', () => {
 
   describe('table cells', () => {
     it('should render cells', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
-      );
+      setupComponent();
 
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
       expect(screen.getByText(hit.flattened['@timestamp'] as string)).toBeInTheDocument();
@@ -108,21 +117,13 @@ describe('DocViewerTable', () => {
     });
 
     it('should find by field name', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
-      );
+      const { user } = setupComponent();
 
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
       expect(screen.getByText('bytes')).toBeInTheDocument();
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(screen.getByTestId('unifiedDocViewerFieldsSearchInput'), {
-          target: { value: 'bytes' },
-        });
-      });
+      await user.type(screen.getByTestId('unifiedDocViewerFieldsSearchInput'), 'bytes');
 
       expect(screen.queryByText('@timestamp')).toBeNull();
       expect(screen.queryByText('bytes')).toBeInTheDocument();
@@ -130,21 +131,16 @@ describe('DocViewerTable', () => {
     });
 
     it('should find by field value', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
-      );
+      const { user } = setupComponent();
 
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
       expect(screen.getByText('bytes')).toBeInTheDocument();
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
 
-      act(() => {
-        fireEvent.change(screen.getByTestId('unifiedDocViewerFieldsSearchInput'), {
-          target: { value: hit.flattened['extension.keyword'] as string },
-        });
-      });
+      await user.type(
+        screen.getByTestId('unifiedDocViewerFieldsSearchInput'),
+        String(hit.flattened['extension.keyword'])
+      );
 
       expect(screen.queryByText('@timestamp')).toBeNull();
       expect(screen.queryByText('bytes')).toBeNull();
@@ -154,11 +150,7 @@ describe('DocViewerTable', () => {
 
   describe('switch - show only selected fields', () => {
     it('should disable the switch if columns is empty', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
-      );
+      setupComponent();
 
       expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
@@ -169,11 +161,7 @@ describe('DocViewerTable', () => {
     it('should disable the switch even if it was previously switched on', async () => {
       storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
 
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={[]} />
-        </IntlProvider>
-      );
+      setupComponent();
 
       expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeDisabled();
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
@@ -184,11 +172,7 @@ describe('DocViewerTable', () => {
     it('should show only selected fields if it was previously switched on', async () => {
       storage.set(SHOW_ONLY_SELECTED_FIELDS, true);
 
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={['extension.keyword']} />
-        </IntlProvider>
-      );
+      setupComponent({ columns: ['extension.keyword'] });
 
       expect(screen.getByTestId('unifiedDocViewerShowOnlySelectedFieldsSwitch')).toBeEnabled();
       expect(screen.getByText('@timestamp')).toBeInTheDocument();
@@ -197,11 +181,7 @@ describe('DocViewerTable', () => {
     });
 
     it('should allow toggling the switch', async () => {
-      render(
-        <IntlProvider locale="en">
-          <DocViewerTable dataView={dataView} hit={hit} columns={['bytes']} />
-        </IntlProvider>
-      );
+      setupComponent({ columns: ['bytes'] });
 
       const showOnlySelectedFieldsSwitch = screen.getByTestId(
         'unifiedDocViewerShowOnlySelectedFieldsSwitch'
@@ -230,6 +210,106 @@ describe('DocViewerTable', () => {
       expect(screen.getByText('bytes')).toBeInTheDocument();
       expect(screen.getByText('extension.keyword')).toBeInTheDocument();
       expect(storage.get(SHOW_ONLY_SELECTED_FIELDS)).toBe(false);
+    });
+  });
+
+  describe('pinning', () => {
+    it('should render pinning controls', async () => {
+      setupComponent({ columns: ['bytes'] });
+
+      expect(screen.getByTestId('unifiedDocViewer_pinControl_bytes')).toBeInTheDocument();
+      expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toBeInTheDocument();
+    });
+
+    describe.each([
+      {
+        from: 'Pin field',
+        to: 'Unpin field',
+        fieldInitialStatus: 'unpinned',
+        before: () => storage.clear(),
+      },
+      {
+        from: 'Unpin field',
+        to: 'Pin field',
+        fieldInitialStatus: 'pinned',
+        before: () => storage.set('discover:pinnedFields', { [dataView.id!]: ['bytes'] }),
+      },
+    ])('when the field is $fieldInitialStatus', ({ from, to, before }) => {
+      beforeEach(() => {
+        before();
+      });
+
+      afterEach(() => {
+        storage.clear();
+      });
+
+      describe('when the pinning control is clicked', () => {
+        it('should toggle the field', async () => {
+          const { user } = setupComponent({ columns: ['bytes'] });
+
+          expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toHaveAttribute(
+            'aria-label',
+            from
+          );
+
+          await user.click(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes'));
+
+          expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toHaveAttribute(
+            'aria-label',
+            to
+          );
+        });
+
+        it('should not focus the toggled field', async () => {
+          const { user } = setupComponent({ columns: ['bytes'] });
+
+          expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toHaveAttribute(
+            'aria-label',
+            from
+          );
+
+          await user.click(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes'));
+
+          expect(document.activeElement).not.toBe(
+            screen
+              .getByTestId('unifiedDocViewer_pinControlButton_bytes')
+              .closest('[role="gridcell"]')
+          );
+        });
+      });
+
+      describe('when the pinning control is focused and Enter is pressed', () => {
+        it('should toggle the field', async () => {
+          const { user } = setupComponent({ columns: ['bytes'] });
+
+          const button = screen.getByTestId('unifiedDocViewer_pinControlButton_bytes');
+          expect(button).toHaveAttribute('aria-label', from);
+
+          button.focus();
+          await user.keyboard('{Enter}');
+
+          expect(screen.getByTestId('unifiedDocViewer_pinControlButton_bytes')).toHaveAttribute(
+            'aria-label',
+            to
+          );
+        });
+
+        it('should focus the toggled field', async () => {
+          const { user } = setupComponent({ columns: ['bytes'] });
+
+          const button = screen.getByTestId('unifiedDocViewer_pinControlButton_bytes');
+          expect(button).toHaveAttribute('aria-label', from);
+
+          button.focus();
+          await user.keyboard('{Enter}');
+
+          expect(document.activeElement).toBe(
+            screen
+              .getByTestId('unifiedDocViewer_pinControlButton_bytes')
+              .closest('[role="gridcell"]')
+          );
+        });
+      });
     });
   });
 });
