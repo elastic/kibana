@@ -31,7 +31,7 @@ describe('test useInspector', () => {
     const lensRequests = new RequestAdapter();
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.internalState.dispatch(
-      internalStateActions.setExpandedDoc({} as unknown as DataTableRecord)
+      internalStateActions.setExpandedDoc({ expandedDoc: {} as unknown as DataTableRecord })
     );
     const { result } = renderHook(
       () => {

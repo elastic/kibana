@@ -26,7 +26,7 @@ export { suggest } from './src/autocomplete/autocomplete';
 export type {
   ValidationErrors,
   ESQLUserDefinedColumn,
-  ESQLRealField,
+  ESQLFieldWithMetadata,
   ESQLPolicy,
   ErrorTypes as ESQLValidationErrorTypes,
 } from './src/validation/types';
@@ -62,3 +62,5 @@ export {
 } from './src/shared/resources_helpers';
 
 export { getRecommendedQueries } from './src/autocomplete/recommended_queries/templates';
+
+export { esqlFunctionNames } from './src/definitions/generated/function_names';
