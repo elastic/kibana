@@ -12,3 +12,4 @@ export { useRootProfile, BaseAppWrapper, type RootProfileState } from './use_roo
 export { useAdditionalCellActions } from './use_additional_cell_actions';
 export { useDefaultAdHocDataViews } from './use_default_ad_hoc_data_views';
 export { useCustomCellRenderers } from './use_custom_cell_renderers';
+export { useRowIndicatorProvider } from './use_row_indicator_provider';

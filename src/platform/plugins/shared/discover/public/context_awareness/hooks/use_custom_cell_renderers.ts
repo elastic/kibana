@@ -9,8 +9,9 @@
 
 import { type CellRendererColumnMap, type GetCustomCellRenderer } from '@kbn/unified-data-table';
 import { useCallback } from 'react';
-import { getMergedAccessor, type CellRenderersExtensionParams } from '..';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import type { CellRenderersExtensionParams } from '../types';
+import { getMergedAccessor } from '../composable_profile';
 
 export const useCustomCellRenderers = (
   cellRendererParams: CellRenderersExtensionParams,

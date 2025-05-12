@@ -17,6 +17,7 @@ export {
   useAdditionalCellActions,
   useDefaultAdHocDataViews,
   useCustomCellRenderers,
+  useRowIndicatorProvider,
   BaseAppWrapper,
   type RootProfileState,
 } from './hooks';
