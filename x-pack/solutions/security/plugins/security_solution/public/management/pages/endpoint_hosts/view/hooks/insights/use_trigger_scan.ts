@@ -23,11 +23,10 @@ interface UseTriggerScanPayload {
 }
 
 interface UseTriggerScanConfig {
-  onMutate: () => void;
   onSuccess: () => void;
 }
 
-export const useTriggerScan = ({ onMutate, onSuccess }: UseTriggerScanConfig) => {
+export const useTriggerScan = ({ onSuccess }: UseTriggerScanConfig) => {
   const { http } = useKibana().services;
   const toasts = useToasts();
 
@@ -50,7 +49,6 @@ export const useTriggerScan = ({ onMutate, onSuccess }: UseTriggerScanConfig) =>
         }),
       }),
     {
-      onMutate,
       onSuccess,
       onError: (err) => {
         toasts.addDanger({
