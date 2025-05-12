@@ -10,7 +10,7 @@
 import { type EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/css';
 
-const PANEL_WIDTH = '270px';
+const PANEL_WIDTH = '248px';
 
 export const getPanelWrapperStyles = () => css`
   clip-path: polygon(
