@@ -15,8 +15,10 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { ConnectorSelectorBase } from '@kbn/observability-ai-assistant-plugin/public';
-import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public/utils/get_connectors_management_href';
+import {
+  ConnectorSelectorBase,
+  getConnectorsManagementHref,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { useKibana } from '../hooks/use_kibana';
 import { useKnowledgeBase } from '../hooks';
