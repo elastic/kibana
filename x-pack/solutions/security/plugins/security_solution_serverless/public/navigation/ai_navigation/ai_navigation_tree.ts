@@ -33,17 +33,12 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
       isCollapsible: false,
       children: [
         {
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              id: SecurityPageName.alertSummary,
-              link: securityLink(SecurityPageName.alertSummary),
-            },
-            {
-              id: SecurityPageName.attackDiscovery,
-              link: securityLink(SecurityPageName.attackDiscovery),
-            },
-          ],
+          id: SecurityPageName.alertSummary,
+          link: securityLink(SecurityPageName.alertSummary),
+        },
+        {
+          id: SecurityPageName.attackDiscovery,
+          link: securityLink(SecurityPageName.attackDiscovery),
         },
         {
           breadcrumbStatus: 'hidden',
