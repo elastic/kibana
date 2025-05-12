@@ -14,6 +14,7 @@ import {
   ContentPackSavedObject,
   INDEX_PLACEHOLDER,
   findConfiguration,
+  isSupportedSavedObjectType,
 } from '@kbn/content-packs-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -118,8 +119,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('puts placeholders for patterns matching the source stream', async () => {
         // all saved objects only read from `logs`. since we exported the dashboard from
         // the root stream, the replacement logic should only leave placeholders
-        expect(contentPack.entries.length).to.eql(4);
-        expectIndexPatternsFromEntries(contentPack.entries, [INDEX_PLACEHOLDER]);
+        const savedObjects = contentPack.entries.filter(isSupportedSavedObjectType);
+        expect(savedObjects).to.eql(4);
+        expectIndexPatternsFromEntries(savedObjects, [INDEX_PLACEHOLDER]);
       });
     });
 
