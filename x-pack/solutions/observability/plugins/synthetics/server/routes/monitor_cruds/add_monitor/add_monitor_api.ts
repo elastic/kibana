@@ -113,10 +113,7 @@ export class AddEditMonitorAPI {
         },
       };
     } catch (e) {
-      server.logger.error(
-        `Unable to create Synthetics monitor ${monitorWithNamespace[ConfigKey.NAME]}`,
-        { error: e }
-      );
+      e.message = `${e.message}, monitor name: ${monitorWithNamespace[ConfigKey.NAME]}`;
       await this.revertMonitorIfCreated({
         newMonitorId,
       });
@@ -250,7 +247,7 @@ export class AddEditMonitorAPI {
             server.logger.debug(`Successfully triggered test for monitor: ${configId}`);
           })
           .catch((e) => {
-            server.logger.error(`Error triggering test for monitor: ${configId}: ${e}`, {
+            server.logger.error(`Error while triggering test for monitor: ${configId}`, {
               error: e,
             });
           });
@@ -312,8 +309,9 @@ export class AddEditMonitorAPI {
       }
     } catch (e) {
       // ignore errors here
-      // TODO: Who is this log for?
-      server.logger.error(e);
+      server.logger.error(`Unable to revert monitor with id ${newMonitorId}`, {
+        error: e,
+      });
     }
   }
 }
