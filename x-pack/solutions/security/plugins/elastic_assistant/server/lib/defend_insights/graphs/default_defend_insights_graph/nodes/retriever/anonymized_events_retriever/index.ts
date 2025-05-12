@@ -13,7 +13,7 @@ import { BaseRetriever, type BaseRetrieverInput } from '@langchain/core/retrieve
 import { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
-import { getAnonymizedEvents } from '../helpers/get_anonymized_events';
+import { getAnonymizedEvents } from './get_anonymized_events';
 
 export type CustomRetrieverInput = BaseRetrieverInput;
 
