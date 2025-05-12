@@ -106,16 +106,6 @@ export const VisualizeTab = memo(() => {
     [startTransaction]
   );
 
-  useEffect(() => {
-    if (panels.left?.path?.subTab) {
-      setActiveVisualizationId(panels.left?.path?.subTab);
-
-      if (panels.left?.path?.subTab === GRAPH_ID) {
-        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GRAPH_INVESTIGATION);
-      }
-    }
-  }, [panels.left?.path?.subTab]);
-
   // Decide whether to show the graph preview or not
   const { hasGraphRepresentation } = useGraphPreview({
     getFieldsData,
@@ -130,6 +120,23 @@ export const VisualizeTab = memo(() => {
   if (hasGraphRepresentation && graphVisualizationEnabled) {
     options.push(graphVisualizationButton);
   }
+
+  useEffect(() => {
+    if (panels.left?.path?.subTab) {
+      const newId = panels.left.path.subTab;
+
+      // Check if we need to select a different tab when graph feature flag is disabled
+      if (newId === GRAPH_ID && hasGraphRepresentation && !graphVisualizationEnabled) {
+        setActiveVisualizationId(SESSION_VIEW_ID);
+      } else {
+        setActiveVisualizationId(newId);
+
+        if (newId === GRAPH_ID) {
+          uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GRAPH_INVESTIGATION);
+        }
+      }
+    }
+  }, [panels.left?.path?.subTab, graphVisualizationEnabled, hasGraphRepresentation]);
 
   return (
     <>

@@ -8,7 +8,7 @@
  */
 
 import { dateRt } from '.';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 
 describe('dateRt', () => {
   it('passes if it is a valid date/time', () => {

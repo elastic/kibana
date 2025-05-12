@@ -13,6 +13,13 @@ export const GAPS_TABLE_STATUS_LABEL = i18n.translate(
   }
 );
 
+export const GAPS_TABLE_STATUS_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.statusLabelTooltip',
+  {
+    defaultMessage: 'Status of gap',
+  }
+);
+
 export const GAPS_TABLE_ACTIONS_LABEL = i18n.translate(
   'xpack.securitySolution.gapsTable.actionsLabel',
   {
@@ -48,6 +55,13 @@ export const GAPS_TABLE_MANUAL_FILL_TASKS_LABEL = i18n.translate(
   }
 );
 
+export const GAPS_TABLE_MANUAL_FILL_TASKS_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.manualFillTasksLabelTooltip',
+  {
+    defaultMessage: 'Status of manual run filling the gap',
+  }
+);
+
 export const GAPS_TABLE_IN_PROGRESS_LABEL = i18n.translate(
   'xpack.securitySolution.gapsTable.inProgressIntervalsLabel',
   {
@@ -62,6 +76,13 @@ export const GAPS_TABLE_EVENT_TIME_COVERED_LABEL = i18n.translate(
   }
 );
 
+export const GAPS_TABLE_EVENT_TIME_COVERED_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.eventTimeCoveredLabelTooltip',
+  {
+    defaultMessage: 'Progress of manual run filling the gap',
+  }
+);
+
 export const GAPS_TABLE_GAP_RANGE_LABEL = i18n.translate(
   'xpack.securitySolution.gapsTable.gapRangeLabel',
   {
@@ -69,10 +90,24 @@ export const GAPS_TABLE_GAP_RANGE_LABEL = i18n.translate(
   }
 );
 
-export const GAPS_TABLE_GAP_DURATION_TOOLTIP = i18n.translate(
+export const GAPS_TABLE_GAP_RANGE_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.gapRangeLabelTooltip',
+  {
+    defaultMessage: 'Time range of gap',
+  }
+);
+
+export const GAPS_TABLE_GAP_DURATION_LABEL = i18n.translate(
   'xpack.securitySolution.gapsTable.gapDurationTooltip',
   {
     defaultMessage: 'Total gap duration',
+  }
+);
+
+export const GAPS_TABLE_GAP_DURATION_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.gapDurationLabelTooltip',
+  {
+    defaultMessage: 'How long gap lasted',
   }
 );
 
@@ -122,6 +157,13 @@ export const GAPS_TABLE_EVENT_TIME_LABEL = i18n.translate(
   'xpack.securitySolution.gapsTable.eventTimeLabel',
   {
     defaultMessage: 'Detected at',
+  }
+);
+
+export const GAPS_TABLE_EVENT_TIME_LABEL_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.gapsTable.eventTimeLabelTooltip',
+  {
+    defaultMessage: 'Date and time gap was discovered',
   }
 );
 

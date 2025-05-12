@@ -14,6 +14,9 @@ import { Countdown } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { INFORMATION } from '../translations';
 import { APPROXIMATE_TIME_REMAINING } from './translations';
+import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
+
+jest.mock('../../use_kibana_feature_flags');
 
 describe('Countdown', () => {
   const connectorIntervals: GenerationInterval[] = [
@@ -37,6 +40,10 @@ describe('Countdown', () => {
 
   beforeEach(() => {
     jest.clearAllTimers();
+
+    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
+      attackDiscoveryAlertsEnabled: false,
+    });
   });
 
   afterAll(() => {

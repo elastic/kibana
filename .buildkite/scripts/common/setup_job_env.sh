@@ -140,6 +140,14 @@ EOF
   fi
 }
 
+# Set up Security GenAI keys
+{
+  if [[ "${FTR_SECURITY_GEN_AI:-}" =~ ^(1|true)$ ]]; then
+    echo "FTR_SECURITY_GEN_AI was set - exposing LLM connectors"
+    export KIBANA_SECURITY_GEN_AI_CONFIG="$(vault_get security-gen-ai config)"
+  fi
+}
+
 # Set up GCS Service Account for CDN
 {
   GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"

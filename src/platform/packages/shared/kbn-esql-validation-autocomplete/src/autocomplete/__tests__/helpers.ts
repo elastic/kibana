@@ -8,7 +8,6 @@
  */
 
 import { camelCase } from 'lodash';
-import { parse } from '@kbn/esql-ast';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../../definitions/all_operators';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
@@ -24,7 +23,7 @@ import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
 import { TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../factories';
-import { ESQLRealField } from '../../validation/types';
+import { ESQLFieldWithMetadata } from '../../validation/types';
 import {
   FieldType,
   fieldTypes,
@@ -32,7 +31,7 @@ import {
   FunctionReturnType,
   SupportedDataType,
 } from '../../definitions/types';
-import { joinIndices } from '../../__tests__/helpers';
+import { joinIndices, timeseriesIndices } from '../../__tests__/helpers';
 
 export interface Integration {
   name: string;
@@ -53,7 +52,7 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
-export type TestField = ESQLRealField & { suggestedAs?: string };
+export type TestField = ESQLFieldWithMetadata & { suggestedAs?: string };
 
 export const fields: TestField[] = [
   ...fieldTypes.map((type) => ({
@@ -279,7 +278,7 @@ export function createCustomCallbackMocks(
    * `FROM index | EVAL foo = 1 | LIMIT 0` will be used to fetch columns. The response
    * will include "foo" as a column.
    */
-  customColumnsSinceLastCommand?: ESQLRealField[],
+  customColumnsSinceLastCommand?: ESQLFieldWithMetadata[],
   customSources?: Array<{ name: string; hidden: boolean }>,
   customPolicies?: Array<{
     name: string;
@@ -304,6 +303,7 @@ export function createCustomCallbackMocks(
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
+    getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
   };
 }
 
@@ -353,13 +353,7 @@ export const setup = async (caret = '/') => {
       ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
       : { triggerKind: 0 };
 
-    return await autocomplete.suggest(
-      querySansCaret,
-      pos,
-      ctx,
-      (_query: string | undefined) => parse(_query, { withFormatting: true }),
-      opts.callbacks ?? callbacks
-    );
+    return await autocomplete.suggest(querySansCaret, pos, ctx, opts.callbacks ?? callbacks);
   };
 
   const assertSuggestions: AssertSuggestionsFn = async (query, expected, opts) => {

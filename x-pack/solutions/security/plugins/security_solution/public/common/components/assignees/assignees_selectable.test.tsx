@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 
 import { AssigneesSelectable } from './assignees_selectable';
 
@@ -81,7 +82,7 @@ describe('<AssigneesSelectable />', () => {
     expect(assigneesList).toHaveTextContent(i18n.ASSIGNEES_NO_ASSIGNEES);
   });
 
-  it('should call `onSelectionChange` on user selection', () => {
+  it('should call `onSelectionChange` on user selection', async () => {
     (useBulkGetUserProfiles as jest.Mock).mockReturnValue({
       isLoading: false,
       data: [],
@@ -93,12 +94,12 @@ describe('<AssigneesSelectable />', () => {
       onSelectionChange: onSelectionChangeMock,
     });
 
-    getByText('User 1').click();
-    getByText('User 2').click();
-    getByText('User 3').click();
-    getByText('User 3').click();
-    getByText('User 2').click();
-    getByText('User 1').click();
+    await userEvent.click(getByText('User 1'));
+    await userEvent.click(getByText('User 2'));
+    await userEvent.click(getByText('User 3'));
+    await userEvent.click(getByText('User 3'));
+    await userEvent.click(getByText('User 2'));
+    await userEvent.click(getByText('User 1'));
 
     expect(onSelectionChangeMock).toHaveBeenCalledTimes(6);
     expect(onSelectionChangeMock.mock.calls).toEqual([

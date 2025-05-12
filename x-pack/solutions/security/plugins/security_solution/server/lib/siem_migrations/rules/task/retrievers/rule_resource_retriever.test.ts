@@ -6,7 +6,7 @@
  */
 
 import { RuleResourceRetriever } from './rule_resource_retriever'; // Adjust path as needed
-import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 
@@ -14,6 +14,8 @@ jest.mock('../../data/rule_migrations_data_service');
 jest.mock('../../../../../../common/siem_migrations/rules/resources');
 
 const MockResourceIdentifier = ResourceIdentifier as jest.Mock;
+
+const migration = { original_rule: { vendor: 'splunk' } } as unknown as RuleMigration;
 
 describe('RuleResourceRetriever', () => {
   let retriever: RuleResourceRetriever;
@@ -37,21 +39,17 @@ describe('RuleResourceRetriever', () => {
   });
 
   it('throws an error if initialize is not called before getResources', async () => {
-    const originalRule = { vendor: 'splunk' } as unknown as OriginalRule;
-
-    await expect(retriever.getResources(originalRule)).rejects.toThrow(
+    await expect(retriever.getResources(migration)).rejects.toThrow(
       'initialize must be called before calling getResources'
     );
   });
 
   it('returns an empty object if no matching resources are found', async () => {
-    const originalRule = { vendor: 'splunk' } as unknown as OriginalRule;
-
     // Mock the resource identifier to return no resources
     mockResourceIdentifier.fromOriginalRule.mockReturnValue([]);
     await retriever.initialize(); // Pretend initialize has been called
 
-    const result = await retriever.getResources(originalRule);
+    const result = await retriever.getResources(migration);
     expect(result).toEqual({});
   });
 
@@ -73,9 +71,7 @@ describe('RuleResourceRetriever', () => {
       fromResources: jest.fn().mockReturnValue([]),
     }));
 
-    const originalRule = { vendor: 'splunk' } as unknown as OriginalRule;
-
-    const result = await retriever.getResources(originalRule);
+    const result = await retriever.getResources(migration);
     expect(result).toEqual({
       macro: [{ name: 'macro1', type: 'macro' }],
       lookup: [{ name: 'lookup1', type: 'lookup' }],
@@ -83,8 +79,6 @@ describe('RuleResourceRetriever', () => {
   });
 
   it('handles nested resources properly', async () => {
-    const originalRule = { vendor: 'splunk' } as unknown as OriginalRule;
-
     const mockExistingResources = {
       macro: {
         macro1: { name: 'macro1', type: 'macro' },
@@ -113,7 +107,7 @@ describe('RuleResourceRetriever', () => {
       fromResources: jest.fn().mockReturnValue([]).mockReturnValueOnce(mockNestedResources),
     }));
 
-    const result = await retriever.getResources(originalRule);
+    const result = await retriever.getResources(migration);
     expect(result).toEqual({
       macro: [
         { name: 'macro1', type: 'macro' },

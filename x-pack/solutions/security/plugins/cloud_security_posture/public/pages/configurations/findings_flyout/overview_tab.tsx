@@ -11,6 +11,7 @@ import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPanel,
@@ -35,6 +36,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
+import { TruncatedCopyableText } from './findings_right/header';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
@@ -48,7 +50,12 @@ const columns: Array<EuiBasicTableColumn<any>> = [
   {
     field: 'value',
     name: 'Value',
-    truncateText: true,
+    truncateText: false,
+    render: (value: string) => (
+      <>
+        <TruncatedCopyableText textToCopy={value} />
+      </>
+    ),
   },
 ];
 
@@ -95,7 +102,7 @@ const getDetailsList = (
             <b>Rule Description</b>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiLink href={ruleFlyoutLink} target="_blank" style={{ textAlign: 'right' }}>
+            <EuiLink href={ruleFlyoutLink} target="_blank" css={{ textAlign: 'right' }}>
               <EuiIcon type="expand" />
               {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.showRuleDetails', {
                 defaultMessage: 'Show rule details',
@@ -259,7 +266,7 @@ export const OverviewTab = ({
             <EuiSpacer size="m" />
             <EuiDescriptionList listItems={accordion.listItems} />
           </EuiAccordion>
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule />
         </React.Fragment>
       ))}
     </>

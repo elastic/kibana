@@ -165,7 +165,7 @@
               "Specifies the module visibility, i.e. whether it can be accessed by everybody or only modules in the same group"
             ],
             "signature": [
-              "\"private\" | \"shared\""
+              "\"shared\" | \"private\""
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
             "deprecated": false,

@@ -7,107 +7,161 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react';
-import { Subject } from 'rxjs';
-import { createUseTimefilterHook } from './use_timefilter';
 import { TimeRange } from '@kbn/es-query';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { act, renderHook } from '@testing-library/react';
+import { Observable } from 'rxjs';
+import { getAbsoluteTimeRange } from '../../../common';
+import { NowProvider } from '../../now_provider';
+import { TimeHistory } from './time_history';
+import { Timefilter } from './timefilter';
+import { TimeStateUpdate, TimefilterHook } from './use_timefilter';
 
-describe('useTimefilter hook', () => {
-  const timeUpdateSubject = new Subject<void>();
+const now = new Date('2025-04-02T00:00:00.000Z');
 
-  const initialTimeRange: TimeRange = {
-    from: 'now-1d',
+describe('createUseTimefilterHook', () => {
+  let useTimefilter: () => TimefilterHook;
+  let timefilter: Timefilter;
+
+  const timeDefaults = {
+    from: 'now-15m',
     to: 'now',
   };
 
-  const initialAbsoluteTimeRange = {
-    from: '2020-01-01T00:00:00Z',
-    to: '2020-01-02T00:00:00Z',
-  };
+  async function setTimeAndWait(input: TimeRange) {
+    const {
+      result: { current },
+    } = renderHook(() => useTimefilter());
+    return await act(async () => {
+      return await waitForNextFetch$(current.timeState$, () => {
+        timefilter.setTime(input);
+      });
+    });
+  }
 
-  // Track the current time range in the mock
-  let currentTimeRange = { ...initialTimeRange };
+  async function refreshAndWait() {
+    const {
+      result: { current },
+    } = renderHook(() => useTimefilter());
+    return await act(async () => {
+      return await waitForNextFetch$(current.timeState$, () => {
+        current.refresh();
+      });
+    });
+  }
 
-  const mockTimefilter = {
-    getTime: jest.fn().mockImplementation(() => currentTimeRange),
-    getAbsoluteTime: jest.fn().mockReturnValue(initialAbsoluteTimeRange),
-    setTime: jest.fn().mockImplementation((timeRange) => {
-      currentTimeRange = timeRange;
-    }),
-    getTimeUpdate$: jest.fn().mockReturnValue(timeUpdateSubject),
-  };
-
-  const useTimefilter = createUseTimefilterHook(mockTimefilter as any);
+  async function waitForNextFetch$(timeState$: Observable<TimeStateUpdate>, cb: () => void) {
+    return await new Promise<TimeStateUpdate>((resolve) => {
+      const subscription = timeState$.subscribe({
+        next: (val) => {
+          subscription.unsubscribe();
+          resolve(val);
+        },
+      });
+      cb();
+    });
+  }
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    // Reset the current time range for each test
-    currentTimeRange = { ...initialTimeRange };
+    const storage = new Storage(window.localStorage);
+
+    const timeHistory = new TimeHistory(storage);
+
+    const nowProvider = new NowProvider();
+
+    nowProvider.set(now);
+
+    timefilter = new Timefilter(
+      {
+        timeDefaults,
+        refreshIntervalDefaults: {
+          pause: false,
+          value: 0,
+        },
+        minRefreshIntervalDefault: 10,
+      },
+      timeHistory,
+      nowProvider
+    );
+
+    useTimefilter = timefilter.useTimefilter;
   });
 
-  test('time range and absolute time range should have the right values', () => {
-    const { result } = renderHook(() => useTimefilter());
+  describe('initially', () => {
+    it('should return the initial time state based on the timefilter.getTime() value', () => {
+      const { result } = renderHook(() => useTimefilter());
 
-    expect(result.current.timeRange).toEqual(initialTimeRange);
-    expect(result.current.absoluteTimeRange).toEqual({
-      start: new Date(initialAbsoluteTimeRange.from).getTime(),
-      end: new Date(initialAbsoluteTimeRange.to).getTime(),
-    });
-  });
-
-  test('hook should rerender when the time update gets updated', () => {
-    const { result } = renderHook(() => useTimefilter());
-
-    const updatedTimeRange = {
-      from: '2021-01-01T00:00:00Z',
-      to: '2021-01-02T00:00:00Z',
-    };
-
-    const updatedAbsoluteTimeRange = {
-      from: '2021-01-01T00:00:00Z',
-      to: '2021-01-02T00:00:00Z',
-    };
-
-    // Update the current time range for the mock
-    currentTimeRange = updatedTimeRange;
-    mockTimefilter.getAbsoluteTime.mockReturnValue(updatedAbsoluteTimeRange);
-
-    act(() => {
-      timeUpdateSubject.next();
-    });
-
-    expect(result.current.timeRange).toEqual(updatedTimeRange);
-    expect(result.current.absoluteTimeRange).toEqual({
-      start: new Date(updatedAbsoluteTimeRange.from).getTime(),
-      end: new Date(updatedAbsoluteTimeRange.to).getTime(),
+      expect(result.current.timeState).toEqual({
+        asAbsoluteTimeRange: {
+          ...getAbsoluteTimeRange(timeDefaults, { forceNow: now }),
+          mode: 'absolute',
+        },
+        start: now.getTime() - 15 * 60 * 1000,
+        end: now.getTime(),
+        timeRange: timeDefaults,
+      });
     });
   });
 
-  test('setTimeRange should call through correctly', () => {
-    const { result } = renderHook(() => useTimefilter());
+  describe('when updating via setTime', () => {
+    it('updates the time with a relative change', async () => {
+      const next = await setTimeAndWait({
+        from: 'now-30m',
+        to: 'now',
+      });
 
-    const newTimeRange = {
-      from: '2022-01-01T00:00:00Z',
-      to: '2022-01-02T00:00:00Z',
-    };
+      expect(next.timeState).toEqual({
+        asAbsoluteTimeRange: {
+          ...getAbsoluteTimeRange({ from: 'now-30m', to: 'now' }, { forceNow: now }),
+          mode: 'absolute',
+        },
+        start: now.getTime() - 30 * 60 * 1000,
+        end: now.getTime(),
+        timeRange: {
+          from: 'now-30m',
+          to: 'now',
+        },
+      });
 
-    act(() => {
-      result.current.setTimeRange(newTimeRange);
+      expect(next.kind).toBe('shift');
     });
 
-    expect(mockTimefilter.setTime).toHaveBeenCalledWith(newTimeRange);
+    it('updates the time with an absolute change', async () => {
+      const start = new Date(`2025-04-03T00:00:00.000Z`);
+      const end = new Date(`2025-04-04T00:00:00.000Z`);
 
-    // Test with callback form
-    act(() => {
-      result.current.setTimeRange((prevRange) => ({
-        ...prevRange,
-        from: '2022-02-01T00:00:00Z',
-      }));
+      const next = await setTimeAndWait({ from: start.toISOString(), to: end.toISOString() });
+
+      expect(next.timeState).toEqual({
+        asAbsoluteTimeRange: {
+          ...getAbsoluteTimeRange(
+            { from: start.toISOString(), to: end.toISOString() },
+            { forceNow: now }
+          ),
+          mode: 'absolute',
+        },
+        start: start.getTime(),
+        end: end.getTime(),
+        timeRange: {
+          from: start.toISOString(),
+          to: end.toISOString(),
+        },
+      });
+      expect(next.kind).toBe('shift');
     });
 
-    expect(mockTimefilter.setTime).toHaveBeenCalledWith({
-      ...newTimeRange,
-      from: '2022-02-01T00:00:00Z',
+    it('calls timeState$ when refreshing a static time range', async () => {
+      const start = new Date(`2025-04-03T00:00:00.000Z`);
+      const end = new Date(`2025-04-04T00:00:00.000Z`);
+
+      const next = await setTimeAndWait({ from: start.toISOString(), to: end.toISOString() });
+
+      const afterNext = await refreshAndWait();
+
+      expect(afterNext.timeState).toEqual(next.timeState);
+
+      expect(next.kind).toEqual('shift');
+      expect(afterNext.kind).toEqual('override');
     });
   });
 });

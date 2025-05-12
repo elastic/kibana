@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiButton, EuiCallOut, EuiSelect, EuiSpacer } from '@elastic/eui';
 import type { Meta, StoryFn } from '@storybook/react';
 import { MemoryRouter } from 'react-router-dom';
-import { useArgs } from '@storybook/manager-api';
+import { useArgs } from '@storybook/preview-api';
 import { AssetDetails } from './asset_details';
 import { decorateWithGlobalStorybookThemeProviders } from '../../test_utils/use_global_storybook_theme';
 import { type TabIds, type AssetDetailsProps } from './types';

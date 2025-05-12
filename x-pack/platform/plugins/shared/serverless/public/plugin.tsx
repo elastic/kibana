@@ -81,19 +81,12 @@ export class ServerlessPlugin
     return {
       setSideNavComponentDeprecated: (sideNavigationComponent) =>
         project.setSideNavComponent(sideNavigationComponent),
-      initNavigation: (id, navigationTree$, { panelContentProvider, dataTestSubj } = {}) => {
+      initNavigation: (id, navigationTree$, { dataTestSubj } = {}) => {
         project.initNavigation(id, navigationTree$);
         project.setSideNavComponent(() => (
           <SideNavComponent
-            navProps={{
-              navigationTree$: navigationTreeUi$,
-              dataTestSubj,
-              panelContentProvider,
-            }}
-            deps={{
-              core,
-              activeNodes$: activeNavigationNodes$,
-            }}
+            navProps={{ navigationTree$: navigationTreeUi$, dataTestSubj }}
+            deps={{ core, activeNodes$: activeNavigationNodes$ }}
           />
         ));
       },

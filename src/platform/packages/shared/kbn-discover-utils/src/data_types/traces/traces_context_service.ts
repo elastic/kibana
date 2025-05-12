@@ -12,7 +12,7 @@ import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/dat
 import { containsIndexPattern } from '../../utils';
 
 export interface TracesContextService {
-  getAllTracesIndexPattern(): string | undefined;
+  getAllTracesIndexPattern(): string;
   isTracesIndexPattern(indexPattern: unknown): boolean;
   containsTracesIndexPattern(indexPattern: unknown): boolean;
 }
