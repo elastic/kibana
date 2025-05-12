@@ -6,7 +6,7 @@
  */
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import React, { useMemo, useRef } from 'react';
 import { Options } from '../register_items';
@@ -22,7 +22,7 @@ const embeddableClassName = css`
 
 type Props = EmbeddableItemParams & GlobalWidgetParameters;
 
-type ParentApi = ReturnType<React.ComponentProps<typeof ReactEmbeddableRenderer>['getParentApi']>;
+type ParentApi = ReturnType<React.ComponentProps<typeof EmbeddableRenderer>['getParentApi']>;
 
 function ReactEmbeddable({ type, config, timeRange: { from, to }, savedObjectId }: Props) {
   const configWithOverrides = useMemo(() => {
@@ -48,7 +48,7 @@ function ReactEmbeddable({ type, config, timeRange: { from, to }, savedObjectId 
 
   return (
     <div className={embeddableClassName}>
-      <ReactEmbeddableRenderer
+      <EmbeddableRenderer
         type={type}
         getParentApi={() => api}
         maybeId={savedObjectId}

@@ -39,7 +39,17 @@ const OTEL_KUBE_STACK_VERSION = '0.3.9';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
-  const { data, error, refetch } = useKubernetesFlow('kubernetes_otel');
+  const { data, error, refetch } = useKubernetesFlow('kubernetes_otel', {
+    /**
+     * This only needed for stateful deployments
+     * of the stack version >=v8.18.0 <9.0.0.
+     * On those clusters we cannot reference agent version
+     * v8.x because those versions are not GA.
+     * Instead we need to "manually" point to the GA
+     * version, which starts from v9.0.0.
+     */
+    agentVersionPattern: '9.x.x',
+  });
   const [idSelected, setIdSelected] = useState('nodejs');
   const {
     services: { share },
@@ -65,9 +75,14 @@ export const OtelKubernetesPanel: React.FC = () => {
     );
   }
 
-  const otelKubeStackValuesFileUrl = data
-    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack/values.yaml`
-    : '';
+  const agentVersion = data?.elasticAgentVersionInfo.agentTargetVersion ?? '';
+  /**
+   * Extracting the base version in case it has any suffix like `+build12345678`,
+   * as in this flow agent version is used to reference the git tag without any
+   * suffixes.
+   */
+  const agentBaseVersion = agentVersion.split('+')[0];
+  const otelKubeStackValuesFileUrl = `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${agentBaseVersion}/deploy/helm/edot-collector/kube-stack/values.yaml`;
   const namespace = 'opentelemetry-operator-system';
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
   const installStackCommand = data

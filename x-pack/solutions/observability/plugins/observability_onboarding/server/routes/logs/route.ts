@@ -36,6 +36,11 @@ const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
 
 const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'GET /internal/observability_onboarding/logs/setup/environment',
+  params: t.partial({
+    query: t.type({
+      agentVersionPattern: t.string,
+    }),
+  }),
   options: { tags: [] },
   async handler(resources): Promise<{
     apiEndpoint: string;
@@ -48,10 +53,15 @@ const installShipperSetupRoute = createObservabilityOnboardingServerRoute({
       plugins,
       kibanaVersion,
       services: { esLegacyConfigService },
+      params,
     } = resources;
 
     const fleetPluginStart = await plugins.fleet.start();
-    const elasticAgentVersionInfo = await getAgentVersionInfo(fleetPluginStart, kibanaVersion);
+    const elasticAgentVersionInfo = await getAgentVersionInfo(
+      fleetPluginStart,
+      kibanaVersion,
+      params?.query?.agentVersionPattern
+    );
     const kibanaUrl = getKibanaUrl(core.setup, plugins.cloud?.setup);
     const scriptDownloadUrl = new URL(
       core.setup.http.staticAssets.getPluginAssetHref('standalone_agent_setup.sh'),

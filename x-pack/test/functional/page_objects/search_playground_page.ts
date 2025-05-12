@@ -230,6 +230,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
         await testSubjects.click('queryMode');
         await testSubjects.existOrFail('field-baz-false');
+        await testSubjects.click('chatMode');
       },
 
       async clickManageButton() {

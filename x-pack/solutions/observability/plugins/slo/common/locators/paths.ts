@@ -22,7 +22,6 @@ export const paths = {
   slosSettings: `${SLOS_BASE_PATH}${SLO_SETTINGS_PATH}`,
   slosWelcome: `${SLOS_BASE_PATH}${SLOS_WELCOME_PATH}`,
   slosManagement: `${SLOS_BASE_PATH}${SLOS_MANAGEMENT_PATH}`,
-  slosOutdatedDefinitions: `${SLOS_BASE_PATH}${SLOS_OUTDATED_DEFINITIONS_PATH}`,
   sloCreate: `${SLOS_BASE_PATH}${SLO_CREATE_PATH}`,
   sloCreateWithEncodedForm: (encodedParams: string) =>
     `${SLOS_BASE_PATH}${SLO_CREATE_PATH}?_a=${encodedParams}`,
