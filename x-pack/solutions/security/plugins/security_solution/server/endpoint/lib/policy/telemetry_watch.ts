@@ -102,9 +102,10 @@ export class TelemetryConfigWatcher {
           {
             onFailedAttempt: (error) =>
               this.logger.debug(
-                `Failed to read package policies on ${
-                  error.attemptNumber
-                }. attempt on page ${page}, reason: ${stringify(error)}`
+                () =>
+                  `Failed to read package policies on ${
+                    error.attemptNumber
+                  }. attempt on page ${page}, reason: ${stringify(error)}`
               ),
             ...this.retryOptions,
           }
@@ -131,6 +132,8 @@ export class TelemetryConfigWatcher {
       }
 
       if (updates.length) {
+        this.logger.debug(`Updating [${updates.length}] policies`);
+
         try {
           const updateResult = await pRetry(
             () =>

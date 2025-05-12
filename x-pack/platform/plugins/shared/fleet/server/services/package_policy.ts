@@ -931,6 +931,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     options: ListWithKuery & { spaceId?: string }
   ): Promise<ListResult<PackagePolicy>> {
+    const logger = this.getLogger('list');
     const savedObjectType = await getPackagePolicySavedObjectType();
     const isSpacesEnabled = await isSpaceAwarenessEnabled();
     const namespaces = isSpacesEnabled
@@ -944,6 +945,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       kuery,
       fields,
     } = options;
+
+    logger.debug(
+      () =>
+        `Retrieving list of package policies with soClient scoped to [${soClient.getCurrentNamespace()}] and options:${JSON.stringify(
+          options,
+          null,
+          2
+        )}`
+    );
 
     const packagePolicies = await soClient
       .find<PackagePolicySOAttributes>({
@@ -967,7 +977,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       });
     }
 
-    return {
+    const response = {
       items: packagePolicies?.saved_objects.map((so) =>
         mapPackagePolicySavedObjectToPackagePolicy(so)
       ),
@@ -975,6 +985,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       page,
       perPage,
     };
+
+    logger.debug(`Returning [${response.items.length} of ${response.total}] found`);
+
+    return response;
   }
 
   public async listIds(
