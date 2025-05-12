@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public/utils/get_connectors_management_href';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
@@ -46,15 +47,10 @@ export function SettingsTab() {
   const {
     application: { getUrlForApp },
     productDocBase,
+    http,
   } = useKibana().services;
 
   const { config } = useAppContext();
-
-  const getUrlForConnectors = () => {
-    return getUrlForApp('management', {
-      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
-    });
-  };
 
   const getUrlForSpaces = () => {
     return getUrlForApp('management', {
@@ -146,7 +142,7 @@ export function SettingsTab() {
                 iconType="popout"
                 iconSide="right"
                 data-test-subj="settingsTabGoToConnectorsButton"
-                href={getUrlForConnectors()}
+                href={getConnectorsManagementHref(http!)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
