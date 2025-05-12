@@ -246,7 +246,7 @@ const styles = {
   singleColumn: css({
     '&.kbnGrid--mobileView': {
       gridTemplateColumns: '100%',
-      gridTemplateRows: 'auto',
+      gridTemplateRows: 'auto !important',
       gridAutoFlow: 'row',
       gridAutoRows: 'auto',
       '.kbnGridPanel, .kbnGridSectionHeader': {
