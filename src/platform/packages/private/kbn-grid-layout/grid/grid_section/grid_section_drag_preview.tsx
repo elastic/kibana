@@ -33,8 +33,8 @@ export const GridSectionDragPreview = React.memo(() => {
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `1`;
             dragPreviewRef.current.style.gridColumnEnd = `-1`;
-            dragPreviewRef.current.style.gridRowStart = `start-${sectionId}`;
-            dragPreviewRef.current.style.gridRowEnd = `end-${sectionId}`;
+            dragPreviewRef.current.style.gridRowEnd = `start-${sectionId}`;
+            dragPreviewRef.current.style.gridRowStart = `span 1`;
           }
         });
 
@@ -52,7 +52,7 @@ export const GridSectionDragPreview = React.memo(() => {
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
     display: 'none',
-    height: euiTheme.size.xxxl,
+    minHeight: euiTheme.size.xl,
     position: 'relative',
   });
 

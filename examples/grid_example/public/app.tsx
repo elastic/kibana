@@ -314,7 +314,8 @@ const customLayoutStyles = ({ euiTheme }: UseEuiTheme) => {
     // styling for what the grid row header looks like when being dragged
     '.kbnGridSectionHeader--active': {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
-      outline: `1px solid ${euiTheme.border.color}`,
+      outline: `${euiTheme.border.width.thick} solid
+        ${euiTheme.colors.vis.euiColorVis0}`,
       borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
       paddingLeft: '8px',
       // hide accordian arrow + panel count text when row is being dragged
@@ -324,7 +325,7 @@ const customLayoutStyles = ({ euiTheme }: UseEuiTheme) => {
     },
     // styles for the area where the row will be dropped
     '.kbnGridSection--dragPreview': {
-      backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.1),
+      backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.2),
       borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
     },
 
@@ -334,8 +335,16 @@ const customLayoutStyles = ({ euiTheme }: UseEuiTheme) => {
       borderTop: `${euiTheme.border.thin}`,
 
       '&--targeted': {
-        borderTop: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
+        borderTop: `${euiTheme.border.width.thick} solid ${transparentize(
+          euiTheme.colors.vis.euiColorVis0,
+          0.5
+        )}`,
       },
+    },
+
+    // hide border when section is being dragged
+    '&:has(.kbnGridSectionHeader--active) .kbnGridSectionHeader--active + .kbnGridSectionFooter': {
+      borderTop: `none`,
     },
 
     '.kbnGridSection--blocked': {
