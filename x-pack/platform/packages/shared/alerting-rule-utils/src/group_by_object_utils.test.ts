@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getFormattedGroups, unflattenGrouping } from './group_by_object_utils';
+import { getFormattedGroups, unflattenGrouping, getGroupByObject } from './group_by_object_utils';
 
 describe('getFormattedGroups', () => {
   it('should format groupBy correctly for empty input', () => {
@@ -42,6 +42,27 @@ describe('unflattenGrouping', () => {
     expect(unflattenGrouping({ 'host.name': 'host-0', 'container.id': 'container-0' })).toEqual({
       container: { id: 'container-0' },
       host: { name: 'host-0' },
+    });
+  });
+});
+
+describe('getGroupByObject', () => {
+  it('should return an object containing groups for one groupBy field', () => {
+    expect(getGroupByObject('host.name', new Set(['host-0', 'host-1']))).toEqual({
+      'host-0': { host: { name: 'host-0' } },
+      'host-1': { host: { name: 'host-1' } },
+    });
+  });
+
+  it('should return an object containing groups for multiple groupBy fields', () => {
+    expect(
+      getGroupByObject(
+        ['host.name', 'container.id'],
+        new Set(['host-0,container-0', 'host-1,container-1'])
+      )
+    ).toEqual({
+      'host-0,container-0': { container: { id: 'container-0' }, host: { name: 'host-0' } },
+      'host-1,container-1': { container: { id: 'container-1' }, host: { name: 'host-1' } },
     });
   });
 });

@@ -8,6 +8,26 @@
 import { unflattenObject } from '@kbn/object-utils';
 import { Group } from './types';
 
+export const getGroupByObject = (
+  groupBy: string | string[] | undefined,
+  groupValueSet: Set<string>
+): Record<string, unknown> => {
+  const groupKeyValueMappingsObject: Record<string, unknown> = {};
+  if (groupBy) {
+    groupValueSet.forEach((groupValueStr) => {
+      const groupValueArray = groupValueStr.split(',');
+      groupKeyValueMappingsObject[groupValueStr] = unflattenObject(
+        Array.isArray(groupBy)
+          ? groupBy.reduce((result, groupKey, index) => {
+              return { ...result, [groupKey]: groupValueArray[index]?.trim() };
+            }, {})
+          : { [groupBy]: groupValueStr }
+      );
+    });
+  }
+  return groupKeyValueMappingsObject;
+};
+
 export const unflattenGrouping = (
   grouping?: Record<string, string> | undefined
 ): Record<string, any> | undefined => {
