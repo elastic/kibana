@@ -8,81 +8,50 @@
  */
 
 import { omit } from 'lodash';
-import { getSampleLayout } from '../test_utils/sample_layout';
-import { GridLayoutData } from '../types';
-import { deleteRow, movePanelsToSection } from './section_management';
+import { getSampleOrderedLayout } from '../test_utils/sample_layout';
+import { combinePanels, deleteRow } from './section_management';
 
-describe('row management', () => {
-  describe('move panels to row', () => {
-    const checkPanelCountsAfterMove = (
-      originalLayout: GridLayoutData,
-      newLayout: GridLayoutData,
-      startingRow: string,
-      newRow: string
-    ) => {
-      // panels are removed from the starting row
-      expect(newLayout[startingRow].panels).toEqual({});
-      // and added to the new row
-      expect(Object.keys(newLayout[newRow].panels).length).toEqual(
-        Object.keys(originalLayout[newRow].panels).length +
-          Object.keys(originalLayout[startingRow].panels).length
-      );
-    };
-
+describe('section management', () => {
+  describe('combine panels', () => {
     it('move panels from one row to another populated row', () => {
-      const originalLayout = getSampleLayout();
-      const newLayout = movePanelsToSection(originalLayout, 'third', 'first');
-      checkPanelCountsAfterMove(originalLayout, newLayout, 'third', 'first');
+      const originalLayout = getSampleOrderedLayout();
+      const combined = combinePanels(originalLayout.third.panels, originalLayout['main-0'].panels);
+      expect(Object.keys(combined).length).toEqual(
+        Object.keys(originalLayout.third.panels).length +
+          Object.keys(originalLayout['main-0'].panels).length
+      );
 
-      // existing panels in new row do not move
-      Object.values(originalLayout.first.panels).forEach((panel) => {
-        expect(panel).toEqual(newLayout.first.panels[panel.id]); // deep equal
-      });
       // only the new panel's row is different, since no compaction was necessary
-      const newPanel = newLayout.first.panels.panel10;
+      const newPanel = combined.panel10;
       expect(newPanel.row).toBe(14);
       expect(omit(newPanel, 'row')).toEqual(omit(originalLayout.third.panels.panel10, 'row'));
     });
 
     it('move panels from one row to another empty row', () => {
-      const originalLayout = {
-        first: {
-          title: 'Large section',
-          isCollapsed: false,
-          id: 'first',
-          order: 0,
-          panels: {},
-        },
-        second: {
-          title: 'Another section',
-          isCollapsed: false,
-          id: 'second',
-          order: 1,
-          panels: getSampleLayout().first.panels,
-        },
-      };
-      const newLayout = movePanelsToSection(originalLayout, 'second', 'first');
-      checkPanelCountsAfterMove(originalLayout, newLayout, 'second', 'first');
-
+      const originalLayout = getSampleOrderedLayout();
+      const combined = combinePanels({}, originalLayout.second.panels);
+      expect(Object.keys(combined).length).toEqual(
+        Object.keys(originalLayout.second.panels).length
+      );
       // if no panels in new row, then just send all panels to new row with no changes
       Object.values(originalLayout.second.panels).forEach((panel) => {
-        expect(panel).toEqual(newLayout.first.panels[panel.id]); // deep equal
+        expect(panel).toEqual(combined[panel.id]); // deep equal
       });
     });
   });
 
   describe('delete row', () => {
     it('delete existing row', () => {
-      const originalLayout = getSampleLayout();
-      const newLayout = deleteRow(originalLayout, 'first');
+      const originalLayout = getSampleOrderedLayout();
+      const newLayout = deleteRow(originalLayout, 'second');
 
       // modification happens by value and not by reference
-      expect(originalLayout.first).toBeDefined();
-      expect(newLayout.first).not.toBeDefined();
+      expect(originalLayout.second).toBeDefined();
+      expect(newLayout.second).not.toBeDefined();
     });
 
     it('delete non-existant row', () => {
-      const originalLayout = getSampleLayout();
+      const originalLayout = getSampleOrderedLayout();
       expect(() => {
         const newLayout = deleteRow(originalLayout, 'fake');
         expect(newLayout.fake).not.toBeDefined();
