@@ -6,28 +6,58 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiDescribedFormGroup, EuiFormRow, EuiPanel } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiDescribedFormGroup,
+  EuiFormRow,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiTitle,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { UISettings } from './ui_settings';
 import { ProductDocEntry } from './product_doc_entry';
 
+const GoToSpacesButton = ({ getUrlForSpaces }: { getUrlForSpaces: () => string }) => {
+  return (
+    <EuiButton
+      iconType="popout"
+      iconSide="right"
+      data-test-subj="settingsTabGoToSpacesButton"
+      href={getUrlForSpaces()}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {i18n.translate(
+        'xpack.observabilityAiAssistantManagement.settingsPage.goToSpacesButtonLabel',
+        { defaultMessage: 'Go to spaces' }
+      )}
+    </EuiButton>
+  );
+};
+
 export function SettingsTab() {
   const {
-    application: { navigateToApp },
+    application: { getUrlForApp },
     productDocBase,
   } = useKibana().services;
+
   const { config } = useAppContext();
 
-  const handleNavigateToConnectors = () => {
-    navigateToApp('management', {
+  const getUrlForConnectors = () => {
+    return getUrlForApp('management', {
       path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
     });
   };
 
-  const handleNavigateToSpacesConfiguration = () => {
-    navigateToApp('management', {
+  const getUrlForSpaces = () => {
+    return getUrlForApp('management', {
       path: '/kibana/spaces',
     });
   };
@@ -62,15 +92,7 @@ export function SettingsTab() {
           }
         >
           <EuiFormRow fullWidth>
-            <EuiButton
-              data-test-subj="settingsTabGoToSpacesButton"
-              onClick={handleNavigateToSpacesConfiguration}
-            >
-              {i18n.translate(
-                'xpack.observabilityAiAssistantManagement.settingsPage.goToFeatureControlsButtonLabel',
-                { defaultMessage: 'Go to Spaces' }
-              )}
-            </EuiButton>
+            <GoToSpacesButton getUrlForSpaces={getUrlForSpaces} />
           </EuiFormRow>
         </EuiDescribedFormGroup>
       )}
@@ -78,35 +100,63 @@ export function SettingsTab() {
       <EuiDescribedFormGroup
         fullWidth
         title={
-          <h3>
-            {i18n.translate(
-              'xpack.observabilityAiAssistantManagement.settingsPage.connectorSettingsLabel',
-              {
-                defaultMessage: 'Connector settings',
-              }
-            )}
-          </h3>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="sparkles" size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.settingsPage.aiConnectorLabel',
+                    { defaultMessage: 'AI Connector' }
+                  )}
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         }
-        description={i18n.translate(
-          'xpack.observabilityAiAssistantManagement.settingsPage.euiDescribedFormGroup.inOrderToUseLabel',
-          {
-            defaultMessage:
-              'In order to use the AI Assistant you must set up a Generative AI connector.',
-          }
-        )}
+        description={
+          // TODO: update link when the link is ready
+          <p>
+            <FormattedMessage
+              id="xpack.observabilityAiAssistantManagement.settingsPage.aiConnectorDescriptionWithLink"
+              defaultMessage="A large language model (LLM) is required to power the AI Assistant and AI‑driven features in Elastic. This is a space setting and, by default, Elastic uses its Elastic‑managed LLM connector ({link}) when no custom connectors are available. You can always configure and use your own connectors."
+              values={{
+                link: (
+                  <EuiLink href="#" target="_blank">
+                    {i18n.translate(
+                      'xpack.observabilityAiAssistantManagement.settingsPage.additionalCostsLink',
+                      { defaultMessage: 'additional costs incur' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        }
       >
         <EuiFormRow fullWidth>
-          <EuiButton
-            data-test-subj="settingsTabGoToConnectorsButton"
-            onClick={handleNavigateToConnectors}
-          >
-            {i18n.translate(
-              'xpack.observabilityAiAssistantManagement.settingsPage.goToConnectorsButtonLabel',
-              {
-                defaultMessage: 'Manage connectors',
-              }
-            )}
-          </EuiButton>
+          <EuiFlexGroup gutterSize="m" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <GoToSpacesButton getUrlForSpaces={getUrlForSpaces} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="popout"
+                iconSide="right"
+                data-test-subj="settingsTabGoToConnectorsButton"
+                href={getUrlForConnectors()}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.settingsPage.goToConnectorsButtonLabel',
+                  { defaultMessage: 'Manage connectors' }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 

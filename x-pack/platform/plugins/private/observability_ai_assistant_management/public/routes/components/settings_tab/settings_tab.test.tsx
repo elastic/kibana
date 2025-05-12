@@ -15,32 +15,33 @@ jest.mock('../../../hooks/use_app_context');
 
 const useAppContextMock = useAppContext as jest.Mock;
 
+const getUrlForAppMock = jest.fn();
+
 describe('SettingsTab', () => {
   useAppContextMock.mockReturnValue({ config: { spacesEnabled: true, visibilityEnabled: true } });
+
   it('should offer a way to configure Observability AI Assistant visibility in apps', () => {
-    const navigateToAppMock = jest.fn(() => Promise.resolve());
-    const { getByTestId } = render(<SettingsTab />, {
+    const { getAllByTestId } = render(<SettingsTab />, {
       coreStart: {
-        application: { navigateToApp: navigateToAppMock },
+        application: { getUrlForApp: getUrlForAppMock },
       },
     });
 
-    fireEvent.click(getByTestId('settingsTabGoToSpacesButton'));
+    fireEvent.click(getAllByTestId('settingsTabGoToSpacesButton')[0]);
 
-    expect(navigateToAppMock).toBeCalledWith('management', { path: '/kibana/spaces' });
+    expect(getUrlForAppMock).toBeCalledWith('management', { path: '/kibana/spaces' });
   });
 
   it('should offer a way to configure Gen AI connectors', () => {
-    const navigateToAppMock = jest.fn(() => Promise.resolve());
     const { getByTestId } = render(<SettingsTab />, {
       coreStart: {
-        application: { navigateToApp: navigateToAppMock },
+        application: { getUrlForApp: getUrlForAppMock },
       },
     });
 
     fireEvent.click(getByTestId('settingsTabGoToConnectorsButton'));
 
-    expect(navigateToAppMock).toBeCalledWith('management', {
+    expect(getUrlForAppMock).toBeCalledWith('management', {
       path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
     });
   });
