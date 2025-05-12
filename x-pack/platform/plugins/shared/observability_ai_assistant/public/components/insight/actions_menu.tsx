@@ -74,7 +74,6 @@ export function ActionsMenu({
       content: (
         <EuiPanel>
           <ConnectorSelectorBase {...connectors} />
-
           <EuiButtonEmpty flush="left" size="xs" onClick={handleNavigateToConnectors}>
             {i18n.translate(
               'xpack.observabilityAiAssistant.insight.actions.connector.manageConnectors',
