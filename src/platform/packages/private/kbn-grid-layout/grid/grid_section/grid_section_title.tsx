@@ -44,7 +44,7 @@ export const GridSectionTitle = React.memo(
     const inputRef = useRef<HTMLInputElement | null>(null);
     const currentSection = gridLayoutStateManager.gridLayout$.value[sectionId];
     const [sectionTitle, setSectionTitle] = useState<string>(
-      currentSection.isMainSection ? '' : currentSection.title
+      !currentSection || currentSection.isMainSection ? '' : currentSection.title
     );
 
     useEffect(() => {

@@ -22,7 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { GridSectionData } from '../types';
+import { CollapsibleSection, GridSectionData } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { useGridLayoutRowEvents } from '../use_grid_layout_events';
 import { deleteRow } from '../utils/section_management';
@@ -46,10 +46,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     gridLayoutStateManager.accessMode$.getValue() === 'VIEW'
   );
   const [panelCount, setPanelCount] = useState<number>(
-    Object.keys(
-      (gridLayoutStateManager.gridLayout$.getValue()[sectionId] as unknown as GridSectionData)
-        .panels
-    ).length
+    Object.keys(gridLayoutStateManager.gridLayout$.getValue()[sectionId]?.panels ?? {}).length
   );
 
   useEffect(() => {
@@ -183,8 +180,10 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         className={classNames('kbnGridSectionHeader', {
           'kbnGridSectionHeader--active': isActive,
           'kbnGridSectionHeader--collapsed': (
-            gridLayoutStateManager.gridLayout$.getValue()[sectionId] as unknown as GridSectionData
-          ).isCollapsed,
+            gridLayoutStateManager.gridLayout$.getValue()[sectionId] as
+              | CollapsibleSection
+              | undefined
+          )?.isCollapsed,
         })}
         data-test-subj={`kbnGridSectionHeader-${sectionId}`}
         ref={(element: HTMLDivElement | null) => {
