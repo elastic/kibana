@@ -683,12 +683,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       featureUsageService.start(plugins.licensing);
 
-      this.policyWatcher = new PolicyWatcher(
-        plugins.fleet.packagePolicyService,
-        core.savedObjects,
-        core.elasticsearch,
-        logger
-      );
+      this.policyWatcher = new PolicyWatcher(this.endpointAppContextService);
       this.policyWatcher.start(licenseService);
 
       this.telemetryWatcher = new TelemetryConfigWatcher(
