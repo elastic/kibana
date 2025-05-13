@@ -2068,7 +2068,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const numberOfCallbacks = appContextService.getExternalCallbacks(externalCallbackType)?.size;
     let runResult: any;
 
-    logger.debug(`Running ${numberOfCallbacks} external callbacks for ${externalCallbackType}`);
+    logger.debug(`Running [${numberOfCallbacks}] external callbacks for [${externalCallbackType}]`);
 
     try {
       if (externalCallbackType === 'packagePolicyPostDelete') {
@@ -2171,12 +2171,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         }
       }
     } catch (error) {
-      logger.error(`Error running external callbacks for ${externalCallbackType}:`);
+      logger.error(`Error running external callbacks for [${externalCallbackType}]:`);
       logger.error(error);
       throw error;
     }
 
-    logger.debug(`done`);
+    logger.debug(`Running of [${externalCallbackType}] external callbacks done`);
 
     return runResult as unknown as RunExternalCallbacksPackagePolicyResponse<A>;
   }

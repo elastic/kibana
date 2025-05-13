@@ -391,10 +391,13 @@ class AgentPolicyService {
     agentPolicy: NewAgentPolicy | Partial<AgentPolicy> | AgentPolicy
   ): Promise<NewAgentPolicy | Partial<AgentPolicy> | AgentPolicy> {
     const logger = this.getLogger('runExternalCallbacks');
-    logger.debug(`Running external callbacks for ${externalCallbackType}`);
     try {
       const externalCallbacks = appContextService.getExternalCallbacks(externalCallbackType);
       let newAgentPolicy = agentPolicy;
+
+      logger.debug(
+        `Running [${externalCallbacks?.size}] external callbacks for [${externalCallbackType}]`
+      );
 
       if (externalCallbacks && externalCallbacks.size > 0) {
         let updatedNewAgentPolicy = newAgentPolicy;
@@ -423,10 +426,12 @@ class AgentPolicyService {
       }
       return newAgentPolicy;
     } catch (error) {
-      logger.error(`Error running external callbacks for ${externalCallbackType}`);
+      logger.error(`Error running external callbacks for [${externalCallbackType}]`);
       logger.error(error);
       throw error;
     }
+
+    logger.debug(`Running of external callbacks for [${externalCallbackType}] done`);
   }
 
   public async create(

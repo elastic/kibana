@@ -75,7 +75,7 @@ const getEndpointPolicyForAgentPolicy = async (
 
   if (!agentPolicyIntegrations) {
     const fullAgentPolicy = await fleetServices.agentPolicy.get(
-      fleetServices.savedObjects.createInternalScopedSoClient(),
+      fleetServices.savedObjects.createInternalUnscopedSoClient(),
       agentPolicy.id,
       true
     );
