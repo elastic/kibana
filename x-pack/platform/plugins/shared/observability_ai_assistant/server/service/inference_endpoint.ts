@@ -113,7 +113,7 @@ export async function getKbModelStatus({
   const currentInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(() => undefined);
   if (!inferenceId) {
     if (!currentInferenceId) {
-      logger.error('Inference id not provided and not found in write index');
+      logger.debug('Inference id not provided and not found in write index');
       return {
         enabled,
         errorMessage: 'Inference id not found',

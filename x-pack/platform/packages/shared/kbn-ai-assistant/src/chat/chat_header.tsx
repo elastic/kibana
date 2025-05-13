@@ -22,11 +22,13 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { Conversation, ConversationAccess } from '@kbn/observability-ai-assistant-plugin/common';
+import { ElasticLlmTourCallout } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
 import { ChatSharingMenu } from './chat_sharing_menu';
 import { ChatContextMenu } from './chat_context_menu';
+import { hasElasticManagedLlmConnector } from '../utils/has_elastic_managed_llm_connector';
 
 // needed to prevent InlineTextEdit component from expanding container
 const minWidthClassName = css`
@@ -105,6 +107,8 @@ export function ChatHeader({
       );
     }
   };
+
+  const hasElasticLlm = hasElasticManagedLlmConnector(connectors.connectors);
 
   return (
     <EuiPanel
@@ -267,7 +271,13 @@ export function ChatHeader({
               ) : null}
 
               <EuiFlexItem grow={false}>
-                <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                {hasElasticLlm ? (
+                  <ElasticLlmTourCallout>
+                    <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                  </ElasticLlmTourCallout>
+                ) : (
+                  <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
