@@ -273,9 +273,7 @@ export const getPackagePolicyUpdateCallback = (
         endpointIntegrationData,
         (await endpointServices
           .getInternalFleetServices()
-          .packagePolicy.get(soClient, endpointIntegrationData.id as string, {
-            spaceId: '*',
-          })
+          .packagePolicy.get(soClient, endpointIntegrationData.id as string)
           .catch(catchAndWrapError)) as PolicyData,
         featureUsageService
       );

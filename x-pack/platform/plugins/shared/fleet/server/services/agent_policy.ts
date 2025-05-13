@@ -657,10 +657,17 @@ class AgentPolicyService {
       async (agentPolicySO) => {
         if (agentPolicySO.error) {
           if (options.ignoreMissing && agentPolicySO.error.statusCode === 404) {
+            logger.debug(
+              `Agent policy [${agentPolicySO.id}] was not found, but 'options.ignoreMissing' is 'true`
+            );
             return null;
           } else if (agentPolicySO.error.statusCode === 404) {
+            logger.debug(`Agent policy [${agentPolicySO.id}] was not found. Throwing error`);
             throw new AgentPolicyNotFoundError(`Agent policy ${agentPolicySO.id} not found`);
           } else {
+            logger.debug(
+              `Error encountered while bulkGet agent policy [${agentPolicySO.id}]: ${agentPolicySO.error.message}`
+            );
             throw new FleetError(agentPolicySO.error.message);
           }
         }
