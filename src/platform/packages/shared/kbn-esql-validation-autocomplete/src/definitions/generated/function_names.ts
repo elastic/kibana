@@ -104,6 +104,7 @@ export const esqlFunctionNames = [
   'RIGHT',
   'ROUND',
   'RTRIM',
+  'SAMPLE',
   'SHA1',
   'SHA256',
   'SIGNUM',
