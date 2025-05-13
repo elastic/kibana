@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import {
   getEnvironmentLabel,
   ENVIRONMENT_NOT_DEFINED,
@@ -88,6 +88,7 @@ export function EnvironmentSelect({
     [searchValue, start, end, serviceName]
   );
   const terms = data?.terms ?? [];
+  const isInvalid = terms.length === 0 && searchValue !== '';
 
   const options: Array<EuiComboBoxOptionOption<string>> = [
     ...(searchValue === ''
@@ -100,23 +101,32 @@ export function EnvironmentSelect({
   const onSearch = useMemo(() => debounce(setSearchValue, 300), []);
 
   return (
-    <EuiComboBox
-      data-test-subj="environmentFilter"
-      async
-      isClearable={false}
+    <EuiFormRow
+      error={i18n.translate('xpack.apm.filter.environment.error', {
+        defaultMessage: '{value} is not a valid environment',
+        values: { value: searchValue },
+      })}
       style={{ minWidth: '256px' }}
-      placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {
-        defaultMessage: 'Select environment',
-      })}
-      prepend={i18n.translate('xpack.apm.filter.environment.label', {
-        defaultMessage: 'Environment',
-      })}
-      singleSelection={{ asPlainText: true }}
-      options={options}
-      selectedOptions={selectedOptions}
-      onChange={(changedOptions) => onSelect(changedOptions)}
-      onSearchChange={onSearch}
-      isLoading={status === FETCH_STATUS.LOADING || searchStatus === FETCH_STATUS.LOADING}
-    />
+      isInvalid={isInvalid}
+    >
+      <EuiComboBox
+        data-test-subj="environmentFilter"
+        async
+        isClearable={false}
+        isInvalid={isInvalid}
+        placeholder={i18n.translate('xpack.apm.filter.environment.placeholder', {
+          defaultMessage: 'Select environment',
+        })}
+        prepend={i18n.translate('xpack.apm.filter.environment.label', {
+          defaultMessage: 'Environment',
+        })}
+        singleSelection={{ asPlainText: true }}
+        options={options}
+        selectedOptions={selectedOptions}
+        onChange={(changedOptions) => onSelect(changedOptions)}
+        onSearchChange={onSearch}
+        isLoading={status === FETCH_STATUS.LOADING || searchStatus === FETCH_STATUS.LOADING}
+      />
+    </EuiFormRow>
   );
 }

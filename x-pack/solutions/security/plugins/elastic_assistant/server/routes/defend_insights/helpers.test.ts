@@ -129,6 +129,7 @@ describe('defend insights route helpers', () => {
         rawDefendInsights: '{"eventsContextCount": 5, "insights": ["insight1", "insight2"]}',
         startTime: moment(),
         telemetry: { reportEvent: jest.fn() } as any,
+        insightType: DefendInsightType.Enum.incompatible_antivirus,
       };
       await updateDefendInsights(params);
 

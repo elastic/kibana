@@ -54,6 +54,7 @@ exports[`Table Helpers OverflowField it returns correctly against snapshot 1`] =
   <EuiToolTip
     content="This string is exactly fifty-one chars in length!!!"
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >

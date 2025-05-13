@@ -47,6 +47,12 @@ const pages = {
       privateOption: 'observabilityAiAssistantChatPrivateOption',
       loadingBadge: 'observabilityAiAssistantChatAccessLoadingBadge',
     },
+    contextMenu: {
+      button: 'observabilityAiAssistantChatContextMenuButtonIcon',
+      archiveOption: 'observabilityAiAssistantContextMenuArchive',
+      unarchiveOption: 'observabilityAiAssistantContextMenuUnarchive',
+    },
+    archivedBadge: 'observabilityAiAssistantArchivedBadge',
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',
@@ -81,7 +87,6 @@ const pages = {
 
 export async function ObservabilityAIAssistantUIProvider({
   getPageObjects,
-  getService,
 }: InheritedFtrProviderContext): Promise<ObservabilityAIAssistantUIService> {
   const pageObjects = getPageObjects(['common', 'security']);
 

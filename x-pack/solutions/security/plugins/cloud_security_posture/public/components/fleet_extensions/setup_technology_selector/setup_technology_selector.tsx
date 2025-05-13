@@ -26,10 +26,12 @@ export const SetupTechnologySelector = ({
   disabled,
   setupTechnology,
   onSetupTechnologyChange,
+  showLimitationsMessage = true,
 }: {
   disabled: boolean;
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
+  showLimitationsMessage?: boolean;
 }) => {
   const radioGroupItemId1 = useGeneratedHtmlId({
     prefix: 'radioGroupItem',
@@ -127,7 +129,9 @@ export const SetupTechnologySelector = ({
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiCallOut title={limitationsMessage} color="warning" iconType="alert" size="m" />
+      {showLimitationsMessage && (
+        <EuiCallOut title={limitationsMessage} color="warning" iconType="alert" size="m" />
+      )}
       <EuiSpacer size="m" />
       <EuiRadioGroup
         disabled={disabled}

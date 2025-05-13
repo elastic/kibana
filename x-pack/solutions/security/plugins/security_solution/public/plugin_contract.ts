@@ -57,7 +57,6 @@ export class PluginContract {
         updateNavLinks(isSolutionNavigationEnabled, core);
       },
       setOnboardingSettings: this.onboardingService.setSettings.bind(this.onboardingService),
-      getSolutionNavigation: () => lazySolutionNavigation(core),
     };
   }
 
@@ -80,11 +79,4 @@ const lazyResolver = async () => {
     './resolver'
   );
   return resolverPluginSetup();
-};
-const lazySolutionNavigation = async (core: CoreStart) => {
-  const { getSolutionNavigation } = await import(
-    /* webpackChunkName: "solution_navigation" */
-    './app/solution_navigation'
-  );
-  return getSolutionNavigation(core);
 };

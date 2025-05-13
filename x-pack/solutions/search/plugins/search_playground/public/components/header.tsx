@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiBetaBadge,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiPageHeaderSection,
@@ -95,14 +94,6 @@ export const Header: React.FC<HeaderProps> = ({
               onChange={(e) => onSelectPageModeChange(e.target.value as PlaygroundPageMode)}
             />
           )}
-
-          <EuiBetaBadge
-            label={i18n.translate('xpack.searchPlayground.pageTitle.techPreview', {
-              defaultMessage: 'TECH PREVIEW',
-            })}
-            color="hollow"
-            alignment="middle"
-          />
         </EuiFlexGroup>
       </EuiPageHeaderSection>
       <EuiPageHeaderSection>

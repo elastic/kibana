@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useGridLayoutPanelEvents } from './panel_events';
-export { useGridLayoutRowEvents } from './row_events';
+export { useGridLayoutPanelEvents } from './panel/events';
+export { useGridLayoutRowEvents } from './row/events';

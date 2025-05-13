@@ -3,6 +3,7 @@
 exports[`Summary Search Client returns the summary documents without duplicate temporary summary documents 1`] = `
 Array [
   Object {
+    "conflicts": "proceed",
     "index": ".slo-observability.summary-v3*",
     "query": Object {
       "bool": Object {
@@ -25,6 +26,7 @@ Array [
         ],
       },
     },
+    "slices": "auto",
     "wait_for_completion": false,
   },
 ]

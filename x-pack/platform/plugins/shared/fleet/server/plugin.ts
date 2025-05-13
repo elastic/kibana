@@ -150,7 +150,7 @@ import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_ag
 import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deployment';
 import { SyncIntegrationsTask } from './tasks/sync_integrations/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
-import { registerBulkUpgradePackagesTask } from './tasks/bulk_upgrade_packages_task';
+import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operations';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -640,7 +640,7 @@ export class FleetPlugin
     registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
     registerDeployAgentPoliciesTask(deps.taskManager);
     registerBumpAgentPoliciesTask(deps.taskManager);
-    registerBulkUpgradePackagesTask(deps.taskManager);
+    registerPackagesBulkOperationTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
     this.checkDeletedFilesTask = new CheckDeletedFilesTask({

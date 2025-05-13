@@ -6,6 +6,7 @@
  */
 import type { CoreStart } from '@kbn/core/public';
 
+import { configurationsLinks } from './configurations/links';
 import { links as attackDiscoveryLinks } from './attack_discovery/links';
 import { links as assetInventoryLinks } from './asset_inventory/links';
 import type { AppLinkItems } from './common/links/types';
@@ -20,6 +21,7 @@ import { onboardingLinks } from './onboarding/links';
 import { findingsLinks } from './cloud_security_posture/links';
 import type { StartPlugins } from './types';
 import { dashboardsLinks } from './dashboards/links';
+import { entityAnalyticsLinks } from './entity_analytics/links';
 
 // TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
 export { solutionAppLinksSwitcher } from './app/solution_navigation/links/app_links';
@@ -31,9 +33,11 @@ export const appLinks: AppLinkItems = Object.freeze([
   attackDiscoveryLinks,
   findingsLinks,
   casesLinks,
+  configurationsLinks,
   timelinesLinks,
   indicatorsLinks,
   exploreLinks,
+  entityAnalyticsLinks,
   assetInventoryLinks,
   rulesLinks,
   onboardingLinks,
@@ -53,9 +57,11 @@ export const getFilteredLinks = async (
     attackDiscoveryLinks,
     findingsLinks,
     casesLinks,
+    configurationsLinks,
     timelinesLinks,
     indicatorsLinks,
     exploreLinks,
+    entityAnalyticsLinks,
     assetInventoryLinks,
     rulesLinks,
     onboardingLinks,

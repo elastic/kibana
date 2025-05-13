@@ -105,7 +105,7 @@ function startEluMeasurement<T>(
           active
         )}ms out of ${Math.round(duration)}ms) and ${eluThreshold * 100}% (${Math.round(
           utilization * 100
-        )}%) `,
+        )}%). Run \`node scripts/profile.js\` to find out why.`,
         {
           labels: {
             request_path: path,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
@@ -43,24 +43,23 @@ import {
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
 } from '../../common/endpoint/models/policy_config_helpers';
-import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
+import type { NewPolicyData, PolicyConfig, PolicyData } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
 import type { IRequestContextFactory } from '../request_context_factory';
-import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
+import { installEndpointSecurityPrebuiltRule } from '../lib/detection_engine/prebuilt_rules/logic/rules_package/install_endpoint_security_prebuilt_rule';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
 import { validateIntegrationConfig } from './handlers/validate_integration_config';
 import { removePolicyFromArtifacts } from './handlers/remove_policy_from_artifacts';
-import type { FeatureUsageService } from '../endpoint/services/feature_usage/service';
-import type { EndpointMetadataService } from '../endpoint/services/metadata';
 import { notifyProtectionFeatureUsage } from './notify_protection_feature_usage';
 import type { AnyPolicyCreateConfig } from './types';
 import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
 import { createEventFilters } from './handlers/create_event_filters';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import { removeProtectionUpdatesNote } from './handlers/remove_protection_updates_note';
+import { catchAndWrapError } from '../endpoint/utils';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -122,7 +121,6 @@ export const getPackagePolicyCreateCallback = (
   securitySolutionRequestContextFactory: IRequestContextFactory,
   alerts: AlertingServerStart,
   licenseService: LicenseService,
-  exceptionsClient: ExceptionListClient | undefined,
   cloud: CloudSetup,
   productFeatures: ProductFeaturesService,
   telemetryConfigProvider: TelemetryConfigProvider
@@ -144,6 +142,11 @@ export const getPackagePolicyCreateCallback = (
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
     }
+
+    logger.debug(
+      () =>
+        `Checking endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
+    );
 
     if (newPackagePolicy?.inputs) {
       validatePolicyAgainstProductFeatures(newPackagePolicy.inputs, productFeatures);
@@ -176,15 +179,13 @@ export const getPackagePolicyCreateCallback = (
 
     // perform these operations in parallel in order to help in not delaying the API response too much
     const [, manifestValue] = await Promise.all([
-      // Install Detection Engine prepackaged rules
-      exceptionsClient &&
-        installPrepackagedRules({
-          logger,
-          context: securitySolutionContext,
-          request,
-          alerts,
-          exceptionsClient,
-        }),
+      installEndpointSecurityPrebuiltRule({
+        logger,
+        context: securitySolutionContext,
+        request,
+        alerts,
+        soClient,
+      }),
 
       // create the Artifact Manifest for this policy
       createPolicyArtifactManifest(logger, manifestManager),
@@ -229,18 +230,27 @@ export const getPackagePolicyCreateCallback = (
 };
 
 export const getPackagePolicyUpdateCallback = (
-  logger: Logger,
-  licenseService: LicenseService,
-  featureUsageService: FeatureUsageService,
-  endpointMetadataService: EndpointMetadataService,
+  endpointServices: EndpointAppContextService,
   cloud: CloudSetup,
-  esClient: ElasticsearchClient,
   productFeatures: ProductFeaturesService
 ): PutPackagePolicyUpdateCallback => {
-  return async (newPackagePolicy: NewPackagePolicy): Promise<UpdatePackagePolicy> => {
+  const logger = endpointServices.createLogger('endpointPackagePolicyUpdateCallback');
+  const licenseService = endpointServices.getLicenseService();
+  const featureUsageService = endpointServices.getFeatureUsageService();
+
+  return async (
+    newPackagePolicy: NewPackagePolicy,
+    soClient,
+    esClient
+  ): Promise<UpdatePackagePolicy> => {
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
     }
+
+    logger.debug(
+      () =>
+        `Checking endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
+    );
 
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
 
@@ -258,11 +268,16 @@ export const getPackagePolicyUpdateCallback = (
 
     validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
-    await notifyProtectionFeatureUsage(
-      endpointIntegrationData,
-      featureUsageService,
-      endpointMetadataService
-    );
+    if (endpointIntegrationData.id) {
+      await notifyProtectionFeatureUsage(
+        endpointIntegrationData,
+        (await endpointServices
+          .getInternalFleetServices()
+          .packagePolicy.get(soClient, endpointIntegrationData.id as string)
+          .catch(catchAndWrapError)) as PolicyData,
+        featureUsageService
+      );
+    }
 
     const newEndpointPackagePolicy = endpointIntegrationData.inputs[0].config?.policy
       ?.value as PolicyConfig;

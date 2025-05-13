@@ -129,6 +129,9 @@ export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
   `/entity_analytics_asset_criticality` as const;
 export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
   `/entity_analytics_entity_store` as const;
+export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
+export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
+  '/entity_analytics_privileged_user_monitoring' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
@@ -143,6 +146,9 @@ export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
+
+// AI SOC exclusive paths
+export const CONFIGURATIONS_PATH = '/configurations' as const;
 
 // cloud logs to exclude from default index pattern
 export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];

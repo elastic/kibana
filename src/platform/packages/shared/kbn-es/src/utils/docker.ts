@@ -63,12 +63,12 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
-export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security']);
+export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security', 'chat']);
 export const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
   return serverlessProjectTypes.has(value);
 };
 
-export type ServerlessProjectType = 'es' | 'oblt' | 'security';
+export type ServerlessProjectType = 'es' | 'oblt' | 'security' | 'chat';
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;

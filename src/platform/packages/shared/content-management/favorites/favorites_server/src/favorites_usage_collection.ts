@@ -115,11 +115,12 @@ export function registerFavoritesUsageCollection({
           []) as estypes.AggregationsStringTermsBucket[];
 
         typesBuckets.forEach((bucket) => {
-          favoritesUsage[bucket.key] = {
-            total: bucket.stats.sum,
-            total_users_spaces: bucket.stats.count,
-            avg_per_user_per_space: bucket.stats.avg,
-            max_per_user_per_space: bucket.stats.max,
+          const stats = bucket.stats as estypes.AggregationsStatsAggregate;
+          favoritesUsage[`${bucket.key}`] = {
+            total: stats.sum,
+            total_users_spaces: stats.count,
+            avg_per_user_per_space: stats.avg!,
+            max_per_user_per_space: stats.max!,
           };
         });
 

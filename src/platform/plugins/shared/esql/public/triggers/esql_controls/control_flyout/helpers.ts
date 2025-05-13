@@ -7,12 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { monaco } from '@kbn/monaco';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
 import { timeUnits } from '@kbn/esql-validation-autocomplete';
+import { VariableNamePrefix } from '../types';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
   return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
 }
+
+const getQueryPart = (queryString: string, cursorColumn: number, variable: string) => {
+  const queryStringTillCursor = queryString.slice(0, cursorColumn);
+  const lastChar = queryStringTillCursor.slice(-1);
+  const secondLastChar = queryStringTillCursor.slice(-2, -1);
+
+  if (lastChar === '?') {
+    return [
+      queryString.slice(0, cursorColumn - 2),
+      variable,
+      queryString.slice(cursorColumn - 1),
+    ].join('');
+  } else if (secondLastChar === '?') {
+    return [
+      queryString.slice(0, cursorColumn - 2),
+      variable,
+      queryString.slice(cursorColumn - 1),
+    ].join('');
+  }
+
+  return [
+    queryString.slice(0, cursorColumn - 1),
+    variable,
+    queryString.slice(cursorColumn - 1),
+  ].join('');
+};
 
 export const updateQueryStringWithVariable = (
   queryString: string,
@@ -26,20 +53,13 @@ export const updateQueryStringWithVariable = (
   if (lines.length > 1) {
     const queryArray = queryString.split('\n');
     const queryPartToBeUpdated = queryArray[cursorLine - 1];
-    const queryWithVariable = [
-      queryPartToBeUpdated.slice(0, cursorColumn - 1),
-      variable,
-      queryPartToBeUpdated.slice(cursorColumn - 1),
-    ].join('');
+
+    const queryWithVariable = getQueryPart(queryPartToBeUpdated, cursorColumn, variable);
     queryArray[cursorLine - 1] = queryWithVariable;
     return queryArray.join('\n');
   }
 
-  return [
-    queryString.slice(0, cursorColumn - 1),
-    variable,
-    queryString.slice(cursorColumn - 1),
-  ].join('');
+  return [getQueryPart(queryString, cursorColumn, variable)].join('');
 };
 
 export const getQueryForFields = (queryString: string, cursorPosition?: monaco.Position) => {
@@ -65,7 +85,7 @@ export const areValuesIntervalsValid = (values: string[]) => {
   });
 };
 
-export const getVariablePrefix = (variableType: ESQLVariableType) => {
+export const getVariableSuggestion = (variableType: ESQLVariableType) => {
   switch (variableType) {
     case ESQLVariableType.FIELDS:
       return 'field';
@@ -146,4 +166,42 @@ export const getVariableTypeFromQuery = (str: string, variableType: ESQLVariable
   }
 
   return variableType;
+};
+
+export const getVariableNamePrefix = (type: ESQLVariableType) => {
+  switch (type) {
+    case ESQLVariableType.FIELDS:
+    case ESQLVariableType.FUNCTIONS:
+      return VariableNamePrefix.IDENTIFIER;
+    case ESQLVariableType.VALUES:
+    case ESQLVariableType.TIME_LITERAL:
+    default:
+      return VariableNamePrefix.VALUE;
+  }
+};
+
+export const checkVariableExistence = (
+  esqlVariables: ESQLControlVariable[],
+  variableName: string
+): boolean => {
+  const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
+  const match = variableName.match(/^(\?*)/);
+  const leadingQuestionMarksCount = match ? match[0].length : 0;
+
+  return esqlVariables.some((variable) => {
+    const prefix = getVariableNamePrefix(variable.type);
+    if (leadingQuestionMarksCount === 2) {
+      if (prefix === VariableNamePrefix.IDENTIFIER) {
+        return variable.key === variableNameWithoutQuestionmark;
+      }
+      return false;
+    }
+    if (leadingQuestionMarksCount === 1) {
+      if (prefix === VariableNamePrefix.VALUE) {
+        return variable.key === variableNameWithoutQuestionmark;
+      }
+      return false;
+    }
+    return false;
+  });
 };

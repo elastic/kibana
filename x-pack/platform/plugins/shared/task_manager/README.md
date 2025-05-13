@@ -2,9 +2,10 @@
 
 The task manager is a generic system for running background tasks.
 
-Documentation: https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
+[Documentation](https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management)
 
 It supports:
+
 - Single-run and recurring tasks
 - Scheduling tasks to run after a specified datetime
 - Basic retry logic

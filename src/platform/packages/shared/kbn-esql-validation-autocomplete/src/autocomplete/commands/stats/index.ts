@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLFunction } from '@kbn/esql-ast';
+import { isSingleItem } from '../../../..';
 import { CommandSuggestParams, Location } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import {
@@ -16,8 +18,14 @@ import {
   getControlSuggestionIfSupported,
 } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { pushItUpInTheList } from '../../helper';
-import { byCompleteItem, getDateHistogramCompletionItem, getPosition } from './util';
+import { isExpressionComplete, pushItUpInTheList, suggestForExpression } from '../../helper';
+import {
+  byCompleteItem,
+  getDateHistogramCompletionItem,
+  getPosition,
+  whereCompleteItem,
+} from './util';
+import { isMarkerNode } from '../../../shared/context';
 
 export async function suggest({
   innerText,
@@ -27,6 +35,7 @@ export async function suggest({
   getPreferences,
   getVariables,
   supportsControls,
+  getExpressionType,
 }: CommandSuggestParams<'stats'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
 
@@ -53,10 +62,37 @@ export async function suggest({
 
     case 'expression_complete':
       return [
+        whereCompleteItem,
         byCompleteItem,
         pipeCompleteItem,
         { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND, text: ', ' },
       ];
+
+    case 'after_where':
+      const whereFn = command.args[command.args.length - 1] as ESQLFunction;
+      const expressionRoot = isMarkerNode(whereFn.args[1]) ? undefined : whereFn.args[1]!;
+
+      if (expressionRoot && !isSingleItem(expressionRoot)) {
+        return [];
+      }
+
+      const suggestions = await suggestForExpression({
+        expressionRoot,
+        getExpressionType,
+        getColumnsByType,
+        location: Location.STATS_WHERE,
+        innerText,
+        preferredExpressionType: 'boolean',
+      });
+
+      // Is this a complete boolean expression?
+      // If so, we can call it done and suggest a pipe
+      const expressionType = getExpressionType(expressionRoot);
+      if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
+        suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' }, byCompleteItem);
+      }
+
+      return suggestions;
 
     case 'grouping_expression_after_assignment':
       return [

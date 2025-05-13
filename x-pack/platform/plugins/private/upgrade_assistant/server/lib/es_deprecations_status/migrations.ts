@@ -22,7 +22,6 @@ import {
   isFrozenDeprecation,
 } from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
-import { ENT_SEARCH_DATASTREAM_PREFIXES, ENT_SEARCH_INDEX_PREFIX } from '../enterprise_search';
 
 /**
  * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
@@ -195,17 +194,12 @@ const excludeDeprecation = (
   deprecation: BaseDeprecation,
   correctiveAction?: CorrectiveAction
 ): boolean => {
-  if (
-    deprecation.type === 'index_settings' &&
-    correctiveAction?.type === 'reindex' &&
-    deprecation.index?.startsWith(ENT_SEARCH_INDEX_PREFIX)
-  ) {
+  if (deprecation.type === 'index_settings' && correctiveAction?.type === 'reindex') {
     return true;
   } else if (
     deprecation.type === 'data_streams' &&
     correctiveAction?.type === 'dataStream' &&
-    correctiveAction.metadata.reindexRequired &&
-    ENT_SEARCH_DATASTREAM_PREFIXES.some((prefix) => deprecation.index?.startsWith(prefix))
+    correctiveAction.metadata.reindexRequired
   ) {
     return true;
   } else if (

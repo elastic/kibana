@@ -21,6 +21,12 @@ import { createTelemetryServiceMock } from '../../../common/lib/telemetry/teleme
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
 import { getQuery, groupingSearchResponse } from './grouping_settings/mock';
 import { AlertsEventTypes } from '../../../common/lib/telemetry';
+import {
+  defaultGroupingOptions,
+  defaultGroupStatsAggregations,
+  defaultGroupStatsRenderer,
+  defaultGroupTitleRenderers,
+} from './grouping_settings';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
 jest.mock('../../../sourcerer/containers');
@@ -45,10 +51,10 @@ jest.mock('../../../common/containers/use_global_time', () => {
 });
 
 const mockOptions = [
-  { label: 'ruleName', key: 'kibana.alert.rule.name' },
-  { label: 'userName', key: 'user.name' },
-  { label: 'hostName', key: 'host.name' },
-  { label: 'sourceIP', key: 'source.ip' },
+  { label: 'Rule name', key: 'kibana.alert.rule.name' },
+  { label: 'User name', key: 'user.name' },
+  { label: 'Host name', key: 'host.name' },
+  { label: 'Source IP', key: 'source.ip' },
 ];
 
 jest.mock('../../../common/utils/alerts', () => {
@@ -113,7 +119,13 @@ const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="a
 
 const testProps: AlertsTableComponentProps = {
   ...mockDate,
+  accordionButtonContent: defaultGroupTitleRenderers,
+  accordionExtraActionGroupStats: {
+    aggregations: defaultGroupStatsAggregations,
+    renderer: defaultGroupStatsRenderer,
+  },
   defaultFilters: [],
+  defaultGroupingOptions,
   globalFilters: [],
   globalQuery: {
     query: 'query',
@@ -191,6 +203,7 @@ describe('GroupedAlertsTable', () => {
     });
     expect(mockDispatch.mock.calls[1][0].payload).toEqual({
       activeGroups: ['none'],
+      options: mockOptions,
       tableId: testProps.tableId,
     });
   });

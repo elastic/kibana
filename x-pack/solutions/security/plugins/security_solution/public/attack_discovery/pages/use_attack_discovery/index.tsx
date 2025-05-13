@@ -12,7 +12,11 @@ import type {
   GenerationInterval,
   AttackDiscoveryStats,
 } from '@kbn/elastic-assistant-common';
-import { AttackDiscoveryPostResponse, API_VERSIONS } from '@kbn/elastic-assistant-common';
+import {
+  AttackDiscoveryPostResponse,
+  API_VERSIONS,
+  ATTACK_DISCOVERY,
+} from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
@@ -188,7 +192,7 @@ export const useAttackDiscovery = ({
         setApproximateFutureTime(null);
 
         // call the internal API to generate attack discoveries:
-        const rawResponse = await http.post('/internal/elastic_assistant/attack_discovery', {
+        const rawResponse = await http.post(ATTACK_DISCOVERY, {
           body: JSON.stringify(bodyWithOverrides),
           version: API_VERSIONS.internal.v1,
         });

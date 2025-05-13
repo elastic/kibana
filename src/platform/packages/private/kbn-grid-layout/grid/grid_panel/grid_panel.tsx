@@ -47,6 +47,11 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
       grid-row-start: ${initialPanel.row + 1};
       grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
+      .kbnGridPanel--dragHandle,
+      .kbnGridPanel--resizeHandle {
+        touch-action: none; // prevent scrolling on touch devices
+        scroll-margin-top: ${gridLayoutStateManager.runtimeSettings$.value.keyboardDragTopLimit}px;
+      }
     `;
   }, [gridLayoutStateManager, rowId, panelId]);
 

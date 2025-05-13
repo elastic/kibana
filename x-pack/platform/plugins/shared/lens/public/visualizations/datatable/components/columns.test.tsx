@@ -32,6 +32,12 @@ const table: Datatable = {
   ],
   rows: [{ a: 123 }],
 };
+
+const emptyTable: Datatable = {
+  type: 'datatable',
+  columns: [],
+  rows: [],
+};
 const visibleColumns = ['a'];
 const cellValueAction: LensCellValueAction = {
   displayName: 'Test',
@@ -168,6 +174,13 @@ describe('getContentData', () => {
       });
       renderCellAction(cellActions, 2);
       expect(screen.getByRole('button')).toHaveTextContent('Test');
+    });
+
+    it('should not fail for a table with empty data', () => {
+      const columns = callCreateGridColumns({
+        table: emptyTable,
+      });
+      expect(columns).toHaveLength(0);
     });
   });
 });

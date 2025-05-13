@@ -18,7 +18,7 @@ import {
   createInternalStateStore,
   createRuntimeStateManager,
 } from '../application/main/state_management/redux';
-import type { HistoryLocationState } from '../build_services';
+import type { DiscoverServices, HistoryLocationState } from '../build_services';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
@@ -31,6 +31,7 @@ export function getDiscoverStateMock({
   runtimeStateManager,
   history,
   customizationContext = mockCustomizationContext,
+  services: originalServices = discoverServiceMock,
 }: {
   isTimeBased?: boolean;
   savedSearch?: SavedSearch | false;
@@ -38,12 +39,13 @@ export function getDiscoverStateMock({
   stateStorageContainer?: IKbnUrlStateStorage;
   history?: History<HistoryLocationState>;
   customizationContext?: DiscoverCustomizationContext;
+  services?: DiscoverServices;
 }) {
   if (!history) {
     history = createBrowserHistory<HistoryLocationState>();
     history.push('/');
   }
-  const services = { ...discoverServiceMock, history };
+  const services = { ...originalServices, history };
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
   stateStorageContainer =
@@ -55,16 +57,18 @@ export function getDiscoverStateMock({
       ...(toasts && withNotifyOnErrors(toasts)),
     });
   runtimeStateManager = runtimeStateManager ?? createRuntimeStateManager();
+  const internalState = createInternalStateStore({
+    services,
+    customizationContext,
+    runtimeStateManager,
+    urlStateStorage: stateStorageContainer,
+  });
   const container = getDiscoverStateContainer({
+    tabId: internalState.getState().tabs.unsafeCurrentId,
     services,
     customizationContext,
     stateStorageContainer,
-    internalState: createInternalStateStore({
-      services,
-      customizationContext,
-      runtimeStateManager,
-      urlStateStorage: stateStorageContainer,
-    }),
+    internalState,
     runtimeStateManager,
   });
   if (savedSearch !== false) {

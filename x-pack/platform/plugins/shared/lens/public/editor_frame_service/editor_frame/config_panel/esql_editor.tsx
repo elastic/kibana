@@ -16,6 +16,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { BehaviorSubject } from 'rxjs';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import type { Simplify } from '../../../types';
@@ -106,7 +107,9 @@ export function ESQLEditor({
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
 
   const esqlVariables = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.esqlVariables$ : undefined
+    isApiESQLVariablesCompatible(parentApi)
+      ? parentApi?.esqlVariables$
+      : new BehaviorSubject(undefined)
   );
 
   const dispatch = useLensDispatch();

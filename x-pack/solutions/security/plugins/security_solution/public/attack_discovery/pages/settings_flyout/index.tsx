@@ -17,9 +17,14 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
+  DEFAULT_END,
+  DEFAULT_START,
+} from '@kbn/elastic-assistant-common';
 import type { Filter, Query } from '@kbn/es-query';
 
+import { useKibana } from '../../../common/lib/kibana';
 import { Footer } from './footer';
 import * as i18n from './translations';
 import { useSettingsView } from './hooks/use_settings_view';
@@ -28,7 +33,6 @@ import type { AlertsSelectionSettings } from './types';
 import { MIN_FLYOUT_WIDTH } from './constants';
 import { getMaxAlerts } from './alert_selection/helpers/get_max_alerts';
 import { getDefaultQuery } from '../helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export const DEFAULT_STACK_BY_FIELD = 'kibana.alert.rule.name';
 
@@ -59,12 +63,17 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
   setStart,
   start,
 }) => {
+  const {
+    services: { featureFlags },
+  } = useKibana();
+
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'attackDiscoverySettingsFlyoutTitle',
   });
 
-  const isAttackDiscoverySchedulingEnabled = useIsExperimentalFeatureEnabled(
-    'assistantAttackDiscoverySchedulingEnabled'
+  const isAttackDiscoverySchedulingEnabled = featureFlags.getBooleanValue(
+    ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
+    false
   );
 
   const [settings, setSettings] = useState<AlertsSelectionSettings>({

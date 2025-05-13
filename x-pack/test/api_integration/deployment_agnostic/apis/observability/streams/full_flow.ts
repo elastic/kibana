@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IngestStreamUpsertRequest } from '@kbn/streams-schema';
+import { IngestStreamUpsertRequest, WiredStreamDefinition } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -17,6 +17,7 @@ import {
   enableStreams,
   fetchDocument,
   forkStream,
+  getStream,
   indexAndAssertTargetStream,
   indexDocument,
   putStream,
@@ -359,6 +360,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should allow to update field type to incompatible type', async () => {
         const body: IngestStreamUpsertRequest = {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               lifecycle: { inherit: {} },
@@ -401,6 +403,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should not allow to update field type to system', async () => {
         const body: IngestStreamUpsertRequest = {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               lifecycle: { inherit: {} },
@@ -437,6 +440,43 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dataStreams.data_streams.map((stream) => [stream.name, stream.indices.length])
         );
         expect(actualIndexCounts).to.eql(expectedIndexCounts);
+      });
+
+      it('removes routing from parent when child is deleted', async () => {
+        const deleteResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: 'logs.nginx.access',
+            },
+          },
+        });
+        expect(deleteResponse.status).to.eql(200);
+
+        const streamResponse = await getStream(apiClient, 'logs.nginx');
+        expect((streamResponse.stream as WiredStreamDefinition).ingest.wired.routing).to.eql([
+          {
+            destination: 'logs.nginx.error',
+            if: {
+              field: 'log',
+              operator: 'eq',
+              value: 'error',
+            },
+          },
+        ]);
+      });
+
+      it('deletes children when parent is deleted', async () => {
+        const deleteResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: 'logs.nginx',
+            },
+          },
+        });
+        expect(deleteResponse.status).to.eql(200);
+
+        await getStream(apiClient, 'logs.nginx', 404);
+        await getStream(apiClient, 'logs.nginx.error', 404);
       });
     });
   });

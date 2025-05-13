@@ -42,7 +42,9 @@ export default function (ftrContext: FtrProviderContext) {
     });
   };
 
-  describe('changes in license types', () => {
+  describe('changes in license types', function () {
+    this.tags('skipFIPS');
+
     before(async function setup() {
       await scenario.setup();
     });

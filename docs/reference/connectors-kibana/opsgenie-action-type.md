@@ -16,10 +16,8 @@ To create this connector, you must have a valid {{opsgenie}} URL and API key. Fo
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../images/opsgenie-connector.png
-:alt: Opsgenie connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Opsgenie connector](../images/opsgenie-connector.png)
 
 
 ### Connector configuration [opsgenie-connector-configuration]
@@ -53,10 +51,8 @@ After you create a connector, use the **Test** tab to test its actions:
 
 When you create a rule that uses an {{opsgenie}} connector, its actions (with the exception of recovery actions) create {{opsgenie}} alerts. You can test this type of action when you create or edit your connector:
 
-:::{image} ../images/opsgenie-create-alert-test.png
-:alt: {{opsgenie}} create alert action test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![{{opsgenie}} create alert action test](../images/opsgenie-create-alert-test.png)
 
 You can configure the create alert action through the form view or using a JSON editor.
 
@@ -146,10 +142,8 @@ Example JSON editor contents
 
 When you create a rule that uses an {{opsgenie}} connector, its recovery actions close {{opsgenie}} alerts. You can test this type of action when you create or edit your connector:
 
-:::{image} ../images/opsgenie-close-alert-test.png
-:alt: {{opsgenie}} close alert action test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![{{opsgenie}} close alert action test](../images/opsgenie-close-alert-test.png)
 
 The close alert action has the following configuration properties.
 
@@ -177,25 +171,17 @@ After obtaining an Opsgenie instance, configure the API integration. For details
 
 If you’re using a free trial, go to the `Teams` dashboard and select the appropriate team.
 
-:::{image} ../images/opsgenie-teams.png
-:alt: Opsgenie teams dashboard
-:::
+![Opsgenie teams dashboard](../images/opsgenie-teams.png)
 
 Select the `Integrations` menu item, then select `Add integration`.
 
-:::{image} ../images/opsgenie-integrations.png
-:alt: Opsgenie teams integrations
-:::
+![Opsgenie teams integrations](../images/opsgenie-integrations.png)
 
 Search for `API` and select the `API` integration.
 
-:::{image} ../images/opsgenie-add-api-integration.png
-:alt: Opsgenie API integration
-:::
+![Opsgenie API integration](../images/opsgenie-add-api-integration.png)
 
 Configure the integration and ensure you record the `API Key`. This key will be used to populate the `API Key` field when creating the Kibana Opsgenie connector. Click `Save Integration` after you finish configuring the integration.
 
-:::{image} ../images/opsgenie-save-integration.png
-:alt: Opsgenie save integration
-:::
+![Opsgenie save integration](../images/opsgenie-save-integration.png)
 

@@ -6,9 +6,8 @@
  */
 
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
+import type { ConnectorsAuthz } from '../common/connectors/authz';
 
-export interface AssistantCardMetadata {
+export interface AssistantCardMetadata extends ConnectorsAuthz {
   connectors: ActionConnector[];
-  canExecuteConnectors: boolean;
-  canCreateConnectors: boolean;
 }

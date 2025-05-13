@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateUserElasticSearchQuery } from './user_query';
+import { validateUserElasticSearchQuery, disableExecuteQuery } from './user_query';
 
 describe('User Query utilities', () => {
   describe('validateUserElasticSearchQuery', () => {
@@ -112,6 +112,46 @@ describe('User Query utilities', () => {
         isUserCustomized: true,
         userQueryErrors: [expect.any(String)],
       });
+    });
+  });
+  describe('disableExecuteQuery', () => {
+    it('should return true if query is null', () => {
+      expect(disableExecuteQuery(undefined, null)).toEqual(true);
+    });
+    it('should return true if query is empty', () => {
+      expect(disableExecuteQuery(undefined, '')).toEqual(true);
+      expect(disableExecuteQuery(undefined, '   ')).toEqual(true);
+    });
+    it('should return true if query is undefined', () => {
+      expect(disableExecuteQuery(undefined, undefined)).toEqual(true);
+    });
+    it('should return true if query is invalid', () => {
+      const validations = {
+        isValid: false,
+        isUserCustomized: true,
+      };
+      expect(disableExecuteQuery(validations, 'test')).toEqual(true);
+    });
+    it('should return false if query is valid', () => {
+      const validations = {
+        isValid: true,
+        isUserCustomized: true,
+      };
+      expect(disableExecuteQuery(validations, 'test')).toEqual(false);
+    });
+    it('should return false if query is valid and userCustomized is false', () => {
+      const validations = {
+        isValid: true,
+        isUserCustomized: false,
+      };
+      expect(disableExecuteQuery(validations, 'test')).toEqual(false);
+    });
+    it('should return false if query is valid and userCustomized is true', () => {
+      const validations = {
+        isValid: true,
+        isUserCustomized: true,
+      };
+      expect(disableExecuteQuery(validations, 'test')).toEqual(false);
     });
   });
 });

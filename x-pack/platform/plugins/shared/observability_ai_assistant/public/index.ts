@@ -68,6 +68,7 @@ export {
   StreamingChatResponseEventType,
   ConversationAccess,
   KnowledgeBaseType,
+  KnowledgeBaseState,
 } from '../common';
 
 export type {

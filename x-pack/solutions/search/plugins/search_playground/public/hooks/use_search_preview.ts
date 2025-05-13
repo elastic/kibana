@@ -9,7 +9,7 @@ import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { useQuery } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { APIRoutes, ChatForm, ChatFormFields, Pagination } from '../types';
+import { APIRoutes, PlaygroundForm, PlaygroundFormFields, Pagination } from '../types';
 import { useKibana } from './use_kibana';
 import { DEFAULT_PAGINATION } from '../../common';
 import { elasticsearchQueryObject } from '../utils/user_query';
@@ -17,12 +17,13 @@ import { elasticsearchQueryObject } from '../utils/user_query';
 export interface FetchSearchResultsArgs {
   query: string;
   pagination: Pagination;
-  indices: ChatForm[ChatFormFields.indices];
-  elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery];
+  indices: PlaygroundForm[PlaygroundFormFields.indices];
+  elasticsearchQuery: PlaygroundForm[PlaygroundFormFields.elasticsearchQuery];
   http: HttpSetup;
 }
 
 interface UseSearchPreviewData {
+  executionTime: number;
   results: SearchHit[];
   pagination: Pagination;
 }
@@ -33,6 +34,7 @@ export interface UseSearchPreviewResponse {
 }
 
 export const DEFAULT_SEARCH_PREVIEW_DATA: UseSearchPreviewData = {
+  executionTime: 0,
   results: [],
   pagination: DEFAULT_PAGINATION,
 };
@@ -45,6 +47,7 @@ export const fetchSearchResults = async ({
   http,
 }: FetchSearchResultsArgs): Promise<UseSearchPreviewData> => {
   return http.post<{
+    executionTime: number;
     results: SearchHit[];
     pagination: Pagination;
   }>(APIRoutes.POST_SEARCH_QUERY, {
@@ -68,21 +71,21 @@ export const useSearchPreview = ({
   const {
     services: { http },
   } = useKibana();
-  const { getValues } = useFormContext<ChatForm>();
-  const indices = getValues(ChatFormFields.indices);
-  const elasticsearchQuery = getValues(ChatFormFields.elasticsearchQuery);
+  const { getValues } = useFormContext<PlaygroundForm>();
+  const indices = getValues(PlaygroundFormFields.indices);
+  const elasticsearchQuery = getValues(PlaygroundFormFields.elasticsearchQuery);
   const queryFn = () => {
     const formData = getValues();
     const elasticsearchQueryBody = elasticsearchQueryObject(
-      formData[ChatFormFields.elasticsearchQuery],
-      formData[ChatFormFields.userElasticsearchQuery],
-      formData[ChatFormFields.userElasticsearchQueryValidations]
+      formData[PlaygroundFormFields.elasticsearchQuery],
+      formData[PlaygroundFormFields.userElasticsearchQuery],
+      formData[PlaygroundFormFields.userElasticsearchQueryValidations]
     );
     return fetchSearchResults({
       query,
       pagination,
       http,
-      indices: formData[ChatFormFields.indices],
+      indices: formData[PlaygroundFormFields.indices],
       elasticsearchQuery: elasticsearchQueryBody,
     });
   };
@@ -98,6 +101,7 @@ export const useSearchPreview = ({
   });
 
   return {
+    executionTime: data.executionTime,
     pagination: data.pagination,
     results: data.results,
   };

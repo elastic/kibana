@@ -11,7 +11,7 @@ import React from 'react';
 import { faker } from '@faker-js/faker';
 import { Query, Filter, AggregateQuery, TimeRange } from '@kbn/es-query';
 import { initializeTitleManager, PhaseEvent, ViewMode } from '@kbn/presentation-publishing';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';

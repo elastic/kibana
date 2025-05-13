@@ -221,6 +221,34 @@ export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
   },
 };
 
+export const PRIVMON_ENGINE_INITIALIZATION_EVENT: EventTypeOpts<{
+  duration: number;
+}> = {
+  eventType: 'privmon_engine_initialization',
+  schema: {
+    duration: {
+      type: 'long',
+      _meta: {
+        description: 'Duration (in seconds) of the privilege monitoring engine initialization',
+      },
+    },
+  },
+};
+
+export const PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
+  error: string;
+}> = {
+  eventType: 'privmon_engine_resource_init_failure',
+  schema: {
+    error: {
+      type: 'keyword',
+      _meta: {
+        description: 'Error message for a resource initialization failure',
+      },
+    },
+  },
+};
+
 export const ALERT_SUPPRESSION_EVENT: EventTypeOpts<{
   suppressionAlertsCreated: number;
   suppressionAlertsSuppressed: number;
@@ -1241,6 +1269,21 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
   },
 };
 
+export const ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT: EventTypeOpts<{
+  insightId: string;
+}> = {
+  eventType: 'endpoint_workflow_insights_remediated_event',
+  schema: {
+    insightId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the action that was sent to the endpoint',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -1250,11 +1293,14 @@ export const events = [
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+  ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
+  PRIVMON_ENGINE_INITIALIZATION_EVENT,
+  PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,

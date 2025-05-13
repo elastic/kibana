@@ -122,6 +122,7 @@ export type {
   // Models
   Agent,
   AgentStatus,
+  DataStream,
   FleetServerAgentMetadata,
   AgentMetadata,
   NewAgentPolicy,

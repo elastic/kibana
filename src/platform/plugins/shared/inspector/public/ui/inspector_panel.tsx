@@ -131,7 +131,7 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={true}>
               <EuiTitle size="s">
-                <h1>{title}</h1>
+                <h1 id="inspector-panel-title">{title}</h1>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

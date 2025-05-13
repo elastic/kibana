@@ -2082,10 +2082,10 @@
           },
           {
             "parentPluginId": "@kbn/response-ops-rule-form",
-            "id": "def-public.RuleFormState.aadTemplateFields",
+            "id": "def-public.RuleFormState.alertFields",
             "type": "Array",
             "tags": [],
-            "label": "aadTemplateFields",
+            "label": "alertFields",
             "description": [],
             "signature": [
               {

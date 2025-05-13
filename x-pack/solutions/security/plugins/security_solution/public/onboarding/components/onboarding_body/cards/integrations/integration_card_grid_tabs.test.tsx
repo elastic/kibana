@@ -28,7 +28,10 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   }),
 }));
 
-const mockPackageList = jest.fn().mockReturnValue(<div data-test-subj="packageList" />);
+const mockPackageList = jest.fn<
+  React.JSX.Element,
+  Array<{ showSearchTools?: boolean; searchTerm: string }>
+>(() => <div data-test-subj="packageList" />);
 
 jest.mock('@kbn/fleet-plugin/public');
 jest

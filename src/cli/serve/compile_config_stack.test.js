@@ -79,7 +79,6 @@ describe('compileConfigStack', () => {
     async (productTier) => {
       getConfigFromFiles.mockImplementationOnce(() => {
         return {
-          serverless: 'es',
           xpack: {
             securitySolutionServerless: {
               enabled: true,
@@ -111,10 +110,31 @@ describe('compileConfigStack', () => {
     }
   );
 
+  it.each(['search_ai_lake', 'essentials', 'complete'])(
+    'adds all `security` %s tier config to the stack (when coming from CLI options)',
+    async (productTier) => {
+      const configList = compileConfigStack({
+        serverless: 'security',
+        dev: true,
+        securityProductTier: productTier,
+      }).map(toFileNames);
+
+      expect(configList).toEqual([
+        'serverless.yml',
+        'serverless.security.yml',
+        'kibana.yml',
+        'kibana.dev.yml',
+        'serverless.dev.yml',
+        'serverless.security.dev.yml',
+        `serverless.security.${productTier}.yml`,
+        `serverless.security.${productTier}.dev.yml`,
+      ]);
+    }
+  );
+
   it('adds no additional `security` tier config to the stack when no product tier', async () => {
     getConfigFromFiles.mockImplementationOnce(() => {
       return {
-        serverless: 'es',
         xpack: {
           securitySolutionServerless: {
             enabled: true,

@@ -191,7 +191,6 @@ describe('Fleet integrations', () => {
         requestContextFactoryMock.create(),
         endpointAppContextStartContract.alerting,
         licenseService,
-        exceptionListClient,
         cloudService,
         productFeaturesService,
         telemetryConfigProviderMock
@@ -579,6 +578,17 @@ describe('Fleet integrations', () => {
   });
 
   describe('package policy update callback', () => {
+    let endpointAppContextServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
+
+    beforeEach(() => {
+      endpointAppContextServiceMock = createMockEndpointAppContextService();
+      endpointAppContextServiceMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
+      endpointAppContextServiceMock.getLicenseService.mockReturnValue(licenseService);
+      (
+        endpointAppContextServiceMock.getInternalFleetServices().packagePolicy.get as jest.Mock
+      ).mockResolvedValue(createMockPolicyData());
+    });
+
     describe('when the license is below platinum', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -589,12 +599,8 @@ describe('Fleet integrations', () => {
       it('returns an error if paid features are turned on in the policy', async () => {
         const mockPolicy = policyFactory(); // defaults with paid features on
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -609,12 +615,8 @@ describe('Fleet integrations', () => {
         const mockPolicy = policyFactoryWithoutPaidFeatures();
         mockPolicy.windows.malware.mode = ProtectionModes.detect;
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -643,12 +645,8 @@ describe('Fleet integrations', () => {
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_protection_updates')
         );
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -665,12 +663,8 @@ describe('Fleet integrations', () => {
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_custom_notification')
         );
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -721,12 +715,8 @@ describe('Fleet integrations', () => {
         async ({ date, message }) => {
           const mockPolicy = policyFactory(); // defaults with paid features on
           const callback = getPackagePolicyUpdateCallback(
-            logger,
-            licenseService,
-            endpointAppContextStartContract.featureUsageService,
-            endpointMetadataService,
+            endpointAppContextServiceMock,
             cloudService,
-            esClient,
             productFeaturesService
           );
           const policyConfig = generator.generatePolicyPackagePolicy();
@@ -786,12 +776,8 @@ describe('Fleet integrations', () => {
         async ({ date, message }) => {
           const mockPolicy = policyFactory(); // defaults with paid features on
           const callback = getPackagePolicyUpdateCallback(
-            logger,
-            licenseService,
-            endpointAppContextStartContract.featureUsageService,
-            endpointMetadataService,
+            endpointAppContextServiceMock,
             cloudService,
-            esClient,
             productFeaturesService
           );
           const policyConfig = generator.generatePolicyPackagePolicy();
@@ -829,12 +815,8 @@ describe('Fleet integrations', () => {
         const mockPolicy = policyFactory();
         mockPolicy.windows.popup.malware.message = 'paid feature';
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -854,12 +836,8 @@ describe('Fleet integrations', () => {
           ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_policy_protections')
         );
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
 
@@ -933,12 +911,8 @@ describe('Fleet integrations', () => {
         mockPolicy.meta.serverless = false;
         mockPolicy.meta.billable = false;
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -971,12 +945,8 @@ describe('Fleet integrations', () => {
         mockPolicy.meta.serverless = false;
         mockPolicy.meta.billable = false;
         const callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
         const policyConfig = generator.generatePolicyPackagePolicy();
@@ -1013,12 +983,8 @@ describe('Fleet integrations', () => {
         licenseEmitter.next(Platinum);
 
         callback = getPackagePolicyUpdateCallback(
-          logger,
-          licenseService,
-          endpointAppContextStartContract.featureUsageService,
-          endpointMetadataService,
+          endpointAppContextServiceMock,
           cloudService,
-          esClient,
           productFeaturesService
         );
 
@@ -1112,12 +1078,8 @@ describe('Fleet integrations', () => {
       licenseEmitter.next(Enterprise);
 
       const callback = getPackagePolicyUpdateCallback(
-        logger,
-        licenseService,
-        endpointAppContextStartContract.featureUsageService,
-        endpointMetadataService,
+        endpointAppContextServiceMock,
         cloudService,
-        esClient,
         productFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();

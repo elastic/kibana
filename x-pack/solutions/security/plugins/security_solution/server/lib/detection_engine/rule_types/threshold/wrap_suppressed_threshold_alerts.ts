@@ -24,7 +24,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 
-import type { ThresholdBucket } from './types';
+import type { ThresholdCompositeBucket } from './types';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import { transformBucketIntoHit } from './bulk_create_threshold_signals';
 import type { SecuritySharedParams } from '../types';
@@ -43,7 +43,7 @@ export const wrapSuppressedThresholdALerts = ({
   startedAt,
 }: {
   sharedParams: SecuritySharedParams<ThresholdRuleParams>;
-  buckets: ThresholdBucket[];
+  buckets: ThresholdCompositeBucket[];
   buildReasonMessage: BuildReasonMessage;
   startedAt: Date;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {

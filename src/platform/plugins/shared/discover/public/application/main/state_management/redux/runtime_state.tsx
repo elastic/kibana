@@ -11,14 +11,17 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
-import { useInternalStateSelector } from './hooks';
-import type { DiscoverInternalState } from './types';
+import { useCurrentTabContext } from './hooks';
+import type { DiscoverStateContainer } from '../discover_state';
+import type { ConnectedCustomizationService } from '../../../../customizations';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
 }
 
 interface TabRuntimeState {
+  stateContainer?: DiscoverStateContainer;
+  customizationService?: ConnectedCustomizationService;
   currentDataView: DataView;
 }
 
@@ -40,28 +43,23 @@ export const createRuntimeStateManager = (): RuntimeStateManager => ({
 });
 
 export const createTabRuntimeState = (): ReactiveTabRuntimeState => ({
+  stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
+  customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(undefined),
   currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
 });
 
 export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
   useObservable(stateSubject$, stateSubject$.getValue());
 
-export const selectCurrentTabRuntimeState = (
-  internalState: DiscoverInternalState,
-  runtimeStateManager: RuntimeStateManager
-) => {
-  const currentTabId = internalState.tabs.currentId;
-  return runtimeStateManager.tabs.byId[currentTabId];
-};
+export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
+  runtimeStateManager.tabs.byId[tabId];
 
 export const useCurrentTabRuntimeState = <T,>(
   runtimeStateManager: RuntimeStateManager,
   selector: (tab: ReactiveTabRuntimeState) => BehaviorSubject<T>
 ) => {
-  const tab = useInternalStateSelector((state) =>
-    selectCurrentTabRuntimeState(state, runtimeStateManager)
-  );
-  return useRuntimeState(selector(tab));
+  const { currentTabId } = useCurrentTabContext();
+  return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
 };
 
 type CombinedRuntimeState = DiscoverRuntimeState & TabRuntimeState;

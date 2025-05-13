@@ -33,9 +33,9 @@ export interface EsDocSearchProps {
    */
   dataView: DataView;
   /**
-   * Records fetched from text based query
+   * Record fetched from ES|QL query
    */
-  textBasedHits?: DataTableRecord[];
+  esqlHit?: DataTableRecord;
   /**
    * An optional callback that will be called before fetching the doc
    */
@@ -54,7 +54,7 @@ export function useEsDocSearch({
   id,
   index,
   dataView,
-  textBasedHits,
+  esqlHit,
   onBeforeFetch,
   onProcessRecord,
 }: EsDocSearchProps): [ElasticRequestState, DataTableRecord | null, () => void] {
@@ -111,16 +111,13 @@ export function useEsDocSearch({
   }, [analytics, data.search, dataView, id, index, onBeforeFetch, onProcessRecord]);
 
   useEffect(() => {
-    if (textBasedHits) {
-      const selectedHit = textBasedHits?.find((r) => r.id === id);
-      if (selectedHit) {
-        setStatus(ElasticRequestState.Found);
-        setHit(selectedHit);
-      }
+    if (esqlHit) {
+      setStatus(ElasticRequestState.Found);
+      setHit(esqlHit);
     } else {
       requestData();
     }
-  }, [id, requestData, textBasedHits]);
+  }, [id, requestData, esqlHit]);
 
   return [status, hit, requestData];
 }

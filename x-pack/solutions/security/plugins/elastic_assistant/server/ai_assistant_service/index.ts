@@ -52,6 +52,10 @@ import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
+import {
+  AttackDiscoveryScheduleDataClient,
+  CreateAttackDiscoveryScheduleDataClientParams,
+} from '../lib/attack_discovery/schedules/data_client';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -547,7 +551,7 @@ export class AIAssistantService {
   public async createAIAssistantKnowledgeBaseDataClient(
     opts: CreateAIAssistantClientParams &
       GetAIAssistantKnowledgeBaseDataClientParams & {
-        trainedModelsProvider: ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+        getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
       }
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
     // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
@@ -587,7 +591,7 @@ export class AIAssistantService {
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
-      trainedModelsProvider: opts.trainedModelsProvider,
+      getTrainedModelsProvider: opts.getTrainedModelsProvider,
     });
   }
 
@@ -607,6 +611,14 @@ export class AIAssistantService {
       indexPatternsResourceName: this.resourceNames.aliases.attackDiscovery,
       kibanaVersion: this.options.kibanaVersion,
       spaceId: opts.spaceId,
+    });
+  }
+
+  public async createAttackDiscoverySchedulingDataClient(
+    opts: CreateAttackDiscoveryScheduleDataClientParams
+  ): Promise<AttackDiscoveryScheduleDataClient | null> {
+    return new AttackDiscoveryScheduleDataClient({
+      rulesClient: opts.rulesClient,
     });
   }
 

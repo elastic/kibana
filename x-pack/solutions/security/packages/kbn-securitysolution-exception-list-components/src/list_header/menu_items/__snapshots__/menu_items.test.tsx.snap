@@ -7,7 +7,7 @@ exports[`MenuItems should not render Manage rules 1`] = `
     data-test-subj="Container"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
     >
       <div
         class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
@@ -76,10 +76,10 @@ exports[`MenuItems should not render linkedRules HeaderMenu component, instead s
     data-test-subj="Container"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
     >
       <span
-        class="emotion-EuiTextColor"
+        class="emotion-euiTextColor-subdued-noLinkedRulesCss"
         data-test-subj="noLinkedRules"
       >
         Linked to 0 rules
@@ -141,10 +141,10 @@ exports[`MenuItems should render all menu actions enabled 1`] = `
     data-test-subj="Container"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
     >
       <span
-        class="emotion-EuiTextColor"
+        class="emotion-euiTextColor-subdued-noLinkedRulesCss"
         data-test-subj="noLinkedRules"
       >
         Linked to 0 rules
@@ -206,7 +206,7 @@ exports[`MenuItems should render delete action disabled when "canUserEditList" i
     data-test-subj="Container"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
     >
       <div
         class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
@@ -275,7 +275,7 @@ exports[`MenuItems should render linkedRules, manageRules and menuActions 1`] = 
     data-test-subj="Container"
   >
     <div
-      class="euiFlexItem emotion-euiFlexItem-grow-1"
+      class="euiFlexItem emotion-euiFlexItem-grow-1-headerMenuCss"
     >
       <div
         class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"

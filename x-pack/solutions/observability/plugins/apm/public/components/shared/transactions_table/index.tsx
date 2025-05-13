@@ -9,7 +9,6 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { compact } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -24,7 +23,7 @@ import { FETCH_STATUS, isPending, isSuccess, useFetcher } from '../../../hooks/u
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
-import type { TableSearchBar } from '../managed_table';
+import type { TableSearchBar, VisibleItemsStartEnd } from '../managed_table';
 import { ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
@@ -74,6 +73,7 @@ export function TransactionsTable({
   showSparkPlots,
 }: Props) {
   const { link } = useApmRouter();
+  const [renderedItemIndices, setRenderedItemIndices] = useState<VisibleItemsStartEnd>([0, 0]);
 
   const {
     query,
@@ -91,12 +91,10 @@ export function TransactionsTable({
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
-  const [renderedItems, setRenderedItems] = useState<ApiResponse['transactionGroups']>([]);
 
   const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
     useTableData({
       comparisonEnabled,
-      currentPageItems: renderedItems,
       end,
       environment,
       kuery,
@@ -106,6 +104,7 @@ export function TransactionsTable({
       serviceName,
       start,
       transactionType,
+      renderedItemIndices,
     });
 
   useEffect(() => {
@@ -252,8 +251,8 @@ export function TransactionsTable({
             isLoading={mainStatisticsStatus === FETCH_STATUS.LOADING}
             tableSearchBar={tableSearchBar}
             showPerPageOptions={showPerPageOptions}
-            onChangeRenderedItems={setRenderedItems}
             saveTableOptionsToUrl={saveTableOptionsToUrl}
+            onChangeItemIndices={setRenderedItemIndices}
           />
         </OverviewTableContainer>
       </EuiFlexItem>
@@ -263,7 +262,6 @@ export function TransactionsTable({
 
 function useTableData({
   comparisonEnabled,
-  currentPageItems,
   end,
   environment,
   kuery,
@@ -273,9 +271,9 @@ function useTableData({
   serviceName,
   start,
   transactionType,
+  renderedItemIndices,
 }: {
   comparisonEnabled: boolean | undefined;
-  currentPageItems: ApiResponse['transactionGroups'];
   end: string;
   environment: string;
   kuery: string;
@@ -285,6 +283,7 @@ function useTableData({
   serviceName: string;
   start: string;
   transactionType: string | undefined;
+  renderedItemIndices: VisibleItemsStartEnd;
 }) {
   const preferredDataSource = usePreferredDataSourceAndBucketSize({
     start,
@@ -339,16 +338,25 @@ function useTableData({
     ]
   );
 
+  const itemsToFetch = useMemo(
+    () =>
+      mainStatistics.transactionGroups
+        .slice(...renderedItemIndices)
+        .map(({ name }) => name)
+        .filter((name) => Boolean(name))
+        .sort(),
+    [renderedItemIndices, mainStatistics.transactionGroups]
+  );
+
   const { data: detailedStatistics, status: detailedStatisticsStatus } = useFetcher(
     (callApmApi) => {
-      const transactionNames = compact(currentPageItems.map(({ name }) => name));
       if (
         start &&
         end &&
         transactionType &&
         latencyAggregationType &&
         preferredDataSource &&
-        transactionNames.length > 0
+        itemsToFetch.length > 0
       ) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
@@ -366,7 +374,7 @@ function useTableData({
                 rollupInterval: preferredDataSource.source.rollupInterval,
                 useDurationSummary: !!shouldUseDurationSummary,
                 latencyAggregationType: latencyAggregationType as LatencyAggregationType,
-                transactionNames: JSON.stringify(transactionNames.sort()),
+                transactionNames: JSON.stringify(itemsToFetch),
                 offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               },
             },
@@ -377,7 +385,7 @@ function useTableData({
     // only fetches detailed statistics when `currentPageItems` is updated.
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatistics.requestId, currentPageItems, offset, comparisonEnabled],
+    [mainStatistics.requestId, itemsToFetch, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 

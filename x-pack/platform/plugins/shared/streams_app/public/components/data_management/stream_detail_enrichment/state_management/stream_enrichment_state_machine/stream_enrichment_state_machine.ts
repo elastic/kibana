@@ -14,6 +14,7 @@ import {
   stopChild,
   and,
   ActorRefFrom,
+  raise,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
@@ -23,7 +24,7 @@ import {
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import {
-  StreamEnrichmentContext,
+  StreamEnrichmentContextType,
   StreamEnrichmentEvent,
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
@@ -41,6 +42,7 @@ import {
   createSimulationMachineImplementations,
 } from '../simulation_state_machine';
 import { processorMachine, ProcessorActorRef } from '../processor_state_machine';
+import { getConfiguredProcessors, getStagedProcessors, getUpsertWiredFields } from './utils';
 
 const createId = htmlIdGenerator();
 
@@ -49,7 +51,7 @@ export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachi
 export const streamEnrichmentMachine = setup({
   types: {
     input: {} as StreamEnrichmentInput,
-    context: {} as StreamEnrichmentContext,
+    context: {} as StreamEnrichmentContextType,
     events: {} as StreamEnrichmentEvent,
   },
   actors: {
@@ -187,10 +189,7 @@ export const streamEnrichmentMachine = setup({
       type: 'parallel',
       entry: [
         { type: 'stopProcessors' },
-        {
-          type: 'setupProcessors',
-          params: ({ context }) => ({ definition: context.definition }),
-        },
+        { type: 'setupProcessors', params: ({ context }) => ({ definition: context.definition }) },
       ],
       on: {
         'stream.received': {
@@ -213,7 +212,10 @@ export const streamEnrichmentMachine = setup({
                 },
                 'stream.update': {
                   guard: 'canUpdateStream',
-                  actions: [{ type: 'sendResetEventToSimulator' }],
+                  actions: [
+                    { type: 'sendResetEventToSimulator' },
+                    raise({ type: 'simulation.viewDataPreview' }),
+                  ],
                   target: 'updating',
                 },
               },
@@ -224,11 +226,8 @@ export const streamEnrichmentMachine = setup({
                 src: 'upsertStream',
                 input: ({ context }) => ({
                   definition: context.definition,
-                  processors: context.processorsRefs
-                    .map((proc) => proc.getSnapshot())
-                    .filter((proc) => proc.matches('configured'))
-                    .map((proc) => proc.context.processor),
-                  fields: undefined, // TODO: implementing in follow-up PR
+                  processors: getConfiguredProcessors(context),
+                  fields: getUpsertWiredFields(context),
                 }),
                 onDone: {
                   target: 'idle',
@@ -295,13 +294,16 @@ export const streamEnrichmentMachine = setup({
                   on: {
                     'simulation.viewDetectedFields': 'viewDetectedFields',
                     'simulation.changePreviewDocsFilter': {
-                      actions: [forwardTo('simulator')],
+                      actions: forwardTo('simulator'),
                     },
                   },
                 },
                 viewDetectedFields: {
                   on: {
                     'simulation.viewDataPreview': 'viewDataPreview',
+                    'simulation.fields.*': {
+                      actions: forwardTo('simulator'),
+                    },
                   },
                 },
               },
@@ -345,10 +347,3 @@ export const createStreamEnrichmentMachineImplementations = ({
     }),
   },
 });
-
-function getStagedProcessors(context: StreamEnrichmentContext) {
-  return context.processorsRefs
-    .map((proc) => proc.getSnapshot())
-    .filter((proc) => proc.context.isNew)
-    .map((proc) => proc.context.processor);
-}

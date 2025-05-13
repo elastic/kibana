@@ -7,13 +7,13 @@
 
 import deepEqual from 'fast-deep-equal';
 import { i18n } from '@kbn/i18n';
-import type { ChatForm, ChatFormFields, UserQueryValidations } from '../types';
+import type { PlaygroundForm, PlaygroundFormFields, UserQueryValidations } from '../types';
 
 export const validateUserElasticSearchQuery = (
-  userQuery: ChatForm[ChatFormFields.userElasticsearchQuery],
-  elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery]
+  userQuery: PlaygroundForm[PlaygroundFormFields.userElasticsearchQuery],
+  elasticsearchQuery: PlaygroundForm[PlaygroundFormFields.elasticsearchQuery]
 ): UserQueryValidations => {
-  if (userQuery === null) {
+  if (userQuery === null || userQuery === undefined || typeof userQuery !== 'string') {
     return { isValid: false, isUserCustomized: false };
   }
   let userQueryErrors: string[] | undefined;
@@ -49,18 +49,19 @@ export const validateUserElasticSearchQuery = (
 
 export const disableExecuteQuery = (
   validations: UserQueryValidations | undefined,
-  query: string
+  query: string | null | undefined
 ): boolean => {
   return (
-    query.trim().length === 0 ||
-    (validations?.isUserCustomized === true && validations?.isValid === false)
+    (validations?.isUserCustomized === true && validations?.isValid === false) ||
+    !query ||
+    query.trim().length === 0
   );
 };
 
 export const elasticsearchQueryString = (
-  elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery],
-  userElasticsearchQuery: ChatForm[ChatFormFields.userElasticsearchQuery],
-  userElasticsearchQueryValidations: ChatForm[ChatFormFields.userElasticsearchQueryValidations]
+  elasticsearchQuery: PlaygroundForm[PlaygroundFormFields.elasticsearchQuery],
+  userElasticsearchQuery: PlaygroundForm[PlaygroundFormFields.userElasticsearchQuery],
+  userElasticsearchQueryValidations: PlaygroundForm[PlaygroundFormFields.userElasticsearchQueryValidations]
 ) => {
   if (!userElasticsearchQuery || userElasticsearchQueryValidations?.isUserCustomized === false) {
     return JSON.stringify(elasticsearchQuery);
@@ -72,9 +73,9 @@ export const elasticsearchQueryString = (
 };
 
 export const elasticsearchQueryObject = (
-  elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery],
-  userElasticsearchQuery: ChatForm[ChatFormFields.userElasticsearchQuery],
-  userElasticsearchQueryValidations: ChatForm[ChatFormFields.userElasticsearchQueryValidations]
+  elasticsearchQuery: PlaygroundForm[PlaygroundFormFields.elasticsearchQuery],
+  userElasticsearchQuery: PlaygroundForm[PlaygroundFormFields.userElasticsearchQuery],
+  userElasticsearchQueryValidations: PlaygroundForm[PlaygroundFormFields.userElasticsearchQueryValidations]
 ): { retriever: any } => {
   if (!userElasticsearchQuery || userElasticsearchQueryValidations?.isUserCustomized === false) {
     return elasticsearchQuery;
@@ -86,5 +87,5 @@ export const elasticsearchQueryObject = (
 };
 
 export const formatElasticsearchQueryString = (
-  elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery]
+  elasticsearchQuery: PlaygroundForm[PlaygroundFormFields.elasticsearchQuery]
 ) => JSON.stringify(elasticsearchQuery, null, 2);

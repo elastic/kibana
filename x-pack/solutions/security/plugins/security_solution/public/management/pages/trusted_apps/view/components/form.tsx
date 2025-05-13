@@ -230,7 +230,7 @@ const defaultConditionEntry = (): TrustedAppConditionEntry<ConditionEntryField.H
 });
 
 export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
-  ({ item, policies, policiesIsLoading, onChange, mode, error: submitError }) => {
+  ({ item, onChange, mode, error: submitError }) => {
     const getTestId = useTestIdGenerator('trustedApps-form');
     const [visited, setVisited] = useState<
       Partial<{
@@ -543,10 +543,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             <EuiFormRow fullWidth data-test-subj={getTestId('policySelection')}>
               <EffectedPolicySelect
                 item={item}
-                options={policies}
                 description={POLICY_SELECT_DESCRIPTION}
                 data-test-subj={getTestId('effectedPolicies')}
-                isLoading={policiesIsLoading}
                 onChange={handleEffectedPolicyOnChange}
               />
             </EuiFormRow>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniqBy } from 'lodash';
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTopHitsAggregate,
@@ -143,6 +144,9 @@ export const createPrebuiltRuleAssetsClient = (
           .map((v) => `(${attr}.rule_id: ${v.rule_id} AND ${attr}.version: ${v.version})`)
           .join(' OR ');
 
+        // Usage of savedObjectsClient.bulkGet() is ~25% more performant and
+        // simplifies deduplication but too many tests get broken.
+        // See https://github.com/elastic/kibana/issues/218198
         const findResult = await savedObjectsClient.find<PrebuiltRuleAsset>({
           type: PREBUILT_RULE_ASSETS_SO_TYPE,
           filter,
@@ -150,7 +154,11 @@ export const createPrebuiltRuleAssetsClient = (
         });
 
         const ruleAssets = findResult.saved_objects.map((so) => so.attributes);
-        return validatePrebuiltRuleAssets(ruleAssets);
+        // Rule assets may have duplicates we have to get rid of.
+        // In particular prebuilt rule assets package v8.17.1 has duplicates.
+        const uniqueRuleAssets = uniqBy(ruleAssets, 'rule_id');
+
+        return validatePrebuiltRuleAssets(uniqueRuleAssets);
       });
     },
   };

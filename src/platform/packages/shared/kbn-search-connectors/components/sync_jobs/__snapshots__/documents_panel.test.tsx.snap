@@ -24,6 +24,7 @@ exports[`DocumentsPanel renders 1`] = `
               />
             }
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
@@ -55,6 +56,7 @@ exports[`DocumentsPanel renders 1`] = `
               />
             }
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >
@@ -86,6 +88,7 @@ exports[`DocumentsPanel renders 1`] = `
               />
             }
             delay="regular"
+            disableScreenReaderOutput={false}
             display="inlineBlock"
             position="top"
           >

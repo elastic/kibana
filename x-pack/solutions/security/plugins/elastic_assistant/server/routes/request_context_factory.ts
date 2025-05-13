@@ -78,6 +78,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     };
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
     return {
       core: coreContext,
@@ -124,10 +125,11 @@ export class RequestContextFactory implements IRequestContextFactory {
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
           // uses internal user to interact with ML API
-          trainedModelsProvider: plugins.ml.trainedModelsProvider(
-            {} as KibanaRequest,
-            coreStart.savedObjects.createInternalRepository()
-          ),
+          getTrainedModelsProvider: () =>
+            plugins.ml.trainedModelsProvider(
+              {} as KibanaRequest,
+              coreStart.savedObjects.createInternalRepository()
+            ),
         });
       }),
 
@@ -138,6 +140,12 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
+        });
+      }),
+
+      getAttackDiscoverySchedulingDataClient: memoize(async () => {
+        return this.assistantService.createAttackDiscoverySchedulingDataClient({
+          rulesClient,
         });
       }),
 

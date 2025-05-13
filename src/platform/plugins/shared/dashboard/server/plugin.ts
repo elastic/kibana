@@ -17,6 +17,7 @@ import { ContentManagementServerSetup } from '@kbn/content-management-plugin/ser
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -42,6 +43,7 @@ interface SetupDeps {
 interface StartDeps {
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
+  savedObjectsTagging?: SavedObjectTaggingStart;
 }
 
 export class DashboardPlugin
@@ -65,17 +67,20 @@ export class DashboardPlugin
       })
     );
 
-    const { contentClient } = plugins.contentManagement.register({
-      id: CONTENT_ID,
-      storage: new DashboardStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
-        logger: this.logger.get('storage'),
-      }),
-      version: {
-        latest: LATEST_VERSION,
-      },
+    void core.getStartServices().then(([_, { savedObjectsTagging }]) => {
+      const { contentClient } = plugins.contentManagement.register({
+        id: CONTENT_ID,
+        storage: new DashboardStorage({
+          throwOnResultValidationError: this.initializerContext.env.mode.dev,
+          logger: this.logger.get('storage'),
+          savedObjectsTagging,
+        }),
+        version: {
+          latest: LATEST_VERSION,
+        },
+      });
+      this.contentClient = contentClient;
     });
-    this.contentClient = contentClient;
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 
@@ -139,7 +144,7 @@ export class DashboardPlugin
     }
 
     return {
-      contentClient: this.contentClient,
+      getContentClient: () => this.contentClient,
     };
   }
 

@@ -80,6 +80,8 @@ enabled:
   - src/platform/test/functional/apps/discover/group6/config.ts
   - src/platform/test/functional/apps/discover/group7/config.ts
   - src/platform/test/functional/apps/discover/group8/config.ts
+  - src/platform/test/functional/apps/discover/group9/config.ts
+  - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
   - src/platform/test/functional/apps/discover/observability/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
@@ -266,6 +268,7 @@ enabled:
   - x-pack/test/functional/apps/rollup_job/config.ts
   - x-pack/test/functional/apps/saved_objects_management/config.ts
   - x-pack/test/functional/apps/saved_query_management/config.ts
+  - x-pack/test/functional/apps/saved_query_management/config.v2.ts
   - x-pack/test/functional/apps/security/config.ts
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts

@@ -56,7 +56,7 @@ function shouldWriteType(level: ParsedLogLevel, type: MessageTypes) {
   return Boolean(level.flags[type === 'success' ? 'info' : type]);
 }
 
-function stringifyError(error: string | Error) {
+function stringifyError(error: string | Error): string {
   if (typeof error !== 'string' && !(error instanceof Error)) {
     error = new Error(`"${error}" thrown`);
   }
@@ -65,7 +65,11 @@ function stringifyError(error: string | Error) {
     return error;
   }
 
-  return error.stack || error.message || error;
+  if (error instanceof AggregateError) {
+    return [error.stack, ...error.errors.map(stringifyError)].join('\n');
+  }
+
+  return error.stack || error.message || String(error);
 }
 
 export class ToolingLogTextWriter implements Writer {

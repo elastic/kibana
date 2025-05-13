@@ -6,6 +6,7 @@
  */
 import * as React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
@@ -21,7 +22,11 @@ import { EuiFieldText } from '@elastic/eui';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
-import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import {
+  ALERTING_FEATURE_ID,
+  RuleNotifyWhen,
+  SanitizedRuleAction,
+} from '@kbn/alerting-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { transformActionVariables } from '@kbn/alerts-ui-shared/src/action_variables/transforms';
 
@@ -48,9 +53,36 @@ const CUSTOM_NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
   },
 ];
 
+const mockedRuleTypeIndex = new Map(
+  Object.entries({
+    test_rule_type: {
+      enabledInLicense: true,
+      id: 'test_rule_type',
+      name: 'test rule',
+      actionGroups: [{ id: 'default', name: 'Default' }],
+      recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+      actionVariables: { context: [], state: [] },
+      defaultActionGroupId: 'default',
+      producer: ALERTING_FEATURE_ID,
+      minimumLicenseRequired: 'basic',
+      authorizedConsumers: {
+        [ALERTING_FEATURE_ID]: { read: true, all: false },
+      },
+      ruleTaskTimeout: '1m',
+    },
+  })
+);
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
 jest.mock('../../../common/lib/kibana');
+
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => ({
+  useGetRuleTypesPermissions: jest.fn(),
+}));
+const { useGetRuleTypesPermissions } = jest.requireMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
 
 jest.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', () => {
   const original = jest.requireActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
@@ -70,8 +102,8 @@ jest.mock('../../../common/get_experimental_features', () => ({
   },
 }));
 
-jest.mock('../../hooks/use_rule_aad_template_fields', () => ({
-  useRuleTypeAadTemplateFields: () => ({
+jest.mock('../../hooks/use_rule_alert_fields', () => ({
+  useRuleTypeAlertFields: () => ({
     isLoading: false,
     fields: [],
   }),
@@ -80,6 +112,14 @@ jest.mock('../../hooks/use_rule_aad_template_fields', () => ({
 describe('action_type_form', () => {
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  useGetRuleTypesPermissions.mockReturnValue({
+    ruleTypesState: {
+      isLoading: false,
+      isInitialLoading: false,
+      data: mockedRuleTypeIndex,
+    },
   });
 
   const mockedActionParamsFields = React.lazy(async () => ({
@@ -748,27 +788,29 @@ function getActionTypeForm({
   };
 
   return (
-    <ActionTypeForm
-      actionConnector={actionConnector ?? actionConnectorDefault}
-      actionItem={actionItem ?? actionItemDefault}
-      connectors={connectors ?? connectorsDefault}
-      onAddConnector={onAddConnector ?? jest.fn()}
-      onDeleteAction={onDeleteAction ?? jest.fn()}
-      onConnectorSelected={onConnectorSelected ?? jest.fn()}
-      defaultActionGroupId={defaultActionGroupId ?? 'default'}
-      setActionParamsProperty={setActionParamsProperty ?? jest.fn()}
-      setActionFrequencyProperty={setActionFrequencyProperty ?? jest.fn()}
-      setActionAlertsFilterProperty={setActionAlertsFilterProperty ?? jest.fn()}
-      index={index ?? 1}
-      actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
-      actionTypeRegistry={actionTypeRegistry}
-      hasAlertsMappings={hasAlertsMappings}
-      messageVariables={messageVariables}
-      summaryMessageVariables={summaryMessageVariables}
-      notifyWhenSelectOptions={notifyWhenSelectOptions}
-      producerId={producerId}
-      featureId={featureId}
-      ruleTypeId={ruleTypeId}
-    />
+    <QueryClientProvider client={new QueryClient()}>
+      <ActionTypeForm
+        actionConnector={actionConnector ?? actionConnectorDefault}
+        actionItem={actionItem ?? actionItemDefault}
+        connectors={connectors ?? connectorsDefault}
+        onAddConnector={onAddConnector ?? jest.fn()}
+        onDeleteAction={onDeleteAction ?? jest.fn()}
+        onConnectorSelected={onConnectorSelected ?? jest.fn()}
+        defaultActionGroupId={defaultActionGroupId ?? 'default'}
+        setActionParamsProperty={setActionParamsProperty ?? jest.fn()}
+        setActionFrequencyProperty={setActionFrequencyProperty ?? jest.fn()}
+        setActionAlertsFilterProperty={setActionAlertsFilterProperty ?? jest.fn()}
+        index={index ?? 1}
+        actionTypesIndex={actionTypeIndex ?? actionTypeIndexDefault}
+        actionTypeRegistry={actionTypeRegistry}
+        hasAlertsMappings={hasAlertsMappings}
+        messageVariables={messageVariables}
+        summaryMessageVariables={summaryMessageVariables}
+        notifyWhenSelectOptions={notifyWhenSelectOptions}
+        producerId={producerId}
+        featureId={featureId}
+        ruleTypeId={ruleTypeId}
+      />
+    </QueryClientProvider>
   );
 }

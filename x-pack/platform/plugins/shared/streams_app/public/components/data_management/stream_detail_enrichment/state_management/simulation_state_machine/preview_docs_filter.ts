@@ -15,18 +15,32 @@ export const previewDocsFilterOptions = {
       { defaultMessage: 'All samples' }
     ),
   },
-  outcome_filter_matched: {
-    id: 'outcome_filter_matched',
+  outcome_filter_parsed: {
+    id: 'outcome_filter_parsed',
     label: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.matched',
-      { defaultMessage: 'Matched' }
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.parsed',
+      { defaultMessage: 'Parsed' }
     ),
   },
-  outcome_filter_unmatched: {
-    id: 'outcome_filter_unmatched',
+  outcome_filter_partially_parsed: {
+    id: 'outcome_filter_partially_parsed',
     label: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.unmatched',
-      { defaultMessage: 'Unmatched' }
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.partially_parsed',
+      { defaultMessage: 'Partially parsed' }
+    ),
+  },
+  outcome_filter_skipped: {
+    id: 'outcome_filter_skipped',
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.skipped',
+      { defaultMessage: 'Skipped' }
+    ),
+  },
+  outcome_filter_failed: {
+    id: 'outcome_filter_failed',
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.failed',
+      { defaultMessage: 'Failed' }
     ),
   },
 } as const;

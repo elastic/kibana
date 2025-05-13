@@ -16,7 +16,6 @@ import { AlertsLocatorParams, observabilityPaths } from '@kbn/observability-plug
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { sloBurnRateParamsSchema } from '@kbn/response-ops-rule-params/slo_burn_rate';
-import { SLO_BURN_RATE_AAD_FIELDS } from '../../../../common/field_names/slo';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -39,7 +38,6 @@ export function sloBurnRateRuleType(
     name: i18n.translate('xpack.slo.rules.burnRate.name', {
       defaultMessage: 'SLO burn rate',
     }),
-    fieldsForAAD: SLO_BURN_RATE_AAD_FIELDS,
     validate: {
       params: sloBurnRateParamsSchema,
     },

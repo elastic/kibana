@@ -35,10 +35,14 @@ export const KPIsSection = memo(({ dataView }: KPIsSectionProps) => {
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
 
+  const getGlobalFiltersSelector = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
+  const filters = useDeepEqualSelector(getGlobalFiltersSelector);
+
   return (
     <EuiFlexGroup data-test-subj={KPIS_SECTION}>
       <EuiFlexItem>
         <SeverityLevelPanel
+          filters={filters}
           signalIndexName={signalIndexName}
           query={query}
           showCellActions={false}
@@ -46,13 +50,18 @@ export const KPIsSection = memo(({ dataView }: KPIsSectionProps) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <AlertsByRulePanel
+          filters={filters}
           signalIndexName={signalIndexName}
           query={query}
           showCellActions={false}
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <AlertsProgressBarByHostNamePanel signalIndexName={signalIndexName} query={query} />
+        <AlertsProgressBarByHostNamePanel
+          filters={filters}
+          signalIndexName={signalIndexName}
+          query={query}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

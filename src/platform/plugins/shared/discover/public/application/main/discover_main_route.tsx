@@ -12,6 +12,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useEffect, useState } from 'react';
 import React from 'react';
+import useUnmount from 'react-use/lib/useUnmount';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -20,6 +21,7 @@ import {
   createInternalStateStore,
   createRuntimeStateManager,
   internalStateActions,
+  CurrentTabProvider,
 } from './state_management/redux';
 import type { RootProfileState } from '../../context_awareness';
 import { useRootProfile, useDefaultAdHocDataViews } from '../../context_awareness';
@@ -34,7 +36,7 @@ import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
 
 // TEMPORARY: This is a temporary flag to enable/disable tabs in Discover until the feature is fully implemented.
-const TABS_ENABLED = false;
+export const TABS_ENABLED = false;
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -103,6 +105,12 @@ export const DiscoverMainRoute = ({
     }
   }, [initializeMainRoute, rootProfileState]);
 
+  useUnmount(() => {
+    for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
+      internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
+    }
+  });
+
   if (rootProfileState.rootProfileLoading || mainRouteInitializationState.loading) {
     return <BrandedLoadingIndicator />;
   }
@@ -137,9 +145,11 @@ export const DiscoverMainRoute = ({
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
         {TABS_ENABLED ? (
-          <TabsView sessionViewProps={sessionViewProps} />
+          <TabsView {...sessionViewProps} />
         ) : (
-          <DiscoverSessionView {...sessionViewProps} />
+          <CurrentTabProvider currentTabId={internalState.getState().tabs.unsafeCurrentId}>
+            <DiscoverSessionView {...sessionViewProps} />
+          </CurrentTabProvider>
         )}
       </rootProfileState.AppWrapper>
     </InternalStateProvider>

@@ -48,11 +48,10 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
   const { notifications } = useStartServices();
 
   const {
-    data: changelogResponse,
+    data: changelogText,
     error: changelogError,
     isLoading,
   } = useGetFileByPathQuery(`/package/${packageName}/${latestVersion}/changelog.yml`);
-  const changelogText = changelogResponse?.data;
 
   // currentVersion is used to display the changelog up to the current installed version, when there is a newer one available
   const finalChangelog = currentVersion

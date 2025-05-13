@@ -151,5 +151,5 @@ const createDocumentProfileProviders = (providerServices: ProfileProviderService
   createExampleDocumentProfileProvider(),
   createObservabilityLogDocumentProfileProvider(providerServices),
   createObservabilityTracesSpanDocumentProfileProvider(providerServices),
-  createObservabilityTracesTransactionDocumentProfileProvider(),
+  createObservabilityTracesTransactionDocumentProfileProvider(providerServices),
 ];

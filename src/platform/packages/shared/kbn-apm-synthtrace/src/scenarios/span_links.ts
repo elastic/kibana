@@ -19,6 +19,7 @@ import {
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
+import { parseApmScenarioOpts } from './helpers/apm_scenario_ops_parser';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -38,8 +39,12 @@ function getSpanLinksFromEvents(events: ApmFields[]) {
   );
 }
 
-const scenario: Scenario<ApmFields> = async ({ logger }) => {
+const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
+  const { pipeline = 'default' } = parseApmScenarioOpts(scenarioOpts);
   return {
+    bootstrap: async ({ apmEsClient }) => {
+      apmEsClient.pipeline(apmEsClient.getPipeline(pipeline));
+    },
     generate: ({ range, clients: { apmEsClient } }) => {
       const producerTimestamps = range.ratePerMinute(1);
       const producerConsumerTimestamps = range.ratePerMinute(1);

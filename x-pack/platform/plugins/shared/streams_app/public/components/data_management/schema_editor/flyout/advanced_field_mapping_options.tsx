@@ -7,17 +7,21 @@
 import {
   EuiAccordion,
   EuiCodeBlock,
+  EuiFormRow,
   EuiLink,
   EuiPanel,
-  EuiSpacer,
-  EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getAdvancedParameters } from '@kbn/streams-schema';
+import {
+  FieldDefinitionConfigAdvancedParameters,
+  isSchema,
+  recursiveRecord,
+} from '@kbn/streams-schema';
+import { useBoolean } from '@kbn/react-hooks';
 import { SchemaField } from '../types';
 import { useKibana } from '../../../../hooks/use_kibana';
 
@@ -28,15 +32,22 @@ const label = i18n.translate('xpack.streams.advancedFieldMappingOptions.label', 
 export const AdvancedFieldMappingOptions = ({
   field,
   onChange,
+  onValidate,
   isEditing,
 }: {
   field: SchemaField;
   onChange: (field: Partial<SchemaField>) => void;
+  onValidate?: (isValid: boolean) => void;
   isEditing: boolean;
 }) => {
   const { core } = useKibana();
 
   const accordionId = useGeneratedHtmlId({ prefix: 'accordionID' });
+
+  const [hasParsingError, { on: markAsParsingError, off: resetParsingErrorFlag }] =
+    useBoolean(false);
+
+  const isInvalid = hasParsingError || !getValidFlag(field.additionalParameters);
 
   const jsonOptions = useMemo(
     () => (field.additionalParameters ? JSON.stringify(field.additionalParameters, null, 2) : ''),
@@ -46,50 +57,73 @@ export const AdvancedFieldMappingOptions = ({
   return (
     <EuiAccordion id={accordionId} buttonContent={label}>
       <EuiPanel color="subdued">
-        <EuiText size="xs">
-          <FormattedMessage
-            id="xpack.streams.advancedFieldMappingOptions.docs.label"
-            defaultMessage="Parameters can be defined with JSON. {link}"
-            values={{
-              link: (
-                <EuiLink
-                  data-test-subj="streamsAppAdvancedFieldMappingOptionsViewDocumentationLink"
-                  href={core.docLinks.links.elasticsearch.docsBase.concat('mapping-params.html')}
-                  target="_blank"
-                  external
-                >
-                  <FormattedMessage
-                    id="xpack.streams.indexPattern.randomSampling.learnMore"
-                    defaultMessage="View documentation."
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-        <EuiSpacer size="s" />
-        {isEditing ? (
-          <CodeEditor
-            height={120}
-            languageId="json"
-            value={jsonOptions}
-            onChange={(value) => {
-              try {
-                onChange({
-                  additionalParameters:
-                    value === '' ? undefined : getAdvancedParameters(field.name, JSON.parse(value)),
-                });
-              } catch (error: unknown) {
-                // do nothing
-              }
-            }}
-          />
-        ) : (
-          <EuiCodeBlock language="json" isCopyable>
-            {jsonOptions ?? ''}
-          </EuiCodeBlock>
-        )}
+        <EuiFormRow
+          isInvalid={isInvalid}
+          error={
+            isInvalid
+              ? i18n.translate('xpack.streams.advancedFieldMappingOptions.error', {
+                  defaultMessage:
+                    'Invalid advanced field mapping parameters. It should be defined as a JSON object.',
+                })
+              : undefined
+          }
+          label={
+            <FormattedMessage
+              id="xpack.streams.advancedFieldMappingOptions.docs.label"
+              defaultMessage="Parameters can be defined with JSON. {link}"
+              values={{
+                link: (
+                  <EuiLink
+                    data-test-subj="streamsAppAdvancedFieldMappingOptionsViewDocumentationLink"
+                    href={core.docLinks.links.elasticsearch.docsBase.concat('mapping-params.html')}
+                    target="_blank"
+                    external
+                  >
+                    <FormattedMessage
+                      id="xpack.streams.indexPattern.randomSampling.learnMore"
+                      defaultMessage="View documentation."
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        >
+          {isEditing ? (
+            <CodeEditor
+              height={120}
+              languageId="json"
+              value={jsonOptions}
+              onChange={(value) => {
+                try {
+                  const additionalParameters =
+                    value === ''
+                      ? undefined
+                      : (JSON.parse(value) as FieldDefinitionConfigAdvancedParameters);
+                  onChange({ additionalParameters });
+                  if (onValidate) onValidate(getValidFlag(additionalParameters));
+                  resetParsingErrorFlag();
+                } catch (error: unknown) {
+                  markAsParsingError();
+                  if (onValidate) onValidate(false);
+                }
+              }}
+            />
+          ) : (
+            <EuiCodeBlock language="json" isCopyable>
+              {jsonOptions}
+            </EuiCodeBlock>
+          )}
+        </EuiFormRow>
       </EuiPanel>
     </EuiAccordion>
+  );
+};
+
+const getValidFlag = (additionalParameters?: FieldDefinitionConfigAdvancedParameters) => {
+  return Boolean(
+    !additionalParameters ||
+      additionalParameters === '' ||
+      isSchema(recursiveRecord, additionalParameters)
   );
 };

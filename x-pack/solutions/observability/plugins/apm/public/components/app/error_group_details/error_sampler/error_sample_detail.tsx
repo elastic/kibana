@@ -56,6 +56,7 @@ import { ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { SampleSummary } from './sample_summary';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
+import { buildUrl } from '../../../../utils/build_url';
 
 const TransactionLinkName = styled.div`
   margin-left: ${({ theme }) => theme.euiTheme.size.s};
@@ -154,11 +155,22 @@ export function ErrorSampleDetails({
 
   const tabs = getTabs(error);
   const currentTab = getCurrentTab(tabs, detailTab) as ErrorTab;
+  const urlFromError = error.error.page?.url || error.url?.full;
+  const urlFromTransaction = transaction?.transaction?.page?.url || transaction?.url?.full;
+  const errorOrTransactionUrl = error?.url ? error : transaction;
+  const errorOrTransactionHttp = error?.http ? error : transaction;
+  const errorOrTransactionUserAgent = error?.user_agent
+    ? error.user_agent
+    : transaction?.user_agent;
 
-  const errorUrl = error.error.page?.url || error.url?.full;
-  const method = error.http?.request?.method;
-  const status = error.http?.response?.status_code;
-  const userAgent = error?.user_agent;
+  // To get the error data needed for the summary we use the transaction fallback in case
+  // the error data is not available.
+  // In case of OTel the error data is not available in the error response and we need to use
+  // the associated root span data (which is called "transaction" here because of the APM data model).
+  const errorUrl = urlFromError || urlFromTransaction || buildUrl(errorOrTransactionUrl);
+  const method = errorOrTransactionHttp?.http?.request?.method;
+  const status = errorOrTransactionHttp?.http?.response?.status_code;
+  const userAgent = errorOrTransactionUserAgent;
   const environment = error.service.environment;
   const serviceVersion = error.service.version;
   const isUnhandled = error.error.exception?.[0]?.handled === false;
@@ -205,7 +217,7 @@ export function ErrorSampleDetails({
                 <EuiFlexItem>
                   <EuiIcon type="apmTrace" />
                 </EuiFlexItem>
-                <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
+                <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
                   {i18n.translate('xpack.apm.errorSampleDetails.viewOccurrencesInTraceExplorer', {
                     defaultMessage: 'Explore traces with this error',
                   })}
@@ -223,7 +235,7 @@ export function ErrorSampleDetails({
               <EuiFlexItem>
                 <EuiIcon type="discoverApp" />
               </EuiFlexItem>
-              <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
+              <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
                 {i18n.translate(
                   'xpack.apm.errorSampleDetails.viewOccurrencesInDiscoverButtonLabel',
                   {
@@ -247,7 +259,7 @@ export function ErrorSampleDetails({
         <Summary
           items={[
             <TimestampTooltip time={errorData ? error.timestamp.us / 1000 : 0} />,
-            errorUrl && method ? (
+            errorUrl ? (
               <HttpInfoSummaryItem url={errorUrl} method={method} status={status} />
             ) : null,
             userAgent?.name ? <UserAgentSummaryItem {...userAgent} /> : null,

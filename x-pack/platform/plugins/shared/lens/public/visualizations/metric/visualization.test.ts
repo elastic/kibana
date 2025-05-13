@@ -126,6 +126,33 @@ describe('metric visualization', () => {
         ).toMatchSnapshot();
       });
 
+      test('generates configuration with no collapseBy', () => {
+        const groups = visualization.getConfiguration({
+          state: { ...fullState, collapseFn: undefined },
+          layerId: fullState.layerId,
+          frame: mockFrameApi,
+        }).groups;
+        const breakdownGroup = groups.find(({ groupId }) => groupId === GROUP_ID.BREAKDOWN_BY);
+        expect(breakdownGroup?.accessors[0].triggerIconType).toBeUndefined();
+      });
+
+      test('generates configuration with no collapseBy if the primary metric is not numeric', () => {
+        const groups = visualization.getConfiguration({
+          state: fullState,
+          layerId: fullState.layerId,
+          frame: createMockFramePublicAPI({
+            activeData: generateActiveData([
+              {
+                id: 'first',
+                rows: Array(3).fill({ 'metric-col-id': 'test', 'max-metric-col-id': 100 }),
+              },
+            ]),
+          }),
+        }).groups;
+        const breakdownGroup = groups.find(({ groupId }) => groupId === GROUP_ID.BREAKDOWN_BY);
+        expect(breakdownGroup?.accessors[0].triggerIconType).toBeUndefined();
+      });
+
       test('color-by-value', () => {
         expect(
           visualization.getConfiguration({
@@ -660,6 +687,7 @@ describe('metric visualization', () => {
           datasourceLayers.first as jest.Mocked<DatasourcePublicAPI>
         ).getOperationForColumnId.mockReturnValue({
           isStaticValue: true,
+          dataType: 'number',
         } as OperationDescriptor);
 
         const ast = visualization.toExpression(
@@ -693,6 +721,79 @@ describe('metric visualization', () => {
         (
           datasourceLayers.first as jest.Mocked<DatasourcePublicAPI>
         ).getOperationForColumnId.mockClear();
+      });
+
+      it('builds breakdown by metric without collapse function if metric is not numeric', () => {
+        const mockDatasource = createMockDatasource();
+        mockDatasource.publicAPIMock.getMaxPossibleNumValues.mockReturnValue(maxPossibleNumValues);
+        mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+          isStaticValue: false,
+          dataType: 'string',
+        } as OperationDescriptor);
+
+        const newDatasourceLayers = {
+          first: mockDatasource.publicAPIMock,
+        };
+
+        const ast = visualization.toExpression(
+          {
+            ...fullState,
+            // force a collapse fn
+            collapseFn: 'sum',
+            // Turning off an accessor to make sure it gets filtered out from the collapse arguments
+            secondaryMetricAccessor: undefined,
+          },
+          newDatasourceLayers
+        ) as ExpressionAstExpression;
+
+        expect(ast.chain).toHaveLength(1);
+        expect(ast.chain[0]).toMatchInlineSnapshot(`
+          Object {
+            "arguments": Object {
+              "breakdownBy": Array [
+                "breakdown-col-id",
+              ],
+              "color": Array [
+                "static-color",
+              ],
+              "iconAlign": Array [
+                "left",
+              ],
+              "inspectorTableId": Array [
+                "first",
+              ],
+              "max": Array [
+                "max-metric-col-id",
+              ],
+              "maxCols": Array [
+                5,
+              ],
+              "metric": Array [
+                "metric-col-id",
+              ],
+              "palette": Array [],
+              "secondaryPrefix": Array [
+                "extra-text",
+              ],
+              "subtitle": Array [
+                "subtitle",
+              ],
+              "titlesTextAlign": Array [
+                "left",
+              ],
+              "trendline": Array [],
+              "valueFontSize": Array [
+                "default",
+              ],
+              "valuesTextAlign": Array [
+                "right",
+              ],
+            },
+            "function": "metricVis",
+            "type": "function",
+          }
+        `);
+        expect(ast.chain[0].arguments.breakdownBy).not.toBeUndefined();
       });
     });
 

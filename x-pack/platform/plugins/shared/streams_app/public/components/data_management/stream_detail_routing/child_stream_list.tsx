@@ -12,37 +12,33 @@ import {
   EuiDragDropContext,
   EuiDroppable,
   EuiDraggable,
-  EuiPanel,
-  EuiButtonEmpty,
+  EuiButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import { cloneDeep } from 'lodash';
 import React from 'react';
-import { EMPTY_EQUALS_CONDITION } from '../../../util/condition';
+import { ALWAYS_CONDITION } from '../../../util/condition';
 import { NestedView } from '../../nested_view';
-import { useRoutingState } from './hooks/routing_state';
+import { useRoutingStateContext } from './hooks/routing_state';
 import { CurrentStreamEntry } from './current_stream_entry';
 import { NewRoutingStreamEntry } from './new_routing_stream_entry';
 import { RoutingStreamEntry } from './routing_stream_entry';
 
-export function ChildStreamList({
-  definition,
-  availableStreams,
-  routingAppState: {
-    childUnderEdit,
-    selectChildUnderEdit,
-    childStreams,
-    onChildStreamDragEnd,
-    onChildStreamDragStart,
-    draggingChildStream,
-  },
-}: {
-  definition: WiredStreamGetResponse;
-  routingAppState: ReturnType<typeof useRoutingState>;
-  availableStreams: string[];
-}) {
+export function ChildStreamList({ availableStreams }: { availableStreams: string[] }) {
+  const {
+    routingAppState: {
+      childUnderEdit,
+      selectChildUnderEdit,
+      childStreams,
+      onChildStreamDragEnd,
+      onChildStreamDragStart,
+      draggingChildStream,
+      hasChildStreamsOrderChanged,
+    },
+    definition,
+  } = useRoutingStateContext();
   return (
     <EuiFlexGroup
       direction="column"
@@ -52,18 +48,53 @@ export function ChildStreamList({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiText
-          size="s"
-          className={css`
-            height: 40px;
-            align-content: center;
-            font-weight: bold;
-          `}
-        >
-          {i18n.translate('xpack.streams.streamDetailRouting.rules.header', {
-            defaultMessage: 'Routing rules',
-          })}
-        </EuiText>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiText
+            size="s"
+            className={css`
+              height: 40px;
+              align-content: center;
+              font-weight: bold;
+            `}
+          >
+            {i18n.translate('xpack.streams.streamDetailRouting.rules.header', {
+              defaultMessage: 'Routing rules',
+            })}
+          </EuiText>
+          {definition.privileges.simulate && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  !definition.privileges.manage
+                    ? i18n.translate('xpack.streams.streamDetailRouting.rules.onlySimulate', {
+                        defaultMessage:
+                          "You don't have sufficient privileges to create new streams, only simulate.",
+                      })
+                    : undefined
+                }
+              >
+                <EuiButton
+                  iconType="plus"
+                  size="s"
+                  data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
+                  onClick={() => {
+                    selectChildUnderEdit({
+                      isNew: true,
+                      child: {
+                        destination: `${definition.stream.name}.child`,
+                        if: cloneDeep(ALWAYS_CONDITION),
+                      },
+                    });
+                  }}
+                >
+                  {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
+                    defaultMessage: 'Create child stream',
+                  })}
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexGroup
         direction="column"
@@ -81,6 +112,7 @@ export function ChildStreamList({
                   <EuiDraggable
                     key={child.destination}
                     index={i}
+                    isDragDisabled={!definition.privileges.manage}
                     draggableId={child.destination}
                     hasInteractiveChildren={true}
                     customDragHandle={true}
@@ -89,10 +121,14 @@ export function ChildStreamList({
                     {(provided) => (
                       <NestedView
                         key={i}
+                        last={!childUnderEdit?.isNew && i === childStreams.length - 1}
                         isBeingDragged={draggingChildStream === child.destination}
                       >
                         <RoutingStreamEntry
                           draggableProvided={provided}
+                          disableEditButton={
+                            hasChildStreamsOrderChanged || !definition.privileges.manage
+                          }
                           child={
                             !childUnderEdit?.isNew &&
                             child.destination === childUnderEdit?.child.destination
@@ -126,7 +162,7 @@ export function ChildStreamList({
             </EuiFlexGroup>
           </EuiDroppable>
         </EuiDragDropContext>
-        {childUnderEdit?.isNew ? (
+        {childUnderEdit?.isNew && (
           <NestedView last>
             <NewRoutingStreamEntry
               child={childUnderEdit.child}
@@ -141,28 +177,6 @@ export function ChildStreamList({
                 });
               }}
             />
-          </NestedView>
-        ) : (
-          <NestedView last>
-            <EuiPanel hasShadow={false} hasBorder paddingSize="none">
-              <EuiButtonEmpty
-                iconType="plus"
-                data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
-                onClick={() => {
-                  selectChildUnderEdit({
-                    isNew: true,
-                    child: {
-                      destination: `${definition.stream.name}.child`,
-                      if: cloneDeep(EMPTY_EQUALS_CONDITION),
-                    },
-                  });
-                }}
-              >
-                {i18n.translate('xpack.streams.streamDetailRouting.addRule', {
-                  defaultMessage: 'Create a new child stream',
-                })}
-              </EuiButtonEmpty>
-            </EuiPanel>
           </NestedView>
         )}
       </EuiFlexGroup>

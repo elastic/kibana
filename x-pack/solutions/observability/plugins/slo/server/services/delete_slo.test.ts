@@ -56,9 +56,7 @@ describe('DeleteSLO', () => {
       await deleteSLO.execute(slo.id);
 
       expect(mockRepository.findById).toMatchSnapshot();
-      expect(mockSummaryTransformManager.stop).toMatchSnapshot();
       expect(mockSummaryTransformManager.uninstall).toMatchSnapshot();
-      expect(mockTransformManager.stop).toMatchSnapshot();
       expect(mockTransformManager.uninstall).toMatchSnapshot();
       expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toMatchSnapshot();
       expect(mockEsClient.deleteByQuery).toMatchSnapshot();

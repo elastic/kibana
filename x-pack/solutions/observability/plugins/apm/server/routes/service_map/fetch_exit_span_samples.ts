@@ -25,12 +25,12 @@ import {
   TRACE_ID,
   EVENT_OUTCOME,
   AT_TIMESTAMP,
-  LINKS_SPAN_ID,
+  OTEL_SPAN_LINKS_SPAN_ID,
   SPAN_NAME,
   SPAN_LINKS_SPAN_ID,
   TRANSACTION_NAME,
   SPAN_LINKS_TRACE_ID,
-  LINKS_TRACE_ID,
+  OTEL_SPAN_LINKS_TRACE_ID,
 } from '../../../common/es_fields/apm';
 
 // https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#span-limits
@@ -224,7 +224,10 @@ async function fetchSpanLinksFromTraceIds({
           {
             bool: {
               minimum_should_match: 1,
-              should: [...existsQuery(SPAN_LINKS_TRACE_ID), ...existsQuery(LINKS_TRACE_ID)],
+              should: [
+                ...existsQuery(SPAN_LINKS_TRACE_ID),
+                ...existsQuery(OTEL_SPAN_LINKS_TRACE_ID),
+              ],
             },
           },
           {
@@ -232,7 +235,7 @@ async function fetchSpanLinksFromTraceIds({
               minimum_should_match: 1,
               should: [
                 ...termsQuery(SPAN_LINKS_TRACE_ID, ...traceIds),
-                ...termsQuery(LINKS_TRACE_ID, ...traceIds),
+                ...termsQuery(OTEL_SPAN_LINKS_TRACE_ID, ...traceIds),
                 // needed for focused service map
                 // containing incoming links in the root transaction
                 ...termsQuery(TRACE_ID, ...traceIds),
@@ -264,7 +267,7 @@ async function fetchSpanLinksFromTraceIds({
           },
           otelLinkedSpanId: {
             terms: {
-              field: LINKS_SPAN_ID,
+              field: OTEL_SPAN_LINKS_SPAN_ID,
               size: SPAN_LINK_IDS_LIMIT,
             },
           },
@@ -307,7 +310,7 @@ async function fetchSpanLinksFromTraceIds({
           },
           otelLinkedSpanId: {
             terms: {
-              field: LINKS_SPAN_ID,
+              field: OTEL_SPAN_LINKS_SPAN_ID,
               size: SPAN_LINK_IDS_LIMIT,
             },
           },

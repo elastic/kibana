@@ -12,8 +12,8 @@ import {
   createInternalStateStore,
   createRuntimeStateManager,
   internalStateActions,
-  selectCurrentTab,
-  selectCurrentTabRuntimeState,
+  selectTab,
+  selectTabRuntimeState,
 } from '.';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { mockCustomizationContext } from '../../../../customizations/__mocks__/customization_context';
@@ -28,14 +28,15 @@ describe('InternalStateStore', () => {
       runtimeStateManager,
       urlStateStorage: createKbnUrlStateStorage(),
     });
-    expect(selectCurrentTab(store.getState()).dataViewId).toBeUndefined();
+    const tabId = store.getState().tabs.allIds[0];
+    expect(selectTab(store.getState(), tabId).dataViewId).toBeUndefined();
     expect(
-      selectCurrentTabRuntimeState(store.getState(), runtimeStateManager).currentDataView$.value
+      selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value
     ).toBeUndefined();
-    store.dispatch(internalStateActions.setDataView(dataViewMock));
-    expect(selectCurrentTab(store.getState()).dataViewId).toBe(dataViewMock.id);
-    expect(
-      selectCurrentTabRuntimeState(store.getState(), runtimeStateManager).currentDataView$.value
-    ).toBe(dataViewMock);
+    store.dispatch(internalStateActions.setDataView({ tabId, dataView: dataViewMock }));
+    expect(selectTab(store.getState(), tabId).dataViewId).toBe(dataViewMock.id);
+    expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value).toBe(
+      dataViewMock
+    );
   });
 });

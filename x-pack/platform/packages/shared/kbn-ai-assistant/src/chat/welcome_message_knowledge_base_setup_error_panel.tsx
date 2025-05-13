@@ -38,8 +38,10 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
   const { http } = useKibana().services;
 
   const modelId = knowledgeBase.status.value?.endpoint?.service_settings?.model_id;
-  const deploymentState = knowledgeBase.status.value?.model_stats?.deployment_state;
-  const allocationState = knowledgeBase.status.value?.model_stats?.allocation_state;
+  const deploymentState = knowledgeBase.status.value?.modelStats?.deployment_stats?.state;
+  const deploymentReason = knowledgeBase.status.value?.modelStats?.deployment_stats?.reason;
+  const allocationState =
+    knowledgeBase.status.value?.modelStats?.deployment_stats?.allocation_status?.state;
 
   return (
     <div
@@ -58,34 +60,46 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
 
           <EuiDescriptionListDescription>
             <ul>
-              {!deploymentState ? (
+              {deploymentState ? (
+                <>
+                  <li>
+                    <EuiIcon type="alert" color="subdued" />{' '}
+                    <FormattedMessage
+                      id="xpack.aiAssistant.welcomeMessage.modelIsNotDeployedLabel"
+                      defaultMessage="Model {modelId} is not deployed"
+                      values={{
+                        modelId: <EuiCode>{modelId}</EuiCode>,
+                      }}
+                    />
+                  </li>
+                  <li>
+                    <EuiIcon type="alert" color="subdued" />{' '}
+                    <FormattedMessage
+                      id="xpack.aiAssistant.welcomeMessage.modelIsNotStartedLabel"
+                      defaultMessage="Deployment state of {modelId} is {deploymentState}"
+                      values={{
+                        modelId: <EuiCode>{modelId}</EuiCode>,
+                        deploymentState: <EuiCode>{deploymentState}</EuiCode>,
+                      }}
+                    />
+                  </li>
+                </>
+              ) : null}
+
+              {deploymentReason ? (
                 <li>
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
-                    id="xpack.aiAssistant.welcomeMessage.modelIsNotDeployedLabel"
-                    defaultMessage="Model {modelId} is not deployed"
+                    id="xpack.aiAssistant.welcomeMessage.modelIsNotStartedLabelReason"
+                    defaultMessage="reason: {reason}"
                     values={{
-                      modelId: <EuiCode>{modelId}</EuiCode>,
+                      reason: <EuiCode>{deploymentReason}</EuiCode>,
                     }}
                   />
                 </li>
               ) : null}
 
-              {deploymentState && deploymentState !== 'started' ? (
-                <li>
-                  <EuiIcon type="alert" color="subdued" />{' '}
-                  <FormattedMessage
-                    id="xpack.aiAssistant.welcomeMessage.modelIsNotStartedLabel"
-                    defaultMessage="Deployment state of {modelId} is {deploymentState}"
-                    values={{
-                      modelId: <EuiCode>{modelId}</EuiCode>,
-                      deploymentState: <EuiCode>{deploymentState}</EuiCode>,
-                    }}
-                  />
-                </li>
-              ) : null}
-
-              {allocationState && allocationState !== 'fully_allocated' ? (
+              {allocationState ? (
                 <li>
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
@@ -128,7 +142,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                 <EuiLink
                   data-test-subj="observabilityAiAssistantWelcomeMessageTrainedModelsLink"
                   external
-                  href={http?.basePath.prepend('/app/ml/trained_models')}
+                  href={http?.basePath.prepend('/app/management/ml/trained_models')}
                   target="_blank"
                 >
                   {i18n.translate('xpack.aiAssistant.welcomeMessage.trainedModelsLinkLabel', {

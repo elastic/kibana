@@ -31,7 +31,7 @@ export function getConnectorType(): InferenceConnector {
     iconClass: 'sparkles',
     isExperimental: true,
     selectMessage: i18n.translate('xpack.stackConnectors.components.inference.selectMessageText', {
-      defaultMessage: 'Use the Elastic LLM for your chat and RAG usecases.',
+      defaultMessage: 'Use the Elastic Managed LLM for your chat and RAG use cases.',
     }),
     actionTypeTitle: INFERENCE_CONNECTOR_TITLE,
     validateParams: async (

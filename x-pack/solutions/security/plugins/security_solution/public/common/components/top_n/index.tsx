@@ -97,7 +97,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
   browserFields,
   dataProviders,
   field,
-  dataViewSpec: indexPattern,
+  dataViewSpec,
   globalFilters = EMPTY_FILTERS,
   globalQuery = EMPTY_QUERY,
   kqlMode,
@@ -121,7 +121,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
             config: getEsQueryConfig(uiSettings),
             dataProviders,
             filters: activeTimelineFilters,
-            indexPattern,
+            dataViewSpec,
             kqlMode,
             kqlQuery: {
               language: 'kuery',
@@ -135,7 +135,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       uiSettings,
       dataProviders,
       activeTimelineFilters,
-      indexPattern,
+      dataViewSpec,
       kqlMode,
       activeTimelineKqlQueryExpression,
     ]
@@ -155,7 +155,7 @@ const StatefulTopNComponent: React.FC<Props> = ({
       field={field as AlertsStackByField}
       filters={isActiveTimeline(scopeId ?? '') ? EMPTY_FILTERS : globalFilters}
       from={isActiveTimeline(scopeId ?? '') ? activeTimelineFrom : from}
-      indexPattern={indexPattern}
+      dataViewSpec={dataViewSpec}
       options={options}
       paddingSize={paddingSize}
       query={isActiveTimeline(scopeId ?? '') ? EMPTY_QUERY : globalQuery}

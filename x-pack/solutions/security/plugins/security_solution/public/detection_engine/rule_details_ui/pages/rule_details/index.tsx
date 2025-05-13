@@ -39,6 +39,11 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import {
+  defaultGroupStatsAggregations,
+  defaultGroupStatsRenderer,
+  defaultGroupTitleRenderers,
+} from '../../../../detections/components/alerts_table/grouping_settings';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
 import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
@@ -178,6 +183,25 @@ const StyledMinHeightTabContainer = styled.div`
 const RuleFieldsSectionWrapper = styled.div`
   overflow-wrap: anywhere;
 `;
+
+const defaultGroupingOptions = [
+  {
+    label: i18n.SOURCE_ADDRESS,
+    key: 'source.address',
+  },
+  {
+    label: i18n.USER_NAME,
+    key: 'user.name',
+  },
+  {
+    label: i18n.HOST_NAME,
+    key: 'host.name',
+  },
+  {
+    label: i18n.DESTINATION_ADDRESS,
+    key: 'destination.address',
+  },
+];
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
@@ -535,6 +559,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     confirmManualRuleRun,
   } = useManualRuleRunConfirmation();
 
+  const accordionExtraActionGroupStats = useMemo(
+    () => ({
+      aggregations: defaultGroupStatsAggregations,
+      renderer: defaultGroupStatsRenderer,
+    }),
+    []
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -762,8 +794,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
+                        accordionButtonContent={defaultGroupTitleRenderers}
+                        accordionExtraActionGroupStats={accordionExtraActionGroupStats}
                         currentAlertStatusFilterValue={currentAlertStatusFilterValue}
                         defaultFilters={alertMergedFilters}
+                        defaultGroupingOptions={defaultGroupingOptions}
                         from={from}
                         globalFilters={filters}
                         globalQuery={query}

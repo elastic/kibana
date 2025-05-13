@@ -19,7 +19,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/lib/kibana/kibana_react');
 jest.mock('../../../../common/hooks/use_experimental_features', () => {
-  return { useIsExperimentalFeatureEnabled: jest.fn() };
+  return { useIsExperimentalFeatureEnabled: jest.fn(), useEnableExperimental: () => jest.fn() };
 });
 
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');

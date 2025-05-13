@@ -115,9 +115,9 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables the Attack Discovery Scheduling functionality and API endpoint`.
+   * Enables advanced ESQL generation for the Assistant.
    */
-  assistantAttackDiscoverySchedulingEnabled: false,
+  advancedEsqlGeneration: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -226,6 +226,11 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
 
   /**
+   * Enables Privilege Monitoring
+   */
+  privilegeMonitoringEnabled: false,
+
+  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
@@ -239,6 +244,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables flyout history and new preview navigation
    */
   newExpandableFlyoutNavigationDisabled: false,
+
+  /**
+   * Enables the ability to edit highlighted fields in the alertflyout
+   */
+  editHighlightedFieldsEnabled: false,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
@@ -256,6 +266,9 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables banner for informing users about changes in data collection.
    */
   eventCollectionDataReductionBannerEnabled: true,
+
+  /** Enables new Data View Picker */
+  newDataViewPickerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

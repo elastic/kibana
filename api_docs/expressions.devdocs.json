@@ -795,6 +795,133 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.Execution.canUseCachedResult",
+            "type": "Function",
+            "tags": [],
+            "label": "#canUseCachedResult",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, input: unknown, args: Record<string, unknown>) => { hash: string; value: ",
+              "FunctionCacheItem",
+              "; valid: boolean; } | { hash: string | undefined; value: undefined; valid: false; }"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.canUseCachedResult.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.canUseCachedResult.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.canUseCachedResult.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.Execution.getSideEffectFn",
+            "type": "Function",
+            "tags": [],
+            "label": "#getSideEffectFn",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, args: Record<string, unknown>) => (() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.getSideEffectFn.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.getSideEffectFn.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2216,11 +2343,14 @@
           {
             "parentPluginId": "expressions",
             "id": "def-public.ExpressionFunction.allowCache",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "allowCache",
             "description": [
               "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | { withSideEffects: (params: Record<string, unknown>, handlers: object) => () => void; }"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -8437,10 +8567,10 @@
             "tags": [],
             "label": "allowCache",
             "description": [
-              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.\n\nIt is possible to collect side effects produced by the function\n(e.g. logging, sending events to the server, etc.) and return a\nhandler to reproduce such side effects when the function cache is used\ninstead of the original function implementation."
             ],
             "signature": [
-              "boolean | undefined"
+              "boolean | { withSideEffects(args: Arguments, context: Context): () => void; } | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/types.ts",
             "deprecated": false,
@@ -14371,6 +14501,133 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.Execution.canUseCachedResult",
+            "type": "Function",
+            "tags": [],
+            "label": "#canUseCachedResult",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, input: unknown, args: Record<string, unknown>) => { hash: string; value: ",
+              "FunctionCacheItem",
+              "; valid: boolean; } | { hash: string | undefined; value: undefined; valid: false; }"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.canUseCachedResult.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.canUseCachedResult.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.canUseCachedResult.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.Execution.getSideEffectFn",
+            "type": "Function",
+            "tags": [],
+            "label": "#getSideEffectFn",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, args: Record<string, unknown>) => (() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.getSideEffectFn.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.getSideEffectFn.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -15573,11 +15830,14 @@
           {
             "parentPluginId": "expressions",
             "id": "def-server.ExpressionFunction.allowCache",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "allowCache",
             "description": [
               "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | { withSideEffects: (params: Record<string, unknown>, handlers: object) => () => void; }"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -19814,10 +20074,10 @@
             "tags": [],
             "label": "allowCache",
             "description": [
-              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.\n\nIt is possible to collect side effects produced by the function\n(e.g. logging, sending events to the server, etc.) and return a\nhandler to reproduce such side effects when the function cache is used\ninstead of the original function implementation."
             ],
             "signature": [
-              "boolean | undefined"
+              "boolean | { withSideEffects(args: Arguments, context: Context): () => void; } | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/types.ts",
             "deprecated": false,
@@ -23535,6 +23795,133 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.Execution.canUseCachedResult",
+            "type": "Function",
+            "tags": [],
+            "label": "#canUseCachedResult",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, input: unknown, args: Record<string, unknown>) => { hash: string; value: ",
+              "FunctionCacheItem",
+              "; valid: boolean; } | { hash: string | undefined; value: undefined; valid: false; }"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.canUseCachedResult.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.canUseCachedResult.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.canUseCachedResult.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.Execution.getSideEffectFn",
+            "type": "Function",
+            "tags": [],
+            "label": "#getSideEffectFn",
+            "description": [],
+            "signature": [
+              "<Fn extends ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunction",
+                "text": "ExpressionFunction"
+              },
+              ">(fn: Fn, args: Record<string, unknown>) => (() => void) | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.getSideEffectFn.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "fn",
+                "description": [],
+                "signature": [
+                  "Fn"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.getSideEffectFn.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/plugins/shared/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -24956,11 +25343,14 @@
           {
             "parentPluginId": "expressions",
             "id": "def-common.ExpressionFunction.allowCache",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "allowCache",
             "description": [
               "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | { withSideEffects: (params: Record<string, unknown>, handlers: object) => () => void; }"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -32810,10 +33200,10 @@
             "tags": [],
             "label": "allowCache",
             "description": [
-              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.\n\nIt is possible to collect side effects produced by the function\n(e.g. logging, sending events to the server, etc.) and return a\nhandler to reproduce such side effects when the function cache is used\ninstead of the original function implementation."
             ],
             "signature": [
-              "boolean | undefined"
+              "boolean | { withSideEffects(args: Arguments, context: Context): () => void; } | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/types.ts",
             "deprecated": false,
