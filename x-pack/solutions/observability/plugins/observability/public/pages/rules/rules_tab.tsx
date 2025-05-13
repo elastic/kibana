@@ -33,7 +33,7 @@ export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
   });
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
-
+  console.log('filteredRuleTypes', filteredRuleTypes);
   const { lastResponse, params, search, status, type } = urlStateStorage.get<{
     lastResponse: string[];
     params: Record<string, string | number | object>;

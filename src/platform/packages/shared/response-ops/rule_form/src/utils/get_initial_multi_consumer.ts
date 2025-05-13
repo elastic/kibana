@@ -44,6 +44,12 @@ export const getInitialMultiConsumer = ({
   ruleTypes: RuleTypeWithDescription[];
   isServerless?: boolean;
 }): RuleCreationValidConsumer | null => {
+  console.log('getInitialMultiConsumer', {
+    multiConsumerSelection,
+    validConsumers,
+    ruleType,
+    isServerless,
+  });
   // If rule type doesn't support multi-consumer or no valid consumers exists,
   // return nothing
   if (!MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id) || validConsumers.length === 0) {
@@ -53,6 +59,11 @@ export const getInitialMultiConsumer = ({
   // Use the only value in valid consumers
   if (validConsumers.length === 1) {
     return validConsumers[0];
+  }
+
+  // If o11y is in the valid consumers and it is serverless, just use that
+  if (isServerless && validConsumers.includes(AlertConsumers.STACK_ALERTS)) {
+    return AlertConsumers.STACK_ALERTS;
   }
 
   const selectedAvailableRuleType = ruleTypes.find((availableRuleType) => {

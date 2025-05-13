@@ -26,7 +26,7 @@ xpack.features.overrides:
     category: 'observability'
     order: 1200
   ### Stack alerts is hidden in Role management since it's not needed.
-  stackAlerts.hidden: true
+  stackAlerts.hidden: false
   ### By default, this feature named as `Synthetics and Uptime`, but should be renamed to `Synthetics` since `Uptime` is not available.
   uptime.name: 'Synthetics'
 
@@ -35,6 +35,12 @@ xpack.slo.enabled: true
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
+
+
+## Enable the capability for the observability feature ID in the serverless environment to take ownership of the rules.
+## The value need to be a featureId observability Or stackAlerts Or siem
+xpack.alerting.rules.overwriteProducer: 'observability'
+
 
 ## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true

@@ -40,6 +40,8 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
   const dispatch = useRuleFormDispatch();
 
   const validatedSelectedConsumer = useMemo(() => {
+    console.log('validatedSelectedConsumer');
+
     return getValidatedMultiConsumer({
       multiConsumerSelection,
       validConsumers,

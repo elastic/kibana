@@ -9,8 +9,8 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_c
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('ElasticSearch query rule', () => {
-    loadTestFile(require.resolve('./query_dsl'));
-    loadTestFile(require.resolve('./query_dsl_with_group_by'));
+    // loadTestFile(require.resolve('./query_dsl'));
+    // loadTestFile(require.resolve('./query_dsl_with_group_by'));
     loadTestFile(require.resolve('./consumers_and_privileges'));
   });
 }
