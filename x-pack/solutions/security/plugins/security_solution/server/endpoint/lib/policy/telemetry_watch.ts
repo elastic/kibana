@@ -93,12 +93,19 @@ export class TelemetryConfigWatcher {
     do {
       try {
         response = await pRetry(
-          () =>
-            this.policyService.list(this.makeInternalSOClient(), {
-              page,
-              perPage: 100,
-              kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-            }),
+          (attemptCount) =>
+            this.policyService
+              .list(this.makeInternalSOClient(), {
+                page,
+                perPage: 100,
+                kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+              })
+              .then((result) => {
+                this.logger.debug(
+                  `Retrieved page [${page}] of endpoint package policies on attempt [${attemptCount}]`
+                );
+                return result;
+              }),
           {
             onFailedAttempt: (error) =>
               this.logger.debug(
