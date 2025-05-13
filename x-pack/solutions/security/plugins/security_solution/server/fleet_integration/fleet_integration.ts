@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   PostPackagePolicyCreateCallback,
@@ -459,24 +458,29 @@ export const getAgentPolicyPostUpdateCallback = (
 };
 
 export const getPackagePolicyDeleteCallback = (
-  exceptionsClient: ExceptionListClient | undefined,
-  savedObjectsClient: SavedObjectsClientContract | undefined
+  endpointServices: EndpointAppContextService
 ): PostPackagePolicyPostDeleteCallback => {
+  const exceptionsClient = endpointServices.getExceptionListsClient();
+  const logger = endpointServices.createLogger('endpointPolicyDeleteCallback');
+
   return async (deletePackagePolicy): Promise<void> => {
     if (!exceptionsClient) {
       return;
     }
 
     const policiesToRemove: Array<Promise<void>> = [];
+
     for (const policy of deletePackagePolicy) {
       if (isEndpointPackagePolicy(policy)) {
-        policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy));
-        if (savedObjectsClient) {
-          policiesToRemove.push(removeProtectionUpdatesNote(savedObjectsClient, policy));
-        }
+        logger.debug(`Processing deleted endpoint policy [${policy.id}]`);
+
+        policiesToRemove.push(removePolicyFromArtifacts(exceptionsClient, policy, logger));
+        policiesToRemove.push(removeProtectionUpdatesNote(endpointServices, policy));
       }
     }
 
     await Promise.all(policiesToRemove);
+
+    logger.debug(`Done processing deleted policies`);
   };
 };
