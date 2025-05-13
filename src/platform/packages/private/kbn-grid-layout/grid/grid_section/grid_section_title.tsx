@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
+import { CollapsibleSection } from '../types';
 
 export const GridSectionTitle = React.memo(
   ({
@@ -42,10 +43,15 @@ export const GridSectionTitle = React.memo(
     const { gridLayoutStateManager } = useGridLayoutContext();
 
     const inputRef = useRef<HTMLInputElement | null>(null);
-    const currentSection = gridLayoutStateManager.gridLayout$.value[sectionId];
-    const [sectionTitle, setSectionTitle] = useState<string>(
-      !currentSection || currentSection.isMainSection ? '' : currentSection.title
-    );
+    /**
+     * This element should never be rendered for "main" sections, so casting to CollapsibleSection
+     * is safe; however, if this somehow **did** happen for a main section, we would fall back to
+     * an empty string for the title (which should be fine)
+     */
+    const currentSection = gridLayoutStateManager.gridLayout$.value[sectionId] as
+      | CollapsibleSection
+      | undefined;
+    const [sectionTitle, setSectionTitle] = useState<string>(currentSection?.title ?? '');
 
     useEffect(() => {
       /**
@@ -55,8 +61,8 @@ export const GridSectionTitle = React.memo(
         .pipe(
           map((gridLayout) => {
             const section = gridLayout[sectionId];
-            if (!section) return '';
-            return section.isMainSection ? '' : section.title;
+            if (!section || section.isMainSection) return ''; // main sections cannot have titles
+            return section.title;
           }),
           distinctUntilChanged()
         )
@@ -143,7 +149,7 @@ export const GridSectionTitle = React.memo(
                   iconType="pencil"
                   onClick={() => setEditTitleOpen(true)}
                   color="text"
-                  aria-label={i18n.translate('kbnGridLayout.section.editRowTitle', {
+                  aria-label={i18n.translate('kbnGridLayout.section.editTitleAriaLabel', {
                     defaultMessage: 'Edit section title',
                   })}
                   data-test-subj={`kbnGridSectionTitle-${sectionId}--edit`}

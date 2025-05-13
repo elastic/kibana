@@ -17,6 +17,12 @@ export interface GridSectionProps {
   sectionId: string;
 }
 
+/**
+ * This component "wraps" all the panels in a given section and it is used to:
+ * 1. Apply styling to a targeted section via the `kbnGridSection--targeted` class name
+ * 2. Apply styling to sections where dropping is blocked via the `kbnGridSection--blocked` class name
+ * 3. The ref to this component is used to figure out which section is being targeted
+ */
 export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
@@ -42,8 +48,8 @@ export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) =
         (activePanel) => {
           const rowRef = gridLayoutStateManager.sectionRefs.current[sectionId];
           if (!rowRef) return;
-          const targetRow = activePanel?.targetRow;
-          if (sectionId === targetRow && activePanel) {
+          const targetSection = activePanel?.targetSection;
+          if (sectionId === targetSection && activePanel) {
             rowRef.classList.add('kbnGridSection--targeted');
           } else {
             rowRef.classList.remove('kbnGridSection--targeted');

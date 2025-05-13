@@ -9,7 +9,7 @@
 
 import { omit } from 'lodash';
 import { getSampleOrderedLayout } from '../test_utils/sample_layout';
-import { combinePanels, deleteRow } from './section_management';
+import { combinePanels, deleteSection } from './section_management';
 
 describe('section management', () => {
   describe('combine panels', () => {
@@ -43,7 +43,7 @@ describe('section management', () => {
   describe('delete row', () => {
     it('delete existing row', () => {
       const originalLayout = getSampleOrderedLayout();
-      const newLayout = deleteRow(originalLayout, 'second');
+      const newLayout = deleteSection(originalLayout, 'second');
 
       // modification happens by value and not by reference
       expect(originalLayout.second).toBeDefined();
@@ -53,7 +53,7 @@ describe('section management', () => {
     it('delete non-existant row', () => {
       const originalLayout = getSampleOrderedLayout();
       expect(() => {
-        const newLayout = deleteRow(originalLayout, 'fake');
+        const newLayout = deleteSection(originalLayout, 'fake');
         expect(newLayout.fake).not.toBeDefined();
       }).not.toThrow();
     });

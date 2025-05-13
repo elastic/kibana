@@ -13,7 +13,7 @@ import { skip } from 'rxjs';
 import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
-export const GridPanelDragPreview = () => {
+export const GridPanelDragPreview = React.memo(() => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
@@ -26,7 +26,7 @@ export const GridPanelDragPreview = () => {
         .subscribe((activePanel) => {
           if (!dragPreviewRef.current) return;
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-          const sectionId = activePanel?.targetRow;
+          const sectionId = activePanel?.targetSection;
           if (!activePanel || !sectionId || !gridLayout[sectionId]?.panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
@@ -50,7 +50,7 @@ export const GridPanelDragPreview = () => {
   );
 
   return <div ref={dragPreviewRef} className={'kbnGridPanel--dragPreview'} css={styles} />;
-};
+});
 
 const styles = css({ display: 'none', pointerEvents: 'none' });
 

@@ -24,8 +24,8 @@ import { i18n } from '@kbn/i18n';
 
 import { CollapsibleSection } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { useGridLayoutRowEvents } from '../use_grid_layout_events';
-import { deleteRow } from '../utils/section_management';
+import { useGridLayoutSectionEvents } from '../use_grid_layout_events';
+import { deleteSection } from '../utils/section_management';
 import { DeleteGridSectionModal } from './delete_grid_section_modal';
 import { GridSectionTitle } from './grid_section_title';
 
@@ -37,7 +37,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
-  const { startDrag, onBlur } = useGridLayoutRowEvents({ sectionId });
+  const { startDrag, onBlur } = useGridLayoutSectionEvents({ sectionId });
 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
@@ -119,6 +119,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         }
       });
 
+    /**
+     * This subscription is responsible for setting the collapsed state class name
+     */
     const collapsedStateSubscription = gridLayoutStateManager.gridLayout$
       .pipe(
         map((gridLayout) => {
@@ -145,7 +148,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
     };
   }, [gridLayoutStateManager, sectionId]);
 
-  const confirmDeleteRow = useCallback(() => {
+  const confirmDeleteSection = useCallback(() => {
     /**
      * Memoization of this callback does not need to be dependant on the React panel count
      * state, so just grab the panel count via gridLayoutStateManager instead
@@ -154,13 +157,16 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
       gridLayoutStateManager.gridLayout$.getValue()[sectionId].panels
     ).length;
     if (!Boolean(count)) {
-      const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), sectionId);
+      const newLayout = deleteSection(gridLayoutStateManager.gridLayout$.getValue(), sectionId);
       gridLayoutStateManager.gridLayout$.next(newLayout);
     } else {
       setDeleteModalVisible(true);
     }
   }, [gridLayoutStateManager, sectionId]);
 
+  /**
+   * Callback for collapsing and/or expanding the section when the title button is clicked
+   */
   const toggleIsCollapsed = useCallback(() => {
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
     const section = newLayout[sectionId];
@@ -179,6 +185,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         css={(theme) => styles.headerStyles(theme, sectionId)}
         className={classNames('kbnGridSectionHeader', {
           'kbnGridSectionHeader--active': isActive,
+          // sets the collapsed state on mount
           'kbnGridSectionHeader--collapsed': (
             gridLayoutStateManager.gridLayout$.getValue()[sectionId] as
               | CollapsibleSection
@@ -212,7 +219,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                   data-test-subj={`kbnGridSectionHeader-${sectionId}--panelCount`}
                   className={'kbnGridLayout--panelCount'}
                 >
-                  {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
+                  {i18n.translate('kbnGridLayout.section.panelCount', {
                     defaultMessage:
                       '({panelCount} {panelCount, plural, one {panel} other {panels}})',
                     values: {
@@ -228,9 +235,9 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       <EuiButtonIcon
                         iconType="trash"
                         color="danger"
-                        className="kbnGridLayout--deleteRowIcon"
-                        onClick={confirmDeleteRow}
-                        aria-label={i18n.translate('kbnGridLayout.row.deleteRow', {
+                        className="kbnGridLayout--deleteSectionIcon"
+                        onClick={confirmDeleteSection}
+                        aria-label={i18n.translate('kbnGridLayout.section.deleteSection', {
                           defaultMessage: 'Delete section',
                         })}
                       />
@@ -244,7 +251,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       iconType="move"
                       color="text"
                       className="kbnGridSection--dragHandle"
-                      aria-label={i18n.translate('kbnGridLayout.row.moveRow', {
+                      aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
                         defaultMessage: 'Move section',
                       })}
                       onMouseDown={startDrag}
@@ -287,7 +294,7 @@ const styles = {
       gridRowStart: `span 1`,
       gridRowEnd: `start-${sectionId}`,
       height: `${euiTheme.size.xl}`,
-      '.kbnGridLayout--deleteRowIcon': {
+      '.kbnGridLayout--deleteSectionIcon': {
         marginLeft: euiTheme.size.xs,
       },
       '.kbnGridLayout--panelCount': {
@@ -303,21 +310,21 @@ const styles = {
       },
 
       // these styles hide the delete + move actions by default and only show them on hover
-      [`.kbnGridLayout--deleteRowIcon,
+      [`.kbnGridLayout--deleteSectionIcon,
         .kbnGridSection--dragHandle`]: {
         opacity: '0',
         [`${euiCanAnimate}`]: {
           transition: `opacity ${euiTheme.animation.extraFast} ease-in`,
         },
       },
-      [`&:hover .kbnGridLayout--deleteRowIcon, 
+      [`&:hover .kbnGridLayout--deleteSectionIcon, 
         &:hover .kbnGridSection--dragHandle,
-        &:has(:focus-visible) .kbnGridLayout--deleteRowIcon,
+        &:has(:focus-visible) .kbnGridLayout--deleteSectionIcon,
         &:has(:focus-visible) .kbnGridSection--dragHandle`]: {
         opacity: 1,
       },
 
-      // these styles ensure that dragged rows are rendered **above** everything else + the move icon stays visible
+      // these styles ensure that dragged sections are rendered **above** everything else + the move icon stays visible
       '&.kbnGridSectionHeader--active': {
         zIndex: euiTheme.levels.modal,
         '.kbnGridSection--dragHandle': {

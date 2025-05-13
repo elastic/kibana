@@ -41,7 +41,7 @@ export const startAction = (
     type: 'click',
     id: panelId,
     panelDiv: panelRef,
-    targetRow: sectionId,
+    targetSection: sectionId,
     sensorType: getSensorType(e),
     position: panelRect,
     sensorOffsets: getSensorOffsets(e, panelRect),
@@ -69,7 +69,7 @@ export const moveAction = (
     // if no interaction event return early
     return;
   }
-  const currentPanelData = currentLayout[activePanel.targetRow].panels[activePanel.id];
+  const currentPanelData = currentLayout[activePanel.targetSection].panels[activePanel.id];
   if (!currentPanelData) {
     return;
   }
@@ -88,7 +88,7 @@ export const moveAction = (
   })();
 
   // find the grid that the preview rect is over
-  const lastSectionId = activePanel.targetRow;
+  const lastSectionId = activePanel.targetSection;
   let previousSection;
   const targetSectionId = (() => {
     // TODO: temporary blocking of moving with keyboard between sections till we can fix the bug with commiting the action
@@ -235,7 +235,7 @@ export const moveAction = (
     type: type as ActivePanelEvent['type'],
     id: activePanel.id,
     position: previewRect,
-    targetRow: targetSectionId,
+    targetSection: targetSectionId,
   });
 };
 

@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CollapsibleSection, MainSection } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { deleteRow, resolveSections } from '../utils/section_management';
+import { deleteSection, resolveSections } from '../utils/section_management';
 
 export const DeleteGridSectionModal = ({
   sectionId,
@@ -87,7 +87,10 @@ export const DeleteGridSectionModal = ({
         <EuiButton
           onClick={() => {
             setDeleteModalVisible(false);
-            const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), sectionId);
+            const newLayout = deleteSection(
+              gridLayoutStateManager.gridLayout$.getValue(),
+              sectionId
+            );
             gridLayoutStateManager.gridLayout$.next(newLayout);
           }}
           fill

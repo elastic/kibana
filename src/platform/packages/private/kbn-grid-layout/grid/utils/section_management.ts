@@ -38,7 +38,7 @@ export const combinePanels = (
  * @param sectionId The section to be deleted
  * @returns Updated layout with the section at `sectionId` deleted and orders adjusted
  */
-export const deleteRow = (layout: OrderedLayout, sectionId: string) => {
+export const deleteSection = (layout: OrderedLayout, sectionId: string) => {
   const newLayout = cloneDeep(layout);
   delete newLayout[sectionId];
   return resolveSections(newLayout);
