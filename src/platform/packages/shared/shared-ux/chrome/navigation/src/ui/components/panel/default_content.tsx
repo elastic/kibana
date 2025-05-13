@@ -7,12 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-chrome-browser';
 import React, { Fragment, type FC } from 'react';
+import { i18n } from '@kbn/i18n';
+import { Theme, css } from '@emotion/react';
 
 import { PanelGroup } from './panel_group';
 import { PanelNavItem } from './panel_nav_item';
+
+const panelContentStyles = {
+  title: ({ euiTheme }: Theme) => css`
+    margin: calc(${euiTheme.size.xs} * 2);
+    padding-top: calc(${euiTheme.size.xxs} * 3);
+    padding-left: calc(${euiTheme.size.xs} * 2);
+  `,
+  panelNavigation: () => css`
+    width: 100%;
+  `,
+};
+
+function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
+  return children !== undefined;
+}
 
 function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
   return children === undefined;
@@ -27,16 +44,17 @@ function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>)
  *
  * @param node The current active node
  * @returns The children serialized
+ * @throws error if the node's children are a mix of items and groups
  */
 function serializeChildren(node: PanelSelectedNode): ChromeProjectNavigationNode[] | undefined {
   if (!node.children) return undefined;
 
-  const someChildrenAreItems = node.children.some((_node) => {
+  const allChildrenAreItems = node.children.every((_node) => {
     if (isItemNode(_node)) return true;
     return _node.renderAs === 'item';
   });
 
-  if (someChildrenAreItems) {
+  if (allChildrenAreItems) {
     // Automatically wrap all the children into top level "root" group.
     return [
       {
@@ -45,6 +63,17 @@ function serializeChildren(node: PanelSelectedNode): ChromeProjectNavigationNode
         children: [...node.children],
       },
     ];
+  }
+
+  const allChildrenAreGroups = node.children.every((_node) => {
+    if (_node.renderAs === 'item') return false;
+    return isGroupNode(_node);
+  });
+
+  if (!allChildrenAreGroups) {
+    throw new Error(
+      `[Chrome navigation] Error in node [${node.id}]. Children must either all be "groups" or all "items" but not a mix of both.`
+    );
   }
 
   return node.children;
@@ -59,14 +88,39 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
   const filteredChildren = selectedNode.children?.filter(
     (child) => child.sideNavStatus !== 'hidden'
   );
-  const serializedChildren = serializeChildren({ ...selectedNode, children: filteredChildren });
+
+  let serializedChildren: ChromeProjectNavigationNode[] = [];
+  let serializeError: Error | null = null;
+  try {
+    serializedChildren = serializeChildren({ ...selectedNode, children: filteredChildren }) ?? [];
+  } catch (err) {
+    serializeError = err;
+  }
+
+  if (serializeError) {
+    // eslint-disable-next-line no-console
+    console.error(serializeError);
+    return (
+      <EuiCallOut
+        color="danger"
+        iconType="cross"
+        data-test-subj="sideNavPanelError"
+        title={i18n.translate(
+          'sharedUXPackages.chrome.sideNavigation.panelContent.serializeError',
+          { defaultMessage: 'Side navigation parsing error' }
+        )}
+      >
+        {serializeError.message}
+      </EuiCallOut>
+    );
+  }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
+    <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
       {/* Panel title */}
       <EuiFlexItem>
         {typeof selectedNode.title === 'string' ? (
-          <EuiTitle size="xxs">
+          <EuiTitle size="xxs" css={panelContentStyles.title}>
             <h2>{selectedNode.title}</h2>
           </EuiTitle>
         ) : (
@@ -75,18 +129,14 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
       </EuiFlexItem>
 
       {/* Panel navigation */}
-      <EuiFlexItem css={{ width: '100%' }}>
+      <EuiFlexItem css={panelContentStyles.panelNavigation}>
         {serializedChildren?.map((child, i) => {
-          const hasHorizontalRuleBefore =
-            i === 0 ? false : !!serializedChildren?.[i - 1]?.appendHorizontalRule;
           const isGroup = !!child.children;
+
           return isGroup ? (
             <Fragment key={child.id}>
-              <PanelGroup
-                navNode={child}
-                isFirstInList={i === 0}
-                hasHorizontalRuleBefore={hasHorizontalRuleBefore}
-              />
+              <PanelGroup navNode={child} nodeIndex={i} />
+              {i < serializedChildren.length - 1 && <EuiHorizontalRule margin="xs" />}
             </Fragment>
           ) : (
             <PanelNavItem key={child.id} item={child} />

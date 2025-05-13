@@ -41,7 +41,9 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
   // poll for status when installing, until install is complete and the KB is ready
   const isPolling =
-    (isInstalling || isWarmingUpModel) && statusRequest.value?.kbState !== KnowledgeBaseState.READY;
+    ((isInstalling || isWarmingUpModel) &&
+      statusRequest.value?.kbState !== KnowledgeBaseState.READY) ||
+    statusRequest.value?.kbState === KnowledgeBaseState.DEPLOYING_MODEL;
 
   useEffect(() => {
     // toggle installing state to false once KB is ready
