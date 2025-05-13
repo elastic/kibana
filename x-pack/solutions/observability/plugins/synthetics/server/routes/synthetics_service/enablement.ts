@@ -59,6 +59,7 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () =>
 
       return { ...res, isServiceAllowed };
     } catch (e) {
+      // TODO What can go wrong here and should we log it as error?
       server.logger.error(`Unable to get Synthetics enablement`, { error: e });
       throw e;
     }
@@ -90,6 +91,7 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
       await security.authc.apiKeys?.invalidateAsInternalUser({ ids: [apiKey?.id || ''] });
       return response.ok({});
     } catch (e) {
+      // TODO What can go wrong here and should we log it as error?
       server.logger.error(`Unable to disable Synthetics`, { error: e });
       throw e;
     }

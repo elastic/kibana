@@ -115,9 +115,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
               },
             });
           }
+        } else if (e.statusCode >= 500) {
+          server.logger.error(e);
+        } else {
+          server.logger.debug(e);
         }
-        // TODO: check if we log bad request
-        server.logger.error(e);
         throw e;
       }
     });

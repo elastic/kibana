@@ -71,7 +71,9 @@ export class DeleteMonitorAPI {
           error: `Monitor id ${monitorId} not found!`,
         });
       } else {
-        server.logger.error(`Failed to decrypt monitor to delete ${monitorId}${e}`);
+        server.logger.error(`Failed to decrypt monitor to delete, monitor id: ${monitorId}`, {
+          error: e,
+        });
         sendErrorTelemetryEvents(server.logger, server.telemetry, {
           reason: `Failed to decrypt monitor to delete ${monitorId}`,
           message: e?.message,

@@ -114,6 +114,8 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
           })) ?? [],
       };
     } catch (error) {
+      // TODO Shouldn't we throw this error?
+      // What can go wrong here and should we log it as error?
       logger.error(`Failed to fetch Synthetics suggestions: ${error}`, { error });
     }
   },
