@@ -154,7 +154,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         agentPolicies={agentPolicies}
         key="packagePolicyDelete"
         packagePolicyPackage={packagePolicy.package}
-        showInputPackageWarning={
+        shouldDeleteDatastreamAssets={
           packagePolicy.package?.type === 'input' &&
           !isInputPackageDatasetUsedByMultiplePolicies(datasetName)
         }

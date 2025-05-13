@@ -192,6 +192,7 @@ export async function removeAssetsForInputPackagePolicy(opts: {
         savedObjectsClient,
         pkgName: packageInfo.name,
       });
+
       if (!installation) {
         throw new FleetError(`${packageInfo.name} is not installed`);
       }
@@ -208,7 +209,9 @@ export async function removeAssetsForInputPackagePolicy(opts: {
         (asset) => asset.id.search(regex) > -1
       );
       const filteredEsIndexPatterns: Record<string, string> = {};
-      filteredEsIndexPatterns[datasetName] = esIndexPatterns[datasetName];
+      if (esIndexPatterns) {
+        filteredEsIndexPatterns[datasetName] = esIndexPatterns[datasetName];
+      }
       const installationToDelete = {
         ...installation,
         installed_es: filteredInstalledEs,

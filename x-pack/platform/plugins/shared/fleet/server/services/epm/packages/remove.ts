@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { difference } from 'lodash';
+import { differenceBy } from 'lodash';
 
 import type { SavedObject } from '@kbn/core/server';
 
@@ -510,11 +510,14 @@ export async function cleanupAssets(
     es_index_patterns: installedIndexPatterns,
   } = originalInstallation;
   const { installed_es: ESToRemove, installed_kibana: kibanaToRemove } = installationToDelete;
-  delete installedIndexPatterns[datasetName];
+
+  if (installedIndexPatterns && installedIndexPatterns[datasetName]) {
+    delete installedIndexPatterns[datasetName];
+  }
 
   await soClient.update(PACKAGES_SAVED_OBJECT_TYPE, originalInstallation.name, {
-    installed_es: difference(installedEs, ESToRemove),
-    installed_kibana: difference(installedKibana, kibanaToRemove),
+    installed_es: differenceBy(installedEs, ESToRemove, 'id'),
+    installed_kibana: differenceBy(installedKibana, kibanaToRemove, 'id'),
     es_index_patterns: installedIndexPatterns,
   });
   auditLoggingService.writeCustomSoAuditLog({

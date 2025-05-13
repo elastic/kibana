@@ -167,18 +167,74 @@ describe('deleteESAsset', () => {
       } as any;
     });
 
-    it('should clean up assets', async () => {
+    it('should remove assets marked for deletion', async () => {
       const installation = {
         name: 'test',
         version: '1.0.0',
         installed_kibana: [],
-        installed_es: [],
+        installed_es: [
+          {
+            id: 'logs@custom',
+            type: 'component_template',
+          },
+          {
+            id: 'udp@custom',
+            type: 'component_template',
+          },
+          {
+            id: 'logs-udp.generic',
+            type: 'index_template',
+          },
+          {
+            id: 'logs-udp.generic@package',
+            type: 'component_template',
+          },
+        ],
+        es_index_patterns: {
+          generic: 'logs-generic-*',
+          'udp.generic': 'logs-udp.generic-*',
+          'udp.test': 'logs-udp.test-*',
+        },
       } as any;
-      await cleanupAssets(installation, esClientMock, soClientMock);
+      const installationToDelete = {
+        name: 'test',
+        version: '1.0.0',
+        installed_kibana: [],
+        installed_es: [
+          {
+            id: 'logs-udp.generic',
+            type: 'index_template',
+          },
+          {
+            id: 'logs-udp.generic@package',
+            type: 'component_template',
+          },
+        ],
+      } as any;
+      await cleanupAssets(
+        'generic',
+        installationToDelete,
+        installation,
+        esClientMock,
+        soClientMock
+      );
 
       expect(soClientMock.update).toBeCalledWith('epm-packages', 'test', {
-        installed_es: [],
+        installed_es: [
+          {
+            id: 'logs@custom',
+            type: 'component_template',
+          },
+          {
+            id: 'udp@custom',
+            type: 'component_template',
+          },
+        ],
         installed_kibana: [],
+        es_index_patterns: {
+          'udp.generic': 'logs-udp.generic-*',
+          'udp.test': 'logs-udp.test-*',
+        },
       });
     });
   });

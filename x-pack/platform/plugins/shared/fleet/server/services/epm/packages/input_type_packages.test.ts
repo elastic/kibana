@@ -158,7 +158,8 @@ describe('removeAssetsForInputPackagePolicy', () => {
       packageInfo: {
         type: 'integration',
       } as any,
-      soClient: savedObjectsClientMock.create(),
+      datasetName: 'test',
+      savedObjectsClient: savedObjectsClientMock.create(),
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
@@ -172,7 +173,8 @@ describe('removeAssetsForInputPackagePolicy', () => {
         type: 'input',
         status: 'not_installed',
       } as any,
-      soClient: savedObjectsClientMock.create(),
+      datasetName: 'test',
+      savedObjectsClient: savedObjectsClientMock.create(),
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
@@ -181,10 +183,34 @@ describe('removeAssetsForInputPackagePolicy', () => {
 
   it('should clean up assets for input packages with status = installed', async () => {
     const mockedLogger = jest.mocked(appContextService.getLogger());
-    jest.mocked(getInstallation).mockResolvedValue({
+    const installation = {
       name: 'logs',
       version: '1.0.0',
-    } as any);
+      installed_kibana: [],
+      installed_es: [
+        {
+          id: 'logs@custom',
+          type: 'component_template',
+        },
+        {
+          id: 'udp@custom',
+          type: 'component_template',
+        },
+        {
+          id: 'logs-udp.test',
+          type: 'index_template',
+        },
+        {
+          id: 'logs-udp.test@package',
+          type: 'component_template',
+        },
+      ],
+      es_index_patterns: {
+        generic: 'logs-udp.generic-*',
+        test: 'logs-udp.test-*',
+      },
+    } as any;
+    jest.mocked(getInstallation).mockResolvedValue(installation);
 
     await removeAssetsForInputPackagePolicy({
       packageInfo: {
@@ -193,12 +219,83 @@ describe('removeAssetsForInputPackagePolicy', () => {
         name: 'logs',
         version: '1.0.0',
       } as any,
-      soClient: savedObjectsClientMock.create(),
+      datasetName: 'test',
+      savedObjectsClient: savedObjectsClientMock.create(),
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
     expect(cleanupAssetsMock).toBeCalledWith(
-      { name: 'logs', version: '1.0.0' },
+      'test',
+      {
+        es_index_patterns: { test: 'logs-udp.test-*' },
+        installed_es: [
+          { id: 'logs-udp.test', type: 'index_template' },
+          { id: 'logs-udp.test@package', type: 'component_template' },
+        ],
+        installed_kibana: [],
+        name: 'logs',
+        package_assets: [],
+        version: '1.0.0',
+      },
+      installation,
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  it('should clean up assets matching exactly the datasetName', async () => {
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+    const installation = {
+      name: 'logs',
+      version: '1.0.0',
+      installed_kibana: [],
+      installed_es: [
+        {
+          id: 'logs-udp.test',
+          type: 'index_template',
+        },
+        {
+          id: 'logs-udp.test@package',
+          type: 'component_template',
+        },
+        {
+          id: 'logs-udp.test1',
+          type: 'index_template',
+        },
+        {
+          id: 'logs-udp.test1@package',
+          type: 'component_template',
+        },
+      ],
+    } as any;
+    jest.mocked(getInstallation).mockResolvedValue(installation);
+
+    await removeAssetsForInputPackagePolicy({
+      packageInfo: {
+        type: 'input',
+        status: 'installed',
+        name: 'logs',
+        version: '1.0.0',
+      } as any,
+      datasetName: 'test',
+      savedObjectsClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      logger: mockedLogger,
+    });
+    expect(cleanupAssetsMock).toBeCalledWith(
+      'test',
+      {
+        installed_es: [
+          { id: 'logs-udp.test', type: 'index_template' },
+          { id: 'logs-udp.test@package', type: 'component_template' },
+        ],
+        installed_kibana: [],
+        es_index_patterns: {},
+        name: 'logs',
+        package_assets: [],
+        version: '1.0.0',
+      },
+      installation,
       expect.anything(),
       expect.anything()
     );
@@ -215,7 +312,8 @@ describe('removeAssetsForInputPackagePolicy', () => {
         name: 'logs',
         version: '1.0.0',
       } as any,
-      soClient: savedObjectsClientMock.create(),
+      datasetName: 'test',
+      savedObjectsClient: savedObjectsClientMock.create(),
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
@@ -238,7 +336,8 @@ describe('removeAssetsForInputPackagePolicy', () => {
         name: 'logs',
         version: '1.0.0',
       } as any,
-      soClient: savedObjectsClientMock.create(),
+      datasetName: 'test',
+      savedObjectsClient: savedObjectsClientMock.create(),
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
