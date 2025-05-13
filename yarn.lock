@@ -8014,16 +8014,6 @@
     uuid "^10.0.0"
     zod "^3.23.8"
 
-"@langchain/openai@>=0.1.0 <0.4.0", "@langchain/openai@>=0.2.0 <0.4.0", "@langchain/openai@^0.3.11":
-  version "0.3.11"
-  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.3.11.tgz#c93ee298a87318562a1da6c2915a180fe5155ac4"
-  integrity sha512-mEFbpJ8w8NPArsquUlCwxvZTKNkXxqwzvTEYzv6Jb7gUoBDOZtwLg6AdcngTJ+w5VFh3wxgPy0g3zb9Aw0Qbpw==
-  dependencies:
-    js-tiktoken "^1.0.12"
-    openai "^4.68.0"
-    zod "^3.22.4"
-    zod-to-json-schema "^3.22.3"
-
 "@langchain/openai@>=0.1.0 <0.5.0":
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.4.4.tgz#1832420495c53c28aa4e6515583bad8f0b83a637"
@@ -8031,6 +8021,16 @@
   dependencies:
     js-tiktoken "^1.0.12"
     openai "^4.77.0"
+    zod "^3.22.4"
+    zod-to-json-schema "^3.22.3"
+
+"@langchain/openai@>=0.2.0 <0.4.0", "@langchain/openai@^0.3.11":
+  version "0.3.11"
+  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.3.11.tgz#c93ee298a87318562a1da6c2915a180fe5155ac4"
+  integrity sha512-mEFbpJ8w8NPArsquUlCwxvZTKNkXxqwzvTEYzv6Jb7gUoBDOZtwLg6AdcngTJ+w5VFh3wxgPy0g3zb9Aw0Qbpw==
+  dependencies:
+    js-tiktoken "^1.0.12"
+    openai "^4.68.0"
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
