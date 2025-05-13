@@ -120,7 +120,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // all saved objects only read from `logs`. since we exported the dashboard from
         // the root stream, the replacement logic should only leave placeholders
         const savedObjects = contentPack.entries.filter(isSupportedSavedObjectType);
-        expect(savedObjects).to.eql(4);
+        expect(savedObjects.length).to.eql(4);
         expectIndexPatternsFromEntries(savedObjects, [INDEX_PLACEHOLDER]);
       });
     });
