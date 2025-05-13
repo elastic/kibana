@@ -28,6 +28,7 @@ import {
   SavedQuery,
   syncGlobalQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
+import { css } from '@emotion/react';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -63,8 +64,24 @@ import {
 } from '../saved_map';
 import { waitUntilTimeLayersLoad$ } from './wait_until_time_layers_load';
 import { RefreshConfig as MapRefreshConfig, ParsedMapStateJSON } from '../saved_map';
-import { mapFullScreenStyles, mapsPluginStyles, reactMapsRootStyles } from './map_app_styles';
 
+const styles = {
+  wrapper: css([
+    {
+      display: 'flex',
+      flexDirection: 'column',
+    },
+    kibanaFullBodyHeightCss(),
+  ]),
+  fullScreen: css({
+    height: '100vh !important',
+  }),
+  reactMapsRoot: css({
+    flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
+  }),
+};
 export interface Props {
   savedMap: SavedMap;
   // saveCounter used to trigger MapApp render after SaveMap.save
@@ -580,14 +597,10 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     return (
-      <div
-        id="maps-plugin"
-        css={[kibanaFullBodyHeightCss(), mapsPluginStyles]}
-        style={this.props.isFullScreen ? mapFullScreenStyles : undefined}
-      >
+      <div id="maps-plugin" css={[styles.wrapper, this.props.isFullScreen && styles.fullScreen]}>
         {this._renderTopNav()}
         <h1 className="euiScreenReaderOnly">{`screenTitle placeholder`}</h1>
-        <div id="react-maps-root" css={reactMapsRootStyles}>
+        <div id="react-maps-root" css={styles.reactMapsRoot}>
           {this._renderLegacyUrlConflict()}
           <MapContainer
             addFilters={this._addFilter}

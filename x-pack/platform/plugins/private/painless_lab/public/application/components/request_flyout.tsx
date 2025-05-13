@@ -16,10 +16,8 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getPainlessLabBottomBarPlaceholderStyles } from '../../styles';
 import { Links } from '../../links';
 
 interface Props {
@@ -103,8 +101,6 @@ export const RequestFlyout: FunctionComponent<Props> = ({
             },
           ]}
         />
-
-        <div css={getPainlessLabBottomBarPlaceholderStyles(useEuiTheme().euiTheme)} />
       </EuiFlyoutBody>
     </EuiFlyout>
   );
