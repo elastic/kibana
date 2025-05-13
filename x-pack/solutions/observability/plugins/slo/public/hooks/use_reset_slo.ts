@@ -50,6 +50,8 @@ export function useResetSlo() {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
         queryClient.invalidateQueries({ queryKey: sloKeys.historicalSummaries(), exact: false });
         queryClient.invalidateQueries({ queryKey: sloKeys.details(), exact: false });
+        queryClient.invalidateQueries({ queryKey: sloKeys.allDefinitions(), exact: false });
+
         toasts.addSuccess(
           i18n.translate('xpack.slo.slo.reset.successNotification', {
             defaultMessage: '{name} reset successfully',

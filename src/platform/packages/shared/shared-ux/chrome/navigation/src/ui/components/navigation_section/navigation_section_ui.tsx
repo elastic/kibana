@@ -42,33 +42,78 @@ const sectionStyles = {
     paddingBlock: euiTheme.size.xs,
     paddingInline: euiTheme.size.s,
   }),
-  euiCollapsibleNavItem: ({ euiTheme }: Theme) => css`
-    .euiAccordion__childWrapper {
-      transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
+  euiCollapsibleNavSection: ({ euiTheme }: Theme) => css`
+    & > .euiCollapsibleNavLink {
+      /* solution title in primary nav  */
+      font-weight: ${euiTheme.font.weight.bold};
+      margin: ${euiTheme.size.s} 0;
+      margin-bottom: calc(${euiTheme.size.xs} * 1.5);
     }
+
+    .euiCollapsibleNavAccordion {
+      &.euiAccordion__triggerWrapper,
+      &.euiCollapsibleNavLink {
+        &:focus-within {
+          background: ${euiTheme.colors.backgroundBasePlain};
+        }
+
+        &:hover {
+          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        }
+      }
+
+      &.isSelected {
+        .euiAccordion__triggerWrapper,
+        .euiCollapsibleNavLink {
+          background-color: ${euiTheme.colors.backgroundLightPrimary};
+
+          * {
+            color: ${euiTheme.colors.textPrimary};
+          }
+        }
+      }
+    }
+
     .euiAccordion__children .euiCollapsibleNavItem__items {
       padding-inline-start: ${euiTheme.size.m};
       margin-inline-start: ${euiTheme.size.m};
     }
+
     &:only-child .euiCollapsibleNavItem__icon {
       transform: scale(1.33);
     }
   `,
   euiCollapsibleNavSubItem: ({ euiTheme }: Theme) => css`
+    .euiAccordion__button:focus,
+    .euiAccordion__button:hover {
+      text-decoration: none;
+    }
+
     &.euiLink,
     &.euiCollapsibleNavLink {
-      :hover {
+      &:focus,
+      &:hover {
         background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        text-decoration: none;
       }
+
       &.isSelected {
-        :hover {
+        background-color: ${euiTheme.colors.backgroundLightPrimary};
+        &:focus,
+        &:hover {
           background-color: ${euiTheme.colors.backgroundLightPrimary};
+        }
+
+        * {
+          color: ${euiTheme.colors.textPrimary};
         }
       }
     }
-
+  `,
+  euiAccordionChildWrapper: ({ euiTheme }: Theme) => css`
     .euiAccordion__childWrapper {
       background-color: ${euiTheme.colors.backgroundBasePlain};
+      transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
     }
   `,
 };
@@ -461,7 +506,8 @@ function nodeToEuiCollapsibleNavProps(
       path,
       isSelected,
       onClick,
-      css: sectionStyles.euiCollapsibleNavSubItem,
+      css: [sectionStyles.euiCollapsibleNavSubItem, sectionStyles.euiAccordionChildWrapper],
+      className: classnames([isSelected ? 'isSelected' : undefined]),
       icon: navNode.icon,
       // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
       title: navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
@@ -609,12 +655,12 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
       {items ? (
         <EuiCollapsibleNavItem
           {...rest}
-          css={sectionStyles.euiCollapsibleNavItem}
+          css={[sectionStyles.euiCollapsibleNavSection, sectionStyles.euiAccordionChildWrapper]}
           items={items}
           accordionProps={getAccordionProps(navNode.path)}
         />
       ) : (
-        <EuiCollapsibleNavItem {...props} css={sectionStyles.euiCollapsibleNavItem} />
+        <EuiCollapsibleNavItem {...props} css={sectionStyles.euiCollapsibleNavSection} />
       )}
     </div>
   );
