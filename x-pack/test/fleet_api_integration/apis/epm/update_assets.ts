@@ -382,6 +382,10 @@ export default function (providerContext: FtrProviderContext) {
               type: 'osquery-saved-query',
             },
             {
+              id: 'sample_security_ai_prompt',
+              type: 'security-ai-prompt',
+            },
+            {
               id: 'sample_tag',
               type: 'tag',
             },
@@ -550,6 +554,11 @@ export default function (providerContext: FtrProviderContext) {
           {
             id: '7f97600c-d983-53e0-ae2a-a59bf35d7f0d',
             path: 'all_assets-0.2.0/kibana/csp_rule_template/sample_csp_rule_template.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: '848d7b69-26d1-52c1-8afc-65e627b34812',
+            path: 'all_assets-0.2.0/kibana/security_ai_prompt/sample_security_ai_prompts.json',
             type: 'epm-packages-assets',
           },
           {

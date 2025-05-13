@@ -65,14 +65,17 @@ export class LinksPlugin
 
       plugins.embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
-          container.addNewPanel<LinksSerializedState>({
-            panelType: CONTENT_ID,
-            serializedState: {
-              rawState: {
-                savedObjectId: savedObject.id,
+          container.addNewPanel<LinksSerializedState>(
+            {
+              panelType: CONTENT_ID,
+              serializedState: {
+                rawState: {
+                  savedObjectId: savedObject.id,
+                },
               },
             },
-          });
+            true
+          );
         },
         savedObjectType: CONTENT_ID,
         savedObjectName: APP_NAME,
