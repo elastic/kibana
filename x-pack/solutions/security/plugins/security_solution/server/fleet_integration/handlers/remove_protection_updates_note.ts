@@ -26,7 +26,7 @@ export const removeProtectionUpdatesNote = async (
     endpointServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
   const soClient = isSpacesEnabled
     ? endpointServices.savedObjects.createInternalUnscopedSoClient(false)
-    : endpointServices.savedObjects.createInternalScopedSoClient();
+    : endpointServices.savedObjects.createInternalScopedSoClient({ readonly: false });
 
   if (policy.id) {
     const foundProtectionUpdatesNotes = await soClient
