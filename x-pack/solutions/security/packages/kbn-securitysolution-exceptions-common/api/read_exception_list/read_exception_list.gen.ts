@@ -26,11 +26,11 @@ import {
 export type ReadExceptionListRequestQuery = z.infer<typeof ReadExceptionListRequestQuery>;
 export const ReadExceptionListRequestQuery = z.object({
   /**
-   * Either `id` or `list_id` must be specified
+   * Exception list's identifier. Either `id` or `list_id` must be specified.
    */
   id: ExceptionListId.optional(),
   /**
-   * Either `id` or `list_id` must be specified
+   * Human readable exception list string identifier, e.g. `trusted-linux-processes`. Either `id` or `list_id` must be specified.
    */
   list_id: ExceptionListHumanId.optional(),
   namespace_type: ExceptionNamespaceType.optional().default('single'),

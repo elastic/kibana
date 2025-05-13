@@ -14,18 +14,18 @@
  *   version: 2023-10-31
  */
 
-import type { z } from '@kbn/zod';
+import { z } from '@kbn/zod';
 
-import { SuccessResponse, NoParametersRequestSchema } from '../../../model/schema/common.gen';
+import { BaseActionSchema } from '../../../model/schema/common.gen';
 
-export type UnisolateRouteRequestBody = z.infer<typeof UnisolateRouteRequestBody>;
-export const UnisolateRouteRequestBody = NoParametersRequestSchema;
+export type UnisolateRouteResponse = z.infer<typeof UnisolateRouteResponse>;
+export const UnisolateRouteResponse = z.object({});
 
 export type EndpointUnisolateActionRequestBody = z.infer<typeof EndpointUnisolateActionRequestBody>;
-export const EndpointUnisolateActionRequestBody = UnisolateRouteRequestBody;
+export const EndpointUnisolateActionRequestBody = BaseActionSchema;
 export type EndpointUnisolateActionRequestBodyInput = z.input<
   typeof EndpointUnisolateActionRequestBody
 >;
 
 export type EndpointUnisolateActionResponse = z.infer<typeof EndpointUnisolateActionResponse>;
-export const EndpointUnisolateActionResponse = SuccessResponse;
+export const EndpointUnisolateActionResponse = UnisolateRouteResponse;

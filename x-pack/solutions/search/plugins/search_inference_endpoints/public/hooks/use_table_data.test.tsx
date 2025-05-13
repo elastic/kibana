@@ -7,18 +7,22 @@
 
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { renderHook } from '@testing-library/react';
-import { QueryParams } from '../components/all_inference_endpoints/types';
+import {
+  QueryParams,
+  SortFieldInferenceEndpoint,
+  SortOrder,
+} from '../components/all_inference_endpoints/types';
 import { useTableData } from './use_table_data';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from '../components/all_inference_endpoints/types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { TRAINED_MODEL_STATS_QUERY_KEY } from '../../common/constants';
 
-const inferenceEndpoints = [
+const inferenceEndpoints: InferenceAPIConfigResponse[] = [
   {
     inference_id: 'my-elser-model-04',
     task_type: 'sparse_embedding',
-    service: 'elser',
+    service: 'elasticsearch',
     service_settings: {
       num_allocations: 1,
       num_threads: 1,
@@ -29,17 +33,6 @@ const inferenceEndpoints = [
   {
     inference_id: 'my-elser-model-01',
     task_type: 'sparse_embedding',
-    service: 'elser',
-    service_settings: {
-      num_allocations: 1,
-      num_threads: 1,
-      model_id: '.elser_model_2',
-    },
-    task_settings: {},
-  },
-  {
-    inference_id: 'my-elser-model-05',
-    task_type: 'text_embedding',
     service: 'elasticsearch',
     service_settings: {
       num_allocations: 1,
@@ -48,17 +41,27 @@ const inferenceEndpoints = [
     },
     task_settings: {},
   },
-] as InferenceAPIConfigResponse[];
+  {
+    inference_id: 'my-openai-model-05',
+    task_type: 'text_embedding',
+    service: 'openai',
+    service_settings: {
+      url: 'https://somewhere.com',
+      model_id: 'third-party-model',
+    },
+    task_settings: {},
+  },
+];
 
-const queryParams = {
+const queryParams: QueryParams = {
   page: 1,
   perPage: 10,
-  sortField: 'endpoint',
-  sortOrder: 'desc',
-} as QueryParams;
+  sortField: SortFieldInferenceEndpoint.inference_id,
+  sortOrder: SortOrder.desc,
+};
 
 const filterOptions = {
-  provider: ['elser', 'elasticsearch'],
+  provider: ['elasticsearch', 'openai'],
   type: ['sparse_embedding', 'text_embedding'],
 } as any;
 
@@ -103,7 +106,7 @@ describe('useTableData', () => {
     expect(result.current.sorting).toEqual({
       sort: {
         direction: 'desc',
-        field: 'endpoint',
+        field: 'inference_id',
       },
     });
   });
@@ -118,7 +121,7 @@ describe('useTableData', () => {
       b.inference_id.localeCompare(a.inference_id)
     );
 
-    const sortedEndpoints = result.current.sortedTableData.map((item) => item.endpoint);
+    const sortedEndpoints = result.current.sortedTableData.map((item) => item.inference_id);
     const expectedModelIds = expectedSortedData.map((item) => item.inference_id);
 
     expect(sortedEndpoints).toEqual(expectedModelIds);
@@ -126,7 +129,7 @@ describe('useTableData', () => {
 
   it('should filter data based on provider and type from filterOptions', () => {
     const filterOptions2 = {
-      provider: ['elser'],
+      provider: ['elasticsearch'],
       type: ['text_embedding'],
     } as any;
     const { result } = renderHook(
@@ -138,8 +141,8 @@ describe('useTableData', () => {
     expect(
       filteredData.every(
         (endpoint) =>
-          filterOptions.provider.includes(endpoint.provider) &&
-          filterOptions.type.includes(endpoint.type)
+          filterOptions.provider.includes(endpoint.service) &&
+          filterOptions.type.includes(endpoint.task_type)
       )
     ).toBeTruthy();
   });
@@ -151,6 +154,6 @@ describe('useTableData', () => {
       { wrapper }
     );
     const filteredData = result.current.sortedTableData;
-    expect(filteredData.every((item) => item.endpoint.includes(searchKey))).toBeTruthy();
+    expect(filteredData.every((item) => item.inference_id.includes(searchKey))).toBeTruthy();
   });
 });

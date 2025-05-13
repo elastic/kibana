@@ -18,6 +18,9 @@ import {
   EuiSelectableTemplateSitewideOption,
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
+  useEuiBreakpoint,
+  mathWithUnits,
+  useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
@@ -36,7 +39,6 @@ import { i18nStrings } from '../strings';
 import { getSuggestions, SearchSuggestion } from '../suggestions';
 import { PopoverFooter } from './popover_footer';
 import { PopoverPlaceholder } from './popover_placeholder';
-import './search_bar.scss';
 import { SearchBarProps } from './types';
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
@@ -96,6 +98,14 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
 
+  const styles = css({
+    [useEuiBreakpoint(['m', 'l'])]: {
+      width: mathWithUnits(euiTheme.size.xxl, (x) => x * 10),
+    },
+    [useEuiMinBreakpoint('xl')]: {
+      width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
+    },
+  });
   // Initialize searchableTypes data
   useEffect(() => {
     if (initialLoad) {
@@ -360,7 +370,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       isPreFiltered
       onChange={onChange}
       options={options}
-      className="kbnSearchBar"
+      css={styles}
       popoverButtonBreakpoints={['xs', 's']}
       singleSelection={true}
       renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
@@ -395,6 +405,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       emptyMessage={<EmptyMessage />}
       noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
       popoverProps={{
+        zIndex: Number(euiTheme.levels.navigation),
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,

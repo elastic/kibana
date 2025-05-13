@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { getRuleExecutionStatusPendingAttributes } from '../lib/rule_execution_status';
-import { RawRule } from '../types';
+import type { RawRule } from '../types';
 
 export function transformRulesForExport(rules: SavedObject[]): Array<SavedObject<RawRule>> {
   const exportDate = new Date().toISOString();

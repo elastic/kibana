@@ -5,45 +5,62 @@
  * 2.0.
  */
 
-import { Subject, Observable } from 'rxjs';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map as mapOptional, none } from 'fp-ts/lib/Option';
+import type { Observable } from 'rxjs';
+import { Subject, withLatestFrom, BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged, startWith } from 'rxjs';
+import { pipe } from 'fp-ts/pipeable';
+import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { Logger, ExecutionContextStart } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { Logger, ExecutionContextStart, IBasePath } from '@kbn/core/server';
 
-import { Result, asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
-import { ManagedConfiguration } from './lib/create_managed_configuration';
-import { TaskManagerConfig, CLAIM_STRATEGY_UPDATE_BY_QUERY } from './config';
-
+import type { Result } from './lib/result_type';
+import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
+import type { TaskManagerConfig } from './config';
 import {
+  CLAIM_STRATEGY_UPDATE_BY_QUERY,
+  WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS,
+} from './config';
+
+import type {
   TaskMarkRunning,
   TaskRun,
   TaskClaim,
   TaskRunRequest,
-  asTaskRunRequestEvent,
   TaskPollingCycle,
-  asTaskPollingCycleEvent,
   TaskManagerStat,
-  asTaskManagerStatEvent,
   TaskManagerMetric,
 } from './task_events';
-import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
-import { Middleware } from './lib/middleware';
+import {
+  asTaskRunRequestEvent,
+  asTaskPollingCycleEvent,
+  asTaskManagerStatEvent,
+} from './task_events';
+import type { TimedFillPoolResult } from './lib/fill_pool';
+import { fillPool, FillPoolResult } from './lib/fill_pool';
+import type { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
-import { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool } from './task_pool';
-import { TaskManagerRunner, TaskRunner } from './task_running';
-import { TaskStore } from './task_store';
+import type { TaskRunner } from './task_running';
+import { TaskManagerRunner } from './task_running';
+import type { TaskStore } from './task_store';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
-import { TaskTypeDictionary } from './task_type_dictionary';
+import type { TaskTypeDictionary } from './task_type_dictionary';
 import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
-import { ClaimOwnershipResult } from './task_claimers';
-import { TaskPartitioner } from './lib/task_partitioner';
-import { TaskPoller } from './polling/task_poller';
+import type { ClaimOwnershipResult } from './task_claimers';
+import type { TaskPartitioner } from './lib/task_partitioner';
+import type { TaskPoller } from './polling/task_poller';
+import {
+  createCapacityScan,
+  createPollIntervalScan,
+  countErrors,
+  ADJUST_THROUGHPUT_INTERVAL,
+} from './lib/create_managed_configuration';
+import { createRunningAveragedStat } from './monitoring/task_run_calculators';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -51,7 +68,8 @@ export interface ITaskEventEmitter<T> {
   get events(): Observable<T>;
 }
 
-export type TaskPollingLifecycleOpts = {
+export interface TaskPollingLifecycleOpts {
+  basePathService: IBasePath;
   logger: Logger;
   definitions: TaskTypeDictionary;
   taskStore: TaskStore;
@@ -61,7 +79,8 @@ export type TaskPollingLifecycleOpts = {
   executionContext: ExecutionContextStart;
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
-} & ManagedConfiguration;
+  startingCapacity: number;
+}
 
 export type TaskLifecycleEvent =
   | TaskMarkRunning
@@ -81,12 +100,17 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private store: TaskStore;
   private taskClaiming: TaskClaiming;
   private bufferedStore: BufferedTaskStore;
+  private readonly basePathService: IBasePath;
   private readonly executionContext: ExecutionContextStart;
 
   private logger: Logger;
   private poller: TaskPoller<string, TimedFillPoolResult>;
+  private started = false;
 
   public pool: TaskPool;
+
+  public capacityConfiguration$: Observable<number>;
+  public pollIntervalConfiguration$: Observable<number>;
 
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
@@ -96,6 +120,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private currentPollInterval: number;
+  private currentTmUtilization$ = new BehaviorSubject<number>(0);
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -103,19 +128,20 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
    * mechanism.
    */
   constructor({
+    basePathService,
     logger,
     middleware,
-    capacityConfiguration$,
-    pollIntervalConfiguration$,
+    config,
     // Elasticsearch and SavedObjects availability status
     elasticsearchAndSOAvailability$,
-    config,
     taskStore,
     definitions,
     executionContext,
     usageCounter,
     taskPartitioner,
+    startingCapacity,
   }: TaskPollingLifecycleOpts) {
+    this.basePathService = basePathService;
     this.logger = logger;
     this.middleware = middleware;
     this.definitions = definitions;
@@ -123,9 +149,25 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.executionContext = executionContext;
     this.usageCounter = usageCounter;
     this.config = config;
-    this.currentPollInterval = config.poll_interval;
-    pollIntervalConfiguration$.subscribe((pollInterval) => {
-      this.currentPollInterval = pollInterval;
+    const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
+    this.currentPollInterval = pollInterval;
+
+    const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
+    const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
+    const tmUtilizationQueue = createRunningAveragedStat<number>(window);
+    this.capacityConfiguration$ = errorCheck$.pipe(
+      createCapacityScan(config, logger, startingCapacity),
+      startWith(startingCapacity),
+      distinctUntilChanged()
+    );
+    this.pollIntervalConfiguration$ = errorCheck$.pipe(
+      withLatestFrom(this.currentTmUtilization$),
+      createPollIntervalScan(logger, this.currentPollInterval, claimStrategy, tmUtilizationQueue),
+      startWith(this.currentPollInterval),
+      distinctUntilChanged()
+    );
+    this.pollIntervalConfiguration$.subscribe((newPollInterval) => {
+      this.currentPollInterval = newPollInterval;
     });
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
@@ -138,7 +180,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.pool = new TaskPool({
       logger,
       strategy: config.claim_strategy,
-      capacity$: capacityConfiguration$,
+      capacity$: this.capacityConfiguration$,
       definitions: this.definitions,
     });
     this.pool.load.subscribe(emitEvent);
@@ -156,13 +198,11 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
 
-    const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
-
     let pollIntervalDelay$: Observable<number> | undefined;
     if (claimStrategy === CLAIM_STRATEGY_UPDATE_BY_QUERY) {
       pollIntervalDelay$ = delayOnClaimConflicts(
-        capacityConfiguration$,
-        pollIntervalConfiguration$,
+        this.capacityConfiguration$,
+        this.pollIntervalConfiguration$,
         this.events$,
         config.version_conflict_threshold,
         config.monitored_stats_running_average_window
@@ -172,7 +212,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,
       initialPollInterval: pollInterval,
-      pollInterval$: pollIntervalConfiguration$,
+      pollInterval$: this.pollIntervalConfiguration$,
       pollIntervalDelay$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
@@ -194,15 +234,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.subscribeToPoller(this.poller.events$);
 
     elasticsearchAndSOAvailability$.subscribe((areESAndSOAvailable) => {
-      if (areESAndSOAvailable) {
-        // start polling for work
+      if (areESAndSOAvailable && !this.started) {
         this.poller.start();
-      } else if (!areESAndSOAvailable) {
-        this.logger.info(
-          `Stopping the task poller because Elasticsearch and/or saved-objects service became unavailable`
-        );
-        this.poller.stop();
-        this.pool.cancelRunningTasks();
+        this.started = true;
       }
     });
   }
@@ -221,6 +255,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
     return new TaskManagerRunner({
+      basePathService: this.basePathService,
       logger: this.logger,
       instance,
       store: this.bufferedStore,
@@ -318,6 +353,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
               tmUtilization = 100;
             }
 
+            this.currentTmUtilization$.next(tmUtilization);
             this.emitEvent(asTaskManagerStatEvent('workerUtilization', asOk(tmUtilization)));
           })
         )

@@ -19,11 +19,6 @@ describe('classicNavigationFactory', function () {
       title: 'Overview',
     },
     {
-      id: 'enterpriseSearchContent:searchIndices',
-      title: 'Indices',
-      url: '/app/elasticsearch/content/search_indices',
-    },
-    {
       id: 'enterpriseSearchContent:connectors',
       title: 'Connectors',
       url: '/app/elasticsearch/content/connectors',
@@ -66,7 +61,7 @@ describe('classicNavigationFactory', function () {
       },
     ];
     expect(classicNavigationFactory(items, core, history)).toEqual({
-      icon: 'logoEnterpriseSearch',
+      icon: 'logoElasticsearch',
       items: [
         {
           href: '/app/elasticsearch/overview',
@@ -111,12 +106,6 @@ describe('classicNavigationFactory', function () {
         name: 'Content',
         items: [
           {
-            id: 'searchIndices',
-            deepLink: {
-              link: 'enterpriseSearchContent:searchIndices',
-            },
-          },
-          {
             id: 'searchConnectors',
             deepLink: {
               link: 'enterpriseSearchContent:connectors',
@@ -132,13 +121,6 @@ describe('classicNavigationFactory', function () {
         id: 'searchContent',
         items: [
           {
-            href: '/app/elasticsearch/content/search_indices',
-            id: 'searchIndices',
-            isSelected: false,
-            name: 'Indices',
-            onClick: expect.any(Function),
-          },
-          {
             href: '/app/elasticsearch/content/connectors',
             id: 'searchConnectors',
             isSelected: false,
@@ -153,20 +135,20 @@ describe('classicNavigationFactory', function () {
   it('returns name if provided over the deeplink title', () => {
     const items: ClassicNavItem[] = [
       {
-        id: 'searchIndices',
+        id: 'searchConnectors',
         deepLink: {
-          link: 'enterpriseSearchContent:searchIndices',
+          link: 'enterpriseSearchContent:connectors',
         },
-        name: 'Index Management',
+        name: 'Date connectors',
       },
     ];
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/elasticsearch/content/search_indices',
-        id: 'searchIndices',
+        href: '/app/elasticsearch/content/connectors',
+        id: 'searchConnectors',
         isSelected: false,
-        name: 'Index Management',
+        name: 'Date connectors',
         onClick: expect.any(Function),
       },
     ]);

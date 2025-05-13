@@ -7,8 +7,8 @@
 
 import { isString } from 'lodash';
 
+import { ApiOperation } from '@kbn/core-security-server';
 import type { ApiActions as ApiActionsType } from '@kbn/security-plugin-types-server';
-import { ApiOperation } from '@kbn/security-plugin-types-server';
 
 export class ApiActions implements ApiActionsType {
   private readonly prefix: string;

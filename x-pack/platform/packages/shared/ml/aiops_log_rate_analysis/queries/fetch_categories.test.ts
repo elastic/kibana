@@ -67,57 +67,55 @@ describe('getCategoryRequest', () => {
     // time range filter whatsoever, for example for start/end (0,50).
     expect(query).toEqual({
       index: 'the-index',
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      range: {
-                        'the-time-field-name': {
-                          gte: 10,
-                          lte: 20,
-                          format: 'epoch_millis',
-                        },
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    range: {
+                      'the-time-field-name': {
+                        gte: 10,
+                        lte: 20,
+                        format: 'epoch_millis',
                       },
                     },
-                    {
-                      range: {
-                        'the-time-field-name': {
-                          gte: 30,
-                          lte: 40,
-                          format: 'epoch_millis',
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          sample: {
-            random_sampler: { probability: 0.1, seed: 1234 },
-            aggs: {
-              categories: {
-                categorize_text: {
-                  field: 'the-field-name',
-                  size: 1000,
-                },
-                aggs: {
-                  examples: {
-                    top_hits: { size: 4, sort: ['the-time-field-name'], _source: 'the-field-name' },
                   },
+                  {
+                    range: {
+                      'the-time-field-name': {
+                        gte: 30,
+                        lte: 40,
+                        format: 'epoch_millis',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        sample: {
+          random_sampler: { probability: 0.1, seed: 1234 },
+          aggs: {
+            categories: {
+              categorize_text: {
+                field: 'the-field-name',
+                size: 1000,
+              },
+              aggs: {
+                examples: {
+                  top_hits: { size: 4, sort: ['the-time-field-name'], _source: 'the-field-name' },
                 },
               },
             },
           },
         },
-        size: 0,
       },
+      size: 0,
     });
   });
 });

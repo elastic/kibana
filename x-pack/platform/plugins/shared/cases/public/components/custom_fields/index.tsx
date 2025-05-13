@@ -64,7 +64,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
   return (
     <EuiDescribedFormGroup
       fullWidth
-      title={<h3>{i18n.TITLE}</h3>}
+      title={<h2>{i18n.TITLE}</h2>}
       description={<p>{i18n.DESCRIPTION}</p>}
       data-test-subj="custom-fields-form-group"
       css={{ alignItems: 'flex-start' }}

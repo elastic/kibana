@@ -1,292 +1,5 @@
 {
   "properties": {
-    "cloud_defend": {
-      "properties": {
-        "indices": {
-          "properties": {
-            "alerts": {
-              "properties": {
-                "doc_count": {
-                  "type": "long"
-                },
-                "deleted": {
-                  "type": "long"
-                },
-                "size_in_bytes": {
-                  "type": "long"
-                },
-                "last_doc_timestamp": {
-                  "type": "date"
-                }
-              }
-            },
-            "file": {
-              "properties": {
-                "doc_count": {
-                  "type": "long"
-                },
-                "deleted": {
-                  "type": "long"
-                },
-                "size_in_bytes": {
-                  "type": "long"
-                },
-                "last_doc_timestamp": {
-                  "type": "date"
-                }
-              }
-            },
-            "process": {
-              "properties": {
-                "doc_count": {
-                  "type": "long"
-                },
-                "deleted": {
-                  "type": "long"
-                },
-                "size_in_bytes": {
-                  "type": "long"
-                },
-                "last_doc_timestamp": {
-                  "type": "date"
-                }
-              }
-            },
-            "latestPackageVersion": {
-              "type": "keyword"
-            },
-            "packageStatus": {
-              "properties": {
-                "status": {
-                  "type": "keyword"
-                },
-                "installedPackagePolicies": {
-                  "type": "long"
-                },
-                "healthyAgents": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
-        "pods_stats": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "account_id": {
-                "type": "keyword"
-              },
-              "container_image_name": {
-                "type": "keyword"
-              },
-              "container_image_tag": {
-                "type": "keyword"
-              },
-              "pod_name": {
-                "type": "keyword"
-              },
-              "total_doc_count": {
-                "type": "long"
-              },
-              "process_doc_count": {
-                "type": "long"
-              },
-              "file_doc_count": {
-                "type": "long"
-              },
-              "alert_doc_count": {
-                "type": "long"
-              }
-            }
-          }
-        },
-        "accounts_stats": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "account_id": {
-                "type": "keyword"
-              },
-              "cloud_provider": {
-                "type": "keyword"
-              },
-              "kubernetes_version": {
-                "type": "keyword"
-              },
-              "total_doc_count": {
-                "type": "long"
-              },
-              "file_doc_count": {
-                "type": "long"
-              },
-              "process_doc_count": {
-                "type": "long"
-              },
-              "alert_doc_count": {
-                "type": "long"
-              },
-              "agents_count": {
-                "type": "short"
-              },
-              "nodes_count": {
-                "type": "short"
-              },
-              "pods_count": {
-                "type": "short"
-              }
-            }
-          }
-        },
-        "installation_stats": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "package_policy_id": {
-                "type": "keyword"
-              },
-              "package_version": {
-                "type": "keyword"
-              },
-              "agent_policy_id": {
-                "type": "keyword"
-              },
-              "created_at": {
-                "type": "date"
-              },
-              "agent_count": {
-                "type": "long"
-              },
-              "policy_yaml": {
-                "type": "keyword"
-              },
-              "selectors": {
-                "type": "array",
-                "items": {
-                  "properties": {
-                    "type": {
-                      "type": "keyword"
-                    },
-                    "name": {
-                      "type": "keyword"
-                    },
-                    "operation": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "containerImageFullName": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "containerImageName": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "containerImageTag": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "kubernetesClusterId": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "kubernetesClusterName": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "kubernetesNamespace": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "kubernetesPodLabel": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "kubernetesPodName": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "targetFilePath": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "ignoreVolumeFiles": {
-                      "type": "boolean"
-                    },
-                    "ignoreVolumeMounts": {
-                      "type": "boolean"
-                    },
-                    "processExecutable": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "processName": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "sessionLeaderInteractive": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              },
-              "responses": {
-                "type": "array",
-                "items": {
-                  "properties": {
-                    "type": {
-                      "type": "keyword"
-                    },
-                    "match": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "exclude": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    },
-                    "actions": {
-                      "type": "array",
-                      "items": {
-                        "type": "keyword"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "cloud_security_posture": {
       "properties": {
         "indices": {
@@ -718,6 +431,25 @@
           "properties": {
             "detection_rules": {
               "properties": {
+                "spaces_usage": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of spaces where detection rules added"
+                      }
+                    },
+                    "rules_in_spaces": {
+                      "type": "array",
+                      "items": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "Number of rules is each space"
+                        }
+                      }
+                    }
+                  }
+                },
                 "detection_rule_usage": {
                   "properties": {
                     "query": {
@@ -2039,6 +1771,314 @@
                             }
                           }
                         },
+                        "new_terms": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
+                        "esql": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
                         "threat_match": {
                           "properties": {
                             "failures": {
@@ -2989,6 +3029,314 @@
                             }
                           }
                         },
+                        "new_terms": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
+                        "esql": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
                         "threat_match": {
                           "properties": {
                             "failures": {
@@ -3786,6 +4134,314 @@
                     "custom_rules": {
                       "properties": {
                         "eql": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
+                        "new_terms": {
+                          "properties": {
+                            "failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of failed rules"
+                              }
+                            },
+                            "top_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "partial_failures": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of partial failure rules"
+                              }
+                            },
+                            "top_partial_failures": {
+                              "type": "array",
+                              "items": {
+                                "properties": {
+                                  "message": {
+                                    "type": "keyword",
+                                    "_meta": {
+                                      "description": "Failed rule message"
+                                    }
+                                  },
+                                  "count": {
+                                    "type": "long",
+                                    "_meta": {
+                                      "description": "Number of times the message occurred"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "succeeded": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The number of successful rules"
+                              }
+                            },
+                            "index_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "search_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "enrichment_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_duration": {
+                              "properties": {
+                                "max": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The max duration"
+                                  }
+                                },
+                                "avg": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The avg duration"
+                                  }
+                                },
+                                "min": {
+                                  "type": "float",
+                                  "_meta": {
+                                    "description": "The min duration"
+                                  }
+                                }
+                              }
+                            },
+                            "gap_count": {
+                              "type": "long",
+                              "_meta": {
+                                "description": "The count of gaps"
+                              }
+                            }
+                          }
+                        },
+                        "esql": {
                           "properties": {
                             "failures": {
                               "type": "long",

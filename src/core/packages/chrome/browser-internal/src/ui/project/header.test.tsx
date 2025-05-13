@@ -21,6 +21,7 @@ describe('Header', () => {
   const mockProps: Omit<ProjectHeaderProps, 'children'> = {
     application: mockApplication,
     breadcrumbs$: Rx.of([]),
+    breadcrumbsAppendExtensions$: Rx.of([]),
     actionMenu$: Rx.of(undefined),
     docLinks: docLinksServiceMock.createStartContract(),
     globalHelpExtensionMenuLinks$: Rx.of([]),

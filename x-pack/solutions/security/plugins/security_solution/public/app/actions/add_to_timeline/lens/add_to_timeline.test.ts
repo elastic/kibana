@@ -71,7 +71,7 @@ describe('createAddToTimelineLensAction', () => {
   });
 
   it('should return display name', () => {
-    expect(addToTimelineAction.getDisplayName(context)).toEqual('Add to timeline');
+    expect(addToTimelineAction.getDisplayName(context)).toEqual('Add to Timeline');
   });
 
   it('should return icon type', () => {
@@ -85,7 +85,7 @@ describe('createAddToTimelineLensAction', () => {
           ...context,
           embeddable: {
             ...getMockLensApi(),
-            blockingError: new BehaviorSubject(new Error('some error')),
+            blockingError$: new BehaviorSubject(new Error('some error')),
           },
         })
       ).toEqual(false);
@@ -163,8 +163,26 @@ describe('createAddToTimelineLensAction', () => {
       expect(await addToTimelineAction.isCompatible(context)).toEqual(false);
     });
 
-    it('should return true if everything is okay', async () => {
-      expect(await addToTimelineAction.isCompatible(context)).toEqual(true);
+    it('should return false when the user does not have access to timeline', async () => {
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).read = false;
+      const _action = createAddToTimelineLensAction({ store, order: 1 });
+      expect(await _action.isCompatible(context)).toEqual(false);
+    });
+
+    it('should return true when the user has read access to timeline', async () => {
+      (
+        KibanaServices.get().application.capabilities.securitySolutionTimeline as {
+          crud: boolean;
+          read: boolean;
+        }
+      ).read = true;
+      const _action = createAddToTimelineLensAction({ store, order: 1 });
+      expect(await _action.isCompatible(context)).toEqual(false);
     });
   });
 

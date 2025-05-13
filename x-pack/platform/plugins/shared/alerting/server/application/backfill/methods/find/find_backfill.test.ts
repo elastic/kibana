@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../..';
-import { AlertingAuthorization } from '../../../../authorization';
+import type { AlertingAuthorization } from '../../../../authorization';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -22,11 +22,11 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { fromKueryExpression } from '@kbn/es-query';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ConstructorOptions, RulesClient } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
 import { adHocRunStatus } from '../../../../../common/constants';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { SavedObject } from '@kbn/core/server';
-import { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
+import type { SavedObject } from '@kbn/core/server';
+import type { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { transformAdHocRunToBackfillResult } from '../../transforms';
 
@@ -142,35 +142,7 @@ const authDslFilter = {
   type: 'function',
 };
 
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
-  taskManager,
-  ruleTypeRegistry,
-  unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
-  logger: loggingSystemMock.create().get(),
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
-  auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
-  isAuthenticationTypeAPIKey: jest.fn(),
-  getAuthenticationAPIKey: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient,
-  isSystemAction: jest.fn(),
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-};
-
+const mockActionsClient = actionsClientMock.create();
 const fakeRuleName = 'fakeRuleName';
 
 const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
@@ -186,7 +158,6 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
       name: fakeRuleName,
       tags: ['foo'],
       alertTypeId: 'myType',
-      // @ts-expect-error
       params: {},
       apiKeyOwner: 'user',
       apiKeyCreatedByUser: false,
@@ -195,6 +166,7 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
       schedule: {
         interval: '12h',
       },
+      actions: [],
       createdBy: 'user',
       updatedBy: 'user',
       createdAt: '2019-02-12T21:01:22.479Z',
@@ -222,10 +194,41 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
 
 describe('findBackfill()', () => {
   let rulesClient: RulesClient;
+  let isSystemAction: jest.Mock;
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    rulesClient = new RulesClient(rulesClientParams);
+    isSystemAction = jest.fn().mockReturnValue(false);
+    mockActionsClient.isSystemAction.mockImplementation(isSystemAction);
+
+    rulesClient = new RulesClient({
+      taskManager,
+      ruleTypeRegistry,
+      unsecuredSavedObjectsClient,
+      authorization: authorization as unknown as AlertingAuthorization,
+      actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
+      spaceId: 'default',
+      namespace: 'default',
+      getUserName: jest.fn(),
+      createAPIKey: jest.fn(),
+      logger: loggingSystemMock.create().get(),
+      internalSavedObjectsRepository,
+      encryptedSavedObjectsClient: encryptedSavedObjects,
+      getActionsClient: jest.fn().mockResolvedValue(mockActionsClient),
+      getEventLogClient: jest.fn(),
+      kibanaVersion,
+      auditLogger,
+      maxScheduledPerMinute: 10000,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      isAuthenticationTypeAPIKey: jest.fn(),
+      getAuthenticationAPIKey: jest.fn(),
+      getAlertIndicesAlias: jest.fn(),
+      alertsService: null,
+      backfillClient,
+      isSystemAction: jest.fn(),
+      connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+      uiSettings: uiSettingsServiceMock.createStartContract(),
+    });
     authorization.getFindAuthorizationFilter.mockResolvedValue({
       filter,
       ensureRuleTypeIsAuthorized() {},
@@ -282,7 +285,7 @@ describe('findBackfill()', () => {
       page: 1,
       perPage: 10,
       total: 1,
-      data: [transformAdHocRunToBackfillResult(mockAdHocRunSO)],
+      data: [transformAdHocRunToBackfillResult({ adHocRunSO: mockAdHocRunSO, isSystemAction })],
     });
   });
 
@@ -331,7 +334,7 @@ describe('findBackfill()', () => {
       page: 1,
       perPage: 10,
       total: 1,
-      data: [transformAdHocRunToBackfillResult(mockAdHocRunSO)],
+      data: [transformAdHocRunToBackfillResult({ adHocRunSO: mockAdHocRunSO, isSystemAction })],
     });
   });
 
@@ -398,7 +401,7 @@ describe('findBackfill()', () => {
       page: 1,
       perPage: 10,
       total: 1,
-      data: [transformAdHocRunToBackfillResult(mockAdHocRunSO)],
+      data: [transformAdHocRunToBackfillResult({ adHocRunSO: mockAdHocRunSO, isSystemAction })],
     });
   });
 
@@ -465,7 +468,7 @@ describe('findBackfill()', () => {
       page: 1,
       perPage: 10,
       total: 1,
-      data: [transformAdHocRunToBackfillResult(mockAdHocRunSO)],
+      data: [transformAdHocRunToBackfillResult({ adHocRunSO: mockAdHocRunSO, isSystemAction })],
     });
   });
 
@@ -548,7 +551,7 @@ describe('findBackfill()', () => {
       page: 1,
       perPage: 10,
       total: 1,
-      data: [transformAdHocRunToBackfillResult(mockAdHocRunSO)],
+      data: [transformAdHocRunToBackfillResult({ adHocRunSO: mockAdHocRunSO, isSystemAction })],
     });
   });
 
@@ -633,7 +636,127 @@ describe('findBackfill()', () => {
       page: 1,
       perPage: 10,
       total: 1,
-      data: [transformAdHocRunToBackfillResult(mockAdHocRunSO)],
+      data: [transformAdHocRunToBackfillResult({ adHocRunSO: mockAdHocRunSO, isSystemAction })],
+    });
+  });
+
+  test('should successfully find backfill for rule with actions', async () => {
+    const mockAdHocRunSOWithActions = {
+      ...mockAdHocRunSO,
+      attributes: {
+        ...mockAdHocRunSO.attributes,
+        rule: {
+          ...mockAdHocRunSO.attributes.rule,
+          actions: [
+            {
+              uuid: '123abc',
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'test',
+              params: {},
+            },
+          ],
+        },
+      },
+      references: [
+        { id: 'abc', name: 'rule', type: RULE_SAVED_OBJECT_TYPE },
+        { id: '4', name: 'action_0', type: 'action' },
+      ],
+      score: 0,
+    };
+    unsecuredSavedObjectsClient.find.mockResolvedValue({
+      saved_objects: [mockAdHocRunSOWithActions],
+      per_page: 10,
+      page: 1,
+      total: 1,
+    });
+
+    const result = await rulesClient.findBackfill({
+      page: 1,
+      perPage: 10,
+      start: '2024-02-09T02:07:55Z',
+      end: '2024-03-29T02:07:55Z',
+      ruleIds: 'abc',
+    });
+
+    expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+      authorizationEntity: 'rule',
+      filterOpts: {
+        fieldNames: {
+          consumer: 'ad_hoc_run_params.attributes.rule.consumer',
+          ruleTypeId: 'ad_hoc_run_params.attributes.rule.alertTypeId',
+        },
+        type: 'kql',
+      },
+    });
+
+    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
+      filter: {
+        type: 'function',
+        function: 'and',
+        arguments: [
+          {
+            type: 'function',
+            function: 'and',
+            arguments: [
+              {
+                type: 'function',
+                function: 'range',
+                arguments: [
+                  { isQuoted: false, type: 'literal', value: 'ad_hoc_run_params.attributes.start' },
+                  'gte',
+                  { isQuoted: true, type: 'literal', value: '2024-02-09T02:07:55Z' },
+                ],
+              },
+              {
+                type: 'function',
+                function: 'range',
+                arguments: [
+                  { isQuoted: false, type: 'literal', value: 'ad_hoc_run_params.attributes.end' },
+                  'lte',
+                  { isQuoted: true, type: 'literal', value: '2024-03-29T02:07:55Z' },
+                ],
+              },
+            ],
+          },
+          authDslFilter,
+        ],
+      },
+      hasReference: [{ id: 'abc', type: RULE_SAVED_OBJECT_TYPE }],
+      page: 1,
+      perPage: 10,
+      type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+      event: {
+        action: 'ad_hoc_run_find',
+        category: ['database'],
+        outcome: 'success',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id: '1',
+          type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          name: 'backfill for rule "fakeRuleName"',
+        },
+      },
+      message:
+        'User has found ad hoc run for ad_hoc_run_params [id=1] backfill for rule "fakeRuleName"',
+    });
+
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 1,
+      data: [
+        transformAdHocRunToBackfillResult({
+          adHocRunSO: mockAdHocRunSOWithActions,
+          isSystemAction,
+        }),
+      ],
     });
   });
 
@@ -688,7 +811,7 @@ describe('findBackfill()', () => {
       page: 1,
       perPage: 10,
       total: 1,
-      data: [transformAdHocRunToBackfillResult(mockAdHocRunSO)],
+      data: [transformAdHocRunToBackfillResult({ adHocRunSO: mockAdHocRunSO, isSystemAction })],
     });
   });
 

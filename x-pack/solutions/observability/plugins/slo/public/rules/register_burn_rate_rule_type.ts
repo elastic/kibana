@@ -32,7 +32,7 @@ const sloBurnRateDefaultActionMessage = i18n.translate(
 const sloBurnRateDefaultRecoveryMessage = i18n.translate(
   'xpack.slo.rules.burnRate.defaultRecoveryMessage',
   {
-    defaultMessage: `'{{context.reason}}'
+    defaultMessage: `Recovered: '{{context.reason}}'
 
 '{{rule.name}}' has recovered.
 

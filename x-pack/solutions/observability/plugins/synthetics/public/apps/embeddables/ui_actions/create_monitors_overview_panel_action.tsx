@@ -11,16 +11,16 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
+import { CoreStart } from '@kbn/core/public';
 import { ClientPluginsStart } from '../../../plugin';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
-
-export const ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID =
-  'CREATE_SYNTHETICS_MONITORS_OVERVIEW_EMBEDDABLE';
+import { ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID } from './constants';
+import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 
 export function createMonitorsOverviewPanelAction(
-  getStartServices: StartServicesAccessor<ClientPluginsStart>
+  coreStart: CoreStart,
+  pluginStart: ClientPluginsStart
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_SYNTHETICS_MONITORS_OVERVIEW_ACTION_ID,
@@ -32,9 +32,6 @@ export function createMonitorsOverviewPanelAction(
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-      const [coreStart, pluginStart] = await getStartServices();
-      const { openMonitorConfiguration } = await import('../common/monitors_open_configuration');
-
       const initialState = await openMonitorConfiguration({
         coreStart,
         pluginStart,
@@ -44,11 +41,12 @@ export function createMonitorsOverviewPanelAction(
             defaultMessage: 'Create monitors overview',
           }
         ),
+        type: SYNTHETICS_MONITORS_EMBEDDABLE,
       });
       try {
         embeddable.addNewPanel({
           panelType: SYNTHETICS_MONITORS_EMBEDDABLE,
-          initialState,
+          serializedState: { rawState: initialState },
         });
       } catch (e) {
         return Promise.reject();

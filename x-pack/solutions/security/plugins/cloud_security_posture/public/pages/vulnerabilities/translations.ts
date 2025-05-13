@@ -44,7 +44,7 @@ export const VULNERABILITIES_GROUPS_UNIT = (
       });
     default:
       return i18n.translate('xpack.csp.vulnerabilities.groupUnit', {
-        values: { groupCount: totalCount },
+        values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {group} other {groups}}`,
       });
   }

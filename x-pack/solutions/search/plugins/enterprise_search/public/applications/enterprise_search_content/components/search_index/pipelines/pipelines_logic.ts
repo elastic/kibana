@@ -71,7 +71,7 @@ import {
   RevertConnectorPipelineActions,
   RevertConnectorPipelineApilogic,
 } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
-import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
+import { isApiIndex, isConnectorIndex } from '../../../utils/indices';
 
 type PipelinesActions = Pick<
   Actions<PostPipelineArgs, PostPipelineResponse>,
@@ -229,7 +229,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
   },
   listeners: ({ actions, values }) => ({
     apiSuccess: ({ pipeline }) => {
-      if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
+      if (isConnectorIndex(values.index)) {
         if (values.index.connector) {
           // had to split up these if checks rather than nest them or typescript wouldn't recognize connector as defined
           actions.fetchIndexApiSuccess({
@@ -247,7 +247,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
     },
     closePipelineSettings: () =>
       actions.setPipelineState(
-        isConnectorIndex(values.index) || isCrawlerIndex(values.index)
+        isConnectorIndex(values.index)
           ? values.index.connector?.pipeline ?? values.defaultPipelineValues
           : values.defaultPipelineValues
       ),
@@ -304,22 +304,20 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
     fetchIndexApiSuccess: (index) => {
       if (!values.showPipelineSettings) {
         // Don't do this when the modal is open to avoid overwriting the values while editing
-        const pipeline =
-          isConnectorIndex(index) || isCrawlerIndex(index)
-            ? index.connector?.pipeline
-            : values.defaultPipelineValues;
+        const pipeline = isConnectorIndex(index)
+          ? index.connector?.pipeline
+          : values.defaultPipelineValues;
         actions.setPipelineState(pipeline ?? values.defaultPipelineValues);
       }
     },
     openPipelineSettings: () => {
-      const pipeline =
-        isCrawlerIndex(values.index) || isConnectorIndex(values.index)
-          ? values.index.connector?.pipeline
-          : values.defaultPipelineValues;
+      const pipeline = isConnectorIndex(values.index)
+        ? values.index.connector?.pipeline
+        : values.defaultPipelineValues;
       actions.setPipelineState(pipeline ?? values.defaultPipelineValues);
     },
     revertPipelineSuccess: () => {
-      if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
+      if (isConnectorIndex(values.index)) {
         if (values.index.connector) {
           // had to split up these if checks rather than nest them or typescript wouldn't recognize connector as defined
           actions.fetchIndexApiSuccess({
@@ -332,7 +330,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       actions.fetchCustomPipeline({ indexName: values.indexName });
     },
     savePipeline: () => {
-      if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
+      if (isConnectorIndex(values.index)) {
         if (values.index.connector) {
           actions.makeRequest({
             connectorId: values.index.connector?.id,

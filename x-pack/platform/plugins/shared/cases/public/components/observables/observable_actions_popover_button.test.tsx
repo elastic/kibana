@@ -10,8 +10,7 @@ import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { buildCasesPermissions, createAppMockRenderer } from '../../common/mock';
+import { buildCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 
 import { ObservableActionsPopoverButton } from './observable_actions_popover_button';
 import type { CaseUI } from '../../../common';
@@ -24,7 +23,6 @@ jest.mock('../../containers/use_post_observables');
 jest.mock('../../containers/use_delete_observables');
 
 describe('ObservableActionsPopoverButton', () => {
-  let appMockRender: AppMockRenderer;
   const addObservable = jest.fn().mockResolvedValue({});
   const deleteObservable = jest.fn().mockResolvedValue({});
 
@@ -43,11 +41,10 @@ describe('ObservableActionsPopoverButton', () => {
         typeof useDeleteObservable
       >);
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders observable actions popover button correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
     );
 
@@ -57,7 +54,7 @@ describe('ObservableActionsPopoverButton', () => {
   });
 
   it('clicking the button opens the popover', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
     );
 
@@ -74,7 +71,7 @@ describe('ObservableActionsPopoverButton', () => {
 
   describe('edit buttton', () => {
     it('clicking edit button opens the edit modal', async () => {
-      appMockRender.render(
+      renderWithTestingProviders(
         <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
       );
 
@@ -92,7 +89,7 @@ describe('ObservableActionsPopoverButton', () => {
 
   describe('delete button', () => {
     it('clicking delete button opens the confirmation modal', async () => {
-      appMockRender.render(
+      renderWithTestingProviders(
         <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
       );
 
@@ -108,7 +105,7 @@ describe('ObservableActionsPopoverButton', () => {
     });
 
     it('clicking delete button in the confirmation modal calls deleteObservable with proper params', async () => {
-      appMockRender.render(
+      renderWithTestingProviders(
         <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
       );
 
@@ -130,12 +127,9 @@ describe('ObservableActionsPopoverButton', () => {
     });
 
     it('delete button is not rendered if user has no update permission', async () => {
-      appMockRender = createAppMockRenderer({
-        permissions: buildCasesPermissions({ update: false }),
-      });
-
-      appMockRender.render(
-        <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
+      renderWithTestingProviders(
+        <ObservableActionsPopoverButton caseData={caseData} observable={observable} />,
+        { wrapperProps: { permissions: buildCasesPermissions({ update: false }) } }
       );
 
       await userEvent.click(

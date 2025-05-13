@@ -2,7 +2,7 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": []
+    "types": ["@kbn/ambient-ui-types"]
   },
   "include": [
     "**/*.ts",

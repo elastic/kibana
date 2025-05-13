@@ -32,9 +32,11 @@ export const useStartMigration = (onSuccess?: OnSuccess) => {
       (async () => {
         try {
           dispatch({ type: 'start' });
-          await siemMigrations.rules.startRuleMigration(migrationId, retry);
+          const { started } = await siemMigrations.rules.startRuleMigration(migrationId, retry);
 
-          notifications.toasts.addSuccess(RULES_DATA_INPUT_START_MIGRATION_SUCCESS);
+          if (started) {
+            notifications.toasts.addSuccess(RULES_DATA_INPUT_START_MIGRATION_SUCCESS);
+          }
           dispatch({ type: 'success' });
           onSuccess?.();
         } catch (err) {

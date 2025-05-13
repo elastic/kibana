@@ -6,7 +6,7 @@
  */
 import { merge } from 'lodash';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import { ClusterPutComponentTemplateBody } from '../../types';
+import type { ClusterPutComponentTemplateBody } from '../../types';
 import { ecsFieldMap } from '../field_maps/ecs_field_map';
 import { technicalRuleFieldMap } from '../field_maps/technical_rule_field_map';
 

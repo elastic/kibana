@@ -1525,7 +1525,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         ];
         cases.forEach(({ type, value }) => {
-          it(`should return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
+          it(`should NOT return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
             await installMockPrebuiltRules(supertest, es);
             const prebuiltRule = await fetchPrebuiltRule();
 
@@ -1540,23 +1540,11 @@ export default ({ getService }: FtrProviderContext): void => {
                   },
                 ],
               })
-              .expect(500);
+              .expect(200);
 
-            expect(body.attributes.summary).toEqual({
-              failed: 1,
-              skipped: 0,
-              succeeded: 0,
-              total: 1,
-            });
-            expect(body.attributes.errors[0]).toEqual({
-              message: "Elastic rule can't be edited",
-              status_code: 500,
-              rules: [
-                {
-                  id: prebuiltRule.id,
-                  name: prebuiltRule.name,
-                },
-              ],
+            expect(body).toMatchObject({
+              success: true,
+              rules_count: 1,
             });
           });
         });
@@ -2071,63 +2059,6 @@ export default ({ getService }: FtrProviderContext): void => {
               expect(prebuiltRule.version).toBe(readRule.version);
             });
           });
-
-          // if rule action is applied together with another edit action, that can't be applied to prebuilt rule (for example: tags action)
-          // bulk edit request should return error
-          it(`should return error if one of edit action is not eligible for prebuilt rule`, async () => {
-            await installMockPrebuiltRules(supertest, es);
-            const prebuiltRule = await fetchPrebuiltRule();
-            const webHookConnector = await createWebHookConnector();
-
-            const { body } = await postBulkAction()
-              .send({
-                ids: [prebuiltRule.id],
-                action: BulkActionTypeEnum.edit,
-                [BulkActionTypeEnum.edit]: [
-                  {
-                    type: BulkActionEditTypeEnum.set_rule_actions,
-                    value: {
-                      throttle: '1h',
-                      actions: [
-                        {
-                          ...webHookActionMock,
-                          id: webHookConnector.id,
-                        },
-                      ],
-                    },
-                  },
-                  {
-                    type: BulkActionEditTypeEnum.set_tags,
-                    value: ['tag-1'],
-                  },
-                ],
-              })
-              .expect(500);
-
-            expect(body.attributes.summary).toEqual({
-              failed: 1,
-              skipped: 0,
-              succeeded: 0,
-              total: 1,
-            });
-            expect(body.attributes.errors[0]).toEqual({
-              message: "Elastic rule can't be edited",
-              status_code: 500,
-              rules: [
-                {
-                  id: prebuiltRule.id,
-                  name: prebuiltRule.name,
-                },
-              ],
-            });
-
-            // Check that the updates were not made
-            const { body: readRule } = await fetchRule(prebuiltRule.rule_id).expect(200);
-
-            expect(readRule.actions).toEqual(prebuiltRule.actions);
-            expect(readRule.tags).toEqual(prebuiltRule.tags);
-            expect(readRule.version).toBe(prebuiltRule.version);
-          });
         });
 
         describe('throttle', () => {
@@ -2522,6 +2453,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         const startDate = moment().add(1, 'd');
+        const endDate = moment().add(2, 'd');
 
         const { body } = await securitySolutionApi
           .performRulesBulkAction({
@@ -2529,7 +2461,10 @@ export default ({ getService }: FtrProviderContext): void => {
             body: {
               ids: [createdRule1.id, createdRule2.id],
               action: BulkActionTypeEnum.run,
-              [BulkActionTypeEnum.run]: { start_date: startDate.toISOString() },
+              [BulkActionTypeEnum.run]: {
+                start_date: startDate.toISOString(),
+                end_date: endDate.toISOString(),
+              },
             },
           })
           .expect(400);

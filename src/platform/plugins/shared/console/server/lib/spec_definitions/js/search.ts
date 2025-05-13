@@ -226,6 +226,12 @@ export const search = (specService: SpecDefinitionsService) => {
       knn: {
         __template: {
           field: '',
+          query_vector_builder: {
+            text_embedding: {
+              model_id: '',
+              model_text: '',
+            },
+          },
           k: 10,
           num_candidates: 100,
         },
@@ -236,9 +242,17 @@ export const search = (specService: SpecDefinitionsService) => {
             k: 10,
             num_candidates: 100,
             query_vector: [],
-            query_vector_builder: {},
-            similarity: { __one_of: ['l2_norm', 'cosine', 'dot_product'] },
+            query_vector_builder: {
+              text_embedding: {
+                model_id: '',
+                model_text: '',
+              },
+            },
+            similarity: { __one_of: ['l2_norm', 'cosine', 'dot_product', 'max_inner_product'] },
             boost: 1.0,
+            rescore_vector: {
+              oversample: 1.5,
+            },
           },
           [
             {
@@ -248,11 +262,17 @@ export const search = (specService: SpecDefinitionsService) => {
               num_candidates: 100,
               query_vector: [],
               query_vector_builder: {},
-              similarity: { __one_of: ['l2_norm', 'cosine', 'dot_product'] },
+              similarity: { __one_of: ['l2_norm', 'cosine', 'dot_product', 'max_inner_product'] },
               boost: 1.0,
+              rescore_vector: {
+                oversample: 1.5,
+              },
             },
           ],
         ],
+      },
+      retriever: {
+        // populated by a global rule
       },
     },
   });

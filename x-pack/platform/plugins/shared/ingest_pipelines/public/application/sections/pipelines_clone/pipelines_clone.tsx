@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading, useKibana, attemptToURIDecode } from '../../../shared_imports';
 
 import { PipelinesCreate } from '../pipelines_create';
+import { getErrorText } from '../utils';
 
 export interface ParamProps {
   sourceName: string;
@@ -36,7 +37,7 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
 
   useEffect(() => {
     if (error && !isLoading) {
-      services.notifications!.toasts.addError(error, {
+      services.notifications!.toasts.addError(new Error(getErrorText(error)), {
         title: i18n.translate('xpack.ingestPipelines.clone.loadSourcePipelineErrorTitle', {
           defaultMessage: 'Cannot load {name}.',
           values: { name: sourceName },

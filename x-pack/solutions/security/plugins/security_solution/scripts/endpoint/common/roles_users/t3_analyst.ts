@@ -17,7 +17,7 @@ export const getT3Analyst: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siem: [
+          siemV2: [
             'all',
             'read_alerts',
             'crud_alerts',
@@ -34,6 +34,8 @@ export const getT3Analyst: () => Omit<Role, 'name'> = () => {
             'scan_operations_all',
             'workflow_insights_all',
           ],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
       },
     ],

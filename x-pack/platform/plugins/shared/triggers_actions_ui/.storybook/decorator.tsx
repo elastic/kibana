@@ -8,7 +8,7 @@
 import React, { FC, PropsWithChildren } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { action } from '@storybook/addon-actions';
-import { DecoratorFn } from '@storybook/react';
+import { StoryContext } from '@storybook/react';
 import { EMPTY, of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
@@ -24,7 +24,7 @@ import { getActionTypeRegistry } from './context/action_type_registry';
 import { getDefaultServicesApplication } from './context/application';
 
 interface StorybookContextDecoratorProps {
-  context: Parameters<DecoratorFn>[1];
+  context: StoryContext;
   servicesApplicationOverride?: Partial<ApplicationStart>;
   servicesOverride?: Partial<KibanaServices>;
 }
@@ -71,7 +71,7 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
       ruleKqlBar: true,
       isMustacheAutocompleteOn: false,
       showMustacheAutocompleteSwitch: false,
-      isUsingRuleCreateFlyout: false,
+      alertDeletionSettingsEnabled: false,
     },
   });
 

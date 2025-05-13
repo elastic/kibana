@@ -24,13 +24,14 @@ import {
 } from '../../../common/bedrock/constants';
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { AxiosError } from 'axios';
+import type { AxiosError } from 'axios';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 
 // @ts-ignore
 const mockSigner = jest.spyOn(aws, 'sign').mockReturnValue({ signed: true });
 const mockSend = jest.fn();
+const encodedModel = encodeURIComponent(DEFAULT_BEDROCK_MODEL);
 describe('BedrockConnector', () => {
   let mockRequest: jest.Mock;
   let mockError: jest.Mock;
@@ -111,7 +112,7 @@ describe('BedrockConnector', () => {
               'Content-Type': 'application/json',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
-            path: '/model/anthropic.claude-3-5-sonnet-20240620-v1:0/invoke',
+            path: `/model/${encodedModel}/invoke`,
             service: 'bedrock',
           },
           { accessKeyId: '123', secretAccessKey: 'secret' }
@@ -124,7 +125,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: DEFAULT_BODY,
@@ -154,7 +155,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunActionResponseSchema,
             data: v2Body,
@@ -212,7 +213,7 @@ describe('BedrockConnector', () => {
               'x-amzn-bedrock-accept': '*/*',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
-            path: '/model/anthropic.claude-3-5-sonnet-20240620-v1:0/invoke-with-response-stream',
+            path: `/model/${encodedModel}/invoke-with-response-stream`,
             service: 'bedrock',
           },
           { accessKeyId: '123', secretAccessKey: 'secret' }
@@ -225,7 +226,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
-            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke-with-response-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             responseType: 'stream',
@@ -246,7 +247,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
-            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke-with-response-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             responseType: 'stream',
@@ -286,7 +287,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             responseType: 'stream',
-            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke-with-response-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             data: JSON.stringify({
@@ -341,7 +342,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             responseType: 'stream',
-            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke-with-response-stream`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             data: JSON.stringify({
@@ -442,7 +443,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: JSON.stringify({
@@ -486,7 +487,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: JSON.stringify({
@@ -532,7 +533,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: JSON.stringify({
@@ -582,7 +583,7 @@ describe('BedrockConnector', () => {
           {
             signed: true,
             timeout: DEFAULT_TIMEOUT_MS,
-            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: JSON.stringify({
@@ -609,7 +610,7 @@ describe('BedrockConnector', () => {
         expect(mockRequest).toHaveBeenCalledWith(
           {
             signed: true,
-            url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke`,
+            url: `${DEFAULT_BEDROCK_URL}/model/${encodedModel}/invoke`,
             method: 'post',
             responseSchema: RunApiLatestResponseSchema,
             data: JSON.stringify({

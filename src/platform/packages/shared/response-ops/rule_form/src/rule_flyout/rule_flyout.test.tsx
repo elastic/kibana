@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { RuleFlyout } from './rule_flyout';
 import {
   RULE_FORM_PAGE_RULE_DEFINITION_TITLE_SHORT,
@@ -110,31 +110,26 @@ describe('ruleFlyout', () => {
     render(<RuleFlyout onCancel={onCancel} onSave={onSave} />);
 
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterNextStepButton'));
-    await waitFor(() =>
-      expect(screen.getByTestId('ruleFlyoutFooterPreviousStepButton')).toBeInTheDocument()
-    );
+    expect(await screen.findByTestId('ruleFlyoutFooterPreviousStepButton')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterNextStepButton'));
-    await waitFor(() =>
-      expect(screen.getByTestId('ruleFlyoutFooterSaveButton')).toBeInTheDocument()
-    );
+    expect(await screen.findByTestId('ruleFlyoutFooterSaveButton')).toBeInTheDocument();
+
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterPreviousStepButton'));
-    await waitFor(() =>
-      expect(screen.getByTestId('ruleFlyoutFooterNextStepButton')).toBeInTheDocument()
-    );
+    expect(await screen.findByTestId('ruleFlyoutFooterNextStepButton')).toBeInTheDocument();
   });
 
   test('should call onSave when save button is pressed', async () => {
     render(<RuleFlyout onCancel={onCancel} onSave={onSave} />);
 
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterNextStepButton'));
-    await waitFor(() =>
-      expect(screen.getByTestId('ruleFlyoutFooterPreviousStepButton')).toBeInTheDocument()
-    );
+    expect(await screen.findByTestId('ruleFlyoutFooterPreviousStepButton')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterNextStepButton'));
-    await waitFor(() =>
-      expect(screen.getByTestId('ruleFlyoutFooterSaveButton')).toBeInTheDocument()
-    );
+    expect(await screen.findByTestId('ruleFlyoutFooterSaveButton')).toBeInTheDocument();
+
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterSaveButton'));
+
+    expect(await screen.findByTestId('confirmCreateRuleModal')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(onSave).toHaveBeenCalledWith({
       ...formDataMock,
@@ -147,5 +142,34 @@ describe('ruleFlyout', () => {
 
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterCancelButton'));
     expect(onCancel).toHaveBeenCalled();
+  });
+
+  test('should display discard changes modal only if changes are made in the form', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        application: {
+          navigateToUrl,
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          },
+        },
+      },
+      baseErrors: {},
+      paramsErrors: {},
+      touched: true,
+      formData: formDataMock,
+      connectors: [],
+      connectorTypes: [],
+      aadTemplateFields: [],
+    });
+
+    render(<RuleFlyout onCancel={onCancel} onSave={onSave} />);
+
+    fireEvent.click(screen.getByTestId('ruleFlyoutFooterCancelButton'));
+    expect(screen.getByTestId('confirmRuleCloseModal')).toBeInTheDocument();
   });
 });

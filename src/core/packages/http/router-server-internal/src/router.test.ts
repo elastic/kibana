@@ -14,6 +14,7 @@ import { createRequestMock } from '@kbn/hapi-mocks/src/request';
 import { createFooValidation } from './router.test.util';
 import { Router, type RouterOptions } from './router';
 import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
+import { getEnvOptions, createTestEnv } from '@kbn/config-mocks';
 
 const mockResponse = {
   code: jest.fn().mockImplementation(() => mockResponse),
@@ -26,9 +27,12 @@ const mockResponseToolkit = {
 
 const logger = loggingSystemMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 const routerOptions: RouterOptions = {
-  isDev: false,
+  env,
   versionedRouterOptions: {
     defaultHandlerResolutionStrategy: 'oldest',
     useVersionResolutionStrategyForInternalPaths: [],
@@ -49,6 +53,11 @@ describe('Router', () => {
         {
           path: '/',
           validate: { body: validation, query: validation, params: validation },
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
           options: {
             deprecated: {
               documentationUrl: 'https://fake-url.com',
@@ -99,12 +108,22 @@ describe('Router', () => {
         .post({
           path: '/versioned',
           access: 'internal',
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
         })
         .addVersion({ version: '999', validate: false }, async (ctx, req, res) => res.ok());
       router.get(
         {
           path: '/unversioned',
           validate: { body: validation, query: validation, params: validation },
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
         },
         (context, req, res) => res.ok()
       );
@@ -127,6 +146,11 @@ describe('Router', () => {
         {
           path: '/',
           validate: staticOrLazy ? fooValidation : () => fooValidation,
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
         },
         (context, req, res) => res.ok()
       );
@@ -154,6 +178,11 @@ describe('Router', () => {
       router.post(
         {
           path: '/public',
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
           options: {
             access: 'public',
           },
@@ -164,6 +193,11 @@ describe('Router', () => {
       router.post(
         {
           path: '/internal',
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
           options: {
             access: 'internal',
           },
@@ -190,6 +224,11 @@ describe('Router', () => {
       router.post(
         {
           path: '/public',
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
           options: {
             access: 'public',
           },
@@ -200,6 +239,11 @@ describe('Router', () => {
       router.post(
         {
           path: '/public-resource',
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
           options: {
             access: 'public',
             httpResource: true,
@@ -236,6 +280,11 @@ describe('Router', () => {
     router.post(
       {
         path: '/',
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
         validate: lazyValidation,
       },
       (context, req, res) => res.ok()
@@ -273,7 +322,7 @@ describe('Router', () => {
 
   it('registers pluginId if provided', () => {
     const pluginId = Symbol('test');
-    const router = new Router('', logger, enhanceWithContext, { pluginId });
+    const router = new Router('', logger, enhanceWithContext, { pluginId, env });
     expect(router.pluginId).toBe(pluginId);
   });
 
@@ -295,6 +344,11 @@ describe('Router', () => {
           {
             path: '/',
             validate: { params: { validate: () => 'error' } } as any,
+            security: {
+              authz: {
+                requiredPrivileges: ['foo'],
+              },
+            },
           },
           (context, req, res) => res.ok({})
         )
@@ -312,6 +366,11 @@ describe('Router', () => {
             path: '/',
             validate: false,
             options: { security: { authz: { requiredPrivileges: [] } } } as any,
+            security: {
+              authz: {
+                requiredPrivileges: ['foo'],
+              },
+            },
           },
           (context, req, res) => res.ok({})
         )
@@ -329,6 +388,11 @@ describe('Router', () => {
             path: '/',
             options: { body: { output: 'file' } } as any, // We explicitly don't support 'file'
             validate: { body: schema.object({}, { unknowns: 'allow' }) },
+            security: {
+              authz: {
+                requiredPrivileges: ['foo'],
+              },
+            },
           },
           (context, req, res) => res.ok({})
         )
@@ -380,7 +444,18 @@ describe('Router', () => {
 
     it('should default `output: "stream" and parse: false` when no body validation is required but not a GET', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
-      router.post({ path: '/', validate: {} }, (context, req, res) => res.ok({}));
+      router.post(
+        {
+          path: '/',
+          validate: {},
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
+        },
+        (context, req, res) => res.ok({})
+      );
       const [route] = router.getRoutes();
       expect(route.options).toEqual({ body: { output: 'stream', parse: false } });
     });
@@ -388,7 +463,16 @@ describe('Router', () => {
     it('should NOT default `output: "stream" and parse: false` when the user has specified body options (he cares about it)', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.post(
-        { path: '/', options: { body: { maxBytes: 1 } }, validate: {} },
+        {
+          path: '/',
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
+          options: { body: { maxBytes: 1 } },
+          validate: {},
+        },
         (context, req, res) => res.ok({})
       );
       const [route] = router.getRoutes();
@@ -397,7 +481,18 @@ describe('Router', () => {
 
     it('should NOT default `output: "stream" and parse: false` when no body validation is required and GET', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
-      router.get({ path: '/', validate: {} }, (context, req, res) => res.ok({}));
+      router.get(
+        {
+          path: '/',
+          validate: {},
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
+        },
+        (context, req, res) => res.ok({})
+      );
       const [route] = router.getRoutes();
       expect(route.options).toEqual({});
     });

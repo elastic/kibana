@@ -21,11 +21,11 @@ import { TimelineResponse } from '../model/components.gen';
 export type GetTimelineRequestQuery = z.infer<typeof GetTimelineRequestQuery>;
 export const GetTimelineRequestQuery = z.object({
   /**
-   * The ID of the template timeline to retrieve
+   * The `savedObjectId` of the template timeline to retrieve
    */
   template_timeline_id: z.string().optional(),
   /**
-   * The ID of the Timeline to retrieve.
+   * The `savedObjectId` of the Timeline to retrieve.
    */
   id: z.string().optional(),
 });

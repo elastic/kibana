@@ -11,7 +11,8 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import { getNewSavedSearch, getSavedSearch, saveSavedSearch, SaveSavedSearchOptions } from '.';
+import type { SaveSavedSearchOptions } from '.';
+import { getNewSavedSearch, getSavedSearch, saveSavedSearch } from '.';
 import { SavedSearchType } from '../../../common';
 import type { SavedSearchCrudTypes } from '../../../common/content_management';
 import type { SavedSearch, SerializableSavedSearch } from '../../../common/types';

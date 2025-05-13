@@ -8,7 +8,6 @@
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import { ReportingStart } from '@kbn/reporting-plugin/public';
 import {
   CoreSetup,
@@ -68,7 +67,6 @@ export interface CanvasStartDeps {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  visualizations: VisualizationsStart;
   spaces?: SpacesPluginStart;
   contentManagement: ContentManagementPublicStart;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getElasticLogo } from '@kbn/presentation-util-plugin/common';
+import { elasticLogo } from '../../../../public/lib';
 
 export const fontStyle = {
   type: 'style',
@@ -23,7 +23,6 @@ export const fontStyle = {
 };
 
 export const getContainerStyle = async () => {
-  const { elasticLogo } = await getElasticLogo();
   return {
     type: 'containerStyle',
     border: '3px dotted blue',

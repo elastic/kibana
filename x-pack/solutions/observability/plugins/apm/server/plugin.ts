@@ -200,6 +200,7 @@ export class APMPlugin
     // This will add an API key to all existing APM package policies
     addApiKeysToEveryPackagePolicyIfMissing({
       coreStartPromise: getCoreStart(),
+      licensing: plugins.licensing,
       pluginStartPromise: getPluginStart(),
       logger: this.logger,
     }).catch((e) => {
@@ -257,20 +258,17 @@ export class APMPlugin
 
     // create .apm-agent-configuration index without blocking start lifecycle
     createApmAgentConfigurationIndex({ client, logger }).catch((e) => {
-      logger.error('Failed to create .apm-agent-configuration index');
-      logger.error(e);
+      logger.debug(`Failed to create .apm-agent-configuration index: ${e.message}`);
     });
 
     // create .apm-custom-link index without blocking start lifecycle
     createApmCustomLinkIndex({ client, logger }).catch((e) => {
-      logger.error('Failed to create .apm-custom-link index');
-      logger.error(e);
+      logger.debug(`Failed to create .apm-custom-link index: ${e.message}`);
     });
 
     // create .apm-source-map index without blocking start lifecycle
     createApmSourceMapIndexTemplate({ client, logger }).catch((e) => {
-      logger.error('Failed to create apm-source-map index template');
-      logger.error(e);
+      logger.debug(`Failed to create apm-source-map index template: ${e.message}`);
     });
   }
 

@@ -15,11 +15,11 @@ interface Props {
   contextId: string;
   endgameParentProcessName: string | null | undefined;
   eventId: string;
-  isDraggable?: boolean;
   processParentPid: number | null | undefined;
   processParentName: string | null | undefined;
   processPpid: number | undefined | null;
   text: string | null | undefined;
+  scopeId: string;
 }
 
 export const ParentProcessDraggable = React.memo<Props>(
@@ -27,11 +27,11 @@ export const ParentProcessDraggable = React.memo<Props>(
     contextId,
     endgameParentProcessName,
     eventId,
-    isDraggable,
     processParentName,
     processParentPid,
     processPpid,
     text,
+    scopeId,
   }) => {
     if (
       isNillEmptyOrNotFinite(processParentName) &&
@@ -55,10 +55,10 @@ export const ParentProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processParentName) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.parent.name"
-              isDraggable={isDraggable}
               value={processParentName}
               fieldType="keyword"
               isAggregatable={true}
@@ -69,10 +69,10 @@ export const ParentProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(endgameParentProcessName) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.parent_process_name"
-              isDraggable={isDraggable}
               value={endgameParentProcessName}
               fieldType="keyword"
               isAggregatable={true}
@@ -83,10 +83,10 @@ export const ParentProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processParentPid) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.parent.pid"
-              isDraggable={isDraggable}
               queryValue={String(processParentPid)}
               value={`(${String(processParentPid)})`}
               fieldType="keyword"
@@ -98,10 +98,10 @@ export const ParentProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processPpid) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.ppid"
-              isDraggable={isDraggable}
               queryValue={String(processPpid)}
               value={`(${String(processPpid)})`}
               fieldType="keyword"

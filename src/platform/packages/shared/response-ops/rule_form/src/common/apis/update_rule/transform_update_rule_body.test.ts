@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleTypeParams } from '../../types';
+import type { RuleTypeParams } from '../../types';
 import { transformUpdateRuleBody } from './transform_update_rule_body';
-import { UpdateRuleBody } from './types';
+import type { UpdateRuleBody } from './types';
 
 const ruleToUpdate: UpdateRuleBody<RuleTypeParams> = {
   params: {

@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { uniq } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { DirectionBadge } from '../direction';
 import { DefaultDraggable, DraggableBadge } from '../../../../common/components/draggables';
@@ -45,10 +45,10 @@ export const Network = React.memo<{
   contextId: string;
   direction?: string[] | null;
   eventId: string;
-  isDraggable?: boolean;
   packets?: string[] | null;
   protocol?: string[] | null;
   transport?: string[] | null;
+  scopeId: string;
 }>(
   ({
     bytes,
@@ -56,20 +56,20 @@ export const Network = React.memo<{
     contextId,
     direction,
     eventId,
-    isDraggable,
     packets,
     protocol,
     transport,
+    scopeId,
   }) => (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none">
       {direction != null
         ? uniq(direction).map((dir) => (
             <EuiFlexItemMarginRight grow={false} key={dir}>
               <DirectionBadge
+                scopeId={scopeId}
                 contextId={contextId}
                 direction={dir}
                 eventId={eventId}
-                isDraggable={isDraggable}
               />
             </EuiFlexItemMarginRight>
           ))
@@ -80,9 +80,9 @@ export const Network = React.memo<{
             <EuiFlexItemMarginRight grow={false} key={proto}>
               <DraggableBadge
                 contextId={contextId}
+                scopeId={scopeId}
                 eventId={eventId}
                 field={NETWORK_PROTOCOL_FIELD_NAME}
-                isDraggable={isDraggable}
                 value={proto}
                 isAggregatable={true}
                 fieldType="keyword"
@@ -96,9 +96,9 @@ export const Network = React.memo<{
             !isNaN(Number(b)) ? (
               <EuiFlexItemMarginRight grow={false} key={b}>
                 <DefaultDraggable
+                  scopeId={scopeId}
                   field={NETWORK_BYTES_FIELD_NAME}
                   id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_BYTES_FIELD_NAME}-${b}`}
-                  isDraggable={isDraggable}
                   value={b}
                 >
                   <Stats size="xs">
@@ -116,9 +116,9 @@ export const Network = React.memo<{
         ? uniq(packets).map((p) => (
             <EuiFlexItemMarginRight grow={false} key={p}>
               <DefaultDraggable
+                scopeId={scopeId}
                 field={NETWORK_PACKETS_FIELD_NAME}
                 id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_PACKETS_FIELD_NAME}-${p}`}
-                isDraggable={isDraggable}
                 value={p}
               >
                 <Stats size="xs">
@@ -133,11 +133,11 @@ export const Network = React.memo<{
         ? uniq(transport).map((trans) => (
             <EuiFlexItemMarginRight grow={false} key={trans}>
               <DraggableBadge
+                scopeId={scopeId}
                 contextId={contextId}
                 data-test-subj="network-transport"
                 eventId={eventId}
                 field={NETWORK_TRANSPORT_FIELD_NAME}
-                isDraggable={isDraggable}
                 value={trans}
                 isAggregatable={true}
                 fieldType="keyword"
@@ -150,10 +150,10 @@ export const Network = React.memo<{
         ? uniq(communityId).map((trans) => (
             <EuiFlexItem grow={false} key={trans}>
               <DraggableBadge
+                scopeId={scopeId}
                 contextId={contextId}
                 eventId={eventId}
                 field={NETWORK_COMMUNITY_ID_FIELD_NAME}
-                isDraggable={isDraggable}
                 value={trans}
                 isAggregatable={true}
                 fieldType="keyword"

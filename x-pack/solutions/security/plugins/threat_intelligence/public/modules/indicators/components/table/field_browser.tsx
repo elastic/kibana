@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { VFC } from 'react';
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
-import { VFC } from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { FieldBrowser } from '@kbn/response-ops-alerts-fields-browser';
 
 export interface IndicatorsFieldBrowserProps {
   browserFields: Readonly<Record<string, Partial<BrowserField>>>;
@@ -22,15 +22,15 @@ export const IndicatorsFieldBrowser: VFC<IndicatorsFieldBrowserProps> = ({
   onResetColumns,
   onToggleColumn,
 }) => {
-  const { triggersActionsUi } = useKibana().services;
-
-  return triggersActionsUi.getFieldBrowser({
-    browserFields,
-    columnIds,
-    onResetColumns,
-    onToggleColumn,
-    options: {
-      preselectedCategoryIds: ['threat', 'base', 'event', 'agent'],
-    },
-  });
+  return (
+    <FieldBrowser
+      browserFields={browserFields}
+      columnIds={columnIds}
+      onResetColumns={onResetColumns}
+      onToggleColumn={onToggleColumn}
+      options={{
+        preselectedCategoryIds: ['threat', 'base', 'event', 'agent'],
+      }}
+    />
+  );
 };

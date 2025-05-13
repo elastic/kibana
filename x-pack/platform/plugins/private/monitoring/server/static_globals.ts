@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, ElasticsearchClient, Logger, PluginInitializerContext } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { MonitoringConfig } from './config';
 import { PluginsSetup } from './types';
 import { mbSafeQuery } from './lib/mb_safe_query';

@@ -8,12 +8,12 @@
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { createAppContextStartContractMock } from '../../../mocks';
-import type { PackagePolicyInput } from '../../../../common/types';
+import type { PackagePolicyAssetsMap, PackagePolicyInput } from '../../../../common/types';
 import { appContextService } from '../..';
 
 import { getTemplateInputs, templatePackagePolicyToFullInputStreams } from './get_template_inputs';
 import REDIS_1_18_0_PACKAGE_INFO from './__fixtures__/redis_1_18_0_package_info.json';
-import { getPackageAssetsMap, getPackageInfo } from './get';
+import { getAgentTemplateAssetsMap, getPackageInfo } from './get';
 import { REDIS_ASSETS_MAP } from './__fixtures__/redis_1_18_0_streams_template';
 import { LOGS_2_3_0_ASSETS_MAP, LOGS_2_3_0_PACKAGE_INFO } from './__fixtures__/logs_2_3_0';
 import { DOCKER_2_11_0_PACKAGE_INFO, DOCKER_2_11_0_ASSETS_MAP } from './__fixtures__/docker_2_11_0';
@@ -324,19 +324,19 @@ describe('Fleet - templatePackagePolicyToFullInputStreams', () => {
 describe('Fleet - getTemplateInputs', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    jest.mocked(getPackageAssetsMap).mockImplementation(async ({ packageInfo }) => {
+    jest.mocked(getAgentTemplateAssetsMap).mockImplementation(async ({ packageInfo }) => {
       if (packageInfo.name === 'redis' && packageInfo.version === '1.18.0') {
-        return REDIS_ASSETS_MAP;
+        return REDIS_ASSETS_MAP as PackagePolicyAssetsMap;
       }
 
       if (packageInfo.name === 'log') {
-        return LOGS_2_3_0_ASSETS_MAP;
+        return LOGS_2_3_0_ASSETS_MAP as PackagePolicyAssetsMap;
       }
       if (packageInfo.name === 'docker') {
-        return DOCKER_2_11_0_ASSETS_MAP;
+        return DOCKER_2_11_0_ASSETS_MAP as PackagePolicyAssetsMap;
       }
 
-      return new Map();
+      return new Map() as PackagePolicyAssetsMap;
     });
     jest.mocked(getPackageInfo).mockImplementation(async ({ pkgName, pkgVersion }) => {
       const pkgInfo = packageInfoCache.get(`${pkgName}-${pkgVersion}`);

@@ -10,16 +10,17 @@ import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText } f
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import * as i18n from './translations';
 import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
-import { InferenceEndpointUI, InferenceUsageInfo } from '../../../../../types';
+import { InferenceUsageInfo } from '../../../../../types';
 import { RenderMessageWithIcon } from '../../component/render_message_with_icon';
 import { ScanUsageResults } from '../../component/scan_usage_results';
 
 interface ConfirmDeleteEndpointModalProps {
   onCancel: () => void;
   onConfirm: () => void;
-  inferenceEndpoint: InferenceEndpointUI;
+  inferenceEndpoint: InferenceInferenceEndpointInfo;
 }
 
 export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProps> = ({
@@ -33,8 +34,8 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
   const [ignoreWarningCheckbox, setIgnoreWarningCheckbox] = useState<boolean>(false);
 
   const { data } = useScanUsage({
-    type: inferenceEndpoint.type,
-    id: inferenceEndpoint.endpoint,
+    type: inferenceEndpoint.task_type,
+    id: inferenceEndpoint.inference_id,
   });
 
   const onIgnoreWarningCheckboxChange = (state: boolean) => {
@@ -88,7 +89,7 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
             `}
             data-test-subj="deleteModalInferenceEndpointName"
           >
-            {inferenceEndpoint.endpoint}
+            {inferenceEndpoint.inference_id}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>

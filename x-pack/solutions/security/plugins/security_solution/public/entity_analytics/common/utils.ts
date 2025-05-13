@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiLightVars } from '@kbn/ui-theme';
 import { RiskSeverity } from '../../../common/search_strategy';
 import { SEVERITY_COLOR } from '../../overview/components/detection_response/utils';
 export { RISK_LEVEL_RANGES as RISK_SCORE_RANGES } from '../../../common/entity_analytics/risk_engine';
@@ -18,8 +17,12 @@ export const SEVERITY_UI_SORT_ORDER = [
   RiskSeverity.Critical,
 ];
 
+// Migration to tokens from EUI during the Borealis theme migration is blocked until new severity palette is agreed upon.
+// We keep using hardcoded colors until security severity palette is ready https://github.com/elastic/kibana/issues/203387
+// TODO: Borealis migration - move from hardcoded values to severity palette, which should instead use shared hook across security:
+// https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
 export const RISK_SEVERITY_COLOUR: { [k in RiskSeverity]: string } = {
-  [RiskSeverity.Unknown]: euiLightVars.euiColorMediumShade,
+  [RiskSeverity.Unknown]: '#aaa', // euiThemeVars no longer in use. Hard coded temporarily, see above.
   [RiskSeverity.Low]: SEVERITY_COLOR.low,
   [RiskSeverity.Moderate]: SEVERITY_COLOR.medium,
   [RiskSeverity.High]: SEVERITY_COLOR.high,

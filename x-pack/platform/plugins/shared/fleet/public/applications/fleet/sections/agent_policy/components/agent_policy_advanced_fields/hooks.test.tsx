@@ -43,18 +43,28 @@ const mockApiCallsWithOutputs = (http: MockedFleetStartServices['http']) => {
               name: 'Output 1',
               is_default: true,
               is_default_monitoring: true,
+              type: 'elasticsearch',
             },
             {
               id: 'output2',
               name: 'Output 2',
               is_default: false,
               is_default_monitoring: false,
+              type: 'remote_elasticsearch',
             },
             {
               id: 'output3',
               name: 'Output 3',
               is_default: false,
               is_default_monitoring: false,
+              type: 'logstash',
+            },
+            {
+              id: 'output4',
+              name: 'Output 4',
+              is_default: false,
+              is_default_monitoring: false,
+              type: 'kafka',
             },
           ],
         },
@@ -198,90 +208,29 @@ describe('useOutputOptions', () => {
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
-          "disabled": undefined,
+          "disabled": false,
           "inputDisplay": "Default (currently Output 1)",
           "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
-          "disabled": true,
-          "inputDisplay": <React.Fragment>
-            <EuiText
-              size="s"
-            >
-              Output 1
-            </EuiText>
-            <EuiSpacer
-              size="xs"
-            />
-            <EuiText
-              size="s"
-            >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
-                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
-                values={
-                  Object {
-                    "outputType": undefined,
-                  }
-                }
-              />
-            </EuiText>
-          </React.Fragment>,
+          "disabled": false,
+          "inputDisplay": "Output 1",
           "value": "output1",
         },
         Object {
-          "disabled": true,
-          "inputDisplay": <React.Fragment>
-            <EuiText
-              size="s"
-            >
-              Output 2
-            </EuiText>
-            <EuiSpacer
-              size="xs"
-            />
-            <EuiText
-              size="s"
-            >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
-                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
-                values={
-                  Object {
-                    "outputType": undefined,
-                  }
-                }
-              />
-            </EuiText>
-          </React.Fragment>,
+          "disabled": false,
+          "inputDisplay": "Output 2",
           "value": "output2",
         },
         Object {
-          "disabled": true,
-          "inputDisplay": <React.Fragment>
-            <EuiText
-              size="s"
-            >
-              Output 3
-            </EuiText>
-            <EuiSpacer
-              size="xs"
-            />
-            <EuiText
-              size="s"
-            >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
-                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
-                values={
-                  Object {
-                    "outputType": undefined,
-                  }
-                }
-              />
-            </EuiText>
-          </React.Fragment>,
+          "disabled": false,
+          "inputDisplay": "Output 3",
           "value": "output3",
+        },
+        Object {
+          "disabled": false,
+          "inputDisplay": "Output 4",
+          "value": "output4",
         },
       ]
     `);
@@ -306,6 +255,11 @@ describe('useOutputOptions', () => {
           "disabled": false,
           "inputDisplay": "Output 3",
           "value": "output3",
+        },
+        Object {
+          "disabled": false,
+          "inputDisplay": "Output 4",
+          "value": "output4",
         },
       ]
     `);
@@ -324,90 +278,29 @@ describe('useOutputOptions', () => {
     expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
       Array [
         Object {
-          "disabled": undefined,
+          "disabled": false,
           "inputDisplay": "Default (currently Output 1)",
           "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": true,
-          "inputDisplay": <React.Fragment>
-            <EuiText
-              size="s"
-            >
-              Output 1
-            </EuiText>
-            <EuiSpacer
-              size="xs"
-            />
-            <EuiText
-              size="s"
-            >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
-                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
-                values={
-                  Object {
-                    "outputType": undefined,
-                  }
-                }
-              />
-            </EuiText>
-          </React.Fragment>,
+          "inputDisplay": "Output 1",
           "value": "output1",
         },
         Object {
           "disabled": true,
-          "inputDisplay": <React.Fragment>
-            <EuiText
-              size="s"
-            >
-              Output 2
-            </EuiText>
-            <EuiSpacer
-              size="xs"
-            />
-            <EuiText
-              size="s"
-            >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
-                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
-                values={
-                  Object {
-                    "outputType": undefined,
-                  }
-                }
-              />
-            </EuiText>
-          </React.Fragment>,
+          "inputDisplay": "Output 2",
           "value": "output2",
         },
         Object {
           "disabled": true,
-          "inputDisplay": <React.Fragment>
-            <EuiText
-              size="s"
-            >
-              Output 3
-            </EuiText>
-            <EuiSpacer
-              size="xs"
-            />
-            <EuiText
-              size="s"
-            >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
-                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
-                values={
-                  Object {
-                    "outputType": undefined,
-                  }
-                }
-              />
-            </EuiText>
-          </React.Fragment>,
+          "inputDisplay": "Output 3",
           "value": "output3",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": "Output 4",
+          "value": "output4",
         },
       ]
     `);
@@ -432,6 +325,11 @@ describe('useOutputOptions', () => {
           "disabled": true,
           "inputDisplay": "Output 3",
           "value": "output3",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": "Output 4",
+          "value": "output4",
         },
       ]
     `);
@@ -524,7 +422,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <Memo(MemoizedFormattedMessage)
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for this policy."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText"
                 values={
                   Object {
@@ -556,7 +454,7 @@ describe('useOutputOptions', () => {
               size="s"
             >
               <Memo(MemoizedFormattedMessage)
-                defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
+                defaultMessage="{outputType} output for agent integration is not supported for this policy."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
                   Object {
@@ -656,6 +554,116 @@ describe('useOutputOptions', () => {
       ]
     `);
   });
+
+  it('should only enable elasticsearch data output for agentless policy', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    mockedUseLicence.mockReturnValue({
+      hasAtLeast: () => true,
+    } as unknown as LicenseService);
+    mockApiCallsWithOutputs(testRenderer.startServices.http);
+    const { result } = testRenderer.renderHook(() =>
+      useOutputOptions({
+        supports_agentless: true,
+      } as AgentPolicy)
+    );
+    expect(result.current.isLoading).toBeTruthy();
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+    expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "disabled": false,
+          "inputDisplay": "Default (currently Output 1)",
+          "value": "@@##DEFAULT_SELECT##@@",
+        },
+        Object {
+          "disabled": false,
+          "inputDisplay": "Output 1",
+          "value": "output1",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": <React.Fragment>
+            <EuiText
+              size="s"
+            >
+              Output 2
+            </EuiText>
+            <EuiSpacer
+              size="xs"
+            />
+            <EuiText
+              size="s"
+            >
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="{outputType} output for agent integration is not supported for this policy."
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                values={
+                  Object {
+                    "outputType": "remote_elasticsearch",
+                  }
+                }
+              />
+            </EuiText>
+          </React.Fragment>,
+          "value": "output2",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": <React.Fragment>
+            <EuiText
+              size="s"
+            >
+              Output 3
+            </EuiText>
+            <EuiSpacer
+              size="xs"
+            />
+            <EuiText
+              size="s"
+            >
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="{outputType} output for agent integration is not supported for this policy."
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                values={
+                  Object {
+                    "outputType": "logstash",
+                  }
+                }
+              />
+            </EuiText>
+          </React.Fragment>,
+          "value": "output3",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": <React.Fragment>
+            <EuiText
+              size="s"
+            >
+              Output 4
+            </EuiText>
+            <EuiSpacer
+              size="xs"
+            />
+            <EuiText
+              size="s"
+            >
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="{outputType} output for agent integration is not supported for this policy."
+                id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
+                values={
+                  Object {
+                    "outputType": "kafka",
+                  }
+                }
+              />
+            </EuiText>
+          </React.Fragment>,
+          "value": "output4",
+        },
+      ]
+    `);
+  });
 });
 
 describe('useFleetServerHostsOptions', () => {
@@ -672,6 +680,11 @@ describe('useFleetServerHostsOptions', () => {
           "disabled": undefined,
           "inputDisplay": "Default (currently Default)",
           "value": "@@##DEFAULT_SELECT##@@",
+        },
+        Object {
+          "disabled": false,
+          "inputDisplay": "Default",
+          "value": "default-host",
         },
         Object {
           "disabled": true,

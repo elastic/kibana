@@ -8,6 +8,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
+import * as i18n from './translations';
 
 export const LinkRuleSwitch = memo(
   ({
@@ -35,7 +36,12 @@ export const LinkRuleSwitch = memo(
 
     return (
       <EuiFlexItem grow={false}>
-        <EuiSwitch onChange={onLinkOrUnlinkRule} label="" checked={isRuleLinked} />
+        <EuiSwitch
+          onChange={onLinkOrUnlinkRule}
+          checked={isRuleLinked}
+          label={i18n.LINK_SWITCH_ARIA_LABEL(rule.name)}
+          showLabel={false}
+        />
       </EuiFlexItem>
     );
   }

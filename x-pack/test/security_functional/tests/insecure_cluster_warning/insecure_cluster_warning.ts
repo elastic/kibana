@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('skipFIPS');
     before(async () => {
       await es.indices.create({ index: 'my-index-001' });
-      await es.index({ index: 'my-index-001', body: { foo: 'bar' } });
+      await es.index({ index: 'my-index-001', document: { foo: 'bar' } });
     });
 
     after(async () => {

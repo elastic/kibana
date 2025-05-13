@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { fromKueryExpression, KueryNode, Query } from '@kbn/es-query';
 
 import useAsync from 'react-use/lib/useAsync';
@@ -88,7 +88,6 @@ export const KqlSearchBar = React.memo<KqlSearchBarProps>(({ onQuerySubmit }) =>
       indexPatterns={loading || error ? NO_INDEX_PATTERNS : dataView}
       showAutoRefreshOnly={false}
       showDatePicker={false}
-      saveQueryMenuVisibility="hidden"
       showQueryInput={true}
       showQueryMenu={false}
       showFilterBar={true}

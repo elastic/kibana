@@ -22,7 +22,7 @@
     "patterns": [
       "_snapshot/{repository}/_cleanup"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/clean-up-snapshot-repo-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/clean-up-snapshot-repo-api.html",
     "availability": {
       "stack": true,
       "serverless": false

@@ -12,6 +12,8 @@ import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@el
 import * as i18n from './translations';
 import type { RuleMigrationStats } from '../../types';
 
+export const SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID = 'siemMigrationsSelectMigrationButton';
+
 export interface HeaderButtonsProps {
   /**
    * Available rule migrations stats
@@ -72,6 +74,7 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
           </EuiTitle>
           <EuiSpacer size="xs" />
           <EuiComboBox
+            id={SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID}
             aria-label={i18n.SIEM_MIGRATIONS_OPTION_AREAL_LABEL}
             onChange={onChange}
             options={migrationOptions}

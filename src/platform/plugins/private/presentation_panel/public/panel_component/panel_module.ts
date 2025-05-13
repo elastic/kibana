@@ -13,4 +13,5 @@ export { RemovePanelAction } from '../panel_actions/remove_panel_action/remove_p
 export { CustomTimeRangeBadge } from '../panel_actions/customize_panel_action';
 export { CustomizePanelAction } from '../panel_actions/customize_panel_action';
 export { EditPanelAction } from '../panel_actions/edit_panel_action/edit_panel_action';
+export { ShowConfigPanelAction } from '../panel_actions/show_config_panel_action/show_config_panel_action';
 export { InspectPanelAction } from '../panel_actions/inspect_panel_action/inspect_panel_action';

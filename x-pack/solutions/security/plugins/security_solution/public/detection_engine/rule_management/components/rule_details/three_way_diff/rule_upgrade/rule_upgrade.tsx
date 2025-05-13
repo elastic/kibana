@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import type { FieldsUpgradeState } from '../../../../model/prebuilt_rule_upgrade';
 import {
   FieldUpgradeStateEnum,
   type RuleUpgradeState,
@@ -17,6 +18,7 @@ import { RuleUpgradeInfoBar } from './rule_upgrade_info_bar';
 import { RuleUpgradeCallout } from './rule_upgrade_callout';
 import { FieldUpgrade } from './field_upgrade';
 import { FieldUpgradeContextProvider } from './field_upgrade_context';
+import { RuleHasMissingBaseVersionCallout } from './missing_base_version_callout';
 
 interface RuleUpgradeProps {
   ruleUpgradeState: RuleUpgradeState;
@@ -31,9 +33,7 @@ export const RuleUpgrade = memo(function RuleUpgrade({
   const numOfFieldsWithUpdates = calcNumOfFieldsWithUpdates(ruleUpgradeState);
   const numOfSolvableConflicts = calcNumOfSolvableConflicts(ruleUpgradeState);
   const numOfNonSolvableConflicts = calcNumOfNonSolvableConflicts(ruleUpgradeState);
-  const fieldNames = Object.keys(
-    ruleUpgradeState.fieldsUpgradeState
-  ) as UpgradeableDiffableFields[];
+  const fieldNames = extractSortedFieldNames(ruleUpgradeState.fieldsUpgradeState);
 
   return (
     <>
@@ -42,8 +42,16 @@ export const RuleUpgrade = memo(function RuleUpgrade({
         totalNumOfFields={totalNumOfFields}
         numOfFieldsWithUpdates={numOfFieldsWithUpdates}
         numOfConflicts={numOfSolvableConflicts + numOfNonSolvableConflicts}
+        currentVersionNumber={ruleUpgradeState.current_rule.version}
+        targetVersionNumber={ruleUpgradeState.target_rule.version}
       />
       <EuiSpacer size="s" />
+      {!ruleUpgradeState.has_base_version && (
+        <>
+          <RuleHasMissingBaseVersionCallout />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <RuleUpgradeCallout
         numOfSolvableConflicts={numOfSolvableConflicts}
         numOfNonSolvableConflicts={numOfNonSolvableConflicts}
@@ -83,4 +91,31 @@ function calcNumOfNonSolvableConflicts(ruleUpgradeState: RuleUpgradeState): numb
   return Object.values(ruleUpgradeState.fieldsUpgradeState).filter(
     ({ state }) => state === FieldUpgradeStateEnum.NonSolvableConflict
   ).length;
+}
+
+/**
+ * Defines fields sorting order by state.
+ * Lower number corresponds to higher priority.
+ */
+const FIELDS_STATE_ORDER_MAP = {
+  [FieldUpgradeStateEnum.NonSolvableConflict]: 0,
+  [FieldUpgradeStateEnum.SolvableConflict]: 1,
+  [FieldUpgradeStateEnum.SameUpdate]: 2,
+  [FieldUpgradeStateEnum.NoConflict]: 3,
+  [FieldUpgradeStateEnum.Accepted]: 4,
+  [FieldUpgradeStateEnum.NoUpdate]: 5,
+} as const;
+
+function extractSortedFieldNames(
+  fieldsUpgradeState: FieldsUpgradeState
+): UpgradeableDiffableFields[] {
+  const fieldNames = Object.keys(fieldsUpgradeState) as UpgradeableDiffableFields[];
+
+  fieldNames.sort(
+    (a, b) =>
+      FIELDS_STATE_ORDER_MAP[fieldsUpgradeState[a].state] -
+      FIELDS_STATE_ORDER_MAP[fieldsUpgradeState[b].state]
+  );
+
+  return fieldNames;
 }

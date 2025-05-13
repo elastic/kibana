@@ -17,6 +17,7 @@ import { ESQLEditor } from './esql_editor';
 import type { ESQLEditorProps } from './types';
 import { ReactWrapper } from 'enzyme';
 import { coreMock } from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 describe('ESQLEditor', () => {
   const uiConfig: Record<string, any> = {};
@@ -30,6 +31,7 @@ describe('ESQLEditor', () => {
       client: uiSettings,
     },
     core: coreMock.createStart(),
+    data: dataPluginMock.createStartContract(),
   };
 
   function renderESQLEditorComponent(testProps: ESQLEditorProps) {
@@ -162,5 +164,15 @@ describe('ESQLEditor', () => {
     expect(component.find('[data-test-subj="ESQLEditor-run-query-button"]').length).not.toBe(1);
     findTestSubject(component, 'ESQLEditor-run-query-button').simulate('click');
     expect(onTextLangQuerySubmit).toHaveBeenCalled();
+  });
+
+  it('should not render the run query button if the hideRunQueryButton prop is set to true and editorIsInline prop is set to true', async () => {
+    const newProps = {
+      ...props,
+      hideRunQueryButton: true,
+      editorIsInline: true,
+    };
+    const component = mount(renderESQLEditorComponent({ ...newProps }));
+    expect(component.find('[data-test-subj="ESQLEditor-run-query-button"]').length).toBe(0);
   });
 });

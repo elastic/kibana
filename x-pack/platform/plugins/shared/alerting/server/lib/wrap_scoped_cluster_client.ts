@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   TransportRequestOptions,
   TransportResult,
   TransportRequestOptionsWithMeta,
@@ -23,9 +23,9 @@ import type {
   SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
   EqlSearchRequest as EqlSearchRequestWithBody,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { SearchMetrics, RuleInfo } from './types';
+import type { SearchMetrics, RuleInfo } from './types';
 
 interface WrapScopedClusterClientFactoryOpts {
   scopedClusterClient: IScopedClusterClient;
@@ -57,9 +57,9 @@ export interface WrappedScopedClusterClient {
 export function createWrappedScopedClusterClientFactory(
   opts: WrapScopedClusterClientFactoryOpts
 ): WrappedScopedClusterClient {
-  let numSearches: number = 0;
-  let esSearchDurationMs: number = 0;
-  let totalSearchDurationMs: number = 0;
+  let numSearches = 0;
+  let esSearchDurationMs = 0;
+  let totalSearchDurationMs = 0;
 
   function logMetrics(metrics: LogSearchMetricsOpts) {
     numSearches++;
@@ -162,7 +162,10 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
     options?: TransportRequestOptions
   ): Promise<TResponse | TransportResult<TResponse, TContext>> {
     // Wrap ES|QL requests with an abort signal
-    if (params.method === 'POST' && params.path === '/_query') {
+    if (
+      (params.method === 'POST' && ['/_query', '/_query/async'].includes(params.path)) ||
+      (params.method === 'GET' && params.path.startsWith('/_query/async'))
+    ) {
       let requestOptions: TransportRequestOptions = {};
       try {
         requestOptions = options ?? {};
@@ -253,7 +256,7 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
             requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
           }`
       );
-      const result = (await originalEqlSearch.call(opts.esClient, params, {
+      const result = (await originalEqlSearch.call(opts.esClient.eql, params, {
         ...searchOptions,
         ...(requestTimeout
           ? {

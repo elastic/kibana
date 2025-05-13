@@ -53,7 +53,7 @@ export async function getHostsAlertsCount({
           field: HOST_NAME_FIELD,
           size: limit,
           order: {
-            _key: 'asc',
+            _key: 'asc' as const,
           },
         },
         aggs: {

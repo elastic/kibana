@@ -92,6 +92,29 @@ export const registerSettings = (uiSettings: UiSettingsServiceSetup, config: Ban
         },
       }),
     },
+    'banners:linkColor': {
+      name: i18n.translate('xpack.banners.settings.linkColor.title', {
+        defaultMessage: 'Banner link color',
+      }),
+      description: i18n.translate('xpack.banners.settings.linkColor.description', {
+        defaultMessage: 'Set the color of the banner link. {subscriptionLink}',
+        values: {
+          subscriptionLink,
+        },
+      }),
+      category: ['banner'],
+      order: 4,
+      type: 'color',
+      value: config.linkColor,
+      requiresPageReload: true,
+      schema: schema.string({
+        validate: (color) => {
+          if (!isHexColor(color)) {
+            return `'banners:linkColor' must be an hex color`;
+          }
+        },
+      }),
+    },
     'banners:backgroundColor': {
       name: i18n.translate('xpack.banners.settings.backgroundColor.title', {
         defaultMessage: 'Banner background color',
@@ -103,7 +126,7 @@ export const registerSettings = (uiSettings: UiSettingsServiceSetup, config: Ban
         },
       }),
       category: ['banner'],
-      order: 4,
+      order: 5,
       type: 'color',
       value: config.backgroundColor,
       requiresPageReload: true,

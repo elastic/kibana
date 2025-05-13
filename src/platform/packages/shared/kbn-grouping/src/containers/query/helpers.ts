@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, FILTERS } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
+import { MAX_RUNTIME_FIELD_SIZE } from '.';
 export const getEmptyValue = () => '—';
+
+export const checkIsFlattenResults = (groupByField: string, fields: string[] = []): boolean =>
+  fields.includes(groupByField);
 
 type StrictFilter = Filter & {
   query: Record<string, any>;
@@ -16,9 +21,63 @@ type StrictFilter = Filter & {
 
 export const createGroupFilter = (
   selectedGroup: string,
-  values?: string[] | null
-): StrictFilter[] =>
-  values != null && values.length > 0
+  values?: string[] | null,
+  multiValueFields?: string[]
+): StrictFilter[] => {
+  const shouldIgnoreFieldSize = checkIsFlattenResults(selectedGroup, multiValueFields);
+
+  // Define initial filters based on shouldIgnoreFieldSize
+  let initialFilters: StrictFilter[];
+  if (shouldIgnoreFieldSize) {
+    initialFilters = [
+      {
+        meta: {
+          alias: null,
+          disabled: false,
+          type: FILTERS.CUSTOM,
+          negate: false,
+          key: selectedGroup,
+        },
+        query: {
+          script: {
+            script: {
+              // exclude documents whose size is greater than MAX_RUNTIME_FIELD_SIZE since they are already part of the none group
+              source: `doc[params['field']].size() <  ${MAX_RUNTIME_FIELD_SIZE}`,
+              params: {
+                field: selectedGroup,
+                size: values?.length || 0,
+              },
+            },
+          },
+        },
+      },
+    ];
+  } else {
+    initialFilters = [
+      {
+        meta: {
+          alias: null,
+          disabled: false,
+          type: FILTERS.CUSTOM,
+          negate: false,
+          key: selectedGroup,
+        },
+        query: {
+          script: {
+            script: {
+              source: "doc[params['field']].size()==params['size']",
+              params: {
+                field: selectedGroup,
+                size: values?.length || 0,
+              },
+            },
+          },
+        },
+      },
+    ];
+  }
+
+  return values != null && values.length > 0
     ? values.reduce(
         (acc: StrictFilter[], query) => [
           ...acc,
@@ -42,46 +101,43 @@ export const createGroupFilter = (
             },
           },
         ],
-        [
-          {
-            meta: {
-              alias: null,
-              disabled: false,
-              type: FILTERS.CUSTOM,
-              negate: false,
-              key: selectedGroup,
-            },
-            query: {
-              script: {
-                script: {
-                  // this will give us an exact match for events with multiple values on the group field
-                  // for example, when values === ['a'], we match events with ['a'], but not ['a', 'b', 'c']
-                  source: "doc[params['field']].size()==params['size']",
-                  params: {
-                    field: selectedGroup,
-                    size: values.length,
-                  },
-                },
-              },
-            },
-          },
-        ]
+        initialFilters
       )
     : [];
+};
 
 export const getNullGroupFilter = (selectedGroup: string): StrictFilter[] => [
   {
     meta: {
       disabled: false,
-      negate: true,
+      negate: false,
       alias: null,
       key: selectedGroup,
-      value: 'exists',
-      type: 'exists',
+      type: FILTERS.CUSTOM,
     },
     query: {
-      exists: {
-        field: selectedGroup,
+      // Matches documents where selectedGroup is missing or array length is greater than 100
+      bool: {
+        should: [
+          {
+            bool: {
+              must_not: {
+                exists: {
+                  field: selectedGroup,
+                },
+              },
+            },
+          },
+          {
+            script: {
+              script: {
+                source: `doc.containsKey('${selectedGroup}') && doc['${selectedGroup}'].size() > ${MAX_RUNTIME_FIELD_SIZE}`,
+                lang: 'painless',
+              },
+            },
+          },
+        ],
+        minimum_should_match: 1,
       },
     },
   },

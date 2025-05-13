@@ -61,6 +61,12 @@ export interface FindingsGroupingAggregation {
   benchmarkId?: {
     buckets?: GenericBuckets[];
   };
+  accountName?: {
+    buckets?: GenericBuckets[];
+  };
+  clusterName?: {
+    buckets?: GenericBuckets[];
+  };
   isLoading?: boolean;
 }
 

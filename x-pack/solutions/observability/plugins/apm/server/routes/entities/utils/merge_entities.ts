@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact, uniq } from 'lodash';
+import { castArray, compact, uniq } from 'lodash';
 import type { EntityDataStreamType } from '@kbn/observability-shared-plugin/common';
 import type { EntityLatestServiceRaw } from '../types';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
@@ -49,7 +49,7 @@ function mergeFunc(entity: EntityLatestServiceRaw, existingEntity?: MergedServic
   if (!existingEntity) {
     return {
       ...commonEntityFields,
-      dataStreamTypes: uniq(entity['data_stream.type']),
+      dataStreamTypes: uniq(castArray(entity['data_stream.type'])),
       environments: uniq(
         compact(
           Array.isArray(entity['service.environment'])
@@ -62,7 +62,10 @@ function mergeFunc(entity: EntityLatestServiceRaw, existingEntity?: MergedServic
   return {
     ...commonEntityFields,
     dataStreamTypes: uniq(
-      compact([...(existingEntity?.dataStreamTypes ?? []), ...entity['data_stream.type']])
+      compact([
+        ...(existingEntity?.dataStreamTypes ?? []),
+        ...castArray(entity['data_stream.type']),
+      ])
     ),
     environments: uniq(compact([...existingEntity?.environments, entity['service.environment']])),
   };

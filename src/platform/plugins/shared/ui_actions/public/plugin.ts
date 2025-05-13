@@ -14,6 +14,7 @@ import {
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
   addPanelMenuTrigger,
+  alertRuleTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
 import { UiActionsService } from './service';
 import { setAnalytics, setI18n, setNotifications, setTheme, setUserProfile } from './services';
@@ -21,9 +22,11 @@ import { setAnalytics, setI18n, setNotifications, setTheme, setUserProfile } fro
 export type UiActionsPublicSetup = Pick<
   UiActionsService,
   | 'addTriggerAction'
+  | 'addTriggerActionAsync'
   | 'attachAction'
   | 'detachAction'
   | 'registerAction'
+  | 'registerActionAsync'
   | 'registerTrigger'
   | 'unregisterAction'
 >;
@@ -52,6 +55,7 @@ export class UiActionsPlugin
   public setup(_core: CoreSetup): UiActionsPublicSetup {
     this.service.registerTrigger(addPanelMenuTrigger);
     this.service.registerTrigger(rowClickTrigger);
+    this.service.registerTrigger(alertRuleTrigger);
     this.service.registerTrigger(visualizeFieldTrigger);
     this.service.registerTrigger(visualizeGeoFieldTrigger);
     return this.service;

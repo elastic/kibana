@@ -20,6 +20,7 @@ function getPluginSearchPaths({ rootDir }) {
 /**
  * @param {import('./types').PluginSelector} selector
  * @param {import('./types').PluginCategoryInfo} category
+ * @returns {boolean}
  */
 function matchCategory(selector, category) {
   if (!category.oss && selector.oss) {
@@ -40,6 +41,7 @@ function matchCategory(selector, category) {
 /**
  * @param {import('./types').PluginSelector} selector
  * @param {string} pkgDir
+ * @returns {boolean}
  */
 function matchPluginPaths(selector, pkgDir) {
   if (!selector.paths) {
@@ -52,6 +54,7 @@ function matchPluginPaths(selector, pkgDir) {
 /**
  * @param {import('./types').PluginSelector} selector
  * @param {string} pkgDir
+ * @returns {boolean}
  */
 function matchPluginParentDirs(selector, pkgDir) {
   if (!selector.parentDirs) {
@@ -64,6 +67,7 @@ function matchPluginParentDirs(selector, pkgDir) {
 /**
  * @param {import('./types').PluginSelector} selector
  * @param {string} pkgDir
+ * @returns {boolean}
  */
 function matchParentDirsLimit(selector, pkgDir) {
   return !selector.limitParentDirs
@@ -74,6 +78,7 @@ function matchParentDirsLimit(selector, pkgDir) {
 /**
  * @param {import('./types').PluginSelector} selector
  * @param {import('./types').PluginPackage} pkg
+ * @returns {boolean}
  */
 function matchBrowserServer(selector, pkg) {
   if (selector.browser && !pkg.manifest.plugin.browser) {
@@ -88,6 +93,25 @@ function matchBrowserServer(selector, pkg) {
 
 /**
  * @param {import('./types').PluginSelector} selector
+ * @param {import('./types').PluginPackage} pkg
+ * @returns {boolean}
+ */
+function matchPluginGroups(selector, pkg) {
+  if (Array.isArray(selector.allowlistPluginGroups)) {
+    return (
+      // if the allowlist is defined, ensure the plugin belongs to one of the groups
+      selector.allowlistPluginGroups.includes(pkg.group) ||
+      // add an exception for example and test plugins (they might not have a group)
+      pkg.group === 'common'
+    );
+  }
+
+  return true;
+}
+
+/**
+ * @param {import('./types').PluginSelector} selector
+ * @returns {(pkg: import('./package').Package) => pkg is import('./types').PluginPackage}
  */
 function getPluginPackagesFilter(selector = {}) {
   /**
@@ -100,25 +124,8 @@ function getPluginPackagesFilter(selector = {}) {
     matchParentDirsLimit(selector, pkg.directory) &&
     (matchCategory(selector, pkg.getPluginCategories()) ||
       matchPluginPaths(selector, pkg.directory) ||
-      matchPluginParentDirs(selector, pkg.directory));
+      matchPluginParentDirs(selector, pkg.directory)) &&
+    matchPluginGroups(selector, pkg);
 }
 
-/**
- * @returns {(pkg: import('./package').Package) => boolean}
- */
-function getDistributablePacakgesFilter() {
-  return (pkg) => {
-    if (pkg.isDevOnly()) {
-      return false;
-    }
-
-    if (!pkg.isPlugin()) {
-      return true;
-    }
-
-    const type = pkg.getPluginCategories();
-    return !(type.example || type.testPlugin);
-  };
-}
-
-module.exports = { getPluginSearchPaths, getPluginPackagesFilter, getDistributablePacakgesFilter };
+module.exports = { getPluginSearchPaths, getPluginPackagesFilter };

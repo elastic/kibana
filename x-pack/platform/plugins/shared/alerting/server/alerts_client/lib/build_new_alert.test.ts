@@ -6,7 +6,7 @@
  */
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { buildNewAlert } from './build_new_alert';
-import { Alert } from '@kbn/alerts-as-data-utils';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   SPACE_IDS,
   ALERT_ACTION_GROUP,
@@ -28,6 +28,7 @@ import {
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
+  ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import { alertRule } from './test_fixtures';
 
@@ -54,6 +55,7 @@ describe('buildNewAlert', () => {
       [ALERT_FLAPPING_HISTORY]: [],
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_RULE_EXECUTION_TIMESTAMP]: '2023-03-28T12:27:28.159Z',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_STATUS]: 'active',
@@ -90,6 +92,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
       [ALERT_WORKFLOW_STATUS]: 'open',
@@ -128,6 +131,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: ['maint-1', 'maint-321'],
+      [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
       [ALERT_WORKFLOW_STATUS]: 'open',
@@ -171,6 +175,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
       [ALERT_WORKFLOW_STATUS]: 'open',
@@ -204,6 +209,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_RULE_EXECUTION_TIMESTAMP]: '2030-12-15T02:44:13.124Z',
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
@@ -253,6 +259,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
       [ALERT_WORKFLOW_STATUS]: 'custom_workflow',
@@ -306,6 +313,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
       [ALERT_WORKFLOW_STATUS]: 'open',
@@ -361,6 +369,7 @@ describe('buildNewAlert', () => {
       [ALERT_INSTANCE_ID]: 'alert-A',
       [ALERT_SEVERITY_IMPROVING]: false,
       [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+      [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_STATUS]: 'active',
       [ALERT_UUID]: legacyAlert.getUuid(),
       [ALERT_WORKFLOW_STATUS]: 'open',

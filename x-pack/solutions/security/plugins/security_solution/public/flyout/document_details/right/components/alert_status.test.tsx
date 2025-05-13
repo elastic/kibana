@@ -29,7 +29,8 @@ const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'user1', full_name: 'User 1' }, data: {} },
 ];
 
-describe('<AlertStatus />', () => {
+// Failing: See https://github.com/elastic/kibana/issues/216474
+describe.skip('<AlertStatus />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });

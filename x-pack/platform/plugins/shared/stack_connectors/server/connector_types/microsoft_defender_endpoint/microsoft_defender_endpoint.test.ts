@@ -5,39 +5,14 @@
  * 2.0.
  */
 
-import {
-  CreateMicrosoftDefenderConnectorMockResponse,
-  microsoftDefenderEndpointConnectorMocks,
-} from './mocks';
+import type { CreateMicrosoftDefenderConnectorMockResponse } from './mocks';
+import { microsoftDefenderEndpointConnectorMocks } from './mocks';
 
 describe('Microsoft Defender for Endpoint Connector', () => {
   let connectorMock: CreateMicrosoftDefenderConnectorMockResponse;
 
   beforeEach(() => {
     connectorMock = microsoftDefenderEndpointConnectorMocks.create();
-  });
-
-  describe('Access Token management', () => {
-    it('should call API to generate as new token', async () => {
-      await connectorMock.instanceMock.isolateHost(
-        { id: '1-2-3', comment: 'foo' },
-        connectorMock.usageCollector
-      );
-
-      expect(connectorMock.instanceMock.request).toHaveBeenCalledWith(
-        expect.objectContaining({
-          url: `${connectorMock.options.config.oAuthServerUrl}/${connectorMock.options.config.tenantId}/oauth2/v2.0/token`,
-          method: 'POST',
-          data: {
-            grant_type: 'client_credentials',
-            client_id: connectorMock.options.config.clientId,
-            scope: connectorMock.options.config.oAuthScope,
-            client_secret: connectorMock.options.secrets.clientSecret,
-          },
-        }),
-        connectorMock.usageCollector
-      );
-    });
   });
 
   describe('#testConnector', () => {

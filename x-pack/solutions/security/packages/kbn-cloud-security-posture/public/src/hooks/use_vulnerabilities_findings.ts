@@ -21,12 +21,16 @@ import type {
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps, UseCspOptions } from '../types';
 import { showErrorToast } from '../..';
-import { getVulnerabilitiesAggregationCount, getVulnerabilitiesQuery } from '../utils/hooks_utils';
+import {
+  getVulnerabilitiesAggregationCount,
+  getVulnerabilitiesQuery,
+} from '../utils/findings_query_builders';
 
 export enum VULNERABILITY {
+  TITLE = 'vulnerability.title',
   ID = 'vulnerability.id',
   SEVERITY = 'vulnerability.severity',
-  PACKAGE_NAME = 'vulnerability.package.name',
+  PACKAGE_NAME = 'package.name',
 }
 
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
@@ -42,6 +46,7 @@ export interface VulnerabilitiesPackage extends Vulnerability {
 }
 
 export interface VulnerabilitiesFindingTableDetailsFields {
+  [VULNERABILITY.TITLE]: string;
   [VULNERABILITY.ID]: string;
   [VULNERABILITY.SEVERITY]: string;
   [VULNERABILITY.PACKAGE_NAME]: string;

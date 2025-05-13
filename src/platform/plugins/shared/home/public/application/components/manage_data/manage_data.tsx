@@ -8,7 +8,15 @@
  */
 
 import React, { FC, MouseEvent } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiTitle,
+  EuiFlexItem,
+  UseEuiTheme,
+} from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -27,6 +35,7 @@ interface Props {
 
 export const ManageData: FC<Props> = ({ addBasePath, application, features }) => {
   const { share, trackUiMetric } = getServices();
+
   const consoleHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
   const managementHref = share.url.locators
     .get('MANAGEMENT_APP_LOCATOR')
@@ -40,21 +49,20 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
       <KibanaPageTemplate.Section
         bottomBorder
         paddingSize="xl"
-        className="homDataManage"
-        aria-labelledby="homDataManage__title"
-        data-test-subj="homDataManage"
+        aria-labelledby="homeDataManage__title"
+        data-test-subj="homeDataManage"
       >
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={1}>
             <EuiTitle size="s">
-              <h2 id="homDataManage__title">
+              <h2 id="homeDataManage__title">
                 <FormattedMessage id="home.manageData.sectionTitle" defaultMessage="Management" />
               </h2>
             </EuiTitle>
           </EuiFlexItem>
 
           {isDevToolsEnabled || isManagementEnabled ? (
-            <EuiFlexItem className="homDataManage__actions" grow={false}>
+            <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" responsive={false} wrap>
                 {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
                 {isDevToolsEnabled && consoleHref !== undefined ? (
@@ -66,7 +74,6 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                     >
                       <EuiButtonEmpty
                         data-test-subj="homeDevTools"
-                        className="kbnOverviewPageHeader__actionButton"
                         flush="both"
                         iconType="wrench"
                         href={consoleHref}
@@ -89,7 +96,6 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                     >
                       <EuiButtonEmpty
                         data-test-subj="homeManage"
-                        className="kbnOverviewPageHeader__actionButton"
                         flush="both"
                         iconType="gear"
                         href={managementHref}
@@ -109,9 +115,18 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
 
         <EuiSpacer />
 
-        <EuiFlexGroup className="homDataManage__content">
+        <EuiFlexGroup>
           {features.map((feature) => (
-            <EuiFlexItem className="homDataManage__item" key={feature.id}>
+            <EuiFlexItem
+              css={({ euiTheme }: UseEuiTheme) =>
+                css({
+                  [`@media (min-width: ${euiTheme.breakpoint.l}px)`]: {
+                    maxWidth: `calc(33.33% - ${euiTheme.size.l})`,
+                  },
+                })
+              }
+              key={feature.id}
+            >
               <Synopsis
                 description={feature.description}
                 iconType={feature.icon}

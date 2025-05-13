@@ -9,7 +9,7 @@
 // The original function created an index, while here we create a datastream. If and when responseOps develops first-party code to work with datastreams (https://github.com/elastic/kibana/issues/140403), this file should be removed.
 
 import { get } from 'lodash';
-import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
@@ -50,7 +50,7 @@ const updateTotalFieldLimitSetting = async ({
       () =>
         esClient.indices.putSettings({
           index,
-          body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
+          settings: { 'index.mapping.total_fields.limit': totalFieldsLimit },
         }),
       { logger }
     );
@@ -89,7 +89,7 @@ export const updateUnderlyingMapping = async ({ logger, esClient, index }: Updat
 
   try {
     await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index, body: simulatedMapping }),
+      () => esClient.indices.putMapping({ index, ...simulatedMapping }),
       { logger }
     );
     logger.info(`Update mappings for ${index}`);

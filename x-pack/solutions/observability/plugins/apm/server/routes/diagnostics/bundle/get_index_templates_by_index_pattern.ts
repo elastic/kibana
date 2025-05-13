@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndicesSimulateTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import { orderBy } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { getApmIndexPatterns } from './get_indices';
 import { getIndexTemplate } from './get_index_template';
 import { getApmIndexTemplateNames } from '../helpers/get_apm_index_template_names';

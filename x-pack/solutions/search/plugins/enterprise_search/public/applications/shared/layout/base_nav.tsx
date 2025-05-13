@@ -10,7 +10,6 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import {
   ENTERPRISE_SEARCH_APP_ID,
-  ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   SEARCH_ELASTICSEARCH,
   SEARCH_VECTOR_SEARCH,
   SEARCH_SEMANTIC_SEARCH,
@@ -41,16 +40,15 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
     ),
   });
 
-  // Content
+  // Data
   navItems.push({
-    'data-test-subj': 'searchSideNav-Content',
-    id: 'content',
+    'data-test-subj': 'searchSideNav-Data',
+    id: 'data',
     items: [
       {
         'data-test-subj': 'searchSideNav-Indices',
         deepLink: {
-          link: 'enterpriseSearchContent:searchIndices',
-          shouldShowActiveForSubroutes: true,
+          link: 'elasticsearchIndexManagement',
         },
         id: 'search_indices',
       },
@@ -71,8 +69,8 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
         id: 'crawlers',
       },
     ],
-    name: i18n.translate('xpack.enterpriseSearch.nav.contentTitle', {
-      defaultMessage: 'Content',
+    name: i18n.translate('xpack.enterpriseSearch.nav.dataTitle', {
+      defaultMessage: 'Data',
     }),
   });
 
@@ -95,13 +93,6 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
           link: 'enterpriseSearchApplications:searchApplications',
         },
         id: 'searchApplications',
-      },
-      {
-        'data-test-subj': 'searchSideNav-BehavioralAnalytics',
-        deepLink: {
-          link: ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
-        },
-        id: 'analyticsCollections',
       },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
@@ -128,6 +119,14 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
           shouldShowActiveForSubroutes: true,
         },
         id: 'synonyms',
+      },
+      {
+        'data-test-subj': 'searchSideNav-QueryRules',
+        deepLink: {
+          link: 'searchQueryRules',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'searchQueryRules',
       },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {

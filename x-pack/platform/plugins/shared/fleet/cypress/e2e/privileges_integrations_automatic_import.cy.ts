@@ -23,7 +23,7 @@ import {
   CONNECTOR_BEDROCK,
   CONNECTOR_GEMINI,
   CONNECTOR_OPENAI,
-  CREATE_INTEGRATION_ASSISTANT,
+  CREATE_AUTOMATIC_IMPORT,
   CREATE_INTEGRATION_LANDING_PAGE,
   CREATE_INTEGRATION_UPLOAD,
   MISSING_PRIVILEGES,
@@ -62,7 +62,7 @@ describe('When the user does not have enough previleges for Integrations', () =>
       });
 
       it('Create Assistant is not accessible if user has read role in integrations', () => {
-        loginWithUserAndWaitForPage(CREATE_INTEGRATION_ASSISTANT, AutomaticImportIntegrUser);
+        loginWithUserAndWaitForPage(CREATE_AUTOMATIC_IMPORT, AutomaticImportIntegrUser);
         cy.getBySel(MISSING_PRIVILEGES).should('exist');
       });
 
@@ -114,7 +114,7 @@ describe('When the user has All permissions for Integrations and read permission
   });
 
   it('Create Assistant is accessible but execute connector is not accessible', () => {
-    loginWithUserAndWaitForPage(CREATE_INTEGRATION_ASSISTANT, AutomaticImportConnectorReadUser);
+    loginWithUserAndWaitForPage(CREATE_AUTOMATIC_IMPORT, AutomaticImportConnectorReadUser);
     cy.getBySel(CONNECTOR_BEDROCK).should('not.exist');
     cy.getBySel(CONNECTOR_OPENAI).should('not.exist');
     cy.getBySel(CONNECTOR_GEMINI).should('not.exist');
@@ -135,7 +135,7 @@ describe('When the user has All permissions for Integrations and All permissions
   });
 
   it('Create Assistant is not accessible but upload is accessible', () => {
-    loginWithUserAndWaitForPage(CREATE_INTEGRATION_ASSISTANT, AutomaticImportConnectorAllUser);
+    loginWithUserAndWaitForPage(CREATE_AUTOMATIC_IMPORT, AutomaticImportConnectorAllUser);
     cy.getBySel(CONNECTOR_BEDROCK).should('exist');
     cy.getBySel(CONNECTOR_OPENAI).should('exist');
     cy.getBySel(CONNECTOR_GEMINI).should('exist');

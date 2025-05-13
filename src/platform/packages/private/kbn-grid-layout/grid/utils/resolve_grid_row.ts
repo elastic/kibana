@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridPanelData, GridRowData } from '../types';
+import { GridLayoutData, GridPanelData, GridRowData } from '../types';
 
 const collides = (panelA: GridPanelData, panelB: GridPanelData) => {
   if (panelA.id === panelB.id) return false; // same panel
@@ -46,7 +46,16 @@ const getFirstCollision = (gridLayout: GridRowData, keysInOrder: string[]): stri
   return undefined;
 };
 
-export const getKeysInOrder = (panels: GridRowData['panels'], draggedId?: string): string[] => {
+export const getRowKeysInOrder = (rows: GridLayoutData): string[] => {
+  return Object.values(rows)
+    .sort(({ order: orderA }, { order: orderB }) => orderA - orderB)
+    .map(({ id }) => id);
+};
+
+export const getPanelKeysInOrder = (
+  panels: GridRowData['panels'],
+  draggedId?: string
+): string[] => {
   const panelKeys = Object.keys(panels);
   return panelKeys.sort((panelKeyA, panelKeyB) => {
     const panelA = panels[panelKeyA];
@@ -72,7 +81,7 @@ export const getKeysInOrder = (panels: GridRowData['panels'], draggedId?: string
 const compactGridRow = (originalLayout: GridRowData) => {
   const nextRowData = { ...originalLayout, panels: { ...originalLayout.panels } };
   // compact all vertical space.
-  const sortedKeysAfterMove = getKeysInOrder(nextRowData.panels);
+  const sortedKeysAfterMove = getPanelKeysInOrder(nextRowData.panels);
   for (const panelKey of sortedKeysAfterMove) {
     const panel = nextRowData.panels[panelKey];
     // try moving panel up one row at a time until it collides
@@ -99,7 +108,7 @@ export const resolveGridRow = (
     nextRowData.panels[dragRequest.id] = dragRequest;
   }
   // get keys in order from top to bottom, left to right, with priority on the dragged item if it exists
-  const sortedKeys = getKeysInOrder(nextRowData.panels, dragRequest?.id);
+  const sortedKeys = getPanelKeysInOrder(nextRowData.panels, dragRequest?.id);
 
   // while the layout has at least one collision, try to resolve them in order
   let collision = getFirstCollision(nextRowData, sortedKeys);

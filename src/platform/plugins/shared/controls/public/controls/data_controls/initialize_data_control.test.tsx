@@ -52,20 +52,20 @@ describe('initializeDataControl', () => {
           controlGroupApi
         );
 
-        dataControl.api.defaultPanelTitle!.pipe(skip(1), first()).subscribe(() => {
+        dataControl.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
           done();
         });
       });
 
       test('should set data view', () => {
-        const dataViews = dataControl!.api.dataViews.value;
+        const dataViews = dataControl!.api.dataViews$.value;
         expect(dataViews).not.toBeUndefined();
         expect(dataViews!.length).toBe(1);
         expect(dataViews![0].id).toBe('myDataViewId');
       });
 
       test('should set default panel title', () => {
-        const defaultPanelTitle = dataControl!.api.defaultPanelTitle!.value;
+        const defaultPanelTitle = dataControl!.api.defaultTitle$!.value;
         expect(defaultPanelTitle).not.toBeUndefined();
         expect(defaultPanelTitle).toBe('My field name');
       });
@@ -86,13 +86,13 @@ describe('initializeDataControl', () => {
           controlGroupApi
         );
 
-        dataControl.api.dataViews.pipe(skip(1), first()).subscribe(() => {
+        dataControl.api.dataViews$.pipe(skip(1), first()).subscribe(() => {
           done();
         });
       });
 
       test('should set blocking error', () => {
-        const error = dataControl!.api.blockingError.value;
+        const error = dataControl!.api.blockingError$.value;
         expect(error).not.toBeUndefined();
         expect(error!.message).toBe(
           'Simulated error: no data view found for id notGonnaFindMeDataViewId'
@@ -100,9 +100,9 @@ describe('initializeDataControl', () => {
       });
 
       test('should clear blocking error when valid data view id provided', (done) => {
-        dataControl!.api.dataViews.pipe(skip(1), first()).subscribe((dataView) => {
+        dataControl!.api.dataViews$.pipe(skip(1), first()).subscribe((dataView) => {
           expect(dataView).not.toBeUndefined();
-          expect(dataControl!.api.blockingError.value).toBeUndefined();
+          expect(dataControl!.api.blockingError$.value).toBeUndefined();
           done();
         });
         dataControl!.stateManager.dataViewId.next('myDataViewId');
@@ -124,25 +124,23 @@ describe('initializeDataControl', () => {
           controlGroupApi
         );
 
-        dataControl.api.defaultPanelTitle!.pipe(skip(1), first()).subscribe(() => {
+        dataControl.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
           done();
         });
       });
 
       test('should set blocking error', () => {
-        const error = dataControl!.api.blockingError.value;
+        const error = dataControl!.api.blockingError$.value;
         expect(error).not.toBeUndefined();
         expect(error!.message).toBe('Could not locate field: notGonnaFindMeFieldName');
       });
 
       test('should clear blocking error when valid field name provided', (done) => {
-        dataControl!.api
-          .defaultPanelTitle!.pipe(skip(1), first())
-          .subscribe((defaultPanelTitle) => {
-            expect(defaultPanelTitle).toBe('My field name');
-            expect(dataControl!.api.blockingError.value).toBeUndefined();
-            done();
-          });
+        dataControl!.api.defaultTitle$!.pipe(skip(1), first()).subscribe((defaultTitle) => {
+          expect(defaultTitle).toBe('My field name');
+          expect(dataControl!.api.blockingError$.value).toBeUndefined();
+          done();
+        });
         dataControl!.stateManager.fieldName.next('myFieldName');
       });
     });

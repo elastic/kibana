@@ -1,50 +1,125 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`HeaderPage it renders 1`] = `
-<Fragment>
-  <EuiPageHeader
-    alignItems="center"
+.c1 .siemSubtitle__item {
+  color: #7a7f89;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.c0,
+.c0 * {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+@media only screen and (min-width:575px) {
+  .c1 .siemSubtitle__item {
+    display: inline-block;
+    margin-right: 16px;
+  }
+
+  .c1 .siemSubtitle__item:last-child {
+    margin-right: 0;
+  }
+}
+
+<div
+  data-test-subj="header-page"
+>
+  <header
+    class="euiPageHeader emotion-euiPageHeader"
   >
-    <HeaderSection>
-      <Memo(TitleComponent)
-        badgeOptions={
-          Object {
-            "beta": true,
-            "text": "Beta",
-            "tooltip": "Test tooltip",
-          }
-        }
-        title="Test title"
-      />
-      <EuiSpacer
-        size="s"
-      />
-      <Subtitle
-        data-test-subj="header-page-subtitle"
-        items="Test subtitle"
-      />
-    </HeaderSection>
-    <EuiPageHeaderSection
-      data-test-subj="header-page-supplements"
+    <div
+      class="emotion-euiPageHeaderContent"
     >
-      <p>
-        Test supplement
-      </p>
-    </EuiPageHeaderSection>
-  </EuiPageHeader>
-  <EuiSpacer
-    size="xs"
+      <div
+        class="css-acb1mh-flex-center"
+      >
+        <div
+          class="euiPageHeaderSection css-1xndooq-headerSection"
+        >
+          <h1
+            class="euiTitle css-1tgxtfm-Header-euiTitle-l e1mvi39w1"
+            data-test-subj="header-page-title"
+          >
+            <span
+              class="css-80vzk8-TitleWrapper e1mvi39w0"
+            >
+              <span
+                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              >
+                <span
+                  class="c0"
+                >
+                  Test title
+                </span>
+              </span>
+            </span>
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <span
+                class="euiBetaBadge emotion-euiBetaBadge-hollow-m-baseline"
+                data-test-subj="header-page-title-beta-badge"
+                tabindex="0"
+              >
+                Beta
+              </span>
+            </span>
+          </h1>
+          <div
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="c1 siemSubtitle"
+            data-test-subj="header-page-subtitle"
+          >
+            <p
+              class="siemSubtitle__item siemSubtitle__item--text"
+              data-test-subj="header-panel-subtitle"
+            >
+              Test subtitle
+            </p>
+          </div>
+        </div>
+        <div
+          class="euiPageHeaderSection"
+          data-test-subj="header-page-supplements"
+        >
+          <p>
+            Test supplement
+          </p>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div
+    class="euiSpacer euiSpacer--xs emotion-euiSpacer-xs"
   />
-  <Subtitle
+  <div
+    class="c1 siemSubtitle"
     data-test-subj="header-page-subtitle-2"
-    items="Test subtitle 2"
+  >
+    <p
+      class="siemSubtitle__item siemSubtitle__item--text"
+      data-test-subj="header-panel-subtitle"
+    >
+      Test subtitle 2
+    </p>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
-  <EuiSpacer
-    size="m"
+  <div
+    class="css-v9atdk-Divider"
   />
-  <Divider />
-  <EuiSpacer
-    size="l"
+  <div
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />
-</Fragment>
+</div>
 `;

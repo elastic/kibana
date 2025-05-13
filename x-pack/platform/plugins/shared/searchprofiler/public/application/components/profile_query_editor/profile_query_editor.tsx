@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useRef, memo, useCallback, useState } from 'react';
+import React, { useRef, memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
   EuiForm,
   EuiFieldText,
   EuiFormRow,
-  EuiButton,
-  EuiText,
+  EuiButtonIcon,
   EuiFlexGroup,
-  EuiSpacer,
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
@@ -56,9 +55,8 @@ export const ProfileQueryEditor = memo(() => {
   const searchProfilerQuery =
     searchProfilerQueryURI &&
     decompressFromEncodedURIComponent(searchProfilerQueryURI.replace(/^data:text\/plain,/, ''));
-  const [editorValue, setEditorValue] = useState(
-    searchProfilerQuery ? searchProfilerQuery : INITIAL_EDITOR_VALUE
-  );
+
+  const editorValue = useRef(searchProfilerQuery || INITIAL_EDITOR_VALUE);
 
   const requestProfile = useRequestProfile();
 
@@ -66,7 +64,7 @@ export const ProfileQueryEditor = memo(() => {
     dispatch({ type: 'setProfiling', value: true });
     try {
       const { data: result, error } = await requestProfile({
-        query: editorValue,
+        query: editorValue.current,
         index: indexInputRef.current.value,
       });
       if (error) {
@@ -92,7 +90,7 @@ export const ProfileQueryEditor = memo(() => {
   const hasIndices = isLoading || indicesDataError ? false : indicesData?.hasIndices;
 
   const isDisabled = !licenseEnabled || !hasIndices;
-  const tooltipContent = !licenseEnabled
+  const tooltipContentDisabled = !licenseEnabled
     ? i18n.translate('xpack.searchProfiler.formProfileButton.noLicenseTooltip', {
         defaultMessage: 'You need an active license to use Search Profiler',
       })
@@ -100,35 +98,38 @@ export const ProfileQueryEditor = memo(() => {
         defaultMessage: 'You must have at least one index to use Search Profiler',
       });
 
-  const button = (
-    <EuiButton
-      data-test-subj={isDisabled ? 'disabledProfileButton' : 'profileButton'}
-      fill
-      disabled={isDisabled}
-      onClick={!isDisabled ? handleProfileClick : undefined}
-    >
-      <EuiText>
-        {i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {
-          defaultMessage: 'Profile',
-        })}
-      </EuiText>
-    </EuiButton>
+  const tooltipContentEnabled = i18n.translate(
+    'xpack.searchProfiler.sendRequestButtonTooltipContent',
+    {
+      defaultMessage: 'Click to send request',
+    }
   );
 
+  const tooltipContent = isDisabled ? tooltipContentDisabled : tooltipContentEnabled;
+
   return (
-    <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
+    <EuiFlexGroup
+      responsive={false}
+      gutterSize="none"
+      direction="column"
+      css={css`
+        height: 100%;
+      `}
+    >
       {/* Form */}
       <EuiFlexItem grow={false}>
         <EuiForm>
-          <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexGroup responsive={false} direction="row" gutterSize="s" alignItems="flexEnd">
             <EuiFlexItem>
               <EuiFormRow
+                fullWidth
                 label={i18n.translate('xpack.searchProfiler.formIndexLabel', {
                   defaultMessage: 'Index',
                 })}
               >
                 <EuiFieldText
                   data-test-subj="indexName"
+                  fullWidth
                   disabled={!licenseEnabled}
                   inputRef={(ref) => {
                     if (ref) {
@@ -139,40 +140,38 @@ export const ProfileQueryEditor = memo(() => {
                 />
               </EuiFormRow>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={tooltipContent}>
+                <EuiButtonIcon
+                  iconType={'playFilled'}
+                  data-test-subj={isDisabled ? 'disabledProfileButton' : 'profileButton'}
+                  disabled={isDisabled}
+                  onClick={!isDisabled ? handleProfileClick : undefined}
+                  size="m"
+                  display="base"
+                  aria-label={i18n.translate('xpack.searchProfiler.formProfileButtonLabel', {
+                    defaultMessage: 'Profile',
+                  })}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiForm>
       </EuiFlexItem>
 
       {/* Editor */}
-      <EuiFlexItem grow={10}>
+      <EuiFlexItem
+        grow={1}
+        css={css`
+          overflow: hidden;
+        `}
+      >
         <Editor
           onEditorReady={onEditorReady}
-          setEditorValue={setEditorValue}
-          editorValue={editorValue}
+          setEditorValue={(val) => (editorValue.current = val)}
+          editorValue={editorValue.current}
           licenseEnabled={licenseEnabled}
         />
-      </EuiFlexItem>
-
-      {/* Button */}
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup
-          className="prfDevTool__profileButtonContainer"
-          gutterSize="none"
-          direction="row"
-        >
-          <EuiFlexItem grow={5}>
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={5}>
-            {isDisabled ? (
-              <EuiToolTip position="top" content={tooltipContent}>
-                {button}
-              </EuiToolTip>
-            ) : (
-              button
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

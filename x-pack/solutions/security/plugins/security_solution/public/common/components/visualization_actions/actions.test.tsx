@@ -29,7 +29,7 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    EuiContextMenu: jest.fn().mockReturnValue(<div data-test-subj="viz-actions-menu" />),
+    EuiContextMenu: jest.fn(() => <div data-test-subj="viz-actions-menu" />),
   };
 });
 

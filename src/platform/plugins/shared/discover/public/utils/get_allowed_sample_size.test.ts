@@ -9,7 +9,7 @@
 
 import { SAMPLE_SIZE_SETTING } from '@kbn/discover-utils';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from './get_allowed_sample_size';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 
 describe('allowed sample size', () => {
   function getUiSettingsMock(sampleSize?: number): IUiSettingsClient {

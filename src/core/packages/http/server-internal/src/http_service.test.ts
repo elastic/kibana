@@ -486,7 +486,7 @@ test('passes versioned config to router', async () => {
     expect.any(Object), // logger
     expect.any(Function), // context enhancer
     expect.objectContaining({
-      isDev: true,
+      env,
       versionedRouterOptions: {
         defaultHandlerResolutionStrategy: 'newest',
         useVersionResolutionStrategyForInternalPaths: ['/foo'],

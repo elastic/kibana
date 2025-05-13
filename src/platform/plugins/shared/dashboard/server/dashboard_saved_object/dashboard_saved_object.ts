@@ -39,7 +39,7 @@ export const createDashboardSavedObjectType = ({
     getInAppUrl(obj) {
       return {
         path: `/app/dashboards#/view/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'dashboard.show',
+        uiCapabilitiesPath: 'dashboard_v2.show',
       };
     },
   },

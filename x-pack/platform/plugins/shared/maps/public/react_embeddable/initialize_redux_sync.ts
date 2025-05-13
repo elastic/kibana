@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { BehaviorSubject, debounceTime, filter, map, Subscription } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, map, merge, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { PaletteRegistry } from '@kbn/coloring';
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { MapCenterAndZoom } from '../../common/descriptor_types';
+import type { MapCenterAndZoom } from '../../common/descriptor_types';
 import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
 import { MapStoreState } from '../reducers/store';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
@@ -27,11 +27,7 @@ import {
 import {
   setEmbeddableSearchContext,
   setExecutionContext,
-  setGotoWithCenter,
-  setHiddenLayers,
-  setIsLayerTOCOpen,
   setMapSettings,
-  setOpenTOCDetails,
   setQuery,
   setReadOnly,
 } from '../actions';
@@ -57,6 +53,28 @@ function getHiddenLayerIds(state: MapStoreState) {
     .filter((layer) => !layer.visible)
     .map((layer) => layer.id);
 }
+
+export const reduxSyncComparators: StateComparators<
+  Pick<
+    MapSerializedState,
+    'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'mapBuffer' | 'openTOCDetails'
+  >
+> = {
+  hiddenLayers: 'deepEquality',
+  isLayerTOCOpen: 'referenceEquality',
+  mapCenter: (a, b) => {
+    if (!a || !b) {
+      return a === b;
+    }
+
+    if (a.lat !== b.lat) return false;
+    if (a.lon !== b.lon) return false;
+    // Map may not restore reset zoom exactly
+    return Math.abs(a.zoom - b.zoom) < 0.05;
+  },
+  mapBuffer: 'skip',
+  openTOCDetails: 'deepEquality',
+};
 
 export function initializeReduxSync({
   savedMap,
@@ -170,7 +188,7 @@ export function initializeReduxSync({
       unsubscribeFromStore();
     },
     api: {
-      dataLoading: dataLoading$,
+      dataLoading$,
       filters$,
       getInspectorAdapters: () => {
         return getInspectorAdapters(store.getState());
@@ -199,45 +217,16 @@ export function initializeReduxSync({
         store.dispatch(setEventHandlers(eventHandlers));
       },
     },
-    comparators: {
-      // mapBuffer comparator intentionally omitted and is not part of unsaved changes check
-      hiddenLayers: [
-        hiddenLayers$,
-        (nextValue: string[]) => {
-          store.dispatch<any>(setHiddenLayers(nextValue));
-        },
-        fastIsEqual,
-      ],
-      isLayerTOCOpen: [
-        isLayerTOCOpen$,
-        (nextValue: boolean) => {
-          store.dispatch(setIsLayerTOCOpen(nextValue));
-        },
-      ],
-      mapCenter: [
-        mapCenterAndZoom$,
-        (nextValue: MapCenterAndZoom) => {
-          store.dispatch(setGotoWithCenter(nextValue));
-        },
-        fastIsEqual,
-      ],
-      openTOCDetails: [
-        openTOCDetails$,
-        (nextValue: string[]) => {
-          store.dispatch(setOpenTOCDetails(nextValue));
-        },
-        fastIsEqual,
-      ],
-    } as StateComparators<
-      Pick<MapSerializedState, 'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'openTOCDetails'>
-    >,
-    serialize: () => {
+    anyStateChange$: merge(hiddenLayers$, isLayerTOCOpen$, mapCenterAndZoom$, openTOCDetails$).pipe(
+      map(() => undefined)
+    ),
+    getLatestState: () => {
       return {
-        hiddenLayers: getHiddenLayerIds(store.getState()),
-        isLayerTOCOpen: getIsLayerTOCOpen(store.getState()),
+        hiddenLayers: hiddenLayers$.value,
+        isLayerTOCOpen: isLayerTOCOpen$.value,
         mapBuffer: getMapBuffer(store.getState()),
-        mapCenter: getMapCenterAndZoom(store.getState()),
-        openTOCDetails: getOpenTOCDetails(store.getState()),
+        mapCenter: mapCenterAndZoom$.value,
+        openTOCDetails: openTOCDetails$.value,
       };
     },
   };

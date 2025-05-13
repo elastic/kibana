@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export { AnonymizationSettings } from '../../data_anonymization/settings/anonymization_settings';
-export { ConversationSettings } from '../conversations/conversation_settings/conversation_settings';
 export { EvaluationSettings } from './evaluation_settings/evaluation_settings';
 export { KnowledgeBaseSettings } from '../../knowledge_base/knowledge_base_settings';
 export { QuickPromptSettings } from '../quick_prompts/quick_prompt_settings/quick_prompt_settings';

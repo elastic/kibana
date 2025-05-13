@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiHealth } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiHealth, useEuiTheme } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as I18n from './translations';
 
-import {
-  RISK_COLOR_LOW,
-  RISK_COLOR_MEDIUM,
-  RISK_COLOR_HIGH,
-  RISK_COLOR_CRITICAL,
-  RISK_SCORE_LOW,
-  RISK_SCORE_MEDIUM,
-  RISK_SCORE_HIGH,
-  RISK_SCORE_CRITICAL,
-} from '../../../../common/constants';
+import { getRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
 
 export interface SeverityOptionItem {
   value: Severity;
@@ -31,28 +23,38 @@ const StyledEuiHealth = styled(EuiHealth)`
   line-height: inherit;
 `;
 
-export const severityOptions: SeverityOptionItem[] = [
-  {
-    value: 'low',
-    inputDisplay: <StyledEuiHealth color={RISK_COLOR_LOW}>{I18n.LOW}</StyledEuiHealth>,
-  },
-  {
-    value: 'medium',
-    inputDisplay: <StyledEuiHealth color={RISK_COLOR_MEDIUM}>{I18n.MEDIUM}</StyledEuiHealth>,
-  },
-  {
-    value: 'high',
-    inputDisplay: <StyledEuiHealth color={RISK_COLOR_HIGH}>{I18n.HIGH}</StyledEuiHealth>,
-  },
-  {
-    value: 'critical',
-    inputDisplay: <StyledEuiHealth color={RISK_COLOR_CRITICAL}>{I18n.CRITICAL}</StyledEuiHealth>,
-  },
-];
+export enum SeverityLevel {
+  low = 'low',
+  medium = 'medium',
+  high = 'high',
+  critical = 'critical',
+}
 
-export const defaultRiskScoreBySeverity: Record<Severity, number> = {
-  low: RISK_SCORE_LOW,
-  medium: RISK_SCORE_MEDIUM,
-  high: RISK_SCORE_HIGH,
-  critical: RISK_SCORE_CRITICAL,
+const getSeverityOptions: (euiTheme: EuiThemeComputed) => SeverityOptionItem[] = (euiTheme) => {
+  const palette = getRiskSeverityColors(euiTheme);
+  return [
+    {
+      value: SeverityLevel.low,
+      inputDisplay: <StyledEuiHealth color={palette.low}>{I18n.LOW}</StyledEuiHealth>,
+    },
+    {
+      value: SeverityLevel.medium,
+      inputDisplay: <StyledEuiHealth color={palette.medium}>{I18n.MEDIUM}</StyledEuiHealth>,
+    },
+    {
+      value: SeverityLevel.high,
+      inputDisplay: <StyledEuiHealth color={palette.high}>{I18n.HIGH}</StyledEuiHealth>,
+    },
+    {
+      value: SeverityLevel.critical,
+      inputDisplay: <StyledEuiHealth color={palette.critical}>{I18n.CRITICAL}</StyledEuiHealth>,
+    },
+  ];
+};
+
+export const useSeverityOptions = () => {
+  const { euiTheme } = useEuiTheme();
+  const severityOptions = useMemo(() => getSeverityOptions(euiTheme), [euiTheme]);
+
+  return severityOptions;
 };

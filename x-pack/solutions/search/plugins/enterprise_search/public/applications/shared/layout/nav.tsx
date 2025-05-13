@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 
 import { ANALYTICS_PLUGIN, APPLICATIONS_PLUGIN } from '../../../../common/constants';
 import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
-import { useIndicesNav } from '../../enterprise_search_content/components/search_index/indices/indices_nav';
 
 import { KibanaLogic } from '../kibana';
 
@@ -32,8 +31,6 @@ import { generateNavLink } from './nav_link_helpers';
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
   const { isSidebarEnabled, getNavLinks } = useValues(KibanaLogic);
 
-  const indicesNavItems = useIndicesNav();
-
   const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = useMemo(() => {
     const baseNavItems = buildBaseClassicNavItems();
     const deepLinks = getNavLinks().reduce((links, link) => {
@@ -41,8 +38,8 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
       return links;
     }, {} as Record<string, ChromeNavLink | undefined>);
 
-    return generateSideNavItems(baseNavItems, deepLinks, { search_indices: indicesNavItems });
-  }, [indicesNavItems]);
+    return generateSideNavItems(baseNavItems, deepLinks);
+  }, []);
 
   if (!isSidebarEnabled && !alwaysReturn) return undefined;
 
@@ -165,46 +162,82 @@ export const useEnterpriseSearchAnalyticsNav = (
   const applicationsNav = navItems.find((item) => item.id === 'build');
   const analyticsNav = applicationsNav?.items?.find((item) => item.id === 'analyticsCollections');
 
-  if (!name || !paths || !analyticsNav) return navItems;
+  if (!name && !analyticsNav) {
+    applicationsNav?.items?.push({
+      id: 'analyticsCollections',
+      name: ANALYTICS_PLUGIN.NAME,
+      ...generateNavLink({
+        shouldNotCreateHref: true,
+        shouldShowActiveForSubroutes: false,
+        to: ANALYTICS_PLUGIN.URL,
+      }),
+    });
+    return navItems;
+  }
 
-  analyticsNav.items = [
-    {
-      id: 'analyticsCollection',
+  if (!paths || analyticsNav) return navItems;
+  if (!analyticsNav) {
+    applicationsNav?.items?.push({
+      id: 'analyticsCollections',
+      name: ANALYTICS_PLUGIN.NAME,
+      ...generateNavLink({
+        shouldNotCreateHref: true,
+        shouldShowActiveForSubroutes: false,
+        to: ANALYTICS_PLUGIN.URL,
+      }),
       items: [
-        {
-          id: 'analyticsCollectionOverview',
-          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollections.overviewTitle', {
-            defaultMessage: 'Overview',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: ANALYTICS_PLUGIN.URL + paths.overview,
-          }),
-        },
-        {
-          id: 'analyticsCollectionExplorer',
-          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollections.explorerTitle', {
-            defaultMessage: 'Explorer',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: ANALYTICS_PLUGIN.URL + paths.explorer,
-          }),
-        },
-        {
-          id: 'analyticsCollectionIntegration',
-          name: i18n.translate('xpack.enterpriseSearch.nav.analyticsCollections.integrationTitle', {
-            defaultMessage: 'Integration',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            to: ANALYTICS_PLUGIN.URL + paths.integration,
-          }),
-        },
+        ...(paths
+          ? [
+              {
+                id: 'analyticsCollection',
+                items: [
+                  {
+                    id: 'analyticsCollectionOverview',
+                    name: i18n.translate(
+                      'xpack.enterpriseSearch.nav.analyticsCollections.overviewTitle',
+                      {
+                        defaultMessage: 'Overview',
+                      }
+                    ),
+                    ...generateNavLink({
+                      shouldNotCreateHref: true,
+                      to: ANALYTICS_PLUGIN.URL + paths.overview,
+                    }),
+                  },
+                  {
+                    id: 'analyticsCollectionExplorer',
+                    name: i18n.translate(
+                      'xpack.enterpriseSearch.nav.analyticsCollections.explorerTitle',
+                      {
+                        defaultMessage: 'Explorer',
+                      }
+                    ),
+                    ...generateNavLink({
+                      shouldNotCreateHref: true,
+                      to: ANALYTICS_PLUGIN.URL + paths.explorer,
+                    }),
+                  },
+                  {
+                    id: 'analyticsCollectionIntegration',
+                    name: i18n.translate(
+                      'xpack.enterpriseSearch.nav.analyticsCollections.integrationTitle',
+                      {
+                        defaultMessage: 'Integration',
+                      }
+                    ),
+                    ...generateNavLink({
+                      shouldNotCreateHref: true,
+                      to: ANALYTICS_PLUGIN.URL + paths.integration,
+                    }),
+                  },
+                ],
+                name,
+              },
+            ]
+          : []),
       ],
-      name,
-    },
-  ];
+    });
+  }
 
   return navItems;
 };

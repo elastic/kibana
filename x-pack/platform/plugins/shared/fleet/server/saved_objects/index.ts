@@ -102,6 +102,7 @@ import {
 } from './migrations/to_v8_15_0';
 import { backfillAgentPolicyToV4 } from './model_versions/agent_policy_v4';
 import { backfillOutputPolicyToV7 } from './model_versions/outputs';
+import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 
 /*
  * Saved object types and mappings
@@ -247,9 +248,14 @@ export const getSavedObjectTypes = (
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
           global_data_tags: { type: 'flattened', index: false },
+          agentless: {
+            dynamic: false,
+            properties: {},
+          },
           monitoring_pprof_enabled: { type: 'boolean', index: false },
           monitoring_http: { type: 'flattened', index: false },
           monitoring_diagnostics: { type: 'flattened', index: false },
+          required_versions: { type: 'flattened', index: false },
         },
       },
       migrations: {
@@ -314,6 +320,29 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                agentless: {
+                  dynamic: false,
+                  properties: {},
+                },
+              },
+            },
+          ],
+        },
+        '7': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                required_versions: { type: 'flattened', index: false },
+              },
+            },
+          ],
+        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -358,6 +387,11 @@ export const getSavedObjectTypes = (
           advanced_settings: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
           global_data_tags: { type: 'flattened', index: false },
+          agentless: {
+            dynamic: false,
+            properties: {},
+          },
+          required_versions: { type: 'flattened', index: false },
         },
       },
       modelVersions: {
@@ -366,6 +400,16 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {},
+            },
+          ],
+        },
+        '2': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                required_versions: { type: 'flattened', index: false },
+              },
             },
           ],
         },
@@ -380,6 +424,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           output_id: { type: 'keyword', index: false },
           name: { type: 'keyword' },
@@ -591,6 +636,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
+        },
       },
       migrations: {
         '7.13.0': migrateOutputToV7130,
@@ -606,6 +659,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           description: { type: 'text' },
@@ -805,6 +859,22 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '17': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: packagePolicyV17AdvancedFieldsForEndpointV818,
+            },
+          ],
+        },
+        '18': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -832,6 +902,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           description: { type: 'text' },
@@ -890,6 +961,22 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '3': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: packagePolicyV17AdvancedFieldsForEndpointV818,
+            },
+          ],
+        },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
+            },
+          ],
+        },
       },
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -901,6 +988,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           version: { type: 'keyword' },
@@ -988,6 +1076,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
+            },
+          ],
+        },
       },
       migrations: {
         '7.14.0': migrateInstallationToV7140,
@@ -1042,12 +1138,23 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           source_id: { type: 'keyword', index: false },
           name: { type: 'keyword' },
           is_default: { type: 'boolean' },
           host: { type: 'keyword' },
           proxy_id: { type: 'keyword' },
+        },
+      },
+      modelVersions: {
+        '1': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
+            },
+          ],
         },
       },
     },
@@ -1060,6 +1167,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           is_default: { type: 'boolean' },
@@ -1077,6 +1185,14 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 is_internal: { type: 'boolean', index: false },
               },
+            },
+          ],
+        },
+        '2': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
             },
           ],
         },
@@ -1166,9 +1282,15 @@ export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
   'channel_buffer_size',
 ]);
 
+// dangerouslyExposeValue added to allow the user with access to the SO to see and edit these values through the UI
 export const OUTPUT_ENCRYPTED_FIELDS = new Set([
   { key: 'ssl', dangerouslyExposeValue: true },
   { key: 'password', dangerouslyExposeValue: true },
+  { key: 'kibana_api_key', dangerouslyExposeValue: true },
+]);
+
+export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([
+  { key: 'ssl', dangerouslyExposeValue: true },
 ]);
 
 export function registerEncryptedSavedObjects(
@@ -1189,5 +1311,17 @@ export function registerEncryptedSavedObjects(
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
     attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
+  });
+  encryptedSavedObjects.registerType({
+    type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: FLEET_SERVER_HOST_ENCRYPTED_FIELDS,
+    // enforceRandomId allows to create an SO with an arbitrary id
+    enforceRandomId: false,
+  });
+  encryptedSavedObjects.registerType({
+    type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    // enforceRandomId allows to create an SO with an arbitrary id
+    enforceRandomId: false,
   });
 }

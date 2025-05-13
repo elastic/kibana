@@ -9,6 +9,7 @@ import { schema, TypeOf } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   sloOrphanSummaryCleanUpTaskEnabled: schema.boolean({ defaultValue: true }),
+  tempSummaryCleanupTaskEnabled: schema.boolean({ defaultValue: true }),
   enabled: schema.boolean({ defaultValue: true }),
   experimental: schema.maybe(
     schema.object({

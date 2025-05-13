@@ -8,10 +8,11 @@
  */
 
 import type { ESQLMessage, ESQLLocation } from '@kbn/esql-ast';
+import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorError } from '../types';
 
-export interface ESQLVariable {
+export interface ESQLUserDefinedColumn {
   name: string;
   // invalid expressions produce columns of type "unknown"
   // also, there are some cases where we can't yet infer the type of
@@ -20,10 +21,11 @@ export interface ESQLVariable {
   location: ESQLLocation;
 }
 
-export interface ESQLRealField {
+export interface ESQLFieldWithMetadata {
   name: string;
   type: FieldType;
   isEcs?: boolean;
+  hasConflict?: boolean;
   metadata?: {
     description?: string;
   };
@@ -38,17 +40,11 @@ export interface ESQLPolicy {
 
 export interface ReferenceMaps {
   sources: Set<string>;
-  variables: Map<string, ESQLVariable[]>;
-  fields: Map<string, ESQLRealField>;
+  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
+  fields: Map<string, ESQLFieldWithMetadata>;
   policies: Map<string, ESQLPolicy>;
   query: string;
-  joinIndices: JoinIndexAutocompleteItem[];
-}
-
-export interface JoinIndexAutocompleteItem {
-  name: string;
-  mode: 'lookup' | string;
-  aliases: string[];
+  joinIndices: IndexAutocompleteItem[];
 }
 
 export interface ValidationErrors {
@@ -121,11 +117,11 @@ export interface ValidationErrors {
   };
   unsupportedColumnTypeForCommand: {
     message: string;
-    type: { command: string; type: string; typeCount: number; givenType: string; column: string };
+    type: { command: string; type: string; givenType: string; column: string };
   };
-  unknownOption: {
+  unknownDissectKeyword: {
     message: string;
-    type: { command: string; option: string };
+    type: { keyword: string };
   };
   wrongOptionArgumentType: {
     message: string;
@@ -159,11 +155,7 @@ export interface ValidationErrors {
     message: string;
     type: { field: string };
   };
-  unsupportedSetting: {
-    message: string;
-    type: { setting: string; expected: string };
-  };
-  unsupportedSettingCommandValue: {
+  unsupportedMode: {
     message: string;
     type: { command: string; value: string; expected: string };
   };
@@ -214,6 +206,10 @@ export interface ValidationErrors {
   invalidJoinIndex: {
     message: string;
     type: { identifier: string };
+  };
+  tooManyForks: {
+    message: string;
+    type: {};
   };
 }
 

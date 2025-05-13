@@ -17,7 +17,7 @@ export const getRuleAuthor: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siem: [
+          siemV2: [
             'all',
             'read_alerts',
             'crud_alerts',
@@ -30,6 +30,8 @@ export const getRuleAuthor: () => Omit<Role, 'name'> = () => {
             'actions_log_management_read',
             'workflow_insights_all',
           ],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
       },
     ],

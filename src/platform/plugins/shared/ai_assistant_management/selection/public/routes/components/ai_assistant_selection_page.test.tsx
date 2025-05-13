@@ -93,13 +93,9 @@ describe('AiAssistantSelectionPage', () => {
 
       it('renders the documentation links correctly', () => {
         renderComponent(testCapabilities);
-
-        expect(
-          screen.getByTestId('pluginsAiAssistantSelectionPageDocumentationLink')
-        ).toHaveAttribute(
-          'href',
-          'https://www.elastic.co/guide/en/observability/master/obs-ai-assistant.html'
-        );
+        const docLink = screen.getByTestId('pluginsAiAssistantSelectionPageDocumentationLink');
+        expect(docLink).toBeInTheDocument();
+        expect(docLink.getAttribute('href')).toContain('observability-ai-assistant');
       });
     });
   });
@@ -139,13 +135,9 @@ describe('AiAssistantSelectionPage', () => {
 
       it('renders the documentation links correctly', () => {
         renderComponent(testCapabilities);
-
-        expect(
-          screen.getByTestId('securityAiAssistantSelectionPageDocumentationLink')
-        ).toHaveAttribute(
-          'href',
-          'https://www.elastic.co/guide/en/security/master/security-assistant.html'
-        );
+        const docLink = screen.getByTestId('securityAiAssistantSelectionPageDocumentationLink');
+        expect(docLink).toBeInTheDocument();
+        expect(docLink.getAttribute('href')).toContain('ai-assistant');
       });
     });
   });

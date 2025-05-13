@@ -8,22 +8,25 @@
  */
 
 import { isEqual } from 'lodash';
-import { History } from 'history';
-import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
-import { Filter, compareFilters, COMPARE_ALL_OPTIONS, FilterStateStore } from '@kbn/es-query';
+import type { History } from 'history';
+import type { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
+import type { Filter } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, FilterStateStore } from '@kbn/es-query';
+import type { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncStates,
   withNotifyOnErrors,
-  ReduxLikeStateContainer,
 } from '@kbn/kibana-utils-plugin/public';
 
-import { connectToQueryState, DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import { connectToQueryState } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { getValidFilters } from '../../../utils/get_valid_filters';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
+import { APP_STATE_URL_KEY } from '../../../../common';
 
 export interface AppState {
   /**
@@ -133,8 +136,8 @@ export interface GetStateReturn {
    */
   flushToUrl: (replace?: boolean) => void;
 }
+
 const GLOBAL_STATE_URL_KEY = '_g';
-const APP_STATE_URL_KEY = '_a';
 
 /**
  * Builds and returns appState and globalState containers

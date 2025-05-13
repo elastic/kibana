@@ -10,6 +10,7 @@ import { formatNumber } from '@elastic/eui';
 import { mapPercentageToQuality } from '../../common/utils';
 import { BYTE_NUMBER_FORMAT, MAX_HOSTS_METRIC_VALUE, NUMBER_FORMAT } from '../../common/constants';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
+import { calculatePercentage } from '../utils';
 
 export const useOverviewSummaryPanel = () => {
   const { service } = useDatasetQualityDetailsContext();
@@ -55,12 +56,19 @@ export const useOverviewSummaryPanel = () => {
     NUMBER_FORMAT
   );
 
-  const degradedPercentage =
-    Number(totalDocsCount) > 0
-      ? (Number(totalDegradedDocsCount) / Number(totalDocsCount)) * 100
-      : 0;
+  const totalFailedDocsCount = formatNumber(dataStreamDetails?.failedDocsCount ?? 0, NUMBER_FORMAT);
 
-  const quality = mapPercentageToQuality(degradedPercentage);
+  const degradedPercentage = calculatePercentage({
+    totalDocs: dataStreamDetails.docsCount,
+    count: dataStreamDetails?.degradedDocsCount,
+  });
+
+  const failedPercentage = calculatePercentage({
+    totalDocs: dataStreamDetails.docsCount,
+    count: dataStreamDetails?.failedDocsCount,
+  });
+
+  const quality = mapPercentageToQuality([degradedPercentage, failedPercentage]);
 
   return {
     totalDocsCount,
@@ -70,6 +78,7 @@ export const useOverviewSummaryPanel = () => {
     totalHostsCount,
     isSummaryPanelLoading,
     totalDegradedDocsCount,
+    totalFailedDocsCount,
     quality,
   };
 };

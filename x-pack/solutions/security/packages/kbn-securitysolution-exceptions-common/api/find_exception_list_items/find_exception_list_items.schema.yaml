@@ -14,7 +14,7 @@ paths:
         - name: list_id
           in: query
           required: true
-          description: List's id
+          description: The `list_id`s of the items to fetch.
           schema:
             type: array
             items:
@@ -30,6 +30,9 @@ paths:
             items:
               $ref: '#/components/schemas/FindExceptionListItemsFilter'
             default: []
+          examples:
+            singleFilter:
+              value: [exception-list.attributes.name:%My%20item]
         - name: namespace_type
           in: query
           required: false
@@ -41,11 +44,15 @@ paths:
             items:
               $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
             default: [single]
+          examples:
+            single:
+              value: [single]
         - name: search
           in: query
           required: false
           schema:
             type: string
+            example: host.name
         - name: page
           in: query
           required: false
@@ -53,6 +60,7 @@ paths:
           schema:
             type: integer
             minimum: 0
+            example: 1
         - name: per_page
           in: query
           required: false
@@ -60,19 +68,22 @@ paths:
           schema:
             type: integer
             minimum: 0
+            example: 20
         - name: sort_field
           in: query
           required: false
-          description: Determines which field is used to sort the results
+          description: Determines which field is used to sort the results.
           schema:
             $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          example: 'name'
         - name: sort_order
           in: query
           required: false
-          description: Determines the sort order, which can be `desc` or `asc`
+          description: Determines the sort order, which can be `desc` or `asc`.
           schema:
             type: string
             enum: [desc, asc]
+            example: desc
       responses:
         200:
           description: Successful response
@@ -101,6 +112,37 @@ paths:
                   - page
                   - per_page
                   - total
+              examples:
+                simpleListItems:
+                  value:
+                    data:
+                      - id: 459c5e7e-f8b2-4f0b-b136-c1fc702f72da
+                        item_id: simple_list_item
+                        list_id: simple_list
+                        type: simple
+                        name: Sample Exception List Item
+                        description: This is a sample exception item.
+                        entries:
+                          - type: exists
+                            field: actingProcess.file.signer
+                            operator: excluded
+                          - type: match_any
+                            field: host.name
+                            value: [jupiter, saturn]
+                            operator: included
+                        namespace_type: single
+                        os_types: [linux]
+                        tags: [malware]
+                        comments: []
+                        _version: WzgsMV0=
+                        tie_breaker_id: ad0754ff-7b19-49ca-b73e-e6aff6bfa2d0
+                        created_at: 2025-01-07T21:12:25.512Z
+                        created_by: elastic
+                        updated_at: 2025-01-07T21:12:25.512Z
+                        updated_by: elastic
+                    page: 1
+                    per_page: 20
+                    total: 1
         400:
           description: Invalid input data response
           content:
@@ -109,30 +151,58 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/exception_lists/items/_find?list_id=simple_list&namespace_type=single] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
         404:
           description: Exception list not found response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: 'exception list list_id: "foo" does not exist'
+                    status_code: 404
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
 
 components:
   schemas:

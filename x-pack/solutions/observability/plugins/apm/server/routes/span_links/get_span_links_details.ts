@@ -75,40 +75,38 @@ async function fetchSpanLinksDetails({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    body: {
-      fields: [...requiredFields, ...requiredTxFields, ...requiredSpanFields, ...optionalFields],
-      track_total_hits: false,
-      size: 1000,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(startWithBuffer, endWithBuffer),
-            ...kqlQuery(kuery),
-            {
-              bool: {
-                should: spanLinks.map((item) => {
-                  return {
-                    bool: {
-                      filter: [
-                        { term: { [TRACE_ID]: item.trace.id } },
-                        {
-                          bool: {
-                            should: [
-                              { term: { [SPAN_ID]: item.span.id } },
-                              { term: { [TRANSACTION_ID]: item.span.id } },
-                            ],
-                            minimum_should_match: 1,
-                          },
+    fields: [...requiredFields, ...requiredTxFields, ...requiredSpanFields, ...optionalFields],
+    track_total_hits: false,
+    size: 1000,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(startWithBuffer, endWithBuffer),
+          ...kqlQuery(kuery),
+          {
+            bool: {
+              should: spanLinks.map((item) => {
+                return {
+                  bool: {
+                    filter: [
+                      { term: { [TRACE_ID]: item.trace.id } },
+                      {
+                        bool: {
+                          should: [
+                            { term: { [SPAN_ID]: item.span.id } },
+                            { term: { [TRANSACTION_ID]: item.span.id } },
+                          ],
+                          minimum_should_match: 1,
                         },
-                      ],
-                    },
-                  };
-                }),
-                minimum_should_match: 1,
-              },
+                      },
+                    ],
+                  },
+                };
+              }),
+              minimum_should_match: 1,
             },
-          ],
-        },
+          },
+        ],
       },
     },
   });

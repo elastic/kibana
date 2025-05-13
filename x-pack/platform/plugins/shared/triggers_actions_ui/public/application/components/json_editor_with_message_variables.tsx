@@ -15,7 +15,7 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { AddMessageVariables } from '@kbn/alerts-ui-shared';
+import { AddMessageVariablesOptional } from './add_message_variables_optional';
 import { templateActionVariable } from '../lib';
 
 const NO_EDITOR_ERROR_TITLE = i18n.translate(
@@ -46,6 +46,7 @@ interface Props {
   showButtonTitle?: boolean;
   dataTestSubj?: string;
   euiCodeEditorProps?: { [key: string]: any };
+  isOptionalField?: boolean;
 }
 
 const { useXJsonMode } = XJson;
@@ -69,6 +70,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   showButtonTitle,
   dataTestSubj,
   euiCodeEditorProps = {},
+  isOptionalField = false,
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
@@ -162,12 +164,13 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
       labelAppend={
-        <AddMessageVariables
+        <AddMessageVariablesOptional
+          isOptionalField={isOptionalField}
           buttonTitle={buttonTitle}
           messageVariables={messageVariables}
+          showButtonTitle={showButtonTitle}
           onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}
-          showButtonTitle={showButtonTitle}
         />
       }
       helpText={helpText}

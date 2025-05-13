@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '.';
+import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import type { InMemoryMetrics } from '.';
+import { IN_MEMORY_METRICS } from '.';
 
 export function registerNodeCollector({
   monitoringCollection,

@@ -15,6 +15,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sections/epm/screens/detail/hooks';
 
@@ -99,7 +100,10 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
     useIsFirstTimeAgentUserQuery();
   const { cloud } = useStartServices();
-
+  const NO_TAGS_VALUE = i18n.translate('xpack.fleet.agentList.noTagsValue', {
+    defaultMessage: 'No Tags',
+  });
+  const tagsWithNoTagsIncluded = [...tags, NO_TAGS_VALUE];
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -187,7 +191,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   disabled={agentPolicies.length === 0}
                 />
                 <TagsFilter
-                  tags={tags}
+                  tags={tagsWithNoTagsIncluded}
                   selectedTags={selectedTags}
                   onSelectedTagsChange={onSelectedTagsChange}
                 />
@@ -210,8 +214,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                 </EuiFilterButton>
               </EuiFilterGroup>
             </EuiFlexItem>
-            {(authz.fleet.allAgents && selectionMode === 'manual' && selectedAgents.length) ||
-            (authz.fleet.allAgents && selectionMode === 'query' && nAgentsInTable > 0) ? (
+            {(selectionMode === 'manual' && selectedAgents.length) ||
+            (selectionMode === 'query' && nAgentsInTable > 0) ? (
               <EuiFlexItem grow={false}>
                 <AgentBulkActions
                   nAgentsInTable={nAgentsInTable}

@@ -10,6 +10,7 @@ import type { UseMutationResult } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { i18n } from '@kbn/i18n';
 import type { BaseActionRequestBody } from '../../../../../common/api/endpoint/actions/common/base';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ActionSuccess } from '../components/action_success';
@@ -274,7 +275,18 @@ export const useConsoleActionSubmitter = <
 
     if (apiError) {
       return (
-        <ResultComponent showAs="failure" data-test-subj={getTestId('apiFailure')}>
+        <ResultComponent
+          showAs="failure"
+          data-test-subj={getTestId('apiFailure')}
+          title={
+            actionRequestError
+              ? i18n.translate(
+                  'xpack.securitySolution.useConsoleActionSubmitter.actionRequestFailure',
+                  { defaultMessage: 'Failed to create action request.' }
+                )
+              : undefined
+          }
+        >
           <FormattedMessage
             id="xpack.securitySolution.endpointResponseActions.actionSubmitter.apiErrorDetails"
             defaultMessage="The following error was encountered:"

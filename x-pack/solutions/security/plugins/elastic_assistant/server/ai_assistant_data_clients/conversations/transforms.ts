@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   ConversationResponse,
   Replacements,
   replaceOriginalValuesWithUuidValues,
 } from '@kbn/elastic-assistant-common';
+import _ from 'lodash';
 import { EsConversationSchema } from './types';
 
 export const transformESSearchToConversations = (
@@ -45,7 +46,6 @@ export const transformESSearchToConversations = (
           : {}),
         excludeFromLastConversationStorage:
           conversationSchema.exclude_from_last_conversation_storage,
-        isDefault: conversationSchema.is_default,
         messages:
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           conversationSchema.messages?.map((message: Record<string, any>) => ({
@@ -66,6 +66,15 @@ export const transformESSearchToConversations = (
             ...(message.is_error ? { isError: message.is_error } : {}),
             ...(message.reader ? { reader: message.reader } : {}),
             role: message.role,
+            ...(message.metadata
+              ? {
+                  metadata: {
+                    ...(message.metadata.content_references
+                      ? { contentReferences: message.metadata.content_references }
+                      : {}),
+                  },
+                }
+              : {}),
             ...(message.trace_data
               ? {
                   traceData: {
@@ -123,7 +132,6 @@ export const transformESToConversations = (
           }
         : {}),
       excludeFromLastConversationStorage: conversationSchema.exclude_from_last_conversation_storage,
-      isDefault: conversationSchema.is_default,
       messages:
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         conversationSchema.messages?.map((message: Record<string, any>) => ({
@@ -144,7 +152,7 @@ export const transformESToConversations = (
                 },
               }
             : {}),
-        })) ?? [],
+        })),
       updatedAt: conversationSchema.updated_at,
       replacements,
       namespace: conversationSchema.namespace,
@@ -152,5 +160,28 @@ export const transformESToConversations = (
     };
 
     return conversation;
+  });
+};
+
+export const transformFieldNamesToSourceScheme = (fields: string[]) => {
+  return fields.map((f) => {
+    switch (f) {
+      case 'timestamp':
+        return '@timestamp';
+      case 'apiConfig':
+        return 'api_config';
+      case 'apiConfig.actionTypeId':
+        return 'api_config.action_type_id';
+      case 'apiConfig.connectorId':
+        return 'api_config.connector_id';
+      case 'apiConfig.defaultSystemPromptId':
+        return 'api_config.default_system_prompt_id';
+      case 'apiConfig.model':
+        return 'api_config.model';
+      case 'apiConfig.provider':
+        return 'api_config.provider';
+      default:
+        return _.snakeCase(f);
+    }
   });
 };

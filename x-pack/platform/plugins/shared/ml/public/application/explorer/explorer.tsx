@@ -277,7 +277,10 @@ export const Explorer: FC<ExplorerUIProps> = ({
     anomalyExplorerCommonStateService,
     chartsStateService,
     anomalyDetectionAlertsStateService,
+    anomalyTableService,
   } = useAnomalyExplorerContext();
+
+  const tableData = useObservable(anomalyTableService.tableData$, anomalyTableService.tableData);
 
   const htmlIdGen = useMemo(() => htmlIdGenerator(), []);
 
@@ -365,8 +368,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   const mlIndexUtils = useMlIndexUtils();
   const mlLocator = useMlLocator();
 
-  const { annotations, filterPlaceHolder, indexPattern, influencers, loading, tableData } =
-    explorerState;
+  const { annotations, filterPlaceHolder, indexPattern, influencers, loading } = explorerState;
 
   const chartsData = useObservable(
     chartsStateService.getChartsData$(),
@@ -427,6 +429,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     onSelectionChange: handleJobSelectionChange,
     selectedJobIds,
     selectedGroups,
+    selectedJobs,
   } as unknown as JobSelectorProps;
 
   const noJobsSelected = !selectedJobs || selectedJobs.length === 0;
@@ -435,7 +438,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
     !!overallSwimlaneData?.points && overallSwimlaneData.points.length > 0;
   const hasResultsWithAnomalies =
     (hasResults && overallSwimlaneData!.points.some((v) => v.value > 0)) ||
-    tableData.anomalies?.length > 0;
+    (tableData && tableData.anomalies?.length > 0);
 
   const hasActiveFilter = isDefined(swimLaneSeverity);
 
@@ -517,7 +520,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
           <EuiSpacer size="m" />
         </>
       )}
-      {loading === false && tableData.anomalies?.length ? (
+      {loading === false && tableData && tableData.anomalies?.length ? (
         <AnomaliesMap anomalies={tableData.anomalies} jobIds={selectedJobIds} />
       ) : null}
       {annotationsCnt > 0 && (
@@ -558,66 +561,67 @@ export const Explorer: FC<ExplorerUIProps> = ({
           <EuiSpacer size="m" />
         </>
       )}
-      {loading === false && (
-        <EuiPanel hasBorder hasShadow={false}>
-          <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size={'xs'}>
-                <h2>
-                  <FormattedMessage
-                    id="xpack.ml.explorer.anomaliesTitle"
-                    defaultMessage="Anomalies"
-                  />
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
 
-            <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
-              <AnomalyContextMenu
-                selectedJobs={selectedJobs!}
-                mergedGroupsAndJobsIds={mergedGroupsAndJobsIds}
-                selectedCells={selectedCells}
-                bounds={bounds}
-                interval={swimLaneBucketInterval ? swimLaneBucketInterval.asSeconds() : undefined}
-                chartsCount={chartsData.seriesToPlot.length}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      <EuiPanel hasBorder hasShadow={false}>
+        <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size={'xs'}>
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.explorer.anomaliesTitle"
+                  defaultMessage="Anomalies"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
 
-          <EuiFlexGroup direction="row" gutterSize="l" responsive={true} alignItems="center">
-            <EuiFlexItem grow={false}>
-              <SelectSeverity />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SelectInterval />
-            </EuiFlexItem>
-            {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
-              <EuiFlexItem grow={false}>
-                <CheckboxShowCharts />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-
-          <EuiSpacer size="m" />
-
-          {showCharts ? (
-            // @ts-ignore inferred js types are incorrect
-            <ExplorerChartsContainer
-              {...{
-                ...chartsData,
-                severity,
-                tableData,
-                timefilter,
-                mlLocator,
-                timeBuckets,
-                onSelectEntity: applyFilter,
-                chartsService,
-              }}
+          <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+            <AnomalyContextMenu
+              selectedJobs={selectedJobs!}
+              mergedGroupsAndJobsIds={mergedGroupsAndJobsIds}
+              selectedCells={selectedCells}
+              bounds={bounds}
+              interval={swimLaneBucketInterval ? swimLaneBucketInterval.asSeconds() : undefined}
+              chartsCount={chartsData.seriesToPlot.length}
             />
-          ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-          <EuiSpacer size="m" />
+        <EuiFlexGroup direction="row" gutterSize="l" responsive={true} alignItems="center">
+          <EuiFlexItem grow={false}>
+            <SelectSeverity />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SelectInterval />
+          </EuiFlexItem>
+          {chartsData.seriesToPlot.length > 0 && selectedCells !== undefined && (
+            <EuiFlexItem grow={false}>
+              <CheckboxShowCharts />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
 
+        <EuiSpacer size="m" />
+
+        {showCharts ? (
+          // @ts-ignore inferred js types are incorrect
+          <ExplorerChartsContainer
+            {...{
+              ...chartsData,
+              severity,
+              tableData,
+              timefilter,
+              mlLocator,
+              timeBuckets,
+              onSelectEntity: applyFilter,
+              chartsService,
+            }}
+          />
+        ) : null}
+
+        <EuiSpacer size="m" />
+
+        {tableData ? (
           <AnomaliesTable
             bounds={bounds}
             tableData={tableData}
@@ -625,8 +629,8 @@ export const Explorer: FC<ExplorerUIProps> = ({
             sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
             selectedJobs={selectedJobs}
           />
-        </EuiPanel>
-      )}
+        ) : null}
+      </EuiPanel>
     </div>
   );
 

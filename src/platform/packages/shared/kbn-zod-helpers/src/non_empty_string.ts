@@ -17,3 +17,5 @@ export function isNonEmptyString(input: string, ctx: z.RefinementCtx): void {
     });
   }
 }
+
+export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);

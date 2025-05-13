@@ -6,11 +6,6 @@
       ],
       "h": [],
       "help": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
       "s": [],
       "v": "__flag__",
       "error_trace": "__flag__",
@@ -26,7 +21,21 @@
         "pb"
       ],
       "full_id": "__flag__",
-      "include_unloaded_segments": "__flag__"
+      "include_unloaded_segments": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ]
     },
     "methods": [
       "GET"

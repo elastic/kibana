@@ -12,6 +12,7 @@ import type { CaseCustomFieldNumber } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import { getNumberFieldConfig } from './config';
 import * as i18n from '../translations';
+import { OptionalFieldLabel } from '../../optional_field_label';
 
 const ConfigureComponent: CustomFieldType<CaseCustomFieldNumber>['Configure'] = () => {
   const config = getNumberFieldConfig({
@@ -39,6 +40,7 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldNumber>['Configure'] = 
         config={config}
         componentProps={{
           label: i18n.DEFAULT_VALUE,
+          labelAppend: OptionalFieldLabel,
           euiFieldProps: {
             'data-test-subj': 'number-custom-field-default-value',
             step: 1,

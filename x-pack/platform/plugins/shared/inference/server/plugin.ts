@@ -8,8 +8,9 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import {
-  type BoundInferenceClient,
   createClient as createInferenceClient,
+  createChatModel,
+  type BoundInferenceClient,
   type InferenceClient,
 } from './inference_client';
 import { registerRoutes } from './routes';
@@ -22,6 +23,8 @@ import {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
+import { initLangfuseProcessor } from './tracing/langfuse/init_langfuse_processor';
+import { initPhoenixProcessor } from './tracing/phoenix/init_phoenix_processor';
 
 export class InferencePlugin
   implements
@@ -34,8 +37,27 @@ export class InferencePlugin
 {
   private logger: Logger;
 
+  private config: InferenceConfig;
+
+  private shutdownProcessor?: () => Promise<void>;
+
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
+    this.config = context.config.get();
+
+    const exporter = this.config.tracing?.exporter;
+
+    if (exporter && 'langfuse' in exporter) {
+      this.shutdownProcessor = initLangfuseProcessor({
+        logger: this.logger,
+        config: exporter.langfuse,
+      });
+    } else if (exporter && 'phoenix' in exporter) {
+      this.shutdownProcessor = initPhoenixProcessor({
+        logger: this.logger,
+        config: exporter.phoenix,
+      });
+    }
   }
   setup(
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
@@ -61,6 +83,20 @@ export class InferencePlugin
           logger: this.logger.get('client'),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
+
+      getChatModel: async (options) => {
+        return createChatModel({
+          request: options.request,
+          connectorId: options.connectorId,
+          chatModelOptions: options.chatModelOptions,
+          actions: pluginsStart.actions,
+          logger: this.logger,
+        });
+      },
     };
+  }
+
+  async stop() {
+    await this.shutdownProcessor?.();
   }
 }

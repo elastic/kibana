@@ -15,13 +15,21 @@
  */
 
 import { z } from '@kbn/zod';
-
-import { NonEmptyString } from '../../../model/primitives.gen';
+import { isNonEmptyString } from '@kbn/zod-helpers';
 
 export type AlertsReindexOptions = z.infer<typeof AlertsReindexOptions>;
 export const AlertsReindexOptions = z.object({
+  /**
+   * The throttle for the migration task in sub-requests per second. Corresponds to requests_per_second on the Reindex API.
+   */
   requests_per_second: z.number().int().min(1).optional(),
+  /**
+   * Number of alerts to migrate per batch. Corresponds to the source.size option on the Reindex API.
+   */
   size: z.number().int().min(1).optional(),
+  /**
+   * The number of subtasks for the migration task. Corresponds to slices on the Reindex API.
+   */
   slices: z.number().int().min(1).optional(),
 });
 
@@ -49,7 +57,10 @@ export const SkippedAlertsIndexMigration = z.object({
 export type CreateAlertsMigrationRequestBody = z.infer<typeof CreateAlertsMigrationRequestBody>;
 export const CreateAlertsMigrationRequestBody = z
   .object({
-    index: z.array(NonEmptyString).min(1),
+    /**
+     * Array of index names to migrate.
+     */
+    index: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
   })
   .merge(AlertsReindexOptions);
 export type CreateAlertsMigrationRequestBodyInput = z.input<

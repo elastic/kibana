@@ -2,9 +2,8 @@
 
 exports[`AddData render 1`] = `
 <_EuiPageSection
-  aria-labelledby="homDataAdd__title"
+  aria-labelledby="homeDataAdd__title"
   bottomBorder={true}
-  className="homDataAdd"
   paddingSize="xl"
 >
   <EuiFlexGroup
@@ -15,7 +14,7 @@ exports[`AddData render 1`] = `
         size="s"
       >
         <h2
-          id="homDataAdd__title"
+          id="homeDataAdd__title"
         >
           <MemoizedFormattedMessage
             defaultMessage="Get started by adding integrations"

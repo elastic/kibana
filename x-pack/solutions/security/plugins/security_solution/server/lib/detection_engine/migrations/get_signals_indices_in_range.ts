@@ -44,31 +44,29 @@ export const getSignalsIndicesInRange = async ({
 
   const response = await esClient.search({
     index,
-    body: {
-      aggs: {
-        indexes: {
-          terms: {
-            field: '_index',
-          },
+    aggs: {
+      indexes: {
+        terms: {
+          field: '_index',
         },
       },
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: from,
-                  lte: 'now',
-                  format: 'strict_date_optional_time',
-                },
+    },
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: from,
+                lte: 'now',
+                format: 'strict_date_optional_time',
               },
             },
-          ],
-        },
+          },
+        ],
       },
-      size: 0,
     },
+    size: 0,
   });
 
   const aggs = response.aggregations as IndexesResponse['aggregations'];

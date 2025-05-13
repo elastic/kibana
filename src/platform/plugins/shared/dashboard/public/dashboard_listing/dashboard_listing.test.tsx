@@ -65,7 +65,7 @@ function mountWith({ props: incomingProps }: { props?: Partial<DashboardListingP
 }
 
 test('initial filter is passed through', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
   let component: ReactWrapper;
 
@@ -80,7 +80,7 @@ test('initial filter is passed through', async () => {
 });
 
 test('when showWriteControls is true, table list view is passed editing functions', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = true;
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = true;
 
   let component: ReactWrapper;
 
@@ -99,7 +99,7 @@ test('when showWriteControls is true, table list view is passed editing function
 });
 
 test('when showWriteControls is false, table list view is not passed editing functions', async () => {
-  (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+  (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
   let component: ReactWrapper;
 

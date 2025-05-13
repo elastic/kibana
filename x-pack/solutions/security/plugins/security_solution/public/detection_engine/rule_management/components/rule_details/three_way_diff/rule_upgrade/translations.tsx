@@ -14,16 +14,25 @@ import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 export const TOTAL_NUM_OF_FIELDS = (count: number) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.totalNumOfFieldsWithUpdates"
-    defaultMessage="{countValue} {count, plural, one {field} other {fields}} for review"
+    defaultMessage="{countValue} {count, plural, one {field} other {fields}} {count, plural, one {requires} other {require}} review"
     values={{ countValue: <strong>{count}</strong>, count }}
   />
 );
 
-export const NUM_OF_FIELDS_WITH_UPDATES = (count: number) => (
+export const VERSION_UPDATE_INFO = (
+  numOfFieldsWithUpdates: number,
+  currentVersionNumber: number,
+  targetVersionNumber: number
+) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfFieldsWithUpdates"
-    defaultMessage="{countValue} {count, plural, one {field} other {fields}} in Elastic update"
-    values={{ countValue: <strong>{count}</strong>, count }}
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.versionUpdateInfo"
+    defaultMessage="{numOfFieldsWithUpdatesValue} {numOfFieldsWithUpdates, plural, one {field} other {fields}} being changed in this Elastic update from version {currentVersionNumber} to {targetVersionNumber}"
+    values={{
+      numOfFieldsWithUpdatesValue: <strong>{numOfFieldsWithUpdates}</strong>,
+      numOfFieldsWithUpdates,
+      currentVersionNumber,
+      targetVersionNumber,
+    }}
   />
 );
 
@@ -46,11 +55,10 @@ export function RuleUpgradeHelper(): JSX.Element {
   const {
     docLinks: {
       links: {
-        securitySolution: { manageDetectionRules },
+        securitySolution: { updatePrebuiltDetectionRules },
       },
     },
   } = useKibana().services;
-  const manageDetectionRulesUpdateRulesSection = `${manageDetectionRules}#edit-rules-settings`;
 
   return (
     <FormattedMessage
@@ -58,7 +66,7 @@ export function RuleUpgradeHelper(): JSX.Element {
       defaultMessage="Understand how to&nbsp;{docsLink}."
       values={{
         docsLink: (
-          <EuiLink href={manageDetectionRulesUpdateRulesSection} target="_blank">
+          <EuiLink href={updatePrebuiltDetectionRules} target="_blank">
             {UPGRADE_RULES_DOCS_LINK}
           </EuiLink>
         ),
@@ -70,7 +78,7 @@ export function RuleUpgradeHelper(): JSX.Element {
 export const UPGRADE_STATUS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.upgradeStatusTitle',
   {
-    defaultMessage: 'Update status:',
+    defaultMessage: 'Status:',
   }
 );
 
@@ -80,7 +88,7 @@ export const RULE_HAS_CONFLICTS = (count: number) =>
     {
       values: { count },
       defaultMessage:
-        '{count} {count, plural, one {field has a conflict} other {fields have conflicts}}. Please review and provide a final update.',
+        '{count} {count, plural, one {field has a conflict} other {fields have conflicts}}. Review and provide a final update.',
     }
   );
 
@@ -88,7 +96,21 @@ export const RULE_HAS_SOFT_CONFLICTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasSoftConflictsDescription',
   {
     defaultMessage:
-      'Please review and accept conflicts. You can also keep the current version without the updates, or accept the Elastic update but lose your modifications.',
+      'We auto-resolved the conflicts between your changes and the Elastic update. Review them and do one of the following:',
+  }
+);
+
+export const RULE_HAS_SOFT_CONFLICTS_ACCEPT_SUGGESTED_UPDATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasSoftConflictsAcceptSuggestedUpdate',
+  {
+    defaultMessage: 'Accept the suggested update.',
+  }
+);
+
+export const RULE_HAS_SOFT_CONFLICTS_EDIT_FINAL_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasSoftConflictsEditFinalVersion',
+  {
+    defaultMessage: 'Edit the final version and choose a more appropriate field value.',
   }
 );
 
@@ -96,14 +118,36 @@ export const RULE_HAS_HARD_CONFLICTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasHardConflictsDescription',
   {
     defaultMessage:
-      'Please provide an input for the conflicts. You can also keep the current version without the updates, or accept the Elastic update but lose your modifications.',
+      "We couldn't auto-resolve the conflicts between your changes and the Elastic update. To resolve them, do one of the following:",
+  }
+);
+
+export const RULE_HAS_HARD_CONFLICTS_KEEP_YOUR_CHANGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasHardConflictsKeepYourChanges',
+  {
+    defaultMessage: 'Keep your changes and reject the Elastic update.',
+  }
+);
+
+export const RULE_HAS_HARD_CONFLICTS_ACCEPT_ELASTIC_UPDATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasHardConflictsAcceptElasticUpdate',
+  {
+    defaultMessage: 'Accept the Elastic update and overwrite your changes.',
+  }
+);
+
+export const RULE_HAS_HARD_CONFLICTS_EDIT_FINAL_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasHardConflictsEditFinalVersion',
+  {
+    defaultMessage:
+      'Edit the final version by combining your changes with the Elastic update or choosing a more appropriate field value.',
   }
 );
 
 export const RULE_IS_READY_FOR_UPGRADE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleIsReadyForUpgradeDescription',
   {
-    defaultMessage: 'There are no conflicts and the update is ready to be applied.',
+    defaultMessage: 'There are no conflicts. The rule is ready to be updated.',
   }
 );
 
@@ -111,6 +155,14 @@ export const FIELD_MODIFIED_BADGE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeFlyout.fieldModifiedBadgeDescription',
   {
     defaultMessage:
-      "The field value was edited after rule's installation and differs from the value upon installation",
+      'This field value differs from the one provided in the original version of the rule.',
+  }
+);
+
+export const RULE_BASE_VERSION_IS_MISSING_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeFlyout.baseVersionMissingDescription',
+  {
+    defaultMessage:
+      "The original, unedited version of this Elastic rule couldn't be found. This sometimes happens when a rule hasn't been updated in a while. You can still update this rule, but will only have access to its current version and the incoming Elastic update. Updating Elastic rules more often can help you avoid this in the future. We encourage you to review this update carefully and ensure your changes are not accidentally overwritten.",
   }
 );

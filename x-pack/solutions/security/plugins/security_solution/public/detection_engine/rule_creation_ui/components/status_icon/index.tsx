@@ -10,7 +10,7 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 
 import { useEuiTheme } from '../../../../common/lib/theme/use_eui_theme';
-import type { RuleStatusType } from '../../../../detections/pages/detection_engine/rules/types';
+import type { RuleStatusType } from '../../../common/types';
 
 export interface RuleStatusIconProps {
   name: string;

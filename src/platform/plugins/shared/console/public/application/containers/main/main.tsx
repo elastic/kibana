@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '../../../index.scss';
 import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
@@ -310,6 +311,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
         <EuiSplitPanel.Inner
           paddingSize="none"
           css={[scrollablePanelStyle, { backgroundColor: euiTheme.colors.body }]}
+          data-test-subj="consolePanel"
         >
           {currentTab === SHELL_TAB_ID && (
             <Editor

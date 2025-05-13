@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { APP_ID as CASES_APP_ID } from '@kbn/cases-plugin/common/constants';
 import { APP_ID as SECURITY_SOLUTION_APP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { observabilityFeatureId as OBSERVABILITY_APP_ID } from '@kbn/observability-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { deleteAllCaseItems } from '../../../cases_api_integration/common/lib/api';
 import {
@@ -21,9 +21,10 @@ import {
   casesReadUser,
   obsCasesAllUser,
   obsCasesReadUser,
-  secAllCasesNoneUser,
   secAllUser,
   secReadCasesReadUser,
+  secAllCasesNoneUser,
+  secNoneUser,
 } from './common/users';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -67,6 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secReadCasesReadUser },
       { user: casesReadUser },
       { user: obsCasesReadUser },
+      { user: secAllCasesNoneUser },
     ]) {
       it(`User ${
         user.username
@@ -82,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     }
 
-    for (const { user } of [{ user: secAllCasesNoneUser }]) {
+    for (const { user } of [{ user: secNoneUser }]) {
       it(`User ${
         user.username
       } with roles(s) ${user.roles.join()} cannot bulk get user profiles because they lack the bulkGetUserProfiles privilege`, async () => {

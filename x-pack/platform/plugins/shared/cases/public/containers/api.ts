@@ -19,19 +19,18 @@ import type {
   CasesFindResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
-  UserActionFindResponse,
   SingleCaseMetricsResponse,
   CustomFieldPutRequest,
   CasesSimilarResponse,
   AddObservableRequest,
   UpdateObservableRequest,
+  UserActionInternalFindResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
   CaseUpdateRequest,
   FetchCasesProps,
   ResolvedCase,
-  FindCaseUserActions,
   CaseUserActionTypeWithAll,
   CaseUserActionsStats,
   CaseUsers,
@@ -41,6 +40,7 @@ import type {
   CaseUICustomField,
   SimilarCasesProps,
   CasesSimilarResponseUI,
+  InternalFindCaseUserActions,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -81,6 +81,7 @@ import {
   convertCasesToCamelCase,
   convertCaseResolveToCamelCase,
   convertSimilarCasesToCamel,
+  convertAttachmentsToCamelCase,
 } from '../api/utils';
 
 import type {
@@ -105,37 +106,18 @@ import {
 } from './utils';
 import { decodeCasesFindResponse, decodeCasesSimilarResponse } from '../api/decoders';
 
-export const getCase = async (
-  caseId: string,
-  includeComments: boolean = true,
-  signal: AbortSignal
-): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(getCaseDetailsUrl(caseId), {
-    method: 'GET',
-    query: {
-      includeComments,
-    },
-    signal,
-  });
-  return convertCaseToCamelCase(decodeCaseResponse(response));
-};
-
 export const resolveCase = async ({
   caseId,
-  includeComments = true,
   signal,
 }: {
   caseId: string;
-  includeComments?: boolean;
   signal?: AbortSignal;
 }): Promise<ResolvedCase> => {
   const response = await KibanaServices.get().http.fetch<CaseResolveResponse>(
     `${getCaseDetailsUrl(caseId)}/resolve`,
     {
       method: 'GET',
-      query: {
-        includeComments,
-      },
+      query: { includeComments: true },
       signal,
     }
   );
@@ -211,7 +193,7 @@ export const findCaseUserActions = async (
     perPage: number;
   },
   signal?: AbortSignal
-): Promise<FindCaseUserActions> => {
+): Promise<InternalFindCaseUserActions> => {
   const query = {
     types: params.type !== 'all' ? [params.type] : [],
     sortOrder: params.sortOrder,
@@ -219,7 +201,7 @@ export const findCaseUserActions = async (
     perPage: params.perPage,
   };
 
-  const response = await KibanaServices.get().http.fetch<UserActionFindResponse>(
+  const response = await KibanaServices.get().http.fetch<UserActionInternalFindResponse>(
     getCaseFindUserActionsUrl(caseId),
     {
       method: 'GET',
@@ -233,6 +215,7 @@ export const findCaseUserActions = async (
     userActions: convertUserActionsToCamelCase(
       decodeCaseUserActionsResponse(response.userActions)
     ) as UserActionUI[],
+    latestAttachments: convertAttachmentsToCamelCase(response.latestAttachments),
   };
 };
 

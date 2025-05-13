@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ConnectorTypesResponseV1 } from '../../../../common/routes/connector/response';
-import {
-  connectorTypesQuerySchemaV1,
-  ConnectorTypesRequestQueryV1,
-} from '../../../../common/routes/connector/apis/connector_types';
-import { ActionsRequestHandlerContext } from '../../../types';
+import type { IRouter } from '@kbn/core/server';
+import type { ConnectorTypesResponseV1 } from '../../../../common/routes/connector/response';
+import type { ConnectorTypesRequestQueryV1 } from '../../../../common/routes/connector/apis/connector_types';
+import { connectorTypesQuerySchemaV1 } from '../../../../common/routes/connector/apis/connector_types';
+import type { ActionsRequestHandlerContext } from '../../../types';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
-import { ILicenseState } from '../../../lib';
+import type { ILicenseState } from '../../../lib';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { transformListTypesResponseV1 } from '../list_types/transforms';
 

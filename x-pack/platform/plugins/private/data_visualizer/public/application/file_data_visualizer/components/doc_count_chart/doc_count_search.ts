@@ -7,7 +7,7 @@
 
 import { lastValueFrom } from 'rxjs';
 
-import type estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type estypes from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimeBuckets } from '@kbn/ml-time-buckets';
@@ -38,36 +38,34 @@ export async function runDocCountSearch(
     dataStart.search.search<any, EventRateResponse>({
       params: {
         index,
-        body: {
-          size: 0,
-          query: {
-            bool: {
-              must: [
-                {
-                  range: {
-                    [timeField]: {
-                      gte: earliestMs,
-                      lte: latestMs,
-                      format: 'epoch_millis',
-                    },
+        size: 0,
+        query: {
+          bool: {
+            must: [
+              {
+                range: {
+                  [timeField]: {
+                    gte: earliestMs,
+                    lte: latestMs,
+                    format: 'epoch_millis',
                   },
                 },
-                {
-                  match_all: {},
-                },
-              ],
-            },
+              },
+              {
+                match_all: {},
+              },
+            ],
           },
-          aggs: {
-            eventRate: {
-              date_histogram: {
-                field: timeField,
-                fixed_interval: `${intervalMs}ms`,
-                min_doc_count: 0,
-                extended_bounds: {
-                  min: earliestMs,
-                  max: latestMs,
-                },
+        },
+        aggs: {
+          eventRate: {
+            date_histogram: {
+              field: timeField,
+              fixed_interval: `${intervalMs}ms`,
+              min_doc_count: 0,
+              extended_bounds: {
+                min: earliestMs,
+                max: latestMs,
               },
             },
           },

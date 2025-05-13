@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
@@ -34,6 +34,12 @@ export const useSetupTechnology = ({
   const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(
     defaultSetupTechnology || defaultEditSetupTechnology
   );
+
+  // Default setup technology may update asynchrounously as data loads from
+  // parent component, or when integration is changed, so re-set state if it changes
+  useEffect(() => {
+    setSetupTechnology(defaultSetupTechnology || defaultEditSetupTechnology);
+  }, [defaultEditSetupTechnology, defaultSetupTechnology]);
 
   const updateSetupTechnology = (value: SetupTechnology) => {
     setSetupTechnology(value);

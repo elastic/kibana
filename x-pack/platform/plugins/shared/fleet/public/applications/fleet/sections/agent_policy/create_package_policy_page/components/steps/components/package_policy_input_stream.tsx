@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   useIsWithinMinBreakpoint,
+  EuiAccordion,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
@@ -64,6 +65,7 @@ interface Props {
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
+  totalStreams?: number;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -75,6 +77,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     inputStreamValidationResults,
     forceShowErrors,
     isEditPage,
+    totalStreams,
   }) => {
     const config = useConfig();
     const isExperimentalDataStreamSettingsEnabled =
@@ -91,7 +94,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       !!packagePolicyInputStream.id &&
       packagePolicyInputStream.id === defaultDataStreamId;
     const isPackagePolicyEdit = !!packagePolicyId;
-
+    const shouldShowStreamsToggles = totalStreams ? totalStreams > 1 : true;
     const customDatasetVar = packagePolicyInputStream.vars?.[DATASET_VAR_NAME];
     const customDatasetVarValue = customDatasetVar?.value?.dataset || customDatasetVar?.value;
 
@@ -116,9 +119,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       }
     }, [isDefaultDatastream, containerRef]);
 
-    // Errors state
-    const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
-
+    // Split vars into required and advanced
     const [requiredVars, advancedVars] = useMemo(() => {
       const _requiredVars: RegistryVarsEntry[] = [];
       const _advancedVars: RegistryVarsEntry[] = [];
@@ -135,6 +136,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
       return [_requiredVars, _advancedVars];
     }, [packageInputStream]);
 
+    // Errors state
+    const hasErrors = forceShowErrors && validationHasErrors(inputStreamValidationResults);
+    const hasRequiredVarGroupErrors = inputStreamValidationResults.required_vars;
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
         advancedVars.filter(
@@ -180,7 +184,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   alignItems="flexStart"
                   justifyContent="spaceBetween"
                 >
-                  {packageInfo.type !== 'input' && (
+                  {packageInfo.type !== 'input' && shouldShowStreamsToggles && (
                     <EuiFlexItem grow={false}>
                       <EuiSwitch
                         data-test-subj="streamOptions.switch"
@@ -207,14 +211,50 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                     </EuiFlexItem>
                   ) : null}
                 </EuiFlexGroup>
-                {packageInfo.type !== 'input' && packageInputStream.description ? (
-                  <Fragment>
+                {packageInfo.type !== 'input' &&
+                packageInputStream.description &&
+                shouldShowStreamsToggles ? (
+                  <>
                     <EuiSpacer size="s" />
                     <EuiText size="s" color="subdued">
                       <ReactMarkdown>{packageInputStream.description}</ReactMarkdown>
                     </EuiText>
-                  </Fragment>
+                  </>
                 ) : null}
+                {hasRequiredVarGroupErrors && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <EuiAccordion
+                      id={`${packageInputStream.data_stream.type}-${packageInputStream.data_stream.dataset}-required-vars-group-error`}
+                      paddingSize="s"
+                      buttonContent={
+                        <EuiText color="danger" size="s">
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.requiredVarsGroupErrorText"
+                            defaultMessage="One of these settings groups is required"
+                          />
+                        </EuiText>
+                      }
+                    >
+                      <EuiText size="xs" color="danger">
+                        {Object.entries(inputStreamValidationResults.required_vars || {}).map(
+                          ([groupName, vars]) => {
+                            return (
+                              <>
+                                <strong>{groupName}</strong>
+                                <ul>
+                                  {vars.map(({ name }) => (
+                                    <li key={`${groupName}-${name}`}>{name}</li>
+                                  ))}
+                                </ul>
+                              </>
+                            );
+                          }
+                        )}
+                      </EuiText>
+                    </EuiAccordion>
+                  </>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

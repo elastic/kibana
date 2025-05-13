@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, memo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { InputsModelId } from '../../../common/store/inputs/constants';
@@ -21,23 +21,20 @@ export interface TimelineRefetchProps {
   skip?: boolean;
 }
 
-const TimelineRefetchComponent: React.FC<TimelineRefetchProps> = ({
-  id,
-  inputId,
-  inspect,
-  loading,
-  refetch,
-  skip,
-}) => {
-  const dispatch = useDispatch();
+const TimelineRefetchComponent: React.FC<TimelineRefetchProps> = memo(
+  ({ id, inputId, inspect, loading, refetch, skip }) => {
+    const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (!skip) {
-      dispatch(inputsActions.setQuery({ id, inputId, inspect, loading, refetch }));
-    }
-  }, [dispatch, id, inputId, loading, refetch, inspect, skip]);
+    useEffect(() => {
+      if (!skip) {
+        dispatch(inputsActions.setQuery({ id, inputId, inspect, loading, refetch }));
+      }
+    }, [dispatch, id, inputId, loading, refetch, inspect, skip]);
 
-  return null;
-};
+    return null;
+  }
+);
+
+TimelineRefetchComponent.displayName = 'TimelineRefetchComponent';
 
 export const TimelineRefetch = React.memo(TimelineRefetchComponent);

@@ -41,7 +41,7 @@ const controlGroupMock = getControlGroupMock();
 
 const updateControlGroupInputMock = (newState: ControlGroupRuntimeState) => {
   act(() => {
-    controlGroupMock.snapshotRuntimeState.mockReturnValue(newState);
+    controlGroupMock.getInput.mockReturnValue(newState);
     controlGroupFilterStateMock$.next(newState);
   });
 };
@@ -589,8 +589,14 @@ describe(' Filter Group Component ', () => {
         />
       );
 
-      expect(consoleErrorSpy.mock.calls.length).toBe(1);
-      expect(String(consoleErrorSpy.mock.calls[0][0])).toMatch(URL_PARAM_ARRAY_EXCEPTION_MSG);
+      const componentErrors = consoleErrorSpy.mock.calls.filter(
+        (c) =>
+          !c[0]?.startsWith?.(
+            'Warning: ReactDOM.render'
+          ) /* exclude react@18 legacy root warnings */
+      );
+      expect(componentErrors.length).toBe(1);
+      expect(String(componentErrors[0][0])).toMatch(URL_PARAM_ARRAY_EXCEPTION_MSG);
     });
   });
 

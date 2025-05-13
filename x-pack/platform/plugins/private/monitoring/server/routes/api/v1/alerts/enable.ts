@@ -18,6 +18,12 @@ export function enableAlertsRoute(server: MonitoringCore, npRoute: RouteDependen
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/alerts/enable',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES cluster client',
+        },
+      },
       validate: false,
       options: {
         access: 'internal',

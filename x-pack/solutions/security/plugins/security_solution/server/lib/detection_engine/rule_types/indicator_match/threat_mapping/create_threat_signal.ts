@@ -5,57 +5,47 @@
  * 2.0.
  */
 
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
 import type { CreateThreatSignalOptions } from './types';
-import type { SearchAfterAndBulkCreateReturnType } from '../../types';
+import type {
+  SearchAfterAndBulkCreateParams,
+  SearchAfterAndBulkCreateReturnType,
+} from '../../types';
 import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { buildThreatEnrichment } from './build_threat_enrichment';
+import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
 export const createThreatSignal = async ({
-  alertId,
-  bulkCreate,
-  completeRule,
+  sharedParams,
   currentResult,
   currentThreatList,
   eventsTelemetry,
   filters,
-  inputIndex,
-  language,
-  listClient,
-  outputIndex,
-  query,
-  ruleExecutionLogger,
-  savedId,
-  searchAfterSize,
   services,
-  threatMapping,
-  tuple,
-  type,
-  wrapHits,
   wrapSuppressedHits,
-  runtimeMappings,
-  runOpts,
-  primaryTimestamp,
-  secondaryTimestamp,
-  exceptionFilter,
-  unprocessedExceptions,
   threatFilters,
-  threatIndex,
-  threatIndicatorPath,
-  threatLanguage,
   threatPitId,
-  threatQuery,
   reassignThreatPitId,
   allowedFieldsForTermsQuery,
   inputIndexFields,
   threatIndexFields,
   sortOrder = 'desc',
   isAlertSuppressionActive,
-  experimentalFeatures,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const {
+    exceptionFilter,
+    inputIndex,
+    ruleExecutionLogger,
+    completeRule: {
+      ruleParams: { language, query, savedId, threatMapping, type },
+    },
+  } = sharedParams;
+  const threatIndicatorPath =
+    sharedParams.completeRule.ruleParams.threatIndicatorPath ?? DEFAULT_INDICATOR_SOURCE_PATH;
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
@@ -89,52 +79,35 @@ export const createThreatSignal = async ({
     );
 
     const threatEnrichment = buildThreatEnrichment({
-      ruleExecutionLogger,
+      sharedParams,
       services,
       threatFilters,
-      threatIndex,
       threatIndicatorPath,
-      threatLanguage,
-      threatQuery,
       pitId: threatPitId,
       reassignPitId: reassignThreatPitId,
-      listClient,
-      exceptionFilter,
-      threatMapping,
-      runtimeMappings,
       threatIndexFields,
     });
 
     let result: SearchAfterAndBulkCreateReturnType;
-    const searchAfterBulkCreateParams = {
+    const searchAfterBulkCreateParams: SearchAfterAndBulkCreateParams = {
+      sharedParams,
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
-      bulkCreate,
       enrichment: threatEnrichment,
       eventsTelemetry,
-      exceptionsList: unprocessedExceptions,
       filter: esFilter,
-      inputIndexPattern: inputIndex,
-      listClient,
-      pageSize: searchAfterSize,
-      ruleExecutionLogger,
       services,
       sortOrder,
       trackTotalHits: false,
-      tuple,
-      wrapHits,
-      runtimeMappings,
-      primaryTimestamp,
-      secondaryTimestamp,
     };
 
-    if (isAlertSuppressionActive) {
+    if (
+      isAlertSuppressionActive &&
+      alertSuppressionTypeGuard(sharedParams.completeRule.ruleParams.alertSuppression)
+    ) {
       result = await searchAfterAndBulkCreateSuppressedAlerts({
         ...searchAfterBulkCreateParams,
         wrapSuppressedHits,
-        alertTimestampOverride: runOpts.alertTimestampOverride,
-        alertWithSuppression: runOpts.alertWithSuppression,
-        alertSuppression: completeRule.ruleParams.alertSuppression,
-        experimentalFeatures,
+        alertSuppression: sharedParams.completeRule.ruleParams.alertSuppression,
       });
     } else {
       result = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);

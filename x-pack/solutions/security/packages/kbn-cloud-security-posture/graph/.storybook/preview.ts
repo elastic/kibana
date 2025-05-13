@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import './styles.css';
-
 export const parameters = {};

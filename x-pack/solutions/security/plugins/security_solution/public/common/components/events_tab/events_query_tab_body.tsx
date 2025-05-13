@@ -46,41 +46,59 @@ import {
 } from '../../utils/global_query_string/helpers';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { SecurityCellActionsTrigger } from '../cell_actions';
+import { useUserPrivileges } from '../user_privileges';
 
 export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 
 type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps | NetworkQueryTabBodyProps;
 
-export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
+export type EventsQueryTabBodyComponentProps = Omit<QueryTabBodyProps, 'setQuery'> & {
   additionalFilters: Filter[];
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   indexNames: string[];
-  setQuery: GlobalTimeArgs['setQuery'];
   tableId: TableId;
 };
 
 const EXTERNAL_ALERTS_URL_PARAM = 'onlyExternalAlerts';
+
+// we show a maximum of 6 action buttons
+// - open flyout
+// - investigate in timeline
+// - 3-dot menu for more actions
+// - add new note
+// - session view
+// - analyzer graph
+const MAX_ACTION_BUTTON_COUNT = 6;
 
 const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = ({
   additionalFilters,
   deleteQuery,
   endDate,
   filterQuery,
-  setQuery,
   startDate,
   tableId,
 }) => {
+  let ACTION_BUTTON_COUNT = MAX_ACTION_BUTTON_COUNT;
+
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+
   const isEnterprisePlus = useLicense().isEnterprise();
-  let ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
+  if (!isEnterprisePlus) {
+    ACTION_BUTTON_COUNT--;
+  }
+
+  const {
+    notesPrivileges: { read: canReadNotes },
+  } = useUserPrivileges();
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'
   );
-  if (securitySolutionNotesDisabled) {
+  if (!canReadNotes || securitySolutionNotesDisabled) {
     ACTION_BUTTON_COUNT--;
   }
+
   const leadingControlColumns = useMemo(
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
     [ACTION_BUTTON_COUNT]
@@ -171,7 +189,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           startDate={startDate}
           endDate={endDate}
           filterQuery={filterQuery}
-          setQuery={setQuery}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
         />

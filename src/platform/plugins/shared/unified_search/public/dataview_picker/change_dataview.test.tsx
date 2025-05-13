@@ -197,4 +197,51 @@ describe('DataView component', () => {
       },
     ]);
   });
+
+  it('should properly handle managed data views', async () => {
+    const component = mount(
+      wrapDataViewComponentInContext(
+        {
+          ...props,
+          onDataViewCreated: jest.fn(),
+          savedDataViews: [
+            {
+              id: 'dataview-1',
+              title: 'dataview-1',
+            },
+          ],
+          managedDataViews: [dataViewMock],
+        },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    expect(component.find(DataViewSelector).prop('dataViewsList')).toStrictEqual([
+      {
+        id: 'dataview-1',
+        title: 'dataview-1',
+      },
+      {
+        id: 'the-data-view-id',
+        title: 'the-data-view-title',
+        name: 'the-data-view',
+        type: 'default',
+        isManaged: true,
+      },
+    ]);
+  });
+
+  it('should call onClosePopover when it is given and popover is closed', async () => {
+    const onClosePopoverSpy = jest.fn();
+    const addDataViewSpy = jest.fn();
+    const component = mount(
+      wrapDataViewComponentInContext(
+        { ...props, onClosePopover: onClosePopoverSpy, onDataViewCreated: addDataViewSpy },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
+    expect(onClosePopoverSpy).toHaveBeenCalled();
+  });
 });

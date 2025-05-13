@@ -22,8 +22,6 @@ import {
   EuiSwitch,
   EuiHealth,
   EuiLoadingSpinner,
-  EuiToolTip,
-  EuiBetaBadge,
   EuiTabs,
   EuiTab,
   EuiButtonEmpty,
@@ -33,6 +31,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { i18n } from '@kbn/i18n';
 import { type StoreStatus } from '../../../common/api/entity_analytics';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../common/entity_analytics/asset_criticality';
@@ -46,22 +45,31 @@ import {
   useEntityStoreStatus,
   useStopEntityEngineMutation,
 } from '../components/entity_store/hooks/use_entity_store';
-import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
+
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { MissingPrivilegesCallout } from '../components/entity_store/components/missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
-import { useStoreEntityTypes } from '../hooks/use_enabled_entity_types';
+import { useEntityStoreTypes } from '../hooks/use_enabled_entity_types';
+import { EntityStoreErrorCallout } from '../components/entity_store/components/entity_store_error_callout';
 
 enum TabId {
   Import = 'import',
   Status = 'status',
 }
 
-const isSwitchDisabled = (status?: StoreStatus) => status === 'error' || status === 'installing';
+const isSwitchLoading = (status?: StoreStatus) => status === 'installing';
+const isSwitchDisabled = (status?: StoreStatus) => status === 'error' || isSwitchLoading(status);
 const isEntityStoreEnabled = (status?: StoreStatus) => status === 'running';
 const canDeleteEntityEngine = (status?: StoreStatus) =>
   !['not_installed', 'installing'].includes(status || '');
 const isEntityStoreInstalled = (status?: StoreStatus) => status && status !== 'not_installed';
+
+const entityStoreLabel = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title',
+  {
+    defaultMessage: 'Entity store',
+  }
+);
 
 export const EntityStoreManagementPage = () => {
   const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
@@ -74,7 +82,7 @@ export const EntityStoreManagementPage = () => {
   const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
   const [selectedTabId, setSelectedTabId] = useState(TabId.Import);
   const entityStoreStatus = useEntityStoreStatus({});
-  const entityTypes = useStoreEntityTypes();
+  const entityTypes = useEntityStoreTypes();
   const enableStoreMutation = useEnableEntityStoreMutation();
   const stopEntityEngineMutation = useStopEntityEngineMutation(entityTypes);
   const deleteEntityEngineMutation = useDeleteEntityEngineMutation({
@@ -96,7 +104,7 @@ export const EntityStoreManagementPage = () => {
     if (isEntityStoreEnabled(entityStoreStatus.data?.status)) {
       stopEntityEngineMutation.mutate();
     } else {
-      enableStoreMutation.mutate();
+      enableStoreMutation.mutate({});
     }
   }, [entityStoreStatus.data?.status, stopEntityEngineMutation, enableStoreMutation]);
 
@@ -123,48 +131,19 @@ export const EntityStoreManagementPage = () => {
 
   const callouts = (entityStoreStatus.data?.engines || [])
     .filter((engine) => engine.status === 'error')
-    .map((engine) => {
-      const err = engine.error as {
-        message: string;
-      };
-
-      return (
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.title"
-              defaultMessage={'An error occurred during entity store resource initialization'}
-            />
-          }
-          color="danger"
-          iconType="alert"
-        >
-          <p>{err?.message}</p>
-        </EuiCallOut>
-      );
-    });
+    .map((engine) => <EntityStoreErrorCallout engine={engine} />);
 
   return (
     <>
       <EuiPageHeader
         data-test-subj="entityStoreManagementPage"
-        pageTitle={
-          <>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.title"
-              defaultMessage="Entity Store"
-            />{' '}
-            <EuiToolTip content={TECHNICAL_PREVIEW_TOOLTIP}>
-              <EuiBetaBadge label={TECHNICAL_PREVIEW} />
-            </EuiToolTip>
-          </>
-        }
+        pageTitle={entityStoreLabel}
         alignItems="center"
         rightSideItems={
           !isEntityStoreFeatureFlagDisabled && privileges?.has_all_required
             ? [
                 <EnablementButton
-                  isLoading={isMutationLoading}
+                  isLoading={isMutationLoading || isSwitchLoading(entityStoreStatus.data?.status)}
                   isDisabled={isSwitchDisabled(entityStoreStatus.data?.status)}
                   onSwitch={onSwitchClick}
                   status={entityStoreStatus.data?.status}
@@ -187,7 +166,7 @@ export const EntityStoreManagementPage = () => {
       <EuiText>
         <FormattedMessage
           id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.subTitle"
-          defaultMessage="Store host and user entities observed in events."
+          defaultMessage="Store data for entities observed in events."
         />
       </EuiText>
       {isEntityStoreFeatureFlagDisabled && <EntityStoreFeatureFlagNotAvailableCallout />}
@@ -269,7 +248,7 @@ export const EntityStoreManagementPage = () => {
                 </p>
               </EuiCallOut>
             )}
-            {callouts}
+            {selectedTabId === TabId.Import && callouts}
             {selectedTabId === TabId.Import && <WhatIsAssetCriticalityPanel />}
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -387,12 +366,12 @@ const EnablementButton: React.FC<{
       )}
       <EntityStoreHealth currentEntityStoreStatus={status} />
       <EuiSwitch
-        showLabel={false}
-        label=""
+        label={entityStoreLabel}
         onChange={onSwitch}
         data-test-subj="entity-store-switch"
         checked={isEntityStoreEnabled(status)}
         disabled={isDisabled}
+        showLabel={false}
       />
     </EuiFlexGroup>
   );

@@ -28,9 +28,9 @@ export interface RangeSelectDataContext {
 const getParameters = async (event: RangeSelectDataContext) => {
   const column: Record<string, any> = event.table.columns[event.column];
   // Handling of the ES|QL datatable
-  if (isOfAggregateQueryType(event.query)) {
+  if (isOfAggregateQueryType(event.query) || event.table.meta?.type === 'es_ql') {
     const field = new DataViewField({
-      name: column.name,
+      name: column.meta?.sourceParams?.sourceField || column.name,
       type: column.meta?.type ?? 'unknown',
       esTypes: column.meta?.esType ? ([column.meta.esType] as string[]) : undefined,
       searchable: true,
@@ -43,7 +43,9 @@ const getParameters = async (event: RangeSelectDataContext) => {
     };
   }
   if (column.meta && 'sourceParams' in column.meta) {
-    const { indexPatternId, ...aggConfigs } = column.meta.sourceParams;
+    const { sourceField, ...aggConfigs } = column.meta.sourceParams;
+    const indexPatternId =
+      column.meta.sourceParams.indexPatternId || column.meta.sourceParams.indexPattern;
     const indexPattern = await getIndexPatterns().get(indexPatternId);
     const aggConfigsInstance = getSearchService().aggs.createAggConfigs(indexPattern, [
       aggConfigs as AggConfigSerialized,

@@ -19,7 +19,7 @@ export const useViewInAiAssistant = ({
   attackDiscovery,
   replacements,
 }: {
-  attackDiscovery: AttackDiscovery;
+  attackDiscovery: AttackDiscovery | undefined;
   replacements?: Replacements;
 }) => {
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
@@ -27,20 +27,22 @@ export const useViewInAiAssistant = ({
   // the prompt context for this insight:
   const getPromptContext = useCallback(
     async () =>
-      getAttackDiscoveryMarkdown({
-        attackDiscovery,
-        // note: we do NOT want to replace the replacements here
-      }),
+      attackDiscovery != null
+        ? getAttackDiscoveryMarkdown({
+            attackDiscovery,
+            // note: we do NOT want to replace the replacements here
+          })
+        : '',
     [attackDiscovery]
   );
 
-  const lastFive = attackDiscovery.id ? ` - ${attackDiscovery.id.slice(-5)}` : '';
+  const lastFive = attackDiscovery?.id ? ` - ${attackDiscovery.id.slice(-5)}` : '';
   const { promptContextId, showAssistantOverlay: showOverlay } = useAssistantOverlay(
     category,
-    attackDiscovery.title + lastFive, // conversation title
-    attackDiscovery.title, // description used in context pill
+    attackDiscovery?.title + lastFive, // conversation title
+    attackDiscovery?.title ?? '', // description used in context pill
     getPromptContext,
-    attackDiscovery.id ?? null, // accept the UUID default for this prompt context
+    attackDiscovery?.id ?? null, // accept the UUID default for this prompt context
     null, // suggestedUserPrompt
     null, // tooltip
     isAssistantEnabled,
@@ -49,10 +51,10 @@ export const useViewInAiAssistant = ({
 
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   const showAssistantOverlay = useCallback(() => {
-    showOverlay(true, true);
+    showOverlay(true);
   }, [showOverlay]);
 
-  const disabled = !hasAssistantPrivilege || promptContextId == null;
+  const disabled = attackDiscovery == null || !hasAssistantPrivilege || promptContextId == null;
 
   return useMemo(
     () => ({ promptContextId, disabled, showAssistantOverlay }),

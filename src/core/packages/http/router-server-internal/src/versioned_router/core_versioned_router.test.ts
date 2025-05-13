@@ -11,6 +11,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Router } from '../router';
 import { CoreVersionedRouter } from '.';
 import { createRouter } from './mocks';
+import { createTestEnv } from '@kbn/config-mocks';
 
 const pluginId = Symbol('test');
 describe('Versioned router', () => {
@@ -21,13 +22,38 @@ describe('Versioned router', () => {
     versionedRouter = CoreVersionedRouter.from({
       router,
       log: loggingSystemMock.createLogger(),
+      env: createTestEnv(),
     });
   });
 
   it('can register multiple routes', () => {
-    versionedRouter.get({ path: '/test/{id}', access: 'internal' });
-    versionedRouter.post({ path: '/test', access: 'internal' });
-    versionedRouter.delete({ path: '/test', access: 'internal' });
+    versionedRouter.get({
+      path: '/test/{id}',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+      access: 'internal',
+    });
+    versionedRouter.post({
+      path: '/test',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+      access: 'internal',
+    });
+    versionedRouter.delete({
+      path: '/test',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+      access: 'internal',
+    });
     expect(versionedRouter.getRoutes()).toHaveLength(3);
   });
 
@@ -40,14 +66,32 @@ describe('Versioned router', () => {
       path: '/test/{id}',
       access: 'internal',
       discontinued: 'x.y.z',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     });
     versionedRouter.post({
       path: '/test',
       access: 'internal',
       summary: 'Post test',
       description: 'Post test description',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
     });
-    versionedRouter.delete({ path: '/test', access: 'internal' });
+    versionedRouter.delete({
+      path: '/test',
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    });
     expect(versionedRouter.getRoutes()).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -57,6 +101,13 @@ describe('Versioned router', () => {
           "options": Object {
             "access": "internal",
             "discontinued": "x.y.z",
+            "security": Object {
+              "authz": Object {
+                "requiredPrivileges": Array [
+                  "foo",
+                ],
+              },
+            },
           },
           "path": "/test/{id}",
         },
@@ -67,6 +118,13 @@ describe('Versioned router', () => {
           "options": Object {
             "access": "internal",
             "description": "Post test description",
+            "security": Object {
+              "authz": Object {
+                "requiredPrivileges": Array [
+                  "foo",
+                ],
+              },
+            },
             "summary": "Post test",
           },
           "path": "/test",
@@ -77,6 +135,13 @@ describe('Versioned router', () => {
           "method": "delete",
           "options": Object {
             "access": "internal",
+            "security": Object {
+              "authz": Object {
+                "requiredPrivileges": Array [
+                  "foo",
+                ],
+              },
+            },
           },
           "path": "/test",
         },

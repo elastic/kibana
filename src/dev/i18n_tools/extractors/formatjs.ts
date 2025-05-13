@@ -9,7 +9,7 @@
 
 import { transformWithTs } from '@formatjs/ts-transformer';
 
-import difference from 'lodash/difference';
+import { difference } from 'lodash';
 import * as icuParser from '@formatjs/icu-messageformat-parser';
 import type { MessageFormatElement } from '@formatjs/icu-messageformat-parser';
 

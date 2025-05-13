@@ -96,7 +96,7 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
 
     startServices.application.capabilities = deepFreeze({
       ...startServices.application.capabilities,
-      siem: { show: true, crud: true },
+      siemV2: { show: true, crud: true },
     });
 
     return (
@@ -171,6 +171,7 @@ export const generateFleetPackageInfo = (): PackageInfo => {
         ml_module: [],
         security_rule: [],
         tag: [],
+        security_ai_prompt: [],
         osquery_pack_asset: [],
         osquery_saved_query: [],
       },

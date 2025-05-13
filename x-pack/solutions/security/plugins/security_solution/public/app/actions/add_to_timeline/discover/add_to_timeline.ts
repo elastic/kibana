@@ -8,6 +8,7 @@
 import type { CellAction, CellActionFactory } from '@kbn/cell-actions';
 import { isInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { SecurityAppStore } from '../../../../common/store';
+import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
 import type { StartServices } from '../../../../types';
 import { createAddToTimelineCellActionFactory } from '../cell_action/add_to_timeline';
 
@@ -19,6 +20,7 @@ export const createAddToTimelineDiscoverCellActionFactory = ({
   services: StartServices;
 }): CellActionFactory<CellAction> => {
   const { application } = services;
+  const timelineCapabilities = extractTimelineCapabilities(application.capabilities);
 
   let currentAppId: string | undefined;
   application.currentAppId$.subscribe((appId) => {
@@ -31,6 +33,6 @@ export const createAddToTimelineDiscoverCellActionFactory = ({
   });
 
   return securityAddToTimelineActionFactory.combine<CellAction>({
-    isCompatible: async () => isInSecurityApp(currentAppId),
+    isCompatible: async () => timelineCapabilities.read && isInSecurityApp(currentAppId),
   });
 };

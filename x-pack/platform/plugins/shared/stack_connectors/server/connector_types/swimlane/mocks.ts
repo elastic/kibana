@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExecutorSubActionPushParams, ExternalService, PushToServiceApiParams } from './types';
+import type { ExecutorSubActionPushParams, ExternalService, PushToServiceApiParams } from './types';
 
 export const applicationFields = [
   {

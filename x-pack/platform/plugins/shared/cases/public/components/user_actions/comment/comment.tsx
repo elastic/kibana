@@ -148,7 +148,7 @@ const getCreateCommentUserAction = ({
   caseData,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
-  comment,
+  attachment,
   commentRefs,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
@@ -166,21 +166,21 @@ const getCreateCommentUserAction = ({
   actionsNavigation,
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
-  comment: AttachmentUI;
+  attachment: AttachmentUI;
 } & Omit<
   UserActionBuilderArgs,
   'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
-  switch (comment.type) {
+  switch (attachment.type) {
     case AttachmentType.user:
       const userBuilder = createUserAttachmentUserActionBuilder({
         appId,
         userProfiles,
-        comment,
-        outlined: comment.id === selectedOutlineCommentId,
-        isEdit: manageMarkdownEditIds.includes(comment.id),
+        attachment,
+        outlined: attachment.id === selectedOutlineCommentId,
+        isEdit: manageMarkdownEditIds.includes(attachment.id),
         commentRefs,
-        isLoading: loadingCommentIds.includes(comment.id),
+        isLoading: loadingCommentIds.includes(attachment.id),
         caseId: caseData.id,
         euiTheme,
         handleManageMarkdownEditId,
@@ -195,7 +195,7 @@ const getCreateCommentUserAction = ({
       const alertBuilder = createAlertAttachmentUserActionBuilder({
         userProfiles,
         alertData,
-        comment,
+        attachment,
         userAction,
         getRuleDetailsHref,
         loadingAlertData,
@@ -211,7 +211,7 @@ const getCreateCommentUserAction = ({
       const actionBuilder = createActionAttachmentUserActionBuilder({
         userProfiles,
         userAction,
-        comment,
+        attachment,
         actionsNavigation,
       });
 
@@ -221,10 +221,10 @@ const getCreateCommentUserAction = ({
       const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
         userAction,
         userProfiles,
-        comment,
+        attachment,
         externalReferenceAttachmentTypeRegistry,
         caseData,
-        isLoading: loadingCommentIds.includes(comment.id),
+        isLoading: loadingCommentIds.includes(attachment.id),
         handleDeleteComment,
       });
 
@@ -234,10 +234,10 @@ const getCreateCommentUserAction = ({
       const persistableBuilder = createPersistableStateAttachmentUserActionBuilder({
         userAction,
         userProfiles,
-        comment,
+        attachment,
         persistableStateAttachmentTypeRegistry,
         caseData,
-        isLoading: loadingCommentIds.includes(comment.id),
+        isLoading: loadingCommentIds.includes(attachment.id),
         handleDeleteComment,
       });
 
@@ -273,13 +273,14 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   handleOutlineComment,
   actionsNavigation,
   caseConnectors,
+  attachments,
 }) => ({
   build: () => {
-    const commentUserAction = userAction as SnakeToCamelCase<CommentUserAction>;
+    const attachmentUserAction = userAction as SnakeToCamelCase<CommentUserAction>;
 
-    if (commentUserAction.action === UserActionActions.delete) {
+    if (attachmentUserAction.action === UserActionActions.delete) {
       return getDeleteCommentUserAction({
-        userAction: commentUserAction,
+        userAction: attachmentUserAction,
         caseData,
         handleOutlineComment,
         userProfiles,
@@ -288,22 +289,22 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       });
     }
 
-    const comment = caseData.comments.find((c) => c.id === commentUserAction.commentId);
+    const attachment = attachments.find((c) => c.id === attachmentUserAction.commentId);
 
-    if (comment == null) {
+    if (attachment == null) {
       return [];
     }
 
-    if (commentUserAction.action === UserActionActions.create) {
+    if (attachmentUserAction.action === UserActionActions.create) {
       const commentAction = getCreateCommentUserAction({
         appId,
         caseData,
         casesConfiguration,
         userProfiles,
-        userAction: commentUserAction,
+        userAction: attachmentUserAction,
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
-        comment,
+        attachment,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
@@ -320,6 +321,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         handleManageQuote,
         actionsNavigation,
         caseConnectors,
+        attachments,
       });
 
       return commentAction;

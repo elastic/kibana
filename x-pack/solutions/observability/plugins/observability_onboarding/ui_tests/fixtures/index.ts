@@ -5,46 +5,52 @@
  * 2.0.
  */
 
-import {
-  test as base,
-  PageObjects,
-  createLazyPageObject,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-  KibanaUrl,
+import { v4 as uuidv4 } from 'uuid';
+import { test as base } from '@kbn/scout-oblt';
+import type {
   KbnClient,
-} from '@kbn/scout';
-import { OnboardingHomePage } from './page_objects';
-import { CustomLogsPage } from './page_objects/custom_logs';
+  ObltApiServicesFixture,
+  ObltTestFixtures,
+  ObltWorkerFixtures,
+} from '@kbn/scout-oblt';
+import { getOnboardingApiHelper, OnboardingApiService } from './apis/onboarding';
 
-export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
-  pageObjects: PageObjects & {
-    onboardingHomePage: OnboardingHomePage;
-    customLogsPage: CustomLogsPage;
-  };
+export type ExtendedScoutTestFixtures = ObltTestFixtures;
+
+export interface ExtendedApiServicesFixture extends ObltApiServicesFixture {
+  onboarding: OnboardingApiService;
+}
+export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
+  apiServices: ExtendedApiServicesFixture;
 }
 
-export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>({
+export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
-      page,
-      kbnUrl,
-      kbnClient,
     }: {
       pageObjects: ExtendedScoutTestFixtures['pageObjects'];
-      page: ExtendedScoutTestFixtures['page'];
-      kbnUrl: KibanaUrl;
-      kbnClient: KbnClient;
     },
     use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
-      onboardingHomePage: createLazyPageObject(OnboardingHomePage, page),
-      customLogsPage: createLazyPageObject(CustomLogsPage, page, kbnUrl, kbnClient),
     };
 
     await use(extendedPageObjects);
   },
+  apiServices: [
+    async (
+      { apiServices, kbnClient }: { apiServices: ObltApiServicesFixture; kbnClient: KbnClient },
+      use: (extendedApiServices: ExtendedApiServicesFixture) => Promise<void>
+    ) => {
+      const extendedApiServices = apiServices as ExtendedApiServicesFixture;
+      extendedApiServices.onboarding = getOnboardingApiHelper(kbnClient);
+
+      await use(extendedApiServices);
+    },
+    { scope: 'worker' },
+  ],
 });
+
+export const generateIntegrationName = (name: string) => `${name}_${uuidv4().slice(0, 5)}`;

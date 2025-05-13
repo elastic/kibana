@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { EventLogClient } from './event_log_client';
-import { EsContext } from './es';
+import type { EsContext } from './es';
 import { contextMock } from './es/context.mock';
 import { merge } from 'lodash';
 import moment from 'moment';
-import { IClusterClientAdapter } from './es/cluster_client_adapter';
+import type { IClusterClientAdapter } from './es/cluster_client_adapter';
 import { fromKueryExpression } from '@kbn/es-query';
 
 const expectedSavedObject = {
@@ -285,6 +285,10 @@ describe('EventLogStart', () => {
 function fakeEvent(overrides = {}) {
   return merge(
     {
+      _id: '1',
+      _index: '1',
+      _seq_no: 1,
+      _primary_term: 1,
       event: {
         provider: 'actions',
         action: 'execute',

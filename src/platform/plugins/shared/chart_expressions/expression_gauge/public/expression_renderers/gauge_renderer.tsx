@@ -9,12 +9,18 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { css } from '@emotion/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import {
+  createPerformanceTracker,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_TYPES,
+} from '@kbn/ebt-tools';
 import {
   ChartSizeEvent,
   extractContainerType,
@@ -37,6 +43,13 @@ export const gaugeRenderer: (
   }),
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    const performanceTracker = createPerformanceTracker({
+      type: PERFORMANCE_TRACKER_TYPES.PANEL,
+      subType: EXPRESSION_GAUGE_NAME,
+    });
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
+
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -44,6 +57,8 @@ export const gaugeRenderer: (
     });
 
     const renderComplete = () => {
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
+
       let type: string;
 
       switch (config.args.shape) {
@@ -91,9 +106,23 @@ export const gaugeRenderer: (
     };
 
     const { GaugeComponent } = await import('../components/gauge_component');
+
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
+
     render(
       <KibanaRenderContextProvider {...core}>
-        <div className="gauge-container" data-test-subj="gaugeChart">
+        <div
+          className="eui-scrollBar"
+          data-test-subj="gaugeChart"
+          css={css`
+            height: 100%;
+            width: 100%;
+            // the FocusTrap is adding extra divs which are making the visualization redraw twice
+            // with a visible glitch. This make the chart library resilient to this extra reflow
+            overflow: hidden;
+            user-select: text;
+          `}
+        >
           <GaugeComponent
             {...config}
             setChartSize={setChartSize}

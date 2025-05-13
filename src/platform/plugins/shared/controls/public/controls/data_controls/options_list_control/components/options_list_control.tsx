@@ -20,11 +20,9 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
-import {
-  useBatchedOptionalPublishingSubjects,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { BehaviorSubject } from 'rxjs';
 import { isCompressed } from '../../../../control_group/utils/is_compressed';
 import { OptionsListSelection } from '../../../../../common/options_list/options_list_selections';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
@@ -52,18 +50,18 @@ export const OptionsListControl = ({
     loading,
     panelTitle,
     fieldFormatter,
+    defaultPanelTitle,
   ] = useBatchedPublishingSubjects(
     stateManager.exclude,
     stateManager.existsSelected,
     stateManager.selectedOptions,
     api.invalidSelections$,
     api.field$,
-    api.dataLoading,
-    api.panelTitle,
-    api.fieldFormatter
+    api.dataLoading$,
+    api.title$,
+    api.fieldFormatter,
+    api.defaultTitle$ ?? new BehaviorSubject(undefined)
   );
-
-  const [defaultPanelTitle] = useBatchedOptionalPublishingSubjects(api.defaultPanelTitle);
 
   const delimiter = useMemo(() => OptionsListStrings.control.getSeparator(field?.type), [field]);
 
@@ -125,7 +123,7 @@ export const OptionsListControl = ({
                   tabIndex={0}
                   iconType="alert"
                   size="s"
-                  color="euiColorVis5"
+                  color="euiColorVis9"
                   shape="square"
                   fill="dark"
                   title={OptionsListStrings.control.getInvalidSelectionWarningLabel(

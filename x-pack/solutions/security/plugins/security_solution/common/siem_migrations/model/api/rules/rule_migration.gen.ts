@@ -18,9 +18,9 @@ import { z } from '@kbn/zod';
 import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 import {
-  UpdateRuleMigrationData,
   RuleMigrationTaskStats,
   OriginalRule,
+  UpdateRuleMigrationData,
   RuleMigration,
   RuleMigrationRetryFilter,
   RuleMigrationTranslationStats,
@@ -113,6 +113,23 @@ export type GetRuleMigrationPrebuiltRulesResponse = z.infer<
   typeof GetRuleMigrationPrebuiltRulesResponse
 >;
 export const GetRuleMigrationPrebuiltRulesResponse = z.object({}).catchall(PrebuiltRuleVersion);
+
+/**
+ * The missing index privileges required for the migration
+ */
+export type GetRuleMigrationPrivilegesResponse = z.infer<typeof GetRuleMigrationPrivilegesResponse>;
+export const GetRuleMigrationPrivilegesResponse = z.array(
+  z.object({
+    /**
+     * The index name of the privilege missing
+     */
+    indexName: z.string(),
+    /**
+     * The index privileges level missing
+     */
+    privileges: z.array(z.string()),
+  })
+);
 export type GetRuleMigrationResourcesRequestQuery = z.infer<
   typeof GetRuleMigrationResourcesRequestQuery
 >;
@@ -193,7 +210,7 @@ export type InstallMigrationRulesRequestParamsInput = z.input<
 
 export type InstallMigrationRulesRequestBody = z.infer<typeof InstallMigrationRulesRequestBody>;
 export const InstallMigrationRulesRequestBody = z.object({
-  ids: z.array(NonEmptyString),
+  ids: z.array(NonEmptyString).optional(),
   /**
    * Indicates whether installed rules should be enabled
    */
@@ -206,29 +223,9 @@ export type InstallMigrationRulesRequestBodyInput = z.input<
 export type InstallMigrationRulesResponse = z.infer<typeof InstallMigrationRulesResponse>;
 export const InstallMigrationRulesResponse = z.object({
   /**
-   * Indicates rules migrations have been installed.
+   * Indicates the number of successfully installed migration rules.
    */
-  installed: z.boolean(),
-});
-
-export type InstallTranslatedMigrationRulesRequestParams = z.infer<
-  typeof InstallTranslatedMigrationRulesRequestParams
->;
-export const InstallTranslatedMigrationRulesRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
-export type InstallTranslatedMigrationRulesRequestParamsInput = z.input<
-  typeof InstallTranslatedMigrationRulesRequestParams
->;
-
-export type InstallTranslatedMigrationRulesResponse = z.infer<
-  typeof InstallTranslatedMigrationRulesResponse
->;
-export const InstallTranslatedMigrationRulesResponse = z.object({
-  /**
-   * Indicates rules migrations have been installed.
-   */
-  installed: z.boolean(),
+  installed: z.number(),
 });
 
 export type StartRuleMigrationRequestParams = z.infer<typeof StartRuleMigrationRequestParams>;
@@ -269,6 +266,14 @@ export const StopRuleMigrationResponse = z.object({
    */
   stopped: z.boolean(),
 });
+
+export type UpdateRuleMigrationRequestParams = z.infer<typeof UpdateRuleMigrationRequestParams>;
+export const UpdateRuleMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type UpdateRuleMigrationRequestParamsInput = z.input<
+  typeof UpdateRuleMigrationRequestParams
+>;
 
 export type UpdateRuleMigrationRequestBody = z.infer<typeof UpdateRuleMigrationRequestBody>;
 export const UpdateRuleMigrationRequestBody = z.array(UpdateRuleMigrationData);

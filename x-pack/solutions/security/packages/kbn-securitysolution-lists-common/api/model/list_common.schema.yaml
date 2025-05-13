@@ -1,12 +1,16 @@
 openapi: 3.0.0
 info:
-  title: Common List Attributes
+  title: Common Value List Attributes
   version: 'not applicable'
 paths: {}
 components:
   schemas:
     ListId:
-      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string
+      minLength: 1
+      format: nonempty
+      description: Value list's identifier.
+      example: 21b01cfb-058d-44b9-838c-282be16c91cd
 
     ListType:
       type: string
@@ -34,26 +38,83 @@ components:
         - shape
         - short
         - text
+      description: |
+        Specifies the Elasticsearch data type of excludes the list container holds. Some common examples:
+
+        - `keyword`: Many ECS fields are Elasticsearch keywords
+        - `ip`: IP addresses
+        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR notation)
 
     ListName:
-      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string
+      minLength: 1
+      format: nonempty
+      description: Value list's name.
+      example: 'List of bad IPs'
 
     ListDescription:
-      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string
+      minLength: 1
+      format: nonempty
+      description: Describes the value list.
 
     ListMetadata:
       type: object
       additionalProperties: true
+      description: Placeholder for metadata about the value list.
+
+    ListSerializer:
+      type: string
+      description: |
+        Determines how uploaded list item values are parsed. By default, list items are parsed using these named regex groups:
+
+        - `(?<value>.+)` - Single value item types, such as ip, long, date, keyword, and text.
+        - `(?<gte>.+)-(?<lte>.+)|(?<value>.+)` - Range value item types, such as `date_range`, `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
+      example: (?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))
+
+    ListDeserializer:
+      type: string
+      description: |
+        Determines how retrieved list item values are presented. By default list items are presented using these Handelbar expressions:
+
+        - `{{{value}}}` - Single value item types, such as `ip`, `long`, `date`, `keyword`, and `text`.
+        - `{{{gte}}}-{{{lte}}}` - Range value item types, such as `ip_range`, `double_range`, `float_range`, `integer_range`, and `long_range`.
+        - `{{{gte}}},{{{lte}}}` - Date range values.
+      example: '{{value}}'
+
+    ListVersion:
+      type: integer
+      minimum: 1
+      description: The document version number.
+      example: 1
+
+    ListVersionId:
+      type: string
+      description: |
+        The version id, normally returned by the API when the document is retrieved. Use it ensure updates are done against the latest version.
+      example: WzIsMV0=
 
     ListItemId:
-      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string
+      minLength: 1
+      format: nonempty
+      description: Value list item's identifier.
+      example: 54b01cfb-058d-44b9-838c-282be16c91cd
 
     ListItemValue:
-      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string
+      minLength: 1
+      format: nonempty
+      description: The value used to evaluate exceptions.
 
     ListItemDescription:
-      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string
+      minLength: 1
+      format: nonempty
+      description: Describes the value list item.
+      example: Value list description.
 
     ListItemMetadata:
       type: object
       additionalProperties: true
+      description: Placeholder for metadata about the value list item.

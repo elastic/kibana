@@ -8,12 +8,11 @@
  */
 
 import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { StateComparators, ViewMode } from '@kbn/presentation-publishing';
+import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
-import { DashboardState } from './types';
 
 export function initializeViewModeManager(
   incomingEmbeddable?: EmbeddablePackageState,
@@ -47,17 +46,8 @@ export function initializeViewModeManager(
 
   return {
     api: {
-      viewMode: viewMode$,
+      viewMode$,
       setViewMode,
     },
-    comparators: {
-      viewMode: [
-        viewMode$,
-        setViewMode,
-        // When compared view mode is always considered unequal so that it gets backed up.
-        // view mode unsaved changes do not show unsaved badge
-        () => false,
-      ],
-    } as StateComparators<Pick<DashboardState, 'viewMode'>>,
   };
 }

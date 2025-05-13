@@ -21,7 +21,7 @@ export const apiCanDuplicatePanels = (
 
 export interface CanExpandPanels {
   expandPanel: (panelId: string) => void;
-  expandedPanelId: PublishingSubject<string | undefined>;
+  expandedPanelId$: PublishingSubject<string | undefined>;
 }
 
 export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is CanExpandPanels => {

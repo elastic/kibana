@@ -12,7 +12,11 @@ import moment, { Moment } from 'moment';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 
 import type { Reference } from '@kbn/content-management-utils';
-import { convertPanelMapToPanelsArray, extractReferences, generateNewPanelIds } from '../../common';
+import {
+  convertPanelMapToPanelsArray,
+  generateNewPanelIds,
+} from '../../common/lib/dashboard_panel_converters';
+import { extractReferences } from '../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
 import type { DashboardAttributes } from '../../server';
 
 import { convertDashboardVersionToNumber } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
@@ -21,7 +25,7 @@ import {
   embeddableService,
   savedObjectsTaggingService,
 } from '../services/kibana_services';
-import { DashboardState } from './types';
+import type { DashboardState } from '../../common';
 import { LATEST_VERSION } from '../../common/content_management';
 import { convertNumberToDashboardVersion } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 
@@ -138,6 +142,8 @@ export const getSerializedState = ({
     { embeddablePersistableStateService: embeddableService }
   );
 
+  // TODO Provide tags as an array of tag names in the attribute. In that case, tag references
+  // will be extracted by the server.
   const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
   const references = savedObjectsTaggingApi?.ui.updateTagsReferences
     ? savedObjectsTaggingApi?.ui.updateTagsReferences(dashboardReferences, tags)

@@ -33,23 +33,24 @@ describe('history local storage', function () {
   it('should add queries to cache correctly ', function () {
     addQueriesToCache({
       queryString: 'from kibana_sample_data_flights | limit 10',
+      status: 'success',
     });
     const historyItems = getCachedQueries();
     expect(historyItems.length).toBe(1);
     expect(historyItems[0].timeRan).toBeDefined();
-    expect(historyItems[0].status).toBeUndefined();
+    expect(historyItems[0].status).toBeDefined();
   });
 
-  it('should update queries to cache correctly ', function () {
+  it('should add a second query to cache correctly ', function () {
     addQueriesToCache({
       queryString: 'from kibana_sample_data_flights \n | limit 10 \n | stats meow = avg(woof)',
-      status: 'success',
+      status: 'error',
     });
 
     const historyItems = getCachedQueries();
     expect(historyItems.length).toBe(2);
     expect(historyItems[1].timeRan).toBeDefined();
-    expect(historyItems[1].status).toBe('success');
+    expect(historyItems[1].status).toBe('error');
   });
 
   it('should update queries to cache correctly if they are the same with different format', function () {
@@ -60,8 +61,8 @@ describe('history local storage', function () {
 
     const historyItems = getCachedQueries();
     expect(historyItems.length).toBe(2);
-    expect(historyItems[1].timeRan).toBeDefined();
-    expect(historyItems[1].status).toBe('success');
+    expect(historyItems[0].timeRan).toBeDefined();
+    expect(historyItems[0].status).toBe('success');
   });
 
   it('should allow maximum x queries ', function () {

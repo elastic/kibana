@@ -12,6 +12,7 @@ exports[`Should invert legend 1`] = `
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -38,123 +39,54 @@ exports[`Should invert legend 1`] = `
     height={55}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g
-      key="7"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
+    <MapMarker
+      circleCenterX={25}
+      circleCenterY={47}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        x1={25}
-        x2={56.25}
-        y1={40}
-        y2={40}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
+      }
+      circleTopY={40}
+      formattedValue="19KB"
+      onWidthChange={[Function]}
+      radius={7}
+      textOffset={5}
+      textY={45}
+    />
+    <MapMarker
+      circleCenterX={25}
+      circleCenterY={38.5}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        value="19KB"
-        x={61.25}
-        y={45}
-      />
-      <circle
-        cx={25}
-        cy={47}
-        r={7}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
+      }
+      circleTopY={23}
+      formattedValue="14.25KB"
+      onWidthChange={[Function]}
+      radius={15.5}
+      textOffset={5}
+      textY={28}
+    />
+    <MapMarker
+      circleCenterX={25}
+      circleCenterY={30}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-      />
-    </g>
-    <g
-      key="15.5"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
-        }
-        x1={25}
-        x2={56.25}
-        y1={23}
-        y2={23}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
-        }
-        value="14.25KB"
-        x={61.25}
-        y={28}
-      />
-      <circle
-        cx={25}
-        cy={38.5}
-        r={15.5}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
-    <g
-      key="24"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
-        }
-        x1={25}
-        x2={56.25}
-        y1={6}
-        y2={6}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
-        }
-        value="0KB"
-        x={61.25}
-        y={11}
-      />
-      <circle
-        cx={25}
-        cy={30}
-        r={24}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
+      }
+      circleTopY={6}
+      formattedValue="0KB"
+      onWidthChange={[Function]}
+      radius={24}
+      textOffset={5}
+      textY={11}
+    />
   </svg>
 </div>
 `;
@@ -171,6 +103,7 @@ exports[`Should render legend 1`] = `
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -197,201 +130,86 @@ exports[`Should render legend 1`] = `
     height={71}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g
-      key="7"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
+    <MapMarker
+      circleCenterX={33}
+      circleCenterY={63}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        x1={33}
-        x2={74.25}
-        y1={56}
-        y2={56}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
+      }
+      circleTopY={56}
+      formattedValue="0KB"
+      onWidthChange={[Function]}
+      radius={7}
+      textOffset={5}
+      textY={61}
+    />
+    <MapMarker
+      circleCenterX={33}
+      circleCenterY={56.75}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        value="0KB"
-        x={79.25}
-        y={61}
-      />
-      <circle
-        cx={33}
-        cy={63}
-        r={7}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
+      }
+      circleTopY={43.5}
+      formattedValue="1.188KB"
+      onWidthChange={[Function]}
+      radius={13.25}
+      textOffset={5}
+      textY={48.5}
+    />
+    <MapMarker
+      circleCenterX={33}
+      circleCenterY={50.5}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-      />
-    </g>
-    <g
-      key="13.25"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
+      }
+      circleTopY={31}
+      formattedValue="4.75KB"
+      onWidthChange={[Function]}
+      radius={19.5}
+      textOffset={5}
+      textY={36}
+    />
+    <MapMarker
+      circleCenterX={33}
+      circleCenterY={44.25}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        x1={33}
-        x2={74.25}
-        y1={43.5}
-        y2={43.5}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
+      }
+      circleTopY={18.5}
+      formattedValue="10.688KB"
+      onWidthChange={[Function]}
+      radius={25.75}
+      textOffset={5}
+      textY={23.5}
+    />
+    <MapMarker
+      circleCenterX={33}
+      circleCenterY={38}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        value="1.188KB"
-        x={79.25}
-        y={48.5}
-      />
-      <circle
-        cx={33}
-        cy={56.75}
-        r={13.25}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
-    <g
-      key="19.5"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
-        }
-        x1={33}
-        x2={74.25}
-        y1={31}
-        y2={31}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
-        }
-        value="4.75KB"
-        x={79.25}
-        y={36}
-      />
-      <circle
-        cx={33}
-        cy={50.5}
-        r={19.5}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
-    <g
-      key="25.75"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
-        }
-        x1={33}
-        x2={74.25}
-        y1={18.5}
-        y2={18.5}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
-        }
-        value="10.688KB"
-        x={79.25}
-        y={23.5}
-      />
-      <circle
-        cx={33}
-        cy={44.25}
-        r={25.75}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
-    <g
-      key="32"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
-        }
-        x1={33}
-        x2={74.25}
-        y1={6}
-        y2={6}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
-        }
-        value="19KB"
-        x={79.25}
-        y={11}
-      />
-      <circle
-        cx={33}
-        cy={38}
-        r={32}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
+      }
+      circleTopY={6}
+      formattedValue="19KB"
+      onWidthChange={[Function]}
+      radius={32}
+      textOffset={5}
+      textY={11}
+    />
   </svg>
 </div>
 `;
@@ -408,6 +226,7 @@ exports[`Should render legend with 2 markers when size difference does not provi
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -434,84 +253,38 @@ exports[`Should render legend with 2 markers when size difference does not provi
     height={37}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g
-      key="7"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
+    <MapMarker
+      circleCenterX={16}
+      circleCenterY={29}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        x1={16}
-        x2={36}
-        y1={22}
-        y2={22}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
+      }
+      circleTopY={22}
+      formattedValue="0KB"
+      onWidthChange={[Function]}
+      radius={7}
+      textOffset={5}
+      textY={27}
+    />
+    <MapMarker
+      circleCenterX={16}
+      circleCenterY={21}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        value="0KB"
-        x={41}
-        y={27}
-      />
-      <circle
-        cx={16}
-        cy={29}
-        r={7}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
-    <g
-      key="15"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
-        }
-        x1={16}
-        x2={36}
-        y1={6}
-        y2={6}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
-        }
-        value="19KB"
-        x={41}
-        y={11}
-      />
-      <circle
-        cx={16}
-        cy={21}
-        r={15}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
+      }
+      circleTopY={6}
+      formattedValue="19KB"
+      onWidthChange={[Function]}
+      radius={15}
+      textOffset={5}
+      textY={11}
+    />
   </svg>
 </div>
 `;
@@ -528,6 +301,7 @@ exports[`Should render legend with 3 markers when size difference does not provi
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -554,123 +328,54 @@ exports[`Should render legend with 3 markers when size difference does not provi
     height={55}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g
-      key="7"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
+    <MapMarker
+      circleCenterX={25}
+      circleCenterY={47}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        x1={25}
-        x2={56.25}
-        y1={40}
-        y2={40}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
+      }
+      circleTopY={40}
+      formattedValue="0KB"
+      onWidthChange={[Function]}
+      radius={7}
+      textOffset={5}
+      textY={45}
+    />
+    <MapMarker
+      circleCenterX={25}
+      circleCenterY={38.5}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        value="0KB"
-        x={61.25}
-        y={45}
-      />
-      <circle
-        cx={25}
-        cy={47}
-        r={7}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
+      }
+      circleTopY={23}
+      formattedValue="4.75KB"
+      onWidthChange={[Function]}
+      radius={15.5}
+      textOffset={5}
+      textY={28}
+    />
+    <MapMarker
+      circleCenterX={25}
+      circleCenterY={30}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-      />
-    </g>
-    <g
-      key="15.5"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
-        }
-        x1={25}
-        x2={56.25}
-        y1={23}
-        y2={23}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
-        }
-        value="4.75KB"
-        x={61.25}
-        y={28}
-      />
-      <circle
-        cx={25}
-        cy={38.5}
-        r={15.5}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
-    <g
-      key="24"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
-        }
-        x1={25}
-        x2={56.25}
-        y1={6}
-        y2={6}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
-        }
-        value="19KB"
-        x={61.25}
-        y={11}
-      />
-      <circle
-        cx={25}
-        cy={30}
-        r={24}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
+      }
+      circleTopY={6}
+      formattedValue="19KB"
+      onWidthChange={[Function]}
+      radius={24}
+      textOffset={5}
+      textY={11}
+    />
   </svg>
 </div>
 `;
@@ -687,6 +392,7 @@ exports[`Should render legend with only max marker when size difference does not
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -713,45 +419,22 @@ exports[`Should render legend with only max marker when size difference does not
     height={29}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g
-      key="11"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
+    <MapMarker
+      circleCenterX={12}
+      circleCenterY={17}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        x1={12}
-        x2={27}
-        y1={6}
-        y2={6}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
-        }
-        value="19KB"
-        x={32}
-        y={11}
-      />
-      <circle
-        cx={12}
-        cy={17}
-        r={11}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
+      }
+      circleTopY={6}
+      formattedValue="19KB"
+      onWidthChange={[Function]}
+      radius={11}
+      textOffset={5}
+      textY={11}
+    />
   </svg>
 </div>
 `;
@@ -768,6 +451,7 @@ exports[`Should render legend without label cutoff when min size is 1 1`] = `
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -794,84 +478,38 @@ exports[`Should render legend without label cutoff when min size is 1 1`] = `
     height={21}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g
-      key="1"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
+    <MapMarker
+      circleCenterX={8}
+      circleCenterY={19}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        x1={8}
-        x2={18}
-        y1={18}
-        y2={18}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
+      }
+      circleTopY={18}
+      formattedValue="0KB"
+      onWidthChange={[Function]}
+      radius={1}
+      textOffset={5}
+      textY={21}
+    />
+    <MapMarker
+      circleCenterX={8}
+      circleCenterY={13}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        value="0KB"
-        x={23}
-        y={21}
-      />
-      <circle
-        cx={8}
-        cy={19}
-        r={1}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
-    <g
-      key="7"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
-        }
-        x1={8}
-        x2={18}
-        y1={6}
-        y2={6}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
-        }
-        value="19KB"
-        x={23}
-        y={11}
-      />
-      <circle
-        cx={8}
-        cy={13}
-        r={7}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
+      }
+      circleTopY={6}
+      formattedValue="19KB"
+      onWidthChange={[Function]}
+      radius={7}
+      textOffset={5}
+      textY={11}
+    />
   </svg>
 </div>
 `;
@@ -888,6 +526,7 @@ exports[`Should render max label with std clamp notification 1`] = `
       <EuiToolTip
         content="bytes"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
         title="Symbol size"
@@ -914,45 +553,22 @@ exports[`Should render max label with std clamp notification 1`] = `
     height={29}
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g
-      key="11"
-    >
-      <line
-        style={
-          Object {
-            "stroke": "#d3dae6",
-          }
+    <MapMarker
+      circleCenterX={12}
+      circleCenterY={17}
+      circleStyle={
+        Object {
+          "fillOpacity": 0,
+          "strokeWidth": 1,
         }
-        x1={12}
-        x2={27}
-        y1={6}
-        y2={6}
-      />
-      <RightAlignedText
-        setWidth={[Function]}
-        style={
-          Object {
-            "fill": "#343741",
-            "fontSize": 10,
-          }
-        }
-        value="> 16KB"
-        x={32}
-        y={11}
-      />
-      <circle
-        cx={12}
-        cy={17}
-        r={11}
-        style={
-          Object {
-            "fillOpacity": 0,
-            "stroke": "#343741",
-            "strokeWidth": 1,
-          }
-        }
-      />
-    </g>
+      }
+      circleTopY={6}
+      formattedValue="> 16KB"
+      onWidthChange={[Function]}
+      radius={11}
+      textOffset={5}
+      textY={11}
+    />
   </svg>
 </div>
 `;

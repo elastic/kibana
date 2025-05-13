@@ -8,7 +8,11 @@
 import type { SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  elasticsearchServiceMock,
+  loggingSystemMock,
+} from '@kbn/core/server/mocks';
 
 import {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -24,17 +28,32 @@ import { PackageNotFoundError } from '../../../errors';
 
 import { getSettings } from '../../settings';
 import { auditLoggingService } from '../../audit_logging';
-
 import * as Registry from '../registry';
-
+import { getEsPackage } from '../archive/storage';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 
-import { getInstalledPackages, getPackageInfo, getPackages, getPackageUsageStats } from './get';
+import {
+  getAgentTemplateAssetsMap,
+  getInstalledPackages,
+  getPackageInfo,
+  getPackages,
+  getPackageUsageStats,
+} from './get';
 
 jest.mock('../registry');
 jest.mock('../../settings');
 jest.mock('../../audit_logging');
 jest.mock('../../data_streams');
+jest.mock('../archive/storage', () => {
+  return {
+    ...jest.requireActual('../archive/storage'),
+    getEsPackage: jest
+      .fn()
+      .mockImplementation((...args) =>
+        jest.requireActual('../archive/storage').getEsPackage(...args)
+      ),
+  };
+});
 
 const MockRegistry = jest.mocked(Registry);
 
@@ -490,6 +509,7 @@ owner: elastic`,
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
         id: 'elasticsearch',
+        name: 'elasticsearch',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
       });
     });
@@ -1148,6 +1168,142 @@ owner: elastic`,
 
         expect(MockRegistry.getPackage).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('getAgentTemplateAssetsMap', () => {
+    const assetsMap = new Map([
+      ['test-1.0.0/LICENSE.txt', Buffer.from('')],
+      ['test-1.0.0/changelog.yml', Buffer.from('')],
+      ['test-1.0.0/manifest.yml', Buffer.from('')],
+      ['test-1.0.0/docs/README.md', Buffer.from('')],
+      ['test-1.0.0/img/logo_nginx.svg', Buffer.from('')],
+      ['test-1.0.0/img/nginx-logs-access-error.png', Buffer.from('')],
+      ['test-1.0.0/img/nginx-logs-overview.png', Buffer.from('')],
+      ['test-1.0.0/img/nginx-metrics-overview.png', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/manifest.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/sample_event.json', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/manifest.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/sample_event.json', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/manifest.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/sample_event.json', Buffer.from('')],
+      [
+        'test-1.0.0/kibana/dashboard/nginx-023d2930-f1a5-11e7-a9ef-93c69af7b129.json',
+        Buffer.from(''),
+      ],
+      [
+        'test-1.0.0/kibana/dashboard/nginx-046212a0-a2a1-11e7-928f-5dbe6f6f5519.json',
+        Buffer.from(''),
+      ],
+      [
+        'test-1.0.0/kibana/dashboard/nginx-55a9e6e0-a29e-11e7-928f-5dbe6f6f5519.json',
+        Buffer.from(''),
+      ],
+      ['test-1.0.0/kibana/ml_module/nginx-Logs-ml.json', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/fields/agent.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/fields/base-fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/fields/fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/fields/agent.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/fields/base-fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/fields/fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/fields/agent.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/fields/base-fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/fields/ecs.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/stubstatus/fields/fields.yml', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/agent/stream/httpjson.yml.hbs', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/agent/stream/stream.yml.hbs', Buffer.from('')],
+      ['test-1.0.0/data_stream/access/elasticsearch/ingest_pipeline/default.yml', Buffer.from('')],
+      [
+        'test-1.0.0/data_stream/access/elasticsearch/ingest_pipeline/third-party.yml',
+        Buffer.from(''),
+      ],
+      ['test-1.0.0/data_stream/error/agent/stream/httpjson.yml.hbs', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/agent/stream/stream.yml.hbs', Buffer.from('')],
+      ['test-1.0.0/data_stream/error/elasticsearch/ingest_pipeline/default.yml', Buffer.from('')],
+      [
+        'test-1.0.0/data_stream/error/elasticsearch/ingest_pipeline/third-party.yml',
+        Buffer.from(''),
+      ],
+      ['test-1.0.0/data_stream/stubstatus/agent/stream/stream.yml.hbs', Buffer.from('')],
+    ]);
+
+    beforeEach(() => {
+      MockRegistry.getPackage.mockResolvedValue({
+        paths: [],
+        assetsMap,
+        archiveIterator: createArchiveIteratorFromMap(assetsMap),
+        packageInfo: {
+          name: 'test',
+          version: '1.0.0',
+        } as RegistryPackage,
+      });
+    });
+
+    it('should work with not installed package', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+
+      savedObjectsClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('not found')
+      );
+      const packagePolicyAssetsMap = await getAgentTemplateAssetsMap({
+        savedObjectsClient,
+        logger: loggingSystemMock.createLogger(),
+        packageInfo: {
+          name: 'test',
+          version: '1.0.0',
+        } as any,
+      });
+
+      expect([...packagePolicyAssetsMap.keys()]).toMatchInlineSnapshot(`
+        Array [
+          "test-1.0.0/manifest.yml",
+          "test-1.0.0/data_stream/access/manifest.yml",
+          "test-1.0.0/data_stream/error/manifest.yml",
+          "test-1.0.0/data_stream/stubstatus/manifest.yml",
+          "test-1.0.0/data_stream/access/agent/stream/httpjson.yml.hbs",
+          "test-1.0.0/data_stream/access/agent/stream/stream.yml.hbs",
+          "test-1.0.0/data_stream/error/agent/stream/httpjson.yml.hbs",
+          "test-1.0.0/data_stream/error/agent/stream/stream.yml.hbs",
+          "test-1.0.0/data_stream/stubstatus/agent/stream/stream.yml.hbs",
+        ]
+      `);
+    });
+
+    it('should work installed package', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      jest.mocked(getEsPackage).mockResolvedValueOnce({
+        assets_path: [...assetsMap.keys()].map((path) => ({ id: path, path, type: 'test' })),
+      } as any);
+
+      savedObjectsClient.get.mockResolvedValue({
+        attributes: [
+          {
+            assets_path: [...assetsMap.keys()].map((path) => ({ id: path, path, type: 'test' })),
+          },
+        ],
+      } as any);
+      const packagePolicyAssetsMap = await getAgentTemplateAssetsMap({
+        savedObjectsClient,
+        logger: loggingSystemMock.createLogger(),
+        packageInfo: {
+          name: 'test',
+          version: '1.0.0',
+        } as any,
+      });
+
+      expect([...packagePolicyAssetsMap.keys()]).toMatchInlineSnapshot(`
+        Array [
+          "test-1.0.0/manifest.yml",
+          "test-1.0.0/data_stream/access/manifest.yml",
+          "test-1.0.0/data_stream/error/manifest.yml",
+          "test-1.0.0/data_stream/stubstatus/manifest.yml",
+          "test-1.0.0/data_stream/access/agent/stream/httpjson.yml.hbs",
+          "test-1.0.0/data_stream/access/agent/stream/stream.yml.hbs",
+          "test-1.0.0/data_stream/error/agent/stream/httpjson.yml.hbs",
+          "test-1.0.0/data_stream/error/agent/stream/stream.yml.hbs",
+          "test-1.0.0/data_stream/stubstatus/agent/stream/stream.yml.hbs",
+        ]
+      `);
     });
   });
 });

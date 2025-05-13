@@ -26,6 +26,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
+  USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../constants';
 import { ElasticsearchAssetType } from '../../../types';
 import type {
@@ -53,6 +54,7 @@ import { populatePackagePolicyAssignedAgentsCount } from '../../package_policies
 import * as Registry from '../registry';
 
 import { getInstallation, kibanaSavedObjectTypes } from '.';
+import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 
 const MAX_ASSETS_TO_DELETE = 1000;
 
@@ -63,7 +65,7 @@ export async function removeInstallation(options: {
   esClient: ElasticsearchClient;
   force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, esClient } = options;
+  const { savedObjectsClient, pkgName, pkgVersion, esClient } = options;
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) {
     throw new PackageRemovalError(`${pkgName} is not installed`);
@@ -90,9 +92,11 @@ export async function removeInstallation(options: {
         force: options.force,
       });
     } else {
-      throw new PackageRemovalError(
-        `Unable to remove package with existing package policy(s) in use by agent(s)`
+      const error = new PackageRemovalError(
+        `Unable to remove package ${pkgName}:${pkgVersion} with existing package policy(s) in use by agent(s)`
       );
+      await updateUninstallStatusToFailed(savedObjectsClient, pkgName, error);
+      throw error;
     }
   }
 
@@ -105,6 +109,7 @@ export async function removeInstallation(options: {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'delete',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
@@ -386,7 +391,7 @@ async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string):
 
 async function deleteComponentTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all templates
-  if (name && name !== '*') {
+  if (name && name !== '*' && !name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX)) {
     try {
       await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
     } catch (error) {
@@ -481,4 +486,26 @@ export function cleanupTransforms(
     .filter((asset) => asset.type === ElasticsearchAssetType.transform)
     .map((asset) => asset.id);
   return deleteTransforms(esClient, idsToDelete);
+}
+
+async function updateUninstallStatusToFailed(
+  savedObjectsClient: SavedObjectsClientContract,
+  pkgName: string,
+  error: Error
+) {
+  const pkgSo = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
+  const updatedLatestUninstallFailedAttempts = updateUninstallFailedAttempts({
+    error,
+    createdAt: new Date().toISOString(),
+    latestAttempts: pkgSo.attributes.latest_uninstall_failed_attempts ?? [],
+  });
+  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+    latest_uninstall_failed_attempts: updatedLatestUninstallFailedAttempts,
+  });
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: pkgName,
+    name: pkgName,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
 }

@@ -77,6 +77,11 @@ export const cardinalityOperation: OperationDefinition<
   displayName: CARDINALITY_NAME,
   allowAsReference: true,
   input: 'field',
+  getSerializedFormat() {
+    return {
+      id: 'number',
+    };
+  },
   getPossibleOperationForField: ({
     aggregationRestrictions,
     aggregatable,
@@ -175,6 +180,10 @@ export const cardinalityOperation: OperationDefinition<
         ),
       },
     ];
+  },
+  toESQL: (column, columnId) => {
+    if (column.params?.emptyAsNull || column.timeShift) return;
+    return `COUNT_DISTINCT(${column.sourceField})`;
   },
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggCardinality']>('aggCardinality', {

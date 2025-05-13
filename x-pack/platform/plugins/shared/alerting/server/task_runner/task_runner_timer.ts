@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 export enum TaskRunnerTimerSpan {
   StartTaskRun = 'claim_to_start_duration_ms',

@@ -498,7 +498,7 @@ const getFleetServerManagedDockerArgs = ({
     '--publish',
     `${port}:8220`,
 
-    `docker.elastic.co/beats/elastic-agent:${agentVersion}`,
+    `docker.elastic.co/elastic-agent/elastic-agent:${agentVersion}`,
   ];
 };
 

@@ -464,7 +464,7 @@ describe('When on the package policy create page', () => {
         await setupSaveNavigate(routeState, queryParamsPolicyId);
 
         expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
-          path: '/policies/agent-policy-1?openEnrollmentFlyout=true',
+          path: '/save/url/here?openEnrollmentFlyout=true',
         });
       });
 
@@ -759,7 +759,6 @@ describe('When on the package policy create page', () => {
           expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
         });
 
-        fireEvent.click(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ));
         fireEvent.click(renderResult.getAllByText('Agentless')[0]);
 
         await act(async () => {

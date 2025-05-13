@@ -12,12 +12,11 @@ import { createStore } from '../store';
 import { mockGlobalState } from './global_state';
 import type { AppAction } from '../store/actions';
 import type { Immutable } from '../../../common/endpoint/types';
-import type { StartServices } from '../../types';
 import { createSecuritySolutionStorageMock } from './mock_local_storage';
+import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
 
 const { storage: storageMock } = createSecuritySolutionStorageMock();
-
-const kibanaMock = {} as unknown as StartServices;
+const kibanaMock = createStartServicesMock();
 
 export const createMockStore = (
   state: State = mockGlobalState,

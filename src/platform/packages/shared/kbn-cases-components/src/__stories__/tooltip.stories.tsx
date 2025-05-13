@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ComponentStory, ComponentMeta } from '@storybook/react';
+import { StoryObj, Meta } from '@storybook/react';
 
 import { CaseStatuses } from '../status/types';
 import { Tooltip } from '../tooltip/tooltip';
@@ -59,46 +59,72 @@ const Template = (args: CaseTooltipProps) => (
 export default {
   title: 'CaseTooltip',
   component: Template,
-} as ComponentMeta<typeof Template>;
+} as Meta<typeof Template>;
 
-export const Default: ComponentStory<typeof Template> = Template.bind({});
-Default.args = { ...tooltipProps };
-
-export const LoadingState: ComponentStory<typeof Template> = Template.bind({});
-LoadingState.args = { ...tooltipProps, loading: true };
-
-export const LongTitle: ComponentStory<typeof Template> = Template.bind({});
-LongTitle.args = { ...tooltipProps, content: { ...tooltipContent, title: longTitle } };
-
-export const LongDescription: ComponentStory<typeof Template> = Template.bind({});
-LongDescription.args = {
-  ...tooltipProps,
-  content: { ...tooltipContent, description: longDescription },
+export const Default: StoryObj<typeof Template> = {
+  render: Template,
+  args: { ...tooltipProps },
 };
 
-export const InProgressStatus: ComponentStory<typeof Template> = Template.bind({});
-InProgressStatus.args = {
-  ...tooltipProps,
-  content: { ...tooltipContent, status: CaseStatuses['in-progress'] },
+export const LoadingState: StoryObj<typeof Template> = {
+  render: Template,
+  args: { ...tooltipProps, loading: true },
 };
 
-export const ClosedStatus: ComponentStory<typeof Template> = Template.bind({});
-ClosedStatus.args = {
-  ...tooltipProps,
-  content: { ...tooltipContent, status: CaseStatuses.closed },
+export const LongTitle: StoryObj<typeof Template> = {
+  render: Template,
+  args: { ...tooltipProps, content: { ...tooltipContent, title: longTitle } },
 };
 
-export const NoUserInfo: ComponentStory<typeof Template> = Template.bind({});
-NoUserInfo.args = { ...tooltipProps, content: { ...tooltipContent, createdBy: {} } };
+export const LongDescription: StoryObj<typeof Template> = {
+  render: Template,
 
-export const FullName: ComponentStory<typeof Template> = Template.bind({});
-FullName.args = {
-  ...tooltipProps,
-  content: { ...tooltipContent, createdBy: { fullName: 'Elastic User' } },
+  args: {
+    ...tooltipProps,
+    content: { ...tooltipContent, description: longDescription },
+  },
 };
 
-export const LongUserName: ComponentStory<typeof Template> = Template.bind({});
-LongUserName.args = {
-  ...tooltipProps,
-  content: { ...tooltipContent, createdBy: { fullName: 'LoremIpsumElasticUser WithALongSurname' } },
+export const InProgressStatus: StoryObj<typeof Template> = {
+  render: Template,
+
+  args: {
+    ...tooltipProps,
+    content: { ...tooltipContent, status: CaseStatuses['in-progress'] },
+  },
+};
+
+export const ClosedStatus: StoryObj<typeof Template> = {
+  render: Template,
+
+  args: {
+    ...tooltipProps,
+    content: { ...tooltipContent, status: CaseStatuses.closed },
+  },
+};
+
+export const NoUserInfo: StoryObj<typeof Template> = {
+  render: Template,
+  args: { ...tooltipProps, content: { ...tooltipContent, createdBy: {} } },
+};
+
+export const FullName: StoryObj<typeof Template> = {
+  render: Template,
+
+  args: {
+    ...tooltipProps,
+    content: { ...tooltipContent, createdBy: { fullName: 'Elastic User' } },
+  },
+};
+
+export const LongUserName: StoryObj<typeof Template> = {
+  render: Template,
+
+  args: {
+    ...tooltipProps,
+    content: {
+      ...tooltipContent,
+      createdBy: { fullName: 'LoremIpsumElasticUser WithALongSurname' },
+    },
+  },
 };

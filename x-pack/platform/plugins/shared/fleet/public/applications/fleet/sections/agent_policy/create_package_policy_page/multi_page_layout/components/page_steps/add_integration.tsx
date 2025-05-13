@@ -9,7 +9,7 @@ import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { load } from 'js-yaml';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 import { useConfirmForceInstall } from '../../../../../../../integrations/hooks';
@@ -19,7 +19,12 @@ import { isVerificationError } from '../../../../../../../../services';
 import type { MultiPageStepLayoutProps } from '../../types';
 import type { PackagePolicyFormState } from '../../../types';
 import type { NewPackagePolicy } from '../../../../../../types';
-import { sendCreatePackagePolicy, useStartServices, useUIExtension } from '../../../../../../hooks';
+import {
+  sendCreatePackagePolicy,
+  useFleetStatus,
+  useStartServices,
+  useUIExtension,
+} from '../../../../../../hooks';
 import type { RequestError } from '../../../../../../hooks';
 import { Error, ExtensionWrapper } from '../../../../../../components';
 import { sendGeneratePackagePolicy } from '../../hooks';
@@ -29,6 +34,7 @@ import { validatePackagePolicy, validationHasErrors } from '../../../services';
 import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
+import { ensurePackageKibanaAssetsInstalled } from '../../../../../../services/ensure_kibana_assets_installed';
 
 const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -83,6 +89,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   const { onNext, onBack, isManaged, setIsManaged, packageInfo, integrationInfo, agentPolicy } =
     props;
 
+  const { spaceId } = useFleetStatus();
   const [basePolicyError, setBasePolicyError] = useState<RequestError>();
 
   const { notifications } = useStartServices();
@@ -141,22 +148,34 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
   );
 
   // Save package policy
-  const savePackagePolicy = async ({
-    newPackagePolicy,
-    force,
-  }: {
-    newPackagePolicy: NewPackagePolicy;
-    force?: boolean;
-  }) => {
-    setFormState('LOADING');
-    const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(newPackagePolicy);
-    const result = await sendCreatePackagePolicy({
-      ...policy,
-      force: forceCreateNeeded || force,
-    });
-    setFormState('SUBMITTED');
-    return result;
-  };
+  const savePackagePolicy = useCallback(
+    async ({
+      newPackagePolicy,
+      force,
+    }: {
+      newPackagePolicy: NewPackagePolicy;
+      force?: boolean;
+    }) => {
+      setFormState('LOADING');
+      const { policy, forceCreateNeeded } = await prepareInputPackagePolicyDataset(
+        newPackagePolicy
+      );
+      const result = await sendCreatePackagePolicy({
+        ...policy,
+        force: forceCreateNeeded || force,
+      });
+      setFormState('SUBMITTED');
+      if (!result.error && result.data?.item.package)
+        await ensurePackageKibanaAssetsInstalled({
+          currentSpaceId: spaceId ?? DEFAULT_SPACE_ID,
+          pkgName: result.data.item.package.name,
+          pkgVersion: result.data.item.package.version,
+          toasts: notifications.toasts,
+        });
+      return result;
+    },
+    [notifications.toasts, spaceId]
+  );
 
   const onSubmit = useCallback(
     async ({ force = false }: { force?: boolean } = {}) => {
@@ -190,6 +209,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     },
     [
       validationResults,
+      savePackagePolicy,
       formState,
       packagePolicy,
       notifications.toasts,

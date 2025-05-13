@@ -9,5 +9,7 @@
 
 import { getInputStory, getStory } from './common';
 
-export default getStory('Array Input', 'An input with an array value.');
+const Story = getStory('Array Input', 'An input with an array value.');
 export const ArrayInput = getInputStory('array' as const);
+
+export default { ...Story };

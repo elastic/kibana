@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { ApiKeyForm } from '@kbn/search-api-keys-components';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useNavigateToDiscover } from '../../hooks/use_navigate_to_discover';
 import { useIndex } from '../../hooks/api/use_index';
 import { useKibana } from '../../hooks/use_kibana';
@@ -39,13 +40,21 @@ import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { usePageChrome } from '../../hooks/use_page_chrome';
-import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { useIndexManagementBreadcrumbs } from '../../hooks/use_index_management_breadcrumbs';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
-  const { console: consolePlugin, docLinks, application, history, share } = useKibana().services;
+  const {
+    cloud,
+    console: consolePlugin,
+    docLinks,
+    application,
+    history,
+    share,
+    searchNavigation,
+  } = useKibana().services;
   const {
     data: index,
     refetch,
@@ -71,15 +80,11 @@ export const SearchIndexDetailsPage = () => {
   }, [share, index]);
   const navigateToDiscover = useNavigateToDiscover(indexName);
 
-  const [hasDocuments, setHasDocuments] = useState<boolean>(false);
-  const [isDocumentsLoading, setDocumentsLoading] = useState<boolean>(true);
-  useEffect(() => {
-    setDocumentsLoading(isInitialLoading);
-    setHasDocuments(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
-  }, [indexDocuments, isInitialLoading, setHasDocuments, setDocumentsLoading]);
+  const hasDocuments = Boolean(isInitialLoading || indexDocuments?.results?.data.length);
 
+  const indexManagementBreadcrumbs = useIndexManagementBreadcrumbs();
   usePageChrome(indexName, [
-    ...IndexManagementBreadcrumbs,
+    ...indexManagementBreadcrumbs,
     {
       text: indexName,
     },
@@ -189,13 +194,14 @@ export const SearchIndexDetailsPage = () => {
   }
 
   return (
-    <EuiPageTemplate
+    <KibanaPageTemplate
       offset={0}
       restrictWidth={false}
       data-test-subj="searchIndicesDetailsPage"
       grow={false}
       panelled
       bottomBorder
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
       {isIndexError || isMappingsError || !index || !mappings || !indexDocuments ? (
         <IndexloadingError
@@ -216,7 +222,7 @@ export const SearchIndexDetailsPage = () => {
                   <>
                     <EuiFlexItem>
                       <EuiButtonEmpty
-                        isLoading={isDocumentsLoading}
+                        isLoading={isInitialLoading}
                         data-test-subj="viewInDiscoverLink"
                         onClick={navigateToDiscover}
                       >
@@ -228,7 +234,7 @@ export const SearchIndexDetailsPage = () => {
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiButton
-                        isLoading={isDocumentsLoading}
+                        isLoading={isInitialLoading}
                         data-test-subj="useInPlaygroundLink"
                         onClick={navigateToPlayground}
                         iconType="launch"
@@ -246,7 +252,7 @@ export const SearchIndexDetailsPage = () => {
                     <EuiButtonEmpty
                       href={docLinks.links.apiReference}
                       target="_blank"
-                      isLoading={isDocumentsLoading}
+                      isLoading={isInitialLoading}
                       iconType="documentation"
                       data-test-subj="ApiReferenceDoc"
                     >
@@ -286,7 +292,12 @@ export const SearchIndexDetailsPage = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup>
-                    <QuickStats indexDocuments={indexDocuments} index={index} mappings={mappings} />
+                    <QuickStats
+                      isStateless={cloud?.isServerlessEnabled ?? false}
+                      indexDocuments={indexDocuments}
+                      index={index}
+                      mappings={mappings}
+                    />
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -311,6 +322,6 @@ export const SearchIndexDetailsPage = () => {
         />
       )}
       {embeddableConsole}
-    </EuiPageTemplate>
+    </KibanaPageTemplate>
   );
 };

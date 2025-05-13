@@ -10,27 +10,23 @@
 import {
   EuiButtonEmpty,
   EuiCallOut,
-  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useRuleFormState, useRuleFormSteps } from '../hooks';
-import {
-  DISABLED_ACTIONS_WARNING_TITLE,
-  RULE_FORM_CANCEL_MODAL_CANCEL,
-  RULE_FORM_CANCEL_MODAL_CONFIRM,
-  RULE_FORM_CANCEL_MODAL_DESCRIPTION,
-  RULE_FORM_CANCEL_MODAL_TITLE,
-  RULE_FORM_RETURN_TITLE,
-} from '../translations';
+import { useRuleFormScreenContext, useRuleFormState, useRuleFormSteps } from '../hooks';
+import { DISABLED_ACTIONS_WARNING_TITLE, RULE_FORM_RETURN_TITLE } from '../translations';
 import type { RuleFormData } from '../types';
 import { RulePageFooter } from './rule_page_footer';
 import { RulePageNameInput } from './rule_page_name_input';
+import { RuleActionsConnectorsModal } from '../rule_actions/rule_actions_connectors_modal';
+import { RulePageShowRequestModal } from './rule_page_show_request_modal';
+import { ConfirmRuleClose } from '../components';
 
 export interface RulePageProps {
   isEdit?: boolean;
@@ -43,16 +39,17 @@ export const RulePage = (props: RulePageProps) => {
   const { isEdit = false, isSaving = false, onCancel = () => {}, onSave } = props;
   const [isCancelModalOpen, setIsCancelModalOpen] = useState<boolean>(false);
 
-  const { formData, multiConsumerSelection, connectorTypes, connectors, touched } =
+  const { formData, multiConsumerSelection, connectorTypes, connectors, touched, onInteraction } =
     useRuleFormState();
 
   const { steps } = useRuleFormSteps();
 
   const { actions } = formData;
 
-  const styles = {
-    backgroundColor: 'transparent',
-  };
+  const inLineContainerCss = css`
+    container-type: inline-size;
+    background-color: transparent;
+  `;
 
   const onSaveInternal = useCallback(() => {
     onSave({
@@ -68,6 +65,8 @@ export const RulePage = (props: RulePageProps) => {
       onCancel();
     }
   }, [touched, onCancel]);
+
+  const { isConnectorsScreenVisible, isShowRequestScreenVisible } = useRuleFormScreenContext();
 
   const hasActionsDisabled = useMemo(() => {
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
@@ -86,7 +85,15 @@ export const RulePage = (props: RulePageProps) => {
 
   return (
     <>
-      <EuiPageTemplate grow bottomBorder offset={0} css={styles}>
+      <EuiPageTemplate
+        grow
+        bottomBorder
+        offset={0}
+        css={inLineContainerCss}
+        onClick={onInteraction}
+        onKeyDown={onInteraction}
+        data-test-subj="ruleForm"
+      >
         <EuiPageTemplate.Header>
           <EuiFlexGroup
             direction="column"
@@ -137,19 +144,10 @@ export const RulePage = (props: RulePageProps) => {
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
       {isCancelModalOpen && (
-        <EuiConfirmModal
-          onCancel={() => setIsCancelModalOpen(false)}
-          onConfirm={onCancel}
-          data-test-subj="confirmRuleCloseModal"
-          buttonColor="danger"
-          defaultFocusedButton="confirm"
-          title={RULE_FORM_CANCEL_MODAL_TITLE}
-          confirmButtonText={RULE_FORM_CANCEL_MODAL_CONFIRM}
-          cancelButtonText={RULE_FORM_CANCEL_MODAL_CANCEL}
-        >
-          <p>{RULE_FORM_CANCEL_MODAL_DESCRIPTION}</p>
-        </EuiConfirmModal>
+        <ConfirmRuleClose onCancel={() => setIsCancelModalOpen(false)} onConfirm={onCancel} />
       )}
+      {isConnectorsScreenVisible && <RuleActionsConnectorsModal />}
+      {isShowRequestScreenVisible && <RulePageShowRequestModal isEdit={isEdit} />}
     </>
   );
 };

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { ConfigSchema, IEventLogConfig } from './types';
+import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import type { IEventLogConfig } from './types';
+import { ConfigSchema } from './types';
 
 export { millisToNanos, nanosToMillis } from '../common';
 
@@ -19,10 +20,10 @@ export type {
   IEventLogClient,
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
+  InternalFields,
+  IValidatedEventInternalDocInfo,
 } from './types';
 export { SAVED_OBJECT_REL_PRIMARY } from './types';
-
-export { ClusterClientAdapter } from './es/cluster_client_adapter';
 
 export { createReadySignal } from './lib/ready_signal';
 

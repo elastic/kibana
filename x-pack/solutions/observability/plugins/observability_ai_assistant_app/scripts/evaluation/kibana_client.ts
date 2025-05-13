@@ -25,7 +25,7 @@ import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assis
 import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, isAxiosError, AxiosRequestConfig } from 'axios';
 import { omit, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
 import {
@@ -73,7 +73,7 @@ type CompleteFunction = (params: CompleteFunctionParams) => Promise<{
 }>;
 
 export interface ChatClient {
-  chat: (message: StringOrMessageList) => Promise<InnerMessage>;
+  chat: (message: StringOrMessageList, system: string) => Promise<InnerMessage>;
   complete: CompleteFunction;
   evaluate: (
     {}: { conversationId?: string; messages: InnerMessage[]; errors: ChatCompletionErrorEvent[] },
@@ -81,6 +81,7 @@ export interface ChatClient {
   ) => Promise<EvaluationResult>;
   getResults: () => EvaluationResult[];
   onResult: (cb: (result: EvaluationResult) => void) => () => void;
+  getConnectorId: () => string;
 }
 
 export class KibanaClient {
@@ -93,6 +94,7 @@ export class KibanaClient {
     this.axios = axios.create({
       headers: {
         'kbn-xsrf': 'foo',
+        'x-elastic-internal-origin': 'kibana',
       },
     });
   }
@@ -118,17 +120,15 @@ export class KibanaClient {
   callKibana<T>(
     method: string,
     props: { query?: UrlObject['query']; pathname: string; ignoreSpaceId?: boolean },
-    data?: any
+    data?: any,
+    axiosParams: Partial<AxiosRequestConfig> = {}
   ) {
     const url = this.getUrl(props);
     return this.axios<T>({
       method,
       url,
       ...(method.toLowerCase() === 'delete' && !data ? {} : { data: data || {} }),
-      headers: {
-        'kbn-xsrf': 'true',
-        'x-elastic-internal-origin': 'Kibana',
-      },
+      ...axiosParams,
     }).catch((error) => {
       if (isAxiosError(error)) {
         const interestingPartsOfError = {
@@ -328,10 +328,10 @@ export class KibanaClient {
               }
 
               if (error.message.includes('Status code: 429')) {
-                that.log.info(`429, backing off 20s`);
-
-                return timer(20000);
+                that.log.info(`429, backing off 30s`);
+                return timer(30000);
               }
+
               that.log.info(`Retrying in 5s`);
               return timer(5000);
             },
@@ -349,11 +349,13 @@ export class KibanaClient {
     async function chat(
       name: string,
       {
+        systemMessage,
         messages,
         functions,
         functionCall,
         connectorIdOverride,
       }: {
+        systemMessage: string;
         messages: Message[];
         functions: FunctionDefinition[];
         functionCall?: string;
@@ -367,6 +369,7 @@ export class KibanaClient {
         const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
           {
             name,
+            systemMessage,
             messages,
             connectorId: connectorIdOverride || connectorId,
             functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
@@ -403,14 +406,14 @@ export class KibanaClient {
     const results: EvaluationResult[] = [];
 
     return {
-      chat: async (message) => {
+      chat: async (message, systemMessage) => {
         const messages = [
           ...this.getMessages(message).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
           })),
         ];
-        return chat('chat', { messages, functions: [] });
+        return chat('chat', { systemMessage, messages, functions: [] });
       },
       complete: async ({
         messages: messagesArg,
@@ -515,20 +518,14 @@ export class KibanaClient {
       evaluate: async ({ messages, conversationId, errors }, criteria) => {
         const message = await chat('evaluate', {
           connectorIdOverride: evaluationConnectorId,
-          messages: [
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.System,
-                content: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
+          systemMessage: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
                 which helps our users make sense of their Observability data.
 
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
 
                 For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
                 assistant did wrong, where it could improve, and what the root cause was in case of a failure.`,
-              },
-            },
+          messages: [
             {
               '@timestamp': new Date().toString(),
               message: {
@@ -635,6 +632,7 @@ export class KibanaClient {
         onResultCallbacks.push({ callback, unregister });
         return unregister;
       },
+      getConnectorId: () => connectorId,
     };
   }
 

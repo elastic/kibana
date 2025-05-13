@@ -34,7 +34,7 @@
       "_settings",
       "{index}/_settings"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-update-settings.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-update-settings.html",
     "availability": {
       "stack": true,
       "serverless": true

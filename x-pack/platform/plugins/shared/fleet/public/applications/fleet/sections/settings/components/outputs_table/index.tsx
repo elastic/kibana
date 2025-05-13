@@ -16,7 +16,10 @@ import type { Output } from '../../../../types';
 
 import { OutputHealth } from '../edit_output_flyout/output_health';
 
+import { ExperimentalFeaturesService } from '../../../../services';
+
 import { DefaultBadges } from './badges';
+import { IntegrationSyncStatus } from './integration_sync_status';
 
 export interface OutputsTableProps {
   outputs: Output[];
@@ -53,6 +56,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
 }) => {
   const authz = useAuthz();
   const { getHref } = useLink();
+  const { enableSyncIntegrationsOnRemote } = ExperimentalFeaturesService.get();
 
   const columns = useMemo((): Array<EuiBasicTableColumn<Output>> => {
     return [
@@ -117,6 +121,16 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
           defaultMessage: 'Status',
         }),
       },
+      ...(enableSyncIntegrationsOnRemote
+        ? [
+            {
+              render: (output: Output) => <IntegrationSyncStatus output={output} />,
+              name: i18n.translate('xpack.fleet.settings.outputsTable.integrationSyncColumnTitle', {
+                defaultMessage: 'Integration syncing',
+              }),
+            },
+          ]
+        : []),
       {
         render: (output: Output) => <DefaultBadges output={output} />,
         width: '200px',
@@ -166,7 +180,7 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
         }),
       },
     ];
-  }, [deleteOutput, getHref, authz.fleet.allSettings]);
+  }, [deleteOutput, getHref, authz.fleet.allSettings, enableSyncIntegrationsOnRemote]);
 
   return <EuiBasicTable columns={columns} items={outputs} data-test-subj="settingsOutputsTable" />;
 };

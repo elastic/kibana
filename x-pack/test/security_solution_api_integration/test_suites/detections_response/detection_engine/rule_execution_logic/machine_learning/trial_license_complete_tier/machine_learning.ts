@@ -345,5 +345,29 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
     });
+
+    describe('preview logged requests', () => {
+      it('should not return requests property when not enabled', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+        });
+
+        expect(logs[0].requests).toEqual(undefined);
+      });
+      it('should return requests property when enable_logged_requests set to true', async () => {
+        const { logs } = await previewRule({
+          supertest,
+          rule,
+          enableLoggedRequests: true,
+        });
+
+        const requests = logs[0].requests;
+
+        expect(requests).toHaveLength(1);
+        expect(requests![0].description).toBe('Find all anomalies');
+        expect(requests![0].request).toContain('POST /.ml-anomalies-*/_search');
+      });
+    });
   });
 };

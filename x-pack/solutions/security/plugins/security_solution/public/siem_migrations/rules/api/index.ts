@@ -7,6 +7,7 @@
 
 import { replaceParams } from '@kbn/openapi-common/shared';
 
+import type { RuleMigrationFilters } from '../../../../common/siem_migrations/types';
 import type { UpdateRuleMigrationData } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -15,7 +16,6 @@ import type { SiemMigrationRetryFilter } from '../../../../common/siem_migration
 import {
   SIEM_RULE_MIGRATIONS_PATH,
   SIEM_RULE_MIGRATIONS_ALL_STATS_PATH,
-  SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH,
   SIEM_RULE_MIGRATION_INSTALL_PATH,
   SIEM_RULE_MIGRATION_PATH,
   SIEM_RULE_MIGRATION_START_PATH,
@@ -25,6 +25,7 @@ import {
   SIEM_RULE_MIGRATION_RESOURCES_PATH,
   SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
+  SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationRequestBody,
@@ -32,7 +33,6 @@ import type {
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationResponse,
   GetRuleMigrationTranslationStatsResponse,
-  InstallTranslatedMigrationRulesResponse,
   InstallMigrationRulesResponse,
   StartRuleMigrationRequestBody,
   GetRuleMigrationStatsResponse,
@@ -43,6 +43,7 @@ import type {
   UpdateRuleMigrationResponse,
   StartRuleMigrationResponse,
   GetRuleMigrationIntegrationsResponse,
+  GetRuleMigrationPrivilegesResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
 export interface GetRuleMigrationStatsParams {
@@ -51,7 +52,7 @@ export interface GetRuleMigrationStatsParams {
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
-/** Retrieves the stats for all the existing migrations, aggregated by `migration_id`. */
+/** Retrieves the stats for the specific migration. */
 export const getRuleMigrationStats = async ({
   migrationId,
   signal,
@@ -176,22 +177,8 @@ export interface GetRuleMigrationParams {
   sortField?: string;
   /** Optional direction to sort results by */
   sortDirection?: 'asc' | 'desc';
-  /** Optional search term to filter documents */
-  searchTerm?: string;
-  /** Optional rules ids to filter documents */
-  ids?: string[];
-  /** Optional attribute to retrieve prebuilt migration rules */
-  isPrebuilt?: boolean;
-  /** Optional attribute to retrieve installed migration rules */
-  isInstalled?: boolean;
-  /** Optional attribute to retrieve fully translated migration rules */
-  isFullyTranslated?: boolean;
-  /** Optional attribute to retrieve partially translated migration rules */
-  isPartiallyTranslated?: boolean;
-  /** Optional attribute to retrieve untranslated migration rules */
-  isUntranslatable?: boolean;
-  /** Optional attribute to retrieve failed migration rules */
-  isFailed?: boolean;
+  /** Optional parameter to filter documents */
+  filters?: RuleMigrationFilters;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
@@ -202,14 +189,7 @@ export const getRuleMigrations = async ({
   perPage,
   sortField,
   sortDirection,
-  searchTerm,
-  ids,
-  isPrebuilt,
-  isInstalled,
-  isFullyTranslated,
-  isPartiallyTranslated,
-  isUntranslatable,
-  isFailed,
+  filters,
   signal,
 }: GetRuleMigrationParams): Promise<GetRuleMigrationResponse> => {
   return KibanaServices.get().http.get<GetRuleMigrationResponse>(
@@ -221,17 +201,31 @@ export const getRuleMigrations = async ({
         per_page: perPage,
         sort_field: sortField,
         sort_direction: sortDirection,
-        search_term: searchTerm,
-        ids,
-        is_prebuilt: isPrebuilt,
-        is_installed: isInstalled,
-        is_fully_translated: isFullyTranslated,
-        is_partially_translated: isPartiallyTranslated,
-        is_untranslatable: isUntranslatable,
-        is_failed: isFailed,
+        search_term: filters?.searchTerm,
+        ids: filters?.ids,
+        is_prebuilt: filters?.prebuilt,
+        is_installed: filters?.installed,
+        is_fully_translated: filters?.fullyTranslated,
+        is_partially_translated: filters?.partiallyTranslated,
+        is_untranslatable: filters?.untranslatable,
+        is_failed: filters?.failed,
       },
       signal,
     }
+  );
+};
+
+export interface GetRuleMigrationMissingPrivilegesParams {
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Retrieves all the migration rule documents of a specific migration. */
+export const getRuleMigrationMissingPrivileges = async ({
+  signal,
+}: GetRuleMigrationMissingPrivilegesParams): Promise<GetRuleMigrationPrivilegesResponse> => {
+  return KibanaServices.get().http.get<GetRuleMigrationPrivilegesResponse>(
+    SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
+    { version: '1', signal }
   );
 };
 
@@ -258,7 +252,7 @@ export interface InstallRulesParams {
   /** `id` of the migration to install rules for */
   migrationId: string;
   /** The rule ids to install */
-  ids: string[];
+  ids?: string[];
   /** Optional indicator to enable the installed rule */
   enabled?: boolean;
   /** Optional AbortSignal for cancelling request */
@@ -274,23 +268,6 @@ export const installMigrationRules = async ({
   return KibanaServices.get().http.post<InstallMigrationRulesResponse>(
     replaceParams(SIEM_RULE_MIGRATION_INSTALL_PATH, { migration_id: migrationId }),
     { version: '1', body: JSON.stringify({ ids, enabled }), signal }
-  );
-};
-
-export interface InstallTranslatedRulesParams {
-  /** `id` of the migration to install rules for */
-  migrationId: string;
-  /** Optional AbortSignal for cancelling request */
-  signal?: AbortSignal;
-}
-/** Installs all the translated rules for a specific migration. */
-export const installTranslatedMigrationRules = async ({
-  migrationId,
-  signal,
-}: InstallTranslatedRulesParams): Promise<InstallTranslatedMigrationRulesResponse> => {
-  return KibanaServices.get().http.post<InstallTranslatedMigrationRulesResponse>(
-    replaceParams(SIEM_RULE_MIGRATION_INSTALL_TRANSLATED_PATH, { migration_id: migrationId }),
-    { version: '1', signal }
   );
 };
 
@@ -326,6 +303,8 @@ export const getIntegrations = async ({
 };
 
 export interface UpdateRulesParams {
+  /** `id` of the migration to install rules for */
+  migrationId: string;
   /** The list of migration rules data to update */
   rulesToUpdate: UpdateRuleMigrationData[];
   /** Optional AbortSignal for cancelling request */
@@ -333,12 +312,12 @@ export interface UpdateRulesParams {
 }
 /** Updates provided migration rules. */
 export const updateMigrationRules = async ({
+  migrationId,
   rulesToUpdate,
   signal,
 }: UpdateRulesParams): Promise<UpdateRuleMigrationResponse> => {
-  return KibanaServices.get().http.put<UpdateRuleMigrationResponse>(SIEM_RULE_MIGRATIONS_PATH, {
-    version: '1',
-    body: JSON.stringify(rulesToUpdate),
-    signal,
-  });
+  return KibanaServices.get().http.put<UpdateRuleMigrationResponse>(
+    replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }),
+    { version: '1', body: JSON.stringify(rulesToUpdate), signal }
+  );
 };

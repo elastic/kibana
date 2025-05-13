@@ -34,11 +34,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover histogram', function describeIndexTests() {
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('test/functional/fixtures/es_archiver/long_window_logstash');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
       await security.testUser.setRoles(['kibana_admin', 'long_window_logstash']);
       await kibanaServer.uiSettings.replace(defaultSettings);
@@ -47,7 +53,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.restoreDefaults();
       await PageObjects.common.unsetTime();

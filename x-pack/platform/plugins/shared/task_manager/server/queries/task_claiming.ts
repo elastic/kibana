@@ -8,25 +8,23 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
-import { Subject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { groupBy, isPlainObject } from 'lodash';
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
-import { asOk, asErr, Result } from '../lib/result_type';
-import { ConcreteTaskInstance } from '../task';
-import { TaskClaim } from '../task_events';
+import type { Result } from '../lib/result_type';
+import { asOk, asErr } from '../lib/result_type';
+import type { ConcreteTaskInstance } from '../task';
+import type { TaskClaim } from '../task_events';
 
-import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskStore, UpdateByQueryResult } from '../task_store';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
+import type { TaskStore, UpdateByQueryResult } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
-import {
-  TaskClaimerOpts,
-  TaskClaimerFn,
-  ClaimOwnershipResult,
-  getTaskClaimer,
-} from '../task_claimers';
-import { TaskPartitioner } from '../lib/task_partitioner';
+import type { TaskClaimerOpts, TaskClaimerFn, ClaimOwnershipResult } from '../task_claimers';
+import { getTaskClaimer } from '../task_claimers';
+import type { TaskPartitioner } from '../lib/task_partitioner';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
 export type { ClaimOwnershipResult } from '../task_claimers';
@@ -200,14 +198,14 @@ export function isLimited(
   return batch.concurrency === BatchConcurrency.Limited;
 }
 
-function asLimited(tasksType: string): LimitedBatch {
+export function asLimited(tasksType: string): LimitedBatch {
   return {
     concurrency: BatchConcurrency.Limited,
     tasksTypes: tasksType,
   };
 }
 
-function asUnlimited(tasksTypes: Set<string>): UnlimitedBatch {
+export function asUnlimited(tasksTypes: Set<string>): UnlimitedBatch {
   return {
     concurrency: BatchConcurrency.Unlimited,
     tasksTypes,

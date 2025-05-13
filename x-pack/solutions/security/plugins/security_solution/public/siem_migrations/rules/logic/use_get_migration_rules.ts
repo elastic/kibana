@@ -8,6 +8,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { useCallback } from 'react';
+import type { RuleMigrationFilters } from '../../../../common/siem_migrations/types';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
@@ -20,14 +21,7 @@ export const useGetMigrationRules = (params: {
   perPage?: number;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  searchTerm?: string;
-  ids?: string[];
-  isPrebuilt?: boolean;
-  isInstalled?: boolean;
-  isFullyTranslated?: boolean;
-  isPartiallyTranslated?: boolean;
-  isUntranslatable?: boolean;
-  isFailed?: boolean;
+  filters?: RuleMigrationFilters;
 }) => {
   const { addError } = useAppToasts();
 

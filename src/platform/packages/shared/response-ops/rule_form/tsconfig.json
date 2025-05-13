@@ -30,6 +30,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
-    "@kbn/core-user-profile-browser"
+    "@kbn/core-user-profile-browser",
+    "@kbn/fields-metadata-plugin"
   ]
 }

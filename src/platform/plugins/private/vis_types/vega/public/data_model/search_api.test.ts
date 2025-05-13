@@ -45,10 +45,8 @@ describe('extendSearchParamsWithRuntimeFields', () => {
     expect(await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index'))
       .toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "runtime_mappings": Object {
-            "foo": Object {},
-          },
+        "runtime_mappings": Object {
+          "foo": Object {},
         },
       }
     `);
@@ -56,10 +54,8 @@ describe('extendSearchParamsWithRuntimeFields', () => {
 
   test('should use runtime mappings from spec if it is specified', async () => {
     const requestParams = {
-      body: {
-        runtime_mappings: {
-          test: {},
-        },
+      runtime_mappings: {
+        test: {},
       },
     } as unknown as ReturnType<typeof getSearchParamsFromRequest>;
     const runtimeFields = { foo: {} };
@@ -69,10 +65,8 @@ describe('extendSearchParamsWithRuntimeFields', () => {
     expect(await extendSearchParamsWithRuntimeFields(dataViewsStart, requestParams, 'index'))
       .toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "runtime_mappings": Object {
-            "test": Object {},
-          },
+        "runtime_mappings": Object {
+          "test": Object {},
         },
       }
     `);

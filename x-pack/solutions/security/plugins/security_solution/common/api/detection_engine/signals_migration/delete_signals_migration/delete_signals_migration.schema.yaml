@@ -14,7 +14,7 @@ paths:
         Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
         the migration process. A successful migration will result in both the old and new indices being present.
         As such, the old, orphaned index can (and likely should) be deleted.
-        
+
         While you can delete these indices manually,
         the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted
         after 30 days. It also deletes other artifacts specific to the migration implementation.
@@ -29,11 +29,14 @@ paths:
               type: object
               properties:
                 migration_ids:
+                  description: Array of `migration_id`s to cleanup.
                   type: array
                   items:
                     type: string
                   minItems: 1
               required: [migration_ids]
+              example:
+                migration_ids: [924f7c50-505f-11eb-ae0a-3fa2e626a51d]
       responses:
         200:
           description: Successful response
@@ -43,6 +46,16 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/MigrationCleanupResult'
+              examples:
+                success:
+                  value:
+                    migrations:
+                      - id: 924f7c50-505f-11eb-ae0a-3fa2e626a51d
+                        destinationIndex: .siem-signals-default-000002-r000016
+                        status: success
+                        sourceIndex: .siem-signals-default-000002
+                        version: 16
+                        updated: 2021-01-06T22:05:56.859Z
         400:
           description: Invalid input data response
           content:

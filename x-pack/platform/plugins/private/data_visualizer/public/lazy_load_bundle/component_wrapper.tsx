@@ -8,6 +8,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React, { Suspense } from 'react';
 import { EuiErrorBoundary, EuiSkeletonText } from '@elastic/eui';
+import type { FileUploadResults } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../common/app';
 import type { DataDriftDetectionAppStateProps } from '../application/data_drift/data_drift_app_state';
 
@@ -21,16 +22,24 @@ const FileDataVisualizerComponent = React.lazy(
   () => import('../application/file_data_visualizer/file_data_visualizer')
 );
 
-export const FileDataVisualizerWrapper: FC<{ resultLinks?: ResultLinks }> = ({ resultLinks }) => {
+export const FileDataVisualizerWrapper: FC<{
+  resultLinks?: ResultLinks;
+  setUploadResults?: (results: FileUploadResults) => void;
+}> = ({ resultLinks, setUploadResults }) => {
   return (
     <React.Suspense fallback={<div />}>
-      <FileDataVisualizerComponent resultLinks={resultLinks} />
+      <FileDataVisualizerComponent resultLinks={resultLinks} setUploadResults={setUploadResults} />
     </React.Suspense>
   );
 };
 
-export function getFileDataVisualizerWrapper(resultLinks?: ResultLinks) {
-  return <FileDataVisualizerWrapper resultLinks={resultLinks} />;
+export function getFileDataVisualizerWrapper(
+  resultLinks?: ResultLinks,
+  setUploadResults?: (results: FileUploadResults) => void
+) {
+  return (
+    <FileDataVisualizerWrapper resultLinks={resultLinks} setUploadResults={setUploadResults} />
+  );
 }
 
 const DataDriftLazy = React.lazy(() => import('../application/data_drift'));

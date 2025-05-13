@@ -8,83 +8,70 @@
  */
 
 import { css } from '@emotion/react';
-import React, { PropsWithChildren, useEffect, useRef } from 'react';
-import { combineLatest, distinctUntilChanged, map } from 'rxjs';
-import { GridLayoutStateManager } from './types';
+import React, { useEffect, useRef } from 'react';
+import { combineLatest } from 'rxjs';
+import { useGridLayoutContext } from './use_grid_layout_context';
 
-export const GridHeightSmoother = ({
-  children,
-  gridLayoutStateManager,
-}: PropsWithChildren<{ gridLayoutStateManager: GridLayoutStateManager }>) => {
-  // set the parent div size directly to smooth out height changes.
-  const smoothHeightRef = useRef<HTMLDivElement | null>(null);
+export const GridHeightSmoother = React.memo(
+  ({ children }: { children: React.ReactNode | undefined }) => {
+    const { gridLayoutStateManager } = useGridLayoutContext();
 
-  useEffect(() => {
-    /**
-     * When the user is interacting with an element, the page can grow, but it cannot
-     * shrink. This is to stop a behaviour where the page would scroll up automatically
-     * making the panel shrink or grow unpredictably.
-     */
-    const interactionStyleSubscription = combineLatest([
-      gridLayoutStateManager.gridDimensions$,
-      gridLayoutStateManager.interactionEvent$,
-    ]).subscribe(([dimensions, interactionEvent]) => {
-      if (!smoothHeightRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
+    // set the parent div size directly to smooth out height changes.
+    const smoothHeightRef = useRef<HTMLDivElement | null>(null);
 
-      if (!interactionEvent) {
-        smoothHeightRef.current.style.height = `${dimensions.height}px`;
-        smoothHeightRef.current.style.userSelect = 'auto';
-        return;
-      }
+    useEffect(() => {
+      /**
+       * When the user is interacting with an element, the page can grow, but it cannot
+       * shrink. This is to stop a behaviour where the page would scroll up automatically
+       * making the panel shrink or grow unpredictably.
+       */
+      const interactionStyleSubscription = combineLatest([
+        gridLayoutStateManager.gridDimensions$,
+        gridLayoutStateManager.interactionEvent$,
+      ]).subscribe(([dimensions, interactionEvent]) => {
+        if (!smoothHeightRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
 
-      smoothHeightRef.current.style.height = `${Math.max(
-        dimensions.height ?? 0,
-        smoothHeightRef.current.getBoundingClientRect().height
-      )}px`;
-      smoothHeightRef.current.style.userSelect = 'none';
-    });
-
-    /**
-     * This subscription sets global CSS variables that can be used by all components contained within
-     * this wrapper; note that this is **currently** only used for the gutter size, but things like column
-     * count could be added here once we add the ability to change these values
-     */
-    const globalCssVariableSubscription = gridLayoutStateManager.runtimeSettings$
-      .pipe(
-        map(({ gutterSize }) => gutterSize),
-        distinctUntilChanged()
-      )
-      .subscribe((gutterSize) => {
-        smoothHeightRef.current?.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
+        if (!interactionEvent) {
+          smoothHeightRef.current.style.minHeight = `${dimensions.height}px`;
+          return;
+        }
+        smoothHeightRef.current.style.minHeight = `${
+          smoothHeightRef.current.getBoundingClientRect().height
+        }px`;
       });
 
-    return () => {
-      interactionStyleSubscription.unsubscribe();
-      globalCssVariableSubscription.unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      return () => {
+        interactionStyleSubscription.unsubscribe();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
-  return (
-    <div
-      ref={smoothHeightRef}
-      className={'kbnGridWrapper'}
-      css={css`
-        margin: calc(var(--kbnGridGutterSize) * 1px);
-        overflow-anchor: none;
-        transition: height 500ms linear;
+    return (
+      <div
+        ref={smoothHeightRef}
+        className={'kbnGridWrapper'}
+        css={[styles.heightSmoothing, styles.hasActivePanel]}
+      >
+        {children}
+      </div>
+    );
+  }
+);
 
-        &:has(.kbnGridPanel--expanded) {
-          height: 100% !important;
-          position: relative;
-          transition: none;
-          // switch to padding so that the panel does not extend the height of the parent
-          margin: 0px;
-          padding: calc(var(--kbnGridGutterSize) * 1px);
-        }
-      `}
-    >
-      {children}
-    </div>
-  );
+const styles = {
+  heightSmoothing: css({
+    height: '100%',
+    overflowAnchor: 'none',
+    transition: 'min-height 500ms linear',
+  }),
+  hasActivePanel: css({
+    '&:has(.kbnGridPanel--expanded)': {
+      minHeight: '100% !important',
+      maxHeight: '100vh', // fallback in case if the parent doesn't set the height correctly
+      position: 'relative',
+      transition: 'none',
+    },
+  }),
 };
+
+GridHeightSmoother.displayName = 'KbnGridLayoutHeightSmoother';

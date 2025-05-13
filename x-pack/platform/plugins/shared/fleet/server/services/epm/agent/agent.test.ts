@@ -476,6 +476,23 @@ paths:
       'Error while compiling agent template: options.inverse is not a function'
     );
   });
+
+  it('should throw on invalid yaml', () => {
+    const template = `
+{{#if condition }}\ncondition: {{condition}}\n{{/if}}\n\npaths:\n{{#each paths as |path|}}\n  - {{path}}\n{{/each}}\n\nexclude_files: \n{{#each exclude_files as |exclude_files|}}\n  - {{exclude_files}}\n{{/each}}\n\nmultiline:\n  pattern: \"^\\\\s\"\n  match: after\n\nprocessors:\n- add_locale: ~\n{{#if processors.length}}\n{{processors}}\n{{/if}}\nallow_deprecated_use: true\ntags:\n{{#if preserve_original_event}}\n  - preserve_original_event\n{{/if}}\n{{#each tags as |tag|}}\n  - {{tag}}\n{{/each}}\n\n{{#if ignore_older}}\nignore_older: {{ignore_older}}\n{{/if}}\n
+`;
+    const vars = {
+      processors: {
+        type: 'yaml',
+        value:
+          'data_stream:\n  dataset: test\n\nprocessors:\n  - add_host_metadata: \\~\n  - add_cloud_metadata: \\~',
+      },
+    };
+
+    expect(() => compileTemplate(vars, template)).toThrowError(
+      'YAMLException: duplicated mapping key'
+    );
+  });
 });
 
 describe('encode', () => {

@@ -16,26 +16,28 @@ import {
   isOfQueryType,
 } from '@kbn/es-query';
 import {
+  PublishesTitle,
   PublishingSubject,
   StateComparators,
   apiPublishesUnifiedSearch,
-  getUnchangingComparator,
 } from '@kbn/presentation-publishing';
 import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { partition } from 'lodash';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Visualization } from '../..';
 import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 import { Datasource, IndexPatternMap } from '../../types';
 import { getMergedSearchContext } from '../expressions/merged_search_context';
-import { buildObservableVariable, isTextBasedLanguage } from '../helper';
+import { isTextBasedLanguage } from '../helper';
 import type {
   GetStateType,
   LensEmbeddableStartServices,
   LensInternalApi,
   LensRuntimeState,
+  LensSerializedState,
   ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
 } from '../types';
@@ -65,7 +67,7 @@ function getViewUnderlyingDataArgs({
     canOpenVisualizations: boolean;
     canSaveDashboards: boolean;
     navLinks: Capabilities['navLinks'];
-    discover: Capabilities['discover'];
+    discover_v2: Capabilities['discover_v2'];
   };
   query: Array<Query | AggregateQuery>;
   filters: Filter[];
@@ -186,11 +188,11 @@ function loadViewUnderlyingDataArgs(
     activeVisualizationState,
     activeData,
     capabilities: {
-      canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
-      canSaveVisualizations: Boolean(capabilities.visualize.save),
-      canOpenVisualizations: Boolean(capabilities.visualize.show),
+      canSaveDashboards: Boolean(capabilities.dashboard_v2?.showWriteControls),
+      canSaveVisualizations: Boolean(capabilities.visualize_v2?.save),
+      canOpenVisualizations: Boolean(capabilities.visualize_v2?.show),
       navLinks: capabilities.navLinks,
-      discover: capabilities.discover,
+      discover_v2: capabilities.discover_v2,
     },
     query: mergedSearchContext.query,
     filters: mergedSearchContext.filters || [],
@@ -211,7 +213,7 @@ function createViewUnderlyingDataApis(
 ): ViewInDiscoverCallbacks {
   let viewUnderlyingDataArgs: undefined | ViewUnderlyingDataArgs;
 
-  const [canViewUnderlyingData$] = buildObservableVariable<boolean>(false);
+  const canViewUnderlyingData$ = new BehaviorSubject<boolean>(false);
 
   return {
     canViewUnderlyingData$,
@@ -241,25 +243,27 @@ export function initializeActionApi(
   getLatestState: GetStateType,
   parentApi: unknown,
   searchContextApi: { timeRange$: PublishingSubject<TimeRange | undefined> },
-  titleApi: { panelTitle: PublishingSubject<string | undefined> },
+  title$: PublishesTitle['title$'],
   internalApi: LensInternalApi,
   services: LensEmbeddableStartServices
 ): {
   api: ViewInDiscoverCallbacks & HasDynamicActions;
-  comparators: StateComparators<DynamicActionsSerializedState>;
-  serialize: () => {};
+  anyStateChange$: Observable<void>;
+  getComparators: () => StateComparators<DynamicActionsSerializedState>;
+  getLatestState: () => DynamicActionsSerializedState;
   cleanup: () => void;
+  reinitializeState: (lastSaved?: LensSerializedState) => void;
 } {
-  const dynamicActionsApi = services.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
+  const dynamicActionsManager = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
     uuid,
-    () => titleApi.panelTitle.getValue(),
+    () => title$.getValue(),
     initialState
   );
-  const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
+  const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
   return {
     api: {
-      ...(isTextBasedLanguage(initialState) ? {} : dynamicActionsApi?.dynamicActionsApi ?? {}),
+      ...(isTextBasedLanguage(initialState) ? {} : dynamicActionsManager?.api ?? {}),
       ...createViewUnderlyingDataApis(
         getLatestState,
         internalApi,
@@ -268,14 +272,18 @@ export function initializeActionApi(
         services
       ),
     },
-    comparators: {
-      ...(dynamicActionsApi?.dynamicActionsComparator ?? {
-        enhancements: getUnchangingComparator(),
+    anyStateChange$: dynamicActionsManager?.anyStateChange$ ?? new BehaviorSubject(undefined),
+    getComparators: () => ({
+      ...(dynamicActionsManager?.comparators ?? {
+        enhancements: 'skip',
       }),
-    },
-    serialize: () => dynamicActionsApi?.serializeDynamicActions() ?? {},
+    }),
+    getLatestState: () => dynamicActionsManager?.getLatestState() ?? {},
     cleanup: () => {
       maybeStopDynamicActions?.stopDynamicActions();
+    },
+    reinitializeState: (lastSaved?: LensSerializedState) => {
+      dynamicActionsManager?.reinitializeState(lastSaved ?? {});
     },
   };
 }

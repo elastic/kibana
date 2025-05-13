@@ -52,3 +52,8 @@ export type Options = Omit<IterOptions, 'refDT'> & {
   count?: number;
   tzid: string;
 };
+
+export type ConstructorOptions = Omit<Options, 'byweekday' | 'wkst'> & {
+  byweekday?: Array<string | number> | null;
+  wkst?: Weekday | WeekdayStr | number | null;
+};

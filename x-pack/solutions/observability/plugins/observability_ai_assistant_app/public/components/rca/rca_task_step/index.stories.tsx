@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { RootCauseAnalysisTaskStepItem } from '.';
 import { EntityBadge } from '../entity_badge';
 
-const stories: Meta<{}> = {
+const stories: Meta = {
   title: 'RCA/TaskStepItem',
   component: RootCauseAnalysisTaskStepItem,
 };
 
 export default stories;
 
-export const Pending: Story<{}> = () => {
+export const Pending: StoryFn = () => {
   return (
     <RootCauseAnalysisTaskStepItem
       status="pending"
@@ -34,7 +34,7 @@ export const Pending: Story<{}> = () => {
   );
 };
 
-export const Completed: Story<{}> = () => {
+export const Completed: StoryFn = () => {
   return (
     <RootCauseAnalysisTaskStepItem
       status="completed"
@@ -50,7 +50,7 @@ export const Completed: Story<{}> = () => {
   );
 };
 
-export const Failure: Story<{}> = () => {
+export const Failure: StoryFn = () => {
   return (
     <RootCauseAnalysisTaskStepItem
       status="failure"

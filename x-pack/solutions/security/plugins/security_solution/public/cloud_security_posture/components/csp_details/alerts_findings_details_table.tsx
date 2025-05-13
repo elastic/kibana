@@ -9,7 +9,15 @@ import React, { memo, useCallback, useEffect, useState } from 'react';
 import { encode } from '@kbn/rison';
 import { capitalize } from 'lodash';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiLink } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiPanel,
+  EuiText,
+  EuiBasicTable,
+  EuiIcon,
+  EuiLink,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import {
@@ -39,6 +47,7 @@ import { SeverityBadge } from '../../../common/components/severity_badge';
 import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
+import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 enum KIBANA_ALERTS {
   SEVERITY = 'kibana.alert.severity',
@@ -76,7 +85,9 @@ interface AlertsDetailsFields {
 }
 
 export const AlertsDetailsTable = memo(
-  ({ field, value }: { field: 'host.name' | 'user.name'; value: string }) => {
+  ({ field, value }: { field: CloudPostureEntityIdentifier; value: string }) => {
+    const { euiTheme } = useEuiTheme();
+
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,
@@ -163,7 +174,7 @@ export const AlertsDetailsTable = memo(
     const alertStats = Array.from(severityMap, ([key, count]) => ({
       key: capitalize(key),
       count,
-      color: getSeverityColor(key),
+      color: getSeverityColor(key, euiTheme),
       filter: () => {
         setCurrentFilter(key);
         setQuery(

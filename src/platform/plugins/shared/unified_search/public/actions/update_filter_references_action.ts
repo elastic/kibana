@@ -9,8 +9,7 @@
 
 import { ActionExecutionMeta, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
-
-export const UPDATE_FILTER_REFERENCES_ACTION = 'UPDATE_FILTER_REFERENCES_ACTION';
+import { UPDATE_FILTER_REFERENCES_ACTION } from './constants';
 
 export interface UpdateFilterReferencesActionContext extends ActionExecutionMeta {
   /** The initial data view of the editable layer **/

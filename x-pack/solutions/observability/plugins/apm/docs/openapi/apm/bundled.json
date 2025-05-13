@@ -15,7 +15,7 @@
     },
     {
       "name": "APM sourcemaps",
-      "description": "Configure APM source maps."
+      "description": "Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.\nFor best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.\n"
     },
     {
       "name": "APM annotations",
@@ -30,7 +30,7 @@
     "/api/apm/agent_keys": {
       "post": {
         "summary": "Create an APM agent key",
-        "description": "Create a new agent key for APM.",
+        "description": "Create a new agent key for APM.\nThe user creating an APM agent API key must have at least the `manage_own_api_key` cluster privilege and the APM application-level privileges that it wishes to grant.\nAfter it is created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.\n",
         "operationId": "createAgentKey",
         "tags": [
           "APM agent keys"
@@ -49,6 +49,11 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/agent_keys_object"
+              },
+              "examples": {
+                "createAgentKeyRequest1": {
+                  "$ref": "#/components/examples/agent_keys_object_post_request1"
+                }
               }
             }
           }
@@ -60,6 +65,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/agent_keys_response"
+                },
+                "examples": {
+                  "createAgentKeyResponse1": {
+                    "$ref": "#/components/examples/agent_keys_object_post_200_response1"
+                  }
                 }
               }
             }
@@ -242,6 +252,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/create_annotation_response"
+                },
+                "examples": {
+                  "createAnnotationResponse1": {
+                    "$ref": "#/components/examples/annotation_object_post_200_response1"
+                  }
                 }
               }
             }
@@ -286,7 +301,13 @@
               }
             }
           }
-        }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "Curl",
+            "source": "curl -X POST \\\nhttp://localhost:5601/api/apm/services/opbeans-java/annotation \\\n-H 'Content-Type: application/json' \\\n-H 'kbn-xsrf: true' \\\n-H 'Authorization: Basic YhUlubWZhM0FDbnlQeE6WRtaW49FQmSGZ4RUWXdX' \\\n-d '{\n    \"@timestamp\": \"2020-05-08T10:31:30.452Z\",\n    \"service\": {\n        \"version\": \"1.2\"\n    },\n    \"message\": \"Deployment 1.2\"\n    }'\n"
+          }
+        ]
       }
     },
     "/api/apm/settings/agent-configuration": {
@@ -308,6 +329,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/agent_configurations_response"
+                },
+                "examples": {
+                  "getAgentConfigurationsResponseExample1": {
+                    "$ref": "#/components/examples/agent_configuration_intake_object_get_200_response1"
+                  }
                 }
               }
             }
@@ -364,6 +390,11 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/service_object"
+              },
+              "examples": {
+                "deleteAgentConfigurationRequest1": {
+                  "$ref": "#/components/examples/agent_configuration_intake_object_delete_request1"
+                }
               }
             }
           }
@@ -449,6 +480,11 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/agent_configuration_intake_object"
+              },
+              "examples": {
+                "createUpdateAgentConfigurationRequestExample1": {
+                  "$ref": "#/components/examples/agent_configuration_intake_object_put_request1"
+                }
               }
             }
           }
@@ -585,7 +621,7 @@
     "/api/apm/settings/agent-configuration/search": {
       "post": {
         "summary": "Lookup single agent configuration",
-        "description": "This endpoint allows to search for single agent configuration and update 'applied_by_agent' field.\n",
+        "description": "This endpoint enables you to search for a single agent configuration and update the 'applied_by_agent' field.\n",
         "operationId": "searchSingleConfiguration",
         "tags": [
           "APM agent configuration"
@@ -604,6 +640,11 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/search_agent_configuration_object"
+              },
+              "examples": {
+                "searchSingleConfigurationRequest1": {
+                  "$ref": "#/components/examples/agent_configuration_intake_object_search_request1"
+                }
               }
             }
           }
@@ -615,6 +656,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/search_agent_configuration_response"
+                },
+                "examples": {
+                  "searchSingleConfigurationResponse1": {
+                    "$ref": "#/components/examples/agent_configuration_intake_object_search_200_response1"
+                  }
                 }
               }
             }
@@ -786,7 +832,7 @@
     "/api/apm/sourcemaps": {
       "get": {
         "summary": "Get source maps",
-        "description": "Returns an array of Fleet artifacts, including source map uploads.",
+        "description": "Get an array of Fleet artifacts, including source map uploads. You must have `read` or `all` Kibana privileges for the APM and User Experience feature.\n",
         "operationId": "getSourceMaps",
         "tags": [
           "APM sourcemaps"
@@ -819,6 +865,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/source_maps_response"
+                },
+                "examples": {
+                  "getSourceMapsResponse1": {
+                    "$ref": "#/components/examples/source_maps_get_200_response1"
+                  }
                 }
               }
             }
@@ -863,11 +914,17 @@
               }
             }
           }
-        }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "Curl",
+            "source": "curl -X GET \"http://localhost:5601/api/apm/sourcemaps\" \\\n-H 'Content-Type: application/json' \\\n-H 'kbn-xsrf: true' \\\n-H 'Authorization: ApiKey ${YOUR_API_KEY}'\n"
+          }
+        ]
       },
       "post": {
-        "summary": "Upload source map",
-        "description": "Upload a source map for a specific service and version.",
+        "summary": "Upload a source map",
+        "description": "Upload a source map for a specific service and version. You must have `all` Kibana privileges for the APM and User Experience feature.\nThe maximum payload size is `1mb`. If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error. Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the `server.maxPayload` variable.\n",
         "operationId": "uploadSourceMap",
         "tags": [
           "APM sourcemaps"
@@ -897,6 +954,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/upload_source_maps_response"
+                },
+                "examples": {
+                  "uploadSourceMapResponse1": {
+                    "$ref": "#/components/examples/source_maps_upload_200_response1"
+                  }
                 }
               }
             }
@@ -951,13 +1013,19 @@
               }
             }
           }
-        }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "Curl",
+            "source": "curl -X POST \"http://localhost:5601/api/apm/sourcemaps\" \\\n-H 'Content-Type: multipart/form-data' \\\n-H 'kbn-xsrf: true' \\\n-H 'Authorization: ApiKey ${YOUR_API_KEY}' \\\n-F 'service_name=\"foo\"' \\\n-F 'service_version=\"1.0.0\"' \\\n-F 'bundle_filepath=\"/test/e2e/general-usecase/bundle.js\"' \\\n-F 'sourcemap=\"{\\\"version\\\":3,\\\"file\\\":\\\"static/js/main.chunk.js\\\",\\\"sources\\\":[\\\"fleet-source-map-client/src/index.css\\\",\\\"fleet-source-map-client/src/App.js\\\",\\\"webpack:///./src/index.css?bb0a\\\",\\\"fleet-source-map-client/src/index.js\\\",\\\"fleet-source-map-client/src/reportWebVitals.js\\\"],\\\"sourcesContent\\\":[\\\"content\\\"],\\\"mappings\\\":\\\"mapping\\\",\\\"sourceRoot\\\":\\\"\\\"}\"' \n"
+          }
+        ]
       }
     },
     "/api/apm/sourcemaps/{id}": {
       "delete": {
         "summary": "Delete source map",
-        "description": "Delete a previously uploaded source map.",
+        "description": "Delete a previously uploaded source map. You must have `all` Kibana privileges for the APM and User Experience feature.\n",
         "operationId": "deleteSourceMap",
         "tags": [
           "APM sourcemaps"
@@ -1041,7 +1109,13 @@
               }
             }
           }
-        }
+        },
+        "x-codeSamples": [
+          {
+            "lang": "Curl",
+            "source": "curl -X DELETE \"http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9\" \\\n-H 'Content-Type: application/json' \\\n-H 'kbn-xsrf: true' \\\n-H 'Authorization: ApiKey ${YOUR_API_KEY}'\n"
+          }
+        ]
       }
     },
     "/api/apm/fleet/apm_server_schema": {
@@ -1171,11 +1245,11 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Agent name"
+            "description": "The name of the APM agent key."
           },
           "privileges": {
             "type": "array",
-            "description": "Privileges configuration",
+            "description": "The APM agent key privileges. It can take one or more of the following values:\n* `event:write`, which is required for ingesting APM agent events. * `config_agent:read`, which is required for APM agents to read agent configuration remotely.\n",
             "items": {
               "type": "string",
               "enum": [
@@ -1334,30 +1408,32 @@
         "properties": {
           "@timestamp": {
             "type": "string",
-            "description": "Timestamp"
+            "description": "The date and time of the annotation. It must be in ISO 8601 format."
           },
           "service": {
             "type": "object",
-            "description": "Service",
+            "description": "The service that identifies the configuration to create or update.",
             "required": [
               "version"
             ],
             "properties": {
               "version": {
-                "type": "string"
+                "type": "string",
+                "description": "The version of the service."
               },
               "environment": {
-                "type": "string"
+                "type": "string",
+                "description": "The environment of the service."
               }
             }
           },
           "message": {
             "type": "string",
-            "description": "Message"
+            "description": "The message displayed in the annotation. It defaults to `service.version`."
           },
           "tags": {
             "type": "array",
-            "description": "Tags",
+            "description": "Tags are used by the Applications UI to distinguish APM annotations from other annotations. Tags may have additional functionality in future releases. It defaults to `[apm]`. While you can add additional tags, you cannot remove the `apm` tag.\n",
             "items": {
               "type": "string"
             }
@@ -1455,12 +1531,12 @@
           "name": {
             "type": "string",
             "example": "node",
-            "description": "Name"
+            "description": "The name of the service."
           },
           "environment": {
             "type": "string",
             "example": "prod",
-            "description": "Environment"
+            "description": "The environment of the service."
           }
         }
       },
@@ -1504,7 +1580,7 @@
           "etag": {
             "type": "string",
             "example": "0bc3b5ebf18fba8163fe4c96f491e3767a358f85",
-            "description": "Etag"
+            "description": "`etag` is sent by the APM agent to indicate the `etag` of the last successfully applied configuration. If the `etag` matches an existing configuration its `applied_by_agent` property will be set to `true`. Every time a configuration is edited `applied_by_agent` is reset to `false`.\n"
           }
         }
       },
@@ -1529,7 +1605,7 @@
         "properties": {
           "agent_name": {
             "type": "string",
-            "description": "Agent name"
+            "description": "The agent name is used by the UI to determine which settings to display."
           },
           "service": {
             "$ref": "#/components/schemas/service_object"
@@ -1803,7 +1879,7 @@
           "sourcemap": {
             "type": "string",
             "format": "binary",
-            "description": "The source map. String or file upload. It must follow the\n[source map revision 3 proposal](https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k).\n"
+            "description": "The source map. It can be a string or file upload. It must follow the\n[source map format specification](https://tc39.es/ecma426/).\n"
           }
         }
       },
@@ -1821,6 +1897,62 @@
             "$ref": "#/components/schemas/base_source_map_object"
           }
         ]
+      }
+    },
+    "examples": {
+      "agent_keys_object_post_request1": {
+        "description": "Run `POST /api/apm/agent_keys` to create an APM agent API key with the specified privileges.",
+        "value": "{\n    \"name\": \"apm-key\",\n    \"privileges\": [\"event:write\", \"config_agent:read\"]\n}\n"
+      },
+      "agent_keys_object_post_200_response1": {
+        "description": "An example of a successful response from `POST /api/apm/agent_keys`, which creates an APM agent API key.",
+        "value": "{\n  \"agentKey\": {\n    \"id\": \"3DCLmn0B3ZMhLUa7WBG9\",\n    \"name\": \"apm-key\",\n    \"api_key\": \"PjGloCGOTzaZr8ilUPvkjA\",\n    \"encoded\": \"M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ==\"\n  }\n}\n"
+      },
+      "annotation_object_post_200_response1": {
+        "description": "An example of a successful response from `POST /api/apm/services/opbeans-java/annotation`, which creates an annotation for a service named `opbeans-java`.",
+        "value": "{\n  \"_index\": \"observability-annotations\",\n  \"_id\": \"Lc9I93EBh6DbmkeV7nFX\",\n  \"_version\": 1,\n  \"_seq_no\": 12,\n  \"_primary_term\": 1,\n  \"found\": true,\n  \"_source\": {\n    \"message\": \"Deployment 1.2\",\n    \"@timestamp\": \"2020-05-08T10:31:30.452Z\",\n    \"service\": {\n      \"version\": \"1.2\",\n      \"name\": \"opbeans-java\"\n    },\n    \"tags\": [\n      \"apm\",\n      \"elastic.co\",\n      \"customer\"\n    ],\n    \"annotation\": {\n      \"type\": \"deployment\"\n    },\n    \"event\": {\n      \"created\": \"2020-05-09T02:34:43.937Z\"\n    }\n  }\n}\n"
+      },
+      "agent_configuration_intake_object_get_200_response1": {
+        "description": "An example of a successful response from `GET /api/apm/settings/agent-configuration`.",
+        "value": "[\n  {\n      \"agent_name\": \"go\",\n      \"service\": {\n      \"name\": \"opbeans-go\",\n      \"environment\": \"production\"\n      },\n      \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n      \"capture_body\": \"off\",\n      \"transaction_max_spans\": \"200\"\n      },\n      \"@timestamp\": 1581934104843,\n      \"applied_by_agent\": false,\n      \"etag\": \"1e58c178efeebae15c25c539da740d21dee422fc\"\n  },\n  {\n      \"agent_name\": \"go\",\n      \"service\": {\n      \"name\": \"opbeans-go\"\n      },\n      \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n      \"capture_body\": \"off\",\n      \"transaction_max_spans\": \"300\"\n      },\n      \"@timestamp\": 1581934111727,\n      \"applied_by_agent\": false,\n      \"etag\": \"3eed916d3db434d9fb7f039daa681c7a04539a64\"\n  },\n  {\n      \"agent_name\": \"nodejs\",\n      \"service\": {\n      \"name\": \"frontend\"\n      },\n      \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n      },\n      \"@timestamp\": 1582031336265,\n      \"applied_by_agent\": false,\n      \"etag\": \"5080ed25785b7b19f32713681e79f46996801a5b\"\n  }\n]\n"
+      },
+      "agent_configuration_intake_object_put_request1": {
+        "description": "Run `PUT /api/apm/settings/agent-configuration` to create or update configuration details.",
+        "value": "{\n    \"service\": {\n        \"name\": \"frontend\",\n        \"environment\": \"production\"\n    },\n    \"settings\": {\n        \"transaction_sample_rate\": \"0.4\",\n        \"capture_body\": \"off\",\n        \"transaction_max_spans\": \"500\"\n    },\n    \"agent_name\": \"nodejs\"\n}\n"
+      },
+      "agent_configuration_intake_object_delete_request1": {
+        "description": "Run `DELETE /api/apm/settings/agent-configuration` to delete a configuration.",
+        "value": "{\n    \"service\" : {\n        \"name\": \"frontend\",\n        \"environment\": \"production\"\n    }\n}\n"
+      },
+      "agent_configuration_intake_object_search_request1": {
+        "description": "Run `POST /api/apm/settings/agent-configuration/search` to search configuration details.",
+        "value": "{\n    \"etag\": \"1e58c178efeebae15c25c539da740d21dee422fc\",\n    \"service\" : {\n        \"name\": \"frontend\",\n        \"environment\": \"production\"\n    }\n}\n"
+      },
+      "agent_configuration_intake_object_search_200_response1": {
+        "description": "An example of a successful response from `POST /api/apm/settings/agent-configuration/search`.",
+        "value": "{\n  \"_index\": \".apm-agent-configuration\",\n  \"_id\": \"CIaqXXABmQCdPphWj8EJ\",\n  \"_score\": 2,\n  \"_source\": {\n    \"agent_name\": \"nodejs\",\n    \"service\": {\n      \"name\": \"frontend\"\n    },\n    \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n    },\n    \"@timestamp\": 1582031336265,\n    \"applied_by_agent\": false,\n    \"etag\": \"5080ed25785b7b19f32713681e79f46996801a5b\"\n  }\n}\n"
+      },
+      "source_maps_get_200_response1": {
+        "description": "A successful response from `GET /api/apm/sourcemaps`.",
+        "value": "{\n  \"artifacts\": [\n    {\n      \"type\": \"sourcemap\",\n      \"identifier\": \"foo-1.0.0\",\n      \"relative_url\": \"/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"body\": {\n        \"serviceName\": \"foo\",\n        \"serviceVersion\": \"1.0.0\",\n        \"bundleFilepath\": \"/test/e2e/general-usecase/bundle.js\",\n        \"sourceMap\": {\n          \"version\": 3,\n          \"file\": \"static/js/main.chunk.js\",\n          \"sources\": [\n            \"fleet-source-map-client/src/index.css\",\n            \"fleet-source-map-client/src/App.js\",\n            \"webpack:///./src/index.css?bb0a\",\n            \"fleet-source-map-client/src/index.js\",\n            \"fleet-source-map-client/src/reportWebVitals.js\"\n          ],\n          \"sourcesContent\": [\n            \"content\"\n          ],\n          \"mappings\": \"mapping\",\n          \"sourceRoot\": \"\"\n        }\n      },\n      \"created\": \"2021-07-09T20:47:44.812Z\",\n      \"id\": \"apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"compressionAlgorithm\": \"zlib\",\n      \"decodedSha256\": \"644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"decodedSize\": 441,\n      \"encodedSha256\": \"024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24\",\n      \"encodedSize\": 237,\n      \"encryptionAlgorithm\": \"none\",\n      \"packageName\": \"apm\"\n    }\n  ]\n}\n"
+      },
+      "source_maps_upload_200_response1": {
+        "description": "A successful response from `POST /api/apm/sourcemaps`.",
+        "value": {
+          "type": "sourcemap",
+          "identifier": "foo-1.0.0",
+          "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+          "body": "eJyFkL1OwzAUhd/Fc+MbYMuCEBIbHRjKgBgc96R16tiWr1OQqr47NwqJxEK3q/PzWccXxchnZ7E1A1SjuhjVZtF2yOxiEPlO17oWox3D3uPFeSRTjmJQARfCPeiAgGx8NTKsYdAc1T3rwaSJGcds8Sp3c1HnhfywUZ3QhMTFFGepZxqMC9oex3CS9tpk1XyozgOlmoVKuJX1DqEQZ0su7PGtLU+V/3JPKc3cL7TJ2FNDRPov4bFta3MDM4f7W69lpJjLO9qdK8bzVPhcJz3HUCQ4LbO/p5hCSC4cZPByrp/wFqOklbpefwAhzpqI",
+          "created": "2021-07-09T20:47:44.812Z",
+          "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+          "compressionAlgorithm": "zlib",
+          "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+          "decodedSize": 441,
+          "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+          "encodedSize": 237,
+          "encryptionAlgorithm": "none",
+          "packageName": "apm"
+        }
       }
     }
   }

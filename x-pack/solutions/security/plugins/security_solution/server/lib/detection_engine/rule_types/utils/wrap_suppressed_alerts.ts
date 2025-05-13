@@ -10,7 +10,7 @@ import objectHash from 'object-hash';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
-import type { SignalSourceHit } from '../types';
+import type { SecuritySharedParams, SignalSourceHit } from '../types';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
@@ -18,9 +18,9 @@ import type {
 
 import { transformHitToAlert } from '../factories/utils/transform_hit_to_alert';
 import { getSuppressionAlertFields, getSuppressionTerms } from './suppression_utils';
-import type { SharedParams } from './utils';
 import { generateId } from './utils';
 import type { BuildReasonMessage } from './reason_formatters';
+import type { EqlRuleParams, MachineLearningRuleParams, ThreatRuleParams } from '../../rule_schema';
 
 /**
  * wraps suppressed alerts
@@ -29,21 +29,14 @@ import type { BuildReasonMessage } from './reason_formatters';
  */
 export const wrapSuppressedAlerts = ({
   events,
-  spaceId,
-  completeRule,
-  mergeStrategy,
-  indicesToQuery,
   buildReasonMessage,
-  alertTimestampOverride,
-  ruleExecutionLogger,
-  publicBaseUrl,
-  primaryTimestamp,
-  secondaryTimestamp,
-  intendedTimestamp,
+  sharedParams,
 }: {
   events: SignalSourceHit[];
   buildReasonMessage: BuildReasonMessage;
-} & SharedParams): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+  sharedParams: SecuritySharedParams<MachineLearningRuleParams | EqlRuleParams | ThreatRuleParams>;
+}): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
+  const { completeRule, spaceId, primaryTimestamp, secondaryTimestamp } = sharedParams;
   return events.map((event) => {
     const suppressionTerms = getSuppressionTerms({
       alertSuppression: completeRule?.ruleParams?.alertSuppression,
@@ -61,20 +54,11 @@ export const wrapSuppressedAlerts = ({
     const instanceId = objectHash([suppressionTerms, completeRule.alertId, spaceId]);
 
     const baseAlert: BaseFieldsLatest = transformHitToAlert({
-      spaceId,
-      completeRule,
+      sharedParams,
       doc: event,
-      mergeStrategy,
-      ignoreFields: {},
-      ignoreFieldsRegexes: [],
       applyOverrides: true,
       buildReasonMessage,
-      indicesToQuery,
-      alertTimestampOverride,
-      ruleExecutionLogger,
       alertUuid: id,
-      publicBaseUrl,
-      intendedTimestamp,
     });
 
     return {

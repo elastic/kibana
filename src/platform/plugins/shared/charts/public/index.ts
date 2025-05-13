@@ -20,9 +20,24 @@ export const plugin = () => new ChartsPlugin();
 
 export type { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 
-export * from './static';
-export * from './services/palettes/lighten_color';
-export * from './services/palettes/decrease_opacity';
+export {
+  createColorPalette,
+  seedColors,
+  CurrentTime,
+  EmptyPlaceholder,
+  useCommonChartStyles,
+  Endzones,
+  getAdjustedInterval,
+  renderEndzoneTooltip,
+  Warnings,
+  ColorPickerLazy,
+  ColorPicker,
+  LegendToggleLazy,
+  LegendToggle,
+  MULTILAYER_TIME_AXIS_STYLE,
+} from './static';
+export { lightenColor } from './services/palettes/lighten_color';
+export { decreaseOpacity } from './services/palettes/decrease_opacity';
 export { useActiveCursor } from './services/active_cursor';
 
 export interface ClickTriggerEvent {

@@ -10,13 +10,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPopover,
   EuiDescriptionList,
   EuiDescriptionListDescription,
+  EuiButtonEmpty,
+  euiTextBreakWord,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
@@ -25,7 +26,7 @@ import type { MonacoMessage } from '../helpers';
 const getConstsByType = (type: 'error' | 'warning', count: number) => {
   if (type === 'error') {
     return {
-      color: 'danger',
+      color: 'danger' as const,
       message: i18n.translate('esqlEditor.query.errorCount', {
         defaultMessage: '{count} {count, plural, one {error} other {errors}}',
         values: { count },
@@ -36,7 +37,7 @@ const getConstsByType = (type: 'error' | 'warning', count: number) => {
     };
   } else {
     return {
-      color: 'warning',
+      color: 'warning' as const,
       message: i18n.translate('esqlEditor.query.warningCount', {
         defaultMessage: '{count} {count, plural, one {warning} other {warnings}}',
         values: { count },
@@ -86,7 +87,12 @@ function ErrorsWarningsContent({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} className="ESQLEditor_errorMessage">
+                <EuiFlexItem
+                  grow={false}
+                  css={css`
+                    ${euiTextBreakWord()}
+                  `}
+                >
                   {item.message}
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -117,45 +123,30 @@ export function ErrorsWarningsFooterPopover({
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={type}
-            color={color}
-            size="s"
-            onClick={() => {
-              setIsPopoverOpen(!isPopoverOpen);
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            anchorPosition="downLeft"
-            hasArrow={false}
-            panelPaddingSize="s"
-            button={
-              <EuiText
-                size="xs"
-                color={color}
-                css={css`
-                  &:hover {
-                    cursor: pointer;
-                    text-decoration: underline;
-                  }
-                `}
-                onClick={() => {
-                  setIsPopoverOpen(!isPopoverOpen);
-                }}
-              >
-                <p>{isSpaceReduced ? items.length : message}</p>
-              </EuiText>
-            }
-            ownFocus={false}
-            isOpen={isPopoverOpen}
-            closePopover={() => setIsPopoverOpen(false)}
-          >
-            <ErrorsWarningsContent items={items} type={type} onErrorClick={onErrorClick} />
-          </EuiPopover>
-        </EuiFlexItem>
+        <EuiPopover
+          anchorPosition="downLeft"
+          hasArrow={false}
+          panelPaddingSize="s"
+          button={
+            <EuiButtonEmpty
+              iconType={type}
+              iconSize="s"
+              color={color}
+              size="xs"
+              iconSide="left"
+              onClick={() => {
+                setIsPopoverOpen(!isPopoverOpen);
+              }}
+            >
+              {isSpaceReduced ? items.length : message}
+            </EuiButtonEmpty>
+          }
+          ownFocus={false}
+          isOpen={isPopoverOpen}
+          closePopover={() => setIsPopoverOpen(false)}
+        >
+          <ErrorsWarningsContent items={items} type={type} onErrorClick={onErrorClick} />
+        </EuiPopover>
       </EuiFlexGroup>
     </EuiFlexItem>
   );

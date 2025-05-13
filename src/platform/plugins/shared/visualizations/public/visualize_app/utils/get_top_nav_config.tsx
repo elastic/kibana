@@ -44,12 +44,13 @@ import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../..
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import './visualize_navigation.scss';
+import { serializeReferences } from '../../utils/saved_visualization_references';
+import { serializeState } from '../../embeddable/state';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
   delete: boolean;
   save: boolean;
-  saveQuery: boolean;
   show: boolean;
 }
 
@@ -76,9 +77,9 @@ export interface TopNavConfigParams {
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
-  if (!anonymousUserCapabilities.visualize) return false;
+  if (!anonymousUserCapabilities.visualize_v2) return false;
 
-  const visualize = anonymousUserCapabilities.visualize as unknown as VisualizeCapabilities;
+  const visualize = anonymousUserCapabilities.visualize_v2 as unknown as VisualizeCapabilities;
 
   return !!visualize.show;
 };
@@ -184,10 +185,17 @@ export const getTopNavConfig = (
           }
 
           if (stateTransfer) {
+            const serializedVis = vis.serialize();
+            const { references } = serializeReferences(serializedVis);
             stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
-                input: { savedObjectId: id },
+                serializedState: {
+                  rawState: {
+                    savedObjectId: id,
+                  },
+                  references,
+                },
                 embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
                 searchSessionId: data.search.session.getSessionId(),
               },
@@ -244,16 +252,17 @@ export const getTopNavConfig = (
       return;
     }
 
-    const state = {
-      input: {
-        serializedVis: vis.serialize(),
+    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+      state: {
+        serializedState: serializeState({
+          serializedVis: vis.serialize(),
+        }),
+        embeddableId,
+        type: VISUALIZE_EMBEDDABLE_TYPE,
+        searchSessionId: data.search.session.getSessionId(),
       },
-      embeddableId,
-      type: VISUALIZE_EMBEDDABLE_TYPE,
-      searchSessionId: data.search.session.getSessionId(),
-    };
-
-    stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state, path: originatingPath });
+      path: originatingPath,
+    });
   };
 
   const navigateToOriginatingApp = () => {
@@ -390,7 +399,6 @@ export const getTopNavConfig = (
           // TODO: support sharing in by-value mode
           share.toggleShareContextMenu({
             anchorElement,
-            allowEmbed: true,
             allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
             shareableUrl: unhashUrl(window.location.href),
             objectId: savedVis?.id,
@@ -399,6 +407,11 @@ export const getTopNavConfig = (
               title: i18n.translate('visualizations.share.shareModal.title', {
                 defaultMessage: 'Share this visualization',
               }),
+              config: {
+                embed: {
+                  computeAnonymousCapabilities: showPublicUrlSwitch,
+                },
+              },
             },
             sharingData: {
               title:
@@ -414,7 +427,6 @@ export const getTopNavConfig = (
               },
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
-            showPublicUrlSwitch,
             toasts: toastNotifications,
           });
         }
@@ -513,24 +525,20 @@ export const getTopNavConfig = (
                   history.replace(appPath);
                   setActiveUrl(appPath);
 
-                  const state = {
-                    input: {
-                      serializedVis: {
-                        ...vis.serialize(),
-                        title: newTitle,
-                        description: newDescription,
-                      },
-                    },
-                    embeddableId,
-                    type: VISUALIZE_EMBEDDABLE_TYPE,
-                    searchSessionId: data.search.session.getSessionId(),
-                  };
-
-                  const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
-
                   stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
-                    state,
-                    path,
+                    state: {
+                      serializedState: serializeState({
+                        serializedVis: vis.serialize(),
+                        titles: {
+                          title: newTitle,
+                          description: newDescription,
+                        },
+                      }),
+                      embeddableId,
+                      type: VISUALIZE_EMBEDDABLE_TYPE,
+                      searchSessionId: data.search.session.getSessionId(),
+                    },
+                    path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
                   });
 
                   // TODO: Saved Object Modal requires `id` to be defined so this is a workaround

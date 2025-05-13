@@ -40,8 +40,8 @@ import { closeTimeline, openTimelineById } from '../../../tasks/timeline';
 const siemDataViewTitle = 'Security Default Data View';
 const dataViews = ['logs-*', 'metrics-*', '.kibana-event-log-*'];
 
-// FLAKY: https://github.com/elastic/kibana/issues/198944
-describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/217668
+describe.skip('Timeline scope', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     waitForRulesBootstrap();
   });
@@ -132,7 +132,7 @@ describe.skip('Timeline scope', { tags: ['@ess', '@serverless', '@skipInServerle
     });
 
     const defaultPatterns = [`auditbeat-*`, `${DEFAULT_ALERTS_INDEX}-default`];
-    it('alerts checkbox behaves as expected', () => {
+    it('alerts checkbox behaves as expected', { tags: ['@skipInServerless'] }, () => {
       isDataViewSelection(siemDataViewTitle);
       defaultPatterns.forEach((pattern) => isSourcererSelection(pattern));
       openDataViewSelection();

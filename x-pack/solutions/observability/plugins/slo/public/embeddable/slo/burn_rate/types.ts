@@ -12,8 +12,8 @@ import {
 } from '@kbn/core/public';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import {
-  PublishesPanelTitle,
-  PublishesWritablePanelTitle,
+  PublishesTitle,
+  PublishesWritableTitle,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { Subject } from 'rxjs';
@@ -25,7 +25,7 @@ export interface EmbeddableProps {
   reloadSubject?: Subject<boolean>;
 }
 
-interface BurnRateCustomInput {
+export interface BurnRateCustomInput {
   sloId: string;
   sloInstanceId: string;
   duration: string;
@@ -33,8 +33,8 @@ interface BurnRateCustomInput {
 
 export type SloBurnRateEmbeddableState = SerializedTitles & BurnRateCustomInput;
 export type BurnRateApi = DefaultEmbeddableApi<SloBurnRateEmbeddableState> &
-  PublishesWritablePanelTitle &
-  PublishesPanelTitle;
+  PublishesWritableTitle &
+  PublishesTitle;
 
 export interface SloEmbeddableDeps {
   uiSettings: IUiSettingsClient;

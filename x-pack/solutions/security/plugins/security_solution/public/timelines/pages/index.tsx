@@ -20,18 +20,20 @@ import { TIMELINES_PATH } from '../../../common/constants';
 const timelinesPagePath = `${TIMELINES_PATH}/:tabName(${TimelineTypeEnum.default}|${TimelineTypeEnum.template})`;
 const timelinesDefaultPath = `${TIMELINES_PATH}/${TimelineTypeEnum.default}`;
 
-export const Timelines = React.memo(() => (
-  <Routes>
-    <Route exact path={timelinesPagePath}>
-      <TimelinesPage />
-    </Route>
-    <Route
-      path={TIMELINES_PATH}
-      render={({ location: { search = '' } }) => (
-        <Redirect to={`${timelinesDefaultPath}${appendSearch(search)}`} />
-      )}
-    />
-  </Routes>
-));
+export const Timelines = React.memo(() => {
+  return (
+    <Routes>
+      <Route exact path={timelinesPagePath}>
+        <TimelinesPage />
+      </Route>
+      <Route
+        path={TIMELINES_PATH}
+        render={({ location: { search = '' } }) => (
+          <Redirect to={`${timelinesDefaultPath}${appendSearch(search)}`} />
+        )}
+      />
+    </Routes>
+  );
+});
 
 Timelines.displayName = 'Timelines';

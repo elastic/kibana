@@ -80,7 +80,7 @@ export function generateUpdatePackagePolicyDevToolsRequest(
     {
       package: formatPackage(packagePolicy.package),
       ...omit(packagePolicy, 'version', 'package', 'enabled', 'secret_references'),
-      inputs: formatInputs(packagePolicy.inputs),
+      inputs: formatInputs(packagePolicy.inputs, packagePolicy?.supports_agentless ?? false),
       vars: formatVars(packagePolicy.vars),
     }
   );

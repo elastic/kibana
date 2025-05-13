@@ -8,6 +8,8 @@
 import { mount } from 'enzyme';
 import { repeat } from 'lodash/fp';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import { LineClamp } from '.';
 

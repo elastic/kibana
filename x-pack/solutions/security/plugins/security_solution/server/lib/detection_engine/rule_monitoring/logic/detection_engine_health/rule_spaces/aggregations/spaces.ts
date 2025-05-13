@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { RawData } from '../../../utils/normalization';
 
 // The number of Kibana spaces is limited by the `maxSpaces` config setting of the spaces plugin.

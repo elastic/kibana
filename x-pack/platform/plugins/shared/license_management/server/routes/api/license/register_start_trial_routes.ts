@@ -35,14 +35,26 @@ export function registerStartTrialRoutes({
     }
   );
 
-  router.post({ path: addBasePath('/start_trial'), validate: false }, async (ctx, req, res) => {
-    const { client } = (await ctx.core).elasticsearch;
-    try {
-      return res.ok({
-        body: await startTrial({ client, licensing }),
-      });
-    } catch (error) {
-      return handleEsError({ error, response: res });
+  router.post(
+    {
+      path: addBasePath('/start_trial'),
+      validate: false,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+    },
+    async (ctx, req, res) => {
+      const { client } = (await ctx.core).elasticsearch;
+      try {
+        return res.ok({
+          body: await startTrial({ client, licensing }),
+        });
+      } catch (error) {
+        return handleEsError({ error, response: res });
+      }
     }
-  });
+  );
 }

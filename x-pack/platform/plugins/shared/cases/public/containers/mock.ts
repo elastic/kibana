@@ -38,7 +38,6 @@ import type {
   CasesMetrics,
   ExternalReferenceAttachmentUI,
   PersistableStateAttachmentUI,
-  FindCaseUserActions,
   CaseUsers,
   CaseUserActionsStats,
   CasesFindResponseUI,
@@ -49,6 +48,7 @@ import type {
   CasesConfigurationUITemplate,
   CasesSimilarResponseUI,
   ObservableUI,
+  InternalFindCaseUserActions,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
 import { OBSERVABLE_TYPE_IPV4, SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -974,11 +974,12 @@ export const caseUserActionsWithRegisteredAttachments: UserActionUI[] = [
   },
 ];
 
-export const findCaseUserActionsResponse: FindCaseUserActions = {
+export const findCaseUserActionsResponse: InternalFindCaseUserActions = {
   page: 1,
   perPage: 10,
   total: 30,
   userActions: [...caseUserActionsWithRegisteredAttachments],
+  latestAttachments: [],
 };
 
 export const getCaseUserActionsStatsResponse: CaseUserActionsStats = {
@@ -1321,5 +1322,18 @@ export const mockObservables: ObservableUI[] = [
     description: null,
     createdAt: '2024-12-11',
     updatedAt: '2024-12-11',
+  },
+];
+
+export const mockSimilarObservables = [
+  {
+    value: '127.0.0.1',
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    typeLabel: OBSERVABLE_TYPE_IPV4.label,
+  },
+  {
+    value: '10.0.0.1',
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    typeLabel: OBSERVABLE_TYPE_IPV4.label,
   },
 ];

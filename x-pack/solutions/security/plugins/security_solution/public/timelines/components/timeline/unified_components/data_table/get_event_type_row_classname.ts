@@ -11,12 +11,12 @@ import { getEventType, isEvenEqlSequence, isEventBuildingBlockType } from '../..
 export const getEventTypeRowClassName = (ecsData: TimelineItem['ecs']) => {
   const eventType = getEventType(ecsData);
   const eventTypeClassName =
-    eventType === 'raw'
-      ? 'rawEvent'
-      : eventType === 'eql'
+    eventType === 'eql'
       ? isEvenEqlSequence(ecsData)
         ? 'eqlSequence'
         : 'eqlNonSequence'
+      : eventType === 'raw'
+      ? 'rawEvent'
       : 'nonRawEvent';
 
   const buildingBlockTypeClassName = isEventBuildingBlockType(ecsData) ? 'buildingBlockType' : '';

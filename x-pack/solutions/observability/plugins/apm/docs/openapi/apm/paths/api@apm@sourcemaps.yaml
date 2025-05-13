@@ -1,6 +1,8 @@
 get:
   summary: Get source maps
-  description: Returns an array of Fleet artifacts, including source map uploads.
+  description: >
+    Get an array of Fleet artifacts, including source map uploads.
+    You must have `read` or `all` Kibana privileges for the APM and User Experience feature.
   operationId: getSourceMaps
   tags:
     - APM sourcemaps
@@ -23,6 +25,9 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/source_maps_response.yaml'
+          examples:
+            getSourceMapsResponse1:
+              $ref: '../components/examples/source_maps_get_200_response1.yaml'
     '400':
       description: Bad Request response
       content:
@@ -47,9 +52,17 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/501_response.yaml'
+  x-codeSamples:
+    - $ref: "../components/examples/source_maps_get_curl_request1.yaml"
 post:
-  summary: Upload source map
-  description: Upload a source map for a specific service and version.
+  summary: Upload a source map
+  description: >
+    Upload a source map for a specific service and version.
+    You must have `all` Kibana privileges for the APM and User Experience feature.
+
+    The maximum payload size is `1mb`.
+    If you attempt to upload a source map that exceeds the maximum payload size, you will get a 413 error.
+    Before uploading source maps that exceed this default, change the maximum payload size allowed by Kibana with the `server.maxPayload` variable.
   operationId: uploadSourceMap
   tags:
     - APM sourcemaps
@@ -69,6 +82,9 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/upload_source_maps_response.yaml'
+          examples:
+            uploadSourceMapResponse1:
+              $ref: '../components/examples/source_maps_upload_200_response1.yaml'
     '400':
       description: Bad Request response
       content:
@@ -99,3 +115,5 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/501_response.yaml'
+  x-codeSamples:
+    - $ref: "../components/examples/source_maps_upload_curl_request1.yaml"

@@ -18,8 +18,8 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HashRouter, Redirect, RouteComponentProps } from 'react-router-dom';
 
-import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../plugin_constants';
-import { RedirectToProps } from '../dashboard_container/types';
+import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/constants';
+import { RedirectToProps } from './types';
 import { coreServices, dataService, embeddableService } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardReadonlyBadge, getDashboardPageTitle } from './_dashboard_app_strings';

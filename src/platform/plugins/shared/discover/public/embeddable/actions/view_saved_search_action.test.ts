@@ -8,13 +8,12 @@
  */
 
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { BehaviorSubject } from 'rxjs';
 
 import { discoverServiceMock } from '../../__mocks__/services';
 import { createStartContractMock } from '../../__mocks__/start_contract';
-import { SearchEmbeddableApi } from '../types';
+import type { SearchEmbeddableApi } from '../types';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 import { ViewSavedSearchAction } from './view_saved_search_action';
 
@@ -27,7 +26,7 @@ const compatibleEmbeddableApi: SearchEmbeddableApi = {
     searchSource: { getField: jest.fn() },
   } as unknown as SavedSearch),
   parentApi: {
-    viewMode: new BehaviorSubject('view'),
+    viewMode$: new BehaviorSubject('view'),
   },
 } as unknown as SearchEmbeddableApi;
 
@@ -54,7 +53,7 @@ describe('view saved search action', () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
     expect(
       await action.isCompatible({
-        embeddable: { ...compatibleEmbeddableApi, viewMode: new BehaviorSubject(ViewMode.EDIT) },
+        embeddable: { ...compatibleEmbeddableApi, viewMode$: new BehaviorSubject('edit') },
       })
     ).toBe(false);
   });

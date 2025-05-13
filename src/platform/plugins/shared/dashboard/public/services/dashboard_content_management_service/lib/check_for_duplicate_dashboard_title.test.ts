@@ -8,7 +8,7 @@
  */
 
 import { checkForDuplicateDashboardTitle } from './check_for_duplicate_dashboard_title';
-import { extractTitleAndCount } from '../../../dashboard_container/embeddable/api/lib/extract_title_and_count';
+import { extractTitleAndCount } from '../../../utils/extract_title_and_count';
 import { contentManagementService } from '../../kibana_services';
 
 describe('checkForDuplicateDashboardTitle', () => {

@@ -7,41 +7,87 @@
 
 import {
   EuiAccordion,
-  EuiBadge,
+  EuiBasicTable,
   EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import moment from 'moment';
-import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
+import type { EuiDescriptionListProps, EuiAccordionProps, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  INTERNAL_FEATURE_FLAGS,
 } from '@kbn/cloud-security-posture-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
-import { getVendorName } from '../../../common/utils/get_vendor_name';
-import { truthy } from '../../../../common/utils/helpers';
-import { CSP_MOMENT_FORMAT } from '../../../common/constants';
-import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
-import { useKibana } from '../../../common/hooks/use_kibana';
-import {
-  BenchmarkIcons,
-  CodeBlock,
-  CspFlyoutMarkdown,
-  EMPTY_VALUE,
-  RuleNameLink,
-} from './findings_flyout';
+import { truthy } from '@kbn/cloud-security-posture/src/utils/helpers';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
+import { TruncatedCopyableText } from './findings_right/header';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
+
+const columns: Array<EuiBasicTableColumn<any>> = [
+  {
+    field: 'field',
+    name: 'Field',
+    'data-test-subj': 'firstNameCell',
+  },
+  {
+    field: 'value',
+    name: 'Value',
+    truncateText: false,
+    render: (value: string) => (
+      <>
+        <TruncatedCopyableText textToCopy={value} />
+      </>
+    ),
+  },
+];
+
+const convertObjectToArray = (obj: { [key: string]: any }) => {
+  if (obj === undefined) return null;
+  return Object.keys(obj)
+    .filter((key) => key !== 'raw')
+    .map((key) => ({
+      field: key,
+      value: obj[key],
+    }));
+};
+
+const getResourceList = (data: CspFinding) => [
+  {
+    title: '',
+    description: data ? (
+      <EuiPanel>
+        <EuiPanel hasBorder>
+          <EuiBasicTable
+            tableCaption="Demo of EuiBasicTable"
+            items={convertObjectToArray(data.resource) || []}
+            rowHeader="Field"
+            columns={columns}
+          />
+        </EuiPanel>
+      </EuiPanel>
+    ) : (
+      EMPTY_VALUE
+    ),
+  },
+];
 
 const getDetailsList = (
   data: CspFinding,
@@ -49,68 +95,30 @@ const getDetailsList = (
   discoverDataViewLink?: string
 ) => [
   {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
-      defaultMessage: 'Rule Name',
-    }),
-    description: data.rule?.name ? (
-      <RuleNameLink ruleFlyoutLink={ruleFlyoutLink} ruleName={data.rule.name} />
-    ) : (
-      EMPTY_VALUE
+    title: (
+      <>
+        <EuiFlexGroup direction="row" gutterSize="m">
+          <EuiFlexItem>
+            <b>Rule Description</b>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiLink href={ruleFlyoutLink} target="_blank" css={{ textAlign: 'right' }}>
+              <EuiIcon type="expand" />
+              {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.showRuleDetails', {
+                defaultMessage: 'Show rule details',
+              })}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
     ),
+    description: data.rule?.description ? <EuiText>{data.rule?.description}</EuiText> : EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.alertsTitle', {
       defaultMessage: 'Alerts',
     }),
     description: <FindingsDetectionRuleCounter finding={data} />,
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleTagsTitle', {
-      defaultMessage: 'Rule Tags',
-    }),
-    description: data.rule?.tags?.length ? (
-      <>
-        {data.rule.tags.map((tag) => (
-          <EuiBadge key={tag}>{tag}</EuiBadge>
-        ))}
-      </>
-    ) : (
-      EMPTY_VALUE
-    ),
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.evaluatedAtTitle', {
-      defaultMessage: 'Evaluated at',
-    }),
-    description: data['@timestamp']
-      ? moment(data['@timestamp']).format(CSP_MOMENT_FORMAT)
-      : EMPTY_VALUE,
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle', {
-      defaultMessage: 'Framework Sources',
-    }),
-    description:
-      data.rule?.benchmark?.id && data.rule?.benchmark?.name ? (
-        <BenchmarkIcons
-          benchmarkId={data.rule?.benchmark?.id}
-          benchmarkName={data.rule?.benchmark?.name}
-        />
-      ) : (
-        EMPTY_VALUE
-      ),
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.cisSectionTitle', {
-      defaultMessage: 'Framework Section',
-    }),
-    description: data.rule?.section ? data.rule?.section : EMPTY_VALUE,
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.vendorTitle', {
-      defaultMessage: 'Vendor',
-    }),
-    description: getVendorName(data) || EMPTY_VALUE,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.dataViewTitle', {
@@ -129,22 +137,6 @@ export const getRemediationList = (rule: CspFinding['rule']) => [
     title: '',
     description: rule?.remediation ? (
       <CspFlyoutMarkdown>{rule?.remediation}</CspFlyoutMarkdown>
-    ) : (
-      EMPTY_VALUE
-    ),
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.impactTitle', {
-      defaultMessage: 'Impact',
-    }),
-    description: rule?.impact ? <CspFlyoutMarkdown>{rule.impact}</CspFlyoutMarkdown> : EMPTY_VALUE,
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.defaultValueTitle', {
-      defaultMessage: 'Default Value',
-    }),
-    description: rule?.default_value ? (
-      <CspFlyoutMarkdown>{rule.default_value}</CspFlyoutMarkdown>
     ) : (
       EMPTY_VALUE
     ),
@@ -187,7 +179,7 @@ export const OverviewTab = ({
   data: CspFinding;
   ruleFlyoutLink?: string;
 }) => {
-  const { discover } = useKibana().services;
+  const { discover } = useKibana<CoreStart & CspClientPluginStartDeps>().services;
   const cdrMisconfigurationsDataView = useDataView(CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX);
 
   // link will navigate to our dataview in discover, filtered by the data source of the finding
@@ -221,11 +213,19 @@ export const OverviewTab = ({
       [
         {
           initialIsOpen: true,
-          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.detailsTitle', {
-            defaultMessage: 'Details',
+          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.aboutTitle', {
+            defaultMessage: 'About',
           }),
           id: 'detailsAccordion',
           listItems: getDetailsList(data, ruleFlyoutLink, discoverDataViewLink),
+        },
+        {
+          initialIsOpen: true,
+          title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.detailsTitle', {
+            defaultMessage: 'Resource',
+          }),
+          id: 'detailsAccordion',
+          listItems: getResourceList(data),
         },
         {
           initialIsOpen: true,
@@ -253,22 +253,20 @@ export const OverviewTab = ({
     <>
       {accordions.map((accordion) => (
         <React.Fragment key={accordion.id}>
-          <EuiPanel hasShadow={false} hasBorder>
-            <EuiAccordion
-              id={accordion.id}
-              buttonContent={
-                <EuiText>
-                  <strong>{accordion.title}</strong>
-                </EuiText>
-              }
-              arrowDisplay="left"
-              initialIsOpen={accordion.initialIsOpen}
-            >
-              <EuiSpacer size="m" />
-              <EuiDescriptionList listItems={accordion.listItems} />
-            </EuiAccordion>
-          </EuiPanel>
-          <EuiSpacer size="m" />
+          <EuiAccordion
+            id={accordion.id}
+            buttonContent={
+              <EuiText>
+                <strong>{accordion.title}</strong>
+              </EuiText>
+            }
+            arrowDisplay="left"
+            initialIsOpen={accordion.initialIsOpen}
+          >
+            <EuiSpacer size="m" />
+            <EuiDescriptionList listItems={accordion.listItems} />
+          </EuiAccordion>
+          <EuiHorizontalRule />
         </React.Fragment>
       ))}
     </>

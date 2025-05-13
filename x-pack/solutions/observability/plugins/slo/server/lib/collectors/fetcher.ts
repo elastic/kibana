@@ -10,7 +10,7 @@ import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { StoredSLODefinition } from '../../domain/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { Usage } from './type';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 
 export const fetcher = async (context: CollectorFetchContext) => {
   const finder = context.soClient.createPointInTimeFinder<StoredSLODefinition>({
@@ -19,7 +19,7 @@ export const fetcher = async (context: CollectorFetchContext) => {
   });
 
   const totalInstances = await context.esClient.count({
-    index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+    index: SUMMARY_DESTINATION_INDEX_PATTERN,
     query: {
       bool: {
         filter: [

@@ -24,6 +24,8 @@ export interface GridPanelData extends GridRect {
 }
 
 export interface GridRowData {
+  id: string;
+  order: number;
   title: string;
   isCollapsed: boolean;
   panels: {
@@ -31,12 +33,15 @@ export interface GridRowData {
   };
 }
 
-export type GridLayoutData = GridRowData[];
+export interface GridLayoutData {
+  [rowId: string]: GridRowData;
+}
 
 export interface GridSettings {
   gutterSize: number;
   rowHeight: number;
   columnCount: number;
+  keyboardDragTopLimit: number;
 }
 
 /**
@@ -56,19 +61,37 @@ export interface ActivePanel {
   };
 }
 
+export interface ActiveRowEvent {
+  id: string;
+  sensorType: 'mouse' | 'touch' | 'keyboard';
+  startingPosition: {
+    top: number;
+    left: number;
+  };
+  translate: {
+    top: number;
+    left: number;
+  };
+}
+
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
+  proposedGridLayout$: BehaviorSubject<GridLayoutData | undefined>; // temporary state for layout during drag and drop operations
   expandedPanelId$: BehaviorSubject<string | undefined>;
   isMobileView$: BehaviorSubject<boolean>;
   accessMode$: BehaviorSubject<GridAccessMode>;
-
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
+  activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
-  rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
-  panelRefs: React.MutableRefObject<Array<{ [id: string]: HTMLDivElement | null }>>;
+  layoutRef: React.MutableRefObject<HTMLDivElement | null>;
+  rowRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
+  headerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
+  panelRefs: React.MutableRefObject<{
+    [rowId: string]: { [panelId: string]: HTMLDivElement | null };
+  }>;
 }
 
 /**
@@ -88,7 +111,7 @@ export interface PanelInteractionEvent {
   /**
    * The index of the grid row this panel interaction is targeting.
    */
-  targetRowIndex: number;
+  targetRow: string;
 
   /**
    * The pixel rect of the panel being interacted with.
@@ -99,32 +122,33 @@ export interface PanelInteractionEvent {
    * The pixel offsets from where the mouse was at drag start to the
    * edges of the panel
    */
-  pointerOffsets: {
+  sensorOffsets: {
     top: number;
     left: number;
     right: number;
     bottom: number;
   };
+  sensorType: 'mouse' | 'touch' | 'keyboard';
 }
 
-// TODO: Remove from Dashboard plugin as part of https://github.com/elastic/kibana/issues/190446
-export enum PanelPlacementStrategy {
-  /** Place on the very top of the grid layout, add the height of this panel to all other panels. */
-  placeAtTop = 'placeAtTop',
-  /** Look for the smallest y and x value where the default panel will fit. */
-  findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',
-}
+/**
+ * This type is used to conditionally change the type of `renderPanelContents` depending
+ * on the value of `useCustomDragHandle`
+ */
+export type UseCustomDragHandle =
+  | {
+      useCustomDragHandle: true;
+      renderPanelContents: (
+        panelId: string,
+        setDragHandles: (refs: Array<HTMLElement | null>) => void
+      ) => React.ReactNode;
+    }
+  | {
+      useCustomDragHandle?: false;
+      renderPanelContents: (panelId: string) => React.ReactNode;
+    };
 
-export interface PanelPlacementSettings {
-  strategy?: PanelPlacementStrategy;
-  height: number;
-  width: number;
-}
-
+/**
+ * Controls whether the resize + drag handles are visible and functioning
+ */
 export type GridAccessMode = 'VIEW' | 'EDIT';
-
-export type UserMouseEvent = MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>;
-
-export type UserTouchEvent = TouchEvent | React.TouchEvent<HTMLButtonElement>;
-
-export type UserInteractionEvent = React.UIEvent<HTMLElement> | Event;

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -94,12 +95,13 @@ const RiskEngineStatusRow: React.FC<{
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSwitch
-          label={''}
+          label={i18n.RISK_ENGINE_STATUS_SWITCH_LABEL}
           data-test-subj="risk-score-switch"
           checked={currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED}
           onChange={onSwitchClick}
           disabled={btnIsDisabled}
           aria-describedby={'switchRiskModule'}
+          showLabel={false}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

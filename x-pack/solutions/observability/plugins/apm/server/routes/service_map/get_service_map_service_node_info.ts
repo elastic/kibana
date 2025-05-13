@@ -173,34 +173,32 @@ async function getTransactionStats({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...filter,
-            ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
-            {
-              terms: {
-                [TRANSACTION_TYPE]: defaultTransactionTypes,
-              },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...filter,
+          ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
+          {
+            terms: {
+              [TRANSACTION_TYPE]: defaultTransactionTypes,
             },
-          ],
-        },
+          },
+        ],
       },
-      aggs: {
-        duration: { avg: { field: durationField } },
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
-          },
-          aggs: {
-            latency: { avg: { field: durationField } },
-          },
+    },
+    aggs: {
+      duration: { avg: { field: durationField } },
+      timeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: intervalString,
+          min_doc_count: 0,
+          extended_bounds: { min: start, max: end },
+        },
+        aggs: {
+          latency: { avg: { field: durationField } },
         },
       },
     },
@@ -244,26 +242,24 @@ async function getCpuStats({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [...filter, { exists: { field: METRIC_SYSTEM_CPU_PERCENT } }],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [...filter, { exists: { field: METRIC_SYSTEM_CPU_PERCENT } }],
       },
-      aggs: {
-        avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
-            extended_bounds: { min: start, max: end },
-          },
-          aggs: {
-            cpuAvg: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
-          },
+    },
+    aggs: {
+      avgCpuUsage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
+      timeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: intervalString,
+          min_doc_count: 0,
+          extended_bounds: { min: start, max: end },
+        },
+        aggs: {
+          cpuAvg: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
         },
       },
     },
@@ -298,26 +294,24 @@ function getMemoryStats({
         apm: {
           events: [ProcessorEvent.metric],
         },
-        body: {
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [...filter, ...additionalFilters],
-            },
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [...filter, ...additionalFilters],
           },
-          aggs: {
-            avgMemoryUsage: { avg: { script } },
-            timeseries: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: intervalString,
-                min_doc_count: 0,
-                extended_bounds: { min: start, max: end },
-              },
-              aggs: {
-                memoryAvg: { avg: { script } },
-              },
+        },
+        aggs: {
+          avgMemoryUsage: { avg: { script } },
+          timeseries: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: intervalString,
+              min_doc_count: 0,
+              extended_bounds: { min: start, max: end },
+            },
+            aggs: {
+              memoryAvg: { avg: { script } },
             },
           },
         },

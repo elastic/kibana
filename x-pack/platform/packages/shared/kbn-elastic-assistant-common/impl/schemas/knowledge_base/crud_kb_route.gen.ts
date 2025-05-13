@@ -11,7 +11,7 @@
  *
  * info:
  *   title: KnowledgeBase API endpoints
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from '@kbn/zod';
@@ -31,11 +31,11 @@ export const KnowledgeBaseResponse = z.object({
 export type CreateKnowledgeBaseRequestQuery = z.infer<typeof CreateKnowledgeBaseRequestQuery>;
 export const CreateKnowledgeBaseRequestQuery = z.object({
   /**
-   * Optional ELSER modelId to use when setting up the Knowledge Base
+   * ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
    */
   modelId: z.string().optional(),
   /**
-   * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base
+   * Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
    */
   ignoreSecurityLabs: BooleanFromString.optional().default(false),
 });
@@ -66,11 +66,28 @@ export type ReadKnowledgeBaseRequestParamsInput = z.input<typeof ReadKnowledgeBa
 
 export type ReadKnowledgeBaseResponse = z.infer<typeof ReadKnowledgeBaseResponse>;
 export const ReadKnowledgeBaseResponse = z.object({
+  /**
+   * Indicates if the ELSER model exists for the KnowledgeBase.
+   */
   elser_exists: z.boolean().optional(),
-  index_exists: z.boolean().optional(),
+  /**
+   * Indicates if the setup process is available for the KnowledgeBase.
+   */
   is_setup_available: z.boolean().optional(),
+  /**
+   * Indicates if the setup process is currently in progress.
+   */
   is_setup_in_progress: z.boolean().optional(),
-  pipeline_exists: z.boolean().optional(),
+  /**
+   * Indicates if Security Labs documentation exists in the KnowledgeBase.
+   */
   security_labs_exists: z.boolean().optional(),
+  /**
+   * Indicates if user data exists in the KnowledgeBase.
+   */
   user_data_exists: z.boolean().optional(),
+  /**
+   * The status of the product documentation in the KnowledgeBase.
+   */
+  product_documentation_status: z.string().optional(),
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
 
 export const shallowMockedFields = [
   {
@@ -79,13 +79,19 @@ export const deepMockedFields = shallowMockedFields.map(
 ) as DataView['fields'];
 
 export const buildDataViewMock = ({
-  name,
-  fields: definedFields,
+  id,
+  title,
+  name = 'data-view-mock',
+  fields: definedFields = [] as unknown as DataView['fields'],
   timeFieldName,
+  isPersisted = true,
 }: {
-  name: string;
-  fields: DataView['fields'];
+  id?: string;
+  title?: string;
+  name?: string;
+  fields?: DataView['fields'];
   timeFieldName?: string;
+  isPersisted?: boolean;
 }): DataView => {
   const dataViewFields = [...definedFields] as DataView['fields'];
 
@@ -101,9 +107,16 @@ export const buildDataViewMock = ({
     return dataViewFields;
   };
 
+  dataViewFields.create = (spec: FieldSpec) => {
+    return new DataViewField(spec);
+  };
+
+  id = id ?? `${name}-id`;
+  title = title ?? `${name}-title`;
+
   const dataView = {
-    id: `${name}-id`,
-    title: `${name}-title`,
+    id,
+    title,
     name,
     metaFields: ['_index', '_score'],
     fields: dataViewFields,
@@ -111,14 +124,15 @@ export const buildDataViewMock = ({
     getName: () => name,
     getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, runtimeFields: {} }),
     getSourceFiltering: () => ({}),
-    getIndexPattern: () => `${name}-title`,
+    getIndexPattern: () => title,
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
-    timeFieldName: timeFieldName || '',
+    timeFieldName,
     docvalueFields: [],
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    isTimeBased: () => !!timeFieldName,
     isTimeNanosBased: () => false,
-    isPersisted: () => true,
-    toSpec: () => ({}),
+    isPersisted: () => isPersisted,
+    toSpec: () => ({ id, title, name }),
     toMinimalSpec: () => ({}),
     getTimeField: () => {
       return dataViewFields.find((field) => field.name === timeFieldName);
@@ -130,8 +144,6 @@ export const buildDataViewMock = ({
     getAllowHidden: () => false,
     setFieldCount: jest.fn(),
   } as unknown as DataView;
-
-  dataView.isTimeBased = () => !!timeFieldName;
 
   return dataView;
 };

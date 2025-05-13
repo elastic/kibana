@@ -53,27 +53,25 @@ export async function getErrorGroupSampleIds({
         },
       ],
     },
-    body: {
-      track_total_hits: ERROR_SAMPLES_SIZE,
-      size: ERROR_SAMPLES_SIZE,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [ERROR_GROUP_ID]: groupId } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-          should: [{ term: { [TRANSACTION_SAMPLED]: true } }], // prefer error samples with related transactions
-        },
+    track_total_hits: ERROR_SAMPLES_SIZE,
+    size: ERROR_SAMPLES_SIZE,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          { term: { [ERROR_GROUP_ID]: groupId } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
+        should: [{ term: { [TRANSACTION_SAMPLED]: true } }], // prefer error samples with related transactions
       },
-      fields: requiredFields,
-      sort: asMutableArray([
-        { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
-        { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
-      ] as const),
     },
+    fields: requiredFields,
+    sort: asMutableArray([
+      { _score: { order: 'desc' } }, // sort by _score first to ensure that errors with transaction.sampled:true ends up on top
+      { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
+    ] as const),
   });
   const errorSampleIds = resp.hits.hits.map((item) => {
     const event = unflattenKnownApmEventFields(item.fields, requiredFields);

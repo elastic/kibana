@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { connectorTypeSchema } from '../schemas';
+import type { TypeOf } from '@kbn/config-schema';
+import type { connectorTypeSchema } from '../schemas';
 
 type ConnectorTypeSchemaType = TypeOf<typeof connectorTypeSchema>;
 

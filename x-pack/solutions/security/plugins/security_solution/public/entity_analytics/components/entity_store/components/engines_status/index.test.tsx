@@ -10,15 +10,26 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { EngineStatus } from '.';
 
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import { mockGlobalState } from '../../../../../common/mock';
+import { EntityType } from '../../../../../../common/entity_analytics/types';
 
 const mockUseEntityStore = jest.fn();
 jest.mock('../../hooks/use_entity_store', () => ({
   useEntityStoreStatus: () => mockUseEntityStore(),
+  useEnableEntityStoreMutation: () => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  }),
 }));
 
 const mockDownloadBlob = jest.fn();
 jest.mock('../../../../../common/utils/download_blob', () => ({
   downloadBlob: () => mockDownloadBlob(),
+}));
+
+const mockedExperimentalFeatures = mockGlobalState.app.enableExperimental;
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useEnableExperimental: () => mockedExperimentalFeatures,
 }));
 
 describe('EngineStatus', () => {
@@ -66,7 +77,7 @@ describe('EngineStatus', () => {
     const mockData = {
       engines: [
         {
-          type: 'test',
+          type: EntityType.user,
           components: [{ id: 'entity_engine_id', installed: true, resource: 'entity_engine' }],
         },
       ],
@@ -75,7 +86,7 @@ describe('EngineStatus', () => {
 
     render(<EngineStatus />, { wrapper: TestProviders });
 
-    expect(screen.getByText('Test Store')).toBeInTheDocument();
+    expect(screen.getByText('User Store')).toBeInTheDocument();
     expect(screen.getByText('Download status')).toBeInTheDocument();
   });
 
@@ -83,7 +94,7 @@ describe('EngineStatus', () => {
     const mockData = {
       engines: [
         {
-          type: 'test',
+          type: EntityType.user,
           components: [{ id: 'entity_engine_id', installed: true, resource: 'entity_engine' }],
         },
       ],

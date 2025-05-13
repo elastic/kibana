@@ -9,6 +9,7 @@ import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { Provider as ReduxProvider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiSpacer, EuiText } from '@elastic/eui';
@@ -32,25 +33,27 @@ export default function MonitorStatusAlert({ coreStart, plugins, params }: Props
   const queryClient = new QueryClient();
   const { ruleParams } = params;
   return (
-    <ReduxProvider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <KibanaContextProvider services={{ ...coreStart, ...plugins }}>
-          {params.id && isEmpty(ruleParams) && (
-            <EuiText>
-              <FormattedMessage
-                id="xpack.synthetics.alertRule.monitorStatus.description"
-                defaultMessage="Manage synthetics monitor status rule actions."
-              />
-            </EuiText>
-          )}
+    <InspectorContextProvider>
+      <ReduxProvider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <KibanaContextProvider services={{ ...coreStart, ...plugins }}>
+            {params.id && isEmpty(ruleParams) && (
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.synthetics.alertRule.monitorStatus.description"
+                  defaultMessage="Manage synthetics monitor status rule actions."
+                />
+              </EuiText>
+            )}
 
-          {(!params.id || !isEmpty(ruleParams)) && (
-            <StatusRuleComponent ruleParams={ruleParams} setRuleParams={params.setRuleParams} />
-          )}
+            {(!params.id || !isEmpty(ruleParams)) && (
+              <StatusRuleComponent ruleParams={ruleParams} setRuleParams={params.setRuleParams} />
+            )}
 
-          <EuiSpacer size="m" />
-        </KibanaContextProvider>
-      </QueryClientProvider>
-    </ReduxProvider>
+            <EuiSpacer size="m" />
+          </KibanaContextProvider>
+        </QueryClientProvider>
+      </ReduxProvider>
+    </InspectorContextProvider>
   );
 }

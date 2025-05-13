@@ -20,8 +20,8 @@ import {
   ALERT_RULE_REVISION,
 } from '@kbn/rule-data-utils';
 
-import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { CommonAlertFieldsLatest } from '../../common/schemas';
+import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { CommonAlertFieldsLatest } from '../../common/schemas';
 
 export const getCommonAlertFields = (
   options: RuleExecutorOptions<any, any, any, any, any>

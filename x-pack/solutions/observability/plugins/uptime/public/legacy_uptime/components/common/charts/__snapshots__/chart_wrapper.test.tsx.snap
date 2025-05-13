@@ -2,7 +2,7 @@
 
 exports[`ChartWrapper component renders the component with loading false 1`] = `
 <EuiErrorBoundary>
-  <div
+  <figure
     intl={
       Object {
         "$t": [Function],
@@ -133,13 +133,13 @@ exports[`ChartWrapper component renders the component with loading false 1`] = `
       height={144}
       up={4}
     />
-  </div>
+  </figure>
 </EuiErrorBoundary>
 `;
 
 exports[`ChartWrapper component renders the component with loading true 1`] = `
 <EuiErrorBoundary>
-  <div
+  <figure
     intl={
       Object {
         "$t": [Function],
@@ -270,7 +270,7 @@ exports[`ChartWrapper component renders the component with loading true 1`] = `
       height={144}
       up={4}
     />
-  </div>
+  </figure>
   <EuiFlexGroup
     alignItems="center"
     justifyContent="spaceAround"

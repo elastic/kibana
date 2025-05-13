@@ -966,9 +966,9 @@
           },
           "<Api, {}>, \"showShadow\" | \"showBorder\" | \"showBadges\" | \"showNotifications\" | \"hideLoader\" | \"hideHeader\" | \"hideInspector\" | \"getActions\" | \"setDragHandles\"> | undefined; hidePanelChrome?: boolean | undefined; onAnyStateChange?: ((state: ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.SerializedPanelState",
             "text": "SerializedPanelState"
           },
@@ -1110,9 +1110,9 @@
                 "signature": [
                   "((state: ",
                   {
-                    "pluginId": "@kbn/presentation-containers",
+                    "pluginId": "@kbn/presentation-publishing",
                     "scope": "public",
-                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
                     "section": "def-public.SerializedPanelState",
                     "text": "SerializedPanelState"
                   },
@@ -1131,9 +1131,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "@kbn/presentation-containers",
+                        "pluginId": "@kbn/presentation-publishing",
                         "scope": "public",
-                        "docId": "kibKbnPresentationContainersPluginApi",
+                        "docId": "kibKbnPresentationPublishingPluginApi",
                         "section": "def-public.SerializedPanelState",
                         "text": "SerializedPanelState"
                       },
@@ -1233,17 +1233,17 @@
           },
           "<object>>,",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.HasSerializableState",
             "text": "HasSerializableState"
           },
           "<SerializedState>,",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.HasSnapshottableState",
             "text": "HasSnapshottableState"
           },
@@ -1518,9 +1518,9 @@
             "signature": [
               "(panelState: ",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
+                "docId": "kibKbnPresentationPublishingPluginApi",
                 "section": "def-public.SerializedPanelState",
                 "text": "SerializedPanelState"
               },
@@ -1547,9 +1547,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/presentation-containers",
+                    "pluginId": "@kbn/presentation-publishing",
                     "scope": "public",
-                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
                     "section": "def-public.SerializedPanelState",
                     "text": "SerializedPanelState"
                   },
@@ -1585,9 +1585,9 @@
               },
               "<RuntimeState>) => Api & ",
               {
-                "pluginId": "@kbn/presentation-containers",
+                "pluginId": "@kbn/presentation-publishing",
                 "scope": "public",
-                "docId": "kibKbnPresentationContainersPluginApi",
+                "docId": "kibKbnPresentationPublishingPluginApi",
                 "section": "def-public.HasSnapshottableState",
                 "text": "HasSnapshottableState"
               },
@@ -1634,9 +1634,9 @@
                   },
                   "<RuntimeState>) => Api & ",
                   {
-                    "pluginId": "@kbn/presentation-containers",
+                    "pluginId": "@kbn/presentation-publishing",
                     "scope": "public",
-                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
                     "section": "def-public.HasSnapshottableState",
                     "text": "HasSnapshottableState"
                   },
@@ -1716,20 +1716,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.ViewMode",
-        "type": "Enum",
-        "tags": [],
-        "label": "ViewMode",
-        "description": [],
-        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "embeddable",
@@ -1908,21 +1895,6 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.PANEL_HOVER_TRIGGER",
-        "type": "string",
-        "tags": [],
-        "label": "PANEL_HOVER_TRIGGER",
-        "description": [],
-        "signature": [
-          "\"PANEL_HOVER_TRIGGER\""
-        ],
-        "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
         "id": "def-public.PANEL_NOTIFICATION_TRIGGER",
         "type": "string",
         "tags": [],
@@ -2084,58 +2056,6 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.ADD_PANEL_LEGACY_GROUP",
-        "type": "Object",
-        "tags": [],
-        "label": "ADD_PANEL_LEGACY_GROUP",
-        "description": [],
-        "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.ADD_PANEL_LEGACY_GROUP.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.ADD_PANEL_LEGACY_GROUP.getDisplayName",
-            "type": "Function",
-            "tags": [],
-            "label": "getDisplayName",
-            "description": [],
-            "signature": [
-              "() => string"
-            ],
-            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.ADD_PANEL_LEGACY_GROUP.order",
-            "type": "number",
-            "tags": [],
-            "label": "order",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
         "id": "def-public.ADD_PANEL_OTHER_GROUP",
         "type": "Object",
         "tags": [],
@@ -2191,6 +2111,74 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.ADD_PANEL_OTHER_GROUP.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.ADD_PANEL_VISUALIZATION_GROUP",
+        "type": "Object",
+        "tags": [],
+        "label": "ADD_PANEL_VISUALIZATION_GROUP",
+        "description": [],
+        "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_VISUALIZATION_GROUP.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_VISUALIZATION_GROUP.getDisplayName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_VISUALIZATION_GROUP.getIconType",
+            "type": "Function",
+            "tags": [],
+            "label": "getIconType",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_VISUALIZATION_GROUP.order",
             "type": "number",
             "tags": [],
             "label": "order",
@@ -2332,53 +2320,6 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.panelBadgeTrigger.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.panelHoverTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "panelHoverTrigger",
-        "description": [],
-        "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.panelHoverTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.panelHoverTrigger.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/triggers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.panelHoverTrigger.description",
             "type": "string",
             "tags": [],
             "label": "description",
@@ -3157,71 +3098,7 @@
   },
   "common": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-common.isSavedObjectEmbeddableInput",
-        "type": "Function",
-        "tags": [],
-        "label": "isSavedObjectEmbeddableInput",
-        "description": [],
-        "signature": [
-          "(input: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          " | ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.SavedObjectEmbeddableInput",
-            "text": "SavedObjectEmbeddableInput"
-          },
-          ") => boolean"
-        ],
-        "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-common.isSavedObjectEmbeddableInput.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "input",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableInput",
-                "text": "EmbeddableInput"
-              },
-              " | ",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.SavedObjectEmbeddableInput",
-                "text": "SavedObjectEmbeddableInput"
-              }
-            ],
-            "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "embeddable",
@@ -3375,147 +3252,10 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-common.PanelState",
-        "type": "Interface",
-        "tags": [],
-        "label": "PanelState",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.PanelState",
-            "text": "PanelState"
-          },
-          "<E>"
-        ],
-        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-common.PanelState.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-common.PanelState.explicitInput",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "explicitInput",
-            "description": [],
-            "signature": [
-              "Partial<E> & { id: string; }"
-            ],
-            "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-common.SavedObjectEmbeddableInput",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectEmbeddableInput",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.SavedObjectEmbeddableInput",
-            "text": "SavedObjectEmbeddableInput"
-          },
-          " extends ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          }
-        ],
-        "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-common.SavedObjectEmbeddableInput.savedObjectId",
-            "type": "string",
-            "tags": [],
-            "label": "savedObjectId",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/common/lib/saved_object_embeddable.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-common.ViewMode",
-        "type": "Enum",
-        "tags": [],
-        "label": "ViewMode",
-        "description": [],
-        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-common.EmbeddableInput",
-        "type": "Type",
-        "tags": [],
-        "label": "EmbeddableInput",
-        "description": [],
-        "signature": [
-          "{ version?: string | undefined; viewMode?: ",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; title?: string | undefined; description?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; }"
-        ],
-        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "embeddable",
         "id": "def-common.EmbeddablePersistableStateService",
@@ -3554,14 +3294,15 @@
         "label": "EmbeddableStateWithType",
         "description": [],
         "signature": [
+          "{ enhancements?: ",
           {
-            "pluginId": "embeddable",
+            "pluginId": "@kbn/utility-types",
             "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
           },
-          " & { type: string; }"
+          " | undefined; type: string; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,

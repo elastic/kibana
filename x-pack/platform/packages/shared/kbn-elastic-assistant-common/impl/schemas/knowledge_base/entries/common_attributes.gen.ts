@@ -19,21 +19,21 @@ import { z } from '@kbn/zod';
 import { User, NonEmptyString } from '../../common_attributes.gen';
 
 /**
- * Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval
+ * Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval.
  */
 export type InputSchema = z.infer<typeof InputSchema>;
 export const InputSchema = z.array(
   z.object({
     /**
-     * Name of the field
+     * Name of the field.
      */
     fieldName: z.string(),
     /**
-     * Type of the field
+     * Type of the field.
      */
     fieldType: z.string(),
     /**
-     * Description of the field
+     * Description of the field.
      */
     description: z.string(),
   })
@@ -42,42 +42,56 @@ export const InputSchema = z.array(
 export type KnowledgeBaseEntryErrorSchema = z.infer<typeof KnowledgeBaseEntryErrorSchema>;
 export const KnowledgeBaseEntryErrorSchema = z
   .object({
+    /**
+     * HTTP status code of the error.
+     */
     statusCode: z.number(),
+    /**
+     * Error type or category.
+     */
     error: z.string(),
+    /**
+     * Detailed error message.
+     */
     message: z.string(),
   })
   .strict();
 
 /**
- * Metadata about a Knowledge Base Entry
+ * Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
+ */
+export type KnowledgeBaseResource = z.infer<typeof KnowledgeBaseResource>;
+export const KnowledgeBaseResource = z.enum(['security_labs', 'user']);
+export type KnowledgeBaseResourceEnum = typeof KnowledgeBaseResource.enum;
+export const KnowledgeBaseResourceEnum = KnowledgeBaseResource.enum;
+
+/**
+ * Metadata about a Knowledge Base Entry.
  */
 export type Metadata = z.infer<typeof Metadata>;
 export const Metadata = z.object({
+  kbResource: KnowledgeBaseResource,
   /**
-   * Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
-   */
-  kbResource: z.string(),
-  /**
-   * Source document name or filepath
+   * Source document name or filepath.
    */
   source: z.string(),
   /**
-   * Whether this resource should always be included
+   * Whether this resource should always be included.
    */
   required: z.boolean(),
 });
 
 /**
- * Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings
+ * Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings.
  */
 export type Vector = z.infer<typeof Vector>;
 export const Vector = z.object({
   /**
-   * ID of the model used to create the embeddings
+   * ID of the model used to create the embeddings.
    */
   modelId: z.string(),
   /**
-   * Tokens with their corresponding values
+   * Tokens with their corresponding values.
    */
   tokens: z.object({}).catchall(z.number()),
 });
@@ -85,7 +99,7 @@ export const Vector = z.object({
 export type BaseRequiredFields = z.infer<typeof BaseRequiredFields>;
 export const BaseRequiredFields = z.object({
   /**
-   * Name of the Knowledge Base Entry
+   * Name of the Knowledge Base Entry.
    */
   name: z.string(),
 });
@@ -93,9 +107,13 @@ export const BaseRequiredFields = z.object({
 export type BaseDefaultableFields = z.infer<typeof BaseDefaultableFields>;
 export const BaseDefaultableFields = z.object({
   /**
-   * Kibana Space, defaults to 'default' space
+   * Kibana Space, defaults to 'default' space.
    */
   namespace: z.string().optional(),
+  /**
+   * Whether this Knowledge Base Entry is global, defaults to false.
+   */
+  global: z.boolean().optional(),
   /**
    * Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
    */
@@ -119,21 +137,26 @@ export type ResponseFields = z.infer<typeof ResponseFields>;
 export const ResponseFields = z.object({
   id: NonEmptyString,
   /**
-   * Time the Knowledge Base Entry was created
+   * Time the Knowledge Base Entry was created.
    */
   createdAt: z.string(),
   /**
-   * User who created the Knowledge Base Entry
+   * User who created the Knowledge Base Entry.
    */
   createdBy: z.string(),
   /**
-   * Time the Knowledge Base Entry was last updated
+   * Time the Knowledge Base Entry was last updated.
    */
   updatedAt: z.string(),
   /**
-   * User who last updated the Knowledge Base Entry
+   * User who last updated the Knowledge Base Entry.
    */
   updatedBy: z.string(),
+});
+
+export type DeleteResponseFields = z.infer<typeof DeleteResponseFields>;
+export const DeleteResponseFields = z.object({
+  id: NonEmptyString,
 });
 
 export type SharedResponseProps = z.infer<typeof SharedResponseProps>;
@@ -145,19 +168,16 @@ export const DocumentEntryType = z.literal('document');
 export type DocumentEntryRequiredFields = z.infer<typeof DocumentEntryRequiredFields>;
 export const DocumentEntryRequiredFields = z.object({
   /**
-   * Entry type
+   * Entry type.
    */
   type: z.literal('document'),
+  kbResource: KnowledgeBaseResource,
   /**
-   * Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
-   */
-  kbResource: z.string(),
-  /**
-   * Source document name or filepath
+   * Source document name or filepath.
    */
   source: z.string(),
   /**
-   * Knowledge Base Entry content
+   * Knowledge Base Entry content.
    */
   text: z.string(),
 });
@@ -165,7 +185,7 @@ export const DocumentEntryRequiredFields = z.object({
 export type DocumentEntryOptionalFields = z.infer<typeof DocumentEntryOptionalFields>;
 export const DocumentEntryOptionalFields = z.object({
   /**
-   * Whether this resource should always be included, defaults to false
+   * Whether this resource should always be included, defaults to false.
    */
   required: z.boolean().optional(),
   vector: Vector.optional(),
@@ -193,23 +213,23 @@ export const IndexEntryType = z.literal('index');
 export type IndexEntryRequiredFields = z.infer<typeof IndexEntryRequiredFields>;
 export const IndexEntryRequiredFields = z.object({
   /**
-   * Entry type
+   * Entry type.
    */
   type: z.literal('index'),
   /**
-   * Index or Data Stream to query for Knowledge Base content
+   * Index or Data Stream to query for Knowledge Base content.
    */
   index: z.string(),
   /**
-   * Field to query for Knowledge Base content
+   * Field to query for Knowledge Base content.
    */
   field: z.string(),
   /**
-   * Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description
+   * Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description.
    */
   description: z.string(),
   /**
-   * Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema
+   * Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema.
    */
   queryDescription: z.string(),
 });
@@ -218,7 +238,7 @@ export type IndexEntryOptionalFields = z.infer<typeof IndexEntryOptionalFields>;
 export const IndexEntryOptionalFields = z.object({
   inputSchema: InputSchema.optional(),
   /**
-   * Fields to extract from the query result, defaults to all fields if not provided or empty
+   * Fields to extract from the query result, defaults to all fields if not provided or empty.
    */
   outputFields: z.array(z.string()).optional(),
 });
@@ -248,5 +268,14 @@ export const KnowledgeBaseEntryUpdateProps = z.discriminatedUnion('type', [
   IndexEntryUpdateFields,
 ]);
 
+export type KnowledgeBaseEntryUpdateRouteProps = z.infer<typeof KnowledgeBaseEntryUpdateRouteProps>;
+export const KnowledgeBaseEntryUpdateRouteProps = z.discriminatedUnion('type', [
+  DocumentEntryCreateFields,
+  IndexEntryCreateFields,
+]);
+
 export type KnowledgeBaseEntryResponse = z.infer<typeof KnowledgeBaseEntryResponse>;
 export const KnowledgeBaseEntryResponse = z.discriminatedUnion('type', [DocumentEntry, IndexEntry]);
+
+export type KnowledgeBaseEntryDeleteResponse = z.infer<typeof KnowledgeBaseEntryDeleteResponse>;
+export const KnowledgeBaseEntryDeleteResponse = DeleteResponseFields;

@@ -17,8 +17,11 @@ import { licenseService } from '../../hooks/use_license';
 import { mockHistory } from '../../mock/router';
 import { DEFAULT_EVENTS_STACK_BY_VALUE } from './histogram_configurations';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useUserPrivileges } from '../user_privileges';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../hooks/use_experimental_features');
+jest.mock('../user_privileges');
 
 const mockGetDefaultControlColumn = jest.fn();
 jest.mock('../../../timelines/components/timeline/body/control_columns', () => ({
@@ -93,7 +96,6 @@ jest.mock('../../hooks/use_license', () => {
 describe('EventsQueryTabBody', () => {
   const commonProps: EventsQueryTabBodyComponentProps = {
     indexNames: ['test-index'],
-    setQuery: jest.fn(),
     tableId: TableId.test,
     type: HostsType.page,
     endDate: new Date('2000').toISOString(),
@@ -103,6 +105,9 @@ describe('EventsQueryTabBody', () => {
 
   beforeEach(() => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      notesPrivileges: { read: true },
+    });
     jest.clearAllMocks();
   });
 
@@ -157,14 +162,14 @@ describe('EventsQueryTabBody', () => {
     );
   });
 
-  it('renders the matrix histogram stacked by alerts default value', () => {
+  it('renders the matrix histogram stacked by alerts default value', async () => {
     const result = render(
       <TestProviders>
         <EventsQueryTabBody {...commonProps} />
       </TestProviders>
     );
 
-    result.getByTestId('showExternalAlertsCheckbox').click();
+    await userEvent.click(result.getByTestId('showExternalAlertsCheckbox'));
 
     expect(result.getByTestId('header-section-supplements').querySelector('select')?.value).toEqual(
       'event.module'
@@ -216,7 +221,19 @@ describe('EventsQueryTabBody', () => {
     expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
   });
 
-  it('should 6 columns on Action bar for Enterprise user', () => {
+  it('should have 4 columns on Action bar for non-Enterprise user and if user does not have Notes privileges', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({ notesPrivileges: { read: false } });
+
+    render(
+      <TestProviders>
+        <EventsQueryTabBody {...commonProps} />
+      </TestProviders>
+    );
+
+    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(4);
+  });
+
+  it('should have 6 columns on Action bar for Enterprise user', () => {
     const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
     licenseServiceMock.isEnterprise.mockReturnValue(true);
 
@@ -229,10 +246,24 @@ describe('EventsQueryTabBody', () => {
     expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(6);
   });
 
-  it('should 6 columns on Action bar for Enterprise user and securitySolutionNotesDisabled is true', () => {
+  it('should have 5 columns on Action bar for Enterprise user and securitySolutionNotesDisabled is true', () => {
     const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
     licenseServiceMock.isEnterprise.mockReturnValue(true);
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+
+    render(
+      <TestProviders>
+        <EventsQueryTabBody {...commonProps} />
+      </TestProviders>
+    );
+
+    expect(mockGetDefaultControlColumn).toHaveBeenCalledWith(5);
+  });
+
+  it('should have 5 columns on Action bar for Enterprise user and if user does not have Notes privileges', () => {
+    const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
+    licenseServiceMock.isEnterprise.mockReturnValue(true);
+    (useUserPrivileges as jest.Mock).mockReturnValue({ notesPrivileges: { read: false } });
 
     render(
       <TestProviders>

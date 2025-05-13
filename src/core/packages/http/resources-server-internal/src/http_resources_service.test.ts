@@ -48,7 +48,15 @@ describe('HttpResources service', () => {
       getDeps: () => PrebootDeps | SetupDeps
     ) {
       describe(`${name} register`, () => {
-        const routeConfig: RouteConfig<any, any, any, 'get'> = { path: '/', validate: false };
+        const routeConfig: RouteConfig<any, any, any, 'get'> = {
+          path: '/',
+          validate: false,
+          security: {
+            authz: {
+              requiredPrivileges: ['foo'],
+            },
+          },
+        };
         let register: HttpResources['register'];
 
         beforeEach(async () => {

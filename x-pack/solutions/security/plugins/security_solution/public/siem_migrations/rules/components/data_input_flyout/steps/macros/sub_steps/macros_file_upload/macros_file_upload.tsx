@@ -62,7 +62,7 @@ export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
     const isButtonDisabled = showLoader || macrosToUpload.length === 0;
 
     return (
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFormRow
             helpText={

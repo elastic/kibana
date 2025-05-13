@@ -11,6 +11,7 @@ import { KbnPalettes } from '../classes/palettes';
 import { elasticPalette, getNeutralPalette } from './categorical';
 import { elasticClassicPalette, kibana4Palette, kibana7Palette } from './legacy/categorical';
 import {
+  compareToPalette,
   complementaryPalette,
   coolPalette,
   grayPalette,
@@ -37,6 +38,7 @@ const darkKbnPalettes = new KbnPalettes(
     temperaturePalette,
     warmPalette,
     elasticClassicPalette,
+    compareToPalette,
   ],
   elasticPalette
 );
@@ -46,7 +48,7 @@ const lightKbnPalettes = new KbnPalettes(
     elasticPalette,
     kibana7Palette,
     kibana4Palette,
-    getNeutralPalette(true),
+    getNeutralPalette(false),
     complementaryPalette,
     coolPalette,
     grayPalette,
@@ -56,6 +58,7 @@ const lightKbnPalettes = new KbnPalettes(
     temperaturePalette,
     warmPalette,
     elasticClassicPalette,
+    compareToPalette,
   ],
   elasticPalette
 );

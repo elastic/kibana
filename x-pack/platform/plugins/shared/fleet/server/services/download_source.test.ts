@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -140,19 +140,29 @@ describe('Download Service', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    jest
+      .mocked(appContextService.getExperimentalFeatures)
+      .mockReturnValue({ useSpaceAwareness: true } as any);
+    mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+      canEncrypt: true,
+    } as any);
   });
   afterEach(() => {
     mockedAgentPolicyService.list.mockClear();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
     mockedAgentPolicyService.removeDefaultSourceFromAll.mockReset();
     mockedAppContextService.getInternalUserSOClient.mockReset();
+    mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
   });
+  const esClient = elasticsearchServiceMock.createInternalClient();
+
   describe('create', () => {
     it('work with a predefined id', async () => {
       const soClient = getMockedSoClient();
 
       await downloadSourceService.create(
         soClient,
+        esClient,
         {
           host: 'http://test.co',
           is_default: false,
@@ -175,6 +185,7 @@ describe('Download Service', () => {
 
       await downloadSourceService.create(
         soClient,
+        esClient,
         {
           is_default: true,
           name: 'Test',
@@ -191,7 +202,7 @@ describe('Download Service', () => {
         defaultDownloadSourceId: 'existing-default-download-source',
       });
 
-      await downloadSourceService.create(soClient, {
+      await downloadSourceService.create(soClient, esClient, {
         is_default: true,
         name: 'New default host',
         host: 'http://test.co',
@@ -204,6 +215,41 @@ describe('Download Service', () => {
         { is_default: false }
       );
     });
+
+    it('should throw if encryptedSavedObject is not configured', async () => {
+      const soClient = getMockedSoClient();
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: false,
+      } as any);
+      await expect(
+        downloadSourceService.create(
+          soClient,
+          esClient,
+          {
+            is_default: true,
+            name: 'Test',
+            host: 'http://test.co',
+          },
+          { id: 'download-source-test' }
+        )
+      ).rejects.toThrow(`Agent binary source needs encrypted saved object api key to be set`);
+    });
+
+    it('should work if encryptedSavedObject is configured', async () => {
+      const soClient = getMockedSoClient();
+
+      await downloadSourceService.create(
+        soClient,
+        esClient,
+        {
+          is_default: true,
+          name: 'Test',
+          host: 'http://test.co',
+        },
+        { id: 'download-source-test' }
+      );
+      expect(soClient.create).toBeCalled();
+    });
   });
 
   describe('update', () => {
@@ -212,7 +258,7 @@ describe('Download Service', () => {
         defaultDownloadSourceId: 'existing-default-download-source',
       });
 
-      await downloadSourceService.update(soClient, 'download-source-test', {
+      await downloadSourceService.update(soClient, esClient, 'download-source-test', {
         is_default: true,
         name: 'New default',
         host: 'http://test.co',
@@ -237,7 +283,7 @@ describe('Download Service', () => {
         defaultDownloadSourceId: 'existing-default-download-source',
       });
 
-      await downloadSourceService.update(soClient, 'existing-default-download-source', {
+      await downloadSourceService.update(soClient, esClient, 'existing-default-download-source', {
         is_default: true,
         name: 'Test',
         host: 'http://test.co',

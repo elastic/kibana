@@ -43,7 +43,7 @@ export function AnalyzeDataButton() {
   } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
 
   const basepath = services.http?.basePath.get();
-  const canShowDashboard = services.application?.capabilities.dashboard.show;
+  const canShowDashboard = services.application?.capabilities.dashboard_v2.show;
 
   if (
     (isRumAgentName(agentName) || isMobileAgentName(agentName)) &&

@@ -75,6 +75,7 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
+            scopeId="some_scope"
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
@@ -104,6 +105,7 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
+            scopeId="some_scope"
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
@@ -133,6 +135,7 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
+            scopeId="some_scope"
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
@@ -162,6 +165,7 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
+            scopeId="some_scope"
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
@@ -191,6 +195,7 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
+            scopeId="some_scope"
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
@@ -220,6 +225,7 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
+            scopeId="some_scope"
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
@@ -249,6 +255,7 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
+            scopeId="some_scope"
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
@@ -278,6 +285,7 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
+            scopeId="some_scope"
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
@@ -307,6 +315,7 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
+            scopeId="some_scope"
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
@@ -336,6 +345,7 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
+            scopeId="some_scope"
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
@@ -363,6 +373,7 @@ describe('GenericFileDetails', () => {
       const wrapper = mount(
         <TestProviders>
           <AuditdGenericFileLine
+            scopeId="some_scope"
             id="hello-i-am-an-id"
             contextId="contextid-123"
             text="generic-text-123"
@@ -391,6 +402,7 @@ describe('GenericFileDetails', () => {
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             userName="some-user-name"
@@ -418,6 +430,7 @@ describe('GenericFileDetails', () => {
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             fileIcon="document"
@@ -445,6 +458,7 @@ describe('GenericFileDetails', () => {
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             processTitle="some-process-title"
@@ -472,6 +486,7 @@ describe('GenericFileDetails', () => {
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             workingDirectory="some-working-directory"
@@ -499,6 +514,7 @@ describe('GenericFileDetails', () => {
         <TestProviders>
           <AuditdGenericFileLine
             id="hello-i-am-an-id"
+            scopeId="some_scope"
             contextId="contextid-123"
             text="generic-text-123"
             args={['arg1', 'arg2', 'arg 3']}

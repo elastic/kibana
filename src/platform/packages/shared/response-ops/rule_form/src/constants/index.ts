@@ -8,14 +8,14 @@
  */
 
 import { RuleNotifyWhen } from '@kbn/alerting-types';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   AlertConsumers,
   ES_QUERY_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  RuleCreationValidConsumer,
 } from '@kbn/rule-data-utils';
-import { RuleFormData } from '../types';
+import type { RuleFormData } from '../types';
 
 export * from './routes';
 export * from './rule_flapping';
