@@ -98,7 +98,7 @@ import {
   postBulkUninstallPackagesHandler,
   getOneBulkOperationPackagesHandler,
 } from './bulk_handler';
-import { DeletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
+import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -873,6 +873,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           },
         },
       },
-      DeletePackageDatastreamAssetsHandler
+      deletePackageDatastreamAssetsHandler
     );
 };

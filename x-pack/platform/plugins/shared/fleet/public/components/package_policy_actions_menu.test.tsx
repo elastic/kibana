@@ -61,6 +61,7 @@ function renderMenu({
       upgradePackagePolicyHref="/test/upgrade-link"
       defaultIsOpen={defaultIsOpen}
       key="test1"
+      isInputPackageDatasetUsedByMultiplePolicies={jest.fn()}
     />
   );
 

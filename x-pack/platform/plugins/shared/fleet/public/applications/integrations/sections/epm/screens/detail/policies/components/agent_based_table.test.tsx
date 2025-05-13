@@ -66,6 +66,7 @@ describe.skip('AgentBasedPackagePoliciesTable', () => {
         packagePoliciesTotal={1}
         refreshPackagePolicies={jest.fn()}
         pagination={mockPagination}
+        isInputPackageDatasetUsedByMultiplePolicies={jest.fn()}
       />
     );
     await act(async () => {
@@ -84,6 +85,7 @@ describe.skip('AgentBasedPackagePoliciesTable', () => {
         packagePoliciesTotal={0}
         refreshPackagePolicies={jest.fn()}
         pagination={mockPagination}
+        isInputPackageDatasetUsedByMultiplePolicies={jest.fn()}
       />
     );
     await act(async () => {
@@ -100,6 +102,7 @@ describe.skip('AgentBasedPackagePoliciesTable', () => {
         packagePoliciesTotal={0}
         refreshPackagePolicies={jest.fn()}
         pagination={mockPagination}
+        isInputPackageDatasetUsedByMultiplePolicies={jest.fn()}
       />
     );
     await act(async () => {
@@ -116,6 +119,7 @@ describe.skip('AgentBasedPackagePoliciesTable', () => {
         packagePoliciesTotal={1}
         refreshPackagePolicies={jest.fn()}
         pagination={mockPagination}
+        isInputPackageDatasetUsedByMultiplePolicies={jest.fn()}
       />
     );
 

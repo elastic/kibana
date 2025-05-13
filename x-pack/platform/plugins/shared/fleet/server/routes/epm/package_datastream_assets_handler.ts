@@ -18,7 +18,7 @@ import {
   removeAssetsForInputPackagePolicy,
 } from '../../services/epm/packages/input_type_packages';
 
-export const DeletePackageDatastreamAssetsHandler: FleetRequestHandler<
+export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
   TypeOf<typeof DeletePackageDatastreamAssetsRequestSchema.params>,
   TypeOf<typeof DeletePackageDatastreamAssetsRequestSchema.query>
 > = async (context, request, response) => {
@@ -60,15 +60,19 @@ export const DeletePackageDatastreamAssetsHandler: FleetRequestHandler<
   const existingDataStreamsAreFromDifferentPackage =
     checkExistingDataStreamsAreFromDifferentPackage(packageInfo, existingDataStreams);
 
-  if (!existingDataStreamsAreFromDifferentPackage) {
-    await removeAssetsForInputPackagePolicy({
-      packageInfo,
-      logger,
-      datasetName,
-      esClient,
-      savedObjectsClient,
-    });
+  if (existingDataStreamsAreFromDifferentPackage) {
+    logger.info(`Datastreams matching ${datasetName} exist on other packages and won't be removed`);
+    return response.ok({ body: { success: true } }); //?
   }
+
+  logger.info(`Removing datastreams matching ${datasetName}`);
+  await removeAssetsForInputPackagePolicy({
+    packageInfo,
+    logger,
+    datasetName,
+    esClient,
+    savedObjectsClient,
+  });
 
   return response.ok({ body: { success: true } });
 };
