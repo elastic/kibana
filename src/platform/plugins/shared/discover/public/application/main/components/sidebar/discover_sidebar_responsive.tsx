@@ -157,6 +157,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const services = useDiscoverServices();
   const isEsqlMode = useIsEsqlMode();
   const { stateContainer, sidebarProps } = props;
+  const [portalSidebarProps, setPortalSidebarProps] =
+    useState<DiscoverSidebarResponsiveProps['sidebarProps']>(sidebarProps);
+
   const {
     fieldListVariant,
     columns,
@@ -170,7 +173,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     onRemoveField,
     sidebarToggleState$,
     additionalFilters,
-  } = sidebarProps || {};
+  } = portalSidebarProps || {};
   const selectedDataView = useCurrentDataView();
   const documents$ = stateContainer.dataState.data$.documents$;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
@@ -387,7 +390,13 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     });
   }, [isSidebarCollapsed, unifiedFieldListSidebarContainerApi, sidebarToggleState$]);
 
-  if (!sidebarProps) {
+  useEffect(() => {
+    if (sidebarProps) {
+      setPortalSidebarProps(sidebarProps);
+    }
+  }, [sidebarProps, setPortalSidebarProps]);
+
+  if (!portalSidebarProps) {
     return <div />;
   }
 
