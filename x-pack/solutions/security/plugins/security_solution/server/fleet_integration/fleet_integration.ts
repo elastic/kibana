@@ -466,6 +466,7 @@ export const getPackagePolicyDeleteCallback = (
     if (!exceptionsClient) {
       return;
     }
+
     const policiesToRemove: Array<Promise<void>> = [];
     for (const policy of deletePackagePolicy) {
       if (isEndpointPackagePolicy(policy)) {

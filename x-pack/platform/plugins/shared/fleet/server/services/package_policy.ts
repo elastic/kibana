@@ -2188,8 +2188,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<void> {
+    const logger = this.getLogger('runPostDeleteExternalCallbacks');
     const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyPostDelete');
     const errorsThrown: Error[] = [];
+
+    logger.debug(`Running [${externalCallbacks?.size}] external callbacks`);
 
     if (externalCallbacks && externalCallbacks.size > 0) {
       for (const callback of externalCallbacks) {
@@ -2198,17 +2201,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         try {
           await callback(deletedPackagePolicies, soClient, esClient, context, request);
         } catch (error) {
+          logger.debug(
+            () =>
+              `The following external callback threw error:\n${error.message}\n${
+                error.stack
+              }\nFirst 1k characters of callback:\n${callback.toString().substring(0, 1000)}`
+          );
           errorsThrown.push(error);
         }
       }
 
       if (errorsThrown.length > 0) {
         throw new FleetError(
-          `${errorsThrown.length} encountered while executing package post delete external callbacks`,
+          `${errorsThrown.length} errors encountered while executing package post delete external callbacks`,
           errorsThrown
         );
       }
     }
+
+    logger.debug(`Running of external callbacks done`);
   }
 
   public async runDeleteExternalCallbacks(
@@ -2216,8 +2227,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ): Promise<void> {
+    const logger = this.getLogger('runDeleteExternalCallbacks');
     const externalCallbacks = appContextService.getExternalCallbacks('packagePolicyDelete');
     const errorsThrown: Error[] = [];
+
+    logger.debug(`Running [${externalCallbacks?.size}] external callbacks`);
 
     if (externalCallbacks && externalCallbacks.size > 0) {
       for (const callback of externalCallbacks) {
@@ -2226,17 +2240,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         try {
           await callback(deletedPackagePolices, soClient, esClient);
         } catch (error) {
+          logger.debug(
+            () =>
+              `The following external callback threw error:\n${error.message}\n${
+                error.stack
+              }\nFirst 1k characters of callback:\n${callback.toString().substring(0, 1000)}`
+          );
           errorsThrown.push(error);
         }
       }
 
       if (errorsThrown.length > 0) {
         throw new FleetError(
-          `${errorsThrown.length} encountered while executing package delete external callbacks`,
+          `${errorsThrown.length} errors encountered while executing package delete external callbacks`,
           errorsThrown
         );
       }
     }
+
+    logger.debug(`Running of package policy delete external callbacks done`);
   }
 
   public async removeOutputFromAll(
