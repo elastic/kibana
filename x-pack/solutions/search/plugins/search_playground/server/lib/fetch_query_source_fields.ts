@@ -11,6 +11,7 @@ import {
   IndicesGetMappingResponse,
   FieldCapsFieldCapability,
   MappingPropertyBase,
+  MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -81,7 +82,7 @@ export const fetchFields = async (
     include_unmapped: true,
     index: indices,
   });
-
+  console.log('fieldCapabilities', fieldCapabilities);
   const modelIdFields = getModelIdFields(fieldCapabilities);
 
   const indicesAggsMappings = await Promise.all(
@@ -113,6 +114,7 @@ export const fetchFields = async (
 const INFERENCE_MODEL_FIELD_REGEXP = /\.predicted_value|\.tokens/;
 
 const getSemanticField = (field: string, semanticFields: SemanticField[]) => {
+  console.log(field, semanticFields);
   return semanticFields.find((sf) => sf.field === field);
 };
 
@@ -170,6 +172,52 @@ const sortFields = (fields: FieldCapsResponse['fields']): FieldCapsResponse['fie
   return Object.fromEntries(entries);
 };
 
+const constructSemanticField = (
+  mappingProperties: Record<string, MappingProperty>,
+  semanticTextField?: string
+): SemanticField[] => {
+  return Object.keys(mappingProperties || {})
+    .filter((field) => mappingProperties[field].type === 'semantic_text')
+    .map((field) => {
+      const mapping = mappingProperties[field] as unknown as MappingSemanticTextProperty;
+      return {
+        field: semanticTextField ? `${semanticTextField}.${field}` : field,
+        inferenceId: mapping?.inference_id,
+        embeddingType: mapping?.model_settings?.task_type
+          ? EMBEDDING_TYPE[mapping.model_settings.task_type]
+          : undefined,
+      };
+    });
+};
+const createSemanticTextFieldsList = (
+  mappingPropertiesFilter: Record<string, MappingProperty>,
+  semanticFields: SemanticField[] = [],
+  semanticTextField?: string
+) => {
+  Object.keys(mappingPropertiesFilter || {}).filter((field) => {
+    if (mappingPropertiesFilter[field].type === 'semantic_text') {
+      const semanticField: SemanticField[] = constructSemanticField(
+        mappingPropertiesFilter,
+        semanticTextField
+      );
+      semanticFields.push(...semanticField);
+    } else if (mappingPropertiesFilter[field].type === 'text') {
+      createSemanticTextFieldsList(
+        mappingPropertiesFilter[field].fields || {},
+        semanticFields,
+        field
+      );
+    } else if ('properties' in mappingPropertiesFilter[field]) {
+      createSemanticTextFieldsList(
+        mappingPropertiesFilter[field].properties || {},
+        semanticFields,
+        field
+      );
+    }
+    return semanticFields;
+  });
+  return semanticFields;
+};
 export const parseFieldsCapabilities = (
   fieldCapsResponse: FieldCapsResponse,
   aggMappingDocs: Array<{ index: string; doc: SearchResponse; mapping: IndicesGetMappingResponse }>
@@ -188,29 +236,32 @@ export const parseFieldsCapabilities = (
 
     const mappingProperties = aggDoc.mapping[aggDoc.index].mappings.properties || {};
 
-    const semanticTextFields: SemanticField[] = Object.keys(mappingProperties || {})
-      .filter(
-        // @ts-ignore
-        (field) => mappingProperties[field].type === 'semantic_text'
-      )
-      .map((field) => {
-        const mapping = mappingProperties[field] as unknown as MappingSemanticTextProperty;
-        return {
-          field,
-          inferenceId: mapping?.inference_id,
-          embeddingType: mapping?.model_settings?.task_type
-            ? EMBEDDING_TYPE[mapping.model_settings.task_type]
-            : undefined,
-        };
-      });
-
+    const semanticTextFields: SemanticField[] = createSemanticTextFieldsList(mappingProperties);
+    // console.log('semanticTextFields', semanticTextFields);
+    // const semanticTextFields: SemanticField[] = Object.keys(mappingProperties || {})
+    //   .filter(
+    //     // @ts-ignore
+    //     (field) => mappingProperties[field].type === 'semantic_text'
+    //   )
+    //   .map((field) => {
+    //     // console.log('field', field);
+    //     const mapping = mappingProperties[field] as unknown as MappingSemanticTextProperty;
+    //     return {
+    //       field,
+    //       inferenceId: mapping?.inference_id,
+    //       embeddingType: mapping?.model_settings?.task_type
+    //         ? EMBEDDING_TYPE[mapping.model_settings.task_type]
+    //         : undefined,
+    //     };
+    //   });
+    console.log('semanticTextFields', semanticTextFields);
     return {
       index: aggDoc.index,
       fields: modelIdFields,
       semanticTextFields,
     };
   });
-
+  // console.log('indexModelIdFields', indexModelIdFields);
   const indicesFieldsMap = indices.reduce<IndicesQuerySourceFields>((acc, index) => {
     acc[index] = {
       elser_query_fields: [],
@@ -227,7 +278,7 @@ export const parseFieldsCapabilities = (
   const shouldIgnoreField = (field: string) => {
     return !field.endsWith('model_id');
   };
-
+  // console.log('fields', fields);
   const querySourceFields = Object.keys(fields).reduce<IndicesQuerySourceFields>(
     (acc: IndicesQuerySourceFields, fieldKey) => {
       const field = fields[fieldKey];
@@ -241,9 +292,12 @@ export const parseFieldsCapabilities = (
         const { fields: modelIdFields, semanticTextFields } = indexModelIdFields.find(
           (indexModelIdField) => indexModelIdField.index === index
         )!;
-        const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
-        const semanticFieldMapping = getSemanticField(fieldKey, semanticTextFields);
 
+        const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
+        // console.log('FK', fieldKey, 'FC', fieldCapsResponse);
+        // console.log('nestedField', nestedField);
+        const semanticFieldMapping = getSemanticField(fieldKey, semanticTextFields);
+        // console.log('semanticFieldMapping', semanticFieldMapping);
         if (isFieldInIndex(field, 'text', index) && semanticFieldMapping) {
           // only use this when embeddingType and inferenceId is defined
           // this requires semantic_text field to be set up correctly and ingested
