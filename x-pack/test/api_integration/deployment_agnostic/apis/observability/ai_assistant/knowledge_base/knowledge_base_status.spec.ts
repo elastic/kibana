@@ -21,10 +21,7 @@ import {
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  describe('/internal/observability_ai_assistant/kb/status', function () {
-    // see details: https://github.com/elastic/kibana/issues/219217
-    this.tags(['failsOnMKI']);
-
+  describe('Knowledge base: GET /internal/observability_ai_assistant/kb/status', function () {
     it('returns correct status before knowledge base is setup', async () => {
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/kb/status',

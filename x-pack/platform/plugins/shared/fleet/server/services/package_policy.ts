@@ -891,7 +891,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     return {
       items: packagePolicies?.saved_objects.map((so) =>
-        mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces)
+        mapPackagePolicySavedObjectToPackagePolicy(so)
       ),
       total: packagePolicies?.total,
       page,
@@ -1889,7 +1889,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                     context,
                     request
                   );
-                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = PackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else if (externalCallbackType === 'packagePolicyPostUpdate') {
                   thisCallbackResponse = await (callback as PutPackagePolicyPostUpdateCallback)(
                     updatedNewData as PackagePolicy,
@@ -1898,7 +1900,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                     context,
                     request
                   );
-                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = PackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else {
                   thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
                     updatedNewData as NewPackagePolicy,
@@ -1910,7 +1914,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 }
 
                 if (externalCallbackType === 'packagePolicyCreate') {
-                  updatedNewData = NewPackagePolicySchema.validate(thisCallbackResponse);
+                  updatedNewData = NewPackagePolicySchema.validate(
+                    omit(thisCallbackResponse, 'spaceIds')
+                  );
                 } else if (externalCallbackType === 'packagePolicyUpdate') {
                   const omitted = {
                     ...omit(thisCallbackResponse, [
@@ -2032,7 +2038,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           perPage: SO_SEARCH_LIMIT,
           namespaces: ['*'],
         })
-    ).saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so, so.namespaces));
+    ).saved_objects.map((so) => mapPackagePolicySavedObjectToPackagePolicy(so));
 
     if (packagePolicies.length > 0) {
       const getPackagePolicyUpdate = (packagePolicy: PackagePolicy) => ({
@@ -2151,10 +2157,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             savedObjectType,
           });
 
-          return mapPackagePolicySavedObjectToPackagePolicy(
-            packagePolicySO,
-            packagePolicySO.namespaces
-          );
+          return mapPackagePolicySavedObjectToPackagePolicy(packagePolicySO);
         });
       },
     });
