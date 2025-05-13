@@ -143,14 +143,25 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async expectOnlyDefinedLinks(navItemIds: string[]) {
         const navItemIdRegEx = /nav-item-id-[^\s]+/g;
         const allSideNavLinks = await testSubjects.findAll('*nav-item-id-');
+        const foundNavItemIds: string[] = [];
         for (const sideNavItem of allSideNavLinks) {
           const dataTestSubjs = await sideNavItem.getAttribute('data-test-subj');
           const navItemIdMatch = dataTestSubjs?.match(navItemIdRegEx);
           expect(navItemIdMatch).to.be.ok();
           const navItemId = navItemIdMatch![0].replace('nav-item-id-', '');
           expect(navItemIds).to.contain(navItemId);
+          foundNavItemIds.push(navItemId);
         }
-        expect(allSideNavLinks.length).to.equal(navItemIds.length);
+        expect(foundNavItemIds).to.have.length(
+          navItemIds.length,
+          'Found nav item list length does not match expected list of side nav items'
+        );
+        for (let i = 0; i < foundNavItemIds.length; i++) {
+          expect(foundNavItemIds[i]).to.eql(
+            navItemIds[i],
+            `Nav item ${foundNavItemIds[i]} @ index ${i} does not match expected item ${navItemIds[i]}`
+          );
+        }
       },
       async clickPanelLink(deepLinkId: string) {
         await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
