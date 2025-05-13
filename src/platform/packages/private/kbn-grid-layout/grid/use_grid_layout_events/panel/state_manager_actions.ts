@@ -10,7 +10,13 @@
 import { cloneDeep } from 'lodash';
 import { MutableRefObject } from 'react';
 
-import { GridLayoutStateManager, GridPanelData, GridSectionData, OrderedLayout } from '../../types';
+import {
+  ActivePanelEvent,
+  GridLayoutStateManager,
+  GridPanelData,
+  GridSectionData,
+  OrderedLayout,
+} from '../../types';
 import { GridLayoutContextType } from '../../use_grid_layout_context';
 import { isGridDataEqual, isOrderedLayoutEqual } from '../../utils/equality_checks';
 import { resolveGridSection } from '../../utils/resolve_grid_section';
@@ -23,7 +29,6 @@ let startingLayout: OrderedLayout | undefined;
 export const startAction = (
   e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
-  type: 'drag' | 'resize',
   sectionId: string,
   panelId: string
 ) => {
@@ -33,7 +38,7 @@ export const startAction = (
   startingLayout = gridLayoutStateManager.gridLayout$.getValue();
   const panelRect = panelRef.getBoundingClientRect();
   gridLayoutStateManager.activePanelEvent$.next({
-    type,
+    type: 'click',
     id: panelId,
     panelDiv: panelRef,
     targetRow: sectionId,
@@ -45,6 +50,7 @@ export const startAction = (
 
 export const moveAction = (
   e: UserInteractionEvent,
+  type: Omit<ActivePanelEvent['type'], 'click'>,
   gridLayoutStateManager: GridLayoutContextType['gridLayoutStateManager'],
   pointerPixel: PointerPosition,
   lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>
@@ -226,6 +232,7 @@ export const moveAction = (
   // re-render the active panel
   activePanelEvent$.next({
     ...activePanel,
+    type: type as ActivePanelEvent['type'],
     id: activePanel.id,
     position: previewRect,
     targetRow: targetSectionId,

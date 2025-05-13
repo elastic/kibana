@@ -76,7 +76,8 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
         if (!ref) return;
 
         if (isPanelActive) {
-          ref.classList.add('kbnGridPanel--active');
+          // allow click events through before triggering active status
+          if (activePanel.type !== 'click') ref.classList.add('kbnGridPanel--active');
 
           // if the current panel is active, give it fixed positioning depending on the interaction event
           const { position: draggingPosition } = activePanel;

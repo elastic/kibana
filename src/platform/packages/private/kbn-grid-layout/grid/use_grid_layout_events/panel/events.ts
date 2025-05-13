@@ -38,7 +38,7 @@ export const useGridLayoutPanelEvents = ({
   sectionId,
   panelId,
 }: {
-  interactionType: ActivePanelEvent['type'];
+  interactionType: Omit<ActivePanelEvent['type'], 'click'>;
   sectionId?: string;
   panelId: string;
 }) => {
@@ -49,9 +49,9 @@ export const useGridLayoutPanelEvents = ({
   const onStart = useCallback(
     (ev: UserInteractionEvent) => {
       if (!sectionId) return;
-      startAction(ev, gridLayoutStateManager, interactionType, sectionId, panelId);
+      startAction(ev, gridLayoutStateManager, sectionId, panelId);
     },
-    [gridLayoutStateManager, interactionType, sectionId, panelId]
+    [gridLayoutStateManager, sectionId, panelId]
   );
 
   const onEnd = useCallback(() => {
@@ -77,6 +77,7 @@ export const useGridLayoutPanelEvents = ({
       if (isMouseEvent(ev) || isTouchEvent(ev)) {
         return moveAction(
           ev,
+          interactionType,
           gridLayoutStateManager,
           getSensorPosition(ev),
           lastRequestedPanelPosition
@@ -90,10 +91,16 @@ export const useGridLayoutPanelEvents = ({
           gridLayoutStateManager,
           getSensorPosition(ev)
         );
-        return moveAction(ev, gridLayoutStateManager, pointerPixel, lastRequestedPanelPosition);
+        return moveAction(
+          ev,
+          interactionType,
+          gridLayoutStateManager,
+          pointerPixel,
+          lastRequestedPanelPosition
+        );
       }
     },
-    [gridLayoutStateManager]
+    [gridLayoutStateManager, interactionType]
   );
 
   const startInteraction = useCallback(

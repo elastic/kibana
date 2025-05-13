@@ -51,7 +51,7 @@ export interface ActivePanelEvent {
   /**
    * The type of interaction being performed.
    */
-  type: 'drag' | 'resize';
+  type: 'click' | 'drag' | 'resize';
 
   /**
    * The id of the panel being interacted with.
