@@ -103,7 +103,7 @@ import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20,
 } from '../constants';
 
-import { getNamespaceForSoClient } from './utils/get_so_namespaces';
+import { calculateSavedObjectsNamespaces } from './utils/calculate_saved_objects_namespaces';
 
 import { appContextService } from '.';
 
@@ -199,7 +199,9 @@ class AgentPolicyService {
   ): Promise<AgentPolicy> {
     const logger = this.getLogger('_update');
 
-    logger.debug(`Starting update of agent policy ${id}`);
+    logger.debug(
+      `Starting update of agent policy [${id}] with soClient scoped to [${soClient.getCurrentNamespace()}]`
+    );
 
     const isSpacesEnabled = await isSpaceAwarenessEnabled();
     const savedObjectType = await getAgentPolicySavedObjectType();
@@ -240,30 +242,43 @@ class AgentPolicyService {
       );
     }
 
-    await soClient
-      .update<AgentPolicySOAttributes>(
-        savedObjectType,
-        id,
-        {
-          ...agentPolicy,
-          ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
-          ...(options.removeProtection
-            ? { is_protected: false }
-            : { is_protected: agentPolicy.is_protected }),
-          updated_at: new Date().toISOString(),
-          updated_by: user ? user.username : 'system',
-        },
-        {
-          namespace: isSpacesEnabled
-            ? existingAgentPolicy.space_ids?.at(0) ?? DEFAULT_SPACE_ID
-            : undefined,
-        }
-      )
-      .catch(catchAndWrapError);
+    // If space awareness is enabled and the soClient that was passed on input is not
+    // scoped to the space that the agnet policy is associated with, then initialize
+    // a new client for the update. This should be safe, since the `soClient` provided
+    // on input was used to retrieve the agent policy, thus we know it has access to it.
+    let soClientForUpdate = soClient;
+
+    if (isSpacesEnabled) {
+      const soClientSpaceId = soClient.getCurrentNamespace();
+
+      if (soClientSpaceId && existingAgentPolicy?.space_ids?.includes(soClientSpaceId)) {
+        logger.debug(`Using soClient provided on input for update to agent policy [${id}]`);
+        soClientForUpdate = soClient;
+      } else {
+        const spaceIdForUpdate = existingAgentPolicy?.space_ids?.at(0) ?? DEFAULT_SPACE_ID;
+
+        logger.debug(
+          `Initiating internal soClient scoped to [${spaceIdForUpdate}] for making the update to agent policy [${id}]`
+        );
+        soClientForUpdate = appContextService.getInternalUserSOClientForSpaceId(spaceIdForUpdate);
+      }
+    }
+
+    await soClientForUpdate
+      .update<AgentPolicySOAttributes>(savedObjectType, id, {
+        ...agentPolicy,
+        ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
+        ...(options.removeProtection
+          ? { is_protected: false }
+          : { is_protected: agentPolicy.is_protected }),
+        updated_at: new Date().toISOString(),
+        updated_by: user ? user.username : 'system',
+      })
+      .catch(catchAndWrapError.withMessage(`SO update to agent policy [${id}] failed`));
 
     const newAgentPolicy = await this.get(soClient, id, false);
 
-    logger.debug(`Agent policy SO was updated successfully`);
+    logger.debug(`Agent policy [${id}] Saved Object was updated successfully`);
 
     newAgentPolicy!.package_policies = existingAgentPolicy.package_policies;
 
@@ -587,9 +602,19 @@ class AgentPolicyService {
     options: { fields?: string[]; withPackagePolicies?: boolean; ignoreMissing?: boolean } = {}
   ): Promise<AgentPolicy[]> {
     const logger = this.getLogger('getByIds');
+
+    logger.debug(
+      () =>
+        `Getting agent policies ${JSON.stringify(
+          ids
+        )} using soClient scoped to [${soClient.getCurrentNamespace()}] and options [${JSON.stringify(
+          options
+        )}]`
+    );
+
     const savedObjectType = await getAgentPolicySavedObjectType();
     const isSpacesEnabled = await isSpaceAwarenessEnabled();
-    const namespace = isSpacesEnabled ? await getNamespaceForSoClient(soClient) : undefined;
+    const namespaces = await calculateSavedObjectsNamespaces(soClient);
 
     const objects = ids.map((id) => {
       if (typeof id === 'string') {
@@ -597,20 +622,19 @@ class AgentPolicyService {
           ...options,
           id,
           type: savedObjectType,
-          namespaces: isSpacesEnabled && namespace ? [namespace] : undefined,
+          namespaces,
         };
       }
 
       return {
         ...options,
         id: id.id,
-        namespaces:
-          isSpacesEnabled && (id.spaceId || namespace) ? [(id.spaceId ?? namespace)!] : undefined,
+        namespaces: isSpacesEnabled && id.spaceId ? [id.spaceId] : namespaces,
         type: savedObjectType,
       };
     });
 
-    logger.debug(() => `Retrieving agent policies with: ${JSON.stringify(objects)}`);
+    logger.debug(() => `BulkGet input: ${JSON.stringify(objects)}`);
 
     const bulkGetResponse = await soClient
       .bulkGet<AgentPolicySOAttributes>(objects)

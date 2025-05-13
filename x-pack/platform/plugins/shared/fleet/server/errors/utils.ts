@@ -17,12 +17,12 @@ export function isElasticsearchVersionConflictError(error: Error): boolean {
   return isESClientError(error) && error.meta.statusCode === 409;
 }
 
-export const wrapWithFleetErrorIfNeeded = (err: Error): FleetError => {
+export const wrapWithFleetErrorIfNeeded = (err: Error, messagePrefix?: string): FleetError => {
   if (err instanceof FleetError) {
     return err;
   }
 
-  let message = err.message;
+  let message = `${messagePrefix ? `${messagePrefix}: ` : ''}${err.message}`;
 
   if (isESClientError(err)) {
     message += ` (Status Code: [${err.statusCode}], body: [${JSON.stringify(err.body)}])`;
@@ -30,6 +30,11 @@ export const wrapWithFleetErrorIfNeeded = (err: Error): FleetError => {
 
   return new FleetError(message, err);
 };
+
+interface CatchAndWrapError {
+  (error: Error): Promise<never>;
+  withMessage(message: string): (error: Error) => Promise<never>;
+}
 
 /**
  * Error handling utility for use with promises that will wrap any thrown error with a `FleetError`.
@@ -41,7 +46,15 @@ export const wrapWithFleetErrorIfNeeded = (err: Error): FleetError => {
  * @example
  *
  *    esClient.search(...).catch(catchAndWrapError);
+ *
+ *    // With custom message on error thrown
+ *    esClient.search(...).catch(catchAndWrapError.withMessage('update to item xyz failed'));
+ *
  */
-export const catchAndWrapError = (error: Error): Promise<never> => {
+export const catchAndWrapError: CatchAndWrapError = (error: Error): Promise<never> => {
   return Promise.reject(wrapWithFleetErrorIfNeeded(error));
+};
+
+catchAndWrapError.withMessage = (message) => {
+  return (err: Error) => Promise.reject(wrapWithFleetErrorIfNeeded(err, message));
 };

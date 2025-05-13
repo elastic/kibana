@@ -16,21 +16,32 @@ import { isSpaceAwarenessEnabled } from '../spaces/helpers';
  * namespaces to be used should be `[*]`
  *
  * @param soClient
+ * @param spaceId
  */
-export const getNamespaceForSoClient = async (
-  soClient: SavedObjectsClientContract
-): Promise<string> => {
+export const calculateSavedObjectsNamespaces = async (
+  soClient: SavedObjectsClientContract,
+  spaceId: string[] | string = []
+): Promise<string[] | undefined> => {
   if (!(await isSpaceAwarenessEnabled())) {
-    return '';
+    return undefined;
   }
 
   const soClientNamespace = soClient.getCurrentNamespace();
+  const spaceIds = Array.isArray(spaceId) ? spaceId : [spaceId];
 
-  // Internal un-scoped soClient do not have a namespace set - in these cases we set the namespace to `*`
-  // so that searches are done across all spaces.
   if (!soClientNamespace) {
-    return '*';
+    if (spaceIds.length > 0) {
+      return spaceIds;
+    }
+
+    return ['*'];
   }
 
-  return soClientNamespace;
+  // If the spaceId request is the same as the one that the SO Client is already scoped to,
+  // then return undefined.
+  if (spaceIds.length === 1 && spaceIds[0] === soClientNamespace) {
+    return undefined;
+  }
+
+  return spaceIds.length > 0 ? spaceIds : undefined;
 };
