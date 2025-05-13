@@ -11658,6 +11658,16 @@
               }
             }
           }
+        },
+        "start-local": {
+          "properties": {
+            "version": {
+              "type": "keyword",
+              "_meta": {
+                "description": "version of the start-local script used to launch Kibana"
+              }
+            }
+          }
         }
       }
     },
