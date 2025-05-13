@@ -17,8 +17,6 @@ import {
 } from '@elastic/eui';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 
-import * as i18n from './translations';
-
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { Footer } from '../../footer';
@@ -26,6 +24,7 @@ import { MIN_FLYOUT_WIDTH } from '../../constants';
 import { useEditForm } from '../edit_form';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
 import { useCreateAttackDiscoverySchedule } from '../logic/use_create_schedule';
+import * as i18n from './translations';
 import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
 
 interface Props {
@@ -96,7 +95,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       onClose={onClose}
       paddingSize="m"
       side="right"
-      size="s"
+      size="m"
       type="overlay"
     >
       <EuiFlyoutHeader hasBorder>

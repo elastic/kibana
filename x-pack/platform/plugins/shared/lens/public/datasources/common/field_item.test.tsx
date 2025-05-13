@@ -21,7 +21,6 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { IndexPattern } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from '../form_based/document_field';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
@@ -156,13 +155,11 @@ describe('Lens Field Item', () => {
     const Wrapper: React.FC<{
       children: React.ReactNode;
     }> = ({ children }) => {
-      return (
-        <KibanaRenderContextProvider {...mockedServices.core}>
-          <KibanaContextProvider services={mockedServices}>
-            <button>close the euiPopover</button>
-            {children}
-          </KibanaContextProvider>
-        </KibanaRenderContextProvider>
+      return mockedServices.core.rendering.addContext(
+        <KibanaContextProvider services={mockedServices}>
+          <button>close the euiPopover</button>
+          {children}
+        </KibanaContextProvider>
       );
     };
 
@@ -396,11 +393,11 @@ describe('Lens Field Item', () => {
     };
 
     render(
-      <KibanaRenderContextProvider {...mockedServices.core}>
+      mockedServices.core.rendering.addContext(
         <KibanaContextProvider services={services}>
           <InnerFieldItem {...defaultProps} />
         </KibanaContextProvider>
-      </KibanaRenderContextProvider>
+      )
     );
     await waitFor(() => {
       expect(screen.getByTestId('field-bytes-showDetails')).toBeInTheDocument();

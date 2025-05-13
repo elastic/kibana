@@ -10,13 +10,12 @@ import {
   EuiDataGrid,
   EuiPanel,
   EuiDataGridColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
   EuiBadge,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALERT_ID_COLUMN } from '../../../../common';
 
 const styles = {
   grid: css`
@@ -30,11 +29,10 @@ const styles = {
 };
 
 export interface TestQueryRowTableProps {
-  rawResults: { cols: EuiDataGridColumn[]; rows: Array<Record<string, string | null | undefined>> };
-  alerts: string[] | null;
+  preview: { cols: EuiDataGridColumn[]; rows: Array<Record<string, string | null | undefined>> };
 }
 
-export const TestQueryRowTable: React.FC<TestQueryRowTableProps> = ({ rawResults, alerts }) => {
+export const TestQueryRowTable: React.FC<TestQueryRowTableProps> = ({ preview }) => {
   return (
     <EuiPanel style={{ overflow: 'hidden' }} hasShadow={false} hasBorder={true}>
       <EuiDataGrid
@@ -43,17 +41,27 @@ export const TestQueryRowTable: React.FC<TestQueryRowTableProps> = ({ rawResults
           defaultMessage: 'Test query grid',
         })}
         data-test-subj="test-query-row-datagrid"
-        columns={rawResults.cols}
+        columns={preview.cols}
         columnVisibility={{
-          visibleColumns: rawResults.cols.map((c) => c.id),
+          visibleColumns: preview.cols.map((c) => c.id),
           setVisibleColumns: () => {},
         }}
-        rowCount={rawResults.rows.length}
+        rowCount={preview.rows.length}
         gridStyle={{
           border: 'horizontal',
           rowHover: 'none',
         }}
-        renderCellValue={({ rowIndex, columnId }) => rawResults.rows[rowIndex][columnId] ?? '—'}
+        renderCellValue={({ rowIndex, columnId }) => {
+          const value: string | null | undefined = preview.rows[rowIndex][columnId];
+          if (columnId === ALERT_ID_COLUMN && value) {
+            return (
+              <EuiBadge data-test-subj="alert-badge" color="primary">
+                {value}
+              </EuiBadge>
+            );
+          }
+          return value ?? '-';
+        }}
         pagination={{
           pageIndex: 0,
           pageSize: 10,
@@ -63,28 +71,14 @@ export const TestQueryRowTable: React.FC<TestQueryRowTableProps> = ({ rawResults
         toolbarVisibility={false}
       />
       <EuiSpacer size="m" />
-      {alerts && (
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <h5>
-                {i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryAlerts', {
-                  defaultMessage: 'Alerts generated',
-                })}
-              </h5>
-            </EuiText>
-          </EuiFlexItem>
-          {alerts.map((alert, index) => {
-            return (
-              <EuiFlexItem key={index} grow={false}>
-                <EuiBadge data-test-subj="alert-badge" color="primary">
-                  {alert}
-                </EuiBadge>
-              </EuiFlexItem>
-            );
+      <EuiText color="subdued" size="xs">
+        <p>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.testQueryTableNote', {
+            defaultMessage:
+              'This table is a preview and shows data from only the top 5 rows returned by the query.',
           })}
-        </EuiFlexGroup>
-      )}
+        </p>
+      </EuiText>
     </EuiPanel>
   );
 };

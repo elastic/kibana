@@ -8,21 +8,18 @@
 import expect from '@kbn/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import {
-  TINY_ELSER,
-  clearKnowledgeBase,
-  importTinyElserModel,
-  deleteInferenceEndpoint,
-  deleteKnowledgeBaseModel,
-} from '../../../observability_ai_assistant_api_integration/tests/knowledge_base/helpers';
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/model_and_inference';
+import { clearKnowledgeBase } from '../../../api_integration/deployment_agnostic/apis/observability/ai_assistant/utils/knowledge_base';
 import { ObservabilityAIAssistantApiClient } from '../../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const ml = getService('ml');
   const es = getService('es');
   const { common } = getPageObjects(['common']);
 
@@ -51,32 +48,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   describe('Knowledge management tab', () => {
     before(async () => {
       await clearKnowledgeBase(es);
-
-      // create a knowledge base model
-      await importTinyElserModel(ml);
-
-      await Promise.all([
-        // setup the knowledge base
-        observabilityAIAssistantAPIClient
-          .admin({
-            endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-            params: {
-              query: {
-                model_id: TINY_ELSER.id,
-              },
-            },
-          })
-          .expect(200),
-
-        // login as editor
-        ui.auth.login('editor'),
-      ]);
+      await deployTinyElserAndSetupKb(getService);
+      await ui.auth.login('editor');
     });
 
     after(async () => {
       await Promise.all([
-        deleteKnowledgeBaseModel(ml),
-        deleteInferenceEndpoint({ es }),
+        teardownTinyElserModelAndInferenceEndpoint(getService),
         clearKnowledgeBase(es),
         ui.auth.logout(),
       ]);

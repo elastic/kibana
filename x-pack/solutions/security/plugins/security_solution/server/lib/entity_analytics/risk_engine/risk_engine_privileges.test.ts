@@ -32,7 +32,7 @@ describe('_getMissingPrivilegesMessage', () => {
     const result = _getMissingPrivilegesMessage(noClusterPrivileges);
 
     expect(result).toMatchInlineSnapshot(
-      `"User is missing risk engine privileges.  Missing cluster privileges: manage_index_templates, manage_transform, manage_ingest_pipelines."`
+      `"User is missing risk engine privileges.  Missing cluster privileges to run the risk engine: manage_transform. Missing cluster privileges to enable the risk engine: manage_index_templates, manage_transform, manage_ingest_pipelines."`
     );
   });
 
@@ -59,7 +59,7 @@ describe('_getMissingPrivilegesMessage', () => {
     const result = _getMissingPrivilegesMessage(noIndexPrivileges);
 
     expect(result).toMatchInlineSnapshot(
-      `"User is missing risk engine privileges. Missing index privileges for index \\"risk-score.risk-score-*\\": read, write. "`
+      `"User is missing risk engine privileges. Missing index privileges for index \\"risk-score.risk-score-*\\": read, write.  "`
     );
   });
 
@@ -86,7 +86,7 @@ describe('_getMissingPrivilegesMessage', () => {
     const result = _getMissingPrivilegesMessage(noClusterOrIndexPrivileges);
 
     expect(result).toMatchInlineSnapshot(
-      `"User is missing risk engine privileges. Missing index privileges for index \\"risk-score.risk-score-*\\": read, write. Missing cluster privileges: manage_index_templates, manage_transform, manage_ingest_pipelines."`
+      `"User is missing risk engine privileges. Missing index privileges for index \\"risk-score.risk-score-*\\": read, write. Missing cluster privileges to run the risk engine: manage_transform. Missing cluster privileges to enable the risk engine: manage_index_templates, manage_transform, manage_ingest_pipelines."`
     );
   });
 });

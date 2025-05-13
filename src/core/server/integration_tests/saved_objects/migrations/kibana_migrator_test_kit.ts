@@ -76,6 +76,7 @@ export interface KibanaMigratorTestKitParams {
   nodeRoles?: NodeRoles;
   settings?: Record<string, any>;
   types?: Array<SavedObjectsType<any>>;
+  removedTypes?: string[];
   defaultIndexTypesMap?: IndexTypesMap;
   hashToVersionMap?: Record<string, string>;
   logFilePath?: string;
@@ -140,6 +141,7 @@ export const getKibanaMigratorTestKit = async ({
   kibanaVersion = currentVersion,
   kibanaBranch = currentBranch,
   types = [],
+  removedTypes = [],
   logFilePath = defaultLogFilePath,
   nodeRoles = defaultNodeRoles,
   clientWrapperFactory,
@@ -157,7 +159,7 @@ export const getKibanaMigratorTestKit = async ({
   const rawClient = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
   const client = clientWrapperFactory ? clientWrapperFactory(rawClient) : rawClient;
 
-  const typeRegistry = new SavedObjectTypeRegistry();
+  const typeRegistry = new SavedObjectTypeRegistry({ legacyTypes: removedTypes });
 
   // types must be registered before instantiating the migrator
   registerTypes(typeRegistry, types);
@@ -339,9 +341,13 @@ export const deleteSavedObjectIndices = async (
   client: ElasticsearchClient,
   index: string[] = ALL_SAVED_OBJECT_INDICES
 ) => {
-  const indices = await client.indices.get({ index, allow_no_indices: true }, { ignore: [404] });
+  const res = await client.indices.get({ index, ignore_unavailable: true }, { ignore: [404] });
+  const indices = Object.keys(res);
+  if (!indices.length) {
+    return [];
+  }
   return await client.indices.delete(
-    { index: Object.keys(indices), allow_no_indices: true },
+    { index: indices, ignore_unavailable: true },
     { ignore: [404] }
   );
 };
