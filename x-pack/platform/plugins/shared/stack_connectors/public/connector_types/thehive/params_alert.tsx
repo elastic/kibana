@@ -246,37 +246,39 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
           noSuggestions
         />
       </EuiFormRow>
-      <JsonEditorWithMessageVariables
-        key={selectedTemplate}
-        messageVariables={messageVariables}
-        paramsProperty={'body'}
-        inputTargetValue={alert.body}
-        euiCodeEditorProps={{
-          placeholder: isTest ? testCustomTemplatePlaceHolder : ruleCustomTemplatePlaceHolder,
-          height: '320px',
-        }}
-        label={
-          <>
-            {translations.BODY_LABEL}
-            <TemplateOptions
-              buttonTitle={translations.SELECT_BODY_TEMPLATE_POPOVER_BUTTON}
-              paramsProperty="body"
-              onSelectEventHandler={onSelectTemplate}
-            />
-          </>
-        }
-        ariaLabel={translations.BODY_DESCRIPTION}
-        errors={errors.body as string[]}
-        onDocumentsChange={(json: string) =>
-          editAction('subActionParams', { ...alert, body: json }, index)
-        }
-        dataTestSubj="thehive-body"
-        onBlur={() => {
-          if (!alert.body) {
-            editAction('subActionParams', { ...alert, body: null }, index);
+      {alert.body != null && (
+        <JsonEditorWithMessageVariables
+          key={selectedTemplate}
+          messageVariables={messageVariables}
+          paramsProperty={'body'}
+          inputTargetValue={alert.body}
+          euiCodeEditorProps={{
+            placeholder: isTest ? testCustomTemplatePlaceHolder : ruleCustomTemplatePlaceHolder,
+            height: '320px',
+          }}
+          label={
+            <>
+              {translations.BODY_LABEL}
+              <TemplateOptions
+                buttonTitle={translations.SELECT_BODY_TEMPLATE_POPOVER_BUTTON}
+                paramsProperty="body"
+                onSelectEventHandler={onSelectTemplate}
+              />
+            </>
           }
-        }}
-      />
+          ariaLabel={translations.BODY_DESCRIPTION}
+          errors={errors.body as string[]}
+          onDocumentsChange={(json: string) =>
+            editAction('subActionParams', { ...alert, body: json }, index)
+          }
+          dataTestSubj="thehive-body"
+          onBlur={() => {
+            if (!alert.body) {
+              editAction('subActionParams', { ...alert, body: null }, index);
+            }
+          }}
+        />
+      )}
     </>
   );
 };

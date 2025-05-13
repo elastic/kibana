@@ -9,9 +9,8 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TheHiveParamsAlertFields } from './params_alert';
-import { SUB_ACTION, TheHiveSeverity, TheHiveTemplate } from '../../../common/thehive/constants';
+import { SUB_ACTION, TheHiveSeverity } from '../../../common/thehive/constants';
 import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
-import { bodyOption } from './constants';
 
 describe('TheHiveParamsFields renders', () => {
   const subActionParams: ExecutorSubActionCreateAlertParams = {
@@ -66,13 +65,10 @@ describe('TheHiveParamsFields renders', () => {
     expect(getByTestId('typeInput')).toBeInTheDocument();
     expect(getByTestId('sourceInput')).toBeInTheDocument();
     expect(getByTestId('sourceRefInput')).toBeInTheDocument();
-    expect(getByTestId('bodyTemplateSelectButton')).toBeInTheDocument();
-    expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
 
     expect(getByTestId('severitySelectInput')).toHaveValue('2');
     expect(getByTestId('rule-severity-toggle')).not.toBeChecked();
     expect(getByTestId('tlpSelectInput')).toHaveValue('2');
-    expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '');
   });
 
   it('hides the severity select input when rule severity is enabled', () => {
@@ -88,26 +84,5 @@ describe('TheHiveParamsFields renders', () => {
     );
 
     expect(screen.queryByTestId('severitySelectInput')).not.toBeInTheDocument();
-  });
-
-  it('changes the content of json editor when template is selected', () => {
-    const { getByTestId } = render(<TheHiveParamsAlertFields {...defaultProps} />);
-    const templateSelectButton = getByTestId('bodyTemplateSelectButton');
-
-    fireEvent.click(templateSelectButton);
-    const templateToSelect = getByTestId('Compromised User Account Investigation-selectableOption');
-
-    fireEvent.click(templateToSelect, {
-      target: { value: TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION },
-    });
-    expect(editAction).toHaveBeenNthCalledWith(
-      1,
-      'subActionParams',
-      {
-        ...subActionParams,
-        body: bodyOption[TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION],
-      },
-      0
-    );
   });
 });
