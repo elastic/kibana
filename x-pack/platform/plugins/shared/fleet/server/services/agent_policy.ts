@@ -500,7 +500,9 @@ class AgentPolicyService {
         } as AgentPolicy,
         options
       )
-      .catch(catchAndWrapError);
+      .catch(
+        catchAndWrapError.withMessage(`Attempt to create agent policy [${agentPolicy.id}] failed`)
+      );
 
     await appContextService
       .getUninstallTokenService()
@@ -526,7 +528,12 @@ class AgentPolicyService {
         searchFields: ['name'],
         search: escapeSearchQueryPhrase(givenPolicy.name),
       })
-      .catch(catchAndWrapError);
+      .catch(
+        catchAndWrapError.withMessage(
+          `Failed to find agent policies with name [${givenPolicy.name}]`
+        )
+      );
+
     const idsWithName = results.total && results.saved_objects.map(({ id }) => id);
     if (Array.isArray(idsWithName)) {
       const isEditingSelf = givenPolicy.id && idsWithName.includes(givenPolicy.id);
@@ -638,7 +645,7 @@ class AgentPolicyService {
 
     const bulkGetResponse = await soClient
       .bulkGet<AgentPolicySOAttributes>(objects)
-      .catch(catchAndWrapError);
+      .catch(catchAndWrapError.withMessage(`Failed to get agent policy by IDs`));
 
     const agentPolicies = await pMap(
       bulkGetResponse.saved_objects,
@@ -744,7 +751,9 @@ class AgentPolicyService {
             ...baseFindParams,
             search: kuery,
           })
-          .catch(catchAndWrapError);
+          .catch(
+            catchAndWrapError.withMessage('Failed to find agent policies using simple search term')
+          );
       } else {
         throw e;
       }
@@ -1428,14 +1437,19 @@ class AgentPolicyService {
         .create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
           id: String(id),
         })
-        .catch(catchAndWrapError);
+        .catch(
+          catchAndWrapError.withMessage(
+            `Failed to create [${PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE}] with id [${id}]`
+          )
+        );
     }
 
     await soClient
       .delete(savedObjectType, id, {
         force: true, // need to delete through multiple space
       })
-      .catch(catchAndWrapError);
+      .catch(catchAndWrapError.withMessage(`Failed to delete agent policy [${id}]`));
+
     if (!agentPolicy?.supports_agentless) {
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
         spaceId: soClient.getCurrentNamespace(),
@@ -1578,7 +1592,7 @@ class AgentPolicyService {
         operations: fleetServerPoliciesBulkBody,
         refresh: 'wait_for',
       })
-      .catch(catchAndWrapError);
+      .catch(catchAndWrapError.withMessage('ES bulk operation failed'));
 
     logger.debug(`Bulk update against index [${AGENT_POLICY_INDEX}] with deployment updates done`);
 
@@ -1840,7 +1854,11 @@ class AgentPolicyService {
     const objects = agentPolicyIds.map((id: string) => ({ id, type: savedObjectType }));
     const bulkGetResponse = await soClient
       .bulkGet<AgentPolicySOAttributes>(objects)
-      .catch(catchAndWrapError);
+      .catch(
+        catchAndWrapError.withMessage(
+          `Failed to bulk get agent policies [${agentPolicyIds.join(', ')}]`
+        )
+      );
 
     return this._bumpPolicies(
       internalSoClientWithoutSpaceExtension,
@@ -1901,7 +1919,7 @@ class AgentPolicyService {
             };
           })
         )
-        .catch(catchAndWrapError);
+        .catch(catchAndWrapError.withMessage('bulkUpdate of agent policies failed'));
       updatedAgentPolicies.push(...bulkUpdateSavedObjects);
     }
     if (!updatedAgentPolicies.length) {
@@ -1947,7 +1965,7 @@ class AgentPolicyService {
         perPage: SO_SEARCH_LIMIT,
         filter: normalizeKuery(savedObjectType, 'ingest-agent-policies.is_managed: true'),
       })
-      .catch(catchAndWrapError);
+      .catch(catchAndWrapError.withMessage('Failed to get all managed agent policies'));
 
     return agentPolicies;
   }

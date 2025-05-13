@@ -459,10 +459,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         { ...options, id: packagePolicyId }
       )
-      .catch((err) => {
-        logger.debug(`attempt to create package policy saved object failed with: ${err.message}`);
-        return catchAndWrapError(err);
-      });
+      .catch(catchAndWrapError.withMessage(`attempt to create package policy saved object failed`));
 
     for (const agentPolicy of agentPolicies) {
       if (
@@ -663,7 +660,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const { saved_objects: createdObjects } = await soClient
       .bulkCreate<PackagePolicySOAttributes>(policiesToCreate)
-      .catch(catchAndWrapError);
+      .catch(catchAndWrapError.withMessage('failed to bulk create pacakge policies'));
 
     // Filter out invalid SOs
     const newSos = createdObjects.filter((so) => !so.error && so.attributes);
@@ -793,7 +790,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (packagePolicy.package?.name) {
       const installation = await soClient
         .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, packagePolicy.package?.name)
-        .catch(catchAndWrapError);
+        .catch(
+          catchAndWrapError.withMessage(`Failed to get package [${packagePolicy.package.name}]`)
+        );
 
       // If possible, return the experimental features map for the package policy's `package` field
       if (
@@ -836,16 +835,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         perPage: SO_SEARCH_LIMIT,
         namespaces,
       })
-      .catch((err) => {
-        logger.debug(
-          () =>
-            `Error encountered while attempting to get all package policies for agent policy [${agentPolicyId}] for space [${namespaces?.join(
-              ', '
-            )}]: ${err.message}`
-        );
-
-        return catchAndWrapError(err);
-      });
+      .catch(
+        catchAndWrapError.withMessage(
+          `Error encountered while attempting to get all package policies for agent policy [${agentPolicyId}] for space [${namespaces?.join(
+            ', '
+          )}]`
+        )
+      );
 
     if (!packagePolicySO) {
       logger.debug(
@@ -901,7 +897,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           namespaces,
         }))
       )
-      .catch(catchAndWrapError);
+      .catch(catchAndWrapError.withMessage('bulkGet of package policies failed'));
 
     const packagePolicies = packagePolicySO.saved_objects
       .map((so): PackagePolicy | null => {
@@ -972,7 +968,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
         namespaces,
       })
-      .catch(catchAndWrapError);
+      .catch(catchAndWrapError.withMessage('failed to find package policies'));
 
     for (const packagePolicy of packagePolicies?.saved_objects ?? []) {
       auditLoggingService.writeCustomSoAuditLog({
@@ -1017,7 +1013,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
         namespaces,
       })
-      .catch(catchAndWrapError);
+      .catch(catchAndWrapError.withMessage('failed to find package policies IDs'));
 
     for (const packagePolicy of packagePolicies.saved_objects) {
       auditLoggingService.writeCustomSoAuditLog({
@@ -1209,7 +1205,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           version,
         }
       )
-      .catch(catchAndWrapError);
+      .catch(catchAndWrapError.withMessage(`update of package policy [${id}] failed`));
 
     const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
 
@@ -1807,7 +1803,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             force: true, // need to delete through multiple space
           }
         )
-        .catch(catchAndWrapError);
+        .catch(
+          catchAndWrapError.withMessage(
+            `Bulk delete of package policies [${idsToDelete.join(', ')}] failed`
+          )
+        );
 
       statuses.forEach(({ id, success, error }) => {
         const packagePolicy = packagePolicies.find((p) => p.id === id);
