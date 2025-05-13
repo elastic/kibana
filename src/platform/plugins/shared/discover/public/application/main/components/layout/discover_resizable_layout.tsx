@@ -20,23 +20,23 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import type { SidebarToggleState } from '../../../types';
+import type { DiscoverSidebarResponsiveProps } from '../sidebar/discover_sidebar_responsive';
+import { useCurrentSidebarPortalNode } from '../../state_management/redux/hooks';
 
 export const SIDEBAR_WIDTH_KEY = 'discover:sidebarWidth';
 
 export const DiscoverResizableLayout = ({
   container,
   sidebarToggleState$,
-  sidebarPanel,
+  sidebarProps,
   mainPanel,
 }: {
   container: HTMLElement | null;
   sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
-  sidebarPanel: ReactNode;
+  sidebarProps: DiscoverSidebarResponsiveProps['sidebarProps'];
   mainPanel: ReactNode;
 }) => {
-  const [sidebarPanelNode] = useState(() =>
-    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
-  );
+  const sidebarPortalNode = useCurrentSidebarPortalNode();
   const [mainPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
@@ -60,7 +60,6 @@ export const DiscoverResizableLayout = ({
 
   return (
     <>
-      <InPortal node={sidebarPanelNode}>{sidebarPanel}</InPortal>
       <InPortal node={mainPanelNode}>{mainPanel}</InPortal>
       <ResizableLayout
         className="dscPageBody__contents" // class is used in other styles
@@ -71,7 +70,13 @@ export const DiscoverResizableLayout = ({
         fixedPanelSize={sidebarWidth ?? defaultSidebarWidth}
         minFixedPanelSize={minSidebarWidth}
         minFlexPanelSize={minMainPanelWidth}
-        fixedPanel={<OutPortal node={sidebarPanelNode} />}
+        fixedPanel={
+          sidebarPortalNode ? (
+            <OutPortal node={sidebarPortalNode} sidebarProps={sidebarProps} />
+          ) : (
+            <div className="eui-fullHeight" />
+          )
+        }
         flexPanel={<OutPortal node={mainPanelNode} />}
         data-test-subj="discoverLayout"
         onFixedPanelSizeChange={setSidebarWidth}

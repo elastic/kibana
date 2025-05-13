@@ -27,7 +27,7 @@ import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts
 import type { Filter } from '@kbn/es-query';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import {
@@ -39,7 +39,7 @@ import {
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useDataViewsForPicker } from '../../state_management/redux';
+import { useCurrentDataView, useDataViewsForPicker } from '../../state_management/redux';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -83,62 +83,65 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
 
 export interface DiscoverSidebarResponsiveProps {
   /**
-   * the selected columns displayed in the doc table in discover
+   * Current tab state container
    */
-  columns: string[];
+  stateContainer: DiscoverStateContainer;
   /**
-   * hits fetched from ES, displayed in the doc table
+   * Other sidebar props for the current tab
    */
-  documents$: DataDocuments$;
-  /**
-   * Callback to update breakdown field
-   */
-  onAddBreakdownField?: (breakdownField: DataViewField | undefined) => void;
-  /**
-   * Callback function when selecting a field
-   */
-  onAddField: (fieldName: string) => void;
-  /**
-   * Callback function when adding a filter from sidebar
-   */
-  onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
-  /**
-   * Callback function when changing an data view
-   */
-  onChangeDataView: (id: string) => void;
-  /**
-   * Callback to remove a field column from the table
-   * @param fieldName
-   */
-  onRemoveField: (fieldName: string) => void;
-  /**
-   * Currently selected data view
-   */
-  selectedDataView?: DataView;
-  /**
-   * Metric tracking function
-   * @param metricType
-   * @param eventName
-   */
-  trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  /**
-   * callback to execute on edit runtime field
-   */
-  onFieldEdited: (options?: { removedFieldName?: string }) => Promise<void>;
-  /**
-   * callback to execute on create dataview
-   */
-  onDataViewCreated: (dataView: DataView) => void;
-  /**
-   * For customization and testing purposes
-   */
-  fieldListVariant?: UnifiedFieldListSidebarContainerProps['variant'];
+  sidebarProps:
+    | {
+        /**
+         * the selected columns displayed in the doc table in discover
+         */
+        columns: string[];
+        /**
+         * Callback to update breakdown field
+         */
+        onAddBreakdownField?: (breakdownField: DataViewField | undefined) => void;
+        /**
+         * Callback function when selecting a field
+         */
+        onAddField: (fieldName: string) => void;
+        /**
+         * Callback function when adding a filter from sidebar
+         */
+        onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
+        /**
+         * Callback function when changing an data view
+         */
+        onChangeDataView: (id: string) => void;
+        /**
+         * Callback to remove a field column from the table
+         * @param fieldName
+         */
+        onRemoveField: (fieldName: string) => void;
+        /**
+         * Metric tracking function
+         * @param metricType
+         * @param eventName
+         */
+        trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+        /**
+         * callback to execute on edit runtime field
+         */
+        onFieldEdited: (options?: { removedFieldName?: string }) => Promise<void>;
+        /**
+         * callback to execute on create dataview
+         */
+        onDataViewCreated: (dataView: DataView) => void;
+        /**
+         * For customization and testing purposes
+         */
+        fieldListVariant?: UnifiedFieldListSidebarContainerProps['variant'];
 
-  sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
-  /**
-   * Custom filters to apply for the field list, ex: namespace custom filter
-   */
-  additionalFilters?: Filter[];
+        sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
+        /**
+         * Custom filters to apply for the field list, ex: namespace custom filter
+         */
+        additionalFilters?: Filter[];
+      }
+    | undefined;
 }
 
 /**
@@ -153,9 +156,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
   const isEsqlMode = useIsEsqlMode();
+  const { stateContainer, sidebarProps } = props;
   const {
     fieldListVariant,
-    selectedDataView,
     columns,
     trackUiMetric,
     onAddBreakdownField,
@@ -167,7 +170,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     onRemoveField,
     sidebarToggleState$,
     additionalFilters,
-  } = props;
+  } = sidebarProps || {};
+  const selectedDataView = useCurrentDataView();
+  const documents$ = stateContainer.dataState.data$.documents$;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
     selectedDataView,
@@ -178,7 +183,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
 
   useEffect(() => {
-    const subscription = props.documents$.subscribe((documentState) => {
+    const subscription = documents$.subscribe((documentState) => {
       switch (documentState?.fetchStatus) {
         case FetchStatus.UNINITIALIZED:
           dispatchSidebarStateAction({
@@ -222,7 +227,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       }
     });
     return () => subscription.unsubscribe();
-  }, [props.documents$, dispatchSidebarStateAction, selectedDataViewRef, isEsqlMode]);
+  }, [documents$, dispatchSidebarStateAction, selectedDataViewRef, isEsqlMode]);
 
   useEffect(() => {
     if (selectedDataView !== selectedDataViewRef.current) {
@@ -302,7 +307,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const closeFieldListFlyout = unifiedFieldListSidebarContainerApi?.closeFieldListFlyout;
   const createNewDataView = useMemo(
     () =>
-      canEditDataView
+      canEditDataView && onDataViewCreated
         ? () => {
             const ref = dataViewEditor.openEditor({
               onSave: async (dataView) => {
@@ -324,7 +329,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const createField = unifiedFieldListSidebarContainerApi?.createField;
   const prependDataViewPickerForMobile = useCallback(() => {
-    return selectedDataView ? (
+    return selectedDataView && onChangeDataView ? (
       CustomDataViewPicker ? (
         <CustomDataViewPicker />
       ) : (
@@ -358,14 +363,14 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const onAddFieldToWorkspace = useCallback(
     (field: DataViewField) => {
-      onAddField(field.name);
+      onAddField?.(field.name);
     },
     [onAddField]
   );
 
   const onRemoveFieldFromWorkspace = useCallback(
     (field: DataViewField) => {
-      onRemoveField(field.name);
+      onRemoveField?.(field.name);
     },
     [onRemoveField]
   );
@@ -376,11 +381,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
 
   useEffect(() => {
-    sidebarToggleState$.next({
+    sidebarToggleState$?.next({
       isCollapsed: isSidebarCollapsed,
       toggle: unifiedFieldListSidebarContainerApi?.sidebarVisibility.toggle,
     });
   }, [isSidebarCollapsed, unifiedFieldListSidebarContainerApi, sidebarToggleState$]);
+
+  if (!sidebarProps) {
+    return <div />;
+  }
 
   return (
     <EuiFlexGroup
