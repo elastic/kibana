@@ -21,10 +21,10 @@ export const ElasticLlmTourCallout = ({
 }) => {
   return (
     <TourCallout
-      title={i18n.translate('xpack.aiAssistant.tour.elasticLlmTitle', {
+      title={i18n.translate('xpack.observabilityAiAssistant.tour.elasticLlmTitle', {
         defaultMessage: 'Elastic-managed LLM connector',
       })}
-      subtitle={i18n.translate('xpack.aiAssistant.tour.subtitle', {
+      subtitle={i18n.translate('xpack.observabilityAiAssistant.tour.subtitle', {
         defaultMessage: 'New AI feature!',
       })}
       content={
@@ -45,7 +45,7 @@ export const ElasticLlmTourCallout = ({
       anchorPosition="downLeft"
       isOpen={isOpen}
       hasArrow
-      footerButtonLabel={i18n.translate('xpack.aiAssistant.tour.footerButtonLabel', {
+      footerButtonLabel={i18n.translate('xpack.observabilityAiAssistant.tour.footerButtonLabel', {
         defaultMessage: 'Ok',
       })}
       dismissTour={dismissTour}
