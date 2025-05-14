@@ -246,9 +246,10 @@ function useCytoscapeEventHandlers({
         padding: 40,
         spacingFactor: 1.2,
         nodeSep: 40,
-        edgeSep: 32,
-        rankSep: 128,
-        rankDir: 'LR',
+        edgeSep: 40,
+        rankSep: 50,
+        rankDir: 'TB',
+        align: 'DR',
         ranker: 'network-simplex',
       } as cytoscape.LayoutOptions;
 
