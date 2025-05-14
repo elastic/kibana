@@ -71,6 +71,16 @@ export interface ChatTimelineProps {
   }) => void;
 }
 
+const euiCommentListClassName = css`
+  padding-bottom: 32px;
+`;
+
+const stickyElasticLlmCalloutContainerClassName = css`
+  position: sticky;
+  top: 0;
+  z-index: 1;
+`;
+
 export function ChatTimeline({
   conversationId,
   messages,
@@ -134,12 +144,12 @@ export function ChatTimeline({
   ]);
 
   return (
-    <EuiCommentList
-      className={css`
-        padding-bottom: 32px;
-      `}
-    >
-      {showElasticLlmCalloutInChat ? <ElasticLlmCallout /> : null}
+    <EuiCommentList className={euiCommentListClassName}>
+      {showElasticLlmCalloutInChat ? (
+        <div className={stickyElasticLlmCalloutContainerClassName}>
+          <ElasticLlmCallout />
+        </div>
+      ) : null}
       {items.map((item, index) => {
         return Array.isArray(item) ? (
           <ChatConsolidatedItems
