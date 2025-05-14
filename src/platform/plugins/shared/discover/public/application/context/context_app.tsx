@@ -326,10 +326,10 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
 };
 
 const styles = {
-  docsContent: css`
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  `,
+  docsContent: css({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  }),
   docsPage: kibanaFullBodyHeightCss('54px'), // 54px is the action bar height
 };
