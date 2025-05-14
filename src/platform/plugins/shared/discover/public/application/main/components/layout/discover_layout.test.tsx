@@ -44,7 +44,7 @@ import {
   RuntimeStateProvider,
   internalStateActions,
 } from '../../state_management/redux';
-import { ChartPortalsRenderer } from '../chart';
+import { TabsPortalsRenderer } from '../portals';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -139,7 +139,7 @@ async function mountComponent(
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
       <InternalStateProvider store={stateContainer.internalState}>
-        <ChartPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
+        <TabsPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
           <DiscoverMainProvider value={stateContainer}>
             <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
               <EuiProvider highContrastMode={false}>
@@ -147,7 +147,7 @@ async function mountComponent(
               </EuiProvider>
             </RuntimeStateProvider>
           </DiscoverMainProvider>
-        </ChartPortalsRenderer>
+        </TabsPortalsRenderer>
       </InternalStateProvider>
     </KibanaContextProvider>,
     mountOptions

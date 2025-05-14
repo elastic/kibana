@@ -34,7 +34,7 @@ import {
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
 import { TABS_ENABLED } from '../../constants';
-import { ChartPortalsRenderer } from './components/chart';
+import { TabsPortalsRenderer } from './components/portals';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -142,13 +142,13 @@ export const DiscoverMainRoute = ({
   return (
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
-        <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
+        <TabsPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
           {TABS_ENABLED ? (
             <TabsView {...sessionViewProps} />
           ) : (
             <DiscoverSessionView {...sessionViewProps} />
           )}
-        </ChartPortalsRenderer>
+        </TabsPortalsRenderer>
       </rootProfileState.AppWrapper>
     </InternalStateProvider>
   );

@@ -40,7 +40,7 @@ import {
   RuntimeStateProvider,
   internalStateActions,
 } from '../../state_management/redux';
-import { ChartPortalsRenderer } from '../chart';
+import { TabsPortalsRenderer } from '../portals';
 import { UnifiedHistogramChart } from '@kbn/unified-histogram';
 
 jest.mock('@elastic/eui', () => ({
@@ -163,13 +163,13 @@ const mountComponent = async ({
     <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
         <InternalStateProvider store={stateContainer.internalState}>
-          <ChartPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
+          <TabsPortalsRenderer runtimeStateManager={stateContainer.runtimeStateManager}>
             <DiscoverMainProvider value={stateContainer}>
               <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
                 <DiscoverHistogramLayout {...props} />
               </RuntimeStateProvider>
             </DiscoverMainProvider>
-          </ChartPortalsRenderer>
+          </TabsPortalsRenderer>
         </InternalStateProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

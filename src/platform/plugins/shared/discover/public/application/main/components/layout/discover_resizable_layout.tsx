@@ -72,7 +72,7 @@ export const DiscoverResizableLayout = ({
         minFlexPanelSize={minMainPanelWidth}
         fixedPanel={
           sidebarPortalNode ? (
-            <OutPortal node={sidebarPortalNode} sidebarProps={sidebarProps} />
+            <OutPortal node={sidebarPortalNode} componentProps={{ sidebarProps }} />
           ) : (
             <div className="eui-fullHeight" />
           )

@@ -10,5 +10,5 @@
 export {
   type ChartPortalNode,
   type SidebarPortalNode,
-  ChartPortalsRenderer,
-} from './chart_portals_renderer';
+  TabsPortalsRenderer,
+} from './tabs_portals_renderer';
