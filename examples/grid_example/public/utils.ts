@@ -9,7 +9,6 @@
 
 import { GridLayoutData, GridSectionData } from '@kbn/grid-layout';
 import { MockedDashboardPanelMap, MockedDashboardRowMap } from './types';
-import { cloneDeep } from 'lodash';
 
 export const gridLayoutToDashboardPanelMap = (
   panelState: MockedDashboardPanelMap,
@@ -42,7 +41,7 @@ export const gridLayoutToDashboardPanelMap = (
             x: panelGridData.column,
             w: panelGridData.width,
             h: panelGridData.height,
-            row: widgetId,
+            section: widgetId,
           },
         };
       });
@@ -73,8 +72,8 @@ export const dashboardInputToGridLayout = ({
 
   Object.keys(panels).forEach((panelId) => {
     const gridData = panels[panelId].gridData;
-    if (gridData.row) {
-      (layout[gridData.row] as GridSectionData).panels[panelId] = {
+    if (gridData.section) {
+      (layout[gridData.section] as GridSectionData).panels[panelId] = {
         id: panelId,
         row: gridData.y,
         column: gridData.x,

@@ -26,7 +26,7 @@ export interface DashboardGridData {
 
 interface DashboardPanelState {
   type: string;
-  gridData: DashboardGridData & { row?: string };
+  gridData: DashboardGridData & { section?: string };
   explicitInput: Partial<any> & { id: string };
   version?: string;
 }
