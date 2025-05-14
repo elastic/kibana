@@ -12,10 +12,12 @@ import { TourCallout } from './tour_callout';
 
 export const ElasticLlmTourCallout = ({
   children,
-  isOpen,
+  isOpen = true,
+  dismissTour,
 }: {
   children: ReactElement;
-  isOpen: boolean;
+  isOpen?: boolean;
+  dismissTour?: () => void;
 }) => {
   return (
     <TourCallout
@@ -46,6 +48,7 @@ export const ElasticLlmTourCallout = ({
       footerButtonLabel={i18n.translate('xpack.aiAssistant.tour.footerButtonLabel', {
         defaultMessage: 'Ok',
       })}
+      dismissTour={dismissTour}
     >
       {children}
     </TourCallout>

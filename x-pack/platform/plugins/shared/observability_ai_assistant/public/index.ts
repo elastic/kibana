@@ -130,3 +130,5 @@ export {
   getSettingsManagementHref,
   navigateToSettingsManagementApp,
 } from './utils/navigate_to_settings';
+
+export { useElasticLlmTourCalloutDismissed } from './hooks/use_elastic_llm_tour_callout_dismissed';

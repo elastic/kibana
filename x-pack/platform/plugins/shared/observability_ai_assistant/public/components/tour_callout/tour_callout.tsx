@@ -26,6 +26,7 @@ export interface TourCalloutProps
   children: ReactElement;
   isOpen?: boolean;
   footerButtonLabel: string;
+  dismissTour?: () => void;
 }
 
 export const TourCallout = ({
@@ -40,12 +41,16 @@ export const TourCallout = ({
   subtitle,
   maxWidth = 330,
   footerButtonLabel,
+  dismissTour,
   ...rest
 }: TourCalloutProps) => {
   const [isStepOpen, setIsStepOpen] = useState<boolean>(false);
 
   const handleFinish = () => {
     setIsStepOpen(false);
+    if (dismissTour) {
+      dismissTour();
+    }
   };
 
   useEffect(() => {
