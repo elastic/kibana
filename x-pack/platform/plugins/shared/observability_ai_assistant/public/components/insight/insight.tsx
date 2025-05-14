@@ -41,6 +41,8 @@ import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { InsightBase } from './insight_base';
 import { ActionsMenu } from './actions_menu';
 import { ObservabilityAIAssistantTelemetryEventType } from '../../analytics/telemetry_event_type';
+import { hasElasticManagedLlmConnector } from '../../utils/has_elastic_managed_llm_connector';
+import { ElasticLlmTourCallout } from '../tour_callout/elastic_llm_tour_callout';
 
 function getLastMessageOfType(messages: Message[], role: MessageRole) {
   return last(messages.filter((msg) => msg.message.role === role));
@@ -50,10 +52,12 @@ function ChatContent({
   title: defaultTitle,
   initialMessages,
   connectorId,
+  setIsTourCalloutOpen,
 }: {
   title: string;
   initialMessages: Message[];
   connectorId: string;
+  setIsTourCalloutOpen: (isOpen: boolean) => void;
 }) {
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
@@ -136,6 +140,7 @@ function ChatContent({
                 <StartChatButton
                   disabled={flyoutState.isOpen}
                   onClick={() => {
+                    setIsTourCalloutOpen(false);
                     service.conversations.openNewConversation({
                       messages,
                       title: defaultTitle,
@@ -235,6 +240,7 @@ export function Insight({
   const [isInsightOpen, setInsightOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const [isPromptUpdated, setIsPromptUpdated] = useState(false);
+  const [isTourCalloutOpen, setIsTourCalloutOpen] = useState(true);
 
   const updateInitialMessages = useCallback(async () => {
     if (isArray(initialMessagesOrCallback)) {
@@ -399,6 +405,7 @@ export function Insight({
           title={title}
           initialMessages={messages.messages}
           connectorId={connectors.selectedConnector}
+          setIsTourCalloutOpen={setIsTourCalloutOpen}
         />
       </>
     );
@@ -432,6 +439,8 @@ export function Insight({
     );
   }
 
+  const hasElasticLlm = hasElasticManagedLlmConnector(connectors.connectors);
+
   return (
     <InsightBase
       title={title}
@@ -443,13 +452,25 @@ export function Insight({
         setInsightOpen(isOpen);
       }}
       controls={
-        <ActionsMenu
-          connectors={connectors}
-          onEditPrompt={() => {
-            setEditingPrompt(true);
-            setInsightOpen(true);
-          }}
-        />
+        hasElasticLlm ? (
+          <ElasticLlmTourCallout isOpen={isTourCalloutOpen}>
+            <ActionsMenu
+              connectors={connectors}
+              onEditPrompt={() => {
+                setEditingPrompt(true);
+                setInsightOpen(true);
+              }}
+            />
+          </ElasticLlmTourCallout>
+        ) : (
+          <ActionsMenu
+            connectors={connectors}
+            onEditPrompt={() => {
+              setEditingPrompt(true);
+              setInsightOpen(true);
+            }}
+          />
+        )
       }
       loading={connectors.loading || chatService.loading}
       dataTestSubj={dataTestSubj}

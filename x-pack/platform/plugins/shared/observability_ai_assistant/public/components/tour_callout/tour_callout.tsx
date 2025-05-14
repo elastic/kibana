@@ -24,7 +24,7 @@ export interface TourCalloutProps
     | 'maxWidth'
   > {
   children: ReactElement;
-  initialIsOpen?: boolean;
+  isOpen?: boolean;
   footerButtonLabel: string;
 }
 
@@ -35,7 +35,7 @@ export const TourCallout = ({
   stepsTotal,
   anchorPosition,
   children,
-  initialIsOpen = true,
+  isOpen = true,
   hasArrow = true,
   subtitle,
   maxWidth = 330,
@@ -51,7 +51,7 @@ export const TourCallout = ({
   useEffect(() => {
     let timeoutId: any;
 
-    if (initialIsOpen) {
+    if (isOpen) {
       timeoutId = setTimeout(() => {
         setIsStepOpen(true);
       }, 250);
@@ -64,7 +64,7 @@ export const TourCallout = ({
         clearTimeout(timeoutId);
       }
     };
-  }, [initialIsOpen]);
+  }, [isOpen]);
 
   return (
     <EuiTourStep
@@ -78,9 +78,8 @@ export const TourCallout = ({
       onFinish={handleFinish}
       hasArrow={hasArrow}
       maxWidth={maxWidth}
-      repositionOnScroll={true}
       footerAction={
-        <EuiButtonEmpty size="s" onClick={handleFinish}>
+        <EuiButtonEmpty size="s" color="text" onClick={handleFinish}>
           {footerButtonLabel}
         </EuiButtonEmpty>
       }

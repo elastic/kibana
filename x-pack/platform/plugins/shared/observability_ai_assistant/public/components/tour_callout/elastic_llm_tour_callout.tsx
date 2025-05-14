@@ -10,7 +10,13 @@ import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TourCallout } from './tour_callout';
 
-export const ElasticLlmTourCallout = ({ children }: { children: ReactElement }) => {
+export const ElasticLlmTourCallout = ({
+  children,
+  isOpen,
+}: {
+  children: ReactElement;
+  isOpen: boolean;
+}) => {
   return (
     <TourCallout
       title={i18n.translate('xpack.aiAssistant.tour.elasticLlmTitle', {
@@ -35,7 +41,7 @@ export const ElasticLlmTourCallout = ({ children }: { children: ReactElement }) 
       step={1}
       stepsTotal={1}
       anchorPosition="downLeft"
-      initialIsOpen={true}
+      isOpen={isOpen}
       hasArrow
       footerButtonLabel={i18n.translate('xpack.aiAssistant.tour.footerButtonLabel', {
         defaultMessage: 'Ok',

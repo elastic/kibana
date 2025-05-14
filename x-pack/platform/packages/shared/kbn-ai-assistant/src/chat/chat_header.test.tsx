@@ -8,17 +8,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHeader } from './chat_header';
-import { hasElasticManagedLlmConnector } from '../utils/has_elastic_managed_llm_connector';
+import { hasElasticManagedLlmConnector } from '@kbn/observability-ai-assistant-plugin/public';
 import { ElasticLlmTourCallout } from '@kbn/observability-ai-assistant-plugin/public';
-
-jest.mock('../utils/has_elastic_managed_llm_connector', () => ({
-  hasElasticManagedLlmConnector: jest.fn(),
-}));
 
 jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
   ElasticLlmTourCallout: jest.fn(({ children }) => (
     <div data-test-subj="elastic-llm-tour">{children}</div>
   )),
+  hasElasticManagedLlmConnector: jest.fn(),
 }));
 
 jest.mock('./chat_actions_menu', () => ({
