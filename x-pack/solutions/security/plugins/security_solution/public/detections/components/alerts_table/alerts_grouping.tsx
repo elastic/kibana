@@ -173,11 +173,6 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [dispatch, props.tableId]
   );
 
-  const indexNames = useMemo(() => props.dataViewSpec.title, [props.dataViewSpec]);
-  const runtimeMappings = useMemo(
-    () => props.dataViewSpec.runtimeFieldMap as RunTimeMappings,
-    [props.dataViewSpec]
-  );
   const fields = useMemo(
     () => Object.values(props.dataViewSpec.fields || {}),
     [props.dataViewSpec]
@@ -341,28 +336,18 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           pageSize={pageSize[level] ?? DEFAULT_PAGE_SIZE}
           parentGroupingFilter={parentGroupingFilter}
           renderChildComponent={rcc}
-          runtimeMappings={runtimeMappings}
+          runtimeMappings={props.dataViewSpec.runtimeFieldMap as RunTimeMappings}
           selectedGroup={selectedGroup}
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
-          signalIndexName={indexNames}
+          signalIndexName={props.dataViewSpec.title}
         />
       );
     },
-    [
-      getGrouping,
-      groupStatusAggregations,
-      indexNames,
-      pageIndex,
-      pageSize,
-      props,
-      runtimeMappings,
-      selectedGroups,
-      setPageVar,
-    ]
+    [getGrouping, groupStatusAggregations, pageIndex, pageSize, props, selectedGroups, setPageVar]
   );
 
-  if (isEmpty(indexNames)) {
+  if (isEmpty(props.dataViewSpec.title)) {
     return null;
   }
 
