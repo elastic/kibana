@@ -12,6 +12,7 @@ import {
   FieldCapsFieldCapability,
   MappingPropertyBase,
   MappingProperty,
+  MappingTextProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -172,51 +173,40 @@ const sortFields = (fields: FieldCapsResponse['fields']): FieldCapsResponse['fie
   return Object.fromEntries(entries);
 };
 
-const constructSemanticField = (
-  mappingProperties: Record<string, MappingProperty>,
-  semanticTextField?: string
-): SemanticField[] => {
-  return Object.keys(mappingProperties || {})
-    .filter((field) => mappingProperties[field].type === 'semantic_text')
-    .map((field) => {
-      const mapping = mappingProperties[field] as unknown as MappingSemanticTextProperty;
-      return {
-        field: semanticTextField ? `${semanticTextField}.${field}` : field,
-        inferenceId: mapping?.inference_id,
-        embeddingType: mapping?.model_settings?.task_type
-          ? EMBEDDING_TYPE[mapping.model_settings.task_type]
-          : undefined,
-      };
-    });
-};
 const createSemanticTextFieldsList = (
   mappingPropertiesFilter: Record<string, MappingProperty>,
-  semanticFields: SemanticField[] = [],
+  semanticFieldsList: SemanticField[] = [],
   semanticTextField?: string
 ) => {
   Object.keys(mappingPropertiesFilter || {}).filter((field) => {
     if (mappingPropertiesFilter[field].type === 'semantic_text') {
-      const semanticField: SemanticField[] = constructSemanticField(
-        mappingPropertiesFilter,
-        semanticTextField
-      );
-      semanticFields.push(...semanticField);
+      const semanticFieldMapping: MappingSemanticTextProperty = mappingPropertiesFilter[field];
+      const semanticField: SemanticField = {
+        field: semanticTextField ? `${semanticTextField}.${field}` : field,
+        inferenceId: semanticFieldMapping?.inference_id,
+        embeddingType: semanticFieldMapping?.model_settings?.task_type
+          ? EMBEDDING_TYPE[semanticFieldMapping.model_settings.task_type]
+          : undefined,
+      };
+      semanticFieldsList.push(semanticField);
     } else if (mappingPropertiesFilter[field].type === 'text') {
+      // Multi field
       createSemanticTextFieldsList(
         mappingPropertiesFilter[field].fields || {},
-        semanticFields,
+        semanticFieldsList,
         field
       );
     } else if ('properties' in mappingPropertiesFilter[field]) {
+      // Object
       createSemanticTextFieldsList(
         mappingPropertiesFilter[field].properties || {},
-        semanticFields,
+        semanticFieldsList,
         field
       );
     }
-    return semanticFields;
+    return semanticFieldsList;
   });
-  return semanticFields;
+  return semanticFieldsList;
 };
 export const parseFieldsCapabilities = (
   fieldCapsResponse: FieldCapsResponse,
@@ -237,31 +227,14 @@ export const parseFieldsCapabilities = (
     const mappingProperties = aggDoc.mapping[aggDoc.index].mappings.properties || {};
 
     const semanticTextFields: SemanticField[] = createSemanticTextFieldsList(mappingProperties);
-    // console.log('semanticTextFields', semanticTextFields);
-    // const semanticTextFields: SemanticField[] = Object.keys(mappingProperties || {})
-    //   .filter(
-    //     // @ts-ignore
-    //     (field) => mappingProperties[field].type === 'semantic_text'
-    //   )
-    //   .map((field) => {
-    //     // console.log('field', field);
-    //     const mapping = mappingProperties[field] as unknown as MappingSemanticTextProperty;
-    //     return {
-    //       field,
-    //       inferenceId: mapping?.inference_id,
-    //       embeddingType: mapping?.model_settings?.task_type
-    //         ? EMBEDDING_TYPE[mapping.model_settings.task_type]
-    //         : undefined,
-    //     };
-    //   });
-    console.log('semanticTextFields', semanticTextFields);
+
     return {
       index: aggDoc.index,
       fields: modelIdFields,
       semanticTextFields,
     };
   });
-  // console.log('indexModelIdFields', indexModelIdFields);
+
   const indicesFieldsMap = indices.reduce<IndicesQuerySourceFields>((acc, index) => {
     acc[index] = {
       elser_query_fields: [],
