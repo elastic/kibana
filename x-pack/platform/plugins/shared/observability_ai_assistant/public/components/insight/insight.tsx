@@ -30,7 +30,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import { useFlyoutState } from '../../hooks/use_flyout_state';
-import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
+import { getConnectorsManagementHref } from '../../utils/navigate_to_connectors';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';

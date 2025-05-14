@@ -34,6 +34,7 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
+  hasElasticManagedLlmConnector,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
@@ -377,6 +378,11 @@ export function ChatBody({
     conversation.refresh();
   };
 
+  const hasElasticLlm = hasElasticManagedLlmConnector(connectors.connectors);
+  const showElasticLlmCalloutInChat =
+    (connectors.connectors?.length === 1 || connectors.selectedConnector === 'elastic-llm') &&
+    hasElasticLlm;
+
   const isPublic = conversation.value?.public;
   const isArchived = !!conversation.value?.archived;
   const showPromptEditor = !isArchived && (!isPublic || isConversationOwnedByCurrentUser);
@@ -517,6 +523,7 @@ export function ChatBody({
                       ])
                     )
                   }
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                 />
               ) : (
                 <ChatTimeline
@@ -543,6 +550,7 @@ export function ChatBody({
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
                   isArchived={isArchived}
+                  showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                 />
               )}
             </EuiPanel>
