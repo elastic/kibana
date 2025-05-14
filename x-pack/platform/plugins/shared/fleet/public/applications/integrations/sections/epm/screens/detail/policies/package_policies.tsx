@@ -26,7 +26,6 @@ import type {
   PackageInfo,
   PackagePolicy,
   NewPackagePolicyInput,
-  PackagePolicyPackage,
 } from '../../../../../types';
 import {
   useLink,
