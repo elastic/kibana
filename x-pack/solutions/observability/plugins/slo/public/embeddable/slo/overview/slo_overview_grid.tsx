@@ -114,7 +114,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
     const historicalSummary =
       historicalSummaries.find(
-        (hist) => hist.sloId === slo.id && hist.instanceId === (slo.instanceId ?? ALL_VALUE)
+        (hist) => hist.sloId === slo.id && hist.instanceId === slo.instanceId
       )?.data ?? [];
 
     const lastArray = chartsData[chartsData.length - 1];
@@ -147,7 +147,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
   if (isLoading) {
     return (
-      <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+      <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xl" />
         </EuiFlexItem>

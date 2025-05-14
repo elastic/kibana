@@ -85,7 +85,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
 
     const toastNotifications = useToastNotifications();
     const { application, share, ...startServices } = useAppDependencies();
-    const isDiscoverAvailable = application.capabilities.discover?.show ?? false;
+    const isDiscoverAvailable = application.capabilities.discover_v2?.show ?? false;
 
     useEffect(() => {
       let unmounted = false;
@@ -225,8 +225,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
       <div data-test-subj="transformStepCreateForm">
         <EuiForm>
           {!created && (
-            <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
-              <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
+            <EuiFlexGroup alignItems="center" css={FLEX_GROUP_STYLE}>
+              <EuiFlexItem grow={false} css={FLEX_ITEM_STYLE}>
                 <EuiButton
                   fill
                   isDisabled={loading || (created && started)}
@@ -252,8 +252,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
             </EuiFlexGroup>
           )}
           {created && (
-            <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
-              <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
+            <EuiFlexGroup alignItems="center" css={FLEX_GROUP_STYLE}>
+              <EuiFlexItem grow={false} css={FLEX_ITEM_STYLE}>
                 <EuiButton
                   fill
                   isDisabled={loading || (created && started)}
@@ -276,8 +276,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
             </EuiFlexGroup>
           )}
           {isContinuousTransform(transformConfig) && created ? (
-            <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
-              <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
+            <EuiFlexGroup alignItems="center" css={FLEX_GROUP_STYLE}>
+              <EuiFlexItem grow={false} css={FLEX_ITEM_STYLE}>
                 <EuiButton
                   fill
                   isDisabled={loading}
@@ -300,8 +300,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : null}
-          <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
-            <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
+          <EuiFlexGroup alignItems="center" css={FLEX_GROUP_STYLE}>
+            <EuiFlexItem grow={false} css={FLEX_ITEM_STYLE}>
               <EuiButton
                 isDisabled={loading || created}
                 onClick={() => createTransformHandler()}
@@ -321,13 +321,13 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
-            <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
+          <EuiFlexGroup alignItems="center" css={FLEX_GROUP_STYLE}>
+            <EuiFlexItem grow={false} css={FLEX_ITEM_STYLE}>
               <EuiCopy textToCopy={getTransformConfigDevConsoleStatement()}>
                 {(copy: () => void) => (
                   <EuiButton
                     onClick={copy}
-                    style={{ width: '100%' }}
+                    css={{ width: '100%' }}
                     data-test-subj="transformWizardCopyToClipboardButton"
                   >
                     {i18n.translate(
@@ -363,7 +363,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                 </strong>
               </EuiText>
               <EuiFlexGroup gutterSize="xs">
-                <EuiFlexItem style={{ width: '400px' }} grow={false}>
+                <EuiFlexItem css={{ width: '400px' }} grow={false}>
                   <EuiProgress
                     size="l"
                     color="primary"
@@ -382,7 +382,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
             <>
               <EuiHorizontalRule />
               <EuiFlexGroup gutterSize="l">
-                <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
+                <EuiFlexItem css={PANEL_ITEM_STYLE} grow={false}>
                   <EuiCard
                     icon={<EuiIcon size="xxl" type="list" />}
                     title={i18n.translate('xpack.transform.stepCreateForm.transformListCardTitle', {
@@ -399,8 +399,8 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                   />
                 </EuiFlexItem>
                 {started === true && createDataView === true && dataViewId === undefined && (
-                  <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
-                    <EuiPanel style={{ position: 'relative' }}>
+                  <EuiFlexItem css={PANEL_ITEM_STYLE} grow={false}>
+                    <EuiPanel css={{ position: 'relative' }}>
                       <EuiProgress size="xs" color="primary" position="absolute" />
                       <EuiText color="subdued" size="s">
                         <p>
@@ -416,7 +416,7 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
                   </EuiFlexItem>
                 )}
                 {isDiscoverAvailable && discoverLink !== undefined && (
-                  <EuiFlexItem style={PANEL_ITEM_STYLE} grow={false}>
+                  <EuiFlexItem css={PANEL_ITEM_STYLE} grow={false}>
                     <EuiCard
                       icon={<EuiIcon size="xxl" type="discoverApp" />}
                       title={i18n.translate('xpack.transform.stepCreateForm.discoverCardTitle', {

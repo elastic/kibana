@@ -85,7 +85,6 @@ describe('stepCreateRestartInstallation', () => {
         esClient,
         logger,
         packageInstallContext: {
-          assetsMap: new Map(),
           archiveIterator: createArchiveIteratorFromMap(new Map()),
           paths: [],
           packageInfo: {
@@ -122,7 +121,6 @@ describe('stepCreateRestartInstallation', () => {
           esClient,
           logger,
           packageInstallContext: {
-            assetsMap: new Map(),
             archiveIterator: createArchiveIteratorFromMap(new Map()),
             paths: [],
             packageInfo: {
@@ -167,7 +165,6 @@ describe('stepCreateRestartInstallation', () => {
           esClient,
           logger,
           packageInstallContext: {
-            assetsMap: new Map(),
             archiveIterator: createArchiveIteratorFromMap(new Map()),
             paths: [],
             packageInfo: {
@@ -212,7 +209,6 @@ describe('stepCreateRestartInstallation', () => {
           esClient,
           logger,
           packageInstallContext: {
-            assetsMap: new Map(),
             archiveIterator: createArchiveIteratorFromMap(new Map()),
             paths: [],
             packageInfo: {

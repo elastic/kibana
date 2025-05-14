@@ -35,7 +35,6 @@ import { ListParamItem } from './params_list';
 import { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
-import { syncGlobalParamsAction } from '../../../state/settings';
 
 export const AddParamFlyout = ({
   items,
@@ -114,7 +113,6 @@ export const AddParamFlyout = ({
     if (savedData && !isSaving) {
       closeFlyout();
       dispatch(getGlobalParamAction.get());
-      dispatch(syncGlobalParamsAction.get());
     }
   }, [savedData, isSaving, closeFlyout, dispatch]);
 
@@ -135,7 +133,7 @@ export const AddParamFlyout = ({
   if (isFlyoutVisible) {
     flyout = (
       <FormProvider {...form}>
-        <EuiFlyout ownFocus onClose={closeFlyout} size="m" style={{ minWidth: 500 }}>
+        <EuiFlyout ownFocus onClose={closeFlyout} size="m" css={{ minWidth: 500 }}>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2>{isEditingItem ? EDIT_PARAM : CREATE_PARAM}</h2>

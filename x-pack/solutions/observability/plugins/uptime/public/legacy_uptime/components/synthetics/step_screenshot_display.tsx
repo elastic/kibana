@@ -138,6 +138,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
     }
     // FIXME: Dario thinks there is a better way to do this but
     // he's getting tired and maybe the Uptime folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [basePath, checkGroup, imgSrc, stepIndex, isScreenshotRef, lastRefresh]);
 
   const refDimensions = useMemo(() => {
@@ -173,7 +174,7 @@ export const StepScreenshotDisplay: FC<StepScreenshotDisplayProps> = ({
         <EuiFlexGroup
           alignItems="center"
           direction="column"
-          style={{ paddingTop: '32px' }}
+          css={{ paddingTop: '32px' }}
           data-test-subj="stepScreenshotImageUnavailable"
         >
           <EuiFlexItem grow={false}>

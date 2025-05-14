@@ -20,6 +20,9 @@ import {
   isPhrasesFilter,
 } from '@kbn/es-query';
 
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { sourcererAdapterSelector } from '../../../data_view_manager/redux/selectors';
+import { sourcererSelectors } from '../../../sourcerer/store';
 import {
   updateTimeline,
   startTimelineSaving,
@@ -43,117 +46,170 @@ import type {
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { refreshTimelines } from './helpers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveTimeline> {
   return action.type === saveTimeline.type;
 }
 
 export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State> =
+  // WARN: this is disabled because we need to support experimental data view picker here.
+  // once it is stable, remove the override
+  // eslint-disable-next-line complexity
   (kibana: CoreStart) => (store) => (next) => async (action: Action) => {
-    // perform the action
-    const ret = next(action);
+    if (!isSaveTimelineAction(action)) {
+      return next(action);
+    }
 
-    if (isSaveTimelineAction(action)) {
-      const { id: localTimelineId } = action.payload;
-      const timeline = selectTimelineById(store.getState(), localTimelineId);
-      const { timelineId, timelineVersion, templateTimelineId, templateTimelineVersion } =
-        extractTimelineIdsAndVersions(timeline);
-      const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(store.getState());
+    const { id: localTimelineId } = action.payload;
+    const storeState = store.getState();
+    const timeline = selectTimelineById(storeState, localTimelineId);
+    const { timelineId, timelineVersion, templateTimelineId, templateTimelineVersion } =
+      extractTimelineIdsAndVersions(timeline);
+    const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
+    const selectedDataViewIdSourcerer = sourcererSelectors.sourcererScopeSelectedDataViewId(
+      storeState,
+      SourcererScopeName.timeline
+    );
+    const selectedPatternsSourcerer = sourcererSelectors.sourcererScopeSelectedPatterns(
+      storeState,
+      SourcererScopeName.timeline
+    );
 
-      store.dispatch(startTimelineSaving({ id: localTimelineId }));
+    const { dataViewId: experimentalDataViewId } = sourcererAdapterSelector(
+      SourcererScopeName.timeline
+    )(storeState);
 
-      try {
-        const response = await (action.payload.saveAsNew && timeline.id
-          ? copyTimeline({
-              timelineId,
-              timeline: {
-                ...convertTimelineAsInput(timeline, timelineTimeRange),
-                templateTimelineId,
-                templateTimelineVersion,
-              },
-              savedSearch: timeline.savedSearch,
-            })
-          : persistTimeline({
-              timelineId,
-              version: timelineVersion,
-              timeline: {
-                ...convertTimelineAsInput(timeline, timelineTimeRange),
-                templateTimelineId,
-                templateTimelineVersion,
-              },
-              savedSearch: timeline.savedSearch,
-            }));
+    const experimentalIsDataViewEnabled =
+      storeState.app.enableExperimental.newDataViewPickerEnabled;
 
-        if (isTimelineErrorResponse(response)) {
-          const error = getErrorFromResponse(response);
-          switch (error?.errorCode) {
-            case 403:
-              store.dispatch(showCallOutUnauthorizedMsg());
-              break;
-            // conflict
-            case 409:
-              kibana.notifications.toasts.addDanger({
-                title: i18n.TIMELINE_VERSION_CONFLICT_TITLE,
-                text: i18n.TIMELINE_VERSION_CONFLICT_DESCRIPTION,
-              });
-              break;
-            default:
-              kibana.notifications.toasts.addDanger({
-                title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-                text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
-              });
-          }
-          return;
+    let experimentalSelectedPatterns: string[] = [];
+
+    // NOTE: remove eslint override above after the experimental picker is stabilized
+    if (experimentalIsDataViewEnabled && experimentalDataViewId) {
+      const plugins = await kibana.plugins.onStart<{ dataViews: DataViewsPublicPluginStart }>(
+        'dataViews'
+      );
+
+      if (plugins.dataViews.found) {
+        const experimentalDataView = await plugins.dataViews.contract.get(experimentalDataViewId);
+
+        if (!experimentalDataView.isPersisted()) {
+          return kibana.notifications.toasts.addError(
+            new Error('Persisting timelines with adhoc data views is not allowed'),
+            {
+              title: 'Error persisting timeline',
+            }
+          );
         }
 
-        if (response == null) {
-          kibana.notifications.toasts.addDanger({
-            title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-            text: i18n.UPDATE_TIMELINE_ERROR_TEXT,
-          });
-          return;
-        }
-
-        refreshTimelines(store.getState());
-
-        store.dispatch(
-          updateTimeline({
-            id: localTimelineId,
-            timeline: {
-              ...timeline,
-              id: response.savedObjectId,
-              updated: response.updated ?? undefined,
-              savedObjectId: response.savedObjectId,
-              version: response.version,
-              status: response.status ?? TimelineStatusEnum.active,
-              timelineType: response.timelineType ?? TimelineTypeEnum.default,
-              templateTimelineId: response.templateTimelineId ?? null,
-              templateTimelineVersion: response.templateTimelineVersion ?? null,
-              savedSearchId: response.savedSearchId ?? null,
-              isSaving: false,
-            },
-          })
-        );
-        store.dispatch(
-          setChanged({
-            id: action.payload.id,
-            changed: false,
-          })
-        );
-      } catch (error) {
-        kibana.notifications.toasts.addDanger({
-          title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-          text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
-        });
-      } finally {
-        store.dispatch(
-          endTimelineSaving({
-            id: localTimelineId,
-          })
-        );
+        experimentalSelectedPatterns = experimentalDataView.getIndexPattern().split(',');
       }
     }
-    return ret;
+
+    const indexNames = experimentalIsDataViewEnabled
+      ? experimentalSelectedPatterns
+      : selectedPatternsSourcerer;
+    const dataViewId = experimentalIsDataViewEnabled
+      ? experimentalDataViewId
+      : selectedDataViewIdSourcerer;
+
+    store.dispatch(startTimelineSaving({ id: localTimelineId }));
+
+    try {
+      const response = await (action.payload.saveAsNew && timeline.id
+        ? copyTimeline({
+            timelineId,
+            timeline: {
+              ...convertTimelineAsInput(timeline, timelineTimeRange),
+              dataViewId,
+              indexNames,
+              templateTimelineId,
+              templateTimelineVersion,
+            },
+            savedSearch: timeline.savedSearch,
+          })
+        : persistTimeline({
+            timelineId,
+            version: timelineVersion,
+            timeline: {
+              ...convertTimelineAsInput(timeline, timelineTimeRange),
+              dataViewId,
+              indexNames,
+              templateTimelineId,
+              templateTimelineVersion,
+            },
+            savedSearch: timeline.savedSearch,
+          }));
+
+      if (isTimelineErrorResponse(response)) {
+        const error = getErrorFromResponse(response);
+        switch (error?.errorCode) {
+          case 403:
+            store.dispatch(showCallOutUnauthorizedMsg());
+            break;
+          // conflict
+          case 409:
+            kibana.notifications.toasts.addDanger({
+              title: i18n.TIMELINE_VERSION_CONFLICT_TITLE,
+              text: i18n.TIMELINE_VERSION_CONFLICT_DESCRIPTION,
+            });
+            break;
+          default:
+            kibana.notifications.toasts.addDanger({
+              title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+              text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+            });
+        }
+        return;
+      }
+
+      if (response == null) {
+        kibana.notifications.toasts.addDanger({
+          title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+          text: i18n.UPDATE_TIMELINE_ERROR_TEXT,
+        });
+        return;
+      }
+
+      refreshTimelines(store.getState());
+
+      store.dispatch(
+        updateTimeline({
+          id: localTimelineId,
+          timeline: {
+            ...timeline,
+            id: response.savedObjectId,
+            updated: response.updated ?? undefined,
+            savedObjectId: response.savedObjectId,
+            version: response.version,
+            status: response.status ?? TimelineStatusEnum.active,
+            timelineType: response.timelineType ?? TimelineTypeEnum.default,
+            templateTimelineId: response.templateTimelineId ?? null,
+            templateTimelineVersion: response.templateTimelineVersion ?? null,
+            savedSearchId: response.savedSearchId ?? null,
+            isSaving: false,
+          },
+        })
+      );
+      store.dispatch(
+        setChanged({
+          id: action.payload.id,
+          changed: false,
+        })
+      );
+    } catch (error) {
+      kibana.notifications.toasts.addDanger({
+        title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
+        text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+      });
+    } finally {
+      store.dispatch(
+        endTimelineSaving({
+          id: localTimelineId,
+        })
+      );
+    }
   };
 
 const timelineInput: SavedTimeline = {

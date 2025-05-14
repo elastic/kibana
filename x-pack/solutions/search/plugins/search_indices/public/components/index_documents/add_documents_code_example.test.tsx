@@ -27,6 +27,10 @@ jest.mock('../../hooks/use_elasticsearch_url', () => ({
   useElasticsearchUrl: jest.fn(),
 }));
 
+jest.mock('../../hooks/api/use_onboarding_data', () => ({
+  useOnboardingTokenQuery: jest.fn().mockReturnValue({ data: { token: 'default' } }),
+}));
+
 jest.mock('@kbn/search-api-keys-components', () => ({
   useSearchApiKey: jest.fn().mockReturnValue({ apiKey: 'test-api-key' }),
 }));
@@ -91,7 +95,12 @@ describe('AddDocumentsCodeExample', () => {
     it('pass examples when mapping is default with extra vector fields', () => {
       const indexName = 'test-index';
       const mappingProperties: Record<string, MappingProperty> = {
-        vector: { type: 'dense_vector', dims: 3, similarity: 'extra' },
+        vector: {
+          type: 'dense_vector',
+          dims: 3,
+          // @ts-expect-error `extra` is not a valid MappingDenseVectorSimilarity
+          similarity: 'extra',
+        },
         text: { type: 'text' },
       };
 

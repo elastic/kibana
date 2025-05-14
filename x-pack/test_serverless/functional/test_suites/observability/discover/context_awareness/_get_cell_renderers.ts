@@ -29,11 +29,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('extension getCellRenderers', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     describe('ES|QL mode', () => {
@@ -58,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
           expect(await logLevelBadge.getVisibleText()).to.be('debug');
           expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-            'rgba(190, 207, 227, 1)'
+            'rgba(189, 215, 255, 1)'
           );
         });
 
@@ -199,7 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
             expect(await logLevelBadge.getVisibleText()).to.be('debug');
             expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-              'rgba(190, 207, 227, 1)'
+              'rgba(189, 215, 255, 1)'
             );
           });
 
@@ -216,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
             expect(await logLevelBadge.getVisibleText()).to.be('debug');
             expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-              'rgba(190, 207, 227, 1)'
+              'rgba(189, 215, 255, 1)'
             );
           });
         });

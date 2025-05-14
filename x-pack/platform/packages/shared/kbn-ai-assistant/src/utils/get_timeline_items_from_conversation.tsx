@@ -60,18 +60,23 @@ function FunctionName({ name: functionName }: { name: string }) {
 }
 
 export function getTimelineItemsfromConversation({
+  conversationId,
   chatService,
   currentUser,
   hasConnector,
   messages,
   chatState,
+  isConversationOwnedByCurrentUser,
   onActionClick,
+  isArchived,
 }: {
+  conversationId?: string;
   chatService: ObservabilityAIAssistantChatService;
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
   hasConnector: boolean;
   messages: Message[];
   chatState: ChatState;
+  isConversationOwnedByCurrentUser: boolean;
   onActionClick: ({
     message,
     payload,
@@ -79,11 +84,8 @@ export function getTimelineItemsfromConversation({
     message: Message;
     payload: ChatActionClickPayload;
   }) => void;
+  isArchived: boolean;
 }): ChatTimelineItem[] {
-  const messagesWithoutSystem = messages.filter(
-    (message) => message.message.role !== MessageRole.System
-  );
-
   const items: ChatTimelineItem[] = [
     {
       id: v4(),
@@ -93,14 +95,16 @@ export function getTimelineItemsfromConversation({
       loading: false,
       message: {
         '@timestamp': new Date().toISOString(),
-        message: { role: MessageRole.User },
+        message: {
+          role: !!conversationId && !currentUser ? MessageRole.System : MessageRole.User,
+        },
       },
       title: i18n.translate('xpack.aiAssistant.conversationStartTitle', {
         defaultMessage: 'started a conversation',
       }),
-      role: MessageRole.User,
+      role: !!conversationId && !currentUser ? MessageRole.System : MessageRole.User,
     },
-    ...messagesWithoutSystem.map((message, index) => {
+    ...messages.map((message, index) => {
       const id = v4();
 
       let title: React.ReactNode = '';
@@ -108,10 +112,8 @@ export function getTimelineItemsfromConversation({
       let element: React.ReactNode | undefined;
 
       const prevFunctionCall =
-        message.message.name &&
-        messagesWithoutSystem[index - 1] &&
-        messagesWithoutSystem[index - 1].message.function_call
-          ? messagesWithoutSystem[index - 1].message.function_call
+        message.message.name && messages[index - 1] && messages[index - 1].message.function_call
+          ? messages[index - 1].message.function_call
           : undefined;
 
       let role = message.message.function_call?.trigger || message.message.role;
@@ -198,14 +200,14 @@ export function getTimelineItemsfromConversation({
 
             content = convertMessageToMarkdownCodeBlock(message.message);
 
-            actions.canEdit = hasConnector;
+            actions.canEdit = hasConnector && isConversationOwnedByCurrentUser && !isArchived;
             display.collapsed = true;
           } else {
             // is a prompt by the user
             title = '';
             content = message.message.content;
 
-            actions.canEdit = hasConnector;
+            actions.canEdit = hasConnector && isConversationOwnedByCurrentUser && !isArchived;
             display.collapsed = false;
           }
 
@@ -218,8 +220,8 @@ export function getTimelineItemsfromConversation({
           break;
 
         case MessageRole.Assistant:
-          actions.canRegenerate = hasConnector;
-          actions.canGiveFeedback = true;
+          actions.canRegenerate = hasConnector && isConversationOwnedByCurrentUser && !isArchived;
+          actions.canGiveFeedback = isConversationOwnedByCurrentUser && !isArchived;
           display.hide = false;
 
           // is a function suggestion by the assistant
@@ -246,7 +248,7 @@ export function getTimelineItemsfromConversation({
               display.collapsed = true;
             }
 
-            actions.canEdit = true;
+            actions.canEdit = isConversationOwnedByCurrentUser && !isArchived;
           } else {
             // is an assistant response
             title = '';

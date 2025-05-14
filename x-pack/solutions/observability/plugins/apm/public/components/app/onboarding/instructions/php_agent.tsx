@@ -53,8 +53,17 @@ export const createPhpAgentInstructions = (commonOptions: AgentInstructions): Eu
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          <EuiCodeBlock language="bash" isCopyable={true}>
-            apk add --allow-untrusted &lt;package-file&gt;.apk
+          <EuiCodeBlock
+            language="bash"
+            isCopyable={true}
+            copyAriaLabel={i18n.translate('xpack.apm.onboarding.php.installPackage.copyAriaLabel', {
+              defaultMessage: 'Copy the code to install the APM agent for PHP',
+            })}
+          >
+            {i18n.translate(
+              'xpack.apm.createPhpAgentInstructions.apkAddallowuntrustedpackagefileapkCodeBlockLabel',
+              { defaultMessage: 'apk add --allow-untrusted <package-file>.apk' }
+            )}
           </EuiCodeBlock>
           <EuiSpacer />
           <EuiMarkdownFormat>

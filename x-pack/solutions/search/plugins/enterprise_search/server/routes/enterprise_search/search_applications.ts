@@ -19,7 +19,7 @@ import { fetchAliasIndices } from '../../lib/search_applications/fetch_alias_ind
 import { fetchIndicesStats } from '../../lib/search_applications/fetch_indices_stats';
 
 import { fetchSearchApplicationFieldCapabilities } from '../../lib/search_applications/field_capabilities';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
@@ -34,6 +34,12 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
   router.get(
     {
       path: '/internal/enterprise_search/search_applications',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
@@ -68,6 +74,12 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
   router.get(
     {
       path: '/internal/enterprise_search/search_applications/{engine_name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           engine_name: schema.string(),
@@ -99,6 +111,12 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
   router.put(
     {
       path: '/internal/enterprise_search/search_applications/{engine_name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           indices: schema.arrayOf(schema.string()),
@@ -131,6 +149,7 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
           name: request.params.engine_name,
           search_application: {
             indices: request.body.indices,
+            // @ts-expect-error elasticsearch@9.0.0 has this parameter been renamed to analytics_collection_name?
             name: request.params.engine_name,
             template:
               script == null
@@ -198,6 +217,12 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
   router.delete(
     {
       path: '/internal/enterprise_search/search_applications/{engine_name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           engine_name: schema.string(),
@@ -217,6 +242,12 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
   router.post(
     {
       path: '/internal/enterprise_search/search_applications/{engine_name}/search',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({}, { unknowns: 'allow' }),
         params: schema.object({
@@ -238,6 +269,12 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
   router.post(
     {
       path: '/internal/enterprise_search/search_applications/{engine_name}/api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           keyName: schema.string(),
@@ -263,6 +300,12 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
   router.get(
     {
       path: '/internal/enterprise_search/search_applications/{engine_name}/field_capabilities',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: { params: schema.object({ engine_name: schema.string() }) },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {

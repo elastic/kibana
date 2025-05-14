@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 
-export const getWeekdayInfo = (date: Moment, dayOfWeekFmt: string = 'dddd') => {
+export const getWeekdayInfo = (date: Moment, dayOfWeekFmt = 'dddd') => {
   const dayOfWeek = date.format(dayOfWeekFmt);
   const nthWeekdayOfMonth = Math.ceil(date.date() / 7);
   const isLastOfMonth = nthWeekdayOfMonth > 4 || !date.isSame(moment(date).add(7, 'd'), 'month');

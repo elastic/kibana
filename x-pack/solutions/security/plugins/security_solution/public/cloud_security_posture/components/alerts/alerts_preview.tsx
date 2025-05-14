@@ -74,6 +74,12 @@ export const AlertsPreview = ({
   const { euiTheme } = useEuiTheme();
 
   const severityMap = new Map<string, number>();
+  const severityRank: Record<string, number> = {
+    critical: 4,
+    high: 3,
+    medium: 2,
+    low: 1,
+  };
 
   (Object.keys(alertsData || {}) as AlertsByStatus[]).forEach((status) => {
     if (alertsData?.[status]?.severities) {
@@ -84,11 +90,12 @@ export const AlertsPreview = ({
     }
   });
 
-  const alertStats = Array.from(severityMap, ([key, count]) => ({
+  const alertStats = Array.from(severityMap, ([key, count]: [string, number]) => ({
     key: capitalize(key),
     count,
-    color: getSeverityColor(key),
-  }));
+    color: getSeverityColor(key, euiTheme),
+    sort: severityRank[key.toLowerCase()] || 0,
+  })).sort((a, b) => b.sort - a.sort);
 
   const totalAlertsCount = alertStats.reduce((total, item) => total + item.count, 0);
 
@@ -145,7 +152,7 @@ export const AlertsPreview = ({
             <EuiFlexItem>
               <EuiSpacer />
               <DistributionBar
-                stats={alertStats.reverse()}
+                stats={alertStats}
                 data-test-subj="AlertsPreviewDistributionBarTestId"
               />
             </EuiFlexItem>

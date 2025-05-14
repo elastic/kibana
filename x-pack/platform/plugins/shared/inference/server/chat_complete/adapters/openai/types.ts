@@ -8,3 +8,11 @@
 import type OpenAI from 'openai';
 
 export type OpenAIRequest = Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
+
+// duplicated from x-pack/platform/plugins/shared/stack_connectors/common/openai/constants.ts
+// because depending on stack_connectors from the inference plugin creates a cyclic dependency...
+export enum OpenAiProviderType {
+  OpenAi = 'OpenAI',
+  AzureAi = 'Azure OpenAI',
+  Other = 'Other',
+}

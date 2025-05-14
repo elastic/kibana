@@ -8,7 +8,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { EuiButtonIcon, EuiPopover, EuiProgress } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiProgress, EuiThemeProvider } from '@elastic/eui';
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -89,7 +89,11 @@ async function getComponent({
     size: 'xs',
     workspaceSelectedFieldNames: [],
   };
-  const comp = await mountWithIntl(<UnifiedFieldListItem {...props} />);
+  const comp = await mountWithIntl(
+    <EuiThemeProvider>
+      <UnifiedFieldListItem {...props} />
+    </EuiThemeProvider>
+  );
   // wait for lazy modules
   await new Promise((resolve) => setTimeout(resolve, 0));
   await comp.update();

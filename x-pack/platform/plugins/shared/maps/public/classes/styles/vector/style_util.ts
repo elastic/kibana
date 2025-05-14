@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { ICON_SOURCE, MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../common/constants';
 import { Category } from '../../../../common/descriptor_types';
@@ -19,7 +18,7 @@ export const OTHER_CATEGORY_LABEL = i18n.translate(
   }
 );
 
-export const OTHER_CATEGORY_DEFAULT_COLOR = euiThemeVars.euiColorLightShade;
+export const OTHER_CATEGORY_DEFAULT_COLOR = '#cad3e2'; // Defaulting to a light grey color that works in both dark and light mode
 
 export function getComputedFieldName(styleName: VECTOR_STYLES, fieldName: string) {
   return `${getComputedFieldNamePrefix(fieldName)}__${styleName as string}`;

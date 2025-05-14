@@ -72,24 +72,22 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
 
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        cluster: options.elasticsearchPrivileges?.cluster,
-        index: expectedIndexPrivilegePayload,
-        application: [
-          {
-            application,
-            resources: [`space:${options.spaceId}`],
-            privileges: options.kibanaPrivileges
-              ? uniq([
-                  mockActions.login,
-                  ...(Array.isArray(options.kibanaPrivileges)
-                    ? options.kibanaPrivileges
-                    : [options.kibanaPrivileges]),
-                ])
-              : [mockActions.login],
-          },
-        ],
-      },
+      cluster: options.elasticsearchPrivileges?.cluster,
+      index: expectedIndexPrivilegePayload,
+      application: [
+        {
+          application,
+          resources: [`space:${options.spaceId}`],
+          privileges: options.kibanaPrivileges
+            ? uniq([
+                mockActions.login,
+                ...(Array.isArray(options.kibanaPrivileges)
+                  ? options.kibanaPrivileges
+                  : [options.kibanaPrivileges]),
+              ])
+            : [mockActions.login],
+        },
+      ],
     });
 
     if (errorThrown) {
@@ -860,16 +858,14 @@ describe('#checkPrivilegesWithRequest.atSpace', () => {
     await checkPrivileges.atSpace('space_1', {}, { requireLoginAction: false });
 
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        index: [],
-        application: [
-          {
-            application,
-            resources: [`space:space_1`],
-            privileges: [],
-          },
-        ],
-      },
+      index: [],
+      application: [
+        {
+          application,
+          resources: [`space:space_1`],
+          privileges: [],
+        },
+      ],
     });
   });
 });
@@ -915,24 +911,22 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
 
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        cluster: options.elasticsearchPrivileges?.cluster,
-        index: expectedIndexPrivilegePayload,
-        application: [
-          {
-            application,
-            resources: options.spaceIds.map((spaceId) => `space:${spaceId}`),
-            privileges: options.kibanaPrivileges
-              ? uniq([
-                  mockActions.login,
-                  ...(Array.isArray(options.kibanaPrivileges)
-                    ? options.kibanaPrivileges
-                    : [options.kibanaPrivileges]),
-                ])
-              : [mockActions.login],
-          },
-        ],
-      },
+      cluster: options.elasticsearchPrivileges?.cluster,
+      index: expectedIndexPrivilegePayload,
+      application: [
+        {
+          application,
+          resources: options.spaceIds.map((spaceId) => `space:${spaceId}`),
+          privileges: options.kibanaPrivileges
+            ? uniq([
+                mockActions.login,
+                ...(Array.isArray(options.kibanaPrivileges)
+                  ? options.kibanaPrivileges
+                  : [options.kibanaPrivileges]),
+              ])
+            : [mockActions.login],
+        },
+      ],
     });
 
     if (errorThrown) {
@@ -2034,16 +2028,14 @@ describe('#checkPrivilegesWithRequest.atSpaces', () => {
     await checkPrivileges.atSpaces(['space_1'], {}, { requireLoginAction: false });
 
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        index: [],
-        application: [
-          {
-            application,
-            resources: [`space:space_1`],
-            privileges: [],
-          },
-        ],
-      },
+      index: [],
+      application: [
+        {
+          application,
+          resources: [`space:space_1`],
+          privileges: [],
+        },
+      ],
     });
   });
 });
@@ -2088,24 +2080,22 @@ describe('#checkPrivilegesWithRequest.globally', () => {
 
     expect(mockClusterClient.asScoped).toHaveBeenCalledWith(request);
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        cluster: options.elasticsearchPrivileges?.cluster,
-        index: expectedIndexPrivilegePayload,
-        application: [
-          {
-            application,
-            resources: [GLOBAL_RESOURCE],
-            privileges: options.kibanaPrivileges
-              ? uniq([
-                  mockActions.login,
-                  ...(Array.isArray(options.kibanaPrivileges)
-                    ? options.kibanaPrivileges
-                    : [options.kibanaPrivileges]),
-                ])
-              : [mockActions.login],
-          },
-        ],
-      },
+      cluster: options.elasticsearchPrivileges?.cluster,
+      index: expectedIndexPrivilegePayload,
+      application: [
+        {
+          application,
+          resources: [GLOBAL_RESOURCE],
+          privileges: options.kibanaPrivileges
+            ? uniq([
+                mockActions.login,
+                ...(Array.isArray(options.kibanaPrivileges)
+                  ? options.kibanaPrivileges
+                  : [options.kibanaPrivileges]),
+              ])
+            : [mockActions.login],
+        },
+      ],
     });
 
     if (errorThrown) {
@@ -2886,16 +2876,14 @@ describe('#checkPrivilegesWithRequest.globally', () => {
     await checkPrivileges.globally({}, { requireLoginAction: false });
 
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        index: [],
-        application: [
-          {
-            application,
-            resources: [GLOBAL_RESOURCE],
-            privileges: [],
-          },
-        ],
-      },
+      index: [],
+      application: [
+        {
+          application,
+          resources: [GLOBAL_RESOURCE],
+          privileges: [],
+        },
+      ],
     });
   });
 });

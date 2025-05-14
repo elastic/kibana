@@ -20,7 +20,7 @@ export const getAssistantBaseKibanaFeature = (): BaseKibanaFeatureConfig => ({
       defaultMessage: 'Elastic AI Assistant',
     }
   ),
-  order: 1100,
+  order: 1300,
   category: DEFAULT_APP_CATEGORIES.security,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [ASSISTANT_FEATURE_ID, 'kibana'],

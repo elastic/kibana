@@ -82,10 +82,12 @@ export const MonitorTags = ({ ping, summary }: Props) => {
     return summary ? null : (
       <EuiLink
         data-test-subj="syntheticsMonitorTagsSetTagsLink"
-        href={docLinks?.links.heartbeat.base + '/monitor-options.html#monitor-tags'}
+        href={docLinks?.links.heartbeat.monitorTags}
         target="_blank"
       >
-        Set tags
+        {i18n.translate('xpack.uptime.monitorTags.setTagsLinkLabel', {
+          defaultMessage: 'Set tags',
+        })}
       </EuiLink>
     );
   }
@@ -104,7 +106,7 @@ export const MonitorTags = ({ ping, summary }: Props) => {
             onClickAriaLabel={getFilterLabel(tag)}
             color="hollow"
             className="eui-textTruncate"
-            style={{ maxWidth: 120 }}
+            css={{ maxWidth: 120 }}
           >
             {tag}
           </EuiBadge>
@@ -113,7 +115,7 @@ export const MonitorTags = ({ ping, summary }: Props) => {
             key={tag}
             color="hollow"
             className="eui-textTruncate"
-            style={{ maxWidth: 120 }}
+            css={{ maxWidth: 120 }}
             href={history.createHref({
               pathname: OVERVIEW_ROUTE,
               search: `filters=[["tags",["${tag}"]]]`,

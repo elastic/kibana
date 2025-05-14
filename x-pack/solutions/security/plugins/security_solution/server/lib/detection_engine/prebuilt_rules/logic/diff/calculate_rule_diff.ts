@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import type {
   DiffableRule,
   FullRuleDiff,
@@ -66,9 +67,8 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
   const { base, current, target } = args;
 
   invariant(current != null, 'current version is required');
-  const diffableCurrentVersion = convertRuleToDiffable(
-    convertPrebuiltRuleAssetToRuleResponse(current)
-  );
+  const diffableCurrentVersion = convertRuleToDiffable(current);
+  const isCustomized = isRuleCustomized(current);
 
   invariant(target != null, 'target version is required');
   const diffableTargetVersion = convertRuleToDiffable(
@@ -80,11 +80,14 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
     ? convertRuleToDiffable(convertPrebuiltRuleAssetToRuleResponse(base))
     : undefined;
 
-  const fieldsDiff = calculateRuleFieldsDiff({
-    base_version: diffableBaseVersion || MissingVersion,
-    current_version: diffableCurrentVersion,
-    target_version: diffableTargetVersion,
-  });
+  const fieldsDiff = calculateRuleFieldsDiff(
+    {
+      base_version: diffableBaseVersion || MissingVersion,
+      current_version: diffableCurrentVersion,
+      target_version: diffableTargetVersion,
+    },
+    isCustomized
+  );
 
   const {
     numberFieldsWithUpdates,

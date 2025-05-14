@@ -29,7 +29,6 @@ interface ServicePanelContentProps {
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
-  isDraggable: boolean;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode?: boolean;
@@ -43,7 +42,6 @@ export const ServicePanelContent = ({
   recalculatingScore,
   contextID,
   scopeId,
-  isDraggable,
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
@@ -75,7 +73,6 @@ export const ServicePanelContent = ({
         observedData={observedService}
         contextID={contextID}
         scopeId={scopeId}
-        isDraggable={isDraggable}
         observedFields={observedFields}
         queryId={OBSERVED_SERVICE_QUERY_ID}
       />

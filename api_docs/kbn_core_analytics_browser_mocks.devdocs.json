@@ -14,7 +14,7 @@
         "tags": [],
         "label": "analyticsServiceMock",
         "description": [],
-        "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
+        "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "signature": [
               "() => jest.Mocked<AnalyticsServiceContract>"
             ],
-            "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
+            "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -46,7 +46,7 @@
               "AnalyticsServiceSetup",
               ">"
             ],
-            "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
+            "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -64,7 +64,7 @@
               "AnalyticsServiceStart",
               ">"
             ],
-            "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
+            "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

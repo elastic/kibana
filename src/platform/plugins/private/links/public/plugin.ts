@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -23,14 +24,15 @@ import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
-import { LinksRuntimeState } from './types';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
+import { LinksSerializedState } from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
-import { LinksStrings } from './components/links_strings';
 import { getLinksClient } from './content_management/links_content_management_client';
-import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
-import { registerCreateLinksPanelAction } from './actions/create_links_panel_action';
-import { deserializeLinksSavedObject } from './lib/deserialize_from_library';
+import { setKibanaServices } from './services/kibana_services';
+import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
+
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
@@ -63,11 +65,17 @@ export class LinksPlugin
 
       plugins.embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
-          const initialState = await deserializeLinksSavedObject(savedObject);
-          container.addNewPanel<LinksRuntimeState>({
-            panelType: CONTENT_ID,
-            initialState,
-          });
+          container.addNewPanel<LinksSerializedState>(
+            {
+              panelType: CONTENT_ID,
+              serializedState: {
+                rawState: {
+                  savedObjectId: savedObject.id,
+                },
+              },
+            },
+            true
+          );
         },
         savedObjectType: CONTENT_ID,
         savedObjectName: APP_NAME,
@@ -84,7 +92,9 @@ export class LinksPlugin
         name: CONTENT_ID,
         title: APP_NAME,
         icon: APP_ICON,
-        description: LinksStrings.getDescription(),
+        description: i18n.translate('links.description', {
+          defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
+        }),
         stage: 'production',
         appExtensions: {
           visualizations: {
@@ -100,7 +110,11 @@ export class LinksPlugin
                 title,
                 editor: {
                   onEdit: async (savedObjectId: string) => {
-                    const { openEditorFlyout } = await import('./editor/open_editor_flyout');
+                    const [{ openEditorFlyout }, { deserializeLinksSavedObject }] =
+                      await Promise.all([
+                        import('./editor/open_editor_flyout'),
+                        import('./lib/deserialize_from_library'),
+                      ]);
                     const linksSavedObject = await getLinksClient().get(savedObjectId);
                     const initialState = await deserializeLinksSavedObject(linksSavedObject.item);
                     await openEditorFlyout({ initialState });
@@ -122,20 +136,28 @@ export class LinksPlugin
 
   public start(core: CoreStart, plugins: LinksStartDependencies) {
     setKibanaServices(core, plugins);
-    untilPluginStartServicesReady().then(() => {
-      registerCreateLinksPanelAction();
 
-      plugins.dashboard.registerDashboardPanelPlacementSetting(
-        CONTENT_ID,
-        async (runtimeState?: LinksRuntimeState) => {
-          if (!runtimeState) return {};
-          const isHorizontal = runtimeState.layout === 'horizontal';
-          const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
-          const height = isHorizontal ? 4 : (runtimeState.links?.length ?? 1 * 3) + 4;
-          return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
-        }
-      );
-    });
+    plugins.uiActions.addTriggerActionAsync(
+      ADD_PANEL_TRIGGER,
+      ADD_LINKS_PANEL_ACTION_ID,
+      async () => {
+        const { addLinksPanelAction } = await import('./actions/add_links_panel_action');
+        return addLinksPanelAction;
+      }
+    );
+
+    plugins.dashboard.registerDashboardPanelPlacementSetting(
+      CONTENT_ID,
+      async (serializedState?: SerializedPanelState<LinksSerializedState>) => {
+        if (!serializedState) return {};
+        const { deserializeState } = await import('./embeddable/links_embeddable');
+        const runtimeState = await deserializeState(serializedState);
+        const isHorizontal = runtimeState.layout === 'horizontal';
+        const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
+        const height = isHorizontal ? 4 : (runtimeState.links?.length ?? 1 * 3) + 4;
+        return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
+      }
+    );
 
     return {};
   }

@@ -94,8 +94,8 @@ export const FlyoutHome = (props: Props) => {
 
   const hasJobs = hostJobSummaries.length > 0 || k8sJobSummaries.length > 0;
   const manageJobsLinkProps = useLinkProps({
-    app: 'ml',
-    pathname: '/jobs',
+    app: 'management',
+    pathname: 'ml/anomaly_detection',
   });
 
   // Used for prefilling the feedback form (if both types are enabled do not prefill)
@@ -206,7 +206,7 @@ export const FlyoutHome = (props: Props) => {
                       <EuiButton
                         data-test-subj="infraFlyoutHomeManageJobsInMlButton"
                         {...manageJobsLinkProps}
-                        style={{ marginRight: 5 }}
+                        css={{ marginRight: 5 }}
                       >
                         <FormattedMessage
                           defaultMessage="Manage jobs in ML"
@@ -328,6 +328,10 @@ const CreateJobTab = (props: CreateJobTab) => {
               <>
                 {props.hasHostJobs && (
                   <EuiButtonEmpty
+                    aria-label={i18n.translate(
+                      'xpack.infra.createJobTab.recreatejobsButton.ariaLabel',
+                      { defaultMessage: 'Recreate jobs' }
+                    )}
                     data-test-subj="infraCreateJobTabRecreateJobsButton"
                     onClick={props.createHosts}
                   >
@@ -374,6 +378,10 @@ const CreateJobTab = (props: CreateJobTab) => {
                 <>
                   {props.hasK8sJobs && (
                     <EuiButtonEmpty
+                      aria-label={i18n.translate(
+                        'xpack.infra.createJobTab.recreatejobsButton.ariaLabel',
+                        { defaultMessage: 'Recreate jobs' }
+                      )}
                       data-test-subj="infraCreateJobTabRecreateJobsButton"
                       onClick={props.createK8s}
                     >

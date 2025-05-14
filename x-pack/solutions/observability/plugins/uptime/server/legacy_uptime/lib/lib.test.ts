@@ -27,18 +27,14 @@ describe('UptimeEsClient', () => {
   describe('search', () => {
     it('should call baseESClient.search with correct parameters', async () => {
       const mockSearchParams = {
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       };
 
       const result = await uptimeEsClient.search({
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
 
@@ -62,10 +58,8 @@ describe('UptimeEsClient', () => {
 
     it('should throw an error if baseESClient.search throws an error', async () => {
       const mockSearchParams = {
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       };
       const mockError = new Error('Search error');
@@ -150,18 +144,14 @@ describe('UptimeEsClient', () => {
       uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { stackVersion: '8.9.0' });
 
       const mockSearchParams = {
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       };
 
       await uptimeEsClient.search({
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
 
@@ -183,18 +173,14 @@ describe('UptimeEsClient', () => {
       uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient, { stackVersion: '8.9.0' });
 
       const mockSearchParams = {
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       };
 
       await uptimeEsClient.search({
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
 
@@ -218,20 +204,16 @@ describe('UptimeEsClient', () => {
       });
 
       await uptimeEsClient.search({
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
 
       expect(esClient.search).toHaveBeenCalledWith(
         {
           index: 'heartbeat-*',
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         },
         { meta: true }
@@ -242,20 +224,16 @@ describe('UptimeEsClient', () => {
       });
 
       await uptimeEsClient.search({
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
       });
 
       expect(esClient.search).toHaveBeenLastCalledWith(
         {
           index: 'heartbeat-*',
-          body: {
-            query: {
-              match_all: {},
-            },
+          query: {
+            match_all: {},
           },
         },
         { meta: true }

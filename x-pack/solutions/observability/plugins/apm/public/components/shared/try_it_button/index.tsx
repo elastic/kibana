@@ -29,6 +29,8 @@ interface Props {
   onClick: () => void;
   popoverContent?: React.ReactElement;
   isLoading: boolean;
+  calloutId: string;
+  hideThisContent: string;
 }
 
 export function TryItButton({
@@ -38,16 +40,15 @@ export function TryItButton({
   popoverContent,
   promoLabel,
   isLoading,
+  calloutId,
+  hideThisContent,
 }: Props) {
-  const [showFastFilterTryCallout, setShowFastFilterTryCallout] = useLocalStorage(
-    'apm.showFastFilterTryCallout',
-    true
-  );
+  const [showTryCallout, setShowFastFilterTryCallout] = useLocalStorage(`apm.${calloutId}`, true);
   const { core } = useApmPluginContext();
   const canEditAdvancedSettings = core.application.capabilities.advancedSettings?.save;
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
-  if (!showFastFilterTryCallout) {
+  if (!showTryCallout) {
     return null;
   }
 
@@ -169,8 +170,11 @@ export function TryItButton({
   function HideThisButton() {
     return (
       <EuiFlexItem grow={false}>
-        <EuiToolTip content="Hide this">
+        <EuiToolTip content={hideThisContent}>
           <EuiButtonIcon
+            aria-label={i18n.translate('xpack.apm.hideThisButton.[objectObject]Button.ariaLabel', {
+              defaultMessage: '[object Object]',
+            })}
             data-test-subj="apmHideThisButtonButton"
             iconType="cross"
             onClick={() => {
@@ -183,7 +187,7 @@ export function TryItButton({
   }
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <TechnicalPreviewBadge icon="beaker" />
       {isFeatureEnabled ? null : <PromoLabel />}
       <Link />

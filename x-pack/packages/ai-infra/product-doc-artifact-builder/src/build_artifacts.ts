@@ -6,7 +6,7 @@
  */
 
 import Path from 'path';
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { ProductName } from '@kbn/product-doc-common';
 import {
@@ -31,6 +31,8 @@ const getSourceClient = (config: TaskConfig) => {
       username: config.sourceClusterUsername,
       password: config.sourceClusterPassword,
     },
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 };
 
@@ -44,6 +46,7 @@ const getEmbeddingClient = (config: TaskConfig) => {
     },
     // generating embeddings takes time
     requestTimeout: 10 * 60 * 1000,
+    Connection: HttpConnection,
   });
 };
 

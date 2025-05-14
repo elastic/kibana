@@ -434,6 +434,8 @@ describe('useTimelineEventsHandler', () => {
         );
       });
 
+      expect(mockSearch).toHaveBeenCalledTimes(1);
+
       mockSearch.mockClear();
 
       await loadNextBatch(result);
@@ -487,39 +489,142 @@ describe('useTimelineEventsHandler', () => {
       });
     });
 
-    test('should reset batch to 0th when the data is `refetched`', async () => {
-      const { result } = renderHook((args) => useTimelineEvents(args), {
-        initialProps: { ...props },
+    describe('refetching', () => {
+      /*
+       * Below are some use cases where refetch is triggered :
+       *
+       *  - When user triggers a manual refresh of the data
+       *  - When user updates an event, which triggers a refresh of the data
+       *    - For example, when alert status is updated.
+       *  - When user adds a new column
+       *
+       */
+
+      test('should fetch first batch again when refetch is triggered', async () => {
+        const { result } = renderHook((args) => useTimelineEvents(args), {
+          initialProps: { ...props, timerangeKind: 'absolute' } as UseTimelineEventsProps,
+        });
+
+        await waitFor(() => {
+          expect(mockSearch).toHaveBeenCalledWith(
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
+
+        mockSearch.mockClear();
+
+        act(() => {
+          result.current[1].refetch();
+        });
+
+        await waitFor(() => {
+          expect(mockSearch).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
       });
 
-      await waitFor(() => {
-        expect(mockSearch).toHaveBeenCalledWith(
-          expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
-        );
+      test('should fetch first batch again when refetch is triggered with relative timerange', async () => {
+        const { result } = renderHook((args) => useTimelineEvents(args), {
+          initialProps: { ...props, timerangeKind: 'relative' } as UseTimelineEventsProps,
+        });
+
+        await waitFor(() => {
+          expect(mockSearch).toHaveBeenCalledWith(
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
+
+        mockSearch.mockClear();
+
+        act(() => {
+          result.current[1].refetch();
+        });
+
+        await waitFor(() => {
+          expect(mockSearch).toHaveBeenCalledTimes(1);
+          expect(mockSearch).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
       });
 
-      mockSearch.mockClear();
+      test('should fetch first batch again when refetch is triggered when user has already fetched multiple batches', async () => {
+        const { result } = renderHook((args) => useTimelineEvents(args), {
+          initialProps: { ...props },
+        });
 
-      await loadNextBatch(result);
+        await waitFor(() => {
+          expect(mockSearch).toHaveBeenCalledWith(
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
 
-      await waitFor(() => {
-        expect(mockSearch).toHaveBeenCalledWith(
-          expect.objectContaining({ pagination: { activePage: 1, querySize: 25 } })
-        );
+        mockSearch.mockClear();
+
+        await loadNextBatch(result);
+
+        await waitFor(() => {
+          expect(mockSearch).toHaveBeenCalledWith(
+            expect.objectContaining({ pagination: { activePage: 1, querySize: 25 } })
+          );
+        });
+
+        mockSearch.mockClear();
+
+        act(() => {
+          result.current[1].refetch();
+        });
+
+        await waitFor(() => {
+          expect(mockSearch).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
       });
+    });
 
-      mockSearch.mockClear();
+    describe('sort', () => {
+      test('should fetch first batch again when sort is updated', async () => {
+        const { result, rerender } = renderHook((args) => useTimelineEvents(args), {
+          initialProps: { ...props } as UseTimelineEventsProps,
+        });
 
-      act(() => {
-        result.current[1].refetch();
-      });
+        await waitFor(() => {
+          expect(mockSearch).toHaveBeenCalledWith(
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
 
-      await waitFor(() => {
-        expect(mockSearch).toHaveBeenCalledTimes(1);
-        expect(mockSearch).toHaveBeenNthCalledWith(
-          1,
-          expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
-        );
+        act(() => {
+          result.current[1].loadNextBatch();
+        });
+
+        await waitFor(() => {
+          expect(result.current[0]).toBe(DataLoadingState.loaded);
+          expect(mockSearch).toHaveBeenCalledWith(
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
+
+        mockSearch.mockClear();
+
+        act(() => {
+          rerender({
+            ...props,
+            sort: [...initSortDefault, { ...initSortDefault[0], field: 'event.kind' }],
+          });
+        });
+
+        await waitFor(() => {
+          expect(mockSearch).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
       });
     });
 
@@ -636,7 +741,7 @@ describe('useTimelineEventsHandler', () => {
       //////////////////////
     });
 
-    test('should request 0th batch (refetch) when batchSize is changed', async () => {
+    test('should request 0th batch when batchSize is changed', async () => {
       const { result, rerender } = renderHook((args) => useTimelineEvents(args), {
         initialProps: { ...props, limit: 5 },
       });

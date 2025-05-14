@@ -63,7 +63,8 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
 
 export function deserializeTemplate(
   templateEs: TemplateSerialized & { name: string },
-  cloudManagedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string,
+  isLogsdbEnabled?: boolean
 ): TemplateDeserialized {
   const {
     name,
@@ -92,7 +93,7 @@ export function deserializeTemplate(
   const ilmPolicyName = settings?.index?.lifecycle?.name;
 
   const indexMode = (settings?.index?.mode ??
-    (indexPatterns.some((pattern) => pattern === 'logs-*-*')
+    (isLogsdbEnabled && indexPatterns.some((pattern) => pattern === 'logs-*-*')
       ? LOGSDB_INDEX_MODE
       : STANDARD_INDEX_MODE)) as IndexMode;
 
@@ -168,13 +169,15 @@ export function serializeLegacyTemplate(template: TemplateDeserialized): LegacyT
 
 export function deserializeLegacyTemplate(
   templateEs: LegacyTemplateSerialized & { name: string },
-  cloudManagedTemplatePrefix?: string
+  cloudManagedTemplatePrefix?: string,
+  isLogsdbEnabled?: boolean
 ): TemplateDeserialized {
   const { settings, aliases, mappings, ...rest } = templateEs;
 
   const deserializedTemplate = deserializeTemplate(
     { ...rest, template: { aliases, settings, mappings } },
-    cloudManagedTemplatePrefix
+    cloudManagedTemplatePrefix,
+    isLogsdbEnabled
   );
 
   return {

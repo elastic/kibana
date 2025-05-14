@@ -57,7 +57,6 @@ import {
 import { defaultPaletteParams } from '../constants';
 import { ChartSplit } from './chart_split';
 import { getSplitDimensionAccessor, createSplitPoint } from '../utils/get_split_dimension_utils';
-import './index.scss';
 
 declare global {
   interface Window {

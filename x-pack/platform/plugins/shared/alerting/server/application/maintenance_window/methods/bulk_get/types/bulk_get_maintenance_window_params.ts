@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { bulkGetMaintenanceWindowsParamsSchema } from '../schemas';
+import type { TypeOf } from '@kbn/config-schema';
+import type { bulkGetMaintenanceWindowsParamsSchema } from '../schemas';
 
 export type BulkGetMaintenanceWindowsParams = TypeOf<typeof bulkGetMaintenanceWindowsParamsSchema>;

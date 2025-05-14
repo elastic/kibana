@@ -129,6 +129,7 @@ export class HttpService
     this.internalPreboot = {
       externalUrl: new ExternalUrlConfig(config.externalUrl),
       csp: prebootSetup.csp,
+      prototypeHardening: prebootSetup.prototypeHardening,
       staticAssets: prebootSetup.staticAssets,
       basePath: prebootSetup.basePath,
       registerStaticDir: prebootSetup.registerStaticDir.bind(prebootSetup),
@@ -185,6 +186,7 @@ export class HttpService
 
     this.internalSetup = {
       ...serverContract,
+      rateLimiter: config.rateLimiter,
       registerOnPostValidation: (cb) => {
         Router.on('onPostValidate', cb);
       },
@@ -302,7 +304,7 @@ export class HttpService
             mergeMap(async () => {
               try {
                 // Potentially quite expensive
-                const result = generateOpenApiDocument(
+                const result = await generateOpenApiDocument(
                   this.httpServer.getRouters({ pluginId: query.pluginId }),
                   {
                     baseUrl,

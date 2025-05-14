@@ -43,9 +43,20 @@ export const FindRulesSortFieldEnum = FindRulesSortField.enum;
 export type FindRulesRequestQuery = z.infer<typeof FindRulesRequestQuery>;
 export const FindRulesRequestQuery = z.object({
   fields: ArrayFromString(z.string()).optional(),
-  /**
-   * Search query
-   */
+  /** 
+      * Search query
+
+Filters the returned results according to the value of the specified field, using the alert.attributes.<field name>:<field value> syntax, where <field name> can be:
+- name
+- enabled
+- tags
+- createdBy
+- interval
+- updatedBy
+> info
+> Even though the JSON rule object uses created_by and updated_by fields, you must use createdBy and updatedBy fields in the filter.
+ 
+      */
   filter: z.string().optional(),
   /**
    * Field to sort by
@@ -63,6 +74,14 @@ export const FindRulesRequestQuery = z.object({
    * Rules per page
    */
   per_page: z.coerce.number().int().min(0).optional().default(20),
+  /**
+   * Gaps range start
+   */
+  gaps_range_start: z.string().optional(),
+  /**
+   * Gaps range end
+   */
+  gaps_range_end: z.string().optional(),
 });
 export type FindRulesRequestQueryInput = z.input<typeof FindRulesRequestQuery>;
 

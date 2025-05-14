@@ -14,6 +14,12 @@ export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDepen
     {
       path: '/internal/serverless_search/api_keys',
       validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
     errorHandler(logger)(async (context, request, response) => {
       const core = await context.core;
@@ -49,7 +55,14 @@ export const registerApiKeyRoutes = ({ logger, router, getSecurity }: RouteDepen
       validate: {
         body: schema.any(),
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the es client',
+        },
+      },
     },
+
     errorHandler(logger)(async (context, request, response) => {
       const security = await getSecurity();
 

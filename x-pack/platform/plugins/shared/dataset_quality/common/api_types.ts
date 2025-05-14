@@ -33,6 +33,7 @@ export const dataStreamStatRt = rt.intersection([
     lastActivity: rt.number,
     integration: rt.string,
     totalDocs: rt.number,
+    creationDate: rt.number,
   }),
 ]);
 

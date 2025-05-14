@@ -26,6 +26,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 
 import { mountHttpLogic } from '../shared/http';
 import { mountKibanaLogic, KibanaLogicProps } from '../shared/kibana';
@@ -44,7 +45,6 @@ export const mockKibanaProps: KibanaLogicProps = {
     isCloudEnabled: false,
   },
   config: {
-    host: 'http://localhost:3002',
     ui: {
       enabled: true,
     },
@@ -85,6 +85,7 @@ export const mockKibanaProps: KibanaLogicProps = {
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
   share: sharePluginMock.createStartContract(),
+  uiActions: uiActionsEnhancedPluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   updateSideNavDefinition: jest.fn(),
 };

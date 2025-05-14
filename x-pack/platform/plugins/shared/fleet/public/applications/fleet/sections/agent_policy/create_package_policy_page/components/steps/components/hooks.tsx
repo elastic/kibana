@@ -9,7 +9,8 @@ import { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../../../../../../common/constants';
-import { getAllowedOutputTypesForIntegration } from '../../../../../../../../../common/services/output_helpers';
+import type { PackagePolicy } from '../../../../../../../../../common/types';
+import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
 import { useGetOutputs, useLicense } from '../../../../../../hooks';
 
 export function useDataStreamId() {
@@ -21,11 +22,16 @@ export function useDataStreamId() {
   }, [history.location.search]);
 }
 
-export function useOutputs(packageName: string) {
+export function useOutputs(
+  packagePolicy: Pick<PackagePolicy, 'supports_agentless'>,
+  packageName: string
+) {
   const licenseService = useLicense();
-  const canUseOutputPerIntegration = licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION);
+  const canUseOutputPerIntegration =
+    licenseService.hasAtLeast(LICENCE_FOR_OUTPUT_PER_INTEGRATION) &&
+    !packagePolicy.supports_agentless;
   const { data: outputsData, isLoading } = useGetOutputs();
-  const allowedOutputTypes = getAllowedOutputTypesForIntegration(packageName);
+  const allowedOutputTypes = getAllowedOutputTypesForPackagePolicy(packagePolicy);
   const allowedOutputs = useMemo(() => {
     if (!outputsData || !canUseOutputPerIntegration) {
       return [];

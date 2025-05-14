@@ -4,25 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ExperimentalFeatures } from '../experimental_features';
+
 import { EntityType } from './types';
 
-export const getAllEntityTypes = (): EntityType[] => Object.values(EntityType);
+const ENTITY_ANALYTICS_ENTITY_TYPES = [EntityType.user, EntityType.host, EntityType.service];
 
-export const getDisabledEntityTypes = (
-  experimentalFeatures: ExperimentalFeatures
-): EntityType[] => {
-  const disabledEntityTypes: EntityType[] = [];
-  const isServiceEntityStoreEnabled = experimentalFeatures.serviceEntityStoreEnabled;
-  const isUniversalEntityStoreEnabled = experimentalFeatures.assetInventoryStoreEnabled;
+export const getEntityAnalyticsEntityTypes = (): EntityType[] => ENTITY_ANALYTICS_ENTITY_TYPES;
 
-  if (!isServiceEntityStoreEnabled) {
-    disabledEntityTypes.push(EntityType.service);
+export const getEnabledEntityTypes = (genericDefinitionEnabled: boolean): EntityType[] => {
+  const entities = Object.values(EntityType);
+
+  if (genericDefinitionEnabled) {
+    return entities;
   }
 
-  if (!isUniversalEntityStoreEnabled) {
-    disabledEntityTypes.push(EntityType.universal);
-  }
+  // Remove the index of generic
+  entities.splice(entities.indexOf(EntityType.generic), 1);
 
-  return disabledEntityTypes;
+  return entities;
 };

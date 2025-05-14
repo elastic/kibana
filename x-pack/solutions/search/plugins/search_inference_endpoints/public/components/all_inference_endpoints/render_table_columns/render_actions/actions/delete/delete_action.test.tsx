@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
 import { DeleteAction } from './delete_action';
-import { InferenceEndpointUI } from '../../../../types';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 describe('Delete Action', () => {
-  const mockProvider = {
+  const mockProvider: InferenceInferenceEndpointInfo = {
     inference_id: 'my-hugging-face',
     service: 'hugging_face',
     service_settings: {
@@ -21,39 +21,20 @@ describe('Delete Action', () => {
       url: 'https://dummy.huggingface.com',
     },
     task_settings: {},
-  } as any;
-
-  const mockItem: InferenceEndpointUI = {
-    endpoint: 'my-hugging-face',
-    provider: mockProvider,
-    type: 'text_embedding',
+    task_type: 'text_embedding',
   };
 
-  const Wrapper = ({ item }: { item: InferenceEndpointUI }) => {
+  const Wrapper = ({ item }: { item: InferenceInferenceEndpointInfo }) => {
     const queryClient = new QueryClient();
     return (
       <QueryClientProvider client={queryClient}>
-        <DeleteAction selectedEndpoint={item} />
+        <DeleteAction selectedEndpoint={item} onCancel={jest.fn()} displayModal={true} />
       </QueryClientProvider>
     );
   };
-  it('renders', () => {
-    render(<Wrapper item={mockItem} />);
-
-    expect(screen.getByTestId(/inferenceUIDeleteAction/)).toBeEnabled();
-  });
-
-  it('disable the delete action for preconfigured endpoint', () => {
-    const preconfiguredMockItem = { ...mockItem, endpoint: '.multilingual-e5-small-elasticsearch' };
-    render(<Wrapper item={preconfiguredMockItem} />);
-
-    expect(screen.getByTestId(/inferenceUIDeleteAction/)).toBeDisabled();
-  });
 
   it('loads confirm delete modal', () => {
-    render(<Wrapper item={mockItem} />);
-
-    fireEvent.click(screen.getByTestId(/inferenceUIDeleteAction/));
+    render(<Wrapper item={mockProvider} />);
     expect(screen.getByTestId('deleteModalForInferenceUI')).toBeInTheDocument();
   });
 });

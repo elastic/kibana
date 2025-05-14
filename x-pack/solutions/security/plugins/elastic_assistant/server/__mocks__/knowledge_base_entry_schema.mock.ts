@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
@@ -54,7 +54,7 @@ export const documentEntry: EsDocumentEntry = {
   namespace: 'default',
   semantic_text: 'test',
   type: 'document',
-  kb_resource: 'test',
+  kb_resource: 'user',
   required: true,
   source: 'test',
   text: 'test',
@@ -105,7 +105,7 @@ export const getCreateKnowledgeBaseEntrySchemaMock = (
       source: 'test',
       text: 'test',
       name: 'test',
-      kbResource: 'test',
+      kbResource: 'user',
       ...restProps,
     };
   }
@@ -135,7 +135,7 @@ export const getUpdateKnowledgeBaseEntrySchemaMock = (
   type: 'document',
   source: 'test',
   text: 'test',
-  kbResource: 'test',
+  kbResource: 'user',
   id: entryId,
 });
 
@@ -146,7 +146,7 @@ export const getKnowledgeBaseEntryMock = (
     type: 'document',
     text: 'test',
     source: 'test',
-    kbResource: 'test',
+    kbResource: 'user',
     required: true,
   }
 ): KnowledgeBaseEntryResponse => ({
@@ -157,6 +157,7 @@ export const getKnowledgeBaseEntryMock = (
   createdAt: '2020-04-20T15:25:31.830Z',
   updatedAt: '2020-04-20T15:25:31.830Z',
   namespace: 'default',
+  global: false,
   users: [
     {
       name: 'my_username',

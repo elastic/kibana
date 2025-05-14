@@ -32,7 +32,7 @@ export const FromCommand: React.FC = () => {
   }
 
   return (
-    <EuiPanel hasShadow={false} hasBorder style={{ maxWidth: 360 }}>
+    <EuiPanel hasShadow={false} hasBorder css={{ maxWidth: 360 }}>
       <EuiTitle size="xxs">
         <h3>Sources</h3>
       </EuiTitle>
@@ -51,7 +51,7 @@ export const FromCommand: React.FC = () => {
           color="text"
           onClick={() => {
             const length = from.args.length;
-            const source = Builder.expression.source({
+            const source = Builder.expression.source.node({
               index: `source${length + 1}`,
               sourceType: 'index',
             });

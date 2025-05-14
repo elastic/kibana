@@ -13,14 +13,14 @@ import { act } from 'react-dom/test-utils';
 import { MountPoint } from '@kbn/core/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiToolTipProps } from '@elastic/eui';
 import type { TopNavMenuBadgeProps } from './top_nav_menu_badges';
 import { unifiedSearchMock } from '../mocks';
 
 describe('TopNavMenu', () => {
-  const WRAPPER_SELECTOR = '.kbnTopNavMenu__wrapper';
-  const BADGES_GROUP_SELECTOR = '.kbnTopNavMenu__badgeGroup';
+  const WRAPPER_SELECTOR = 'TopNavMenuItems[data-test-subj="kbn-top-nav-menu-wrapper"]';
+  const BADGES_GROUP_SELECTOR = '[data-test-subj="kbn-top-nav-menu-badge-group"]';
   const TOP_NAV_ITEM_SELECTOR = 'TopNavMenuItem';
   const SEARCH_BAR_SELECTOR = 'AggregateQuerySearchBar';
   const menuItems: TopNavMenuData[] = [
@@ -121,7 +121,7 @@ describe('TopNavMenu', () => {
         className={'myCoolClass'}
       />
     );
-    expect(findTestSubject(component, 'top-nav').hasClass('kbnTopNavMenu')).toBe(true);
+    expect(component.find(WRAPPER_SELECTOR).length).toBe(1);
     expect(component.find('.myCoolClass').length).toBeTruthy();
   });
 
@@ -174,7 +174,7 @@ describe('TopNavMenu', () => {
         mountPoint(portalTarget);
       });
 
-      await refresh();
+      refresh();
 
       expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
 
@@ -197,7 +197,7 @@ describe('TopNavMenu', () => {
         mountPoint(portalTarget);
       });
 
-      await refresh();
+      refresh();
 
       expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
       expect(portalTarget.querySelector(BADGES_GROUP_SELECTOR)).toMatchSnapshot();

@@ -161,28 +161,26 @@ export async function getBeats(req: LegacyRequest, beatsIndexPattern: string, cl
       'hits.hits.inner_hits.earliest.hits.hits._source.beats_stats.metrics.libbeat.output.write.errors',
       'hits.hits.inner_hits.earliest.hits.hits._source.beat.stats.libbeat.output.write.errors',
     ],
-    body: {
-      query: createBeatsQuery({
-        start,
-        end,
-        clusterUuid,
-      }),
-      collapse: {
-        field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restarts
-        inner_hits: {
-          name: 'earliest',
-          size: 1,
-          sort: [
-            { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
-            { '@timestamp': { order: 'asc', unmapped_type: 'long' } },
-          ],
-        },
+    query: createBeatsQuery({
+      start,
+      end,
+      clusterUuid,
+    }),
+    collapse: {
+      field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restarts
+      inner_hits: {
+        name: 'earliest',
+        size: 1,
+        sort: [
+          { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
+          { '@timestamp': { order: 'asc', unmapped_type: 'long' } },
+        ],
       },
-      sort: [
-        { 'beats_stats.beat.uuid': { order: 'asc', unmapped_type: 'long' } }, // need to keep duplicate uuids grouped
-        { timestamp: { order: 'desc', unmapped_type: 'long' } }, // need oldest timestamp to come first for rate calcs to work
-      ],
     },
+    sort: [
+      { 'beats_stats.beat.uuid': { order: 'asc', unmapped_type: 'long' } }, // need to keep duplicate uuids grouped
+      { timestamp: { order: 'desc', unmapped_type: 'long' } }, // need oldest timestamp to come first for rate calcs to work
+    ],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

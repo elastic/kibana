@@ -14,6 +14,7 @@ export interface GraphState {
   anonymizedAlerts: Document[];
   combinedGenerations: string;
   combinedRefinements: string;
+  continuePrompt: string;
   end?: string | null;
   errors: string[];
   filter?: Record<string, unknown> | null;

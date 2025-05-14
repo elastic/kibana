@@ -57,7 +57,7 @@ export function SparkPlot({
       gutterSize="xs"
       responsive={false}
       alignItems="flexEnd"
-      style={flexGroupStyle}
+      css={flexGroupStyle}
     >
       <EuiFlexItem>{valueLabel}</EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -123,7 +123,7 @@ export function SparkPlotItem({
           justifyContent: 'center',
         }}
       >
-        <EuiLoadingChart mono />
+        <EuiLoadingChart />
       </div>
     );
   }

@@ -15,6 +15,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { RuleSummary, RuleType } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
@@ -69,6 +70,11 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
   const { euiTheme } = useEuiTheme();
 
   const isInitialized = useRef(false);
+
+  const ruleDurationWarningIconCss = css`
+    bottom: ${euiTheme.size.xs};
+    position: relative;
+  `;
 
   const [internalRuleSummary, setInternalRuleSummary] = useState<RuleSummary | null>(null);
   const [internalNumberOfExecutions, setInternalNumberOfExecutions] = useState(
@@ -177,11 +183,12 @@ export const RuleExecutionSummaryAndChart = (props: RuleExecutionSummaryAndChart
               }
             )}
           </EuiText>
-          <EuiFlexGroup gutterSize="xs" style={{ alignItems: 'center' }}>
+          <EuiFlexGroup gutterSize="xs" css={{ alignItems: 'center' }}>
             {showDurationWarning && (
               <EuiFlexItem grow={false} data-test-subj="ruleDurationWarning">
                 <EuiIconTip
                   anchorClassName="ruleDurationWarningIcon"
+                  css={ruleDurationWarningIconCss}
                   type="warning"
                   color="warning"
                   content={ruleTypeExcessDurationMessage}

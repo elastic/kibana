@@ -8,6 +8,7 @@
  */
 
 import React, { FC, useCallback } from 'react';
+import { css } from '@emotion/react';
 import { Chart, Bullet, BulletProps, Settings } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -38,10 +39,7 @@ import {
   computeMinMax,
 } from './utils';
 import { getGaugeIconByType } from './utils/icons';
-import './index.scss';
 import { GaugeCentralMajorMode, GaugeTicksPosition } from '../../common/types';
-
-import './gauge.scss';
 import { useGaugeSizeByType } from './utils/use_gauge_size_by_type';
 
 declare global {
@@ -366,7 +364,14 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
   };
 
   return (
-    <div className="gauge__wrapper">
+    <div
+      css={css`
+        flex: 1 1 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%; /* it is used for rendering in Canvas.*/
+      `}
+    >
       <Chart {...getOverridesFor(overrides, 'chart')}>
         <Settings
           noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
@@ -413,7 +418,16 @@ export const GaugeComponent: FC<GaugeRenderProps> = ({
           ]}
         />
       </Chart>
-      {commonLabel && <div className="gauge__label">{commonLabel}</div>}
+      {commonLabel && (
+        <div
+          css={css`
+            width: 100%;
+            text-align: center;
+          `}
+        >
+          {commonLabel}
+        </div>
+      )}
     </div>
   );
 };

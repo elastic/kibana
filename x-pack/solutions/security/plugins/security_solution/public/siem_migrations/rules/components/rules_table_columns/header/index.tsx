@@ -10,19 +10,22 @@ import React from 'react';
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 
 interface TableHeaderProps {
+  id?: string;
   title: string;
   tooltipContent?: React.ReactNode;
 }
 
-export const TableHeader: React.FC<TableHeaderProps> = React.memo(({ title, tooltipContent }) => {
-  return (
-    <EuiToolTip content={tooltipContent}>
-      <>
-        {title}
-        &nbsp;
-        <EuiIcon size="s" type="questionInCircle" color="subdued" className="eui-alignTop" />
-      </>
-    </EuiToolTip>
-  );
-});
+export const TableHeader: React.FC<TableHeaderProps> = React.memo(
+  ({ id, title, tooltipContent }) => {
+    return (
+      <EuiToolTip content={tooltipContent}>
+        <div id={id}>
+          {title}
+          &nbsp;
+          <EuiIcon size="s" type="questionInCircle" color="subdued" className="eui-alignTop" />
+        </div>
+      </EuiToolTip>
+    );
+  }
+);
 TableHeader.displayName = 'TableHeader';

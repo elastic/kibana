@@ -28,16 +28,14 @@ export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {
     size: 1,
     ignore_unavailable: true,
     filter_path: ['hits.hits._source.license'],
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
-        type: dataset,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        clusterUuid,
-        metric: ElasticsearchMetric.getMetricFields(),
-      }),
-    },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type: dataset,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      clusterUuid,
+      metric: ElasticsearchMetric.getMetricFields(),
+    }),
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

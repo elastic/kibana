@@ -170,7 +170,7 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(
       <>
         {showConfirm && (
           <ConfirmUpdate
-            endpointCount={agentSummaryData ? agentSummaryData.all : 0}
+            endpointCount={agentSummaryData ? agentSummaryData.active : 0}
             onCancel={handleSaveCancel}
             onConfirm={handleSaveConfirmation}
           />

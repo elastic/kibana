@@ -22,7 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { renderToString } from 'react-dom/server';
 import React from 'react';
-import debounce from 'lodash/debounce';
+import { debounce } from 'lodash';
 import { PreviewState, FetchDocError } from './types';
 import { BehaviorObservable } from '../../state_utils';
 import { EsDocument, ScriptErrorCodes, Params, FieldPreview } from './types';
@@ -524,10 +524,8 @@ export class PreviewController {
       .search({
         params: {
           index: this.dataView.getIndexPattern(),
-          body: {
-            fields: ['*'],
-            size: limit,
-          },
+          fields: ['*'],
+          size: limit,
         },
       })
       .toPromise()
@@ -571,13 +569,11 @@ export class PreviewController {
       .search({
         params: {
           index: this.dataView.getIndexPattern(),
-          body: {
-            size: 1,
-            fields: ['*'],
-            query: {
-              ids: {
-                values: [id],
-              },
+          size: 1,
+          fields: ['*'],
+          query: {
+            ids: {
+              values: [id],
             },
           },
         },

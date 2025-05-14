@@ -15,14 +15,12 @@ export function AsyncComponent({
   children,
   status,
   error,
-  mono,
   size,
   style,
   alignTop,
 }: AsyncState<any> & {
   style?: EuiFlexGroupProps['style'];
   children: React.ReactElement;
-  mono?: boolean;
   size: 'm' | 'l' | 'xl';
   alignTop?: boolean;
 }) {
@@ -35,17 +33,17 @@ export function AsyncComponent({
       alignItems={alignTop ? 'flexStart' : 'center'}
       justifyContent="center"
       direction="row"
-      style={style}
+      css={style}
       gutterSize="none"
     >
-      <EuiFlexItem grow={false} style={{ alignContent: 'center' }}>
+      <EuiFlexItem grow={false} css={{ alignContent: 'center' }}>
         {error && status === AsyncStatus.Settled ? (
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem>
               <EuiIcon type="warning" color="warning" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText style={{ whiteSpace: 'nowrap' }}>
+              <EuiText css={{ whiteSpace: 'nowrap' }}>
                 {i18n.translate('xpack.profiling.asyncComponent.errorLoadingData', {
                   defaultMessage: 'Could not load data',
                 })}
@@ -53,7 +51,7 @@ export function AsyncComponent({
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <EuiLoadingChart mono={mono} size={size} />
+          <EuiLoadingChart size={size} />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

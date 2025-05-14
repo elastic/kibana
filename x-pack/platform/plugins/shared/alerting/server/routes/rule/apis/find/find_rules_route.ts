@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IRouter } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   FindRulesRequestQueryV1,
   FindRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/find';
-import { findRulesRequestQuerySchemaV1 } from '../../../../../common/routes/rule/apis/find';
-import { RuleParamsV1, ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
-import { ILicenseState } from '../../../../lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
+import {
+  findRulesRequestQuerySchemaV1,
+  findRuleParamsExamplesV1,
+} from '../../../../../common/routes/rule/apis/find';
+import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
+import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+import type { ILicenseState } from '../../../../lib';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
 import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
 import { transformFindRulesBodyV1, transformFindRulesResponseV1 } from './transforms';
@@ -33,6 +38,7 @@ export const findRulesRoute = (
         access: 'public',
         summary: 'Get information about rules',
         tags: ['oas-tag:alerting'],
+        oasOperationObject: findRuleParamsExamplesV1,
       },
       validate: {
         request: {
@@ -84,7 +90,7 @@ export const findRulesRoute = (
         });
 
         const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
-          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields);
+          transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields, false);
 
         return res.ok({
           body: responseBody,

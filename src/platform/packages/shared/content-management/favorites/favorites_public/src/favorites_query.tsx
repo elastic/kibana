@@ -31,7 +31,7 @@ export const useFavorites = ({ enabled = true }: { enabled?: boolean } = { enabl
   return useQuery(
     favoritesKeys.byType(favoritesClient?.getFavoriteType() ?? 'never'),
     () => favoritesClient!.getFavorites(),
-    { enabled }
+    { enabled, staleTime: 5 * 60 * 1000 }
   );
 };
 

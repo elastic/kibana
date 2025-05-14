@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import { EuiFlexGroup, EuiText, EuiBetaBadge } from '@elastic/eui';
 import type { LanguageDocumentationSections } from '../../types';
-
-import './documentation.scss';
 
 interface DocumentationContentProps {
   searchText: string;
@@ -30,13 +30,19 @@ function DocumentationContent({
   filteredGroups,
   sections,
 }: DocumentationContentProps) {
+  const theme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(theme);
   return (
     <>
       <EuiFlexGroup
         gutterSize="none"
         responsive={false}
         direction="column"
-        className="documentation__docsText"
+        css={css`
+          padding: ${theme.euiTheme.size.base};
+          ${scrollBarStyles}
+          overflow-y: auto;
+        `}
       >
         <EuiText size="s">
           {!searchText && (
@@ -46,7 +52,6 @@ function DocumentationContent({
                   scrollTargets.current[sections.groups[0].label] = el;
                 }
               }}
-              className="documentation__docsTextIntro"
             >
               {sections?.initialSection}
             </section>
@@ -55,7 +60,11 @@ function DocumentationContent({
             return (
               <section
                 key={helpGroup.label}
-                className="documentation__docsTextGroup"
+                css={css`
+                  border-top: ${theme.euiTheme.border.thin};
+                  padding-top: ${theme.euiTheme.size.xxl};
+                  margin-top: ${theme.euiTheme.size.xxl};
+                `}
                 ref={(el) => {
                   if (el) {
                     scrollTargets.current[helpGroup.label] = el;
@@ -69,7 +78,9 @@ function DocumentationContent({
                 {filteredGroups?.[index].options.map((helpItem) => {
                   return (
                     <article
-                      className="documentation__docsTextItem"
+                      css={css`
+                        margin-top: ${theme.euiTheme.size.xxl};
+                      `}
                       key={helpItem.label}
                       ref={(el) => {
                         if (el) {
@@ -79,7 +90,9 @@ function DocumentationContent({
                     >
                       {helpItem.preview && (
                         <EuiBetaBadge
-                          className="documentation__techPreviewBadge"
+                          css={css`
+                            margin-bottom: ${theme.euiTheme.size.s};
+                          `}
                           label={i18n.translate('languageDocumentation.technicalPreviewLabel', {
                             defaultMessage: 'Technical Preview',
                           })}

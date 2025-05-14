@@ -23,26 +23,21 @@ import { SearchBarProps } from './query_builder';
 import { useTableDocs } from './use_table_docs';
 import { useFieldSidebar } from './use_field_sidebar';
 
-export function DocumentsTable({
-  dataView,
-  range,
-  name,
-  searchBarProps,
-  setRange,
-}: {
+interface Props {
   searchBarProps: SearchBarProps;
   dataView: DataView;
-  range: TimeRange;
-  setRange: (range: TimeRange) => void;
   name: FieldPath<CreateSLOForm>;
-}) {
+}
+
+export function DocumentsTable({ dataView, name, searchBarProps }: Props) {
+  const services = useKibana().services;
   const { setValue, watch } = useFormContext<CreateSLOForm>();
 
   const filter = watch(name) as QuerySchema;
 
+  const [range, setRange] = useState<TimeRange>({ from: 'now-1d', to: 'now' });
   const [sampleSize, setSampleSize] = useState(100);
   const [columns, setColumns] = useState<string[]>([]);
-  const services = useKibana().services;
   const [sizes, setSizes] = useState({
     fieldsPanel: 180,
     documentsPanel: 500,
@@ -56,6 +51,7 @@ export function DocumentsTable({
 
   const { data, loading, error } = useTableDocs({ dataView, range, sampleSize, name });
   const fieldSideBar = useFieldSidebar({ dataView, columns, setColumns });
+
   return (
     <>
       <QuerySearchBar {...searchBarProps} range={range} setRange={setRange} isFlyoutOpen={true} />
@@ -66,7 +62,7 @@ export function DocumentsTable({
         </>
       )}
       <EuiResizableContainer
-        style={{ height: 'calc(100vh - 300px)' }}
+        css={{ height: 'calc(100vh - 300px)' }}
         onPanelWidthChange={onPanelWidthChange}
       >
         {(EuiResizablePanel, EuiResizableButton) => (
@@ -76,7 +72,7 @@ export function DocumentsTable({
               size={sizes.fieldsPanel}
               minSize="10%"
               tabIndex={0}
-              style={{
+              css={{
                 paddingLeft: 0,
                 paddingRight: 0,
               }}

@@ -87,33 +87,31 @@ export function getLatestStats(req: LegacyRequest, beatsIndexPattern: string, cl
     size: 0,
     ignore_unavailable: true,
     filter_path: 'aggregations',
-    body: {
-      query: createBeatsQuery({
-        clusterUuid,
-        filters: [lastDayFilter],
-      }),
-      aggs: {
-        active_counts: {
-          date_range: {
-            field: 'timestamp',
-            ranges: [
-              { key: 'last1m', from: 'now-1m/m', to: 'now' },
-              { key: 'last5m', from: 'now-5m/m', to: 'now' },
-              { key: 'last20m', from: 'now-20m/m', to: 'now' },
-              { key: 'last1h', from: 'now-1h/h', to: 'now' },
-              { key: 'last1d', from: 'now-1d/d', to: 'now' },
-            ],
-          },
-          ...beatUuidAgg,
+    query: createBeatsQuery({
+      clusterUuid,
+      filters: [lastDayFilter],
+    }),
+    aggs: {
+      active_counts: {
+        date_range: {
+          field: 'timestamp',
+          ranges: [
+            { key: 'last1m', from: 'now-1m/m', to: 'now' },
+            { key: 'last5m', from: 'now-5m/m', to: 'now' },
+            { key: 'last20m', from: 'now-20m/m', to: 'now' },
+            { key: 'last1h', from: 'now-1h/h', to: 'now' },
+            { key: 'last1d', from: 'now-1d/d', to: 'now' },
+          ],
         },
-        versions: {
-          terms: { field: 'beats_stats.beat.version', size: 5 },
-          ...beatUuidAgg,
-        },
-        types: {
-          terms: { field: 'beats_stats.beat.type', size: 5 },
-          ...beatUuidAgg,
-        },
+        ...beatUuidAgg,
+      },
+      versions: {
+        terms: { field: 'beats_stats.beat.version', size: 5 },
+        ...beatUuidAgg,
+      },
+      types: {
+        terms: { field: 'beats_stats.beat.type', size: 5 },
+        ...beatUuidAgg,
       },
     },
   };

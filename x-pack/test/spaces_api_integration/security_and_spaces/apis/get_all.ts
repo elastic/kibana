@@ -21,7 +21,8 @@ export default function getAllSpacesTestSuite(context: FtrProviderContext) {
   // @ts-expect-error getAllTestSuiteFactory expects only DeploymentAgnosticFtrProviderContext
   const { getAllTest, expectRbacForbidden } = getAllTestSuiteFactory(context);
 
-  describe('get all', () => {
+  describe('get all', function () {
+    this.tags('skipFIPS');
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,

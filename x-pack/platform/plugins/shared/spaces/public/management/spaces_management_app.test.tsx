@@ -126,7 +126,7 @@ describe('spacesManagementApp', () => {
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+          class="css-qvyf25-redirectAppLinksStyles"
           data-test-subj="kbnRedirectAppLink"
         >
           Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"serverBasePath":"","history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"maxSpaces":1000,"allowSolutionVisibility":true,"isServerless":false}
@@ -153,7 +153,7 @@ describe('spacesManagementApp', () => {
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+          class="css-qvyf25-redirectAppLinksStyles"
           data-test-subj="kbnRedirectAppLink"
         >
           Spaces Create Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true,"eventTracker":{"analytics":{}}}
@@ -186,10 +186,10 @@ describe('spacesManagementApp', () => {
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+          class="css-qvyf25-redirectAppLinksStyles"
           data-test-subj="kbnRedirectAppLink"
         >
-          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"serverBasePath":"","http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"overlays":{"banners":{}},"notifications":{"toasts":{}},"userProfile":{},"theme":{"theme$":{}},"i18n":{},"logger":{"context":[]},"spacesManager":{"onActiveSpaceChange$":{}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true}
+          Spaces Edit Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"serverBasePath":"","http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"overlays":{"banners":{}},"notifications":{"toasts":{}},"userProfile":{},"theme":{"theme$":{}},"i18n":{},"logger":{"context":[]},"spacesManager":{"onActiveSpaceChange$":{}},"spaceId":"some-space","history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/some-space","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true,"enableSecurityLink":"https://www.elastic.co/docs/deploy-manage/security/set-up-minimal-security#_enable_es_security_features"}
         </div>
       </div>
     `);

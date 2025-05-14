@@ -34,27 +34,25 @@ export const buildRelatedUsersQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      aggregations: {
-        user_count: { cardinality: { field: 'user.name' } },
-        user_data: {
-          terms: {
-            field: 'user.name',
-            size: 1000,
-          },
-          aggs: {
-            ip: {
-              terms: {
-                field: 'host.ip',
-                size: 10,
-              },
+    aggregations: {
+      user_count: { cardinality: { field: 'user.name' } },
+      user_data: {
+        terms: {
+          field: 'user.name',
+          size: 1000,
+        },
+        aggs: {
+          ip: {
+            terms: {
+              field: 'host.ip',
+              size: 10,
             },
           },
         },
       },
-      query: { bool: { filter } },
-      size: 0,
     },
+    query: { bool: { filter } },
+    size: 0,
   };
 
   return dslQuery;

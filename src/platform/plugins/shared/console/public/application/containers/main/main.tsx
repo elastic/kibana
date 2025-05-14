@@ -311,6 +311,7 @@ export function Main({ currentTabProp, isEmbeddable = false }: MainProps) {
         <EuiSplitPanel.Inner
           paddingSize="none"
           css={[scrollablePanelStyle, { backgroundColor: euiTheme.colors.body }]}
+          data-test-subj="consolePanel"
         >
           {currentTab === SHELL_TAB_ID && (
             <Editor

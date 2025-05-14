@@ -33,7 +33,7 @@ export const ChartWrapper: FC<PropsWithChildren<Props>> = ({
 
   return (
     <EuiErrorBoundary>
-      <div
+      <figure
         style={{
           height,
           opacity,
@@ -42,12 +42,12 @@ export const ChartWrapper: FC<PropsWithChildren<Props>> = ({
         {...(rest as HTMLAttributes<HTMLDivElement>)}
       >
         {children}
-      </div>
+      </figure>
       {loading === true && (
         <EuiFlexGroup
           justifyContent="spaceAround"
           alignItems="center"
-          style={{ height, marginTop: `-${height}`, marginBottom: 0 }}
+          css={{ height, marginTop: `-${height}`, marginBottom: 0 }}
         >
           <EuiFlexItem grow={false}>
             <EuiLoadingChart size="xl" />

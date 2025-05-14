@@ -72,7 +72,7 @@ export const IngestionCard: React.FC<IngestionCardProps> = ({
         </>
       }
       description={
-        <EuiText color="subdued" size="s">
+        <EuiText color="subdued" size="s" component="span">
           {description}
         </EuiText>
       }

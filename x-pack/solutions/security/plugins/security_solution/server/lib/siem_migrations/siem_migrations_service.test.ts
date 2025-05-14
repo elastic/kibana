@@ -42,17 +42,17 @@ describe('SiemMigrationsService', () => {
     jest.clearAllMocks();
   });
 
-  describe('with siemMigrationsEnabled flag', () => {
+  describe('with experimental flag enabled', () => {
     beforeEach(() => {
       siemMigrationsService = new SiemMigrationsService(
-        { experimentalFeatures: { siemMigrationsEnabled: true } } as ConfigType,
+        { experimentalFeatures: { siemMigrationsDisabled: false } } as ConfigType,
         logger,
         kibanaVersion
       );
     });
 
     it('should instantiate the rule migrations service', async () => {
-      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion);
+      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion, undefined);
     });
 
     describe('when setup is called', () => {
@@ -90,17 +90,17 @@ describe('SiemMigrationsService', () => {
     });
   });
 
-  describe('without siemMigrationsEnabled flag', () => {
+  describe('without experimental flag disabled', () => {
     beforeEach(() => {
       siemMigrationsService = new SiemMigrationsService(
-        { experimentalFeatures: { siemMigrationsEnabled: false } } as ConfigType,
+        { experimentalFeatures: { siemMigrationsDisabled: true } } as ConfigType,
         logger,
         kibanaVersion
       );
     });
 
     it('should instantiate the rule migrations service', async () => {
-      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion);
+      expect(MockSiemRuleMigrationsService).toHaveBeenCalledWith(logger, kibanaVersion, undefined);
     });
 
     describe('when setup is called', () => {

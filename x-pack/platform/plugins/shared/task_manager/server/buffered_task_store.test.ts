@@ -9,7 +9,7 @@ import { taskStoreMock } from './task_store.mock';
 import { BufferedTaskStore } from './buffered_task_store';
 import { asErr, asOk } from './lib/result_type';
 import { taskManagerMock } from './mocks';
-import { TaskStatus } from './task';
+import type { TaskStatus } from './task';
 
 describe('Buffered Task Store', () => {
   describe('remove', () => {
@@ -374,6 +374,27 @@ describe('Buffered Task Store', () => {
       `);
       expect(await results[2]).toMatchObject(partialTasks[2]);
       expect(await results[3]).toMatchObject(partialTasks[3]);
+    });
+
+    test(`updates the stateVersion`, async () => {
+      const taskStore = taskStoreMock.create({ stateVersion: 2 });
+      const bufferedStore = new BufferedTaskStore(taskStore, {});
+
+      const task = taskManagerMock.createTask();
+      const partialTask = {
+        id: task.id,
+        version: task.version,
+        status: 'running' as TaskStatus,
+      };
+
+      taskStore.bulkPartialUpdate.mockResolvedValue([asOk(partialTask)]);
+
+      expect(
+        await bufferedStore.partialUpdate(partialTask, { validate: false, doc: task })
+      ).toMatchObject(partialTask);
+      expect(taskStore.bulkPartialUpdate).toHaveBeenCalledWith([
+        { ...partialTask, stateVersion: 2 },
+      ]);
     });
   });
 });

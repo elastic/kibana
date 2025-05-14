@@ -8,11 +8,10 @@
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { renderHook } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-
-import { createAppMockRenderer } from '../../common/mock';
+import { TestProviders } from '../../common/mock';
 import { useCasesColumnsSelection } from './use_cases_columns_selection';
 import { useCasesColumnsConfiguration } from './use_cases_columns_configuration';
+import React from 'react';
 
 jest.mock('./use_cases_columns_configuration');
 
@@ -38,14 +37,11 @@ const casesColumnsConfig = {
 };
 
 describe('useCasesColumnsSelection ', () => {
-  let appMockRender: AppMockRenderer;
   const license = licensingMock.createLicense({
     license: { type: 'platinum' },
   });
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer({ license });
-
     useCasesColumnsConfigurationMock.mockReturnValue(casesColumnsConfig);
 
     localStorage.clear();
@@ -57,7 +53,7 @@ describe('useCasesColumnsSelection ', () => {
 
   it('returns the expected selectedColumns when the localstorage is empty', async () => {
     const { result } = renderHook(() => useCasesColumnsSelection(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} license={license} />,
     });
 
     expect(result.current).toMatchInlineSnapshot(`
@@ -96,7 +92,7 @@ describe('useCasesColumnsSelection ', () => {
     localStorage.setItem(localStorageKey, JSON.stringify(selectedColumns));
 
     const { result } = renderHook(() => useCasesColumnsSelection(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} license={license} />,
     });
 
     expect(result.current).toMatchInlineSnapshot(`

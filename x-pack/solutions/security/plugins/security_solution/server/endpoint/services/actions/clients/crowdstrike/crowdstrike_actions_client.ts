@@ -10,13 +10,14 @@ import {
   SUB_ACTION,
   CROWDSTRIKE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   CrowdstrikeBaseApiResponse,
   CrowdStrikeExecuteRTRResponse,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { v4 as uuidv4 } from 'uuid';
 
+import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
 import { mapParametersToCrowdStrikeArguments } from './utils';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
@@ -49,6 +50,8 @@ import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
+import { catchAndWrapError } from '../../../../utils';
+import { buildIndexNameWithNamespace } from '../../../../../../common/endpoint/utils/index_name_utilities';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -62,6 +65,132 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     super(options);
     this.connectorActionsClient = connectorActions;
     connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
+  }
+
+  /**
+   * Returns a list of all indexes for Crowdstrike data supported for response actions
+   * @private
+   */
+  private async fetchIndexNames(): Promise<string[]> {
+    const cachedInfo = this.cache.get<string[]>('fetchIndexNames');
+
+    if (cachedInfo) {
+      this.log.debug(
+        `Returning cached response with list of index names:\n${stringify(cachedInfo)}`
+      );
+      return cachedInfo;
+    }
+
+    const integrationNames = Object.keys(CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION);
+    const fleetServices = this.options.endpointService.getInternalFleetServices(
+      this.options.spaceId
+    );
+    const indexNamespaces = await fleetServices.getIntegrationNamespaces(integrationNames);
+    const indexNames: string[] = [];
+
+    for (const [integrationName, namespaces] of Object.entries(indexNamespaces)) {
+      if (namespaces.length > 0) {
+        const indexPatterns =
+          CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION[
+            integrationName as keyof typeof CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION
+          ];
+
+        for (const indexPattern of indexPatterns) {
+          indexNames.push(
+            ...namespaces.map((namespace) => buildIndexNameWithNamespace(indexPattern, namespace))
+          );
+        }
+      }
+    }
+
+    this.cache.set('fetchIndexNames', indexNames);
+    this.log.debug(() => `Crowdstrike indexes with namespace:\n${stringify(indexNames)}`);
+
+    return indexNames;
+  }
+
+  protected async fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    const cacheKey = `fetchAgentPolicyInfo:${agentIds.sort().join('#')}`;
+    const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached agent policy info. found - returning it:\n${stringify(cacheResponse)}`
+      );
+      return cacheResponse;
+    }
+
+    const esClient = this.options.esClient;
+    const esSearchRequest: SearchRequest = {
+      index: await this.fetchIndexNames(),
+      query: { bool: { filter: [{ terms: { 'device.id': agentIds } }] } },
+      collapse: {
+        field: 'device.id',
+        inner_hits: {
+          name: 'most_recent',
+          size: 1,
+          _source: ['agent', 'device.id', 'event.created'],
+          sort: [{ 'event.created': 'desc' }],
+        },
+      },
+      _source: false,
+      ignore_unavailable: true,
+    };
+
+    if (!esSearchRequest.index || esSearchRequest.index.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to build list of indexes while retrieving policy information for Crowdstrike agents [${agentIds.join(
+          ', '
+        )}]. Check to ensure at least one integration policy exists.`,
+        400
+      );
+    }
+
+    this.log.debug(() => `Searching for agents with:\n${stringify(esSearchRequest)}`);
+
+    // Get the latest ingested document for each agent ID
+    const crowdstrikeEsResults = await esClient.search(esSearchRequest).catch(catchAndWrapError);
+
+    this.log.debug(() => `Records found:\n${stringify(crowdstrikeEsResults, 20)}`);
+
+    const agentIdsFound: string[] = [];
+    const fleetAgentIdToCrowdstrikeAgentIdMap: Record<string, string> =
+      crowdstrikeEsResults.hits.hits.reduce((acc, esDoc) => {
+        const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
+
+        if (doc) {
+          agentIdsFound.push(doc.device.id);
+          acc[doc.agent.id] = doc.device.id;
+        }
+
+        return acc;
+      }, {} as Record<string, string>);
+    const elasticAgentIds = Object.keys(fleetAgentIdToCrowdstrikeAgentIdMap);
+
+    if (elasticAgentIds.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to find elastic agent IDs for Crowdstrike agent ids: [${agentIds.join(', ')}]`,
+        400
+      );
+    }
+
+    // ensure all agent ids were found
+    for (const agentId of agentIds) {
+      if (!agentIdsFound.includes(agentId)) {
+        throw new ResponseActionsClientError(`Crowdstrike agent id [${agentId}] not found`, 404);
+      }
+    }
+
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds, ['crowdstrike']);
+
+    for (const agentInfo of agentPolicyInfo) {
+      agentInfo.agentId = fleetAgentIdToCrowdstrikeAgentIdMap[agentInfo.elasticAgentId];
+    }
+
+    this.cache.set(cacheKey, agentPolicyInfo);
+    return agentPolicyInfo;
   }
 
   protected async writeActionRequestToEndpointIndex<
@@ -137,11 +266,9 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       index: ['logs-crowdstrike*'],
       size: 1,
       _source: ['host.hostname', 'host.name'],
-      body: {
-        query: {
-          bool: {
-            filter: [{ term: { 'device.id': agentId } }],
-          },
+      query: {
+        bool: {
+          filter: [{ term: { 'device.id': agentId } }],
         },
       },
     };

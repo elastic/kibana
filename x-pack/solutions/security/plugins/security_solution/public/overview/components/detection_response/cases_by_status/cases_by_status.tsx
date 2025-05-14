@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import type { AxisStyle, Rotation } from '@elastic/charts';
 import { ScaleType } from '@elastic/charts';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { FormattedNumber } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { BarChart } from '../../../../common/components/charts/barchart';
@@ -110,14 +110,14 @@ const CasesByStatusComponent: React.FC = () => {
   const barColors = useMemo(
     () => ({
       empty: euiTheme.colors.vis.euiColorVis8,
-      open: euiTheme.colors.primary,
-      'in-progress': euiTheme.colors.warning,
+      open: euiTheme.colors.success,
+      'in-progress': euiTheme.colors.primary,
       closed: euiTheme.colors.borderBaseSubdued,
     }),
     [
       euiTheme.colors.vis.euiColorVis8,
       euiTheme.colors.primary,
-      euiTheme.colors.warning,
+      euiTheme.colors.success,
       euiTheme.colors.borderBaseSubdued,
     ]
   );

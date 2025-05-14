@@ -240,7 +240,7 @@ export const ADD_ACTION_HEADER = i18n.translate(
   }
 );
 
-export const ADD_ACTION_OPTIONAL_TEXT = i18n.translate(
+export const OPTIONAL_LABEL = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleActions.addActionOptionalText',
   {
     defaultMessage: 'Optional',
@@ -564,7 +564,7 @@ export const CONFIRM_RULE_SAVE_MESSAGE_TEXT = i18n.translate(
 export const RULE_FORM_PAGE_RULE_DEFINITION_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinitionTitle',
   {
-    defaultMessage: 'Rule definition',
+    defaultMessage: 'Definition',
   }
 );
 
@@ -599,7 +599,7 @@ export const RULE_FORM_PAGE_RULE_ACTIONS_NO_PERMISSION_DESCRIPTION = i18n.transl
 export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDetailsTitle',
   {
-    defaultMessage: 'Rule details',
+    defaultMessage: 'Details',
   }
 );
 
@@ -638,7 +638,7 @@ export const RULE_FORM_CANCEL_MODAL_CONFIRM = i18n.translate(
 export const RULE_FORM_CANCEL_MODAL_CANCEL = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleFormCancelModalCancel',
   {
-    defaultMessage: 'Cancel',
+    defaultMessage: 'Keep editing',
   }
 );
 
@@ -793,3 +793,9 @@ export const SHOW_REQUEST_MODAL_ERROR = i18n.translate(
     defaultMessage: 'Sorry about that, something went wrong.',
   }
 );
+
+export const DEFAULT_RULE_NAME = (ruleTypeName: string) =>
+  i18n.translate('responseOpsRuleForm.ruleForm.defaultRuleName', {
+    defaultMessage: `{ruleTypeName} rule`,
+    values: { ruleTypeName },
+  });

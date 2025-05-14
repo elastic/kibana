@@ -11,7 +11,7 @@
         "label": "useUnsavedChangesPrompt",
         "description": [],
         "signature": [
-          "({ hasUnsavedChanges, openConfirm, history, http, navigateToUrl, messageText, titleText, confirmButtonText, cancelButtonText, }: Props) => void"
+          "(props: Props) => void"
         ],
         "path": "src/platform/packages/shared/kbn-unsaved-changes-prompt/src/unsaved_changes_prompt/unsaved_changes_prompt.tsx",
         "deprecated": false,
@@ -20,9 +20,9 @@
           {
             "parentPluginId": "@kbn/unsaved-changes-prompt",
             "id": "def-public.useUnsavedChangesPrompt.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{\n  hasUnsavedChanges,\n  openConfirm,\n  history,\n  http,\n  navigateToUrl,\n  // Provide overrides for confirm dialog\n  messageText = DEFAULT_BODY_TEXT,\n  titleText = DEFAULT_TITLE_TEXT,\n  confirmButtonText = DEFAULT_CONFIRM_BUTTON,\n  cancelButtonText = DEFAULT_CANCEL_BUTTON,\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "Props"

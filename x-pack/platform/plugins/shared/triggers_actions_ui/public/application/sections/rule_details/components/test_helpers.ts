@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Rule, RuleSummary, RuleType } from '../../../../types';
+import type { Rule, RuleSummary, RuleType } from '../../../../types';
 
 export const getMockLogResponse = () => {
   return {
@@ -80,6 +80,7 @@ export function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
     category: 'my-category',
+    isExportable: true,
     ...overloads,
   };
 }

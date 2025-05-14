@@ -7,7 +7,8 @@
 
 import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -19,21 +20,22 @@ import {
 } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
-import { SharePluginStart } from '@kbn/share-plugin/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { TaskRunnerContext } from './types';
+import type { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const backfillClient = backfillClientMock.create();
@@ -65,6 +67,7 @@ const ruleType: UntypedNormalizedRuleType = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   validate: {
     params: schema.any(),
   },
@@ -128,6 +131,7 @@ describe('Task Runner Factory', () => {
     uiSettings: uiSettingsService,
     usageCounter: mockUsageCounter,
     isServerless: false,
+    getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
   };
 
   beforeEach(() => {

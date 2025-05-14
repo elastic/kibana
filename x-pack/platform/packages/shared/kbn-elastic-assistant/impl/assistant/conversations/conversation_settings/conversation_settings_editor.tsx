@@ -6,12 +6,11 @@
  */
 
 import { EuiFormRow, EuiLink } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
-import { noop } from 'lodash/fp';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
@@ -31,7 +30,7 @@ export interface ConversationSettingsEditorProps {
   conversationsSettingsBulkActions: ConversationsBulkActions;
   http: HttpSetup;
   isDisabled?: boolean;
-  selectedConversation?: Conversation;
+  selectedConversation: Conversation;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
@@ -44,220 +43,159 @@ export interface ConversationSettingsEditorProps {
 export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProps> = React.memo(
   ({
     allSystemPrompts,
-    conversationSettings,
     conversationsSettingsBulkActions,
     http,
     isDisabled = false,
     selectedConversation,
-    setConversationSettings,
     setConversationsSettingsBulkActions,
   }) => {
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
       http,
     });
+    const [conversationUpdates, setConversationUpdates] =
+      useState<Conversation>(selectedConversation);
+    useEffect(() => {
+      if (selectedConversation?.id !== conversationUpdates?.id) {
+        setConversationUpdates(selectedConversation);
+      }
+    }, [conversationUpdates?.id, selectedConversation]);
     const selectedSystemPrompt = useMemo(() => {
-      return getDefaultSystemPrompt({ allSystemPrompts, conversation: selectedConversation });
-    }, [allSystemPrompts, selectedConversation]);
+      return getDefaultSystemPrompt({ allSystemPrompts, conversation: conversationUpdates });
+    }, [allSystemPrompts, conversationUpdates]);
     const handleOnSystemPromptSelectionChange = useCallback(
       (systemPromptId?: string | undefined) => {
-        if (selectedConversation != null && selectedConversation.apiConfig) {
+        if (conversationUpdates != null && conversationUpdates.apiConfig) {
+          const newSystemPromptId =
+            conversationUpdates.apiConfig.defaultSystemPromptId === systemPromptId
+              ? undefined
+              : systemPromptId;
           const updatedConversation = {
-            ...selectedConversation,
+            ...conversationUpdates,
             apiConfig: {
-              ...selectedConversation.apiConfig,
-              defaultSystemPromptId: systemPromptId,
+              ...conversationUpdates.apiConfig,
+              defaultSystemPromptId: newSystemPromptId,
             },
           };
-          setConversationSettings({
-            ...conversationSettings,
-            [updatedConversation.id || updatedConversation.title]: updatedConversation,
-          });
-          if (selectedConversation.id !== '') {
-            setConversationsSettingsBulkActions({
-              ...conversationsSettingsBulkActions,
-              update: {
-                ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.id]: {
-                  ...updatedConversation,
-                  ...(conversationsSettingsBulkActions.update
+          setConversationUpdates(updatedConversation);
+          setConversationsSettingsBulkActions({
+            ...conversationsSettingsBulkActions,
+            update: {
+              ...(conversationsSettingsBulkActions.update ?? {}),
+              [updatedConversation.id]: {
+                ...(conversationsSettingsBulkActions.update
+                  ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                  : {}),
+                apiConfig: {
+                  ...updatedConversation.apiConfig,
+                  ...((conversationsSettingsBulkActions.update
                     ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
-                    : {}),
-                  apiConfig: {
-                    ...updatedConversation.apiConfig,
-                    ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
-                      : {}
-                    ).apiConfig ?? {}),
-                    defaultSystemPromptId: systemPromptId,
-                  },
+                    : {}
+                  ).apiConfig ?? {}),
+                  defaultSystemPromptId: newSystemPromptId,
                 },
               },
-            });
-          } else {
-            const createdConversation = {
-              ...conversationsSettingsBulkActions,
-              create: {
-                ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.title]: updatedConversation,
-              },
-            };
-            setConversationsSettingsBulkActions(createdConversation);
-          }
+            },
+          });
         }
       },
-      [
-        conversationSettings,
-        conversationsSettingsBulkActions,
-        selectedConversation,
-        setConversationSettings,
-        setConversationsSettingsBulkActions,
-      ]
+      [conversationsSettingsBulkActions, conversationUpdates, setConversationsSettingsBulkActions]
     );
 
     const selectedConnector = useMemo(() => {
-      const selectedConnectorId: string | undefined = selectedConversation?.apiConfig?.connectorId;
+      const selectedConnectorId: string | undefined = conversationUpdates?.apiConfig?.connectorId;
       if (areConnectorsFetched) {
         return connectors?.find((c) => c.id === selectedConnectorId);
       }
       return undefined;
-    }, [areConnectorsFetched, connectors, selectedConversation?.apiConfig?.connectorId]);
+    }, [areConnectorsFetched, connectors, conversationUpdates?.apiConfig?.connectorId]);
 
     const selectedProvider = useMemo(
-      () => selectedConversation?.apiConfig?.provider,
-      [selectedConversation?.apiConfig?.provider]
+      () => conversationUpdates?.apiConfig?.provider,
+      [conversationUpdates?.apiConfig?.provider]
     );
 
-    const selectedConversationId = useMemo(
-      () =>
-        selectedConversation?.id === ''
-          ? selectedConversation.title
-          : (selectedConversation?.id as string),
-      [selectedConversation]
-    );
     const handleOnConnectorSelectionChange = useCallback(
       (connector: AIConnector) => {
-        if (selectedConversation != null) {
+        if (conversationUpdates != null) {
           const config = getGenAiConfig(connector);
           const updatedConversation = {
-            ...selectedConversation,
+            ...conversationUpdates,
             apiConfig: {
-              ...selectedConversation.apiConfig,
+              ...conversationUpdates.apiConfig,
               connectorId: connector.id,
               actionTypeId: connector.actionTypeId,
               provider: config?.apiProvider,
               model: config?.defaultModel,
             },
           };
-          setConversationSettings({
-            ...conversationSettings,
-            [selectedConversationId]: updatedConversation,
-          });
-          if (selectedConversation.id !== '') {
-            setConversationsSettingsBulkActions({
-              ...conversationsSettingsBulkActions,
-              update: {
-                ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.id || updatedConversation.title]: {
-                  ...updatedConversation,
-                  ...(conversationsSettingsBulkActions.update
+          setConversationUpdates(updatedConversation);
+
+          setConversationsSettingsBulkActions({
+            ...conversationsSettingsBulkActions,
+            update: {
+              ...(conversationsSettingsBulkActions.update ?? {}),
+              [updatedConversation.id]: {
+                ...(conversationsSettingsBulkActions.update
+                  ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                  : {}),
+                apiConfig: {
+                  ...updatedConversation.apiConfig,
+                  ...((conversationsSettingsBulkActions.update
                     ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
-                    : {}),
-                  apiConfig: {
-                    ...updatedConversation.apiConfig,
-                    ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
-                      : {}
-                    ).apiConfig ?? {}),
-                    connectorId: connector?.id,
-                    actionTypeId: connector?.actionTypeId,
-                    provider: config?.apiProvider,
-                    model: config?.defaultModel,
-                  },
+                    : {}
+                  ).apiConfig ?? {}),
+                  connectorId: connector?.id,
+                  actionTypeId: connector?.actionTypeId,
+                  provider: config?.apiProvider,
+                  model: config?.defaultModel,
                 },
               },
-            });
-          } else {
-            const createdConversation = {
-              ...conversationsSettingsBulkActions,
-              create: {
-                ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.title || updatedConversation.id]: updatedConversation,
-              },
-            };
-            setConversationsSettingsBulkActions(createdConversation);
-          }
+            },
+          });
         }
       },
-      [
-        conversationSettings,
-        conversationsSettingsBulkActions,
-        selectedConversation,
-        selectedConversationId,
-        setConversationSettings,
-        setConversationsSettingsBulkActions,
-      ]
+      [conversationsSettingsBulkActions, conversationUpdates, setConversationsSettingsBulkActions]
     );
 
     const selectedModel = useMemo(() => {
       const connectorModel = getGenAiConfig(selectedConnector)?.defaultModel;
       // Prefer conversation configuration over connector default
-      return selectedConversation?.apiConfig?.model ?? connectorModel;
-    }, [selectedConnector, selectedConversation?.apiConfig?.model]);
+      return conversationUpdates?.apiConfig?.model ?? connectorModel;
+    }, [selectedConnector, conversationUpdates?.apiConfig?.model]);
 
     const handleOnModelSelectionChange = useCallback(
       (model?: string) => {
-        if (selectedConversation != null && selectedConversation.apiConfig) {
+        if (conversationUpdates != null && conversationUpdates.apiConfig) {
           const updatedConversation = {
-            ...selectedConversation,
+            ...conversationUpdates,
             apiConfig: {
-              ...selectedConversation.apiConfig,
+              ...conversationUpdates.apiConfig,
               model,
             },
           };
-          setConversationSettings({
-            ...conversationSettings,
-            [updatedConversation.id || updatedConversation.title]: updatedConversation,
-          });
-          if (selectedConversation.id !== '') {
-            setConversationsSettingsBulkActions({
-              ...conversationsSettingsBulkActions,
-              update: {
-                ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.id]: {
-                  ...updatedConversation,
-                  ...(conversationsSettingsBulkActions.update
+          setConversationUpdates(updatedConversation);
+          setConversationsSettingsBulkActions({
+            ...conversationsSettingsBulkActions,
+            update: {
+              ...(conversationsSettingsBulkActions.update ?? {}),
+              [updatedConversation.id]: {
+                ...(conversationsSettingsBulkActions.update
+                  ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                  : {}),
+                apiConfig: {
+                  ...updatedConversation.apiConfig,
+                  ...((conversationsSettingsBulkActions.update
                     ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
-                    : {}),
-                  apiConfig: {
-                    ...updatedConversation.apiConfig,
-                    ...((conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
-                      : {}
-                    ).apiConfig ?? {}),
-                    model,
-                  },
+                    : {}
+                  ).apiConfig ?? {}),
+                  model,
                 },
               },
-            });
-          } else {
-            const createdConversation = {
-              ...conversationsSettingsBulkActions,
-              create: {
-                ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.id || updatedConversation.title]: updatedConversation,
-              },
-            };
-            setConversationsSettingsBulkActions(createdConversation);
-          }
+            },
+          });
         }
       },
-      [
-        conversationSettings,
-        conversationsSettingsBulkActions,
-        selectedConversation,
-        setConversationSettings,
-        setConversationsSettingsBulkActions,
-      ]
+      [conversationsSettingsBulkActions, conversationUpdates, setConversationsSettingsBulkActions]
     );
     return (
       <>
@@ -275,7 +213,6 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             isSettingsModalVisible={true}
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
-            setIsSettingsModalVisible={noop} // noop, already in settings
           />
         </EuiFormRow>
 

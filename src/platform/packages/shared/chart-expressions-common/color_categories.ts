@@ -8,46 +8,46 @@
  */
 
 import { DatatableRow } from '@kbn/expressions-plugin/common';
-import { isMultiFieldKey } from '@kbn/data-plugin/common';
+import { RawValue, SerializedValue, serializeField } from '@kbn/data-plugin/common';
+import { getValueKey } from '@kbn/coloring';
 
 /**
- * Get the stringified version of all the categories that needs to be colored in the chart.
- * Multifield keys will return as array of string and simple fields (numeric, string) will be returned as a plain unformatted string.
+ * Returns all serialized categories of the dataset for color matching.
+ * All non-serializable fields will be as a plain unformatted string.
+ *
+ * Note: This does **NOT** support transposed columns
  */
 export function getColorCategories(
-  rows: DatatableRow[],
+  rows: DatatableRow[] = [],
   accessor?: string,
-  isTransposed?: boolean,
-  exclude?: any[]
-): Array<string | string[]> {
-  const ids = isTransposed
-    ? Object.keys(rows[0]).filter((key) => accessor && key.endsWith(accessor))
-    : accessor
-    ? [accessor]
-    : [];
+  exclude?: RawValue[],
+  legacyMode: boolean = false // stringifies raw values
+): SerializedValue[] {
+  if (!accessor) return [];
 
-  return rows
-    .flatMap((r) =>
-      ids
-        .map((id) => r[id])
-        .filter((v) => !(v === undefined || exclude?.includes(v)))
-        .map((v) => {
-          // The categories needs to be stringified in their unformatted version.
-          // We can't distinguish between a number and a string from a text input and the match should
-          // work with both numeric field values and string values.
-          const key = (isMultiFieldKey(v) ? v.keys : [v]).map(String);
-          const stringifiedKeys = key.join(',');
-          return { key, stringifiedKeys };
-        })
-    )
-    .reduce<{ keys: Set<string>; categories: Array<string | string[]> }>(
-      (acc, { key, stringifiedKeys }) => {
-        if (!acc.keys.has(stringifiedKeys)) {
-          acc.keys.add(stringifiedKeys);
-          acc.categories.push(key.length === 1 ? key[0] : key);
-        }
-        return acc;
-      },
-      { keys: new Set(), categories: [] }
-    ).categories;
+  const seen = new Set<unknown>();
+  return rows.reduce<SerializedValue[]>((acc, row) => {
+    const hasValue = Object.hasOwn(row, accessor);
+    const rawValue: RawValue = row[accessor];
+    const key = getValueKey(rawValue);
+    if (hasValue && !exclude?.includes(rawValue) && !seen.has(key)) {
+      const value = serializeField(rawValue);
+      seen.add(key);
+      acc.push(legacyMode ? key : value);
+    }
+    return acc;
+  }, []);
+}
+
+/**
+ * Returns all *stringified* categories of the dataset for color matching.
+ *
+ * Should **only** be used with legacy `palettes`
+ */
+export function getLegacyColorCategories(
+  rows?: DatatableRow[],
+  accessor?: string,
+  exclude?: RawValue[]
+): string[] {
+  return getColorCategories(rows, accessor, exclude, true).map(String);
 }

@@ -9,7 +9,7 @@
 
 import fastIsEqual from 'fast-deep-equal';
 import { pick, omit } from 'lodash';
-import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
+import { EmbeddableInput } from './i_embeddable';
 
 // list out the keys from the EmbeddableInput type to allow lodash to pick them later
 const allGenericInputKeys: Readonly<Array<keyof EmbeddableInput>> = [

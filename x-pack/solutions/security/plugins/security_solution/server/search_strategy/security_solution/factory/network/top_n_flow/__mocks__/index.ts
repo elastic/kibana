@@ -872,83 +872,81 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
             'winlogbeat-*',
           ],
           ignore_unavailable: true,
-          body: {
-            aggregations: {
-              source: {
-                terms: { field: 'source.ip', size: 10, order: { bytes_out: 'desc' } },
-                aggs: {
-                  bytes_in: { sum: { field: 'destination.bytes' } },
-                  bytes_out: { sum: { field: 'source.bytes' } },
-                  domain: {
-                    terms: { field: 'source.domain', order: { timestamp: 'desc' } },
-                    aggs: { timestamp: { max: { field: '@timestamp' } } },
-                  },
-                  location: {
-                    filter: { exists: { field: 'source.geo' } },
-                    aggs: {
-                      top_geo: {
-                        top_hits: {
-                          _source: false,
-                          fields: [
-                            'source.geo.*',
-                            {
-                              field: '@timestamp',
-                              format: 'strict_date_optional_time',
-                            },
-                          ],
-                          size: 1,
-                        },
-                      },
-                    },
-                  },
-                  autonomous_system: {
-                    filter: { exists: { field: 'source.as' } },
-                    aggs: {
-                      top_as: {
-                        top_hits: {
-                          _source: false,
-                          fields: [
-                            'source.as.*',
-                            {
-                              field: '@timestamp',
-                              format: 'strict_date_optional_time',
-                            },
-                          ],
-                          size: 1,
-                        },
-                      },
-                    },
-                  },
-                  flows: { cardinality: { field: 'network.community_id' } },
-                  destination_ips: { cardinality: { field: 'destination.ip' } },
+          aggregations: {
+            source: {
+              terms: { field: 'source.ip', size: 10, order: { bytes_out: 'desc' } },
+              aggs: {
+                bytes_in: { sum: { field: 'destination.bytes' } },
+                bytes_out: { sum: { field: 'source.bytes' } },
+                domain: {
+                  terms: { field: 'source.domain', order: { timestamp: 'desc' } },
+                  aggs: { timestamp: { max: { field: '@timestamp' } } },
                 },
-              },
-            },
-            query: {
-              bool: {
-                filter: [
-                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: '2020-09-13T10:16:46.870Z',
-                        lte: '2020-09-14T10:16:46.870Z',
-                        format: 'strict_date_optional_time',
+                location: {
+                  filter: { exists: { field: 'source.geo' } },
+                  aggs: {
+                    top_geo: {
+                      top_hits: {
+                        _source: false,
+                        fields: [
+                          'source.geo.*',
+                          {
+                            field: '@timestamp',
+                            format: 'strict_date_optional_time',
+                          },
+                        ],
+                        size: 1,
                       },
                     },
                   },
-                ],
+                },
+                autonomous_system: {
+                  filter: { exists: { field: 'source.as' } },
+                  aggs: {
+                    top_as: {
+                      top_hits: {
+                        _source: false,
+                        fields: [
+                          'source.as.*',
+                          {
+                            field: '@timestamp',
+                            format: 'strict_date_optional_time',
+                          },
+                        ],
+                        size: 1,
+                      },
+                    },
+                  },
+                },
+                flows: { cardinality: { field: 'network.community_id' } },
+                destination_ips: { cardinality: { field: 'destination.ip' } },
               },
             },
-            _source: false,
-            fields: [
-              {
-                field: '@timestamp',
-                format: 'strict_date_optional_time',
-              },
-            ],
-            size: 0,
           },
+          query: {
+            bool: {
+              filter: [
+                { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: '2020-09-13T10:16:46.870Z',
+                      lte: '2020-09-14T10:16:46.870Z',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          _source: false,
+          fields: [
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+          size: 0,
           track_total_hits: false,
         },
         null,
@@ -976,29 +974,27 @@ export const formattedCountStrategyResponse: NetworkTopNFlowCountStrategyRespons
             'winlogbeat-*',
           ],
           ignore_unavailable: true,
-          body: {
-            aggregations: {
-              top_n_flow_count: { cardinality: { field: 'source.ip' } },
-            },
-            query: {
-              bool: {
-                filter: [
-                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: '2020-09-13T10:16:46.870Z',
-                        lte: '2020-09-14T10:16:46.870Z',
-                        format: 'strict_date_optional_time',
-                      },
+          aggregations: {
+            top_n_flow_count: { cardinality: { field: 'source.ip' } },
+          },
+          query: {
+            bool: {
+              filter: [
+                { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: '2020-09-13T10:16:46.870Z',
+                      lte: '2020-09-14T10:16:46.870Z',
+                      format: 'strict_date_optional_time',
                     },
                   },
-                ],
-              },
+                },
+              ],
             },
-            _source: false,
-            size: 0,
           },
+          _source: false,
+          size: 0,
           track_total_hits: false,
         },
         null,
@@ -1023,83 +1019,81 @@ export const expectedDsl = {
     'winlogbeat-*',
   ],
   ignore_unavailable: true,
-  body: {
-    aggregations: {
-      source: {
-        terms: { field: 'source.ip', size: 10, order: { bytes_out: 'desc' } },
-        aggs: {
-          bytes_in: { sum: { field: 'destination.bytes' } },
-          bytes_out: { sum: { field: 'source.bytes' } },
-          domain: {
-            terms: { field: 'source.domain', order: { timestamp: 'desc' } },
-            aggs: { timestamp: { max: { field: '@timestamp' } } },
-          },
-          location: {
-            filter: { exists: { field: 'source.geo' } },
-            aggs: {
-              top_geo: {
-                top_hits: {
-                  _source: false,
-                  fields: [
-                    'source.geo.*',
-                    {
-                      field: '@timestamp',
-                      format: 'strict_date_optional_time',
-                    },
-                  ],
-                  size: 1,
-                },
-              },
-            },
-          },
-          autonomous_system: {
-            filter: { exists: { field: 'source.as' } },
-            aggs: {
-              top_as: {
-                top_hits: {
-                  _source: false,
-                  fields: [
-                    'source.as.*',
-                    {
-                      field: '@timestamp',
-                      format: 'strict_date_optional_time',
-                    },
-                  ],
-                  size: 1,
-                },
-              },
-            },
-          },
-          flows: { cardinality: { field: 'network.community_id' } },
-          destination_ips: { cardinality: { field: 'destination.ip' } },
+  aggregations: {
+    source: {
+      terms: { field: 'source.ip', size: 10, order: { bytes_out: 'desc' } },
+      aggs: {
+        bytes_in: { sum: { field: 'destination.bytes' } },
+        bytes_out: { sum: { field: 'source.bytes' } },
+        domain: {
+          terms: { field: 'source.domain', order: { timestamp: 'desc' } },
+          aggs: { timestamp: { max: { field: '@timestamp' } } },
         },
-      },
-    },
-    query: {
-      bool: {
-        filter: [
-          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-          {
-            range: {
-              '@timestamp': {
-                gte: '2020-09-13T10:16:46.870Z',
-                lte: '2020-09-14T10:16:46.870Z',
-                format: 'strict_date_optional_time',
+        location: {
+          filter: { exists: { field: 'source.geo' } },
+          aggs: {
+            top_geo: {
+              top_hits: {
+                _source: false,
+                fields: [
+                  'source.geo.*',
+                  {
+                    field: '@timestamp',
+                    format: 'strict_date_optional_time',
+                  },
+                ],
+                size: 1,
               },
             },
           },
-        ],
+        },
+        autonomous_system: {
+          filter: { exists: { field: 'source.as' } },
+          aggs: {
+            top_as: {
+              top_hits: {
+                _source: false,
+                fields: [
+                  'source.as.*',
+                  {
+                    field: '@timestamp',
+                    format: 'strict_date_optional_time',
+                  },
+                ],
+                size: 1,
+              },
+            },
+          },
+        },
+        flows: { cardinality: { field: 'network.community_id' } },
+        destination_ips: { cardinality: { field: 'destination.ip' } },
       },
     },
-    _source: false,
-    fields: [
-      {
-        field: '@timestamp',
-        format: 'strict_date_optional_time',
-      },
-    ],
-    size: 0,
   },
+  query: {
+    bool: {
+      filter: [
+        { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+        {
+          range: {
+            '@timestamp': {
+              gte: '2020-09-13T10:16:46.870Z',
+              lte: '2020-09-14T10:16:46.870Z',
+              format: 'strict_date_optional_time',
+            },
+          },
+        },
+      ],
+    },
+  },
+  _source: false,
+  fields: [
+    {
+      field: '@timestamp',
+      format: 'strict_date_optional_time',
+    },
+  ],
+  size: 0,
   track_total_hits: false,
 };
 
@@ -1116,28 +1110,26 @@ export const expectedCountDsl = {
     'winlogbeat-*',
   ],
   ignore_unavailable: true,
-  body: {
-    aggregations: {
-      top_n_flow_count: { cardinality: { field: 'source.ip' } },
-    },
-    query: {
-      bool: {
-        filter: [
-          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-          {
-            range: {
-              '@timestamp': {
-                gte: '2020-09-13T10:16:46.870Z',
-                lte: '2020-09-14T10:16:46.870Z',
-                format: 'strict_date_optional_time',
-              },
+  aggregations: {
+    top_n_flow_count: { cardinality: { field: 'source.ip' } },
+  },
+  query: {
+    bool: {
+      filter: [
+        { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+        {
+          range: {
+            '@timestamp': {
+              gte: '2020-09-13T10:16:46.870Z',
+              lte: '2020-09-14T10:16:46.870Z',
+              format: 'strict_date_optional_time',
             },
           },
-        ],
-      },
+        },
+      ],
     },
-    _source: false,
-    size: 0,
   },
+  _source: false,
+  size: 0,
   track_total_hits: false,
 };

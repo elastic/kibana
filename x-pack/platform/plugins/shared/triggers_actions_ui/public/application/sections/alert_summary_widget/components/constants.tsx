@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { euiPaletteColorBlind } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -14,9 +13,6 @@ export const ALERT_COUNT_FORMAT = '0.[00]a';
 
 export const ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ = 'activeAlertCount';
 export const TOTAL_ALERT_COUNT_DATA_TEST_SUBJ = 'totalAlertCount';
-
-const visColors = euiPaletteColorBlind();
-export const ALL_ALERT_COLOR = visColors[1];
 
 export const WIDGET_TITLE = (
   <FormattedMessage

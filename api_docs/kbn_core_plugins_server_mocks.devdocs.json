@@ -22,7 +22,7 @@
         "tags": [],
         "label": "pluginServiceMock",
         "description": [],
-        "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+        "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -36,7 +36,7 @@
             "signature": [
               "() => PluginsServiceMock"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +54,7 @@
               "PluginsServiceSetup",
               ">"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -72,7 +72,7 @@
               "PluginsServiceStart",
               ">"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -89,7 +89,7 @@
               "() => ",
               "InternalPluginsServiceSetup"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -106,7 +106,7 @@
               "() => ",
               "InternalPluginsServiceStart"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -122,7 +122,7 @@
             "signature": [
               "() => { browserConfigs: Map<any, any>; internal: Map<any, any>; public: Map<any, any>; }"
             ],
-            "path": "packages/core/plugins/core-plugins-server-mocks/src/plugins_service.mock.ts",
+            "path": "src/core/packages/plugins/server-mocks/src/plugins_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

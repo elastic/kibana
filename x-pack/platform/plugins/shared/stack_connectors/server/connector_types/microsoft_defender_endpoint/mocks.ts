@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import { ConnectorToken } from '@kbn/actions-plugin/server/types';
-import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
-import {
+import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
+import type { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
+import type {
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointMachine,
   MicrosoftDefenderEndpointMachineAction,
@@ -20,14 +20,12 @@ import {
 } from '../../../common/microsoft_defender_endpoint/types';
 import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '../../../common/microsoft_defender_endpoint/constants';
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
-import {
-  ConnectorInstanceMock,
-  createAxiosResponseMock,
-  createConnectorInstanceMock,
-} from '../lib/mocks';
+import type { ConnectorInstanceMock } from '../lib/mocks';
+import { createAxiosResponseMock, createConnectorInstanceMock } from '../lib/mocks';
 
 export interface CreateMicrosoftDefenderConnectorMockResponse {
   options: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   apiMock: { [msApiRoute: string]: (...args: any) => any | Promise<any> };
   instanceMock: ConnectorInstanceMock<MicrosoftDefenderEndpointConnector>;
   usageCollector: ConnectorUsageCollector;

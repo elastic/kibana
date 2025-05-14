@@ -1,0 +1,156 @@
+- input: aws-cloudwatch
+  template_path: aws-cloudwatch.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: log_group_arn
+      type: text
+      title: Log Group ARN
+      multi: false
+      required: false
+      show_user: true
+      description: ARN of the log group to collect logs from.
+    - name: start_position
+      type: text
+      title: Start Position
+      multi: false
+      required: false
+      default: beginning
+      show_user: true
+      description: Allows user to specify if this input should read log files from the beginning or from the end.
+    - name: log_group_name
+      type: text
+      title: Log Group Name
+      multi: false
+      required: false
+      show_user: false
+      description: Name of the log group to collect logs from. `region_name` is required when `log_group_name` is given.
+    - name: log_group_name_prefix
+      type: text
+      title: Log Group Name Prefix
+      multi: false
+      required: false
+      show_user: false
+      description: The prefix for a group of log group names. `region_name` is required when `log_group_name_prefix` is given. `log_group_name` and `log_group_name_prefix` cannot be given at the same time.
+    - name: region_name
+      type: text
+      title: Region Name
+      multi: false
+      required: false
+      show_user: false
+      description: Region that the specified log group or log group prefix belongs to.
+    - name: log_streams
+      type: text
+      title: Log Streams
+      multi: true
+      required: false
+      show_user: false
+      description: A list of strings of log streams names that Filebeat collect log events from.
+    - name: log_stream_prefix
+      type: text
+      title: Log Stream Prefix
+      multi: false
+      required: false
+      show_user: false
+      description: A string to filter the results to include only log events from log streams that have names starting with this prefix.
+    - name: scan_frequency
+      type: text
+      title: Scan Frequency
+      multi: false
+      required: false
+      show_user: false
+      default: 1m
+      description: This config parameter sets how often Filebeat checks for new log events from the specified log group.
+    - name: api_timeout
+      type: text
+      title: API Timeout
+      multi: false
+      required: false
+      show_user: false
+      default: 120s
+      description: The maximum duration of AWS API can take. If it exceeds the timeout, AWS API will be interrupted.
+    - name: api_sleep
+      type: text
+      title: API Sleep
+      multi: false
+      required: false
+      show_user: false
+      default: 200ms
+      description: This is used to sleep between AWS FilterLogEvents API calls inside the same collection period. `FilterLogEvents` API has a quota of 5 transactions per second (TPS)/account/Region. This value should only be adjusted when there are multiple Filebeats or multiple Filebeat inputs collecting logs from the same region and AWS account.
+    - name: latency
+      type: text
+      title: Latency
+      multi: false
+      required: false
+      show_user: false
+      description: "The amount of time required for the logs to be available to CloudWatch Logs. Sample values, `1m` or `5m` — see Golang [time.ParseDuration](https://pkg.go.dev/time#ParseDuration) for more details. Latency translates the query's time range to consider the CloudWatch Logs latency. Example: `5m` means that the integration will query CloudWatch to search for logs available 5 minutes ago."
+    - name: number_of_workers
+      type: integer
+      title: Number of workers
+      required: false
+      show_user: false
+      description: >-
+        The number of workers assigned to reading from log groups. Each worker will read log events from one of the log groups matching `log_group_name_prefix`. For example, if `log_group_name_prefix` matches five log groups, then `number_of_workers` should be set to `5`. The default value is `1`.
+    - name: credential_profile_name
+      type: text
+      title: Credential Profile Name
+      multi: false
+      required: false
+      show_user: false
+    - name: shared_credential_file
+      type: text
+      title: Shared Credential File
+      multi: false
+      required: false
+      show_user: false
+      description: Directory of the shared credentials file
+    - name: default_region
+      type: text
+      title: Default AWS Region
+      multi: false
+      required: false
+      show_user: false
+      default: ""
+      description: >-
+        Default region to use prior to connecting to region specific services/endpoints if no AWS region is set from environment variable, credentials or instance profile. If none of the above are set and no default region is set as well, `us-east-1` is used. A region, either from environment variable, credentials or instance profile or from this default region setting, needs to be set when using regions in non-regular AWS environments such as AWS China or US Government Isolated.
+    - name: access_key_id
+      type: password
+      title: Access Key ID
+      multi: false
+      required: false
+      show_user: true
+      description: First part of access key.
+      secret: true
+    - name: secret_access_key
+      type: password
+      title: Secret Access Key
+      multi: false
+      required: false
+      show_user: true
+      description: Second part of access key.
+      secret: true
+    - name: session_token
+      type: password
+      title: Session Token
+      multi: false
+      required: false
+      show_user: true
+      description: Required when using temporary security credentials.
+      secret: true
+    - name: role_arn
+      type: text
+      title: Role ARN
+      multi: false
+      required: false
+      show_user: false
+      description: AWS IAM Role to assume.
+    - name: proxy_url
+      type: text
+      title: Proxy URL
+      multi: false
+      required: false
+      show_user: false
+      description: >-
+        URL to proxy connections in the form of http[s]://<user>:<password>@<server name/ip>:<port>. Please ensure your username and password are in URL encoded format.

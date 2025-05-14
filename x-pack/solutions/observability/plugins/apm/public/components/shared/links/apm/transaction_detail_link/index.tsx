@@ -7,74 +7,21 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { identity, pickBy } from 'lodash';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { pickKeys } from '../../../../../../common/utils/pick_keys';
-import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { unit } from '../../../../../utils/style';
 import { PopoverTooltip } from '../../../popover_tooltip';
-import { getComparisonEnabled } from '../../../time_comparison/get_comparison_enabled';
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
-import type { APMQueryParams } from '../../url_helpers';
-import type { APMLinkExtendProps } from '../apm_link';
-import { getLegacyApmHref } from '../apm_link';
+import type { APMLinkExtendProps } from '../apm_link_hooks';
 import { MaxGroupsMessage } from '../max_groups_message';
 
 export const txGroupsDroppedBucketName = '_other';
 
 interface Props extends APMLinkExtendProps {
-  serviceName: string;
-  traceId?: string;
-  transactionId?: string;
   transactionName: string;
-  transactionType?: string;
-  latencyAggregationType?: string;
-  environment?: string;
-  comparisonEnabled?: boolean;
-  offset?: string;
-  overflowCount?: number;
+  href: string;
 }
 
-const persistedFilters: Array<keyof APMQueryParams> = ['transactionResult', 'serviceVersion'];
-
-export function TransactionDetailLink({
-  serviceName,
-  traceId,
-  transactionId,
-  transactionName,
-  transactionType,
-  latencyAggregationType,
-  environment,
-  comparisonEnabled,
-  offset = '1d',
-  overflowCount = 0,
-  ...rest
-}: Props) {
-  const { urlParams } = useLegacyUrlParams();
-  const { core } = useApmPluginContext();
-  const defaultComparisonEnabled = getComparisonEnabled({
-    core,
-    urlComparisonEnabled: comparisonEnabled,
-  });
-  const location = useLocation();
-  const href = getLegacyApmHref({
-    basePath: core.http.basePath,
-    path: `/services/${serviceName}/transactions/view`,
-    query: {
-      traceId,
-      transactionId,
-      transactionName,
-      transactionType,
-      comparisonEnabled: defaultComparisonEnabled,
-      offset,
-      ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
-      ...pickBy({ latencyAggregationType, environment }, identity),
-    },
-    search: location.search,
-  });
-
+export function TransactionDetailLink({ transactionName, href, ...rest }: Props) {
   if (transactionName !== txGroupsDroppedBucketName) {
     return (
       <TruncateWithTooltip
@@ -86,7 +33,7 @@ export function TransactionDetailLink({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem grow={false} style={{ fontStyle: 'italic' }}>
+      <EuiFlexItem grow={false} css={{ fontStyle: 'italic' }}>
         {i18n.translate('xpack.apm.transactionDetail.remainingServices', {
           defaultMessage: 'Remaining Transactions',
         })}
@@ -98,7 +45,7 @@ export function TransactionDetailLink({
           })}
           iconType="warning"
         >
-          <EuiText style={{ width: `${unit * 28}px` }} size="s">
+          <EuiText css={{ width: `${unit * 28}px` }} size="s">
             <MaxGroupsMessage />
           </EuiText>
         </PopoverTooltip>

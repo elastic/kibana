@@ -88,7 +88,7 @@ export function getColumns({
           <TruncateWithTooltip
             text={name}
             content={
-              <ErrorDetailLink serviceName={serviceName} errorGroupId={errorGroupId}>
+              <ErrorDetailLink serviceName={serviceName} errorGroupId={errorGroupId} query={query}>
                 {name}
               </ErrorDetailLink>
             }

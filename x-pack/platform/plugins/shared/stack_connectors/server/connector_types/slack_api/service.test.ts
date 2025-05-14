@@ -7,11 +7,11 @@
 
 import axios from 'axios';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { createExternalService } from './service';
-import { SlackApiService } from '../../../common/slack_api/types';
+import type { SlackApiService } from '../../../common/slack_api/types';
 import { SLACK_API_CONNECTOR_ID } from '../../../common/slack_api/constants';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 

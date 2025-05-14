@@ -69,6 +69,10 @@ export interface SchemaValidationOptions {
  */
 export type OptionsForUnknowns = 'allow' | 'ignore' | 'forbid';
 
+export interface UnknownOptions {
+  unknowns?: OptionsForUnknowns;
+}
+
 export interface ExtendsDeepOptions {
   unknowns?: OptionsForUnknowns;
 }

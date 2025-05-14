@@ -9,7 +9,7 @@
 
 import React, { FC, ComponentType } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiEmptyPrompt, EuiForm, IconType } from '@elastic/eui';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 
 import {
   IconCircle,
@@ -211,7 +211,7 @@ function RootComponent(props: RootComponentProps) {
       {props.icons.map((i) => (
         <EuiFlexItem>
           <EuiEmptyPrompt
-            style={{ minWidth: '250px' }}
+            css={{ minWidth: '250px' }}
             hasBorder={true}
             hasShadow={true}
             iconType={i.Component as IconType}
@@ -224,10 +224,12 @@ function RootComponent(props: RootComponentProps) {
   );
 }
 
-const Template: ComponentStory<FC<RootComponentProps>> = (args) => <RootComponent {...args} />;
+const Template: StoryFn<FC<RootComponentProps>> = (args) => <RootComponent {...args} />;
 
-export const Default = Template.bind({});
+export const Default = {
+  render: Template,
 
-Default.args = {
-  icons: IconsArray,
+  args: {
+    icons: IconsArray,
+  },
 };

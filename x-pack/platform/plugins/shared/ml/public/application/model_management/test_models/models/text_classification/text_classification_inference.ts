@@ -14,6 +14,7 @@ import type { TextClassificationResponse, RawTextClassificationResponse } from '
 import { getGeneralInputComponent } from '../text_input';
 import { getTextClassificationOutputComponent } from './text_classification_output';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 export class TextClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
@@ -31,9 +32,10 @@ export class TextClassificationInference extends InferenceBase<TextClassificatio
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    telemetryClient: ITelemetryClient
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, telemetryClient);
 
     this.initialize();
   }

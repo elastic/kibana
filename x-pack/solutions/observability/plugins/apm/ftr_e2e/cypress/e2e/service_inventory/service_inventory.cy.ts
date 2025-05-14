@@ -36,7 +36,9 @@ const mainApiRequestsToIntercept = [
 
 const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
-describe('Service inventory', () => {
+// Failing: See https://github.com/elastic/kibana/issues/219711
+// Failing: See https://github.com/elastic/kibana/issues/219712
+describe.skip('Service Inventory', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
     synthtrace.index(

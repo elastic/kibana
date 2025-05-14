@@ -10,10 +10,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const LinksStrings = {
-  getDescription: () =>
-    i18n.translate('links.description', {
-      defaultMessage: 'Use links to navigate to commonly used dashboards and websites.',
-    }),
   embeddable: {
     getUnsupportedLinkTypeError: () =>
       i18n.translate('links.embeddable.unsupportedLinkTypeError', {

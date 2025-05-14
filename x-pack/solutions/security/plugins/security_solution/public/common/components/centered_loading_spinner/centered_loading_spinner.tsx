@@ -24,7 +24,13 @@ export const CenteredLoadingSpinner = React.memo<CenteredLoadingSpinnerProps>(
       [topOffset, euiTheme]
     );
 
-    return <EuiLoadingSpinner {...euiLoadingSpinnerProps} style={style} />;
+    return (
+      <EuiLoadingSpinner
+        data-test-subj="centeredLoadingSpinner"
+        {...euiLoadingSpinnerProps}
+        css={style}
+      />
+    );
   }
 );
 CenteredLoadingSpinner.displayName = 'CenteredLoadingSpinner';

@@ -31,8 +31,8 @@ export const ResultDetails = ({
 }) => {
   return (
     <div>
-      <EuiText className="eui-textNoWrap" size="s">
-        <StatusBadge status={parseBadgeStatus(pingStatus)} />{' '}
+      <StatusBadge status={parseBadgeStatus(pingStatus)} />
+      <EuiText size="s">
         {!testNowMode
           ? i18n.translate('xpack.synthetics.step.duration.label', {
               defaultMessage: 'after {value}',
@@ -98,7 +98,7 @@ export const TimingDetails = ({ step }: { step: JourneyStep }) => {
       compressed={true}
       type="column"
       listItems={items}
-      style={{ maxWidth: 265 }}
+      css={{ maxWidth: 265 }}
       textStyle="reverse"
       descriptionProps={{ style: { textAlign: 'right' } }}
     />
@@ -131,7 +131,7 @@ export const StepMetrics = ({ step }: { step: JourneyStep }) => {
       compressed={true}
       type="column"
       listItems={items}
-      style={{ maxWidth: 265 }}
+      css={{ maxWidth: 265 }}
       textStyle="reverse"
       descriptionProps={{ style: { textAlign: 'right' } }}
     />

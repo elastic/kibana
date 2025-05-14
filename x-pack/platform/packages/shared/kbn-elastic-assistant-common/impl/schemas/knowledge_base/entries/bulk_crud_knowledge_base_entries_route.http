@@ -1,5 +1,5 @@
 ### Empty Bulk Action
-POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries/_bulk_action
+POST http://{{host}}:{{port}}{{basePath}}/api/security_ai_assistant/knowledge_base/entries/_bulk_action
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}

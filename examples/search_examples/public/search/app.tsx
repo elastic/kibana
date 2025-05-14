@@ -181,13 +181,15 @@ export const SearchExamplesApp = ({
     const aggs = [{ type: metricAggType, params: { field: selectedNumericField!.name } }];
     const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl();
 
+    const body = {
+      aggs: aggsDsl,
+      query,
+    };
+
     const req = {
       params: {
         index: dataView.title,
-        body: {
-          aggs: aggsDsl,
-          query,
-        },
+        ...body,
       },
       // Add a custom request parameter to be consumed by `MyStrategy`.
       ...(strategy ? { get_cool: getCool } : {}),
@@ -197,7 +199,7 @@ export const SearchExamplesApp = ({
     setAbortController(abortController);
 
     // Submit the search request using the `data.search` service.
-    setRequest(req.params.body);
+    setRequest(body);
     setRawResponse({});
     setWarningContents([]);
     setIsLoading(true);
@@ -813,7 +815,7 @@ export const SearchExamplesApp = ({
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem style={{ width: '60%' }}>
+          <EuiFlexItem css={{ width: '60%' }}>
             <EuiTabbedContent
               tabs={reqTabs}
               selectedTab={reqTabs[selectedTab]}

@@ -6,7 +6,6 @@
  */
 
 import { getChatParams } from './get_chat_params';
-import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
 import {
   OPENAI_CONNECTOR_ID,
   BEDROCK_CONNECTOR_ID,
@@ -14,8 +13,10 @@ import {
   INFERENCE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 
 jest.mock('@kbn/langchain/server', () => {
   const original = jest.requireActual('@kbn/langchain/server');
@@ -43,11 +44,15 @@ describe('getChatParams', () => {
     getActionsClientWithRequest: jest.fn(() => Promise.resolve(mockActionsClient)),
   } as unknown as ActionsPluginStartContract;
 
-  const logger = jest.fn() as unknown as Logger;
-  const request = jest.fn() as unknown as KibanaRequest;
+  let logger: MockedLogger;
+  let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+  let inference: ReturnType<typeof inferenceMock.createStartContract>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    logger = loggerMock.create();
+    request = httpServerMock.createKibanaRequest();
+    inference = inferenceMock.createStartContract();
   });
 
   it('returns the correct chat model and prompt for OPENAI_CONNECTOR_ID', async () => {
@@ -60,7 +65,7 @@ describe('getChatParams', () => {
         prompt: 'Hello, world!',
         citations: true,
       },
-      { actions, request, logger }
+      { actions, request, logger, inference }
     );
     expect(Prompt).toHaveBeenCalledWith('Hello, world!', {
       citations: true,
@@ -70,7 +75,14 @@ describe('getChatParams', () => {
     expect(QuestionRewritePrompt).toHaveBeenCalledWith({
       type: 'openai',
     });
-    expect(ActionsClientChatOpenAI).toHaveBeenCalledWith(expect.anything());
+    expect(inference.getChatModel).toHaveBeenCalledWith({
+      request,
+      connectorId: '1',
+      chatModelOptions: expect.objectContaining({
+        model: 'text-davinci-003',
+        maxRetries: 0,
+      }),
+    });
     expect(result.chatPrompt).toContain('Hello, world!');
   });
 
@@ -84,7 +96,7 @@ describe('getChatParams', () => {
         prompt: 'Hello, world!',
         citations: true,
       },
-      { actions, request, logger }
+      { actions, request, logger, inference }
     );
     expect(Prompt).toHaveBeenCalledWith('Hello, world!', {
       citations: true,
@@ -94,14 +106,14 @@ describe('getChatParams', () => {
     expect(QuestionRewritePrompt).toHaveBeenCalledWith({
       type: 'gemini',
     });
-    expect(ActionsClientSimpleChatModel).toHaveBeenCalledWith({
-      temperature: 0,
-      llmType: 'gemini',
-      logger: expect.anything(),
-      model: 'gemini-1.5-pro',
+    expect(inference.getChatModel).toHaveBeenCalledWith({
+      request,
       connectorId: '1',
-      actionsClient: expect.anything(),
-      streaming: true,
+      chatModelOptions: expect.objectContaining({
+        model: 'gemini-1.5-pro',
+        temperature: 0,
+        maxRetries: 0,
+      }),
     });
     expect(result.chatPrompt).toContain('Hello, world!');
   });
@@ -116,7 +128,7 @@ describe('getChatParams', () => {
         prompt: 'How does it work?',
         citations: false,
       },
-      { actions, request, logger }
+      { actions, request, logger, inference }
     );
 
     expect(Prompt).toHaveBeenCalledWith('How does it work?', {
@@ -127,19 +139,19 @@ describe('getChatParams', () => {
     expect(QuestionRewritePrompt).toHaveBeenCalledWith({
       type: 'anthropic',
     });
-    expect(ActionsClientSimpleChatModel).toHaveBeenCalledWith({
-      temperature: 0,
-      llmType: 'bedrock',
-      logger: expect.anything(),
-      model: 'custom-model',
+    expect(inference.getChatModel).toHaveBeenCalledWith({
+      request,
       connectorId: '2',
-      actionsClient: expect.anything(),
-      streaming: true,
+      chatModelOptions: expect.objectContaining({
+        model: 'custom-model',
+        temperature: 0,
+        maxRetries: 0,
+      }),
     });
     expect(result.chatPrompt).toContain('How does it work?');
   });
 
-  it('throws an error for invalid connector id', async () => {
+  it('throws an error for invalid connector type', async () => {
     mockActionsClient.get.mockResolvedValue({ id: '3', actionTypeId: 'unknown' });
 
     await expect(
@@ -149,9 +161,9 @@ describe('getChatParams', () => {
           prompt: 'This should fail.',
           citations: false,
         },
-        { actions, request, logger }
+        { actions, request, logger, inference }
       )
-    ).rejects.toThrow('Invalid connector id');
+    ).rejects.toThrow('Invalid connector type: unknown');
   });
 
   it('returns the correct chat model and uses the default model when not specified in the params', async () => {
@@ -167,7 +179,7 @@ describe('getChatParams', () => {
         prompt: 'How does it work?',
         citations: false,
       },
-      { actions, request, logger }
+      { actions, request, logger, inference }
     );
 
     expect(Prompt).toHaveBeenCalledWith('How does it work?', {
@@ -178,15 +190,14 @@ describe('getChatParams', () => {
     expect(QuestionRewritePrompt).toHaveBeenCalledWith({
       type: 'openai',
     });
-    expect(ActionsClientChatOpenAI).toHaveBeenCalledWith({
-      logger: expect.anything(),
-      model: 'local',
+    expect(inference.getChatModel).toHaveBeenCalledWith({
+      request,
       connectorId: '2',
-      actionsClient: expect.anything(),
-      signal: expect.anything(),
-      traceId: 'test-uuid',
-      temperature: 0.2,
-      maxRetries: 0,
+      chatModelOptions: expect.objectContaining({
+        model: 'local',
+        temperature: 0.2,
+        maxRetries: 0,
+      }),
     });
     expect(result.chatPrompt).toContain('How does it work?');
   });
@@ -204,7 +215,7 @@ describe('getChatParams', () => {
         prompt: 'How does it work?',
         citations: false,
       },
-      { actions, request, logger }
+      { actions, request, logger, inference }
     );
 
     expect(Prompt).toHaveBeenCalledWith('How does it work?', {
@@ -215,14 +226,13 @@ describe('getChatParams', () => {
     expect(QuestionRewritePrompt).toHaveBeenCalledWith({
       type: 'openai',
     });
-    expect(ActionsClientChatOpenAI).toHaveBeenCalledWith({
-      logger: expect.anything(),
-      model: 'local',
+    expect(inference.getChatModel).toHaveBeenCalledWith({
+      request,
       connectorId: '2',
-      actionsClient: expect.anything(),
-      temperature: 0.2,
-      maxRetries: 0,
-      llmType: 'inference',
+      chatModelOptions: expect.objectContaining({
+        model: 'local',
+        maxRetries: 0,
+      }),
     });
     expect(result.chatPrompt).toContain('How does it work?');
   });

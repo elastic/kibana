@@ -16,7 +16,7 @@ import {
   AlertUtils,
   getEventLog,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { TEST_CACHE_EXPIRATION_TIME } from '../create_test_data';
 
 // eslint-disable-next-line import/no-default-export

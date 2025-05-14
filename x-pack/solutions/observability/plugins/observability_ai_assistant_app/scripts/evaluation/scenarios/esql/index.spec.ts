@@ -72,9 +72,6 @@ describe('ES|QL query generation', () => {
               },
             },
           },
-          settings: {
-            'index.mapping.semantic_text.use_legacy_format': false,
-          },
         });
 
         await esClient.index({
@@ -127,9 +124,6 @@ describe('ES|QL query generation', () => {
                 type: 'integer',
               },
             },
-          },
-          settings: {
-            'index.mapping.semantic_text.use_legacy_format': false,
           },
         });
 

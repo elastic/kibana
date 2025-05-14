@@ -7,23 +7,29 @@
 
 import { adHocRunStatus } from '../../common/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { ScheduleBackfillParam } from '../application/backfill/methods/schedule/types';
-import { RuleDomain } from '../application/rule/types';
+import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
+import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import type { ScheduleBackfillParam } from '../application/backfill/methods/schedule/types';
+import type { RuleDomain } from '../application/rule/types';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { BackfillClient } from './backfill_client';
-import { AdHocRunSO } from '../data/ad_hoc_run/types';
+import type { AdHocRunSO } from '../data/ad_hoc_run/types';
 import { transformAdHocRunToBackfillResult } from '../application/backfill/transforms';
 import { RecoveredActionGroup } from '@kbn/alerting-types';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskRunnerFactory } from '../task_runner';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { eventLogClientMock, eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
+import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
+
+jest.mock('../lib/rule_gaps/update/update_gaps', () => ({
+  updateGaps: jest.fn(),
+}));
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { RawRule, RawRuleAction } from '../types';
+import type { RawRule, RawRuleAction } from '../types';
 
 const logger = loggingSystemMock.create().get();
 const taskManagerSetup = taskManagerMock.createSetup();
@@ -31,12 +37,20 @@ const taskManagerStart = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const auditLogger = auditLoggerMock.create();
+const eventLogClient = eventLogClientMock.create();
+const eventLogger = eventLoggerMock.create();
+const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const actionsClient = actionsClientMock.create();
 
 function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfillParam {
   return {
     ruleId: '1',
-    start: '2023-11-16T08:00:00.000Z',
+    ranges: [
+      {
+        start: '2023-11-16T08:00:00.000Z',
+        end: '2023-11-16T20:00:00.000Z',
+      },
+    ],
     runActions: true,
     ...overwrites,
   };
@@ -56,6 +70,7 @@ const mockRuleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   validate: {
     params: { validate: (params) => params },
   },
@@ -180,9 +195,23 @@ function getBulkCreateParam(
 }
 
 const mockCreatePointInTimeFinderAsInternalUser = (
-  response = {
+  response: {
+    saved_objects: Array<{
+      id: string;
+      type: string;
+      attributes: AdHocRunSO;
+      references?: Array<{ id: string; name: string; type: string }>;
+      version?: string;
+    }>;
+  } = {
     saved_objects: [
-      { id: 'abc', type: AD_HOC_RUN_SAVED_OBJECT_TYPE, attributes: getMockAdHocRunAttributes() },
+      {
+        id: 'abc',
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        attributes: getMockAdHocRunAttributes(),
+        references: [{ id: '1', name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
+        version: '1',
+      },
     ],
   }
 ) => {
@@ -234,7 +263,10 @@ describe('BackfillClient', () => {
     test('should successfully create backfill saved objects and queue backfill tasks', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule();
       const rule2 = getMockRule({ id: '2' });
@@ -289,6 +321,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -375,7 +410,10 @@ describe('BackfillClient', () => {
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         actions: [
@@ -461,6 +499,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -591,7 +632,10 @@ describe('BackfillClient', () => {
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         notifyWhen: 'onActiveAlert',
@@ -676,6 +720,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -787,7 +834,11 @@ describe('BackfillClient', () => {
     test('should ignore actions for rule with actions when runActions=false', async () => {
       const mockData = [
         getMockData({ runActions: false }),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z', runActions: false }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+          runActions: false,
+        }),
       ];
       const rule1 = getMockRule({
         actions: [
@@ -873,6 +924,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -1022,6 +1076,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -1110,7 +1167,10 @@ describe('BackfillClient', () => {
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         actions: [
@@ -1196,6 +1256,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -1325,7 +1388,10 @@ describe('BackfillClient', () => {
       ]);
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule({
         notifyWhen: 'onThrottleInterval',
@@ -1412,6 +1478,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -1502,7 +1571,12 @@ describe('BackfillClient', () => {
     });
 
     test('should successfully create multiple backfill saved objects for a single rule', async () => {
-      const mockData = [getMockData(), getMockData({ end: '2023-11-17T08:00:00.000Z' })];
+      const mockData = [
+        getMockData(),
+        getMockData({
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
+      ];
       const rule1 = getMockRule();
       const mockRules = [rule1];
 
@@ -1554,6 +1628,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -1619,7 +1696,10 @@ describe('BackfillClient', () => {
     test('should log warning if no rule found for backfill job', async () => {
       const mockData = [
         getMockData(),
-        getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' }),
+        getMockData({
+          ruleId: '2',
+          ranges: [{ start: '2023-11-16T08:00:00.000Z', end: '2023-11-17T08:00:00.000Z' }],
+        }),
       ];
       const rule1 = getMockRule();
       const mockRules = [rule1];
@@ -1652,6 +1732,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -1674,7 +1757,7 @@ describe('BackfillClient', () => {
         message: 'User has created ad hoc run for ad_hoc_run_params [id=abc]',
       });
       expect(logger.warn).toHaveBeenCalledWith(
-        `Error for ruleId 2 - not scheduling backfill for {\"ruleId\":\"2\",\"start\":\"2023-11-16T08:00:00.000Z\",\"runActions\":true,\"end\":\"2023-11-17T08:00:00.000Z\"}`
+        `Error for ruleId 2 - not scheduling backfill for {\"ruleId\":\"2\",\"ranges\":[{\"start\":\"2023-11-16T08:00:00.000Z\",\"end\":\"2023-11-17T08:00:00.000Z\"}],\"runActions\":true}`
       );
       expect(taskManagerStart.bulkSchedule).toHaveBeenCalledWith([
         {
@@ -1718,6 +1801,7 @@ describe('BackfillClient', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -1772,6 +1856,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
       expect(auditLogger.log).toHaveBeenCalledTimes(5);
       expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
@@ -1921,6 +2008,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
@@ -1983,6 +2073,7 @@ describe('BackfillClient', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -2024,6 +2115,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       expect(taskManagerStart.bulkSchedule).not.toHaveBeenCalled();
@@ -2060,6 +2154,133 @@ describe('BackfillClient', () => {
           },
         },
       ]);
+    });
+
+    test('should call updateGaps with correct params for each backfill', async () => {
+      const mockData = [getMockData(), getMockData({ ruleId: '2' })];
+      const rule1 = getMockRule();
+      const rule2 = getMockRule({ id: '2' });
+      const mockRules = [rule1, rule2];
+
+      const mockAttributes = getMockAdHocRunAttributes();
+      const bulkCreateResult = {
+        saved_objects: [
+          getBulkCreateParam('abc', '1', mockAttributes),
+          getBulkCreateParam('def', '2', mockAttributes),
+        ],
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(bulkCreateResult);
+
+      await backfillClient.bulkQueue({
+        auditLogger,
+        params: mockData,
+        rules: mockRules,
+        ruleTypeRegistry,
+        spaceId: 'default',
+        unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
+        actionsClient,
+      });
+
+      expect(updateGaps).toHaveBeenCalledTimes(2);
+      expect(updateGaps).toHaveBeenNthCalledWith(1, {
+        backfillSchedule: mockAttributes.schedule,
+        ruleId: '1',
+        start: new Date(mockAttributes.start),
+        end: new Date(),
+        eventLogger,
+        eventLogClient,
+        savedObjectsRepository: internalSavedObjectsRepository,
+        logger,
+        backfillClient,
+        actionsClient,
+      });
+      expect(updateGaps).toHaveBeenNthCalledWith(2, {
+        backfillSchedule: mockAttributes.schedule,
+        ruleId: '2',
+        start: new Date(mockAttributes.start),
+        end: new Date(),
+        eventLogger,
+        eventLogClient,
+        savedObjectsRepository: internalSavedObjectsRepository,
+        logger,
+        backfillClient,
+        actionsClient,
+      });
+    });
+
+    test('should handle updateGaps errors gracefully', async () => {
+      const mockData = [getMockData()];
+      const rule1 = getMockRule();
+      const mockRules = [rule1];
+
+      const mockAttributes = getMockAdHocRunAttributes();
+      const bulkCreateResult = {
+        saved_objects: [getBulkCreateParam('abc', '1', mockAttributes)],
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(bulkCreateResult);
+      (updateGaps as jest.Mock).mockRejectedValueOnce(new Error('Failed to update gaps'));
+
+      await backfillClient.bulkQueue({
+        auditLogger,
+        params: mockData,
+        rules: mockRules,
+        ruleTypeRegistry,
+        spaceId: 'default',
+        unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
+        actionsClient,
+      });
+
+      expect(logger.warn).toHaveBeenCalledWith('Error updating gaps for backfill jobs: abc');
+    });
+
+    test('should call updateGaps with end date from backfill param if provided', async () => {
+      const endDate = '2024-02-01T00:00:00.000Z';
+      const mockData = [getMockData({ end: endDate })];
+      const rule1 = getMockRule();
+      const mockRules = [rule1];
+
+      const mockAttributes = getMockAdHocRunAttributes({
+        overwrites: { end: endDate },
+      });
+      const bulkCreateResult = {
+        saved_objects: [getBulkCreateParam('abc', '1', mockAttributes)],
+      };
+
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce(bulkCreateResult);
+
+      await backfillClient.bulkQueue({
+        auditLogger,
+        params: mockData,
+        rules: mockRules,
+        ruleTypeRegistry,
+        spaceId: 'default',
+        unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
+        actionsClient,
+      });
+
+      expect(updateGaps).toHaveBeenCalledWith({
+        backfillSchedule: mockAttributes.schedule,
+        ruleId: '1',
+        start: new Date(mockAttributes.start),
+        end: new Date(endDate),
+        eventLogger,
+        eventLogClient,
+        savedObjectsRepository: internalSavedObjectsRepository,
+        logger,
+        backfillClient,
+        actionsClient,
+      });
     });
   });
 
@@ -2365,6 +2586,102 @@ describe('BackfillClient', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         `Error deleting tasks with IDs: def with errors: delete failed`
       );
+    });
+  });
+
+  describe('findOverlappingBackfills()', () => {
+    test('should find overlapping backfills', async () => {
+      const mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
+      const mockStart = new Date('2024-01-01T00:00:00.000Z');
+      const mockEnd = new Date('2024-01-02T00:00:00.000Z');
+
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            id: 'abc',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes(),
+            references: [{ id: '1', name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
+            version: '1',
+          },
+          {
+            id: 'def',
+            type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+            attributes: getMockAdHocRunAttributes(),
+            references: [{ id: '1', name: 'rule', type: RULE_SAVED_OBJECT_TYPE }],
+            version: '1',
+          },
+        ],
+      });
+
+      mockSavedObjectsRepository.createPointInTimeFinder =
+        unsecuredSavedObjectsClient.createPointInTimeFinder;
+
+      const result = await backfillClient.findOverlappingBackfills({
+        ruleId: '1',
+        start: mockStart,
+        end: mockEnd,
+        savedObjectsRepository: mockSavedObjectsRepository,
+        actionsClient,
+      });
+
+      expect(mockSavedObjectsRepository.createPointInTimeFinder).toHaveBeenCalledWith({
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 100,
+        hasReference: [{ id: '1', type: RULE_SAVED_OBJECT_TYPE }],
+        filter: `
+        ad_hoc_run_params.attributes.start <= "${mockEnd.toISOString()}" and
+        ad_hoc_run_params.attributes.end >= "${mockStart.toISOString()}"
+      `,
+      });
+
+      expect(result).toHaveLength(2);
+      expect('id' in result[0] && result[0].id).toBe('abc');
+      expect('id' in result[1] && result[1].id).toBe('def');
+    });
+
+    test('should handle errors and close finder', async () => {
+      const mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
+      const mockStart = new Date('2024-01-01T00:00:00.000Z');
+      const mockEnd = new Date('2024-01-02T00:00:00.000Z');
+
+      mockSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          throw new Error('Failed to find');
+        },
+      });
+
+      await expect(
+        backfillClient.findOverlappingBackfills({
+          ruleId: '1',
+          start: mockStart,
+          end: mockEnd,
+          savedObjectsRepository: mockSavedObjectsRepository,
+          actionsClient,
+        })
+      ).rejects.toThrow('Failed to find');
+    });
+
+    test('should return empty array when no overlapping backfills found', async () => {
+      const mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
+      const mockStart = new Date('2024-01-01T00:00:00.000Z');
+      const mockEnd = new Date('2024-01-02T00:00:00.000Z');
+
+      mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [] });
+
+      mockSavedObjectsRepository.createPointInTimeFinder =
+        unsecuredSavedObjectsClient.createPointInTimeFinder;
+
+      const result = await backfillClient.findOverlappingBackfills({
+        ruleId: '1',
+        start: mockStart,
+        end: mockEnd,
+        savedObjectsRepository: mockSavedObjectsRepository,
+        actionsClient,
+      });
+
+      expect(result).toHaveLength(0);
     });
   });
 });

@@ -65,6 +65,7 @@ import type {
   UpdateAgentPolicyResponse,
   PostNewAgentActionResponse,
   InstallPackageResponse,
+  FleetServerAgent,
 } from '@kbn/fleet-plugin/common/types';
 import semver from 'semver';
 import axios from 'axios';
@@ -145,18 +146,62 @@ const getAgentPolicyDataForUpdate = (
   ]) as UpdateAgentPolicyRequest['body'];
 };
 
-export const checkInFleetAgent = async (
-  esClient: Client,
-  agentId: string,
-  {
-    agentStatus = 'online',
-    log = createToolingLogger(),
-  }: Partial<{
-    /** The agent status to be sent. If set to `random`, then one will be randomly generated */
-    agentStatus: AgentStatus | 'random';
-    log: ToolingLog;
-  }> = {}
-): Promise<estypes.UpdateResponse> => {
+/**
+ * Assigns an existing Fleet agent to a new policy.
+ * NOTE: should only be used on mocked data.
+ */
+export const assignFleetAgentToNewPolicy = async ({
+  esClient,
+  kbnClient,
+  agentId,
+  newAgentPolicyId,
+  logger = createToolingLogger(),
+}: {
+  esClient: Client;
+  kbnClient: KbnClient;
+  agentId: string;
+  newAgentPolicyId: string;
+  logger?: ToolingLog;
+}): Promise<void> => {
+  const agentPolicy = await fetchAgentPolicy(kbnClient, newAgentPolicyId);
+  const update: Partial<FleetServerAgent> = {
+    ...buildFleetAgentCheckInUpdate(),
+    policy_id: newAgentPolicyId,
+    namespaces: agentPolicy.space_ids ?? [],
+  };
+
+  logger.verbose(
+    `update to agent id [${agentId}] showing assignment to new policy ID [${newAgentPolicyId}]:\n${JSON.stringify(
+      update,
+      null,
+      2
+    )}`
+  );
+
+  await esClient
+    .update({
+      index: AGENTS_INDEX,
+      id: agentId,
+      refresh: 'wait_for',
+      retry_on_conflict: 5,
+      doc: update,
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+type FleetAgentCheckInUpdateDoc = Pick<
+  FleetServerAgent,
+  | 'last_checkin_status'
+  | 'last_checkin'
+  | 'active'
+  | 'unenrollment_started_at'
+  | 'unenrolled_at'
+  | 'upgrade_started_at'
+  | 'upgraded_at'
+>;
+const buildFleetAgentCheckInUpdate = (
+  agentStatus: AgentStatus | 'random' = 'online'
+): FleetAgentCheckInUpdateDoc => {
   const fleetAgentStatus =
     agentStatus === 'random' ? fleetGenerator.randomAgentStatus() : agentStatus;
 
@@ -168,7 +213,7 @@ export const checkInFleetAgent = async (
     'unenrolled_at',
     'upgrade_started_at',
     'upgraded_at',
-  ]);
+  ]) as FleetAgentCheckInUpdateDoc;
 
   // WORKAROUND: Endpoint API will exclude metadata for any fleet agent whose status is `inactive`,
   // which means once we update the Fleet agent with that status, the metadata api will no longer
@@ -183,17 +228,44 @@ export const checkInFleetAgent = async (
     }
   });
 
-  log.verbose(`update to fleet agent [${agentId}][${agentStatus} / ${fleetAgentStatus}]: `, update);
+  return update;
+};
 
-  return esClient.update({
-    index: AGENTS_INDEX,
-    id: agentId,
-    refresh: 'wait_for',
-    retry_on_conflict: 5,
-    body: {
+/**
+ * Checks a Fleet agent in by updating the agent record directly in the `.fleet-agent` index.
+ * @param esClient
+ * @param agentId
+ * @param agentStatus
+ * @param log
+ */
+export const checkInFleetAgent = async (
+  esClient: Client,
+  agentId: string,
+  {
+    agentStatus = 'online',
+    log = createToolingLogger(),
+  }: Partial<{
+    /** The agent status to be sent. If set to `random`, then one will be randomly generated */
+    agentStatus: AgentStatus | 'random';
+    log: ToolingLog;
+  }> = {}
+): Promise<estypes.UpdateResponse> => {
+  const update = buildFleetAgentCheckInUpdate(agentStatus);
+
+  log.verbose(
+    `update to fleet agent [${agentId}][${agentStatus} / ${update.last_checkin_status}]: `,
+    update
+  );
+
+  return esClient
+    .update({
+      index: AGENTS_INDEX,
+      id: agentId,
+      refresh: 'wait_for',
+      retry_on_conflict: 5,
       doc: update,
-    },
-  });
+    })
+    .catch(catchAxiosErrorFormatAndThrow);
 };
 
 /**
@@ -883,19 +955,23 @@ interface GetOrCreateDefaultAgentPolicyOptions {
   kbnClient: KbnClient;
   log: ToolingLog;
   policyName?: string;
+  overrides?: Partial<Omit<CreateAgentPolicyRequest['body'], 'name'>>;
 }
 
 /**
  * Creates a default Fleet Agent policy (if it does not yet exist) for testing. If
- * policy already exists, then it will be reused.
+ * policy already exists, then it will be reused. It uses the policy name to find an
+ * existing match.
  * @param kbnClient
  * @param log
  * @param policyName
+ * @param overrides
  */
 export const getOrCreateDefaultAgentPolicy = async ({
   kbnClient,
   log,
   policyName = DEFAULT_AGENT_POLICY_NAME,
+  overrides = {},
 }: GetOrCreateDefaultAgentPolicyOptions): Promise<AgentPolicy> => {
   const existingPolicy = await fetchAgentPolicyList(kbnClient, {
     kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.name: "${policyName}"`,
@@ -919,6 +995,7 @@ export const getOrCreateDefaultAgentPolicy = async ({
       description: `Policy created by security solution tooling: ${__filename}`,
       namespace: spaceId,
       monitoring_enabled: ['logs', 'metrics'],
+      ...overrides,
     },
   });
 

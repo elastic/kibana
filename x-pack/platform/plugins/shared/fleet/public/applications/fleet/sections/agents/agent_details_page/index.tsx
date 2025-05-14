@@ -33,6 +33,7 @@ import {
   AgentDetailsContent,
   AgentDiagnosticsTab,
 } from './components';
+import { AgentSettings } from './components/agent_settings';
 
 export const AgentDetailsPage: React.FunctionComponent = () => {
   const {
@@ -160,6 +161,14 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         href: getHref('agent_details_diagnostics', { agentId, tabId: 'diagnostics' }),
         isSelected: tabId === 'diagnostics',
       },
+      {
+        id: 'settings',
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.settingsTab', {
+          defaultMessage: 'Settings',
+        }),
+        href: getHref('agent_details_settings', { agentId, tabId: 'settings' }),
+        isSelected: tabId === 'settings',
+      },
     ];
     return tabs;
   }, [getHref, agentId, tabId]);
@@ -236,6 +245,12 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         path={FLEET_ROUTING_PATHS.agent_details_diagnostics}
         render={() => {
           return <AgentDiagnosticsTab agent={agent} />;
+        }}
+      />
+      <Route
+        path={FLEET_ROUTING_PATHS.agent_details_settings}
+        render={() => {
+          return <AgentSettings agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
       <Route

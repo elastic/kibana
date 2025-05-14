@@ -14,8 +14,8 @@ import { mockTimelineModel, TestProviders } from '../../../../../common/mock';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
-  useTimelineFullScreen,
   useGlobalFullScreen,
+  useTimelineFullScreen,
 } from '../../../../../common/containers/use_full_screen';
 import { useSessionView, useSessionViewNavigation } from './use_session_view';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -47,7 +47,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
           },
         },
         sessionView: {
-          getSessionView: jest.fn().mockReturnValue(<div />),
+          getSessionView: jest.fn(() => <div />),
         },
         data: {
           search: jest.fn(),
@@ -61,7 +61,6 @@ jest.mock('../../../../../common/lib/kibana', () => {
         },
         timelines: {
           getLastUpdated: jest.fn(),
-          getLoadingPanel: jest.fn(),
         },
       },
     }),

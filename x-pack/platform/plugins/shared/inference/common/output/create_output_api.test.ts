@@ -220,4 +220,30 @@ describe('createOutputApi', () => {
       })
     );
   });
+
+  it('propagates retry options when provided', async () => {
+    chatComplete.mockResolvedValue(Promise.resolve({ content: 'content', toolCalls: [] }));
+
+    const output = createOutputApi(chatComplete);
+
+    await output({
+      id: 'id',
+      connectorId: '.my-connector',
+      input: 'input message',
+      maxRetries: 42,
+      retryConfiguration: {
+        retryOn: 'all',
+      },
+    });
+
+    expect(chatComplete).toHaveBeenCalledTimes(1);
+    expect(chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        maxRetries: 42,
+        retryConfiguration: {
+          retryOn: 'all',
+        },
+      })
+    );
+  });
 });

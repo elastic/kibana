@@ -709,3 +709,17 @@ export const noAccessToFailureStoreWarningDescription = i18n.translate(
       'Some documents might have been sent to the Failure store. Access is restricted due to potential sensitive information. Please contact your administrator for access',
   }
 );
+
+export const readMore = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssue.flyout.message.readMore',
+  {
+    defaultMessage: 'Read more',
+  }
+);
+
+export const readLess = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssue.flyout.message.readLess',
+  {
+    defaultMessage: 'Read less',
+  }
+);

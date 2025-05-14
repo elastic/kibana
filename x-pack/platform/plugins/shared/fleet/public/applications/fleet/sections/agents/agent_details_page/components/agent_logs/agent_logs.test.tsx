@@ -147,35 +147,4 @@ describe('AgentLogsUI', () => {
     const result = renderComponent();
     expect(result.queryByTestId('viewInLogsBtn')).not.toBeInTheDocument();
   });
-
-  it('should show log level dropdown with correct value', () => {
-    mockStartServices();
-    const result = renderComponent();
-    const logLevelDropdown = result.getByTestId('selectAgentLogLevel');
-    expect(logLevelDropdown.getElementsByTagName('option').length).toBe(4);
-    expect(logLevelDropdown).toHaveDisplayValue('debug');
-  });
-
-  it('should always show apply log level changes button', () => {
-    mockStartServices();
-    const result = renderComponent();
-    const applyLogLevelBtn = result.getByTestId('applyLogLevelBtn');
-    expect(applyLogLevelBtn).toBeInTheDocument();
-    expect(applyLogLevelBtn).not.toHaveAttribute('disabled');
-  });
-
-  it('should hide reset log level button for agents version < 8.15.0', () => {
-    mockStartServices();
-    const result = renderComponent();
-    const resetLogLevelBtn = result.queryByTestId('resetLogLevelBtn');
-    expect(resetLogLevelBtn).not.toBeInTheDocument();
-  });
-
-  it('should show reset log level button for agents version >= 8.15.0', () => {
-    mockStartServices();
-    const result = renderComponent({ agentVersion: '8.15.0' });
-    const resetLogLevelBtn = result.getByTestId('resetLogLevelBtn');
-    expect(resetLogLevelBtn).toBeInTheDocument();
-    expect(resetLogLevelBtn).not.toHaveAttribute('disabled');
-  });
 });

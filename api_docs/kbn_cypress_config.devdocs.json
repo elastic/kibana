@@ -29,7 +29,7 @@
         "signature": [
           "(options: Cypress.ConfigOptions<any> | undefined) => Cypress.ConfigOptions<any>"
         ],
-        "path": "packages/kbn-cypress-config/index.ts",
+        "path": "src/platform/packages/shared/kbn-cypress-config/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "Cypress.ConfigOptions<any> | undefined"
             ],
-            "path": "packages/kbn-cypress-config/index.ts",
+            "path": "src/platform/packages/shared/kbn-cypress-config/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

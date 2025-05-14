@@ -24,7 +24,6 @@ import {
   EuiSelectableOption,
 } from '@elastic/eui';
 import type { ActionVariable } from '@kbn/alerting-types';
-import './add_message_variables.scss';
 import { TruncatedText } from './truncated_text';
 import * as i18n from './translations';
 
@@ -113,7 +112,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       <>
         <EuiText
           size="s"
-          style={{
+          css={{
             fontWeight: euiTheme.font.weight.bold,
           }}
         >
@@ -136,7 +135,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         <EuiFlexItem>
           <EuiText
             size="s"
-            style={{
+            css={{
               fontWeight: euiTheme.font.weight.bold,
             }}
           >
@@ -201,7 +200,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
             {search}
             <EuiSpacer size="xs" />
             {list}
-            <EuiPopoverFooter style={{ paddingTop: 0, paddingBottom: 0 }}>
+            <EuiPopoverFooter css={{ paddingTop: 0, paddingBottom: 0 }}>
               <EuiFlexGroup
                 gutterSize="s"
                 alignItems="center"

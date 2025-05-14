@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  EsQueryRuleActionContext,
-  addMessages,
-  getContextConditionsDescription,
-} from './action_context';
-import { EsQueryRuleParams, EsQueryRuleParamsSchema } from './rule_type_params';
+import type { EsQueryRuleActionContext } from './action_context';
+import { addMessages, getContextConditionsDescription } from './action_context';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import { EsQueryRuleParamsSchema } from '@kbn/response-ops-rule-params/es_query';
 import { Comparator } from '../../../common/comparator_types';
 
 describe('addMessages', () => {

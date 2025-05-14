@@ -71,14 +71,12 @@ export default function buildRequest(config, tlConfig, scriptFields, runtimeFiel
   const request = {
     index: config.index,
     ...(includeFrozen ? { ignore_throttled: false } : {}),
-    body: {
-      query: {
-        bool: bool,
-      },
-      aggs: aggs,
-      size: 0,
-      runtime_mappings: runtimeFields,
+    query: {
+      bool: bool,
     },
+    aggs: aggs,
+    size: 0,
+    runtime_mappings: runtimeFields,
   };
 
   if (timeout) {

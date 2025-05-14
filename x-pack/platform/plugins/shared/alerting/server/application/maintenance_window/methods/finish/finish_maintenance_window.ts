@@ -12,11 +12,8 @@ import {
   mergeEvents,
 } from '../../lib/generate_maintenance_window_events';
 import { getMaintenanceWindowDateAndStatus } from '../../lib/get_maintenance_window_date_and_status';
-import {
-  DateRange,
-  MaintenanceWindowClientContext,
-  MaintenanceWindowStatus,
-} from '../../../../../common';
+import type { DateRange, MaintenanceWindowClientContext } from '../../../../../common';
+import { MaintenanceWindowStatus } from '../../../../../common';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import {
   getMaintenanceWindowSo,

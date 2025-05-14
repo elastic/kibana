@@ -97,7 +97,7 @@ LOCALlogs-.->|"mount[1]"|STagentlogs
 LOCALlogs-.->|"mount[2]"|SEelasticsearchlogs
 SElogsscript-.->|http requests to trigger logs|elasticsearch
 ```
-[1] https://github.com/elastic/elastic-package/blob/main/internal/profile/_static/docker-compose-stack.yml#L133-L135
+[1] https://github.com/elastic/elastic-package/blob/main/internal/stack/_static/docker-compose-stack.yml.tmpl
 
 [2] https://github.com/elastic/integrations/blob/main/packages/elasticsearch/_dev/deploy/docker/docker-compose.yml#L39
 This is a simplified version as there is some gymnastics involved to work around permissions, but the workflow remains the same
@@ -149,7 +149,7 @@ See the [elastic-package-test documentation](https://github.com/elastic/elastic-
 
 The system tests spawn a full setup (`elastic-package stack up` + `elastic-package service up`), install the package and attach a policy to a running agent to collect live data. This real-world setup can be leveraged to continuously validate future versions of the stack when they are released. Right now the service dependencies are running on 8.5.0 and the tests validate that this version is supported. The plan is to have an automated job that opens a PR validating that the tests are still successful with the latest released version.
 
-On the Stack Monitoring side, we have an API integration test suite running against packages; see https://github.com/elastic/kibana/tree/main/x-pack/test/monitoring_api_integration#readme
+On the Stack Monitoring side, we have an API integration test suite running against packages; see https://github.com/elastic/kibana/tree/main/x-pack/platform/test/monitoring_api_integration#readme
 
 ## Troubleshooting
 
@@ -178,4 +178,3 @@ If you need to look at the raw filebeat/metrics logs they are stored under `/usr
 - [v2 diagram](https://github.com/elastic/elastic-agent-shipper/issues/3)
 - [Agent onboarding (internal)](https://ela.st/agent-onboarding-doc)
 - [Elastic Agent architecture v2 (internal)](https://ela.st/agent-v2-archicture-doc)
-

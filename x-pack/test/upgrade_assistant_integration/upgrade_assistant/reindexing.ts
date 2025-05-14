@@ -14,6 +14,7 @@ import {
 } from '@kbn/upgrade-assistant-plugin/common/types';
 import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/server/lib/reindexing/index_settings';
 import { getIndexState } from '@kbn/upgrade-assistant-plugin/common/get_index_state';
+import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -38,7 +39,8 @@ export default function ({ getService }: FtrProviderContext) {
     return lastState;
   };
 
-  describe('reindexing', function () {
+  describe.skip('reindexing', function () {
+    this.onlyEsVersion('8');
     // bail on first error in this suite since cases sequentially depend on each other
     this.bail(true);
 
@@ -156,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
       // This new index is the new soon to be created reindexed index. We create it
       // upfront to simulate a situation in which the user restarted kibana half
       // way through the reindex process and ended up with an extra index.
-      await es.indices.create({ index: 'reindexed-v9-dummydata' });
+      await es.indices.create({ index: 'reindexed-v8-dummydata' });
 
       const { body } = await supertest
         .post(`/api/upgrade_assistant/reindex/dummydata`)
@@ -212,24 +214,27 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('shows no warnings', async () => {
-      const resp = await supertest.get(`/api/upgrade_assistant/reindex/reindexed-v8-6.0-data`); // reusing the index previously migrated in v8->v9 UA tests
+    it('shows reindex and read-only warnings', async () => {
+      const resp = await supertest.get(`/api/upgrade_assistant/reindex/reindexed-v7-6.0-data`); // reusing the index previously migrated in v7->v8 UA tests
+      expect(resp.body.warnings.length).to.be(2);
       // By default, all reindexing operations will replace an index with an alias (with the same name)
       // pointing to a newly created "reindexed" index.
-      expect(resp.body.warnings.length).to.be(1);
-      expect(resp.body.warnings[0].warningType).to.be('replaceIndexWithAlias');
+      expect(sortBy(resp.body.warnings, 'warningType')).to.eql([
+        { warningType: 'makeIndexReadonly', flow: 'readonly' },
+        { warningType: 'replaceIndexWithAlias', flow: 'reindex' },
+      ]);
     });
 
     it('reindexes old 7.0 index', async () => {
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/reindexed-v8-6.0-data`) // reusing the index previously migrated in v8->v9 UA tests
+        .post(`/api/upgrade_assistant/reindex/reindexed-v7-6.0-data`) // reusing the index previously migrated in v7->v8 UA tests
         .set('kbn-xsrf', 'xxx')
         .expect(200);
 
-      expect(body.indexName).to.equal('reindexed-v8-6.0-data');
+      expect(body.indexName).to.equal('reindexed-v7-6.0-data');
       expect(body.status).to.equal(ReindexStatus.inProgress);
 
-      const lastState = await waitForReindexToComplete('reindexed-v8-6.0-data');
+      const lastState = await waitForReindexToComplete('reindexed-v7-6.0-data');
       expect(lastState.errorMessage).to.equal(null);
       expect(lastState.status).to.equal(ReindexStatus.completed);
     });

@@ -9,7 +9,7 @@ import { EuiStat, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Label } from './label';
-import { scaleValue } from './utils';
+import { scaleAndRoundValue } from './utils';
 
 interface Props {
   baselineTotalSamples: number;
@@ -24,7 +24,7 @@ export function TotalSamplesStat({
   comparisonTotalSamples,
   comparisonScaleFactor,
 }: Props) {
-  const scaledBaselineTotalSamples = scaleValue({
+  const scaledBaselineTotalSamples = scaleAndRoundValue({
     value: baselineTotalSamples,
     scaleFactor: baselineScaleFactor,
   });
@@ -38,13 +38,13 @@ export function TotalSamplesStat({
   if (comparisonTotalSamples === undefined || comparisonTotalSamples === 0) {
     return (
       <EuiStat
-        title={<EuiText style={{ fontWeight: 'bold' }}>{value}</EuiText>}
+        title={<EuiText css={{ fontWeight: 'bold' }}>{value}</EuiText>}
         description={sampleHeader}
       />
     );
   }
 
-  const scaledComparisonTotalSamples = scaleValue({
+  const scaledComparisonTotalSamples = scaleAndRoundValue({
     value: comparisonTotalSamples,
     scaleFactor: comparisonScaleFactor,
   });
@@ -55,7 +55,7 @@ export function TotalSamplesStat({
   return (
     <EuiStat
       title={
-        <EuiText style={{ fontWeight: 'bold' }}>
+        <EuiText css={{ fontWeight: 'bold' }}>
           {value}
           <Label value={percentDelta} prepend="(" append=")" />
         </EuiText>

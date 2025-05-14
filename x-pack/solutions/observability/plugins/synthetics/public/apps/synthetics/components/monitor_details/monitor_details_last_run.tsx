@@ -14,7 +14,7 @@ import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 export const MonitorDetailsLastRun: React.FC = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
   let description: string | ReactElement = latestPing
-    ? moment(latestPing.timestamp).fromNow()
+    ? moment(latestPing['@timestamp']).fromNow()
     : '--';
 
   if (!latestPing && pingsLoading) {
@@ -27,7 +27,10 @@ export const MonitorDetailsLastRun: React.FC = () => {
         {
           title: LAST_RUN_LABEL,
           description: (
-            <EuiToolTip content={moment(latestPing?.timestamp).format('LLL')} position="bottom">
+            <EuiToolTip
+              content={moment(latestPing?.['@timestamp']).format('LLL')}
+              position="bottom"
+            >
               <>{description}</>
             </EuiToolTip>
           ),

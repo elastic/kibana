@@ -7,19 +7,18 @@
 
 // This file is skipped
 // @storybook/addon-storyshots is not supported in Jest 27+ https://github.com/storybookjs/storybook/issues/15916
+// @storybook/addon-storyshots has been removed in Storybook 8 https://github.com/storybookjs/storybook/blob/next/MIGRATION.md#storyshots-has-been-removed
 
 import fs from 'fs';
-import { ReactChildren, createElement } from 'react';
+import { ReactChildren } from 'react';
 import path from 'path';
 import moment from 'moment';
 import 'moment-timezone';
 import ReactDOM from 'react-dom';
-import { shallow } from 'enzyme';
-import { create, act } from 'react-test-renderer';
 
-import initStoryshots, { Stories2SnapsConverter } from '@storybook/addon-storyshots';
 // @ts-expect-error untyped library
 import styleSheetSerializer from 'jest-styled-components/src/styleSheetSerializer';
+// @ts-expect-error untyped library
 import { addSerializer } from 'jest-specific-snapshot';
 import { createSerializer } from '@emotion/jest';
 import { replaceEmotionPrefix } from '@elastic/eui/lib/test';
@@ -71,9 +70,9 @@ jest.mock('@kbn/presentation-util-plugin/public/components/expression_input');
 // @ts-expect-error
 ExpressionInput.mockImplementation(() => 'ExpressionInput');
 
-// @ts-expect-error untyped library
 import Dropzone from 'react-dropzone';
 jest.mock('react-dropzone');
+// @ts-expect-error untyped library
 Dropzone.mockImplementation(() => 'Dropzone');
 
 // This element uses a `ref` and cannot be rendered by Jest snapshots.
@@ -96,23 +95,23 @@ const emotionSerializer = createSerializer({
 });
 addSerializer(emotionSerializer);
 
-const converter = new Stories2SnapsConverter();
+// const converter = new Stories2SnapsConverter();
 
 // Initialize Storyshots and build the Jest Snapshots
-initStoryshots({
-  configPath: path.resolve(__dirname),
-  framework: 'react',
-  asyncJest: true,
-  test: async ({ story, context, done }) => {
-    const renderer = create(createElement(story.render));
-    // wait until the element will perform all renders and resolve all promises (lazy loading, especially)
-    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-    // save each snapshot to a different file (similar to "multiSnapshotWithOptions")
-    const snapshotFileName = converter.getSnapshotFileName(context);
-    expect(renderer).toMatchSpecificSnapshot(snapshotFileName);
-    done?.();
-  },
-  // Don't snapshot tests that start with 'redux'
-  storyNameRegex: /^((?!.*?redux).)*$/,
-  renderer: shallow,
-});
+// initStoryshots({
+//   configPath: path.resolve(__dirname),
+//   framework: 'react',
+//   asyncJest: true,
+//   test: async ({ story, context, done }) => {
+//     const renderer = create(createElement(story.render));
+//     // wait until the element will perform all renders and resolve all promises (lazy loading, especially)
+//     await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+//     // save each snapshot to a different file (similar to "multiSnapshotWithOptions")
+//     const snapshotFileName = converter.getSnapshotFileName(context);
+//     expect(renderer).toMatchSpecificSnapshot(snapshotFileName);
+//     done?.();
+//   },
+//   // Don't snapshot tests that start with 'redux'
+//   storyNameRegex: /^((?!.*?redux).)*$/,
+//   renderer: shallow,
+// });

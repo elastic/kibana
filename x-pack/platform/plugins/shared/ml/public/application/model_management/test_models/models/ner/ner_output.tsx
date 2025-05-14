@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -132,7 +132,7 @@ const Lines: FC<{ result: NerResponse }> = ({ result }) => {
                 <EuiIcon
                   size="m"
                   type={getClassIcon(entity.class_name)}
-                  style={{ marginRight: ICON_PADDING, verticalAlign: 'text-top' }}
+                  css={{ marginRight: ICON_PADDING, verticalAlign: 'text-top' }}
                 />
                 {value}
               </div>
@@ -176,7 +176,7 @@ const EntityBadge = ({
   return (
     <EuiBadge
       color={getClassColor(entity.class_name, euiTheme.flags.hasVisColorAdjustment)}
-      style={{
+      css={{
         marginRight: ICON_PADDING,
         marginTop: `-${ICON_PADDING}`,
         // For Amsterdam, add a border to the badge to improve contrast with the background.
@@ -199,7 +199,7 @@ const EntityBadge = ({
           <EuiIcon
             size="s"
             type={getClassIcon(entity.class_name)}
-            style={{ marginRight: ICON_PADDING, marginTop: ICON_PADDING }}
+            css={{ marginRight: ICON_PADDING, marginTop: ICON_PADDING }}
           />
         </EuiFlexItem>
         <EuiFlexItem>{children}</EuiFlexItem>

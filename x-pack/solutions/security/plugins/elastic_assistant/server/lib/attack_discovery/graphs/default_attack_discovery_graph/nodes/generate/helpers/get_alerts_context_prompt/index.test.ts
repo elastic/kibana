@@ -6,13 +6,13 @@
  */
 
 import { getAlertsContextPrompt } from '.';
-import { getDefaultAttackDiscoveryPrompt } from '../../../helpers/get_default_attack_discovery_prompt';
+import { ATTACK_DISCOVERY_DEFAULT } from '../../../../../../../prompt/prompts';
 
 describe('getAlertsContextPrompt', () => {
   it('generates the correct prompt', () => {
     const anonymizedAlerts = ['Alert 1', 'Alert 2', 'Alert 3'];
 
-    const expected = `${getDefaultAttackDiscoveryPrompt()}
+    const expected = `${ATTACK_DISCOVERY_DEFAULT}
 
 Use context from the following alerts to provide insights:
 
@@ -27,7 +27,7 @@ Alert 3
 
     const prompt = getAlertsContextPrompt({
       anonymizedAlerts,
-      attackDiscoveryPrompt: getDefaultAttackDiscoveryPrompt(),
+      attackDiscoveryPrompt: ATTACK_DISCOVERY_DEFAULT,
     });
 
     expect(prompt).toEqual(expected);

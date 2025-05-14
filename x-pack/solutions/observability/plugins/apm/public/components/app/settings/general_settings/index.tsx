@@ -16,13 +16,11 @@ import {
   enableInspectEsQueries,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
-  apmEnableContinuousRollups,
-  enableAgentExplorerView,
   apmEnableProfilingIntegration,
   apmEnableTableSearchBar,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
+  apmEnableServiceMapApiV2,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -51,11 +49,9 @@ function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
     apmLabsButton,
     apmAWSLambdaPriceFactor,
     apmAWSLambdaRequestCostPerMillion,
-    apmEnableServiceMetrics,
-    apmEnableContinuousRollups,
-    enableAgentExplorerView,
     apmEnableTableSearchBar,
     apmEnableServiceInventoryTableSearchBar,
+    apmEnableServiceMapApiV2,
   ];
 
   if (isProfilingIntegrationEnabled) {

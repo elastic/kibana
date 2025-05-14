@@ -16,6 +16,7 @@ describe('EmptySection', () => {
       title: 'APM',
       icon: 'logoObservability',
       description: 'foo bar',
+      showInServerless: false,
     };
     const { getByText, queryAllByText } = render(<EmptySection section={section} />);
 
@@ -31,6 +32,7 @@ describe('EmptySection', () => {
       description: 'foo bar',
       linkTitle: 'install agent',
       href: 'https://www.elastic.co',
+      showInServerless: false,
     };
     const { getByText, getByTestId } = render(<EmptySection section={section} />);
 

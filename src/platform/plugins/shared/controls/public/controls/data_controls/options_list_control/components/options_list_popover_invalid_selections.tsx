@@ -24,6 +24,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
+import { BehaviorSubject } from 'rxjs';
 import { useOptionsListContext } from '../options_list_context_provider';
 import { OptionsListStrings } from '../options_list_strings';
 
@@ -34,7 +35,9 @@ export const OptionsListPopoverInvalidSelections = () => {
     api.invalidSelections$,
     api.fieldFormatter
   );
-  const defaultPanelTitle = useStateFromPublishingSubject(api.defaultTitle$);
+  const defaultPanelTitle = useStateFromPublishingSubject(
+    api.defaultTitle$ ?? new BehaviorSubject(undefined)
+  );
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
   useEffect(() => {
@@ -71,7 +74,6 @@ export const OptionsListPopoverInvalidSelections = () => {
           <EuiFlexItem grow={false}>
             <EuiIcon
               type="warning"
-              color="warning"
               title={OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
               size="s"
             />

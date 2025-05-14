@@ -19,48 +19,35 @@ export default function upgradeAssistantFunctionalTests({
   const security = getService('security');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/167090
   describe.skip('Deprecation pages', function () {
     this.tags(['skipFirefox', 'upgradeAssistant']);
 
     before(async () => {
       await security.testUser.setRoles(['superuser']);
       try {
-        /**
-         * Trigger "Total shards" ES Upgrade readiness check
-         * the number of shards in the test cluster is 25-29
-         * so 5 max shards per node should trigger this check
-         * on both local and CI environments.
-         */
-        await es.cluster.putSettings({
-          body: {
-            persistent: {
-              cluster: {
-                max_shards_per_node: 5,
+        await es.cluster.putComponentTemplate({
+          name: 'deprecated_template',
+          template: {
+            mappings: {
+              _source: {
+                mode: 'stored',
               },
             },
           },
         });
       } catch (e) {
-        log.debug('[Setup error] Error updating cluster settings');
+        log.debug('[Setup error] Error setting up component template with es deprecation]');
         throw e;
       }
     });
 
     after(async () => {
       try {
-        await es.cluster.putSettings({
-          body: {
-            persistent: {
-              cluster: {
-                // initial cluster setting from x-pack/test/functional/config.upgrade_assistant.js
-                max_shards_per_node: 29,
-              },
-            },
-          },
+        await es.cluster.deleteComponentTemplate({
+          name: 'deprecated_template',
         });
       } catch (e) {
-        log.debug('[Cleanup error] Error reseting cluster settings');
+        log.debug('[Cleanup error] Error removing component template with es deprecation');
         throw e;
       }
       await security.testUser.restoreDefaults();
@@ -77,13 +64,9 @@ export default function upgradeAssistantFunctionalTests({
 
     it('renders the Elasticsearch upgrade readiness deprecations', async () => {
       const deprecationMessages = await testSubjects.getVisibleTextAll('defaultTableCell-message');
-      const healthIndicatorsCriticalMessages = await testSubjects.getVisibleTextAll(
-        'healthIndicatorTableCell-message'
-      );
 
-      expect(deprecationMessages).to.contain('Disk usage exceeds low watermark');
-      expect(healthIndicatorsCriticalMessages).to.contain(
-        'Elasticsearch is about to reach the maximum number of shards it can host, based on your current settings.'
+      expect(deprecationMessages[0]).to.contain(
+        'Configuring source mode in mappings is deprecated'
       );
     });
 

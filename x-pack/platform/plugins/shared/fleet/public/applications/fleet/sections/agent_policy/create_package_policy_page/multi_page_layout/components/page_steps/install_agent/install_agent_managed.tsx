@@ -10,7 +10,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiLink, EuiSteps, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import { Error } from '../../../../../../../components';
-import { useStartServices, useAgentVersion } from '../../../../../../../../../hooks';
+import {
+  useStartServices,
+  useAgentVersion,
+  useShowCompleteAgentInstructions,
+} from '../../../../../../../../../hooks';
 
 import { CreatePackagePolicyBottomBar, NotObscuredByBottomBar } from '../..';
 import {
@@ -21,7 +25,10 @@ import { ManualInstructions } from '../../../../../../../../../components/enroll
 
 import { KubernetesManifestApplyStep } from '../../../../../../../../../components/agent_enrollment_flyout/steps/run_k8s_apply_command_step';
 
-import { getRootIntegrations } from '../../../../../../../../../../common/services';
+import {
+  getRootIntegrations,
+  hasInstallServersInputs,
+} from '../../../../../../../../../../common/services';
 
 import type { InstallAgentPageProps } from './types';
 
@@ -47,6 +54,9 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const [commandCopied, setCommandCopied] = useState(false);
   const [applyCommandCopied, setApplyCommandCopied] = useState(false);
 
+  const { onChangeShowCompleteAgentInstructions, showCompleteAgentInstructions } =
+    useShowCompleteAgentInstructions();
+
   if (!enrollmentAPIKey) {
     return (
       <Error
@@ -64,11 +74,15 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const isK8s =
     props.packageInfo.name === 'kubernetes' ? 'IS_KUBERNETES_MULTIPAGE' : 'IS_NOT_KUBERNETES';
 
+  const showInstallServers = hasInstallServersInputs(agentPolicy?.package_policies ?? []);
+
   const installManagedCommands = ManualInstructions({
     apiKey: enrollmentAPIKey.api_key,
     fleetProxy,
     fleetServerHost,
     agentVersion: agentVersion || '',
+    showInstallServers,
+    showCompleteAgentInstructions,
   });
 
   const steps = [
@@ -83,6 +97,8 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       fleetServerHost,
       onCopy: () => setCommandCopied(true),
       rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
+      onChangeShowCompleteAgentInstructions,
+      showCompleteAgentInstructions,
     }),
   ];
 

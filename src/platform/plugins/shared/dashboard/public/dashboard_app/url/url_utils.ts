@@ -7,26 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { serializeRuntimeState } from '@kbn/controls-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { History } from 'history';
 import _ from 'lodash';
 import { skip } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
-
-import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-
-import {
-  DashboardContainerInput,
-  DashboardPanelMap,
-  SharedDashboardState,
-  convertPanelsArrayToPanelMap,
-} from '../../../common';
+import type { DashboardPanelMap } from '../../../common/dashboard_container/types';
+import { convertPanelsArrayToPanelMap } from '../../../common/lib/dashboard_panel_converters';
+import type { DashboardState, SharedDashboardState } from '../../../common/types';
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
 import { DashboardApi } from '../../dashboard_api/types';
-import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management_service/lib/load_dashboard_state';
 import { coreServices } from '../../services/kibana_services';
+import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
 
 const panelIsLegacy = (panel: unknown): panel is SavedDashboardPanel => {
@@ -49,22 +45,22 @@ export const isPanelVersionTooOld = (panels: DashboardPanel[] | SavedDashboardPa
   return false;
 };
 
-function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | undefined {
-  if (!appStateInUrl.panels) {
+function getPanelsMap(panels?: DashboardPanel[]): DashboardPanelMap | undefined {
+  if (!panels) {
     return undefined;
   }
 
-  if (appStateInUrl.panels.length === 0) {
+  if (panels.length === 0) {
     return {};
   }
 
-  if (isPanelVersionTooOld(appStateInUrl.panels)) {
+  if (isPanelVersionTooOld(panels)) {
     coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());
     return undefined;
   }
 
   // convert legacy embeddableConfig keys to panelConfig
-  const panels = appStateInUrl.panels.map((panel) => {
+  const standardizedPanels = panels.map((panel) => {
     if (panelIsLegacy(panel)) {
       const { embeddableConfig, ...rest } = panel;
       return {
@@ -75,7 +71,7 @@ function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | 
     return panel;
   });
 
-  return convertPanelsArrayToPanelMap(panels);
+  return convertPanelsArrayToPanelMap(standardizedPanels);
 }
 
 /**
@@ -83,21 +79,27 @@ function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | 
  */
 export const loadAndRemoveDashboardState = (
   kbnUrlStateStorage: IKbnUrlStateStorage
-): Partial<DashboardContainerInput> => {
+): Partial<DashboardState> => {
   const rawAppStateInUrl = kbnUrlStateStorage.get<SharedDashboardState>(
     DASHBOARD_STATE_STORAGE_KEY
   );
+
   if (!rawAppStateInUrl) return {};
 
-  const panelsMap = getPanelsMap(rawAppStateInUrl);
+  const panelsMap = getPanelsMap(rawAppStateInUrl.panels);
 
   const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
     delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];
     return hashQuery;
   });
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
-  const partialState: Partial<DashboardContainerInput> = {
-    ..._.omit(rawAppStateInUrl, ['panels', 'query']),
+  const partialState: Partial<DashboardState> = {
+    ..._.omit(rawAppStateInUrl, ['controlGroupState', 'panels', 'query']),
+    ...(rawAppStateInUrl.controlGroupState
+      ? {
+          controlGroupInput: serializeRuntimeState(rawAppStateInUrl.controlGroupState).rawState,
+        }
+      : {}),
     ...(panelsMap ? { panels: panelsMap } : {}),
     ...(rawAppStateInUrl.query ? { query: migrateLegacyQuery(rawAppStateInUrl.query) } : {}),
   };

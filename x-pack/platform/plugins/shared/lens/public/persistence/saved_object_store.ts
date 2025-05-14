@@ -6,7 +6,7 @@
  */
 
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import type { SavedObjectReference } from '@kbn/core/public';
+import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
@@ -29,6 +29,7 @@ export interface LensDocument {
       state?: unknown;
     };
     filters: Filter[];
+    needsRefresh?: boolean;
     adHocDataViews?: Record<string, DataViewSpec>;
     internalReferences?: SavedObjectReference[];
   };

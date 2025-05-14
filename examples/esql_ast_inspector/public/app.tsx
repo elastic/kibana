@@ -14,9 +14,9 @@ import { EsqlInspector } from './components/esql_inspector';
 
 export const App = () => {
   return (
-    <EuiProvider>
+    <EuiProvider highContrastMode={false}>
       <EuiPage>
-        <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <EuiPageBody css={{ maxWidth: 1200, margin: '0 auto' }}>
           <EuiPageHeader paddingSize="s" bottomBorder={true} pageTitle="ES|QL AST Inspector" />
           <EuiPageSection paddingSize="s">
             <p>This app gives you the AST for a particular ES|QL query.</p>

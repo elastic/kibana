@@ -12,7 +12,9 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Search solution tests', function () {
     loadTestFile(require.resolve('./tests/classic_navigation'));
     loadTestFile(require.resolve('./tests/solution_navigation'));
+    loadTestFile(require.resolve('./tests/search_overview'));
     loadTestFile(require.resolve('./tests/search_start'));
     loadTestFile(require.resolve('./tests/search_index_details'));
+    loadTestFile(require.resolve('./tests/index_management'));
   });
 };

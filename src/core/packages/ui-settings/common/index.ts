@@ -11,6 +11,7 @@ export type {
   UiSettingsType,
   ReadonlyModeType,
   DeprecationSettings,
+  UiSettingsSolution,
   UiSettingsParams,
   UserProvidedValues,
   UiSettingsScope,

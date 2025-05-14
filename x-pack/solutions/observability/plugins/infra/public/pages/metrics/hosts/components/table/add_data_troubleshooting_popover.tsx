@@ -53,7 +53,7 @@ export const AddDataTroubleshootingPopover = () => {
   } = useKibanaContextForPlugin();
   const addDataLinkHref = share.url.locators
     .get<ObservabilityOnboardingLocatorParams>(OBSERVABILITY_ONBOARDING_LOCATOR)
-    ?.getRedirectUrl({ category: 'logs' });
+    ?.getRedirectUrl({ category: 'host' });
 
   const onButtonClick = () => togglePopover();
 
@@ -76,7 +76,7 @@ export const AddDataTroubleshootingPopover = () => {
       closePopover={closePopover}
     >
       <EuiPopoverTitle>{popoverContent.title}</EuiPopoverTitle>
-      <EuiText size="s" style={{ width: 300 }}>
+      <EuiText size="s" css={{ width: 300 }}>
         {popoverContent.content}
       </EuiText>
       <EuiPopoverFooter>

@@ -22,7 +22,9 @@ import {
 
 import type { AgentPolicy, NewAgentPolicy } from '../types';
 
-import { agentPolicyService, packagePolicyService } from '.';
+import { AgentlessAgentCreateOverProvisionnedError } from '../errors';
+
+import { agentPolicyService, appContextService, packagePolicyService } from '.';
 import { incrementPackageName } from './package_policies';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
@@ -149,6 +151,7 @@ export async function createAgentPolicyWithPackages({
     user,
     id: agentPolicyId,
     authorizationHeader,
+    hasFleetServer,
     skipDeploy: true, // skip deploying the policy until package policies are added
   });
 
@@ -177,7 +180,18 @@ export async function createAgentPolicyWithPackages({
 
   // Create the agentless agent
   if (agentPolicy.supports_agentless) {
-    await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+    try {
+      await agentlessAgentService.createAgentlessAgent(esClient, soClient, agentPolicy);
+    } catch (err) {
+      if (err instanceof AgentlessAgentCreateOverProvisionnedError) {
+        await agentPolicyService.delete(soClient, esClient, agentPolicy.id).catch((deleteError) => {
+          appContextService
+            .getLogger()
+            .error(`Error deleting agentless policy`, { error: agentPolicy });
+        });
+      }
+      throw err;
+    }
   }
 
   return agentPolicy;

@@ -19,9 +19,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     after(async function unloadMakelogs() {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
+    loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_url_state'));
   });
 }

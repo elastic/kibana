@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
-import { RawAction } from '../../../types';
+import type { SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
+import type { RawAction } from '../../../types';
 
 export type FindConnectorsSoResult = SavedObjectsFindResponse<RawAction>;

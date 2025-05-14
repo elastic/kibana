@@ -28,7 +28,7 @@ import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
-import { Config, ConfigEntryView, Secrets } from '../types/types';
+import { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
 import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
 import { DEFAULT_TASK_TYPE, ServiceProviderKeys } from '../constants';
 import { SelectableProvider } from './providers/selectable';
@@ -48,14 +48,19 @@ interface InferenceServicesProps {
   http: HttpSetup;
   toasts: IToasts;
   isEdit?: boolean;
+  isPreconfigured?: boolean;
 }
 
 export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   http,
   toasts,
   isEdit,
+  isPreconfigured,
 }) => {
   const { data: providers, isLoading } = useProviders(http, toasts);
+  const [updatedProviders, setUpdatedProviders] = useState<InferenceProvider[] | undefined>(
+    undefined
+  );
   const [isProviderPopoverOpen, setProviderPopoverOpen] = useState(false);
   const [providerSchema, setProviderSchema] = useState<ConfigEntryView[]>([]);
   const [taskTypeOptions, setTaskTypeOptions] = useState<TaskTypeOption[]>([]);
@@ -92,14 +97,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     }
   }, []);
 
-  const providerIcon = useMemo(
-    () =>
-      Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
-        ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].icon
-        : undefined,
-    [config?.provider]
-  );
-
   const providerName = useMemo(
     () =>
       Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
@@ -117,7 +114,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         taskType,
       });
 
-      const newProvider = providers?.find(
+      const newProvider = updatedProviders?.find(
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
       if (newProvider) {
@@ -129,13 +126,19 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const newConfig = { ...(config.providerConfig ?? {}) };
       const newSecrets = { ...(secrets?.providerSecrets ?? {}) };
       Object.keys(config.providerConfig ?? {}).forEach((k) => {
-        if (!newProvider?.configurations[k].supported_task_types.includes(taskType)) {
+        if (
+          newProvider?.configurations[k]?.supported_task_types &&
+          !newProvider?.configurations[k].supported_task_types.includes(taskType)
+        ) {
           delete newConfig[k];
         }
       });
       if (secrets && secrets?.providerSecrets) {
         Object.keys(secrets.providerSecrets).forEach((k) => {
-          if (!newProvider?.configurations[k].supported_task_types.includes(taskType)) {
+          if (
+            newProvider?.configurations[k]?.supported_task_types &&
+            !newProvider?.configurations[k].supported_task_types.includes(taskType)
+          ) {
             delete newSecrets[k];
           }
         });
@@ -152,12 +155,12 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, providers, secrets, updateFieldValues]
+    [config, secrets, updateFieldValues, updatedProviders]
   );
 
   const onProviderChange = useCallback(
     (provider?: string) => {
-      const newProvider = providers?.find((p) => p.service === provider);
+      const newProvider = updatedProviders?.find((p) => p.service === provider);
 
       setTaskTypeOptions(getTaskTypeOptions(newProvider?.task_types ?? []));
       if (newProvider?.task_types && newProvider?.task_types.length > 0) {
@@ -202,7 +205,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, onTaskTypeOptionsSelect, providers, updateFieldValues]
+    [config, onTaskTypeOptionsSelect, updateFieldValues, updatedProviders]
   );
 
   const onSetProviderConfigEntry = useCallback(
@@ -247,7 +250,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         isDisabled={isEdit}
         isInvalid={isInvalid}
         fullWidth
-        icon={!config?.provider ? { type: 'sparkles', side: 'left' } : providerIcon}
+        icon={!config?.provider ? { type: 'sparkles', side: 'left' } : undefined}
       >
         <EuiFieldText
           onClick={toggleProviderPopover}
@@ -273,7 +276,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       isEdit,
       onClearProvider,
       config?.provider,
-      providerIcon,
       toggleProviderPopover,
       handleProviderKeyboardOpen,
       providerName,
@@ -282,8 +284,22 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   );
 
   useEffect(() => {
+    if (providers) {
+      // Ensure the Elastic Inference Service (EIS) appears at the top of the providers list
+      const elasticServiceIndex = providers.findIndex((provider) => provider.service === 'elastic');
+      if (elasticServiceIndex !== -1) {
+        const elasticService = providers[elasticServiceIndex];
+        const remainingProviders = providers.filter((_, index) => index !== elasticServiceIndex);
+        setUpdatedProviders([elasticService, ...remainingProviders]);
+      } else {
+        setUpdatedProviders(providers);
+      }
+    }
+  }, [providers]);
+
+  useEffect(() => {
     if (config?.provider && config?.taskType && isEdit) {
-      const newProvider = providers?.find((p) => p.service === config.provider);
+      const newProvider = updatedProviders?.find((p) => p.service === config.provider);
       // Update connector providerSchema
 
       const newProviderSchema: ConfigEntryView[] = newProvider
@@ -294,7 +310,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       }
       setSelectedTaskType(config.taskType);
     }
-  }, [config, config?.provider, config?.taskType, isEdit, providers, selectedTaskType]);
+  }, [config, config?.provider, config?.taskType, isEdit, selectedTaskType, updatedProviders]);
 
   useEffect(() => {
     if (isSubmitting) {
@@ -339,6 +355,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     setRequiredProviderFormFields(existingConfiguration.filter((p) => p.required || p.sensitive));
   }, [config?.providerConfig, providerSchema, secrets, selectedTaskType]);
 
+  const isInternalProvider = config?.provider === 'elasticsearch'; // To display link for model_ids for Elasticsearch provider
+
   return !isLoading ? (
     <>
       <UseField
@@ -377,7 +395,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
                 className="rightArrowIcon"
               >
                 <SelectableProvider
-                  providers={providers ?? []}
+                  providers={updatedProviders ?? []}
                   onClosePopover={closeProviderPopover}
                   onProviderChange={onProviderChange}
                 />
@@ -394,6 +412,9 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             direction="column"
             items={requiredProviderFormFields}
             setConfigEntry={onSetProviderConfigEntry}
+            isEdit={isEdit}
+            isPreconfigured={isPreconfigured}
+            isInternalProvider={isInternalProvider}
           />
           <EuiSpacer size="m" />
           <AdditionalOptionsFields

@@ -49,6 +49,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
         setEntry((prevEntry) => ({
           ...prevEntry,
           users: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? [] : privateUsers,
+          global: value === i18n.SHARING_GLOBAL_OPTION_LABEL ? true : false,
         })),
       [privateUsers, setEntry]
     );
@@ -60,7 +61,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
           <EuiText size={'s'}>
             <EuiIcon
               color="subdued"
-              style={{ lineHeight: 'inherit', marginRight: '4px' }}
+              css={{ lineHeight: 'inherit', marginRight: '4px' }}
               type="lock"
             />
             {i18n.SHARING_PRIVATE_OPTION_LABEL}
@@ -74,7 +75,7 @@ export const DocumentEntryEditor: React.FC<Props> = React.memo(
           <EuiText size={'s'}>
             <EuiIcon
               color="subdued"
-              style={{ lineHeight: 'inherit', marginRight: '4px' }}
+              css={{ lineHeight: 'inherit', marginRight: '4px' }}
               type="globe"
             />
             {i18n.SHARING_GLOBAL_OPTION_LABEL}

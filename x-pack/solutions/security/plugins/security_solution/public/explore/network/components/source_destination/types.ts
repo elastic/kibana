@@ -9,13 +9,13 @@ export type SourceDestinationType = 'source' | 'destination';
 
 export interface GeoFieldsProps {
   contextId: string;
+  scopeId: string;
   destinationGeoContinentName?: string[] | null;
   destinationGeoCountryName?: string[] | null;
   destinationGeoCountryIsoCode?: string[] | null;
   destinationGeoRegionName?: string[] | null;
   destinationGeoCityName?: string[] | null;
   eventId: string;
-  isDraggable?: boolean;
   sourceGeoContinentName?: string[] | null;
   sourceGeoCountryName?: string[] | null;
   sourceGeoCountryIsoCode?: string[] | null;
@@ -26,6 +26,7 @@ export interface GeoFieldsProps {
 
 export interface SourceDestinationProps {
   contextId: string;
+  scopeId: string;
   destinationBytes?: string[] | null;
   destinationGeoContinentName?: string[] | null;
   destinationGeoCountryName?: string[] | null;
@@ -38,7 +39,6 @@ export interface SourceDestinationProps {
   destinationPort?: string[] | null;
   direction?: string[] | null;
   eventId: string;
-  isDraggable?: boolean;
   networkBytes?: string[] | null;
   networkCommunityId?: string[] | null;
   networkDirection?: string[] | null;
@@ -57,6 +57,7 @@ export interface SourceDestinationProps {
 
 export interface SourceDestinationIpProps {
   contextId: string;
+  scopeId: string;
   destinationGeoContinentName?: string[] | null;
   destinationGeoCountryName?: string[] | null;
   destinationGeoCountryIsoCode?: string[] | null;
@@ -65,7 +66,6 @@ export interface SourceDestinationIpProps {
   destinationIp?: string[] | null;
   destinationPort?: Array<number | string | null> | null;
   eventId: string;
-  isDraggable?: boolean;
   sourceGeoContinentName?: string[] | null;
   sourceGeoCountryName?: string[] | null;
   sourceGeoCountryIsoCode?: string[] | null;
@@ -78,6 +78,7 @@ export interface SourceDestinationIpProps {
 
 export interface SourceDestinationWithArrowsProps {
   contextId: string;
+  scopeId: string;
   destinationBytes?: string[] | null;
   destinationGeoContinentName?: string[] | null;
   destinationGeoCountryName?: string[] | null;
@@ -88,7 +89,6 @@ export interface SourceDestinationWithArrowsProps {
   destinationPackets?: string[] | null;
   destinationPort?: string[] | null;
   eventId: string;
-  isDraggable?: boolean;
   sourceBytes?: string[] | null;
   sourceGeoContinentName?: string[] | null;
   sourceGeoCountryName?: string[] | null;

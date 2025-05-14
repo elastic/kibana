@@ -25,7 +25,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/doc-links",
     "@kbn/console-plugin",
-    "@kbn/test-jest-helpers",
     "@kbn/kibana-utils-plugin",
     "@kbn/features-plugin",
     "@kbn/ui-theme",
@@ -37,8 +36,7 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/licensing-plugin",
     "@kbn/inference-endpoint-ui-common",
-    "@kbn/es-ui-shared-plugin",
-    "@kbn/safer-lodash-set"
+    "@kbn/object-utils",
   ],
   "exclude": [
     "target/**/*",

@@ -49,6 +49,7 @@ const noPanelStyle = css`
 
 export function ChatConsolidatedItems({
   consolidatedItem,
+  isConversationOwnedByCurrentUser,
   onActionClick,
   onEditSubmit,
   onFeedback,
@@ -57,6 +58,7 @@ export function ChatConsolidatedItems({
   onStopGenerating,
 }: {
   consolidatedItem: ChatTimelineItem[];
+  isConversationOwnedByCurrentUser: ChatTimelineProps['isConversationOwnedByCurrentUser'];
   onActionClick: ChatTimelineProps['onActionClick'];
   onEditSubmit: ChatTimelineProps['onEdit'];
   onFeedback: ChatTimelineProps['onFeedback'];
@@ -128,14 +130,13 @@ export function ChatConsolidatedItems({
                 });
               }}
               onEditSubmit={(message) => onEditSubmit(item.message, message)}
-              onFeedbackClick={(feedback) => {
-                onFeedback(item.message, feedback);
-              }}
+              onFeedbackClick={(feedback) => onFeedback(feedback)}
               onRegenerateClick={() => {
                 onRegenerate(item.message);
               }}
               onSendTelemetry={onSendTelemetry}
               onStopGeneratingClick={onStopGenerating}
+              isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
             />
           ))
         : null}

@@ -5,6 +5,6 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import { bulkUntrackBodySchemaV1 } from '..';
+import type { bulkUntrackBodySchemaV1 } from '..';
 
 export type BulkUntrackRequestBody = TypeOf<typeof bulkUntrackBodySchemaV1>;

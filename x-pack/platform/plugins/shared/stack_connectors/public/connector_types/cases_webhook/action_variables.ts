@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionVariable } from '@kbn/alerting-plugin/common';
+import type { ActionVariable } from '@kbn/alerting-plugin/common';
 import * as i18n from './translations';
 
 export const casesVars: ActionVariable[] = [

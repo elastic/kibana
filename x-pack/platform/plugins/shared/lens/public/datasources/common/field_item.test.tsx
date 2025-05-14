@@ -13,7 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { InnerFieldItem, FieldItemIndexPatternFieldProps } from './field_item';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -21,7 +21,6 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { IndexPattern } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from '../form_based/document_field';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
@@ -118,7 +117,7 @@ const mockedServices = {
   },
   application: {
     capabilities: {
-      discover: { save: true, saveQuery: true, show: true },
+      discover_v2: { save: true, show: true },
     },
   },
   core: corePluginMock,
@@ -156,13 +155,11 @@ describe('Lens Field Item', () => {
     const Wrapper: React.FC<{
       children: React.ReactNode;
     }> = ({ children }) => {
-      return (
-        <KibanaRenderContextProvider {...mockedServices.core}>
-          <KibanaContextProvider services={mockedServices}>
-            <button>close the euiPopover</button>
-            {children}
-          </KibanaContextProvider>
-        </KibanaRenderContextProvider>
+      return mockedServices.core.rendering.addContext(
+        <KibanaContextProvider services={mockedServices}>
+          <button>close the euiPopover</button>
+          {children}
+        </KibanaContextProvider>
       );
     };
 
@@ -175,17 +172,14 @@ describe('Lens Field Item', () => {
     await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
   };
 
-  const getFieldNode = (index = 0) => {
-    return screen.getAllByTestId('lnsFieldListPanelField')[index];
-  };
-
   const queryProgressBar = () => screen.queryByRole('progressbar', { name: 'Loading' });
 
   const queryFieldStats = () => screen.queryByTestId('unifiedFieldStats-buttonGroup');
 
   it('should display displayName of a field', async () => {
     renderFieldItem();
-    expect(getFieldNode()).toHaveTextContent('bytes');
+    const [fieldNode] = await screen.findAllByTestId('lnsFieldListPanelField');
+    expect(fieldNode).toHaveTextContent('bytes');
   });
 
   it('should show gauge icon for gauge fields', async () => {
@@ -388,21 +382,26 @@ describe('Lens Field Item', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('should not display Explore in discover button if discover capabilities show is false', async () => {
+  it('should not display Explore in discover button if discover_v2 capabilities show is false', async () => {
     const services = {
       ...mockedServices,
       application: {
         capabilities: {
-          discover: { save: false, saveQuery: false, show: false },
+          discover_v2: { save: false, show: false },
         },
       },
     };
 
     render(
-      <KibanaContextProvider services={services}>
-        <InnerFieldItem {...defaultProps} />
-      </KibanaContextProvider>
+      mockedServices.core.rendering.addContext(
+        <KibanaContextProvider services={services}>
+          <InnerFieldItem {...defaultProps} />
+        </KibanaContextProvider>
+      )
     );
+    await waitFor(() => {
+      expect(screen.getByTestId('field-bytes-showDetails')).toBeInTheDocument();
+    });
     await clickField('bytes');
     expect(
       screen.queryByTestId('lnsFieldListPanel-exploreInDiscover-bytes')

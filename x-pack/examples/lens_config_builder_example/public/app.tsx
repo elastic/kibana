@@ -22,7 +22,6 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import type { LensEmbeddableInput, FormulaPublicApi } from '@kbn/lens-plugin/public';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { LensConfig, LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -70,7 +69,7 @@ export const App = (props: {
 
   return (
     <EuiPage>
-      <EuiPageBody style={{ maxWidth: 800, margin: '0 auto' }}>
+      <EuiPageBody css={{ maxWidth: 800, margin: '0 auto' }}>
         <EuiPageHeader paddingSize="s" bottomBorder={true} pageTitle="Embedded Lens vis" />
         <EuiPageSection paddingSize="s">
           <p>
@@ -128,7 +127,7 @@ export const App = (props: {
               onTableRowClick={(_data) => {
                 // call back event for on table row click event
               }}
-              viewMode={ViewMode.VIEW}
+              viewMode={'view'}
               extraActions={[
                 {
                   id: 'testAction',

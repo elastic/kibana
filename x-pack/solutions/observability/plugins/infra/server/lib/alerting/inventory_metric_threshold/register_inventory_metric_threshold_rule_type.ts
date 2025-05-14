@@ -11,7 +11,7 @@ import type {
   GetViewInAppRelativeUrlFnOpts,
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
 import { metricInventoryThresholdRuleParamsSchema } from '@kbn/response-ops-rule-params/metric_inventory_threshold';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
@@ -41,7 +41,6 @@ import {
   WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
-import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 const groupActionVariableDescription = i18n.translate(
   'xpack.infra.inventory.alerting.groupActionVariableDescription',
@@ -79,6 +78,7 @@ export function registerInventoryThresholdRuleType(
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'infrastructure',
+    solution: observabilityFeatureId,
     minimumLicenseRequired: 'basic',
     isExportable: true,
     /*
@@ -124,7 +124,6 @@ export function registerInventoryThresholdRuleType(
       ],
     },
     alerts: MetricsRulesTypeAlertDefinition,
-    fieldsForAAD: O11Y_AAD_FIELDS,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

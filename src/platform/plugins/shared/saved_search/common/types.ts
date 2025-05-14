@@ -17,7 +17,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DataGridDensity } from '@kbn/unified-data-table';
-import { VIEW_MODE } from '.';
+import type { VIEW_MODE } from '.';
 
 export interface DiscoverGridSettings extends SerializableRecord {
   columns?: Record<string, DiscoverGridSettingsColumn>;

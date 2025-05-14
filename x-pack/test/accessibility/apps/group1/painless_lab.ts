@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('click on the output button', async () => {
       const painlessTabsOutput = await find.byCssSelector(
-        '[data-test-subj="painlessTabs"] #output'
+        '[data-test-subj="painlessTabs-loaded"] #output'
       );
       await painlessTabsOutput.click();
       await a11y.testAppSnapshot();
@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('click on the parameters button', async () => {
       const painlessTabsParameters = await find.byCssSelector(
-        '[data-test-subj="painlessTabs"] #parameters'
+        '[data-test-subj="painlessTabs-loaded"] #parameters'
       );
       await painlessTabsParameters.click();
       await a11y.testAppSnapshot();
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('click on the context button', async () => {
       const painlessTabsContext = await find.byCssSelector(
-        '[data-test-subj="painlessTabs"] #context'
+        '[data-test-subj="painlessTabs-loaded"] #context'
       );
       await painlessTabsContext.click();
       await a11y.testAppSnapshot();

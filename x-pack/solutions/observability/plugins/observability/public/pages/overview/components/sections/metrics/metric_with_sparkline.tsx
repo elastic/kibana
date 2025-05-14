@@ -19,11 +19,10 @@ interface Props {
   value: NumberOrNull;
   timeseries: any[];
   formatter: (value: NumberOrNull) => string;
-  color: number;
+  color: string;
 }
 export function MetricWithSparkline({ id, formatter, value, timeseries, color }: Props) {
   const { baseTheme, sparklineTheme } = useChartThemes();
-  const colors = baseTheme.colors?.vizColors ?? [];
 
   if (!value) {
     return (
@@ -53,11 +52,11 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
             data={timeseries}
             xAccessor={'timestamp'}
             yAccessors={[id]}
-            color={colors[color] || '#006BB4'}
+            color={color}
           />
         </Chart>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap' }}>
+      <EuiFlexItem grow={false} css={{ whiteSpace: 'nowrap' }}>
         {formatter(value)}
       </EuiFlexItem>
     </EuiFlexGroup>

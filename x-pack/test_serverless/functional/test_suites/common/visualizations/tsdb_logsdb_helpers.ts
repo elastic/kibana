@@ -21,7 +21,7 @@ export const timeSeriesDimensions = ['request', 'url'];
 export const logsDBSpecialFields = ['host'];
 
 export const sharedESArchive =
-  'test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb';
+  'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_logsdb';
 export const fromTime = 'Apr 16, 2023 @ 00:00:00.000';
 export const toTime = 'Jun 16, 2023 @ 00:00:00.000';
 

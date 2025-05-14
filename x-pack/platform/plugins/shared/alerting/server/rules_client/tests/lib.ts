@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { IEventLogClient } from '@kbn/event-log-plugin/server';
+import type { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
-import { ConstructorOptions } from '../rules_client';
-import { RuleTypeRegistry } from '../../rule_type_registry';
+import type { ConstructorOptions } from '../rules_client';
+import type { RuleTypeRegistry } from '../../rule_type_registry';
 import { RecoveredActionGroup } from '../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
@@ -24,6 +24,7 @@ export function setGlobalDate() {
   // A version of date that responds to `new Date(null|undefined)` and `Date.now()`
   // by returning a fixed date, otherwise should be same as Date.
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).Date = class Date {
     constructor(...args: unknown[]) {
       // sometimes the ctor has no args, sometimes has a single `null` arg
@@ -124,6 +125,7 @@ export function getBeforeSetup(
     },
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: { validate: (params) => params },
     },

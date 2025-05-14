@@ -10,10 +10,10 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { ShareContext, ShareMenuItemV2, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { ShareContext } from '@kbn/share-plugin/public';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
-import { ScreenshotExportOpts } from '@kbn/share-plugin/public/types';
+import { ExportGenerationOpts, ExportShare } from '@kbn/share-plugin/public/types';
 import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { checkLicense } from '../../license_check';
 
@@ -39,15 +39,12 @@ const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printable
   return { ...baseParams, locatorParams };
 };
 
-/**
- * This is used by Dashboard and Visualize apps (sharing modal)
- */
-export const reportingExportModalProvider = ({
+export const reportingPDFExportProvider = ({
   apiClient,
   license,
   application,
   startServices$,
-}: ExportModalShareOpts): ShareMenuProvider => {
+}: ExportModalShareOpts): ExportShare => {
   const getShareMenuItems = ({
     objectType,
     objectId,
@@ -57,29 +54,30 @@ export const reportingExportModalProvider = ({
     shareableUrlForSavedObject,
     toasts,
     ...shareOpts
-  }: ShareContext) => {
+  }: ShareContext): ReturnType<ExportShare['config']> => {
     const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
     const licenseToolTipContent = message;
     const licenseHasScreenshotReporting = showLinks;
     const licenseDisabled = !enableLinks;
 
     const capabilityHasDashboardScreenshotReporting =
-      application.capabilities.dashboard?.generateScreenshot === true;
+      application.capabilities.dashboard_v2?.generateScreenshot === true;
     const capabilityHasVisualizeScreenshotReporting =
-      application.capabilities.visualize?.generateScreenshot === true;
+      application.capabilities.visualize_v2?.generateScreenshot === true;
 
     if (!licenseHasScreenshotReporting) {
-      return [];
+      return null;
     }
+
     // for lens png pdf and csv are combined into one modal
     const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
 
     if (!isSupportedType) {
-      return [];
+      return null;
     }
 
     if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
-      return [];
+      return null;
     }
 
     if (
@@ -87,11 +85,10 @@ export const reportingExportModalProvider = ({
       !capabilityHasVisualizeScreenshotReporting &&
       !capabilityHasDashboardScreenshotReporting
     ) {
-      return [];
+      return null;
     }
 
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
-    const shareActions: ShareMenuItemV2[] = [];
 
     const jobProviderOptions: JobParamsProviderOptions = {
       shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
@@ -101,7 +98,7 @@ export const reportingExportModalProvider = ({
 
     const requiresSavedState = sharingData.locatorParams === null;
 
-    const generateReportPDF = ({ intl, optimizedForPrinting = false }: ScreenshotExportOpts) => {
+    const generateReportPDF = ({ intl, optimizedForPrinting = false }: ExportGenerationOpts) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams({ ...jobProviderOptions, optimizedForPrinting }, 'printablePdfV2')(),
       });
@@ -149,7 +146,7 @@ export const reportingExportModalProvider = ({
         });
     };
 
-    const generateExportUrlPDF = ({ optimizedForPrinting }: ScreenshotExportOpts) => {
+    const generateExportUrlPDF = ({ optimizedForPrinting }: ExportGenerationOpts) => {
       const jobParams = apiClient.getDecoratedJobParams(
         getJobParams({ ...jobProviderOptions, optimizedForPrinting }, 'printablePdfV2')()
       );
@@ -157,6 +154,88 @@ export const reportingExportModalProvider = ({
 
       return new URL(relativePathPDF, window.location.href).toString();
     };
+
+    return {
+      name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabel', {
+        defaultMessage: 'PDF',
+      }),
+      toolTipContent: licenseToolTipContent,
+      disabled: licenseDisabled || sharingData.reportingDisabled,
+      label: 'PDF' as const,
+      generateAssetExport: generateReportPDF,
+      generateAssetURIValue: generateExportUrlPDF,
+      exportType: 'printablePdfV2',
+      requiresSavedState,
+      renderLayoutOptionSwitch: objectType === 'dashboard',
+      renderCopyURIButton: true,
+    };
+  };
+
+  return {
+    id: 'pdfReports',
+    shareType: 'integration',
+    groupId: 'export',
+    config: getShareMenuItems,
+  };
+};
+
+export const reportingPNGExportProvider = ({
+  apiClient,
+  license,
+  application,
+  startServices$,
+}: ExportModalShareOpts): ExportShare => {
+  const getShareMenuItems = ({
+    objectType,
+    objectId,
+    isDirty,
+    onClose,
+    shareableUrl,
+    shareableUrlForSavedObject,
+    toasts,
+    ...shareOpts
+  }: ShareContext): ReturnType<ExportShare['config']> | null => {
+    const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
+    const licenseToolTipContent = message;
+    const licenseHasScreenshotReporting = showLinks;
+    const licenseDisabled = !enableLinks;
+
+    const capabilityHasDashboardScreenshotReporting =
+      application.capabilities.dashboard_v2?.generateScreenshot === true;
+    const capabilityHasVisualizeScreenshotReporting =
+      application.capabilities.visualize_v2?.generateScreenshot === true;
+
+    if (!licenseHasScreenshotReporting) {
+      return null;
+    }
+    // for lens png pdf and csv are combined into one modal
+    const isSupportedType = ['dashboard', 'visualization', 'lens'].includes(objectType);
+
+    if (!isSupportedType) {
+      return null;
+    }
+
+    if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
+      return null;
+    }
+
+    if (
+      isSupportedType &&
+      !capabilityHasVisualizeScreenshotReporting &&
+      !capabilityHasDashboardScreenshotReporting
+    ) {
+      return null;
+    }
+
+    const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
+
+    const jobProviderOptions: JobParamsProviderOptions = {
+      shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
+      objectType,
+      sharingData,
+    };
+
+    const requiresSavedState = sharingData.locatorParams === null;
 
     const generateExportUrlPNG = () => {
       const jobParams = apiClient.getDecoratedJobParams(
@@ -167,7 +246,7 @@ export const reportingExportModalProvider = ({
       return new URL(relativePathPNG, window.location.href).toString();
     };
 
-    const generateReportPNG = ({ intl }: ScreenshotExportOpts) => {
+    const generateReportPNG = ({ intl }: ExportGenerationOpts) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams(jobProviderOptions, 'pngV2')(),
       });
@@ -214,48 +293,25 @@ export const reportingExportModalProvider = ({
         });
     };
 
-    shareActions.push({
-      shareMenuItem: {
-        name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabel', {
-          defaultMessage: 'PDF',
-        }),
-        toolTipContent: licenseToolTipContent,
-        disabled: licenseDisabled || sharingData.reportingDisabled,
-        ['data-test-subj']: 'imageExports',
-      },
-      label: 'PDF' as const,
-      generateExport: generateReportPDF,
-      generateExportUrl: generateExportUrlPDF,
-      reportType: 'printablePdfV2',
-      requiresSavedState,
-      layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
-      renderLayoutOptionSwitch: objectType === 'dashboard',
-      renderCopyURLButton: true,
-    });
-
-    shareActions.push({
-      shareMenuItem: {
-        name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabelPNG', {
-          defaultMessage: 'PNG export',
-        }),
-        toolTipContent: licenseToolTipContent,
-        disabled: licenseDisabled || sharingData.reportingDisabled,
-        ['data-test-subj']: 'imageExports',
-      },
+    return {
+      name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabelPNG', {
+        defaultMessage: 'PNG export',
+      }),
+      toolTipContent: licenseToolTipContent,
+      disabled: licenseDisabled || sharingData.reportingDisabled,
       label: 'PNG' as const,
-      generateExport: generateReportPNG,
-      generateExportUrl: generateExportUrlPNG,
-      reportType: 'pngV2',
+      generateAssetExport: generateReportPNG,
+      generateAssetURIValue: generateExportUrlPNG,
+      exportType: 'pngV2',
       requiresSavedState,
-      layoutOption: objectType === 'dashboard' ? ('print' as const) : undefined,
-      renderCopyURLButton: true,
-    });
-
-    return shareActions;
+      renderCopyURIButton: true,
+    };
   };
 
   return {
-    id: 'modalImageReports',
-    getShareMenuItems,
+    shareType: 'integration',
+    groupId: 'export',
+    id: 'imageReports',
+    config: getShareMenuItems,
   };
 };

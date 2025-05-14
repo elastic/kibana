@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { RootCauseAnalysisCallout } from '.';
 
-const stories: Meta<{}> = {
+const stories: Meta = {
   title: 'RCA/Callout',
   component: RootCauseAnalysisCallout,
 };
 
 export default stories;
 
-export const Default: Story<{}> = () => {
+export const Default: StoryFn = () => {
   return (
     <RootCauseAnalysisCallout
       onClick={() => {}}
@@ -26,7 +26,7 @@ export const Default: Story<{}> = () => {
   );
 };
 
-export const CompleteInBackgroundDisabled: Story<{}> = () => {
+export const CompleteInBackgroundDisabled: StoryFn = () => {
   return (
     <RootCauseAnalysisCallout
       onClick={() => {}}

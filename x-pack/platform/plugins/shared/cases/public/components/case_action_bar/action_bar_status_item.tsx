@@ -11,11 +11,16 @@ import { EuiTitle } from '@elastic/eui';
 interface ActionBarStatusItemProps {
   title: string | ReactNode;
   children?: ReactNode;
+  dataTestSubj?: string;
 }
 
-const ActionBarStatusItemComponent: React.FC<ActionBarStatusItemProps> = ({ title, children }) => (
+const ActionBarStatusItemComponent: React.FC<ActionBarStatusItemProps> = ({
+  title,
+  children,
+  dataTestSubj,
+}) => (
   <>
-    <EuiTitle size="xxs">
+    <EuiTitle size="xxs" data-test-subj={dataTestSubj}>
       <strong>{title}</strong>
     </EuiTitle>
     {children}

@@ -135,7 +135,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       ]
     : [];
 
-  const openInVisualize = uiCapabilities?.visualize?.show
+  const openInVisualize = uiCapabilities?.visualize_v2?.show
     ? [
         {
           name: i18n.translate('xpack.infra.metricsExplorer.openInTSVB', {
@@ -187,6 +187,9 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   });
   const button = (
     <EuiButtonEmpty
+      aria-label={i18n.translate('xpack.infra.metricsExplorerChartContextMenu.button.ariaLabel', {
+        defaultMessage: '',
+      })}
       data-test-subj="infraMetricsExplorerChartContextMenuButton"
       contentProps={{ 'aria-label': actionAriaLabel }}
       onClick={togglePopover}

@@ -55,7 +55,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
   const burnRate = alert.fields[ALERT_EVALUATION_VALUE];
 
   if (isLoading) {
-    return <EuiLoadingChart size="m" mono data-test-subj="loading" />;
+    return <EuiLoadingChart size="m" data-test-subj="loading" />;
   }
 
   if (!slo) {
@@ -83,7 +83,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                 data-test-subj="o11yErrorRatePanelSloDetailsLink"
                 href={http.basePath.prepend(alert.link!)}
               >
-                <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
+                <EuiIcon type="sortRight" css={{ marginRight: '4px' }} />
                 <FormattedMessage
                   id="xpack.slo.burnRateRule.alertDetailsAppSection.burnRate.sloDetailsLink"
                   defaultMessage="SLO details"
@@ -103,7 +103,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
               <EuiFlexGroup
                 justifyContent="spaceBetween"
                 direction="column"
-                style={{ minHeight: '100%' }}
+                css={{ minHeight: '100%' }}
               >
                 <EuiFlexItem>
                   <EuiText color="default" size="m">
@@ -112,7 +112,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                         'xpack.slo.burnRateRule.alertDetailsAppSection.burnRate.thresholdBreachedTitle',
                         { defaultMessage: 'Threshold breached' }
                       )}
-                      <EuiIcon type="warning" style={{ marginLeft: '4px' }} />
+                      <EuiIcon type="warning" css={{ marginLeft: '4px' }} />
                     </span>
                   </EuiText>
                 </EuiFlexItem>

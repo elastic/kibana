@@ -9,7 +9,7 @@
 
 import type { Presentable } from '@kbn/ui-actions-browser/src/types';
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
-import { Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 
 /**
  * During action execution we can provide additional information,
@@ -41,7 +41,7 @@ export interface ActionMenuItemProps<Context extends object> {
 }
 
 export type FrequentCompatibilityChangeAction<Context extends object = object> = Action<Context> &
-  Required<Pick<Action<Context>, 'subscribeToCompatibilityChanges' | 'couldBecomeCompatible'>>;
+  Required<Pick<Action<Context>, 'getCompatibilityChangesSubject' | 'couldBecomeCompatible'>>;
 
 export interface Action<Context extends object = object>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
@@ -98,13 +98,9 @@ export interface Action<Context extends object = object>
   shouldAutoExecute?(context: ActionExecutionContext<Context>): Promise<boolean>;
 
   /**
-   * Allows this action to call a method when its compatibility changes.
-   * @returns a subscription that can be used to unsubscribe from the changes.
+   * @returns an Observable that emits when this action's compatibility changes.
    */
-  subscribeToCompatibilityChanges?: (
-    context: Context,
-    onChange: (isCompatible: boolean, action: Action<Context>) => void
-  ) => Subscription | undefined;
+  getCompatibilityChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * Determines if action could become compatible given the context. If present,
@@ -179,13 +175,9 @@ export interface ActionDefinition<Context extends object = object>
   showNotification?: boolean;
 
   /**
-   * Allows this action to call a method when its compatibility changes.
-   * @returns a subscription that can be used to unsubscribe from the changes.
+   * @returns an Observable that emits when this action's compatibility should be recalculated.
    */
-  subscribeToCompatibilityChanges?: (
-    context: Context,
-    onChange: (isCompatible: boolean, action: Action<Context>) => void
-  ) => Subscription | undefined;
+  getCompatibilityChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * Determines if action could become compatible given the context. If present,

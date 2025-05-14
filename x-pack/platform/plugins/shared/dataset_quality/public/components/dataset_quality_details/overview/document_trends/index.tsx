@@ -24,7 +24,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import React, { useCallback } from 'react';
 import {
   discoverAriaText,
@@ -60,7 +60,7 @@ const degradedDocsTooltip = (
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: number }) {
-  const { isFailureStoreEnabled } = useDatasetQualityDetailsState();
+  const { isFailureStoreEnabled } = useDatasetQualityDetailsContext();
   const { timeRange, updateTimeRange, docsTrendChart } = useDatasetQualityDetailsState();
   const {
     dataView,

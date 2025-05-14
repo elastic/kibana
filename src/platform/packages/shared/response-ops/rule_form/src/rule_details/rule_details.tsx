@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -24,6 +25,7 @@ import {
   RULE_TAG_PLACEHOLDER,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
+import { OptionalFieldLabel } from '../optional_field_label';
 
 export const RuleDetails = () => {
   const { formData, baseErrors } = useRuleFormState();
@@ -31,6 +33,17 @@ export const RuleDetails = () => {
   const dispatch = useRuleFormDispatch();
 
   const { tags = [], name } = formData;
+
+  const ruleDetailsContainerCss = css`
+    @container (max-width: 767px) {
+      &.euiDescribedFormGroup {
+        flex-direction: column;
+      }
+      &.euiDescribedFormGroup > .euiFlexItem {
+        width: 100%;
+      }
+    }
+  `;
 
   const tagsOptions = useMemo(() => {
     return tags.map((tag: string) => ({ label: tag }));
@@ -77,6 +90,7 @@ export const RuleDetails = () => {
 
   return (
     <EuiDescribedFormGroup
+      css={ruleDetailsContainerCss}
       fullWidth
       title={<h3>{RULE_DETAILS_TITLE}</h3>}
       description={
@@ -103,6 +117,7 @@ export const RuleDetails = () => {
       <EuiFormRow
         fullWidth
         label={RULE_TAG_INPUT_TITLE}
+        labelAppend={OptionalFieldLabel}
         isInvalid={!!baseErrors?.tags?.length}
         error={baseErrors?.tags}
       >

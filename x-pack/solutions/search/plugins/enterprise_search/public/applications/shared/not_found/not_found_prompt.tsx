@@ -33,7 +33,7 @@ export const NotFoundPrompt: React.FC<Props> = ({
 
   return (
     <KibanaPageTemplate.EmptyPrompt
-      iconType="logoEnterpriseSearch"
+      iconType="logoElasticsearch"
       title={
         <h1>
           {i18n.translate('xpack.enterpriseSearch.notFound.title', {
@@ -59,7 +59,11 @@ export const NotFoundPrompt: React.FC<Props> = ({
             </EuiButtonTo>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiButton href={supportUrl} target="_blank">
+            <EuiButton
+              data-test-subj="enterpriseSearchNotFoundPromptContactSupportButton"
+              href={supportUrl}
+              target="_blank"
+            >
               {i18n.translate('xpack.enterpriseSearch.notFound.action2', {
                 defaultMessage: 'Contact support',
               })}

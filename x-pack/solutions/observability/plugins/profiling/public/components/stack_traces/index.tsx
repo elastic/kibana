@@ -95,7 +95,7 @@ export function StackTraces({
                   })}
                 />
               </EuiFlexItem>
-              <EuiFlexItem style={{ alignContent: 'center' }}>
+              <EuiFlexItem css={{ alignContent: 'center' }}>
                 <AsyncComponent size="xl" {...state} style={{ height: 400 }}>
                   <StackedBarChart
                     height={400}
@@ -111,7 +111,7 @@ export function StackTraces({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <AsyncComponent size="m" mono {...state} style={{ minHeight: 200 }}>
+          <AsyncComponent size="m" {...state} style={{ minHeight: 200 }}>
             <>
               <EuiSpacer />
               <EuiTitle size="s">

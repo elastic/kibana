@@ -76,6 +76,11 @@ export const IntegrationRT = t.intersection([
 
 export type InstalledIntegration = t.TypeOf<typeof IntegrationRT>;
 
+export const LogsDetectLoadingStepPayloadRT = t.type({
+  os: t.string,
+  arch: t.string,
+});
+
 export const ElasticAgentStepPayloadRT = t.type({
   agentId: t.string,
 });
@@ -87,6 +92,7 @@ export const InstallIntegrationsStepPayloadRT = t.array(IntegrationRT);
 export type InstallIntegrationsStepPayload = t.TypeOf<typeof InstallIntegrationsStepPayloadRT>;
 
 export const StepProgressPayloadRT = t.union([
+  LogsDetectLoadingStepPayloadRT,
   ElasticAgentStepPayloadRT,
   InstallIntegrationsStepPayloadRT,
 ]);

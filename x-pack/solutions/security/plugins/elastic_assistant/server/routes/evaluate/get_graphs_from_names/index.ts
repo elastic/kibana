@@ -9,11 +9,13 @@ import {
   ASSISTANT_GRAPH_MAP,
   AssistantGraphMetadata,
   AttackDiscoveryGraphMetadata,
+  DefendInsightsGraphMetadata,
 } from '../../../lib/langchain/graphs';
 
 export interface GetGraphsFromNamesResults {
   attackDiscoveryGraphs: AttackDiscoveryGraphMetadata[];
   assistantGraphs: AssistantGraphMetadata[];
+  defendInsightsGraphs: DefendInsightsGraphMetadata[];
 }
 
 export const getGraphsFromNames = (graphNames: string[]): GetGraphsFromNamesResults =>
@@ -21,9 +23,14 @@ export const getGraphsFromNames = (graphNames: string[]): GetGraphsFromNamesResu
     (acc, graphName) => {
       const graph = ASSISTANT_GRAPH_MAP[graphName];
       if (graph != null) {
-        return graph.graphType === 'assistant'
-          ? { ...acc, assistantGraphs: [...acc.assistantGraphs, graph] }
-          : { ...acc, attackDiscoveryGraphs: [...acc.attackDiscoveryGraphs, graph] };
+        switch (graph.graphType) {
+          case 'assistant':
+            return { ...acc, assistantGraphs: [...acc.assistantGraphs, graph] };
+          case 'attack-discovery':
+            return { ...acc, attackDiscoveryGraphs: [...acc.attackDiscoveryGraphs, graph] };
+          case 'defend-insights':
+            return { ...acc, defendInsightsGraphs: [...acc.defendInsightsGraphs, graph] };
+        }
       }
 
       return acc;
@@ -31,5 +38,6 @@ export const getGraphsFromNames = (graphNames: string[]): GetGraphsFromNamesResu
     {
       attackDiscoveryGraphs: [],
       assistantGraphs: [],
+      defendInsightsGraphs: [],
     }
   );

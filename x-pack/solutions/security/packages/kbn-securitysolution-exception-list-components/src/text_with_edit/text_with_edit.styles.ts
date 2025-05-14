@@ -6,19 +6,13 @@
  */
 
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 export const textWithEditContainerCss = css`
   display: flex;
   width: fit-content;
   align-items: baseline;
-  padding-bottom: ${euiThemeVars.euiSizeS};
+
   h1 {
     margin-bottom: 0;
-  }
-`;
-export const editIconCss = css`
-  button {
-    margin-left: -${euiThemeVars.euiSizeM};
   }
 `;

@@ -15,6 +15,8 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 
 import { productTypes } from '../common/config';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
+import { METERING_TASK as AI4SOC_METERING_TASK } from './ai4soc/constants/metering';
 
 const tlsConfig = schema.object({
   certificate: schema.string(),
@@ -37,13 +39,19 @@ export const configSchema = schema.object({
    * Usage Reporting: the interval between runs of the endpoint task
    */
 
-  usageReportingTaskInterval: schema.string({ defaultValue: '5m' }),
+  usageReportingTaskInterval: schema.string({ defaultValue: ENDPOINT_METERING_TASK.INTERVAL }),
 
   /**
    * Usage Reporting: the interval between runs of the cloud security task
    */
 
   cloudSecurityUsageReportingTaskInterval: schema.string({ defaultValue: '30m' }),
+
+  /**
+   * Usage Reporting: the interval between runs of the ai4soc metering task
+   */
+
+  ai4SocUsageReportingTaskInterval: schema.string({ defaultValue: AI4SOC_METERING_TASK.INTERVAL }),
 
   /**
    * Usage Reporting: timeout value for how long the task should run.

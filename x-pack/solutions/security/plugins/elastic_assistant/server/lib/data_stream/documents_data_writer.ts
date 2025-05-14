@@ -136,13 +136,15 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               path: 'users',
               query: {
                 bool: {
-                  must: [
-                    {
-                      match: authenticatedUser.profile_uid
-                        ? { 'users.id': authenticatedUser.profile_uid }
-                        : { 'users.name': authenticatedUser.username },
-                    },
+                  should: [
+                    // Match on users.id if profile_uid exists
+                    ...(authenticatedUser.profile_uid
+                      ? [{ term: { 'users.id': authenticatedUser.profile_uid } }]
+                      : []),
+                    // Always try to match on users.name
+                    { term: { 'users.name': authenticatedUser.username } },
                   ],
+                  minimum_should_match: 1,
                 },
               },
             },
@@ -163,24 +165,22 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     const updatedAt = new Date().toISOString();
 
     const responseToUpdate = await this.options.esClient.search({
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      ids: {
-                        values: documentsToUpdate?.map((c) => c.id),
-                      },
+      query: {
+        bool: {
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    ids: {
+                      values: documentsToUpdate?.map((c) => c.id),
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
-            ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
-          },
+            },
+          ],
+          ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
         },
       },
       _source: false,
@@ -211,24 +211,22 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     authenticatedUser?: AuthenticatedUser
   ) => {
     const responseToDelete = await this.options.esClient.search({
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      ids: {
-                        values: documentsToDelete,
-                      },
+      query: {
+        bool: {
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    ids: {
+                      values: documentsToDelete,
                     },
-                  ],
-                },
+                  },
+                ],
               },
-            ],
-            ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
-          },
+            },
+          ],
+          ...(authenticatedUser ? this.getFilterByUser(authenticatedUser) : {}),
         },
       },
       _source: false,

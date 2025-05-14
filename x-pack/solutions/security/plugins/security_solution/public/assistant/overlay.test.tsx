@@ -17,9 +17,13 @@ jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: () => ({
     assistantAvailability: mockAssistantAvailability(),
   }),
+  AssistantSpaceIdProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>, // Mock it as a passthrough
 }));
 
 jest.mock('../common/hooks/use_experimental_features');
+jest.mock('../common/hooks/use_space_id', () => ({
+  useSpaceId: () => 'space-id',
+}));
 
 describe('AssistantOverlay', () => {
   const queryClient = new QueryClient({

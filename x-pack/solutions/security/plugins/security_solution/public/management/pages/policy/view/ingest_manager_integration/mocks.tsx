@@ -171,6 +171,7 @@ export const generateFleetPackageInfo = (): PackageInfo => {
         ml_module: [],
         security_rule: [],
         tag: [],
+        security_ai_prompt: [],
         osquery_pack_asset: [],
         osquery_saved_query: [],
       },

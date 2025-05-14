@@ -205,6 +205,39 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.ConnectorSchedulingComponent",
+        "type": "Function",
+        "tags": [],
+        "label": "ConnectorSchedulingComponent",
+        "description": [],
+        "signature": [
+          "({ children, connector, configurationPathOnClick, dataTelemetryIdPrefix, hasChanges, hasIngestionError, hasPlatinumLicense, isDisabled, setHasChanges, shouldShowAccessControlSync, shouldShowIncrementalSync, updateConnectorStatus, updateScheduling, }: ConnectorContentSchedulingProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/components/scheduling/connector_scheduling.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorSchedulingComponent.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  children,\n  connector,\n  configurationPathOnClick,\n  dataTelemetryIdPrefix,\n  hasChanges,\n  hasIngestionError,\n  hasPlatinumLicense,\n  isDisabled,\n  setHasChanges,\n  shouldShowAccessControlSync,\n  shouldShowIncrementalSync,\n  updateConnectorStatus,\n  updateScheduling,\n}",
+            "description": [],
+            "signature": [
+              "ConnectorContentSchedulingProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-connectors/components/scheduling/connector_scheduling.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.createConnector",
         "type": "Function",
         "tags": [],
@@ -655,6 +688,39 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/lib/create_connector_secret.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.DecorativeHorizontalStepper",
+        "type": "Function",
+        "tags": [],
+        "label": "DecorativeHorizontalStepper",
+        "description": [],
+        "signature": [
+          "({ stepCount, }: DecorativeHorizontalStepperProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/components/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.DecorativeHorizontalStepper.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  stepCount = 2,\n}",
+            "description": [],
+            "signature": [
+              "DecorativeHorizontalStepperProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-connectors/components/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1176,6 +1242,39 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.FilteringRulesTable",
+        "type": "Function",
+        "tags": [],
+        "label": "FilteringRulesTable",
+        "description": [],
+        "signature": [
+          "({ showOrder, filteringRules, }: FilteringRulesTableProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/filtering_rules_table.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.FilteringRulesTable.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  showOrder,\n  filteringRules,\n}",
+            "description": [],
+            "signature": [
+              "FilteringRulesTableProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-connectors/components/sync_jobs/filtering_rules_table.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.filteringRuleToText",
         "type": "Function",
         "tags": [],
@@ -1449,6 +1548,109 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.isNotNullish",
+        "type": "Function",
+        "tags": [],
+        "label": "isNotNullish",
+        "description": [],
+        "signature": [
+          "(value: T | null | undefined) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/utils/is_not_nullish.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.isNotNullish.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-connectors/utils/is_not_nullish.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.isResourceNotFoundException",
+        "type": "Function",
+        "tags": [],
+        "label": "isResourceNotFoundException",
+        "description": [],
+        "signature": [
+          "(error: ",
+          "ElasticsearchResponseError",
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/utils/identify_exceptions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.isResourceNotFoundException.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "ElasticsearchResponseError"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-connectors/utils/identify_exceptions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.isStatusTransitionException",
+        "type": "Function",
+        "tags": [],
+        "label": "isStatusTransitionException",
+        "description": [],
+        "signature": [
+          "(error: ",
+          "ElasticsearchResponseError",
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/utils/identify_exceptions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.isStatusTransitionException.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "ElasticsearchResponseError"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-connectors/utils/identify_exceptions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1886,6 +2088,72 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/utils/sync_status_to_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.toAlphanumeric",
+        "type": "Function",
+        "tags": [],
+        "label": "toAlphanumeric",
+        "description": [],
+        "signature": [
+          "(input: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/utils/to_alphanumeric.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.toAlphanumeric.$1",
+            "type": "string",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-connectors/utils/to_alphanumeric.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.toValidIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "toValidIndexName",
+        "description": [],
+        "signature": [
+          "(str: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/lib/generate_connector_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.toValidIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "str",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-connectors/lib/generate_connector_name.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -5160,6 +5428,43 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.FetchIndexResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "FetchIndexResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-search-connectors/types/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.FetchIndexResult.index",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "IndicesIndexState",
+              " & { connector?: ",
+              {
+                "pluginId": "@kbn/search-connectors",
+                "scope": "common",
+                "docId": "kibKbnSearchConnectorsPluginApi",
+                "section": "def-common.Connector",
+                "text": "Connector"
+              },
+              " | undefined; count: number; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-connectors/types/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.FilteringConfig",
         "type": "Interface",
         "tags": [],
@@ -5300,7 +5605,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "\"contains\" | \"<\" | \">\" | \"regex\" | \"equals\" | \"ends_with\" | \"starts_with\""
+              "\"<\" | \">\" | \"regex\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/types/connectors.ts",
             "deprecated": false,
@@ -6457,6 +6762,35 @@
     "misc": [
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.ApiViewIndex",
+        "type": "Type",
+        "tags": [],
+        "label": "ApiViewIndex",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ElasticsearchIndex",
+            "text": "ElasticsearchIndex"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ElasticsearchViewIndexExtension",
+            "text": "ElasticsearchViewIndexExtension"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/types/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.CONNECTOR_DEFINITIONS",
         "type": "Array",
         "tags": [],
@@ -6900,6 +7234,64 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.ElasticsearchIndexWithIngestion",
+        "type": "Type",
+        "tags": [],
+        "label": "ElasticsearchIndexWithIngestion",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorIndex",
+            "text": "ConnectorIndex"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ElasticsearchIndex",
+            "text": "ElasticsearchIndex"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/types/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.ElasticsearchViewIndex",
+        "type": "Type",
+        "tags": [],
+        "label": "ElasticsearchViewIndex",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorViewIndex",
+            "text": "ConnectorViewIndex"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ApiViewIndex",
+            "text": "ApiViewIndex"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/types/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.Field",
         "type": "Type",
         "tags": [],
@@ -6951,7 +7343,7 @@
         "label": "FilteringRuleRule",
         "description": [],
         "signature": [
-          "\"contains\" | \"<\" | \">\" | \"regex\" | \"equals\" | \"ends_with\" | \"starts_with\""
+          "\"<\" | \">\" | \"regex\" | \"equals\" | \"contains\" | \"ends_with\" | \"starts_with\""
         ],
         "path": "src/platform/packages/shared/kbn-search-connectors/types/connectors.ts",
         "deprecated": false,
@@ -49496,7 +49888,7 @@
                         "label": "depends_on",
                         "description": [],
                         "signature": [
-                          "never[]"
+                          "{ field: string; value: string; }[]"
                         ],
                         "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,

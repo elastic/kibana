@@ -7,6 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
+const secretRefSchema = schema.oneOf([
+  schema.object({
+    id: schema.string(),
+  }),
+  schema.string(),
+]);
+
 const DownloadSourceBaseSchema = {
   id: schema.maybe(schema.string()),
   name: schema.string(),
@@ -22,6 +29,18 @@ const DownloadSourceBaseSchema = {
         },
       }),
     ])
+  ),
+  ssl: schema.maybe(
+    schema.object({
+      certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+      certificate: schema.maybe(schema.string()),
+      key: schema.maybe(schema.string()),
+    })
+  ),
+  secrets: schema.maybe(
+    schema.object({
+      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+    })
   ),
 };
 

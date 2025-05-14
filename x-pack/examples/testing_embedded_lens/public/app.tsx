@@ -24,7 +24,6 @@ import type { CoreStart } from '@kbn/core/public';
 import useDebounce from 'react-use/lib/useDebounce';
 import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
@@ -41,7 +40,7 @@ import type {
   MetricVisualizationState,
 } from '@kbn/lens-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { CodeEditor, HJsonLang } from '@kbn/code-editor';
+import { CodeEditor, HJSON_LANG_ID } from '@kbn/code-editor';
 import type { StartDependencies } from './plugin';
 import {
   AllOverrides,
@@ -495,7 +494,7 @@ export const App = (props: {
 
   return (
     <EuiPage>
-      <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
+      <EuiPageBody css={{ maxWidth: 1200, margin: '0 auto' }}>
         <EuiPageHeader paddingSize="s" bottomBorder={true} pageTitle="Lens embeddable playground" />
         <EuiPageSection paddingSize="s">
           <EuiFlexGroup
@@ -631,7 +630,7 @@ export const App = (props: {
                             // call back event for on table row click event
                           }}
                           disableTriggers={!enableTriggers}
-                          viewMode={ViewMode.VIEW}
+                          viewMode={'view'}
                           withDefaultActions={enableDefaultAction}
                           extraActions={
                             enableExtraAction
@@ -715,10 +714,10 @@ export const App = (props: {
                         </EuiCallOut>
                       )}
                     </EuiFlexGroup>
-                    <EuiFlexGroup style={{ height: '75vh' }} direction="column">
+                    <EuiFlexGroup css={{ height: '75vh' }} direction="column">
                       <EuiFlexItem>
                         <CodeEditor
-                          languageId={HJsonLang}
+                          languageId={HJSON_LANG_ID}
                           options={{
                             fontSize: 14,
                             wordWrap: 'on',

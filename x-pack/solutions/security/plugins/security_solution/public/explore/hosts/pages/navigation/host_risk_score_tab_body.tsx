@@ -63,7 +63,7 @@ export const HostRiskScoreQueryTabBody = ({
   }, [toggleStatus]);
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
-  const privileges = useMissingRiskEnginePrivileges();
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
   const { data, inspect, isInspected, hasEngineBeenInstalled, loading, refetch, totalCount } =
     useRiskScore({
       filterQuery,

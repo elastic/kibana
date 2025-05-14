@@ -18,16 +18,16 @@ export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) =>
     .get({
       access: 'internal',
       path: GET_TOTAL_IO_BYTES_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Elasticsearch and it's not tied to a Kibana privilege.`,
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: `This route delegates authorization to Elasticsearch and it's not tied to a Kibana privilege.`,
-          },
-        },
         validate: {
           request: {
             query: schema.object({
@@ -45,29 +45,27 @@ export const registerGetTotalIOBytesRoute = (router: IRouter, logger: Logger) =>
         try {
           const search = await client.search({
             index: [index],
-            body: {
-              query: {
-                bool: {
-                  must: [
-                    { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
-                    { term: { [EVENT_ACTION]: 'text_output' } },
-                    {
-                      range: {
-                        // optimization to prevent data before this session from being hit.
-                        [TIMESTAMP_PROPERTY]: {
-                          gte: sessionStartTime,
-                        },
+            query: {
+              bool: {
+                must: [
+                  { term: { [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId } },
+                  { term: { [EVENT_ACTION]: 'text_output' } },
+                  {
+                    range: {
+                      // optimization to prevent data before this session from being hit.
+                      [TIMESTAMP_PROPERTY]: {
+                        gte: sessionStartTime,
                       },
                     },
-                  ],
-                },
-              },
-              size: 0,
-              aggs: {
-                total_bytes_captured: {
-                  sum: {
-                    field: TOTAL_BYTES_CAPTURED_PROPERTY,
                   },
+                ],
+              },
+            },
+            size: 0,
+            aggs: {
+              total_bytes_captured: {
+                sum: {
+                  field: TOTAL_BYTES_CAPTURED_PROPERTY,
                 },
               },
             },

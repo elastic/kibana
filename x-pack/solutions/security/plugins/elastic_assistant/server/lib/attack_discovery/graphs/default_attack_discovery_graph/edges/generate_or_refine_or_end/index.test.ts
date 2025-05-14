@@ -35,6 +35,7 @@ const graphState: GraphState = {
   ],
   combinedGenerations: '',
   combinedRefinements: '',
+  continuePrompt: 'continue',
   errors: [],
   generationAttempts: 0,
   generations: [],

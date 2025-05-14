@@ -14,7 +14,7 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
 
 export function HeaderMenu(): React.ReactElement | null {
-  const { http, theme } = useKibana().services;
+  const { http, theme, docLinks } = useKibana().services;
 
   const { appMountParameters, isServerless } = usePluginContext();
   return (
@@ -25,6 +25,16 @@ export function HeaderMenu(): React.ReactElement | null {
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <EuiHeaderLinks>
+            <EuiHeaderLink
+              color="primary"
+              href={docLinks.links.observability.slo}
+              iconType="documentation"
+              target="_blank"
+            >
+              {i18n.translate('xpack.slo.headerMenu.documentation', {
+                defaultMessage: 'SLO documentation',
+              })}
+            </EuiHeaderLink>
             <EuiHeaderLink
               color="primary"
               href={http.basePath.prepend('/app/observabilityOnboarding')}

@@ -23,7 +23,6 @@
       "features",
       "files",
       "inspector",
-      "lens",
       "observabilityShared",
       "security",
       "share",
@@ -34,6 +33,7 @@
       "discover",
       "embeddable",
       "home",
+      "lens",
       "licensing",
       "spaces",
       "usageCollection",
@@ -41,7 +41,6 @@
     ],
     "requiredBundles": [
       "dataViews",
-      "embeddable",
       "data",
       "kibanaReact",
       "kibanaUtils",

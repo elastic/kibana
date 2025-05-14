@@ -18,7 +18,7 @@ export function visitEditRulePage(ruleId: string): void {
 }
 
 export const saveEditedRule = () => {
-  cy.get(EDIT_SUBMIT_BUTTON).should('exist').click({ force: true });
+  cy.get(EDIT_SUBMIT_BUTTON).should('exist').click();
   cy.get(EDIT_SUBMIT_BUTTON).should('not.exist');
 };
 

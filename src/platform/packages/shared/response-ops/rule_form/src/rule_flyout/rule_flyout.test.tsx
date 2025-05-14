@@ -128,6 +128,9 @@ describe('ruleFlyout', () => {
 
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterSaveButton'));
 
+    expect(await screen.findByTestId('confirmCreateRuleModal')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
     expect(onSave).toHaveBeenCalledWith({
       ...formDataMock,
       consumer: 'logs',
@@ -139,5 +142,34 @@ describe('ruleFlyout', () => {
 
     fireEvent.click(screen.getByTestId('ruleFlyoutFooterCancelButton'));
     expect(onCancel).toHaveBeenCalled();
+  });
+
+  test('should display discard changes modal only if changes are made in the form', () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        application: {
+          navigateToUrl,
+          capabilities: {
+            actions: {
+              show: true,
+              save: true,
+              execute: true,
+            },
+          },
+        },
+      },
+      baseErrors: {},
+      paramsErrors: {},
+      touched: true,
+      formData: formDataMock,
+      connectors: [],
+      connectorTypes: [],
+      aadTemplateFields: [],
+    });
+
+    render(<RuleFlyout onCancel={onCancel} onSave={onSave} />);
+
+    fireEvent.click(screen.getByTestId('ruleFlyoutFooterCancelButton'));
+    expect(screen.getByTestId('confirmRuleCloseModal')).toBeInTheDocument();
   });
 });

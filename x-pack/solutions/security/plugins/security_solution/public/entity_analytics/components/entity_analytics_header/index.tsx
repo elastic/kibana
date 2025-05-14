@@ -6,11 +6,10 @@
  */
 import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiLink } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useDispatch } from 'react-redux';
 import { capitalize, sumBy } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SEVERITY_COLOR } from '../../../overview/components/detection_response/utils';
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../common/components/links';
 import {
@@ -45,7 +44,6 @@ const StyledEuiTitle = styled(EuiTitle)`
 // This is not used by the inspect feature but required by the refresh button
 const HOST_RISK_QUERY_ID = 'hostRiskScoreKpiQuery';
 const USER_RISK_QUERY_ID = 'userRiskScoreKpiQuery';
-const SERVICE_RISK_QUERY_ID = 'serviceRiskScoreKpiQuery';
 
 export const EntityAnalyticsHeader = () => {
   const { from, to } = useGlobalTime();
@@ -57,7 +55,6 @@ export const EntityAnalyticsHeader = () => {
     }),
     [from, to]
   );
-  const isServiceEntityStoreEnabled = useIsExperimentalFeatureEnabled('serviceEntityStoreEnabled');
 
   const {
     severityCount: hostsSeverityCount,
@@ -79,17 +76,6 @@ export const EntityAnalyticsHeader = () => {
     filterQuery,
     timerange,
     riskEntity: EntityType.user,
-  });
-
-  const {
-    severityCount: servicesSeverityCount,
-    loading: serviceRiskLoading,
-    refetch: refetchServiceRiskScore,
-    inspect: inspectServiceRiskScore,
-  } = useRiskScoreKpi({
-    filterQuery,
-    timerange,
-    riskEntity: EntityType.service,
   });
 
   const { data } = useAggregatedAnomaliesByJob({ skip: false, from, to });
@@ -163,15 +149,6 @@ export const EntityAnalyticsHeader = () => {
     inspect: inspectHostRiskScore,
   });
 
-  useQueryInspector({
-    queryId: SERVICE_RISK_QUERY_ID,
-    loading: serviceRiskLoading,
-    refetch: refetchServiceRiskScore,
-    setQuery,
-    deleteQuery,
-    inspect: inspectServiceRiskScore,
-  });
-
   // Anomaly jobs are enabled if at least one job is started or has data
   const areJobsEnabled = useMemo(
     () =>
@@ -216,15 +193,6 @@ export const EntityAnalyticsHeader = () => {
                 href={userRiskTabUrl}
               />
             </EuiFlexItem>
-
-            {isServiceEntityStoreEnabled && (
-              <EuiFlexItem grow={false}>
-                <CriticalEntitiesCount
-                  entityType={EntityType.service}
-                  severityCount={servicesSeverityCount}
-                />
-              </EuiFlexItem>
-            )}
           </>
         )}
 

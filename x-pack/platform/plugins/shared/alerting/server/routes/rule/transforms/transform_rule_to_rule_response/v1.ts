@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   RuleResponseV1,
   RuleParamsV1,
   RuleLastRunV1,
   MonitoringV1,
 } from '../../../../../common/routes/rule/response';
-import { Rule, RuleLastRun, RuleParams, Monitoring } from '../../../../application/rule/types';
+import type { Rule, RuleLastRun, RuleParams, Monitoring } from '../../../../application/rule/types';
 
 export const transformRuleLastRun = (lastRun: RuleLastRun): RuleLastRunV1 => {
   return {

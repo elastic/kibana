@@ -37,7 +37,7 @@ interface Props {
 
 function Title({ title, size }: { title: string; size?: EuiTextProps['size'] }) {
   return (
-    <EuiText style={{ fontWeight: 'bold' }} textAlign="left" size={size}>
+    <EuiText css={{ fontWeight: 'bold' }} textAlign="left" size={size}>
       {title}
     </EuiText>
   );
@@ -57,12 +57,12 @@ function BaseValue({
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       {icon ? (
-        <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
+        <EuiFlexItem grow={false} css={{ justifyContent: 'center' }}>
           <EuiIcon data-test-subj={`${id}_${icon}_${color}`} type={icon} color={color} size="l" />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
-        <EuiTextColor style={{ fontWeight: 'bold' }} color={color} data-test-subj={`${id}_value`}>
+        <EuiTextColor css={{ fontWeight: 'bold' }} color={color} data-test-subj={`${id}_value`}>
           {value}
         </EuiTextColor>
       </EuiFlexItem>
@@ -77,14 +77,12 @@ export function getValueLable(value: string, perc?: string) {
 export function SummaryItem({
   id,
   baseValue,
-  baseIcon,
   baseColor,
   comparisonValue,
   title,
   isLoading,
   comparisonPerc,
   comparisonColor,
-  comparisonIcon,
   titleHint,
   hasBorder = false,
   compressed = false,
@@ -93,7 +91,7 @@ export function SummaryItem({
   return (
     <EuiPanel hasShadow={false} hasBorder={hasBorder}>
       <EuiStat
-        title={<BaseValue id={id} value={baseValue} color={baseColor} icon={baseIcon} />}
+        title={<BaseValue id={id} value={baseValue} color={baseColor} />}
         titleSize={textSize}
         description={
           <>
@@ -119,12 +117,6 @@ export function SummaryItem({
       >
         {!isLoading && comparisonValue ? (
           <EuiText color={comparisonColor} size={textSize}>
-            {comparisonIcon ? (
-              <EuiIcon
-                data-test-subj={`${id}_comparison_${comparisonIcon}_${comparisonColor}`}
-                type={comparisonIcon}
-              />
-            ) : null}
             <span data-test-subj={`${id}_comparison_value`}>
               {getValueLable(comparisonValue, comparisonPerc)}
             </span>

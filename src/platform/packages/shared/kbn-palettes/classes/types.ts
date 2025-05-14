@@ -22,6 +22,10 @@ export interface IKbnPalette {
    */
   name: string;
   /**
+   * A tag for the palette displayed opposite of the `name`.
+   */
+  tag?: string;
+  /**
    * Type of pallette
    */
   type: KbnPaletteType;

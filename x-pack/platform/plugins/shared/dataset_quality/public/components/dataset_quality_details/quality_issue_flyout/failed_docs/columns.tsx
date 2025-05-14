@@ -7,8 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiBasicTableColumn, EuiCode, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { FailedDocsError } from '../../../../../common/api_types';
+import { ErrorStacktraceLink } from './error_stacktrace_link';
+import { ErrorMessage } from './error_message';
 
 const contentColumnName = i18n.translate(
   'xpack.datasetQuality.details.qualityIssue.failedDocs.erros.contentLabel',
@@ -36,7 +38,7 @@ export const getFailedDocsErrorsColumns = (): Array<EuiBasicTableColumn<FailedDo
     name: contentColumnName,
     field: 'message',
     render: (_, { message }) => {
-      return <EuiCode language="js">{message}</EuiCode>;
+      return <ErrorMessage errorMessage={message} />;
     },
   },
   {
@@ -50,11 +52,7 @@ export const getFailedDocsErrorsColumns = (): Array<EuiBasicTableColumn<FailedDo
     ),
     field: 'type',
     render: (_, { type }) => {
-      return (
-        <EuiBadge color="hollow">
-          <strong>{type}</strong>
-        </EuiBadge>
-      );
+      return <ErrorStacktraceLink errorType={type} />;
     },
     sortable: true,
   },

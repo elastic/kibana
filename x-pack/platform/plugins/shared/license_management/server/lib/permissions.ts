@@ -22,9 +22,7 @@ export async function getPermissions({ isSecurityEnabled, client }: GetPermissio
 
   try {
     const response = await client.asCurrentUser.security.hasPrivileges({
-      body: {
-        cluster: ['manage'], // License management requires "manage" cluster privileges
-      },
+      cluster: ['manage'], // License management requires "manage" cluster privileges
     });
     return {
       hasPermission: response.cluster.manage,

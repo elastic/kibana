@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Backfill } from '../../../../application/backfill/result/types';
+import type { Backfill } from '../../../../application/backfill/result/types';
 import { transformBackfillToBackfillResponse } from './v1';
 
 describe('transformBackfillToBackfillResponse', () => {

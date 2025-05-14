@@ -9,7 +9,7 @@ import { NEVER, lastValueFrom } from 'rxjs';
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../common/constants';
 
 import { getIndicesSearchResultProvider } from './indices_search_result_provider';
 
@@ -51,7 +51,7 @@ describe('Enterprise Search - indices search provider', () => {
     title: 'search-github-api',
     type: 'Index',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/search-github-api`,
+      path: `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/search_indices/search-github-api`,
       prependBasePath: true,
     },
     icon: '/kbn/images/index.svg',
@@ -63,7 +63,7 @@ describe('Enterprise Search - indices search provider', () => {
     title: 'search-msft-sql-index',
     type: 'Index',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/search-msft-sql-index`,
+      path: `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/search_indices/search-msft-sql-index`,
       prependBasePath: true,
     },
     icon: '/kbn/images/index.svg',

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/server';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '@kbn/discover-utils';
-import { LocatorServicesDeps } from '.';
-import { DiscoverAppLocatorParams } from '../../common';
+import type { LocatorServicesDeps } from '.';
+import type { DiscoverAppLocatorParams } from '../../common';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');

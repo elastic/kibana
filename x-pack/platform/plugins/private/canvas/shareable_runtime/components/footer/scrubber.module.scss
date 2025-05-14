@@ -18,9 +18,10 @@
 }
 
 :global .kbnCanvas :local .slideContainer {
-  @include euiScrollBar;
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   width: 100%;
+
+  @include euiScrollBar;
 }

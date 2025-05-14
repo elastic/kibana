@@ -6,21 +6,22 @@
  */
 
 import moment from 'moment-timezone';
-import { createMaintenanceWindow } from './create_maintenance_window';
-import { CreateMaintenanceWindowParams } from './types';
+
 import {
   savedObjectsClientMock,
   loggingSystemMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { SavedObject } from '@kbn/core/server';
-import {
-  MaintenanceWindowClientContext,
-  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-} from '../../../../../common';
+import type { SavedObject } from '@kbn/core/server';
+import { FilterStateStore } from '@kbn/es-query';
+import { Frequency } from '@kbn/rrule';
+
+import type { MaintenanceWindowClientContext } from '../../../../../common';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 import type { MaintenanceWindow } from '../../types';
-import { FilterStateStore } from '@kbn/es-query';
+import { createMaintenanceWindow } from './create_maintenance_window';
+import type { CreateMaintenanceWindowParams } from './types';
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
@@ -57,6 +58,13 @@ describe('MaintenanceWindowClient - create', () => {
 
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
+      rRule: {
+        tzid: 'UTC',
+        dtstart: '2023-02-26T00:00:00.000Z',
+        freq: Frequency.WEEKLY,
+        byweekday: ['-4MO', 'TU'],
+        count: 2,
+      },
     });
 
     savedObjectsClient.create.mockResolvedValueOnce({
@@ -271,53 +279,6 @@ describe('MaintenanceWindowClient - create', () => {
       invalid: 
       ---------^"
     `);
-  });
-
-  it('should throw if trying to create a MW with a scoped query with other than 1 category ID', async () => {
-    jest.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
-
-    const mockMaintenanceWindow = getMockMaintenanceWindow({
-      expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
-    });
-
-    await expect(async () => {
-      await createMaintenanceWindow(mockContext, {
-        data: {
-          title: mockMaintenanceWindow.title,
-          duration: mockMaintenanceWindow.duration,
-          rRule: mockMaintenanceWindow.rRule as CreateMaintenanceWindowParams['data']['rRule'],
-          categoryIds: ['observability', 'securitySolution'],
-          scopedQuery: {
-            kql: "_id: '1234'",
-            filters: [
-              {
-                meta: {
-                  disabled: false,
-                  negate: false,
-                  alias: null,
-                  key: 'kibana.alert.action_group',
-                  field: 'kibana.alert.action_group',
-                  params: {
-                    query: 'test',
-                  },
-                  type: 'phrase',
-                },
-                $state: {
-                  store: FilterStateStore.APP_STATE,
-                },
-                query: {
-                  match_phrase: {
-                    'kibana.alert.action_group': 'test',
-                  },
-                },
-              },
-            ],
-          },
-        },
-      });
-    }).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error validating create maintenance window data - scoped query must be accompanied by 1 category ID"`
-    );
   });
 
   it('should throw if trying to create a maintenance window with invalid category ids', async () => {

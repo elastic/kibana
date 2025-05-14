@@ -44,6 +44,7 @@ const permissions = {
   settings: true,
   createComment: true,
   reopenCase: true,
+  assign: true,
 };
 
 const attachments = [{ type: AttachmentType.user as const, comment: 'test' }];
@@ -58,7 +59,7 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
     <EuiPageTemplate>
       <EuiFlexGrid columns={1}>
         <EuiFlexItem>
-          <EuiPanel style={{ height: 200 }}>
+          <EuiPanel css={{ height: 200 }}>
             <EuiTitle>
               <h2>Cases attachment hooks</h2>
             </EuiTitle>
@@ -67,7 +68,7 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
               alignItems="center"
               responsive={false}
               wrap
-              style={{ marginTop: '5px' }}
+              css={{ marginTop: '5px' }}
             >
               <EuiFlexItem grow={false}>
                 <EuiButton

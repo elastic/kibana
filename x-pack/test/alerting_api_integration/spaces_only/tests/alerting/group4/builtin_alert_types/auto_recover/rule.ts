@@ -10,7 +10,7 @@ import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integrati
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 
 import { Spaces } from '../../../../../scenarios';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, TaskManagerUtils } from '../../../../../../common/lib';
 import { createEsDocuments } from '../../../create_test_data';
 

@@ -50,6 +50,16 @@ export const AgentStatuses = [
   'orphaned',
 ] as const;
 
+export const ActiveAgentStatuses = [
+  'online',
+  'offline',
+  'enrolling',
+  'updating',
+  'degraded',
+  'error',
+  'orphaned',
+]; // excluded: unenrolling, unenrolled, inactive, uninstalled
+
 // Kueries for finding unprivileged and privileged agents
 // Privileged is `not` because the metadata field can be undefined
 export const UNPRIVILEGED_AGENT_KUERY = `${AGENTS_PREFIX}.local_metadata.elastic.agent.unprivileged: true`;

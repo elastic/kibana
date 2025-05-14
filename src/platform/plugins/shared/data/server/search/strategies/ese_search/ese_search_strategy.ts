@@ -10,12 +10,11 @@
 import type { Observable } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { IAsyncSearchRequestParams } from '../..';
-import { getKbnSearchError } from '../../report_search_error';
+import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
 import { DataViewType, isRunningResponse, pollSearch } from '../../../../common';
@@ -53,7 +52,6 @@ export const enhancedEsSearchStrategyProvider = (
       request.params?.keep_alive ?? getDefaultAsyncGetParams(searchConfig, options).keep_alive;
 
     const { body, headers } = await client.asyncSearch.status(
-      // @ts-expect-error keep_alive was recently added and the types haven't been updated yet
       { id: id!, keep_alive: keepAlive },
       { ...options.transport, signal: options.abortSignal, meta: true }
     );
@@ -157,23 +155,31 @@ export const enhancedEsSearchStrategyProvider = (
   ): Promise<IEsSearchResponse> {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const legacyConfig = await firstValueFrom(legacyConfig$);
-    const { body, index, ...params } = request.params!;
-    const method = 'POST';
-    const path = encodeURI(`/${index}/_rollup_search`);
     const querystring = {
       ...getShardTimeout(legacyConfig),
       ...(await getIgnoreThrottled(uiSettingsClient)),
       ...(await getDefaultSearchParams(uiSettingsClient)),
-      ...params,
+    };
+
+    // Custom 400 error here because the client tries to run `index.toString()` and we no-longer can rely on ES 400
+    if (!request.params?.index) {
+      throw new KbnSearchError(`"params.index" is required when performing a rollup search`, 400);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { ignore_unavailable, preference, ...params } = {
+      ...querystring,
+      ...request.params,
+      index: request.params.index,
     };
 
     try {
-      const esResponse = await client.transport.request(
+      const esResponse = await client.rollup.rollupSearch(
         {
-          method,
-          path,
-          body,
-          querystring,
+          ...params,
+          // Not defined in the spec, and the client places it in the body.
+          // This workaround allows us to force it as a query parameter.
+          querystring: { ...params.querystring, ignore_unavailable, preference },
         },
         {
           signal: options?.abortSignal,
@@ -181,7 +187,7 @@ export const enhancedEsSearchStrategyProvider = (
         }
       );
 
-      const response = esResponse.body as estypes.SearchResponse<any>;
+      const response = esResponse.body;
       return {
         rawResponse: shimHitsTotal(response, options),
         ...(esResponse.meta?.request?.params

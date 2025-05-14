@@ -74,6 +74,6 @@ function _formatSecrets(
 }
 
 function replaceApiKey(ymlText: string, apiKey: string) {
-  const regex = new RegExp(/\'\${API_KEY}\'/, 'g');
+  const regex = new RegExp(/\$\{API_KEY}/, 'g');
   return ymlText.replace(regex, `'${apiKey}'`);
 }

@@ -69,7 +69,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
 
   const [tableData, setTableData] = useState<AnomaliesTableData>({
     anomalies: [],
-    examplesByJobId: [''],
+    examplesByJobId: {},
     interval: 0,
     jobIds: [],
     showViewSeriesLink: false,
@@ -214,7 +214,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
         }
         color="danger"
         iconType="warning"
-        style={{ width: '100%' }}
+        css={{ width: '100%' }}
       >
         <p>{error.message}</p>
       </EuiCallOut>
@@ -257,7 +257,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
           {isExplorerLoading && (
             <EuiText
               textAlign={'center'}
-              style={{
+              css={{
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
@@ -266,7 +266,6 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
             >
               <EuiLoadingChart
                 size="xl"
-                mono={true}
                 data-test-subj="mlAnomalyExplorerEmbeddableLoadingIndicator"
               />
             </EuiText>

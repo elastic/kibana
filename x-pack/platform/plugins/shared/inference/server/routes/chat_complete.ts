@@ -20,10 +20,20 @@ import {
   InferenceTaskEventType,
   isInferenceError,
 } from '@kbn/inference-common';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
 import { createClient as createInferenceClient } from '../inference_client';
 import { InferenceServerStart, InferenceStartDependencies } from '../types';
-import { observableIntoEventSourceStream } from '../util/observable_into_event_source_stream';
+
+function getRequestAbortedSignal(request: KibanaRequest) {
+  const controller = new AbortController();
+  request.events.aborted$.subscribe({
+    complete: () => {
+      controller.abort();
+    },
+  });
+  return controller.signal;
+}
 
 const toolCallSchema: Type<ToolCall[]> = schema.arrayOf(
   schema.object({
@@ -38,6 +48,12 @@ const toolCallSchema: Type<ToolCall[]> = schema.arrayOf(
 const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
   connectorId: schema.string(),
   system: schema.maybe(schema.string()),
+  maxRetries: schema.maybe(schema.number()),
+  retryConfiguration: schema.maybe(
+    schema.object({
+      retryOn: schema.maybe(schema.oneOf([schema.literal('all'), schema.literal('auto')])),
+    })
+  ),
   tools: schema.maybe(
     schema.recordOf(
       schema.string(),
@@ -85,7 +101,7 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
     ])
   ),
   functionCalling: schema.maybe(
-    schema.oneOf([schema.literal('native'), schema.literal('simulated')])
+    schema.oneOf([schema.literal('native'), schema.literal('simulated'), schema.literal('auto')])
   ),
   temperature: schema.maybe(schema.number()),
   modelName: schema.maybe(schema.string()),
@@ -116,7 +132,18 @@ export function registerChatCompleteRoute({
 
     const client = createInferenceClient({ request, actions, logger });
 
-    const { connectorId, messages, system, toolChoice, tools, functionCalling } = request.body;
+    const {
+      connectorId,
+      messages,
+      system,
+      toolChoice,
+      tools,
+      functionCalling,
+      maxRetries,
+      modelName,
+      retryConfiguration,
+      temperature,
+    } = request.body;
 
     return client.chatComplete({
       connectorId,
@@ -127,6 +154,10 @@ export function registerChatCompleteRoute({
       functionCalling,
       stream,
       abortSignal: abortController.signal,
+      maxRetries,
+      modelName,
+      retryConfiguration,
+      temperature,
     });
   }
 
@@ -166,6 +197,12 @@ export function registerChatCompleteRoute({
   router.post(
     {
       path: '/internal/inference/chat_complete/stream',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the inference client',
+        },
+      },
       validate: {
         body: chatCompleteBodySchema,
       },
@@ -173,7 +210,10 @@ export function registerChatCompleteRoute({
     async (context, request, response) => {
       const chatCompleteEvents$ = await callChatComplete({ request, stream: true });
       return response.ok({
-        body: observableIntoEventSourceStream(chatCompleteEvents$, logger),
+        body: observableIntoEventSourceStream(chatCompleteEvents$, {
+          logger,
+          signal: getRequestAbortedSignal(request),
+        }),
       });
     }
   );

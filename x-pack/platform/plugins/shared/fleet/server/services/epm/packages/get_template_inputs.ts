@@ -33,7 +33,7 @@ import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_
 import { getFullInputStreams } from '../../agent_policies/package_policies_to_agent_inputs';
 
 import { getPackageInfo } from '.';
-import { getPackageAssetsMap } from './get';
+import { getAgentTemplateAssetsMap } from './get';
 
 type Format = 'yml' | 'json';
 
@@ -161,7 +161,7 @@ export async function getTemplateInputs(
     }
   }
 
-  const assetsMap = await getPackageAssetsMap({
+  const assetsMap = await getAgentTemplateAssetsMap({
     logger: appContextService.getLogger(),
     packageInfo,
     savedObjectsClient: soClient,

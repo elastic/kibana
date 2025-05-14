@@ -62,7 +62,6 @@ describe('AxesSettingsPopover', () => {
 
     return {
       renderer: renderResult,
-      orientation: new EuiButtonGroupTestHarness('lnsXY_axisOrientation_groups'),
       bounds: new EuiButtonGroupTestHarness('lnsXY_axisBounds_groups'),
     };
   };
@@ -86,28 +85,33 @@ describe('AxesSettingsPopover', () => {
   });
 
   it('should have selected the horizontal option on the orientation group', async () => {
-    const result = await renderAxisSettingsPopover({
+    await renderAxisSettingsPopover({
       useMultilayerTimeAxis: false,
       areTickLabelsVisible: true,
     });
-    expect(result.orientation.selected).not.toBeChecked();
+    const orientationGroup = screen.getByRole('group', { name: /orientation/i });
+    const pressedButton = within(orientationGroup).getByRole('button', { pressed: true });
+    expect(pressedButton.title).toBe('Horizontal');
   });
 
   it('should have called the setOrientation function on orientation button group change', async () => {
-    const result = await renderAxisSettingsPopover({
+    await renderAxisSettingsPopover({
       useMultilayerTimeAxis: false,
       areTickLabelsVisible: true,
     });
-    result.orientation.select('Angled');
-    expect(defaultProps.setOrientation).toHaveBeenCalled();
+    const orientationGroup = screen.getByRole('group', { name: /orientation/i });
+    fireEvent.click(within(orientationGroup).getByRole('button', { name: /angled/i }));
+    expect(defaultProps.setOrientation).toBeCalledTimes(1);
+    expect(defaultProps.setOrientation).toBeCalledWith(defaultProps.axis, -45);
   });
 
   it('should hide the orientation group if the tickLabels are set to not visible', async () => {
-    const result = await renderAxisSettingsPopover({
+    await renderAxisSettingsPopover({
       useMultilayerTimeAxis: false,
       areTickLabelsVisible: false,
     });
-    expect(result.orientation.self).not.toBeInTheDocument();
+    const orientationGroup = screen.queryByRole('group', { name: /orientation/i });
+    expect(orientationGroup).not.toBeInTheDocument();
   });
 
   it('hides the endzone visibility switch if no setter is passed in', async () => {

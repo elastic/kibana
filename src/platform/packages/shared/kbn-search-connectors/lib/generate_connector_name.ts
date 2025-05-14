@@ -9,6 +9,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
+import { kebabCase } from 'lodash';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { toAlphanumeric } from '../utils/to_alphanumeric';
@@ -16,6 +18,29 @@ import { indexOrAliasExists } from './exists_index';
 import { MANAGED_CONNECTOR_INDEX_PREFIX } from '../constants';
 
 const GENERATE_INDEX_NAME_ERROR = 'generate_index_name_error';
+
+export const toValidIndexName = (str: string): string => {
+  if (!str || str.trim() === '') {
+    return 'index';
+  }
+
+  // Start with kebabCase to handle most transformations
+  let result = kebabCase(str);
+
+  // Additional processing for ES index name requirements
+  result = result
+    // ES doesn't allow \, /, *, ?, ", <, >, |, comma, #, :
+    .replace(/[\\/*?"<>|,#:]/g, '-')
+    // Cannot start with -, _, +
+    .replace(/^[-_+]/, '');
+
+  // Remove trailing hyphens
+  while (result.endsWith('-')) {
+    result = result.slice(0, -1);
+  }
+
+  return result;
+};
 
 export const generateConnectorName = async (
   client: ElasticsearchClient,
@@ -30,37 +55,44 @@ export const generateConnectorName = async (
 
   const nativePrefix = isNative ? MANAGED_CONNECTOR_INDEX_PREFIX : '';
 
+  // Handle user-provided connector name
   if (userConnectorName) {
-    let indexName = `${nativePrefix}connector-${userConnectorName}`;
-    const resultSameName = await indexOrAliasExists(client, indexName);
-    // index with same name doesn't exist
-    if (!resultSameName) {
+    // Keep original connector name, but sanitize it for index name
+    const sanitizedName = toValidIndexName(userConnectorName);
+
+    // First try with the sanitized name directly
+    let indexName = `${nativePrefix}connector-${sanitizedName}`;
+    const baseNameExists = await indexOrAliasExists(client, indexName);
+
+    if (!baseNameExists) {
       return {
-        connectorName: userConnectorName,
+        connectorName: userConnectorName, // Keep original connector name
         indexName,
       };
     }
-    // if the index name already exists, we will generate until it doesn't for 20 times
-    for (let i = 0; i < 20; i++) {
-      indexName = `${nativePrefix}connector-${userConnectorName}-${uuidv4()
-        .split('-')[1]
-        .slice(0, 4)}`;
 
-      const result = await indexOrAliasExists(client, indexName);
-      if (!result) {
+    // If base name exists, try with random suffixes
+    for (let i = 0; i < 20; i++) {
+      const uniqueSuffix = uuidv4().split('-')[1].slice(0, 4);
+      indexName = `${nativePrefix}connector-${sanitizedName}-${uniqueSuffix}`;
+
+      const exists = await indexOrAliasExists(client, indexName);
+      if (!exists) {
         return {
-          connectorName: userConnectorName,
+          connectorName: userConnectorName, // Keep original connector name
           indexName,
         };
       }
     }
   } else {
+    // Auto-generate a connector name
     for (let i = 0; i < 20; i++) {
-      const connectorName = `${prefix}-${uuidv4().split('-')[1].slice(0, 4)}`;
+      const uniqueSuffix = uuidv4().split('-')[1].slice(0, 4);
+      const connectorName = `${toValidIndexName(prefix)}-${uniqueSuffix}`;
       const indexName = `${nativePrefix}connector-${connectorName}`;
 
-      const result = await indexOrAliasExists(client, indexName);
-      if (!result) {
+      const exists = await indexOrAliasExists(client, indexName);
+      if (!exists) {
         return {
           connectorName,
           indexName,
@@ -68,5 +100,6 @@ export const generateConnectorName = async (
       }
     }
   }
+
   throw new Error(GENERATE_INDEX_NAME_ERROR);
 };

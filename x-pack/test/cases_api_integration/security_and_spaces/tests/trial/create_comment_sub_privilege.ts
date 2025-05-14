@@ -7,11 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import {
-  AttachmentType,
-  ExternalReferenceSOAttachmentPayload,
-} from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   fileAttachmentMetadata,
   getFilesAttachmentReq,
@@ -25,7 +23,7 @@ import {
   createComment,
   updateComment,
   deleteAllComments,
-  getCaseUserActions,
+  findCaseUserActions,
 } from '../../../common/lib/api';
 import {
   superUser,
@@ -128,7 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const userActions = await getCaseUserActions({
+        const { userActions } = await findCaseUserActions({
           supertest,
           caseID: postedCase.id,
           auth: { user: superUser, space: 'space1' },

@@ -8,55 +8,99 @@
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
-jest.mock('../../lib/enterprise_search_config_api', () => ({
-  callEnterpriseSearchConfigAPI: jest.fn(),
-}));
-import { callEnterpriseSearchConfigAPI } from '../../lib/enterprise_search_config_api';
-
 import { registerConfigDataRoute } from './config_data';
 
 describe('Enterprise Search Config Data API', () => {
   let mockRouter: MockRouter;
 
   beforeEach(() => {
-    mockRouter = new MockRouter({
-      method: 'get',
-      path: '/internal/enterprise_search/config_data',
-    });
+    jest.resetAllMocks();
 
-    registerConfigDataRoute({
-      ...mockDependencies,
-      router: mockRouter.router,
-    });
+    mockDependencies.getStartServices.mockResolvedValue([{}, {}]);
   });
 
   describe('GET /internal/enterprise_search/config_data', () => {
-    it('returns an initial set of config data from Enterprise Search', async () => {
-      const mockData = {
-        ...DEFAULT_INITIAL_APP_DATA,
-        publicUrl: 'http://localhost:3002',
-      };
-
-      (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => {
-        return Promise.resolve(mockData);
+    it('returns an initial set of config data', async () => {
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/internal/enterprise_search/config_data',
       });
+
+      registerConfigDataRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+
       await mockRouter.callRoute({});
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
-        body: mockData,
+        body: DEFAULT_INITIAL_APP_DATA,
         headers: { 'content-type': 'application/json' },
       });
     });
 
-    it('throws a 502 error if data returns an empty obj', async () => {
-      (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => {
-        return Promise.resolve({});
+    it('return config features when changed', async () => {
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/internal/enterprise_search/config_data',
       });
+
+      registerConfigDataRoute({
+        ...mockDependencies,
+        config: {
+          ...mockDependencies.config,
+          hasDocumentLevelSecurityEnabled: false,
+          hasIncrementalSyncEnabled: false,
+        },
+        router: mockRouter.router,
+      });
+
       await mockRouter.callRoute({});
 
-      expect(mockRouter.response.customError).toHaveBeenCalledWith({
-        statusCode: 502,
-        body: 'Error fetching data from Enterprise Search',
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          ...DEFAULT_INITIAL_APP_DATA,
+          features: {
+            ...DEFAULT_INITIAL_APP_DATA.features,
+            hasDocumentLevelSecurityEnabled: false,
+            hasIncrementalSyncEnabled: false,
+          },
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+
+    it('has native connectors enabled when agentless is available', async () => {
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/internal/enterprise_search/config_data',
+      });
+
+      registerConfigDataRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+      mockDependencies.getStartServices.mockResolvedValue([
+        {},
+        {
+          cloud: { isCloudEnabled: true },
+          fleet: {
+            agentless: { enabled: true },
+          },
+        },
+      ]);
+
+      await mockRouter.callRoute({});
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          ...DEFAULT_INITIAL_APP_DATA,
+          features: {
+            ...DEFAULT_INITIAL_APP_DATA.features,
+            hasNativeConnectors: true,
+          },
+        },
+        headers: { 'content-type': 'application/json' },
       });
     });
   });

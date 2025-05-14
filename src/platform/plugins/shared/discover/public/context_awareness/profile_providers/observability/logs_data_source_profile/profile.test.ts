@@ -10,15 +10,12 @@
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
+import { BehaviorSubject } from 'rxjs';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
-import {
-  DataSourceCategory,
-  DataSourceProfileProviderParams,
-  RootContext,
-  SolutionType,
-} from '../../../profiles';
+import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
-import { createLogsDataSourceProfileProvider } from './profile';
+import { type LogOverviewContext, createLogsDataSourceProfileProvider } from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { ContextWithProfileId } from '../../../profile_service';
@@ -48,7 +45,10 @@ describe('logsDataSourceProfileProvider', () => {
   };
   const RESOLUTION_MATCH = {
     isMatch: true,
-    context: { category: DataSourceCategory.Logs },
+    context: {
+      category: DataSourceCategory.Logs,
+      logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+    },
   };
   const RESOLUTION_MISMATCH = {
     isMatch: false,
@@ -165,14 +165,17 @@ describe('logsDataSourceProfileProvider', () => {
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
-          context: { category: DataSourceCategory.Logs },
+          context: {
+            category: DataSourceCategory.Logs,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
       });
 
       expect(getRowIndicator).toBeDefined();
-      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#90b0d1', label: 'Info' });
+      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#90bdff', label: 'Info' });
     });
 
     it('should not return a color for a missing log level in the document', () => {
@@ -180,7 +183,10 @@ describe('logsDataSourceProfileProvider', () => {
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
-          context: { category: DataSourceCategory.Logs },
+          context: {
+            category: DataSourceCategory.Logs,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithLogLevel,
@@ -193,7 +199,10 @@ describe('logsDataSourceProfileProvider', () => {
     it('should not set the color indicator handler if data view does not have log level field', () => {
       const getRowIndicatorProvider =
         logsDataSourceProfileProvider.profile.getRowIndicatorProvider?.(() => undefined, {
-          context: { category: DataSourceCategory.Logs },
+          context: {
+            category: DataSourceCategory.Logs,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
         });
       const getRowIndicator = getRowIndicatorProvider?.({
         dataView: dataViewWithoutLogLevel,
@@ -208,7 +217,10 @@ describe('logsDataSourceProfileProvider', () => {
       const getCellRenderers = logsDataSourceProfileProvider.profile.getCellRenderers?.(
         () => ({}),
         {
-          context: { category: DataSourceCategory.Logs },
+          context: {
+            category: DataSourceCategory.Logs,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
         }
       );
       const getCellRenderersParams = {
@@ -231,7 +243,10 @@ describe('logsDataSourceProfileProvider', () => {
     it('should return the passed additional controls', () => {
       const getRowAdditionalLeadingControls =
         logsDataSourceProfileProvider.profile.getRowAdditionalLeadingControls?.(() => undefined, {
-          context: { category: DataSourceCategory.Logs },
+          context: {
+            category: DataSourceCategory.Logs,
+            logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+          },
         });
       const rowAdditionalLeadingControls = getRowAdditionalLeadingControls?.({
         dataView: dataViewWithLogLevel,

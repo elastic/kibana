@@ -8,9 +8,7 @@
  */
 
 import { ESQLCommand } from '@kbn/esql-ast';
-import { i18n } from '@kbn/i18n';
 import { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
-import type { JoinIndexAutocompleteItem } from '../../../validation/types';
 import { SuggestionRawDefinition } from '../../types';
 
 const REGEX =
@@ -65,43 +63,50 @@ export const getPosition = (text: string, command: ESQLCommand): JoinCommandPosi
   };
 };
 
-export const joinIndicesToSuggestions = (
-  indices: JoinIndexAutocompleteItem[]
+export const suggestionIntersection = (
+  suggestions1: SuggestionRawDefinition[],
+  suggestions2: SuggestionRawDefinition[]
 ): SuggestionRawDefinition[] => {
-  const mainSuggestions: SuggestionRawDefinition[] = [];
-  const aliasSuggestions: SuggestionRawDefinition[] = [];
+  const labels1 = new Set<string>();
+  const intersection: SuggestionRawDefinition[] = [];
 
-  for (const index of indices) {
-    mainSuggestions.push({
-      label: index.name,
-      text: index.name + ' ',
-      kind: 'Issue',
-      detail: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.autocomplete.join.indexType.index',
-        {
-          defaultMessage: 'Index',
-        }
-      ),
-      sortText: '0-INDEX-' + index.name,
-    });
+  for (const suggestion1 of suggestions1) {
+    labels1.add(suggestion1.label);
+  }
 
-    if (index.aliases) {
-      for (const alias of index.aliases) {
-        aliasSuggestions.push({
-          label: alias,
-          text: alias + ' $0',
-          kind: 'Issue',
-          detail: i18n.translate(
-            'kbn-esql-validation-autocomplete.esql.autocomplete.join.indexType.alias',
-            {
-              defaultMessage: 'Alias',
-            }
-          ),
-          sortText: '1-ALIAS-' + alias,
-        });
-      }
+  for (const suggestion2 of suggestions2) {
+    if (labels1.has(suggestion2.label)) {
+      intersection.push({ ...suggestion2 });
     }
   }
 
-  return [...mainSuggestions, ...aliasSuggestions];
+  return intersection;
+};
+
+export const suggestionUnion = (
+  suggestions1: SuggestionRawDefinition[],
+  suggestions2: SuggestionRawDefinition[]
+): SuggestionRawDefinition[] => {
+  const labels = new Set<string>();
+  const union: SuggestionRawDefinition[] = [];
+
+  for (const suggestion of suggestions1) {
+    const label = suggestion.label;
+
+    if (!labels.has(label)) {
+      union.push(suggestion);
+      labels.add(label);
+    }
+  }
+
+  for (const suggestion of suggestions2) {
+    const label = suggestion.label;
+
+    if (!labels.has(label)) {
+      union.push(suggestion);
+      labels.add(label);
+    }
+  }
+
+  return union;
 };

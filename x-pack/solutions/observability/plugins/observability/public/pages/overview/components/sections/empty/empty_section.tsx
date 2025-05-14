@@ -14,6 +14,7 @@ export interface Section {
   title: string;
   icon: string;
   description: string;
+  showInServerless: boolean;
   href?: string;
   linkTitle?: string;
   target?: '_blank';
@@ -26,7 +27,7 @@ interface Props {
 export function EmptySection({ section }: Props) {
   return (
     <EuiEmptyPrompt
-      style={{ maxWidth: 'none' }}
+      css={{ maxWidth: 'none' }}
       title={<h2>{section.title}</h2>}
       titleSize="xs"
       body={<EuiText color="default">{section.description}</EuiText>}

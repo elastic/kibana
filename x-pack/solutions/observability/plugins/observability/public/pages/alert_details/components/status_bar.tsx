@@ -8,7 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme, EuiToolTip } from '@elastic/eui';
-import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
+import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared/src/alert_lifecycle_status_badge';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -63,7 +63,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
       <EuiFlexItem grow={false}>
         <TagsList tags={tags} ignoreEmpty color="default" />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ minWidth: 160 }}>
+      <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
         <EuiFlexGroup gutterSize="none" alignItems="center">
           <EuiText size="s" color="subdued">
             <FormattedMessage
@@ -82,7 +82,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
               <EuiLink
                 data-test-subj="o11yAlertRuleLink"
                 href={ruleLink}
-                style={{
+                css={{
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -97,7 +97,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
           </EuiToolTip>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ minWidth: 100 }}>
+      <EuiFlexItem grow={false} css={{ minWidth: 100 }}>
         <EuiFlexGroup gutterSize="none">
           <EuiText size="s" color="subdued">
             <FormattedMessage
@@ -116,7 +116,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
           </EuiText>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ minWidth: 120 }}>
+      <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
         <EuiFlexGroup gutterSize="none">
           <EuiText size="s" color="subdued">
             <FormattedMessage
@@ -135,7 +135,7 @@ export function StatusBar({ alert, alertStatus }: StatusBarProps) {
           </EuiText>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ minWidth: 240 }}>
+      <EuiFlexItem grow={false} css={{ minWidth: 240 }}>
         <EuiFlexGroup gutterSize="none">
           <EuiText size="s" color="subdued">
             <FormattedMessage

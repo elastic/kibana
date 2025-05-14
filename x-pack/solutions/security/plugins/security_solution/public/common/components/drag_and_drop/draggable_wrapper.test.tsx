@@ -15,12 +15,7 @@ import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
-import {
-  ConditionalPortal,
-  disableHoverActions,
-  DraggableWrapper,
-  getStyle,
-} from './draggable_wrapper';
+import { disableHoverActions, DraggableWrapper, getStyle } from './draggable_wrapper';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { TimelineId } from '../../../../common/types';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -85,11 +80,7 @@ describe('DraggableWrapper', () => {
       const wrapper = shallow(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper
-              dataProvider={dataProvider}
-              isDraggable={true}
-              render={() => message}
-            />
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -101,11 +92,7 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper
-              dataProvider={dataProvider}
-              isDraggable={true}
-              render={() => message}
-            />
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -115,14 +102,11 @@ describe('DraggableWrapper', () => {
 
     scopeIdsWithHoverActions.forEach((scopeId) => {
       test(`it renders hover actions (by default) when 'isDraggable' is false and timelineId is '${scopeId}'`, async () => {
-        const isDraggable = false;
-
         const { queryByTestId } = render(
           <TestProviders>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DraggableWrapper
                 dataProvider={dataProvider}
-                isDraggable={isDraggable}
                 render={() => message}
                 scopeId={scopeId}
               />
@@ -136,14 +120,11 @@ describe('DraggableWrapper', () => {
 
     scopeIdsNoHoverActions.forEach((scopeId) => {
       test(`it does NOT render hover actions when 'isDraggable' is false and timelineId is '${scopeId}'`, async () => {
-        const isDraggable = false;
-
         const { queryByTestId } = render(
           <TestProviders>
             <DragDropContextWrapper browserFields={mockBrowserFields}>
               <DraggableWrapper
                 dataProvider={dataProvider}
-                isDraggable={isDraggable}
                 render={() => message}
                 scopeId={scopeId}
               />
@@ -161,30 +142,19 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper
-              dataProvider={dataProvider}
-              isDraggable={true}
-              render={() => message}
-              truncate
-            />
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} truncate />
           </DragDropContextWrapper>
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').exists()).toEqual(
-        true
-      );
+      expect(wrapper.find('[data-test-subj="render-truncatable-content"]').exists()).toEqual(true);
     });
 
     test('it does NOT apply text truncation styling when truncate is NOT specified', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper
-              dataProvider={dataProvider}
-              isDraggable={true}
-              render={() => message}
-            />
+            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -197,21 +167,6 @@ describe('DraggableWrapper', () => {
 });
 
 describe('ConditionalPortal', () => {
-  const mount = useMountAppended();
-  const props = {
-    registerProvider: jest.fn(),
-  };
-
-  it('calls registerProvider when isDragging', () => {
-    mount(
-      <ConditionalPortal {...props}>
-        <div />
-      </ConditionalPortal>
-    );
-
-    expect(props.registerProvider.mock.calls.length).toEqual(1);
-  });
-
   describe('getStyle', () => {
     const style: DraggingStyle = {
       boxSizing: 'border-box',

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { getRuleType as getGeoContainmentRuleType } from './geo_containment';
 import { getRuleType as getThresholdRuleType } from './threshold';
 import { getRuleType as getEsQueryRuleType } from './es_query';

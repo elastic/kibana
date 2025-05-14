@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -30,14 +30,10 @@ import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 import { docLinks } from '../../../../shared/doc_links';
 import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
-import {
-  getContentExtractionDisabled,
-  isApiIndex,
-  isConnectorIndex,
-  isCrawlerIndex,
-} from '../../../utils/indices';
+import { getContentExtractionDisabled, isApiIndex, isConnectorIndex } from '../../../utils/indices';
 
 import { IndexNameLogic } from '../index_name_logic';
+import { SearchIndexTabId } from '../search_index';
 
 import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
@@ -70,12 +66,35 @@ export const SearchIndexPipelines: React.FC = () => {
   const { makeRequest: revertPipeline } = useActions(RevertConnectorPipelineApilogic);
   const apiIndex = isApiIndex(index);
   const extractionDisabled = getContentExtractionDisabled(index);
+  const [isRevertPipeline, setRevertPipeline] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!isDeleteModalOpen) {
+      if (isRevertPipeline) {
+        const pipelinesButton = document.querySelector<HTMLDivElement>(
+          `[id="${SearchIndexTabId.PIPELINES}"]`
+        );
+        if (pipelinesButton) {
+          pipelinesButton.focus();
+        }
+        setRevertPipeline(false);
+      } else if (buttonRef.current) {
+        buttonRef.current.focus();
+      }
+    }
+  }, [isDeleteModalOpen]);
+
+  const onDeletePipeline = useCallback(() => {
+    revertPipeline({ indexName });
+    setRevertPipeline(true);
+  }, [indexName, revertPipeline]);
 
   useEffect(() => {
     if (index) {
       fetchDefaultPipeline(undefined);
       setPipelineState(
-        isConnectorIndex(index) || isCrawlerIndex(index)
+        isConnectorIndex(index)
           ? index.connector?.pipeline ?? defaultPipelineValues
           : defaultPipelineValues
       );
@@ -131,7 +150,12 @@ export const SearchIndexPipelines: React.FC = () => {
                 }
               )}
             </p>
-            <EuiButton color="danger" fill onClick={() => revertPipeline({ indexName })}>
+            <EuiButton
+              data-test-subj="enterpriseSearchSearchIndexPipelinesRevertPipelineToDefaultButton"
+              color="danger"
+              fill
+              onClick={() => revertPipeline({ indexName })}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.buttonLabel',
                 {
@@ -149,7 +173,12 @@ export const SearchIndexPipelines: React.FC = () => {
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink href={docLinks.ingestPipelines} target="_blank" color="subdued">
+              <EuiLink
+                data-test-subj="enterpriseSearchSearchIndexPipelinesLearnMoreAboutUsingPipelinesInSearchLink"
+                href={docLinks.ingestPipelines}
+                target="_blank"
+                color="subdued"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.docLink',
                   {
@@ -198,7 +227,7 @@ export const SearchIndexPipelines: React.FC = () => {
                     </EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <ManageCustomPipelineActions />
+                    <ManageCustomPipelineActions buttonRef={buttonRef} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
@@ -217,7 +246,12 @@ export const SearchIndexPipelines: React.FC = () => {
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink href={docLinks.deployTrainedModels} target="_blank" color="subdued">
+              <EuiLink
+                data-test-subj="enterpriseSearchSearchIndexPipelinesLearnMoreAboutDeployingMachineLearningModelsInElasticLink"
+                href={docLinks.deployTrainedModels}
+                target="_blank"
+                color="subdued"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.docLink',
                   {
@@ -285,7 +319,7 @@ export const SearchIndexPipelines: React.FC = () => {
           )}
           isLoading={revertStatus === Status.LOADING}
           onCancel={closeDeleteModal}
-          onConfirm={() => revertPipeline({ indexName })}
+          onConfirm={onDeletePipeline}
           cancelButtonText={CANCEL_BUTTON_LABEL}
           confirmButtonText={i18n.translate(
             'xpack.enterpriseSearch.content.index.pipelines.deleteModal.confirmButton',

@@ -97,42 +97,40 @@ describe('fetchLogstashVersions', () => {
       index:
         '*:.monitoring-logstash-*,.monitoring-logstash-*,*:metrics-logstash.stack_monitoring.node_stats-*,metrics-logstash.stack_monitoring.node_stats-*',
       filter_path: ['aggregations'],
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { terms: { cluster_uuid: ['cluster123'] } },
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'logstash_stats' } },
-                    { term: { 'metricset.name': 'node_stats' } },
-                    { term: { 'data_stream.dataset': 'logstash.stack_monitoring.node_stats' } },
-                  ],
-                  minimum_should_match: 1,
-                },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { cluster_uuid: ['cluster123'] } },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'logstash_stats' } },
+                  { term: { 'metricset.name': 'node_stats' } },
+                  { term: { 'data_stream.dataset': 'logstash.stack_monitoring.node_stats' } },
+                ],
+                minimum_should_match: 1,
               },
-              { range: { timestamp: { gte: 'now-2m' } } },
-            ],
-          },
+            },
+            { range: { timestamp: { gte: 'now-2m' } } },
+          ],
         },
-        aggs: {
-          index: { terms: { field: '_index', size: 1 } },
-          cluster: {
-            terms: { field: 'cluster_uuid', size: 1 },
-            aggs: {
-              group_by_logstash: {
-                terms: { field: 'logstash_stats.logstash.uuid', size: 10 },
-                aggs: {
-                  group_by_version: {
-                    terms: {
-                      field: 'logstash_stats.logstash.version',
-                      size: 1,
-                      order: { latest_report: 'desc' },
-                    },
-                    aggs: { latest_report: { max: { field: 'timestamp' } } },
+      },
+      aggs: {
+        index: { terms: { field: '_index', size: 1 } },
+        cluster: {
+          terms: { field: 'cluster_uuid', size: 1 },
+          aggs: {
+            group_by_logstash: {
+              terms: { field: 'logstash_stats.logstash.uuid', size: 10 },
+              aggs: {
+                group_by_version: {
+                  terms: {
+                    field: 'logstash_stats.logstash.version',
+                    size: 1,
+                    order: { latest_report: 'desc' },
                   },
+                  aggs: { latest_report: { max: { field: 'timestamp' } } },
                 },
               },
             },

@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { css } from '@emotion/css';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { css } from '@emotion/react';
 
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
@@ -16,7 +17,10 @@ import { OptimizedAccordion } from './optimized_accordion';
 import { LoggedRequestsItem } from './logged_requests_item';
 import { useAccordionStyling } from './use_accordion_styling';
 
-const LoggedRequestsComponent: FC<{ logs: RulePreviewLogs[] }> = ({ logs }) => {
+const LoggedRequestsComponent: FC<{ logs: RulePreviewLogs[]; ruleType: Type }> = ({
+  logs,
+  ruleType,
+}) => {
   const cssStyles = useAccordionStyling();
 
   const AccordionContent = useMemo(
@@ -25,12 +29,12 @@ const LoggedRequestsComponent: FC<{ logs: RulePreviewLogs[] }> = ({ logs }) => {
         <EuiSpacer size="m" />
         {logs.map((log) => (
           <React.Fragment key={log.startedAt}>
-            <LoggedRequestsItem {...log} />
+            <LoggedRequestsItem {...log} ruleType={ruleType} />
           </React.Fragment>
         ))}
       </>
     ),
-    [logs]
+    [logs, ruleType]
   );
 
   if (logs.length === 0) {

@@ -33,6 +33,7 @@ export const getIsAccessApiDeprecation = ({
 export const buildApiAccessDeprecationDetails = ({
   apiUsageStats,
   deprecatedApiDetails,
+  docLinks,
 }: BuildApiDeprecationDetailsParams): DomainDeprecationDetails<ApiDeprecationDetails> => {
   const { apiId, apiTotalCalls, totalMarkedAsResolved } = apiUsageStats;
   const { routeVersion, routePath, routeDeprecationOptions, routeMethod } = deprecatedApiDetails;
@@ -43,7 +44,7 @@ export const buildApiAccessDeprecationDetails = ({
     apiId,
     title: getApiDeprecationTitle(deprecatedApiDetails),
     level: deprecationLevel,
-    message: getApiDeprecationMessage(deprecatedApiDetails, apiUsageStats),
+    message: getApiDeprecationMessage(deprecatedApiDetails, apiUsageStats, docLinks),
     documentationUrl: routeDeprecationOptions?.documentationUrl,
     correctiveActions: {
       manualSteps: getApiDeprecationsManualSteps(),

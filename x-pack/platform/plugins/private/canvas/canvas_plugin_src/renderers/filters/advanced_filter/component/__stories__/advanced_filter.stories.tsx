@@ -6,12 +6,23 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { AdvancedFilter } from '../advanced_filter';
 
-storiesOf('renderers/AdvancedFilter', module)
-  .add('default', () => <AdvancedFilter onChange={action('onChange')} commit={action('commit')} />)
-  .add('with value', () => (
+export default {
+  title: 'renderers/AdvancedFilter',
+};
+
+export const Default = {
+  render: () => <AdvancedFilter onChange={action('onChange')} commit={action('commit')} />,
+
+  name: 'default',
+};
+
+export const WithValue = {
+  render: () => (
     <AdvancedFilter onChange={action('onChange')} commit={action('commit')} value="expression" />
-  ));
+  ),
+
+  name: 'with value',
+};

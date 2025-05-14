@@ -3,7 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "public/**/*", "common/**/*", "server/**/*", "public/**/*.json"],
+  "include": [
+    "*.ts",
+    "public/**/*",
+    "common/**/*",
+    "server/**/*",
+    "public/**/*.json",
+    "../../../../../typings/emotion.d.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
@@ -33,9 +40,8 @@
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/presentation-panel-plugin",
-    "@kbn/embeddable-enhanced-plugin",
     "@kbn/share-plugin",
-    "@kbn/es-query",
+    "@kbn/es-query"
   ],
   "exclude": ["target/**/*"]
 }

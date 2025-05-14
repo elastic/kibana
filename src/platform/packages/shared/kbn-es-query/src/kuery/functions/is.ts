@@ -8,7 +8,7 @@
  */
 
 import { isUndefined } from 'lodash';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
 import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';

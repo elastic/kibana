@@ -8,7 +8,7 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLFunction } from '../../types';
+import { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
 import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
 
@@ -133,20 +133,74 @@ describe('single line query', () => {
         );
       });
 
-      test('supports aliases', () => {
-        const { text } = reprint(`
-          FROM employees | LEFT JOIN languages_lookup AS something ON language_code`);
-
-        expect(text).toBe(
-          'FROM employees | LEFT JOIN languages_lookup AS something ON language_code'
-        );
-      });
-
       test('supports multiple conditions', () => {
         const { text } = reprint(`
           FROM employees | LEFT JOIN a ON b, c, d.e.f`);
 
         expect(text).toBe('FROM employees | LEFT JOIN a ON b, c, d.e.f');
+      });
+    });
+
+    describe('CHANGE_POINT', () => {
+      test('value only', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value');
+      });
+
+      test('value and key', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value ON key`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value ON key');
+      });
+
+      test('value and target', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value AS type, pvalue`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value AS type, pvalue');
+      });
+
+      test('value, key, and target', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value ON key AS type, pvalue`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value ON key AS type, pvalue');
+      });
+
+      test('example from docs', () => {
+        const { text } = reprint(`
+          FROM k8s
+            | STATS count=COUNT() BY @timestamp=BUCKET(@timestamp, 1 MINUTE)
+            | CHANGE_POINT count ON @timestamp AS type, pvalue
+            | LIMIT 123
+        `);
+
+        expect(text).toBe(
+          'FROM k8s | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 1 MINUTE) | CHANGE_POINT count ON @timestamp AS type, pvalue | LIMIT 123'
+        );
+      });
+    });
+
+    describe('FORK', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)
+          `);
+
+        expect(text).toBe(
+          'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM index
+| FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)
+          `);
+
+        expect(text).toBe(
+          'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
       });
     });
   });
@@ -180,13 +234,31 @@ describe('single line query', () => {
       test('quoted source', () => {
         const { text } = reprint('FROM "quoted"');
 
-        expect(text).toBe('FROM quoted');
+        expect(text).toBe('FROM "quoted"');
       });
 
       test('triple-quoted source', () => {
         const { text } = reprint('FROM """quoted"""');
 
-        expect(text).toBe('FROM quoted');
+        expect(text).toBe('FROM "quoted"');
+      });
+
+      test('source selector', () => {
+        const { text } = reprint('FROM index::selector');
+
+        expect(text).toBe('FROM index::selector');
+      });
+
+      test('single-double quoted source selector', () => {
+        const { text } = reprint('FROM index::"selector"');
+
+        expect(text).toBe('FROM index::"selector"');
+      });
+
+      test('triple-double quoted source selector', () => {
+        const { text } = reprint('FROM index::"""say "jump"!"""');
+
+        expect(text).toBe('FROM index::"say \\"jump\\"!"');
       });
     });
 
@@ -379,6 +451,32 @@ describe('single line query', () => {
 
           expect(text).toBe('FROM a | STATS a = AGG(123) WHERE b == TEST(c, 123)');
         });
+      });
+    });
+
+    describe('map expressions', () => {
+      test('empty map', () => {
+        const src = 'ROW fn(1, {"foo": "bar"})';
+        const { root } = parse(src);
+        const node = Walker.match(root, { type: 'map' })! as ESQLMap;
+
+        node.entries = [];
+
+        const text = BasicPrettyPrinter.print(root);
+
+        expect(text).toBe('ROW FN(1, {})');
+      });
+
+      test('one entry in map expression', () => {
+        const { text } = reprint('ROW fn(1, {"booyaka": [1, 2, 42]})');
+
+        expect(text).toBe('ROW FN(1, {"booyaka": [1, 2, 42]})');
+      });
+
+      test('two entries in map expression', () => {
+        const { text } = reprint('ROW fn(1, {"foo": "bar", "baz": null})');
+
+        expect(text).toBe('ROW FN(1, {"foo": "bar", "baz": NULL})');
       });
     });
 
@@ -579,6 +677,17 @@ describe('multiline query', () => {
     const text = multiline(query, { pipeTab: '' }).text;
 
     expect(text).toBe(query);
+  });
+
+  test('keeps FORK branches on single lines', () => {
+    const { text } = multiline(
+      `FROM index| FORK (WHERE keywordField != "" | LIMIT 100)(SORT doubleField ASC NULLS LAST)`
+    );
+
+    expect(text).toBe(`FROM index
+  | FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)`);
   });
 });
 

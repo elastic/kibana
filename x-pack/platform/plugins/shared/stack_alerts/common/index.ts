@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-export {
-  ComparatorFns,
-  getComparatorScript,
-  ComparatorFnNames,
-  getHumanReadableComparator,
-} from './comparator';
+export { getComparatorScript, getHumanReadableComparator } from './comparator';
 
-export type { EsqlTable } from './esql_query_utils';
-export { rowToDocument, transformDatatableToEsqlTable, toEsQueryHits } from './esql_query_utils';
-
+export type { EsqlTable } from './es_query';
 export {
+  rowToDocument,
+  transformDatatableToEsqlTable,
+  getEsqlQueryHits,
+  ALERT_ID_COLUMN,
+  ALERT_ID_SUGGESTED_MAX,
   ES_QUERY_MAX_HITS_PER_EXECUTION,
   ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
-} from './constants';
+} from './es_query';

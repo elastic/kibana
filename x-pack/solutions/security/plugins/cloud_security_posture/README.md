@@ -47,6 +47,10 @@ node scripts/i18n_check.js
 > i18n should run on project scope as it checks translations files outside of our plugin.
 >
 > Fixes can be applied using the --fix flag
+> 1. We shouldn't manually add/update/delete the localization files, nor change the translated strings.
+> 2. The script will remove unused labels.
+> 3. Regarding adding labels - this happens regularly and automated for the whole Kibana repository outside of our flows.
+
 
 Run [**Unit Tests**](https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing):
 
@@ -58,19 +62,18 @@ yarn test:jest --config x-pack/solutions/security/plugins/cloud_security_posture
 >
 > for a coverage report, add the `--coverage` flag, and run `open target/kibana-coverage/jest/x-pack/solutions/security/plugins/cloud_security_posture/index.html`
 
-Run [**Integration Tests**](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#):
+Run [**API Integration Tests**](https://docs.elastic.dev/kibana-dev-docs/tutorials/testing-plugins#):
 
 ```bash
-yarn test:ftr --config x-pack/test/api_integration/config.ts
+yarn test:ftr --config x-pack/test/cloud_security_posture_api/config.ts
+yarn test:ftr --config x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+yarn test:ftr --config x-pack/test_serverless/api_integration/test_suites/security/config.ts --include-tag=cloud_security_posture
 ```
 
 Run [**End-to-End Tests**](https://www.elastic.co/guide/en/kibana/current/development-tests.html#_running_functional_tests):
 
 ```bash
 yarn test:ftr --config x-pack/test/cloud_security_posture_functional/config.ts
-yarn test:ftr --config x-pack/test/api_integration/apis/cloud_security_posture/config.ts
-yarn test:ftr --config x-pack/test/cloud_security_posture_api/config.ts
-yarn test:ftr --config x-pack/test_serverless/api_integration/test_suites/security/config.ts --include-tag=cloud_security_posture
 yarn test:ftr --config x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
 ```
 
@@ -89,7 +92,7 @@ yarn cypress:cloud_security_posture:run:ess
 
 Functional test runner (FTR) can be used separately with `ftr:runner` and `ftr:server`. This is convenient while developing tests.
 
-For example, 
+For example,
 
 run ESS (stateful) api integration tests:
 ```bash

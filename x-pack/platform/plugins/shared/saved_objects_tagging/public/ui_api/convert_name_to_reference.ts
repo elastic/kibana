@@ -6,8 +6,8 @@
  */
 
 import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { convertTagNameToId } from '../../common';
 import { ITagsCache } from '../services';
-import { convertTagNameToId } from '../utils';
 
 export interface BuildConvertNameToReferenceOptions {
   cache: ITagsCache;

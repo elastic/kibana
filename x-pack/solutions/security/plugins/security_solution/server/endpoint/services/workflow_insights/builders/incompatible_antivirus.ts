@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { get as _get, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 
 import type { DefendInsight } from '@kbn/elastic-assistant-common';
 
@@ -23,22 +23,8 @@ import {
   SourceType,
   TargetType,
 } from '../../../../../common/endpoint/types/workflow_insights';
-import { groupEndpointIdsByOS } from '../helpers';
-
-interface FileEventDoc {
-  process: {
-    code_signature?: {
-      subject_name: string;
-      trusted: boolean;
-    };
-    Ext?: {
-      code_signature?: {
-        subject_name: string;
-        trusted: boolean;
-      };
-    };
-  };
-}
+import type { FileEventDoc } from '../helpers';
+import { getValidCodeSignature, groupEndpointIdsByOS } from '../helpers';
 
 export async function buildIncompatibleAntivirusWorkflowInsights(
   params: BuildWorkflowInsightParams
@@ -57,6 +43,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
       const codeSignaturesHits = (
         await esClient.search<FileEventDoc>({
           index: FILE_EVENTS_INDEX_PATTERN,
+          size: eventIds.length,
           query: {
             bool: {
               must: [
@@ -114,7 +101,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
             type: ActionType.Refreshed,
             timestamp: currentTime,
           },
-          value: `${defendInsight.group} ${filePath}${signatureValue ? ` ${signatureValue}` : ''}`,
+          value: `${filePath}${signatureValue ? ` ${signatureValue}` : ''}`,
           metadata: {
             notes: {
               llm_model: apiConfig.model ?? '',
@@ -126,7 +113,7 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
               {
                 list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
                 name: defendInsight.group,
-                description: 'Suggested by Security Workflow Insights',
+                description: 'Suggested by Automatic Troubleshooting',
                 entries: [
                   {
                     field: 'process.executable.caseless',
@@ -162,14 +149,10 @@ export async function buildIncompatibleAntivirusWorkflowInsights(
             const codeSignatureSearchHit = codeSignaturesHits.find((hit) => hit._id === id);
 
             if (codeSignatureSearchHit) {
-              const extPath = os === 'windows' ? '.Ext' : '';
-              const field = `process${extPath}.code_signature`;
-              const value = _get(
-                codeSignatureSearchHit,
-                `_source.${field}.subject_name`,
-                'invalid subject name'
-              );
-              return createRemediation(filePath, os, field, value);
+              const signature = getValidCodeSignature(os, codeSignatureSearchHit._source);
+              if (signature) {
+                return createRemediation(filePath, os, signature.field, signature.value);
+              }
             }
           }
 

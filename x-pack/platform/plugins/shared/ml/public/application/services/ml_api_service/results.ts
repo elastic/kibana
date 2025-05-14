@@ -16,6 +16,7 @@ import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
+  GetAnomaliesTableDataResult,
 } from '../../../../common/types/results';
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsConfig } from '../../../../common/types/storage';
@@ -63,7 +64,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       functionDescription,
     });
 
-    return httpService.http$<any>({
+    return httpService.http$<GetAnomaliesTableDataResult>({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomalies_table_data`,
       method: 'POST',
       body,

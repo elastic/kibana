@@ -46,24 +46,27 @@ export class DatasetQualityPlugin
       http: core.http,
     });
 
+    // TODO: Remove first check once the failure store is enabled
+    const isFailureStoreEnabled = false && !this.isServerless;
+
     const DatasetQuality = createDatasetQuality({
       core,
       plugins,
       telemetryClient,
-      isServerless: this.isServerless,
+      isFailureStoreEnabled,
     });
 
     const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
       core,
       dataStreamStatsService,
-      isServerless: this.isServerless,
+      isFailureStoreEnabled,
     });
 
     const DatasetQualityDetails = createDatasetQualityDetails({
       core,
       plugins,
       telemetryClient,
-      isServerless: this.isServerless,
+      isFailureStoreEnabled,
     });
 
     const createDatasetQualityDetailsController = createDatasetQualityDetailsControllerLazyFactory({
@@ -71,7 +74,7 @@ export class DatasetQualityPlugin
       plugins,
       dataStreamStatsService,
       dataStreamDetailsService,
-      isServerless: this.isServerless,
+      isFailureStoreEnabled,
     });
 
     return {

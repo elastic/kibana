@@ -128,96 +128,94 @@ function buildRequest({ clusterUuid, config, esIndexPattern, timeRange }: BuildR
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.leader_lag_ops.value',
       'aggregations.by_follower_index.buckets.by_shard_id.buckets.follower_lag_ops.value',
     ],
-    body: {
-      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                cluster_uuid: {
-                  value: clusterUuid,
+    sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              cluster_uuid: {
+                value: clusterUuid,
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  term: {
+                    type: {
+                      value: 'ccr_stats',
+                    },
+                  },
                 },
-              },
-            },
-            {
-              bool: {
-                should: [
-                  {
-                    term: {
-                      type: {
-                        value: 'ccr_stats',
-                      },
+                {
+                  term: {
+                    'metricset.name': {
+                      value: 'ccr',
                     },
                   },
-                  {
-                    term: {
-                      'metricset.name': {
-                        value: 'ccr',
-                      },
-                    },
-                  },
-                  {
-                    term: {
-                      'data_stream.dataset': {
-                        value: getElasticsearchDataset('ccr'),
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            {
-              range: {
-                timestamp: {
-                  format: 'epoch_millis',
-                  gte: min,
-                  lte: max,
                 },
+                {
+                  term: {
+                    'data_stream.dataset': {
+                      value: getElasticsearchDataset('ccr'),
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          {
+            range: {
+              timestamp: {
+                format: 'epoch_millis',
+                gte: min,
+                lte: max,
               },
             },
-          ],
+          },
+        ],
+      },
+    },
+    collapse: {
+      field: 'ccr_stats.follower_index',
+      inner_hits: {
+        name: 'by_shard',
+        sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+        size: maxBucketSize,
+        collapse: {
+          field: 'ccr_stats.shard_id',
         },
       },
-      collapse: {
-        field: 'ccr_stats.follower_index',
-        inner_hits: {
-          name: 'by_shard',
-          sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+    },
+    aggs: {
+      by_follower_index: {
+        terms: {
+          field: 'ccr_stats.follower_index',
           size: maxBucketSize,
-          collapse: {
-            field: 'ccr_stats.shard_id',
-          },
         },
-      },
-      aggs: {
-        by_follower_index: {
-          terms: {
-            field: 'ccr_stats.follower_index',
-            size: maxBucketSize,
-          },
-          aggs: {
-            leader_index: {
-              terms: {
-                field: 'ccr_stats.leader_index',
-                size: 1,
-              },
-              aggs: {
-                remote_cluster: {
-                  terms: {
-                    field: 'ccr_stats.remote_cluster',
-                    size: 1,
-                  },
+        aggs: {
+          leader_index: {
+            terms: {
+              field: 'ccr_stats.leader_index',
+              size: 1,
+            },
+            aggs: {
+              remote_cluster: {
+                terms: {
+                  field: 'ccr_stats.remote_cluster',
+                  size: 1,
                 },
               },
             },
-            by_shard_id: {
-              terms: {
-                field: 'ccr_stats.shard_id',
-                size: 10,
-              },
-              aggs,
+          },
+          by_shard_id: {
+            terms: {
+              field: 'ccr_stats.shard_id',
+              size: 10,
             },
+            aggs,
           },
         },
       },
@@ -267,6 +265,12 @@ export function ccrRoute(server: MonitoringCore) {
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ccr',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: validateParams,
       body: validateBody,

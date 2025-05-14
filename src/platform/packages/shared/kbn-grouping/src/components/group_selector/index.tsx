@@ -150,7 +150,7 @@ const GroupSelectorComponent = ({
         data-test-subj="groupByContextMenu"
         initialPanelId="firstPanel"
         panels={panels}
-        euiTheme={euiTheme}
+        border={euiTheme.border}
       />
     </EuiPopover>
   );

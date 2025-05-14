@@ -49,24 +49,24 @@ export const RESET_CONVERSATION = i18n.translate(
   }
 );
 
-export const SHOW_ANONYMIZED = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleLabel',
+export const ANONYMIZE_VALUES = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.anonymizeValues',
   {
-    defaultMessage: 'Show anonymized',
+    defaultMessage: 'Show anonymized values',
   }
 );
 
-export const SHOW_REAL_VALUES = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleRealValuesLabel',
+export const SHOW_CITATIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.showCitationsLabel',
   {
-    defaultMessage: 'Show real values',
+    defaultMessage: 'Show citations',
   }
 );
 
-export const THIS_CONVERSATION_DOES_NOT_INCLUDE_ANONYMIZED_FIELDS = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.thisConversationDoesNotIncludeAnonymizedFieldsTooltip',
+export const CHAT_OPTIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.chatOptions.label',
   {
-    defaultMessage: 'This conversation does not include anonymized fields',
+    defaultMessage: 'Chat options',
   }
 );
 

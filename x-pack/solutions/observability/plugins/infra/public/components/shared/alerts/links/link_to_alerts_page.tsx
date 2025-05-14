@@ -9,6 +9,7 @@ import { encode } from '@kbn/rison';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { ALERTS_PATH } from '../constants';
 
@@ -36,6 +37,9 @@ export const LinkToAlertsPage = ({
   );
   return (
     <EuiButtonEmpty
+      aria-label={i18n.translate('xpack.infra.assetDetails.alertsLink.ariaLabel', {
+        defaultMessage: 'Show all alerts',
+      })}
       data-test-subj={dataTestSubj}
       size="xs"
       iconSide="right"
@@ -56,7 +60,7 @@ export const LinkToAlertsHomePage = ({ dataTestSubj }: { dataTestSubj?: string }
 
   return (
     <EuiLink
-      style={{ display: 'inline-block' }}
+      css={{ display: 'inline-block' }}
       data-test-subj={dataTestSubj}
       href={linkToAlertsPage}
     >

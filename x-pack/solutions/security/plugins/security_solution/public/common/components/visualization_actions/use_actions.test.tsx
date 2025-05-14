@@ -51,7 +51,7 @@ jest.mock('../../lib/kibana/kibana_react', () => {
             addWarning: jest.fn(),
           },
         },
-        application: { capabilities: { visualize: { save: true } } },
+        application: { capabilities: { visualize_v2: { save: true } } },
       },
     }),
   };

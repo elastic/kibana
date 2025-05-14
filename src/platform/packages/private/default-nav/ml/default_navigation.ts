@@ -33,12 +33,6 @@ export const defaultNavigation: MlNodeDefinition = {
       link: 'ml:overview',
     },
     {
-      link: 'ml:notifications',
-    },
-    {
-      link: 'ml:memoryUsage',
-    },
-    {
       title: i18n.translate('defaultNavigation.ml.anomalyDetection', {
         defaultMessage: 'Anomaly Detection',
       }),

@@ -18,7 +18,7 @@ exports[`ML Integrations renders without errors 1`] = `
         aria-label="Loading"
         class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
         role="progressbar"
-        style="border-color:#0077CC currentcolor currentcolor currentcolor"
+        style="border-color:#1750BA currentcolor currentcolor currentcolor"
       />
       <span
         class="eui-textTruncate"

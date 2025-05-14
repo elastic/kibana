@@ -152,7 +152,7 @@ describe('Cases API', () => {
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${caseId}/resolve`, {
         method: 'GET',
         query: {
-          includeComments: false,
+          includeComments: true,
         },
         signal: abortCtrl.signal,
       });

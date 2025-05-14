@@ -20,9 +20,9 @@ export const zeekRowRenderer: RowRenderer = {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'zeek';
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
-      <ZeekDetails data={data} isDraggable={isDraggable} timelineId={scopeId} />
+      <ZeekDetails data={data} timelineId={scopeId} />
     </RowRendererContainer>
   ),
 };

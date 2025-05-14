@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { SLODefinition } from '../domain/models';
 import { SLORepository } from './slo_repository';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
@@ -34,7 +34,7 @@ export class SloDefinitionClient {
   ): Promise<SLODefinitionResult> {
     if (remoteName) {
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
-        index: `${remoteName}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
+        index: `${remoteName}:${SUMMARY_DESTINATION_INDEX_PATTERN}`,
         query: {
           bool: {
             filter: [{ term: { spaceId } }, { term: { 'slo.id': sloId } }],

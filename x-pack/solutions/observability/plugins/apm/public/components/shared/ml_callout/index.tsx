@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { useMlManageJobsHref } from '../../../hooks/use_ml_manage_jobs_href';
-import { useAPMHref } from '../links/apm/apm_link';
+import { useAPMHref } from '../links/apm/apm_link_hooks';
 
 export function shouldDisplayMlCallout(anomalyDetectionSetupState: AnomalyDetectionSetupState) {
   return (
@@ -163,6 +163,9 @@ export function MLCallout({
       {dismissable && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            aria-label={i18n.translate('xpack.apm.mLCallout.button.ariaLabel', {
+              defaultMessage: '',
+            })}
             data-test-subj="apmMLCalloutButton"
             onClick={onDismiss}
             color={properties.color}

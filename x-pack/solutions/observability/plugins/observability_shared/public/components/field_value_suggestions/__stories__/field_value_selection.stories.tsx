@@ -9,7 +9,6 @@ import React, { ComponentType, useEffect, useState } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
-import { text } from '@storybook/addon-knobs';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { FieldValueSelectionProps } from '../types';
 import { FieldValueSelection } from '../field_value_selection';
@@ -83,13 +82,11 @@ export function EmptyState() {
   );
 }
 
-export function SearchState(args: FieldValueSelectionProps) {
-  const name = text('Query', '');
-
+export function SearchState({ query = '' }: FieldValueSelectionProps) {
   const [, setQuery] = useState('');
   useEffect(() => {
-    setQuery(name);
-  }, [name]);
+    setQuery(query);
+  }, [query]);
 
   return (
     <FieldValueSelection
@@ -102,3 +99,7 @@ export function SearchState(args: FieldValueSelectionProps) {
     />
   );
 }
+
+SearchState.args = {
+  query: '',
+};

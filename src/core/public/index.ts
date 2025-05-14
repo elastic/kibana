@@ -308,3 +308,5 @@ export type { CoreSetup, CoreStart, StartServicesAccessor } from '@kbn/core-life
 export type { CoreSystem } from '@kbn/core-root-browser-internal';
 
 export { __kbnBootstrap__ } from '@kbn/core-root-browser-internal';
+
+export { kibanaFullBodyHeightCss, fullScreenGraphicsMixinStyles } from './cssUtils';

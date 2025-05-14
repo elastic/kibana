@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   useEuiFontSize,
@@ -467,7 +467,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            <EuiFlexItem style={{ width: '200px' }} grow={false}>
+            <EuiFlexItem css={{ width: '200px' }} grow={false}>
               <EuiFormRow
                 label={
                   <OptionLabelWithIconTip
@@ -491,7 +491,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            <EuiFlexItem style={{ width: '120px' }} grow={false}>
+            <EuiFlexItem css={{ width: '120px' }} grow={false}>
               <EuiFormRow
                 label={
                   <OptionLabelWithIconTip
@@ -518,7 +518,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
               </EuiFormRow>
             </EuiFlexItem>
             {resultsField !== undefined && legendType === undefined && (
-              <EuiFlexItem style={{ width: '120px' }} grow={false}>
+              <EuiFlexItem css={{ width: '120px' }} grow={false}>
                 <EuiFormRow
                   label={
                     <OptionLabelWithIconTip

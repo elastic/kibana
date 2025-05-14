@@ -13,8 +13,6 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
 import React from 'react';
 
-const LISTING_LIMIT = 1000;
-
 export const MSearchTable = () => {
   const contentClient = useContentClient();
 
@@ -35,7 +33,6 @@ export const MSearchTable = () => {
       },
       contentTypes: [
         { contentTypeId: 'map' },
-        { contentTypeId: 'dashboard' },
         { contentTypeId: 'visualization' },
         { contentTypeId: 'lens' },
         { contentTypeId: 'search' },
@@ -55,7 +52,6 @@ export const MSearchTable = () => {
       id="cm-msearch-table"
       headingId="cm-msearch-table-heading"
       findItems={findItems}
-      listingLimit={LISTING_LIMIT}
       initialPageSize={50}
       entityName={`ContentItem`}
       entityNamePlural={`ContentItems`}

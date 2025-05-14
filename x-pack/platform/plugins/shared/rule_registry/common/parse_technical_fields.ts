@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { pick } from 'lodash';
-import {
-  technicalRuleFieldMap,
-  TechnicalRuleFieldMap,
-} from './assets/field_maps/technical_rule_field_map';
+import type { TechnicalRuleFieldMap } from './assets/field_maps/technical_rule_field_map';
+import { technicalRuleFieldMap } from './assets/field_maps/technical_rule_field_map';
 import { runtimeTypeFromFieldMap } from './field_map';
 
 const technicalFieldRuntimeType =

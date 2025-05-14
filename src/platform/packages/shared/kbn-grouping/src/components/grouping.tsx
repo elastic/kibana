@@ -57,6 +57,11 @@ export interface GroupingProps<T> {
   ) => void;
   unit?: (n: number) => string;
   groupsUnit?: (n: number, parentSelectedGroup: string, hasNullGroup: boolean) => string;
+  // determines if the field size should be ignored when creating a filter
+  // usefull in combination with shouldFlattenMultiValueField param in GroupingQueryArgs
+  // because if the field is a multi-value field, and we emit each value separatly the size of the field will be ignored
+  // when filtering by it
+  multiValueFields?: string[];
 }
 
 const GroupingComponent = <T,>({
@@ -80,10 +85,10 @@ const GroupingComponent = <T,>({
   tracker,
   unit = defaultUnit,
   groupsUnit = GROUPS_UNIT,
+  multiValueFields,
 }: GroupingProps<T>) => {
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
-
   const countCss = css`
     font-size: ${xsFontSize};
     font-weight: ${euiTheme.font.weight.semiBold};
@@ -137,7 +142,8 @@ const GroupingComponent = <T,>({
                       ? getNullGroupFilter(selectedGroup)
                       : createGroupFilter(
                           selectedGroup,
-                          Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key]
+                          Array.isArray(groupBucket.key) ? groupBucket.key : [groupBucket.key],
+                          multiValueFields
                         )
                   }
                   groupNumber={groupNumber}
@@ -173,6 +179,7 @@ const GroupingComponent = <T,>({
               }
               selectedGroup={selectedGroup}
               groupingLevel={groupingLevel}
+              multiValueFields={multiValueFields}
             />
             {groupingLevel > 0 ? null : <EuiSpacer size="s" />}
           </span>
@@ -193,6 +200,7 @@ const GroupingComponent = <T,>({
       tracker,
       trigger,
       unit,
+      multiValueFields,
     ]
   );
 
@@ -208,7 +216,7 @@ const GroupingComponent = <T,>({
           data-test-subj="grouping-table"
           justifyContent="spaceBetween"
           alignItems="center"
-          style={{ paddingBottom: 20, paddingTop: 20 }}
+          css={{ paddingBottom: 20, paddingTop: 20 }}
         >
           <EuiFlexItem grow={false}>
             {groupCount > 0 && unitCount > 0 ? (

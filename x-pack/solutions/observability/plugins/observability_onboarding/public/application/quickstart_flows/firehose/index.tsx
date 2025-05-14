@@ -18,8 +18,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { OnboardingFlowEventContext } from '../../../../common/telemetry_events';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EmptyPrompt } from '../shared/empty_prompt';
@@ -33,6 +34,7 @@ import { ObservabilityOnboardingAppServices } from '../../..';
 import { useWindowBlurDataMonitoringTrigger } from '../shared/use_window_blur_data_monitoring_trigger';
 import { ExistingDataCallout } from './existing_data_callout';
 import { usePopulatedAWSIndexList } from './use_populated_aws_index_list';
+import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 
 const OPTIONS = [
   {
@@ -54,6 +56,12 @@ const OPTIONS = [
 ];
 
 export function FirehosePanel() {
+  useFlowBreadcrumb({
+    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.firehose', {
+      defaultMessage: 'AWS Firehose',
+    }),
+  });
+
   const [selectedOptionId, setSelectedOptionId] = useState<CreateStackOption>(
     CreateStackOption.AWS_CONSOLE_UI
   );
@@ -64,6 +72,17 @@ export function FirehosePanel() {
   } = useKibana<ObservabilityOnboardingAppServices>();
   const { data, status, error, refetch } = useFirehoseFlow();
   const { data: populatedAWSIndexList } = usePopulatedAWSIndexList();
+  const { onPageReady } = usePerformanceContext();
+
+  useEffect(() => {
+    if (data) {
+      onPageReady({
+        meta: {
+          description: `[ttfmp_onboarding] Request to create the onboarding flow succeeded and the flow's UI has rendered`,
+        },
+      });
+    }
+  }, [data, onPageReady]);
 
   const hasExistingData = Array.isArray(populatedAWSIndexList) && populatedAWSIndexList.length > 0;
 

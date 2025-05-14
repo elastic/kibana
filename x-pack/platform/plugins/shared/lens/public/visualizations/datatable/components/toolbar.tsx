@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
-import { RowHeightSettings } from '@kbn/unified-data-table';
+import { RowHeightSettings, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import { ToolbarPopover } from '../../../shared_components';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
@@ -17,41 +17,64 @@ import { DEFAULT_PAGE_SIZE } from './table_basic';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  DEFAULT_ROW_HEIGHT,
   DEFAULT_ROW_HEIGHT_LINES,
+  ROW_HEIGHT_LINES_KEYS,
 } from './constants';
+
+type LineCounts = {
+  [key in keyof typeof ROW_HEIGHT_LINES_KEYS]: number;
+};
+
+const LEGACY_SINGLE_ROW_HEIGHT_MODE = 'single';
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
+
+  const [lineCounts, setLineCounts] = useState<LineCounts>({
+    [ROW_HEIGHT_LINES_KEYS.headerRowHeightLines]:
+      state.headerRowHeightLines && state.headerRowHeightLines > 0
+        ? state.headerRowHeightLines
+        : DEFAULT_HEADER_ROW_HEIGHT_LINES,
+    [ROW_HEIGHT_LINES_KEYS.rowHeightLines]:
+      state.rowHeightLines && state.rowHeightLines > 0
+        ? state.rowHeightLines
+        : DEFAULT_ROW_HEIGHT_LINES,
+  });
+
   const onChangeHeight = useCallback(
     (
       newHeightMode: RowHeightMode | undefined,
       heightProperty: string,
-      heightLinesProperty: string,
-      defaultRowHeight = DEFAULT_ROW_HEIGHT_LINES
+      heightLinesProperty: keyof typeof ROW_HEIGHT_LINES_KEYS
     ) => {
-      const rowHeightLines =
-        newHeightMode === RowHeightMode.single
-          ? 1
-          : newHeightMode !== RowHeightMode.auto
-          ? defaultRowHeight
-          : undefined;
+      const newRowHeightLines =
+        newHeightMode === RowHeightMode.auto
+          ? ROWS_HEIGHT_OPTIONS.auto
+          : lineCounts[heightLinesProperty];
+
       setState({
         ...state,
         [heightProperty]: newHeightMode,
-        [heightLinesProperty]: rowHeightLines,
+        [heightLinesProperty]: newRowHeightLines,
       });
     },
-    [setState, state]
+    [setState, state, lineCounts]
   );
 
   const onChangeHeightLines = useCallback(
-    (newRowHeightLines: number, heightLinesProperty: string) => {
+    (newRowHeightLines: number, heightLinesProperty: keyof typeof ROW_HEIGHT_LINES_KEYS) => {
       setState({
         ...state,
         [heightLinesProperty]: newRowHeightLines,
       });
+
+      setLineCounts({
+        ...lineCounts,
+        [heightLinesProperty]: newRowHeightLines,
+      });
     },
-    [setState, state]
+    [setState, state, lineCounts]
   );
 
   const onTogglePagination = useCallback(() => {
@@ -76,37 +99,37 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
       >
         <RowHeightSettings
           rowHeight={state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT}
-          rowHeightLines={state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES}
           label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
-            defaultMessage: 'Header row height',
+            defaultMessage: 'Max header cell lines',
           })}
           onChangeRowHeight={(mode) =>
-            onChangeHeight(
-              mode,
-              'headerRowHeight',
-              'headerRowHeightLines',
-              DEFAULT_HEADER_ROW_HEIGHT_LINES
-            )
+            onChangeHeight(mode, 'headerRowHeight', ROW_HEIGHT_LINES_KEYS.headerRowHeightLines)
           }
-          onChangeRowHeightLines={(lines) => {
-            onChangeHeightLines(lines, 'headerRowHeightLines');
+          onChangeLineCountInput={(lines) => {
+            onChangeHeightLines(lines, ROW_HEIGHT_LINES_KEYS.headerRowHeightLines);
           }}
           data-test-subj="lnsHeaderHeightSettings"
           maxRowHeight={5}
-          compressed
+          lineCountInput={lineCounts[ROW_HEIGHT_LINES_KEYS.headerRowHeightLines]}
         />
         <RowHeightSettings
-          rowHeight={state.rowHeight}
-          rowHeightLines={state.rowHeightLines}
+          rowHeight={
+            // @ts-ignore - saved state can contain legacy row height mode
+            state.rowHeight === LEGACY_SINGLE_ROW_HEIGHT_MODE
+              ? RowHeightMode.custom
+              : state.rowHeight ?? DEFAULT_ROW_HEIGHT
+          }
           label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
-            defaultMessage: 'Cell row height',
+            defaultMessage: 'Body cell lines',
           })}
-          onChangeRowHeight={(mode) => onChangeHeight(mode, 'rowHeight', 'rowHeightLines')}
-          onChangeRowHeightLines={(lines) => {
-            onChangeHeightLines(lines, 'rowHeightLines');
+          onChangeRowHeight={(mode) =>
+            onChangeHeight(mode, 'rowHeight', ROW_HEIGHT_LINES_KEYS.rowHeightLines)
+          }
+          onChangeLineCountInput={(lines) => {
+            onChangeHeightLines(lines, ROW_HEIGHT_LINES_KEYS.rowHeightLines);
           }}
           data-test-subj="lnsRowHeightSettings"
-          compressed
+          lineCountInput={lineCounts[ROW_HEIGHT_LINES_KEYS.rowHeightLines]}
         />
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.visualOptionsPaginateTable', {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { adHocRunStatus } from '../../common/constants';
-import { AdHocRunSchedule } from '../data/ad_hoc_run/types';
+import type { AdHocRunSchedule } from '../data/ad_hoc_run/types';
 import { partiallyUpdateAdHocRun } from './lib';
 
 const TIME_TO_WAIT = 2000;

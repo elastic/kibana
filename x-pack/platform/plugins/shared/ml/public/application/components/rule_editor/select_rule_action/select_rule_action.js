@@ -50,14 +50,14 @@ export function SelectRuleAction({
   }
 
   return (
-    <div className="select-rule-action">
+    <div>
       {rules.length > 0 && (
         <React.Fragment>
           <DetectorDescriptionList job={job} detector={detector} anomaly={anomaly} />
           <EuiSpacer size="m" />
           {ruleActionPanels}
           <EuiSpacer size="m" />
-          <EuiText style={{ display: 'inline' }}>
+          <EuiText css={{ display: 'inline' }}>
             <FormattedMessage
               id="xpack.ml.ruleEditor.selectRuleAction.orText"
               defaultMessage="Or&nbsp;"

@@ -39,7 +39,6 @@ export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   hostName: string;
-  isDraggable?: boolean;
   isPreviewMode?: boolean;
 }
 
@@ -57,13 +56,7 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const HostPanel = ({
-  contextID,
-  scopeId,
-  hostName,
-  isDraggable,
-  isPreviewMode,
-}: HostPanelProps) => {
+export const HostPanel = ({ contextID, scopeId, hostName, isPreviewMode }: HostPanelProps) => {
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
   const hostNameFilterQuery = useMemo(
     () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
@@ -123,7 +116,6 @@ export const HostPanel = ({
     hasNonClosedAlerts,
     isPreviewMode,
     contextID,
-    isDraggable,
   });
 
   const openDefaultPanel = useCallback(
@@ -179,7 +171,6 @@ export const HostPanel = ({
               riskScoreState={riskScoreState}
               contextID={contextID}
               scopeId={scopeId}
-              isDraggable={!!isDraggable}
               openDetailsPanel={openDetailsPanel}
               isLinkEnabled={isLinkEnabled}
               recalculatingScore={recalculatingScore}
@@ -187,12 +178,7 @@ export const HostPanel = ({
               isPreviewMode={isPreviewMode}
             />
             {isPreviewMode && (
-              <HostPreviewPanelFooter
-                hostName={hostName}
-                contextID={contextID}
-                scopeId={scopeId}
-                isDraggable={!!isDraggable}
-              />
+              <HostPreviewPanelFooter hostName={hostName} contextID={contextID} scopeId={scopeId} />
             )}
           </>
         );

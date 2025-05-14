@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import type { MouseEventHandler, ReactNode } from 'react';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center; /* Corrects horizontal centering in IE11 */
@@ -60,7 +60,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
             descriptionTitle != null || description != null ? (
               <EuiFlexItem
                 grow={false}
-                style={{ maxWidth: maxItemWidth }}
+                css={{ maxWidth: maxItemWidth }}
                 key={`empty-page-${titles[idx]}-action`}
               >
                 <EuiCard
@@ -84,7 +84,7 @@ const EmptyPageComponent = React.memo<EmptyPageProps>(({ actions, message, title
             ) : (
               <EuiFlexItem
                 grow={false}
-                style={{ maxWidth: maxItemWidth }}
+                css={{ maxWidth: maxItemWidth }}
                 key={`empty-page-${titles[idx]}-action`}
               >
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}

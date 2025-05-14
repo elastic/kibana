@@ -9,6 +9,8 @@ import React from 'react';
 
 import type { UseRequestResponse } from '@kbn/es-ui-shared-plugin/public';
 
+import userEvent from '@testing-library/user-event';
+
 import type {
   UninstallToken,
   UninstallTokenMetadata,
@@ -156,10 +158,10 @@ describe('UninstallCommandFlyout', () => {
       );
     });
 
-    it('when user selects Windows, it renders commands for Windows', () => {
+    it('when user selects Windows, it renders commands for Windows', async () => {
       const renderResult = render();
 
-      renderResult.getByTestId('windows').click();
+      await userEvent.click(renderResult.getByTestId('windows'));
 
       const uninstallInstructions = renderResult.getByTestId(
         'uninstall-commands-flyout-code-block'

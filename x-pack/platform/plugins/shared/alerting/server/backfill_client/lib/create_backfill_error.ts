@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ScheduleBackfillError } from '../../application/backfill/methods/schedule/types';
+import type { ScheduleBackfillError } from '../../application/backfill/methods/schedule/types';
 
 export function createBackfillError(
   message: string,

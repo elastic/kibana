@@ -7,13 +7,15 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
+import { ESQLControlVariable, apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildObservableVariable, createEmptyLensState } from '../helper';
+import { createEmptyLensState } from '../helper';
 import type {
   ExpressionWrapperProps,
   LensEmbeddableStartServices,
   LensInternalApi,
   LensOverrides,
+  LensPanelProps,
   LensRuntimeState,
   VisualizationContext,
 } from '../types';
@@ -26,13 +28,13 @@ export function initializeInternalApi(
   titleManager: ReturnType<typeof initializeTitleManager>,
   { visualizationMap }: LensEmbeddableStartServices
 ): LensInternalApi {
-  const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
-  const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
+  const hasRenderCompleted$ = new BehaviorSubject<boolean>(false);
+  const expressionParams$ = new BehaviorSubject<ExpressionWrapperProps | null>(null);
   const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
   if (apiHasAbortController(parentApi)) {
     expressionAbortController$.next(parentApi.abortController);
   }
-  const [renderCount$] = buildObservableVariable<number>(0);
+  const renderCount$ = new BehaviorSubject<number>(0);
 
   const attributes$ = new BehaviorSubject<LensRuntimeState['attributes']>(
     initialState.attributes || createEmptyLensState().attributes
@@ -66,12 +68,17 @@ export function initializeInternalApi(
     activeData: undefined,
   });
 
+  const esqlVariables$ = apiPublishesESQLVariables(parentApi)
+    ? parentApi.esqlVariables$
+    : new BehaviorSubject<ESQLControlVariable[]>([]);
+
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
     attributes$,
     overrides$,
     disableTriggers$,
+    esqlVariables$,
     dataLoading$,
     hasRenderCompleted$,
     expressionParams$,
@@ -98,6 +105,8 @@ export function initializeInternalApi(
     updateAttributes: (attributes: LensRuntimeState['attributes']) => attributes$.next(attributes),
     updateAbortController: (abortController: AbortController | undefined) =>
       expressionAbortController$.next(abortController),
+    updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) =>
+      disableTriggers$.next(disableTriggers),
     updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
     updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),

@@ -11,14 +11,14 @@ import { MemoryHistory, createMemoryHistory } from 'history';
 import React, { useEffect } from 'react';
 import { render, waitFor } from '@testing-library/react';
 
-import type { DashboardRendererProps } from '../dashboard_container/external_api/dashboard_renderer';
-import { DashboardRenderer } from '../dashboard_container/external_api/dashboard_renderer';
+import type { DashboardRendererProps } from '../dashboard_renderer/dashboard_renderer';
+import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import { buildMockDashboardApi } from '../mocks';
 import { dataService } from '../services/kibana_services';
 import { DashboardApp } from './dashboard_app';
 
-jest.mock('../dashboard_container/external_api/dashboard_renderer');
+jest.mock('../dashboard_renderer/dashboard_renderer');
 jest.mock('../dashboard_top_nav');
 
 describe('Dashboard App', () => {

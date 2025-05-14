@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
-import { DataSourceCategory, RootContext, SolutionType } from '../../../../profiles';
+import type { RootContext } from '../../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../../profiles';
 import { createContextAwarenessMocks } from '../../../../__mocks__';
-import { createLogsDataSourceProfileProvider } from '../profile';
+import { createLogsDataSourceProfileProvider, type LogOverviewContext } from '../profile';
 import { createApacheErrorLogsDataSourceProfileProvider } from './apache_error_logs';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
@@ -33,7 +35,13 @@ describe('createApacheErrorLogsDataSourceProfileProvider', () => {
       dataSource: createEsqlDataSource(),
       query: { esql: 'FROM logs-apache.error-*' },
     });
-    expect(result).toEqual({ isMatch: true, context: { category: DataSourceCategory.Logs } });
+    expect(result).toEqual({
+      isMatch: true,
+      context: {
+        category: DataSourceCategory.Logs,
+        logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+      },
+    });
   });
 
   it('should not match an invalid index pattern', async () => {
@@ -47,7 +55,10 @@ describe('createApacheErrorLogsDataSourceProfileProvider', () => {
 
   it('should return default app state', () => {
     const getDefaultAppState = dataSourceProfileProvider.profile.getDefaultAppState?.(() => ({}), {
-      context: { category: DataSourceCategory.Logs },
+      context: {
+        category: DataSourceCategory.Logs,
+        logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
+      },
     });
     expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({
       columns: [

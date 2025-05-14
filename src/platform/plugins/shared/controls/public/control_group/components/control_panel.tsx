@@ -20,7 +20,6 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasParentApi,
@@ -119,14 +118,14 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     setInitialLoadComplete(true);
   }
 
-  const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
-  const isEditable = viewMode === ViewMode.EDIT;
+  const viewMode = rawViewMode ?? 'view';
+  const isEditable = viewMode === 'edit';
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
   const controlGrow = grow ?? DEFAULT_CONTROL_GROW;
   return (
     <EuiFlexItem
       ref={setNodeRef}
-      style={style}
+      css={style}
       grow={controlGrow}
       data-control-id={uuid}
       data-test-subj="control-frame"

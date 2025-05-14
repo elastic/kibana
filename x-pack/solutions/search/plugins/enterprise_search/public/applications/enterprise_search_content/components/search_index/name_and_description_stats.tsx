@@ -18,9 +18,10 @@ import {
   EuiStatProps,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { DESCRIPTION_LABEL, NAME_LABEL } from '../../../shared/constants';
-import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
+import { isConnectorIndex } from '../../utils/indices';
 
 import { ConnectorNameAndDescriptionFlyout } from './connector/connector_name_and_description/connector_name_and_description_flyout';
 import { ConnectorNameAndDescriptionLogic } from './connector/connector_name_and_description/connector_name_and_description_logic';
@@ -33,7 +34,11 @@ const EditDescription: React.FC<{
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>{label}</EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty onClick={onClick}>Edit</EuiButtonEmpty>
+      <EuiButtonEmpty data-test-subj="enterpriseSearchEditDescriptionEditButton" onClick={onClick}>
+        {i18n.translate('xpack.enterpriseSearch.editDescription.editButtonEmptyLabel', {
+          defaultMessage: 'Edit',
+        })}
+      </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -43,7 +48,7 @@ export const NameAndDescriptionStats: React.FC = () => {
   const hideStats = isLoading || isError;
   const { setIsEditing: setIsFlyoutVisible } = useActions(ConnectorNameAndDescriptionLogic);
 
-  if (!(isConnectorIndex(indexData) || isCrawlerIndex(indexData))) {
+  if (!isConnectorIndex(indexData)) {
     return <></>;
   }
 

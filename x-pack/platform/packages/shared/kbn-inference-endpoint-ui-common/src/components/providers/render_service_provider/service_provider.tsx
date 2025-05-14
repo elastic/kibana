@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiHighlight, EuiIcon } from '@elastic/eui';
+import { EuiAvatar, EuiHighlight } from '@elastic/eui';
 import React from 'react';
 
 import { ServiceProviderKeys } from '../../../constants';
@@ -21,6 +21,9 @@ import amazonBedrockIcon from '../assets/images/amazon_bedrock.svg';
 import anthropicIcon from '../assets/images/anthropic.svg';
 import alibabaCloudIcon from '../assets/images/alibaba_cloud.svg';
 import ibmWatsonxIcon from '../assets/images/ibm_watsonx.svg';
+import jinaAIIcon from '../assets/images/jinaai.svg';
+import voyageAIIcon from '../assets/images/voyageai.svg';
+import deepSeekIcon from '../assets/images/deepseek.svg';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
@@ -106,13 +109,35 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     name: 'IBM Watsonx',
     solutions: ['Search'],
   },
+  [ServiceProviderKeys.jinaai]: {
+    icon: jinaAIIcon,
+    name: 'Jina AI',
+    solutions: ['Search'],
+  },
+  [ServiceProviderKeys.voyageai]: {
+    icon: voyageAIIcon,
+    name: 'Voyage AI',
+    solutions: ['Search'],
+  },
+  [ServiceProviderKeys.deepseek]: {
+    icon: deepSeekIcon,
+    name: 'DeepSeek',
+    solutions: ['Search'],
+  },
 };
 
 export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKey }) => {
   const provider = SERVICE_PROVIDERS[providerKey];
 
   return provider ? (
-    <EuiIcon data-test-subj={`icon-service-provider-${providerKey}`} type={provider.icon} />
+    <EuiAvatar
+      name={providerKey}
+      data-test-subj={`icon-service-provider-${providerKey}`}
+      iconType={provider.icon}
+      color="#fff"
+      size="s"
+      type="space"
+    />
   ) : null;
 };
 

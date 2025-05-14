@@ -98,7 +98,7 @@ export const MonitorDetailsPanel = ({
           </>
         )}
         <EuiDescriptionListTitle>{URL_LABEL}</EuiDescriptionListTitle>
-        <EuiDescriptionListDescription style={{ wordBreak: 'break-all' }}>
+        <EuiDescriptionListDescription css={{ wordBreak: 'break-all' }}>
           {url ? (
             <EuiLink data-test-subj="syntheticsMonitorDetailsPanelLink" href={url} external>
               {url}
@@ -111,8 +111,8 @@ export const MonitorDetailsPanel = ({
         </EuiDescriptionListDescription>
         <EuiDescriptionListTitle>{LAST_RUN_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>
-          {latestPing?.timestamp ? (
-            <Time timestamp={latestPing?.timestamp} />
+          {latestPing?.['@timestamp'] ? (
+            <Time timestamp={latestPing?.['@timestamp']} />
           ) : (
             <EuiText color="subdued">
               {i18n.translate('xpack.synthetics.monitorDetailsPanel.TextLabel', {

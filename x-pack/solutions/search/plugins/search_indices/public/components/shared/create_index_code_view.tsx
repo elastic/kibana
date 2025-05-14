@@ -5,10 +5,12 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
+import { i18n } from '@kbn/i18n';
+import { WorkflowId } from '@kbn/search-shared-ui';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
@@ -17,10 +19,10 @@ import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 import { APIKeyCallout } from './api_key_callout';
 import { CodeSample } from './code_sample';
-import { useWorkflow } from './hooks/use_workflow';
 import { LanguageSelector } from './language_selector';
 import { GuideSelector } from './guide_selector';
-import { Workflow, WorkflowId } from '../../code_examples/workflows';
+import { Workflow } from '../../code_examples/workflows';
+import { CreateIndexCodeExamples } from '../../types';
 
 export interface CreateIndexCodeViewProps {
   selectedLanguage: AvailableLanguages;
@@ -34,6 +36,7 @@ export interface CreateIndexCodeViewProps {
     installCommands: string;
     createIndex: string;
   };
+  selectedCodeExamples: CreateIndexCodeExamples;
 }
 
 export const CreateIndexCodeView = ({
@@ -44,10 +47,10 @@ export const CreateIndexCodeView = ({
   selectedWorkflow,
   indexName,
   selectedLanguage,
+  selectedCodeExamples,
 }: CreateIndexCodeViewProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
-  const { createIndexExamples: selectedCodeExamples } = useWorkflow();
 
   const elasticsearchUrl = useElasticsearchUrl();
   const { apiKey } = useSearchApiKey();
@@ -70,52 +73,46 @@ export const CreateIndexCodeView = ({
           <APIKeyCallout apiKey={apiKey} />
         </EuiFlexItem>
       )}
+      <EuiHorizontalRule margin="none" />
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
-          <EuiFlexItem grow={false}>
-            <GuideSelector
-              selectedWorkflowId={selectedWorkflow?.id || 'default'}
-              onChange={changeWorkflowId}
-              showTour={false}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TryInConsoleButton
-              request={selectedCodeExamples.sense.createIndex(codeParams)}
-              application={application}
-              sharePlugin={share}
-              consolePlugin={consolePlugin}
-              telemetryId={`${selectedLanguage}_create_index`}
-              onClick={() => {
-                usageTracker.click([
-                  analyticsEvents.runInConsole,
-                  `${analyticsEvents.runInConsole}_${selectedLanguage}`,
-                ]);
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      {!!selectedWorkflow && (
-        <>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h4>{selectedWorkflow?.title}</h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText color="subdued" size="s">
-              <p>{selectedWorkflow?.summary}</p>
-            </EuiText>
-          </EuiFlexItem>
-        </>
-      )}
-      <EuiFlexItem css={{ maxWidth: '300px' }}>
-        <LanguageSelector
-          options={LanguageOptions}
-          selectedLanguage={selectedLanguage}
-          onSelectLanguage={changeCodingLanguage}
+        <EuiTitle size="xs">
+          <h5>
+            {i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', {
+              defaultMessage: 'Select a workflow guide',
+            })}
+          </h5>
+        </EuiTitle>
+        <EuiSpacer />
+        <GuideSelector
+          selectedWorkflowId={selectedWorkflow?.id || 'default'}
+          onChange={changeWorkflowId}
+          showTour={false}
         />
       </EuiFlexItem>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false} css={{ minWidth: '150px' }}>
+          <LanguageSelector
+            options={LanguageOptions}
+            selectedLanguage={selectedLanguage}
+            onSelectLanguage={changeCodingLanguage}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <TryInConsoleButton
+            request={selectedCodeExamples.sense.createIndex(codeParams)}
+            application={application}
+            sharePlugin={share}
+            consolePlugin={consolePlugin}
+            telemetryId={`${selectedLanguage}_create_index`}
+            onClick={() => {
+              usageTracker.click([
+                analyticsEvents.runInConsole,
+                `${analyticsEvents.runInConsole}_${selectedLanguage}`,
+              ]);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {selectedCodeExample.installCommand && (
         <CodeSample
           title={selectedCodeExamples.installTitle}

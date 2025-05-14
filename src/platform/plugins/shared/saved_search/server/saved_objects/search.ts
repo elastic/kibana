@@ -8,8 +8,8 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsType } from '@kbn/core/server';
-import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type { SavedObjectsType } from '@kbn/core/server';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getAllMigrations } from './search_migrations';
 import { SavedSearchTypeDisplayName } from '../../common/constants';
 import {
@@ -41,7 +41,7 @@ export function getSavedSearchObjectType(
       getInAppUrl(obj) {
         return {
           path: `/app/discover#/view/${encodeURIComponent(obj.id)}`,
-          uiCapabilitiesPath: 'discover.show',
+          uiCapabilitiesPath: 'discover_v2.show',
         };
       },
     },

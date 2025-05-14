@@ -8,6 +8,15 @@
 export enum ProductFeatureSecurityKey {
   /** Enables Advanced Insights (Entity Risk, GenAI) */
   advancedInsights = 'advanced_insights',
+
+  /** Enables Configurations page for AI SOC */
+  configurations = 'configurations',
+
+  /** Elastic endpoint detections, includes alerts, rules, investigations */
+  detections = 'detections',
+
+  /** Enables external detections for AI SOC, includes alerts_summary, basic_rules*/
+  externalDetections = 'external_detections',
   /**
    * Enables Investigation guide in Timeline
    */
@@ -21,6 +30,10 @@ export enum ProductFeatureSecurityKey {
    * running endpoint security
    */
   endpointHostManagement = 'endpoint_host_management',
+  /**
+   * Enables access to Endpoint host isolation and release actions
+   */
+  endpointHostIsolation = 'endpoint_host_isolation',
   /**
    * Enables endpoint policy views that enables user to manage endpoint security policies
    */
@@ -85,12 +98,17 @@ export enum ProductFeatureSecurityKey {
   cloudSecurityPosture = 'cloud_security_posture',
 
   /**
-   * enables the integration assistant
+   * enables the automatic import
    */
-  integrationAssistant = 'integration_assistant',
+  automaticImport = 'automatic_import',
 
   /** Enables Endpoint Workflow Insights */
   securityWorkflowInsights = 'security_workflow_insights',
+
+  /**
+   * Enables customization of prebuilt Elastic rules
+   */
+  prebuiltRuleCustomization = 'prebuilt_rule_customization',
 }
 
 export enum ProductFeatureCasesKey {
@@ -127,6 +145,12 @@ export enum ProductFeatureNotesFeatureKey {
    */
   notes = 'notes',
 }
+export enum ProductFeatureSiemMigrationsKey {
+  /**
+   * Enables the SIEM Migrations main feature
+   */
+  siemMigrations = 'siem_migrations',
+}
 
 // Merges the two enums.
 export const ProductFeatureKey = {
@@ -134,6 +158,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureCasesKey,
   ...ProductFeatureAssistantKey,
   ...ProductFeatureAttackDiscoveryKey,
+  ...ProductFeatureSiemMigrationsKey,
   ...ProductFeatureTimelineFeatureKey,
   ...ProductFeatureNotesFeatureKey,
 };
@@ -143,6 +168,7 @@ export type ProductFeatureKeyType =
   | ProductFeatureCasesKey
   | ProductFeatureAssistantKey
   | ProductFeatureAttackDiscoveryKey
+  | ProductFeatureSiemMigrationsKey
   | ProductFeatureTimelineFeatureKey
   | ProductFeatureNotesFeatureKey;
 
@@ -156,6 +182,7 @@ export enum SecuritySubFeatureId {
   hostIsolationExceptionsBasic = 'hostIsolationExceptionsBasicSubFeature',
   blocklist = 'blocklistSubFeature',
   eventFilters = 'eventFiltersSubFeature',
+  globalArtifactManagement = 'globalArtifactManagementSubFeature',
   policyManagement = 'policyManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
   workflowInsights = 'workflowInsightsSubFeature',
@@ -172,6 +199,7 @@ export enum CasesSubFeatureId {
   casesSettings = 'casesSettingsSubFeature',
   createComment = 'createCommentSubFeature',
   reopenCase = 'reopenCaseSubFeature',
+  assignUsers = 'assignUsersSubFeature',
 }
 
 /** Sub-features IDs for Security Assistant */

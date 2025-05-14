@@ -33,7 +33,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     version: '1.14.0',
   };
 
-  describe('Dataset quality table', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/213289
+  describe.skip('Dataset quality table', () => {
     before(async () => {
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);

@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiLink, EuiPanel } from '@elastic/eui';
-import { Shape } from '@kbn/expression-shape-plugin/common';
+import { Shape } from '../../../canvas_plugin_src/renderers/shape';
 import { Popover } from '../popover';
 import { ShapePicker } from '../shape_picker';
 import { ShapePreview } from '../shape_preview';
@@ -23,7 +23,7 @@ interface Props {
 export const ShapePickerPopover: FC<Props> = ({ shapes, onChange, value, ariaLabel }) => {
   const button = (handleClick: React.MouseEventHandler<any>) => (
     <EuiPanel paddingSize="s" hasShadow={false}>
-      <EuiLink aria-label={ariaLabel} style={{ fontSize: 0 }} onClick={handleClick}>
+      <EuiLink aria-label={ariaLabel} css={{ fontSize: 0 }} onClick={handleClick}>
         <ShapePreview shape={value} />
       </EuiLink>
     </EuiPanel>

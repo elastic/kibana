@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST,
+  CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_SELECTOR,
+} from '../../../../screens/common/rule_actions';
 import { RULE_NAME_HEADER } from '../../../../screens/rule_details';
 import { getIndexConnector } from '../../../../objects/connector';
 import { getSimpleCustomQueryRule } from '../../../../objects/rule';
@@ -21,6 +25,7 @@ import {
 } from '../../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
+  createCasesAction,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleAndContinue,
   fillRuleAction,
@@ -105,6 +110,24 @@ describe(
 
       // UI redirects to rule creation page of a created rule
       cy.get(RULE_NAME_HEADER).should('contain', rule.name);
+    });
+
+    it('Forwards the correct rule type id to the Cases system action', () => {
+      cy.intercept('GET', '/internal/data_views/fields*').as('getAlertsFields');
+      visit(CREATE_RULE_URL);
+      fillDefineCustomRuleAndContinue(rule);
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
+      createCasesAction();
+
+      cy.wait('@getAlertsFields', { timeout: 10000 });
+      cy.get(CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_SELECTOR).within(() => {
+        cy.get('[data-test-subj=comboBoxToggleListButton]').click();
+      });
+      cy.get(CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST).should('be.visible');
+      cy.get(`${CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST} button[role=option]`).then(
+        ($items) => $items.length > 0
+      );
     });
   }
 );
