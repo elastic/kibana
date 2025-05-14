@@ -11,10 +11,8 @@ import {
   PostEvaluateBody,
 } from '@kbn/elastic-assistant-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import {
-  loadConnectorsFromEnvVar,
-  loadLangSmithKeyFromEnvVar,
-} from '../../../../scripts/genai/vault/manage_secrets';
+import os from 'os';
+import { getSecurityGenAIConfigFromEnvVar } from '../../../../scripts/genai/vault/manage_secrets';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 import {
@@ -76,20 +74,21 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Run Evaluations', () => {
-      const buildNumber = process.env.BUILDKITE_BUILD_NUMBER;
+      const buildNumber = process.env.BUILDKITE_BUILD_NUMBER || os.hostname();
+      const config = getSecurityGenAIConfigFromEnvVar();
       const defaultEvalPayload: PostEvaluateBody = {
         runName: `Eval Automation${buildNumber ? ' - ' + buildNumber : ''}`,
         graphs: ['DefaultAssistantGraph'],
         datasetName: 'Sample Dataset',
-        connectorIds: Object.keys(loadConnectorsFromEnvVar()),
-        evaluatorConnectorId: 'gpt-4o',
+        connectorIds: Object.keys(config.connectors),
+        evaluatorConnectorId: config.evaluatorConnectorId,
         alertsIndexPattern: '.alerts-security.alerts-default',
         replacements: {},
         screenContext: {
           timeZone: 'America/Denver',
         },
         size: 100,
-        langSmithApiKey: loadLangSmithKeyFromEnvVar(),
+        langSmithApiKey: config.langsmithKey,
       };
 
       describe('Security Assistant', () => {
@@ -147,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
           const evalPayload: PostEvaluateBody = {
             ...defaultEvalPayload,
             graphs: ['DefaultAttackDiscoveryGraph'],
-            datasetName: 'Attack Discovery: Episode 1',
+            datasetName: 'Eval AD: All Scenarios',
           };
           const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_EVALUATE_URL);
           await supertest

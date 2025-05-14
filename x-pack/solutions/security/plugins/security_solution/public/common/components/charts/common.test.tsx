@@ -18,7 +18,7 @@ import {
   WrappedByAutoSizer,
   useThemes,
 } from './common';
-import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { AMSTERDAM_LIGHT_THEME, AMSTERDAM_DARK_THEME } from '@elastic/charts';
 
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -184,7 +184,7 @@ describe('checkIfAllValuesAreZero', () => {
       });
       const { result } = renderHook(() => useThemes());
 
-      expect(result.current.baseTheme).toBe(LIGHT_THEME);
+      expect(result.current.baseTheme).toBe(AMSTERDAM_LIGHT_THEME);
     });
 
     it('should return dark baseTheme when isDarkMode true', () => {
@@ -194,7 +194,7 @@ describe('checkIfAllValuesAreZero', () => {
       });
       const { result } = renderHook(() => useThemes());
 
-      expect(result.current.baseTheme).toBe(DARK_THEME);
+      expect(result.current.baseTheme).toBe(AMSTERDAM_DARK_THEME);
     });
   });
 });
