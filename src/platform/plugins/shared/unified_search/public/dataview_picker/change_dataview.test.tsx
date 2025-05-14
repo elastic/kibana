@@ -230,4 +230,18 @@ describe('DataView component', () => {
       },
     ]);
   });
+
+  it('should call onClosePopover when it is given and popover is closed', async () => {
+    const onClosePopoverSpy = jest.fn();
+    const addDataViewSpy = jest.fn();
+    const component = mount(
+      wrapDataViewComponentInContext(
+        { ...props, onClosePopover: onClosePopoverSpy, onDataViewCreated: addDataViewSpy },
+        false
+      )
+    );
+    findTestSubject(component, 'dataview-trigger').simulate('click');
+    component.find('[data-test-subj="dataview-create-new"]').first().simulate('click');
+    expect(onClosePopoverSpy).toHaveBeenCalled();
+  });
 });

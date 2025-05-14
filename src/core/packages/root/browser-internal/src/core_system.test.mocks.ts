@@ -128,7 +128,7 @@ jest.doMock('@kbn/core-doc-links-browser-internal', () => ({
   DocLinksService: DocLinksServiceConstructor,
 }));
 
-export const MockRenderingService = renderingServiceMock.create();
+export const MockRenderingService = renderingServiceMock.createInternal();
 export const RenderingServiceConstructor = jest.fn().mockImplementation(() => MockRenderingService);
 jest.doMock('@kbn/core-rendering-browser-internal', () => ({
   RenderingService: RenderingServiceConstructor,

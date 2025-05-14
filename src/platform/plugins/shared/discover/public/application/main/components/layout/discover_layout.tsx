@@ -49,7 +49,6 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
@@ -57,7 +56,9 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useCurrentDataView, useInternalStateSelector } from '../../state_management/redux';
+import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
+import { TABS_ENABLED } from '../../../../constants';
+import { DiscoverHistogramLayout } from './discover_histogram_layout';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -102,7 +103,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
   const dataView = useCurrentDataView();
-  const dataViewLoading = useInternalStateSelector((state) => state.isDataViewLoading);
+  const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
   const fetchCounter = useRef<number>(0);
@@ -368,7 +369,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         background-color: ${pageBackgroundColor};
 
         ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-          ${kibanaFullBodyHeightCss()}
+          ${kibanaFullBodyHeightCss(TABS_ENABLED ? 32 : undefined)}
         }
       `}
     >

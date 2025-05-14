@@ -11,27 +11,25 @@ import {
   type FieldMap,
   type InstallParams,
 } from '@kbn/index-adapter';
-import type { IndexNameProvider, IndexNameProviders } from './rule_migrations_data_client';
+import type {} from './rule_migrations_data_client';
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
-import type { SiemRuleMigrationsClientDependencies } from '../types';
+import type {
+  AdapterId,
+  Adapters,
+  SiemRuleMigrationsClientDependencies,
+  IndexNameProvider,
+  IndexNameProviders,
+} from '../types';
 import {
-  integrationsFieldMap,
-  prebuiltRulesFieldMap,
+  getIntegrationsFieldMap,
+  getPrebuiltRulesFieldMap,
+  migrationsFieldMaps,
   ruleMigrationResourcesFieldMap,
   ruleMigrationsFieldMap,
 } from './rule_migrations_field_maps';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 export const INDEX_PATTERN = '.kibana-siem-rule-migrations';
-
-export interface Adapters {
-  rules: IndexPatternAdapter;
-  resources: IndexPatternAdapter;
-  integrations: IndexAdapter;
-  prebuiltrules: IndexAdapter;
-}
-
-export type AdapterId = keyof Adapters;
 
 interface CreateClientParams {
   spaceId: string;
@@ -47,8 +45,12 @@ interface CreateAdapterParams {
 export class RuleMigrationsDataService {
   private readonly adapters: Adapters;
 
-  constructor(private logger: Logger, private kibanaVersion: string) {
+  constructor(private logger: Logger, private kibanaVersion: string, elserInferenceId?: string) {
     this.adapters = {
+      migrations: this.createIndexPatternAdapter({
+        adapterId: 'migrations',
+        fieldMap: migrationsFieldMaps,
+      }),
       rules: this.createIndexPatternAdapter({
         adapterId: 'rules',
         fieldMap: ruleMigrationsFieldMap,
@@ -59,11 +61,11 @@ export class RuleMigrationsDataService {
       }),
       integrations: this.createIndexAdapter({
         adapterId: 'integrations',
-        fieldMap: integrationsFieldMap,
+        fieldMap: getIntegrationsFieldMap({ elserInferenceId }),
       }),
       prebuiltrules: this.createIndexAdapter({
         adapterId: 'prebuiltrules',
-        fieldMap: prebuiltRulesFieldMap,
+        fieldMap: getPrebuiltRulesFieldMap({ elserInferenceId }),
       }),
     };
   }
@@ -100,6 +102,7 @@ export class RuleMigrationsDataService {
       this.adapters.resources.install({ ...params, logger: this.logger }),
       this.adapters.integrations.install({ ...params, logger: this.logger }),
       this.adapters.prebuiltrules.install({ ...params, logger: this.logger }),
+      this.adapters.migrations.install({ ...params, logger: this.logger }),
     ]);
   }
 
@@ -109,6 +112,7 @@ export class RuleMigrationsDataService {
       resources: this.createIndexNameProvider(this.adapters.resources, spaceId),
       integrations: async () => this.getAdapterIndexName('integrations'),
       prebuiltrules: async () => this.getAdapterIndexName('prebuiltrules'),
+      migrations: this.createIndexNameProvider(this.adapters.migrations, spaceId),
     };
 
     return new RuleMigrationsDataClient(

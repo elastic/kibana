@@ -345,7 +345,7 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
     );
   }
   await deleteKibanaSavedObjectsAssets({ installedPkg, spaceId });
-  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, [], true);
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, true);
 }
 
 const kibanaAssetTypes = Object.values(KibanaAssetType);

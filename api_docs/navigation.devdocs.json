@@ -817,15 +817,7 @@
         "signature": [
           "Omit<",
           "SolutionNavigation",
-          ", \"sideNavComponent\"> & { dataTestSubj?: string | undefined; panelContentProvider?: ",
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.ContentProvider",
-            "text": "ContentProvider"
-          },
-          " | undefined; }"
+          ", \"sideNavComponent\"> & { dataTestSubj?: string | undefined; }"
         ],
         "path": "src/platform/plugins/shared/navigation/public/types.ts",
         "deprecated": false,
@@ -1214,6 +1206,17 @@
             "type": "string",
             "tags": [],
             "label": "security",
+            "description": [],
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.chat",
+            "type": "string",
+            "tags": [],
+            "label": "chat",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,

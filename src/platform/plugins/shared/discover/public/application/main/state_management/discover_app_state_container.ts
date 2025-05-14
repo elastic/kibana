@@ -26,6 +26,7 @@ import { isEqual, omit } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity } from '@kbn/unified-data-table';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverServices } from '../../../build_services';
 import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
@@ -37,17 +38,14 @@ import {
   createEsqlDataSource,
   DataSourceType,
   isDataSourceType,
+  isEsqlSource,
 } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import type { InternalStateStore } from './redux';
+import type { InternalStateStore, TabActionInjector } from './redux';
 import { internalStateActions } from './redux';
+import { APP_STATE_URL_KEY } from '../../../../common';
 
-export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
-  /**
-   * Returns if the current URL is empty
-   */
-  isEmptyURL: () => boolean;
   /**
    * Returns the previous state, used for diffing e.g. if fetching new data is necessary
    */
@@ -183,21 +181,25 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  * @param services
  */
 export const getDiscoverAppStateContainer = ({
+  tabId,
   stateStorage,
   internalState,
   savedSearchContainer,
   services,
+  injectCurrentTab,
 }: {
+  tabId: string;
   stateStorage: IKbnUrlStateStorage;
   internalState: InternalStateStore;
   savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
+  injectCurrentTab: TabActionInjector;
 }): DiscoverAppStateContainer => {
-  let initialState = getInitialState(
-    getCurrentUrlState(stateStorage, services),
-    savedSearchContainer.getState(),
-    services
-  );
+  let initialState = getInitialState({
+    initialUrlState: getCurrentUrlState(stateStorage, services),
+    savedSearch: savedSearchContainer.getState(),
+    services,
+  });
   let previousState = initialState;
   const appStateContainer = createStateContainer<DiscoverAppState>(initialState);
 
@@ -212,7 +214,7 @@ export const getDiscoverAppStateContainer = ({
 
       // When updating to an ES|QL query, sync the data source
       if (isOfAggregateQueryType(value.query)) {
-        value.dataSource = createEsqlDataSource();
+        value = { ...value, dataSource: createEsqlDataSource() };
       }
 
       appStateContainer.set(value);
@@ -224,7 +226,8 @@ export const getDiscoverAppStateContainer = ({
   };
 
   const getAppStateFromSavedSearch = (newSavedSearch: SavedSearch) => {
-    return getStateDefaults({
+    return getInitialState({
+      initialUrlState: undefined,
       savedSearch: newSavedSearch,
       services,
     });
@@ -244,7 +247,11 @@ export const getDiscoverAppStateContainer = ({
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
     addLog('[appState] replaceUrlState', { newPartial, merge });
     const state = merge ? { ...enhancedAppContainer.getState(), ...newPartial } : newPartial;
-    await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
+    if (internalState.getState().tabs.unsafeCurrentId === tabId) {
+      await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
+    } else {
+      enhancedAppContainer.set(state);
+    }
   };
 
   const startAppStateUrlSync = () => {
@@ -268,10 +275,12 @@ export const getDiscoverAppStateContainer = ({
 
       // Only set default state which is not already set in the URL
       internalState.dispatch(
-        internalStateActions.setResetDefaultProfileState({
-          columns: columns === undefined,
-          rowHeight: rowHeight === undefined,
-          breakdownField: breakdownField === undefined,
+        injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+          resetDefaultProfileState: {
+            columns: columns === undefined,
+            rowHeight: rowHeight === undefined,
+            breakdownField: breakdownField === undefined,
+          },
         })
       );
     }
@@ -331,16 +340,10 @@ export const getDiscoverAppStateContainer = ({
     }
   };
 
-  const isEmptyURL = () => {
-    const urlValue = stateStorage.get(APP_STATE_URL_KEY);
-    return urlValue === undefined || urlValue === null;
-  };
-
   const getPrevious = () => previousState;
 
   return {
     ...enhancedAppContainer,
-    isEmptyURL,
     getPrevious,
     hasChanged,
     initAndSync: initializeAndSync,
@@ -354,25 +357,41 @@ export const getDiscoverAppStateContainer = ({
 };
 
 function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
-  return cleanupUrlState(
-    stateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {},
-    services.uiSettings
+  return (
+    cleanupUrlState(stateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {}, services.uiSettings) ??
+    {}
   );
 }
 
-export function getInitialState(
-  initialUrlState: DiscoverAppState | undefined,
-  savedSearch: SavedSearch,
-  services: DiscoverServices
-) {
+export function getInitialState({
+  initialUrlState,
+  savedSearch,
+  overrideDataView,
+  services,
+}: {
+  initialUrlState: DiscoverAppState | undefined;
+  savedSearch: SavedSearch | undefined;
+  overrideDataView?: DataView | undefined;
+  services: DiscoverServices;
+}) {
   const defaultAppState = getStateDefaults({
     savedSearch,
+    overrideDataView,
     services,
   });
-  return handleSourceColumnState(
-    initialUrlState === undefined ? defaultAppState : { ...defaultAppState, ...initialUrlState },
-    services.uiSettings
-  );
+  const mergedState = { ...defaultAppState, ...initialUrlState };
+
+  // https://github.com/elastic/kibana/issues/122555
+  if (typeof mergedState.hideChart !== 'boolean') {
+    mergedState.hideChart = undefined;
+  }
+
+  // Don't allow URL state to overwrite the data source if there's an ES|QL query
+  if (isOfAggregateQueryType(mergedState.query) && !isEsqlSource(mergedState.dataSource)) {
+    mergedState.dataSource = createEsqlDataSource();
+  }
+
+  return handleSourceColumnState(mergedState, services.uiSettings);
 }
 
 /**

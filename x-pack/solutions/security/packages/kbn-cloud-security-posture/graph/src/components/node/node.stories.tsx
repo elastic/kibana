@@ -9,16 +9,15 @@ import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
-import type { StoryFn } from '@storybook/react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { NodeViewModel } from '../types';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
 
 import '@xyflow/react/dist/style.css';
 
-export default {
+const meta: Meta<NodeViewModel> = {
   title: 'Components/Graph Components',
-  description: 'CDR - Graph visualization',
   argTypes: {
     color: {
       options: ['primary', 'danger', 'warning'],
@@ -30,8 +29,18 @@ export default {
     },
     expandButtonClick: { action: 'expandButtonClick' },
   },
+  args: {
+    id: 'siem-windows',
+    label: '',
+    color: 'primary',
+    shape: 'hexagon',
+    icon: 'okta',
+    interactive: true,
+  },
   decorators: [GlobalStylesStorybookDecorator],
 };
+
+export default meta;
 
 const nodeTypes = {
   hexagon: HexagonNode,
@@ -63,13 +72,6 @@ const Template: StoryFn<NodeViewModel> = (args: NodeViewModel) => (
   </ThemeProvider>
 );
 
-export const Node = Template.bind({});
-
-Node.args = {
-  id: 'siem-windows',
-  label: '',
-  color: 'primary',
-  shape: 'hexagon',
-  icon: 'okta',
-  interactive: true,
+export const Node: StoryObj<NodeViewModel> = {
+  render: Template,
 };

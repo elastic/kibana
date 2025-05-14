@@ -13,3 +13,7 @@ export class DefinitionNotFoundError extends StatusError {
     this.name = 'DefinitionNotFoundError';
   }
 }
+
+export function isDefinitionNotFoundError(error: unknown): error is DefinitionNotFoundError {
+  return error instanceof DefinitionNotFoundError;
+}

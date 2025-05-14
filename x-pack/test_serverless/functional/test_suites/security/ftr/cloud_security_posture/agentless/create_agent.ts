@@ -7,7 +7,7 @@
 
 import * as http from 'http';
 import expect from '@kbn/expect';
-import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
 import { setupMockServer } from './mock_agentless_api';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -22,7 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
-  const AWS_MANUAL_TEST_ID = 'aws-manual-setup-option';
   const DIRECT_ACCESS_KEY_ID_TEST_ID = 'awsDirectAccessKeyId';
   const DIRECT_ACCESS_SECRET_KEY_TEST_ID = 'passwordInput-secret-access-key';
 
@@ -44,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should create agentless-agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
@@ -77,24 +76,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
 
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+        CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
-      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
-      await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
       await cisIntegration.selectSetupTechnology('agent-based');
       await pageObjects.header.waitUntilLoadingHasFinished();
-
-      await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
-      await cisIntegration.selectAwsCredentials('direct');
-      await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, 'test');
-      await cisIntegration.fillInTextField(DIRECT_ACCESS_SECRET_KEY_TEST_ID, 'test');
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();

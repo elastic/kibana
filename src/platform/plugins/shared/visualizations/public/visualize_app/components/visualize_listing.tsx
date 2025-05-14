@@ -396,7 +396,6 @@ export const VisualizeListing = () => {
             // for data exploration purposes
             customTableColumn={getCustomColumn()}
             customSortingOptions={getCustomSortingOptions()}
-            listingLimit={listingLimit}
             initialPageSize={initialPageSize}
             initialFilter={''}
             entityName={i18n.translate('visualizations.listing.table.entityName', {
@@ -431,7 +430,6 @@ export const VisualizeListing = () => {
     dashboardCapabilities.createNew,
     initialPageSize,
     kbnUrlStateStorage,
-    listingLimit,
     tableViewProps,
     visualizeLibraryTitle,
   ]);

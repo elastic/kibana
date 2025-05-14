@@ -125,7 +125,14 @@ export type ExceptionsListPreMultiListFindServerExtension = ServerExtensionPoint
  */
 export type ExceptionsListPreExportServerExtension = ServerExtensionPointDefinition<
   'exceptionsListPreExport',
-  ExportExceptionListAndItemsOptions
+  ExportExceptionListAndItemsOptions & {
+    /**
+     * Used internally only by the `ExceptionListClient.exportExceptionListAndItems` to provide registered
+     * server extension points the ability to adjust (via KQL filters) the data that can be exported.
+     * (In support of Elastic Defend support for space awareness)
+     */
+    filter?: string;
+  }
 >;
 
 /**

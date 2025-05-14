@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import hjson from 'hjson';
 import { FtrService } from '../ftr_provider_context';
 
 const compareSpecs = (first: string, second: string) => {
@@ -18,7 +19,6 @@ const compareSpecs = (first: string, second: string) => {
 export class VegaChartPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly browser = this.ctx.getService('browser');
   private readonly retry = this.ctx.getService('retry');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
@@ -51,14 +51,17 @@ export class VegaChartPageObject extends FtrService {
     });
   }
 
-  public async typeInSpec(text: string) {
-    const editor = await this.testSubjects.find('vega-editor');
-    const textarea = await editor.findByCssSelector('textarea');
-
-    await textarea.focus();
-    await this.browser.pressKeys(this.browser.keys.RIGHT);
-    await this.browser.pressKeys(this.browser.keys.RIGHT);
-    await textarea.type(text);
+  public async getSpecAsJSON() {
+    const text = await this.monacoEditor.getCodeEditorValue();
+    try {
+      const spec = hjson.parse(text, { legacyRoot: false, keepWsc: true });
+      return {
+        spec,
+        isValid: true,
+      };
+    } catch (err) {
+      return { spec: text, isValid: false };
+    }
   }
 
   public async cleanSpec() {

@@ -28,11 +28,11 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   let configId2: string;
 
   before(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   after(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   step('setup monitor', async () => {
@@ -120,11 +120,12 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
 
     await retry.tryForTime(3 * 60 * 1000, async () => {
       await page.click(byTestId('querySubmitButton'));
+      await page.waitForTimeout(5000);
 
       const alerts = await page.waitForSelector(`text=1 Alert`, { timeout: 5 * 1000 });
       expect(await alerts.isVisible()).toBe(true);
 
-      const text = await page.textContent(`${byTestId('dataGridRowCell')} .euiLink`);
+      const text = await page.getByTestId('o11yGetRenderCellValueLink').textContent();
 
       expect(text).toBe(reasonMessage);
     });

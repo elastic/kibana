@@ -309,4 +309,4 @@ export type { CoreSystem } from '@kbn/core-root-browser-internal';
 
 export { __kbnBootstrap__ } from '@kbn/core-root-browser-internal';
 
-export { kibanaFullBodyHeightCss } from './cssUtils';
+export { kibanaFullBodyHeightCss, fullScreenGraphicsMixinStyles } from './cssUtils';

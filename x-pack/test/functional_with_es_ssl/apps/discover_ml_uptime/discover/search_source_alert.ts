@@ -37,11 +37,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const SOURCE_DATA_VIEW = 'search-source-alert';
   const OUTPUT_DATA_VIEW = 'search-source-alert-output';
+  const OTHER_DATA_VIEW = 'search-*';
   const ACTION_TYPE_ID = '.index';
   const RULE_NAME = 'test-search-source-alert';
   const ADHOC_RULE_NAME = 'test-adhoc-alert';
   let sourceDataViewId: string;
   let outputDataViewId: string;
+  let otherDataViewId: string;
   let connectorId: string;
 
   const createSourceIndex = () =>
@@ -381,6 +383,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // continue
       }
       try {
+        await deleteDataView(otherDataViewId);
+      } catch {
+        // continue
+      }
+      try {
         await deleteConnector(connectorId);
       } catch {
         // continue
@@ -399,9 +406,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('create data views');
       const sourceDataViewResponse = await createDataView(SOURCE_DATA_VIEW);
       const outputDataViewResponse = await createDataView(OUTPUT_DATA_VIEW);
+      const otherDataViewResponse = await createDataView(OTHER_DATA_VIEW);
 
       sourceDataViewId = sourceDataViewResponse.body.data_view.id;
       outputDataViewId = outputDataViewResponse.body.data_view.id;
+      otherDataViewId = otherDataViewResponse.body.data_view.id;
     });
 
     it('should show time field validation error', async () => {
@@ -500,6 +509,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(selectedDataView).to.be.equal(SOURCE_DATA_VIEW);
 
       await checkUpdatedRuleParamsState();
+    });
+
+    it('should not overwrite current data view with alert data view when starting or saving a Discover session', async () => {
+      await clickViewInApp(RULE_NAME);
+      await dataViews.switchToAndValidate(OTHER_DATA_VIEW);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('discoverNewButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      let selectedDataView = await dataViews.getSelectedName();
+      expect(selectedDataView).to.be.equal(OTHER_DATA_VIEW);
+      await clickViewInApp(RULE_NAME);
+      await dataViews.switchToAndValidate(OTHER_DATA_VIEW);
+      await PageObjects.discover.saveSearch('test-search-source-alert');
+      selectedDataView = await dataViews.getSelectedName();
+      expect(selectedDataView).to.be.equal(OTHER_DATA_VIEW);
     });
 
     it('should display prev data view state after update on clicking prev generated link', async () => {

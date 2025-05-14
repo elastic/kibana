@@ -75,11 +75,9 @@
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
     "@kbn/observability-alert-details",
-    "@kbn/investigation-shared",
     "@kbn/alerting-rule-utils",
     "@kbn/ui-theme",
     "@kbn/core-application-common",
-    "@kbn/securitysolution-ecs",
     "@kbn/alerts-as-data-utils",
     "@kbn/datemath",
     "@kbn/logs-shared-plugin",
@@ -92,7 +90,6 @@
     "@kbn/home-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/guided-onboarding-plugin",
-    "@kbn/investigate-plugin",
     "@kbn/license-management-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/security-plugin",
@@ -103,7 +100,6 @@
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
-    "@kbn/safer-lodash-set",
     "@kbn/features-plugin",
     "@kbn/files-plugin",
     "@kbn/server-route-repository",
@@ -121,7 +117,8 @@
     "@kbn/dashboard-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/controls-plugin",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/object-utils"
   ],
   "exclude": ["target/**/*"]
 }

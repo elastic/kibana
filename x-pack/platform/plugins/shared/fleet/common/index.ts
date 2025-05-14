@@ -122,6 +122,7 @@ export type {
   // Models
   Agent,
   AgentStatus,
+  DataStream,
   FleetServerAgentMetadata,
   AgentMetadata,
   NewAgentPolicy,
@@ -202,3 +203,5 @@ export type {
 } from './types';
 
 export { ElasticsearchAssetType } from './types';
+
+export { FleetError } from './errors';

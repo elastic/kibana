@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { useLoadRuleTypesQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { ViewRuleDetailsAlertAction } from './view_rule_details_alert_action';
 import type { AdditionalContext, AlertActionsProps } from '../types';
@@ -29,7 +29,7 @@ export const DefaultAlertActions = <AC extends AdditionalContext = AdditionalCon
       notifications: { toasts },
     },
   } = useAlertsTableContext();
-  const { authorizedToCreateAnyRules } = useLoadRuleTypesQuery({
+  const { authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
     filteredRuleTypes: [],
     http,
     toasts,

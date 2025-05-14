@@ -95,8 +95,8 @@ export async function onSaveSearch({
 }) {
   const { uiSettings, savedObjectsTagging } = services;
   const dataView = savedSearch.searchSource.getField('index');
-  const overriddenVisContextAfterInvalidation =
-    state.internalState.getState().overriddenVisContextAfterInvalidation;
+  const currentTab = state.getCurrentTab();
+  const overriddenVisContextAfterInvalidation = currentTab.overriddenVisContextAfterInvalidation;
 
   const onSave = async ({
     newTitle,
@@ -176,7 +176,9 @@ export async function onSaveSearch({
         savedSearch.tags = currentTags;
       }
     } else {
-      state.internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
+      state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.resetOnSavedSearchChange)()
+      );
       state.appState.resetInitialState();
     }
 

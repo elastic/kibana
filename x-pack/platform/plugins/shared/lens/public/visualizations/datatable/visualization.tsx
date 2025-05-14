@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { Ast } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
@@ -37,7 +38,7 @@ import { TableDimensionDataExtraEditor, TableDimensionEditor } from './component
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import type { FormatFactory, LayerType } from '../../../common/types';
 import { RowHeightMode } from '../../../common/types';
-import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
+import { getDefaultSummaryLabel } from '../../../common/expressions/impl/datatable/summary';
 import {
   type ColumnState,
   type SortingState,
@@ -59,8 +60,10 @@ import {
   getAccessorType,
 } from '../../shared_components';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
-import { DatatableInspectorTables } from '../../../common/expressions/datatable/datatable_fn';
+import { DatatableInspectorTables } from '../../../common/expressions/defs/datatable/datatable';
 import { getSimpleColumnType } from './components/table_actions';
+import { convertToRuntimeState } from './runtime_state';
+
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
@@ -126,14 +129,18 @@ export const getDatatableVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick],
 
-  initialize(addNewLayer, state) {
-    return (
-      state || {
-        columns: [],
-        layerId: addNewLayer(),
-        layerType: LayerTypes.DATA,
-      }
-    );
+  initialize(addNewLayer, state, mainPalette, datasourceStates) {
+    if (state) return convertToRuntimeState(state, datasourceStates);
+
+    return {
+      columns: [],
+      layerId: addNewLayer(),
+      layerType: LayerTypes.DATA,
+    };
+  },
+
+  convertToRuntimeState(state, datasourceStates) {
+    return convertToRuntimeState(state, datasourceStates);
   },
 
   onDatasourceUpdate(state, frame) {
@@ -498,6 +505,7 @@ export const getDatatableVisualization = ({
         isDarkMode={theme.darkMode}
         palettes={palettes}
         paletteService={paletteService}
+        formatFactory={formatFactory}
       />
     );
   },

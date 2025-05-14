@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { useStreamsAppFetch } from '../hooks/use_streams_app_fetch';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import { StreamsAppLocator } from '../app_locator';
 
 export interface DiscoverStreamsLinkProps {
@@ -22,7 +22,7 @@ export interface DiscoverStreamsLinkProps {
   locator: StreamsAppLocator;
 }
 
-function DiscoverStreamsLink(props: DiscoverStreamsLinkProps) {
+export function DiscoverStreamsLink(props: DiscoverStreamsLinkProps) {
   return (
     <RedirectAppLinks coreStart={{ application: props.coreApplication }}>
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
@@ -75,12 +75,13 @@ function DiscoverStreamsLinkContent({
   doc,
   locator,
 }: DiscoverStreamsLinkProps) {
-  const index = doc.raw._index;
   const flattenedDoc = doc.flattened;
-  const { value, loading, error } = useStreamsAppFetch(
+  const index = doc.raw._index;
+  const fallbackStreamName = getFallbackStreamName(flattenedDoc);
+  const { value, loading, error } = useAbortableAsync(
     async ({ signal }) => {
       if (!index) {
-        return getFallbackStreamName(flattenedDoc);
+        return fallbackStreamName;
       }
       const definition = await streamsRepositoryClient.fetch(
         'GET /internal/streams/_resolve_index',
@@ -95,8 +96,7 @@ function DiscoverStreamsLinkContent({
       );
       return definition?.stream?.name;
     },
-    [streamsRepositoryClient, index],
-    { disableToastOnError: true }
+    [streamsRepositoryClient, index, fallbackStreamName]
   );
   const params = useMemo(() => ({ name: value }), [value]);
   const redirectUrl = useMemo(() => locator.getRedirectUrl(params), [locator, params]);
@@ -113,6 +113,3 @@ function DiscoverStreamsLinkContent({
 
   return <EuiLink href={redirectUrl}>{value}</EuiLink>;
 }
-
-// eslint-disable-next-line import/no-default-export
-export default DiscoverStreamsLink;

@@ -30,7 +30,7 @@ describe('ManagementService', () => {
     managementService.start({ capabilities });
     const start = getSectionsServiceStartPrivate();
 
-    expect(start.getSectionsEnabled().length).toEqual(6);
+    expect(start.getSectionsEnabled().length).toEqual(7);
   });
 
   test('Register section, enable and disable', () => {
@@ -44,11 +44,11 @@ describe('ManagementService', () => {
     managementService.start({ capabilities });
     const start = getSectionsServiceStartPrivate();
 
-    expect(start.getSectionsEnabled().length).toEqual(7);
+    expect(start.getSectionsEnabled().length).toEqual(8);
 
     testSection.disable();
 
-    expect(start.getSectionsEnabled().length).toEqual(6);
+    expect(start.getSectionsEnabled().length).toEqual(7);
   });
 
   test('Disables items that are not allowed by Capabilities', () => {

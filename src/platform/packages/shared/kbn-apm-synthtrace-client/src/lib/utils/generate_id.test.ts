@@ -8,52 +8,76 @@
  */
 
 import {
-  setIdGeneratorStrategy,
   generateLongId,
-  generateShortId,
   generateLongIdWithSeed,
+  generateShortId,
+  resetSequentialGenerator,
+  setIdGeneratorStrategy,
 } from './generate_id';
 
+const generatorVariants = [
+  { type: 'short', length: 16, generateId: generateShortId },
+  { type: 'long', length: 32, generateId: generateLongId },
+];
+
 describe('generate_id', () => {
-  describe('generate deterministic ids', () => {
-    it('should generate a short id of the correct length and format', () => {
+  describe.each(generatorVariants)('generate sequential $type ids', ({ generateId, length }) => {
+    beforeEach(() => {
       setIdGeneratorStrategy('sequential');
-      const shortId = generateShortId();
-      expect(shortId.length).toBe(16);
-      expect(shortId).toContain('00000000000');
+      resetSequentialGenerator();
     });
 
-    it('should generate a long id of the correct length and format', () => {
-      setIdGeneratorStrategy('sequential');
-      const longId = generateLongId();
-      expect(longId.length).toBe(32);
-      expect(longId).toContain('000000000000000000000000001');
+    it('should generate ids of the correct length', () => {
+      const generatedId = generateId();
+      expect(generatedId.length).toBe(length);
     });
 
+    it('should generate ids deterministically', () => {
+      const firstId = generateId();
+
+      resetSequentialGenerator();
+
+      const secondId = generateId();
+
+      expect(firstId).toEqual(secondId);
+    });
+
+    it('should generate sequential ids', () => {
+      const firstId = generateId();
+      const secondId = generateId();
+      const thirdId = generateId();
+
+      expect(firstId < secondId).toBeTruthy();
+      expect(secondId < thirdId).toBeTruthy();
+    });
+  });
+
+  describe.each(generatorVariants)('generate random $type ids', ({ generateId, length }) => {
+    beforeEach(() => {
+      setIdGeneratorStrategy('random');
+      resetSequentialGenerator();
+    });
+
+    it('should generate ids of correct length and format', () => {
+      const shortId = generateId();
+
+      expect(shortId).toMatch(new RegExp(`^[0-9a-fA-F]{${length}}$`));
+    });
+
+    it('should generate unique ids', () => {
+      const firstId = generateId();
+      const secondId = generateId();
+
+      expect(firstId).not.toEqual(secondId);
+    });
+  });
+
+  describe('generate long seeded ids', () => {
     it('should generate a long id with a seed and correct padding', () => {
       const seed = 'order/123';
       const longIdWithSeed = generateLongIdWithSeed(seed);
       expect(longIdWithSeed.length).toBe(32);
       expect(longIdWithSeed).toEqual('00000000000000000000000order_123');
-    });
-  });
-
-  describe('generate random ids', () => {
-    it('should generate a unique id of correct length and valid format', () => {
-      setIdGeneratorStrategy('random');
-      const shortId = generateShortId();
-
-      expect(shortId.length).toBe(16);
-
-      expect(shortId).toMatch(/^(?!\d{14})[0-9a-fA-F]{14}\d{2}$/);
-    });
-
-    it('should generate a long id of the correct length and format', () => {
-      setIdGeneratorStrategy('random');
-      const longId = generateLongId();
-
-      expect(longId.length).toBe(32);
-      expect(longId).toMatch(/^(?!\d{14})[0-9a-fA-F]{14}\d{18}$/);
     });
   });
 });

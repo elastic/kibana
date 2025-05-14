@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { left } from 'fp-ts/lib/Either';
+import { left } from 'fp-ts/Either';
 import { enumeration } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 

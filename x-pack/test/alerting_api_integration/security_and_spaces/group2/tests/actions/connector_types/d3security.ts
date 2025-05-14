@@ -12,8 +12,8 @@ import {
   d3SecuritySuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/d3security_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
 const connectorTypeId = '.d3security';

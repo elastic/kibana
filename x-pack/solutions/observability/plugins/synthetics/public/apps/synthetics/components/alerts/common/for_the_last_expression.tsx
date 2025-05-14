@@ -139,16 +139,12 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
             case 'checksWindow':
               setRuleParams('condition', {
                 ...ruleParams.condition,
-                downThreshold: 5,
-                locationsThreshold: 1,
                 window: { numberOfChecks: 5 },
               });
               break;
             case 'timeWindow':
               setRuleParams('condition', {
                 ...ruleParams.condition,
-                downThreshold: 5,
-                locationsThreshold: 1,
                 window: { time: { unit: 'm', size: 5 } },
               });
               break;

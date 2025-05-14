@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { JsonArray, JsonValue } from '@kbn/utility-types';
 import { RouteMethod } from '@kbn/core/server';
-import { VersionedRouteConfig } from '@kbn/core-http-server';
+import { VersionedRouteConfig, RouteSecurity } from '@kbn/core-http-server';
 
 export interface CallWithRequestParams extends estypes.RequestBase {
   max_concurrent_shard_requests?: number;
@@ -93,4 +93,4 @@ export interface SortedSearchHit extends SearchHit {
 
 export type LogsSharedVersionedRouteConfig<Method extends RouteMethod> = {
   method: RouteMethod;
-} & VersionedRouteConfig<Method>;
+} & Omit<VersionedRouteConfig<Method>, 'security'> & { security?: RouteSecurity };

@@ -9,6 +9,7 @@ import React, { createContext, useMemo } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -17,6 +18,7 @@ import { VIEW_SELECTION } from '../../../../common/constants';
 import { getAllFieldsByName } from '../../../common/containers/source';
 import { eventRenderedViewColumns, getColumns } from './columns';
 import type { AlertColumnHeaders } from './columns';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 interface AlertTableCellContextProps {
   browserFields: BrowserFields;
@@ -35,7 +37,12 @@ export const AlertTableCellContextProvider = ({
   sourcererScope: SourcererScopeName;
   children: React.ReactNode;
 }) => {
-  const { browserFields } = useSourcererDataView(sourcererScope);
+  const { browserFields: oldBrowserFields } = useSourcererDataView(sourcererScope);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const experimentalBrowserFields = useBrowserFields(sourcererScope);
+
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+
   const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
   const license = useLicense();
   const gridColumns = useMemo(() => {

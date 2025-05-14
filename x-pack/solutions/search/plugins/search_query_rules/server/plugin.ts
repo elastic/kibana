@@ -10,6 +10,7 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
+  Logger,
   DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
 
@@ -20,14 +21,23 @@ import {
   SearchQueryRulesPluginStart,
 } from './types';
 
+import { defineRoutes } from './routes';
 import { PLUGIN_ID, PLUGIN_TITLE } from '../common';
 
 export class SearchQueryRulesPlugin
   implements Plugin<SearchQueryRulesPluginSetup, SearchQueryRulesPluginStart, {}, {}>
 {
-  constructor(initializerContext: PluginInitializerContext) {}
+  private readonly logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
 
   public setup(core: CoreSetup, plugins: SearchQueryRulesPluginSetupDependencies) {
+    const router = core.http.createRouter();
+
+    defineRoutes({ router, logger: this.logger });
+
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
       name: PLUGIN_TITLE,

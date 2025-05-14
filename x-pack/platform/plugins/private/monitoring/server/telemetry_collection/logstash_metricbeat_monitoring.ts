@@ -33,6 +33,8 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
     stats: INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATS,
   };
 
+  private monitoringType: string = 'metricbeat';
+
   /*
    * Call the function for fetching and summarizing Logstash metrics for Metricbeat monitoring
    * @param {Object} callCluster - ES client
@@ -67,6 +69,7 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
    * @param monitoringType - the monitoring type where metricbeat monitoring is intended.
    */
   setIndexPattern(monitoringType: string) {
+    this.monitoringType = monitoringType;
     if (monitoringType === 'stack') {
       this.indexPattern.state = INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE;
       this.indexPattern.stats = INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATS;
@@ -79,6 +82,11 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
   getIndexPattern(): { [key: string]: string } {
     return this.indexPattern;
   }
+
+  getMonitoringType(): string {
+    return this.monitoringType;
+  }
+
   /*
    * Update a clusters object with processed Logstash stats for metricbeat monitoring
    * @param {Array} results - array of LogstashStats docs from ES
@@ -117,7 +125,8 @@ export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
         incrementByKey(a, thisVersion);
         clusters[clusterUuid].versions = mapToList(a, 'version');
 
-        const thisCollectionType = hit._source?.agent?.type || 'metricbeat';
+        // for stack_monitoring, agent internally uses metricbeat or filebeat
+        const thisCollectionType = this.getMonitoringType() === 'stack' ? 'agent' : 'metricbeat';
         if (!Object.hasOwn(clusterStats, 'collection_types')) {
           clusterStats.collection_types = {};
         }

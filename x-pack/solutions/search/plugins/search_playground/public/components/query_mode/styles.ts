@@ -12,6 +12,11 @@ export const FullHeight = css({
   height: '100%',
 });
 
+export const PanelFillContainer = css({
+  // This is needed to maintain the resizable container height when rendering output editor with larger content
+  height: '90%',
+});
+
 export const QueryViewContainer = (euiTheme: EuiThemeComputed<{}>) =>
   css({
     padding: euiTheme.size.l,

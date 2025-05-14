@@ -14,8 +14,10 @@ export const existingDashboardFileNames = new Set([
   'classic_apm-otel_other-dotnet',
   'classic_apm-edot-nodejs',
   'classic_apm-edot-java',
+  'otel_native-edot-java',
   'classic_apm-edot-dotnet',
   'otel_native-edot-python',
+  'otel_native-edot-nodejs',
 ]);
 
 // The new dashboard files should be mapped here
@@ -60,6 +62,12 @@ export async function loadDashboardFile(filename: string) {
         './opentelemetry_java.json'
       );
     }
+    case 'otel_native-edot-java': {
+      return import(
+        /* webpackChunkName: "lazyJavaOtelNativeEdotDashboard" */
+        './otel_native-edot-java.json'
+      );
+    }
     case 'classic_apm-edot-dotnet': {
       return import(
         /* webpackChunkName: "lazyDotnetOtelNativeDashboard" */
@@ -76,6 +84,12 @@ export async function loadDashboardFile(filename: string) {
       return import(
         /* webpackChunkName: "lazyPythonOtelNativeEdotDashboard" */
         './otel_native-edot-python.json'
+      );
+    }
+    case 'otel_native-edot-nodejs': {
+      return import(
+        /* webpackChunkName: "lazyNodeJsOtelNativeEdotDashboard" */
+        './otel_native-edot-nodejs.json'
       );
     }
     default: {

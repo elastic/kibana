@@ -49,7 +49,7 @@ export async function createAnomalyDetectionJobs({
   }
 
   return withApmSpan('create_anomaly_detection_jobs', async () => {
-    logger.info(`Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`);
+    logger.debug(`Creating ML anomaly detection jobs for environments: [${uniqueMlJobEnvs}].`);
     const apmMetricIndex = indices.metric;
     const responses = [];
     const failedJobs = [];
@@ -68,13 +68,16 @@ export async function createAnomalyDetectionJobs({
     // https://github.com/elastic/elasticsearch/issues/36271
     for (const environment of uniqueMlJobEnvs) {
       try {
-        responses.push(
-          await createAnomalyDetectionJob({
-            mlClient,
-            environment,
-            apmMetricIndex,
-          })
-        );
+        const response = await createAnomalyDetectionJob({
+          mlClient,
+          environment,
+          apmMetricIndex,
+        });
+        if (response.jobs[0].success || !response.jobs[0].error) {
+          responses.push(response);
+        } else {
+          failedJobs.push({ id: response.jobs[0].id, error: response.jobs[0].error });
+        }
       } catch (e) {
         if (!e.id || !e.error) {
           throw e;

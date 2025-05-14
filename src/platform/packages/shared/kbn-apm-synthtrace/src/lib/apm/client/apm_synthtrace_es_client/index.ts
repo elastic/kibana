@@ -8,11 +8,13 @@
  */
 
 import { Client, estypes } from '@elastic/elasticsearch';
-import { ApmFields } from '@kbn/apm-synthtrace-client';
+import { ApmFields, ApmOtelFields, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 import { ValuesType } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../../../shared/base_client';
 import { Logger } from '../../../utils/create_logger';
 import { apmPipeline } from './apm_pipeline';
+import { apmToOtelPipeline } from './otel/apm_to_otel_pipeline';
+import { otelToApmPipeline } from './otel/otel_to_apm_pipeline';
 
 export enum ComponentTemplateName {
   LogsApp = 'logs-apm.app@custom',
@@ -28,7 +30,7 @@ export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOpt
   version: string;
 }
 
-export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields> {
+export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOtelFields> {
   public readonly version: string;
 
   constructor(options: { client: Client; logger: Logger } & ApmSynthtraceEsClientOptions) {
@@ -36,7 +38,14 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields> {
       ...options,
       pipeline: apmPipeline(options.logger, options.version),
     });
-    this.dataStreams = ['traces-apm*', 'metrics-apm*', 'logs-apm*'];
+    this.dataStreams = [
+      'traces-apm*',
+      'metrics-apm*',
+      'logs-apm*',
+      'metrics-*.otel*',
+      'traces-*.otel*',
+      'logs-*.otel*',
+    ];
     this.version = options.version;
   }
 
@@ -76,5 +85,29 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields> {
     } = { includeSerialization: true }
   ) {
     return apmPipeline(this.logger, versionOverride ?? this.version, includeSerialization);
+  }
+
+  getPipeline(
+    pipeline: ApmSynthtracePipelines,
+    options: {
+      includeSerialization?: boolean;
+      versionOverride?: string;
+    } = { includeSerialization: true }
+  ) {
+    switch (pipeline) {
+      case 'otel': {
+        return otelToApmPipeline(this.logger, options.includeSerialization);
+      }
+      case 'apmToOtel': {
+        return apmToOtelPipeline(
+          this.logger,
+          options.versionOverride ?? this.version,
+          options.includeSerialization
+        );
+      }
+      default: {
+        return this.getDefaultPipeline(options);
+      }
+    }
   }
 }

@@ -129,6 +129,7 @@ const projectRequest = axios.create({
   headers: {
     Authorization: `ApiKey ${process.env.PROJECT_API_KEY}`,
   },
+  allowAbsoluteUrls: false,
 });
 
 purgeProjects().catch((e) => {

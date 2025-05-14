@@ -70,12 +70,10 @@ export interface RegistryRuleType
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
-    | 'fieldsForAAD'
     | 'alerts'
   > {
   id: string;
   enabledInLicense: boolean;
-  hasFieldsForAAD: boolean;
   hasAlertsMappings: boolean;
   validLegacyConsumers: string[];
 }
@@ -276,6 +274,22 @@ export class RuleTypeRegistry {
       }
     }
 
+    // validate cancelAlertsOnTimeout if set
+    if (
+      ruleType.cancelAlertsOnRuleTimeout === false &&
+      (ruleType.autoRecoverAlerts == null || ruleType.autoRecoverAlerts === true)
+    ) {
+      throw new Error(
+        i18n.translate('xpack.alerting.ruleTypeRegistry.register.cancelAlertsOnTimeoutError', {
+          defaultMessage:
+            'Rule type "{id}" cannot have both cancelAlertsOnRuleTimeout set to false and autoRecoverAlerts set to true.',
+          values: {
+            id: ruleType.id,
+          },
+        })
+      );
+    }
+
     const normalizedRuleType = augmentActionGroupsWithReserved<
       Params,
       ExtractedParams,
@@ -405,8 +419,6 @@ export class RuleTypeRegistry {
           _ruleType.name,
           _ruleType.minimumLicenseRequired
         ).isValid,
-        fieldsForAAD: _ruleType.fieldsForAAD,
-        hasFieldsForAAD: Boolean(_ruleType.fieldsForAAD),
         hasAlertsMappings: !!_ruleType.alerts,
         ...(_ruleType.alerts ? { alerts: _ruleType.alerts } : {}),
         validLegacyConsumers: _ruleType.validLegacyConsumers,

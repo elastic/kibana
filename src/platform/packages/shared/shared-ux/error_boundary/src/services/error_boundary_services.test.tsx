@@ -14,6 +14,7 @@ import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { KibanaErrorBoundaryProviderDeps } from '../../types';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '../..';
 import { BadComponent } from '../../mocks';
+import userEvent from '@testing-library/user-event';
 
 describe('<KibanaErrorBoundaryProvider>', () => {
   let analytics: KibanaErrorBoundaryProviderDeps['analytics'];
@@ -32,12 +33,12 @@ describe('<KibanaErrorBoundaryProvider>', () => {
         </KibanaErrorBoundary>
       </KibanaErrorBoundaryProvider>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    await userEvent.click(await findByTestId('clickForErrorBtn'));
 
     expect(reportEventSpy).toBeCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
       component_stack: expect.any(String),
-      error_message: 'FatalReactError: This is an error to show the test user!',
+      error_message: 'Error: This is an error to show the test user!',
       error_stack: expect.any(String),
     });
   });
@@ -60,13 +61,13 @@ describe('<KibanaErrorBoundaryProvider>', () => {
         </KibanaErrorBoundary>
       </KibanaErrorBoundaryProvider>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+    await userEvent.click(await findByTestId('clickForErrorBtn'));
 
     expect(reportEventSpy2).not.toBeCalled();
     expect(reportEventSpy1).toBeCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
       component_stack: expect.any(String),
-      error_message: 'FatalReactError: This is an error to show the test user!',
+      error_message: 'Error: This is an error to show the test user!',
       error_stack: expect.any(String),
     });
   });

@@ -14,10 +14,12 @@ import {
   type EuiTabbedContentTab,
   EuiSpacer,
 } from '@elastic/eui';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+
 import * as i18n from './translations';
 import { useSettingsView } from './use_settings_view';
-import type { FilterSettings } from '../types';
-import { Schedule } from '../schedule';
+import type { AlertsSelectionSettings } from '../types';
+import { useScheduleView } from './use_schedule_view';
 
 /*
  * Fixes tabs to the top and allows the content to scroll.
@@ -36,13 +38,35 @@ export interface UseTabsView {
 }
 
 interface Props {
-  filterSettings: FilterSettings;
+  connectorId: string | undefined;
+  onConnectorIdSelected: (connectorId: string) => void;
+  onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
+  onSettingsReset?: () => void;
+  onSettingsSave?: () => void;
+  settings: AlertsSelectionSettings;
+  stats: AttackDiscoveryStats | null;
 }
 
-export const useTabsView = ({ filterSettings }: Props): UseTabsView => {
+export const useTabsView = ({
+  connectorId,
+  onConnectorIdSelected,
+  onSettingsReset,
+  onSettingsSave,
+  onSettingsChanged,
+  settings,
+  stats,
+}: Props): UseTabsView => {
   const { settingsView, actionButtons: filterActionButtons } = useSettingsView({
-    filterSettings,
+    connectorId,
+    onConnectorIdSelected,
+    onSettingsReset,
+    onSettingsSave,
+    onSettingsChanged,
+    settings,
+    showConnectorSelector: true,
+    stats,
   });
+  const { scheduleView, actionButtons: scheduleTabButtons } = useScheduleView();
 
   const settingsTab: EuiTabbedContentTab = useMemo(
     () => ({
@@ -65,11 +89,11 @@ export const useTabsView = ({ filterSettings }: Props): UseTabsView => {
       content: (
         <>
           <EuiSpacer size="m" />
-          <Schedule />
+          {scheduleView}
         </>
       ),
     }),
-    []
+    [scheduleView]
   );
 
   const tabs = useMemo(() => {
@@ -101,8 +125,8 @@ export const useTabsView = ({ filterSettings }: Props): UseTabsView => {
   }, [selectedTab, tabs]);
 
   const actionButtons = useMemo(
-    () => (selectedTabId === 'settings' ? filterActionButtons : undefined),
-    [filterActionButtons, selectedTabId]
+    () => (selectedTabId === 'settings' ? filterActionButtons : scheduleTabButtons),
+    [filterActionButtons, scheduleTabButtons, selectedTabId]
   );
 
   return { tabsContainer, actionButtons };

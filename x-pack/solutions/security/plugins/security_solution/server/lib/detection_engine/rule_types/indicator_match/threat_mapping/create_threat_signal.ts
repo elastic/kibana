@@ -18,6 +18,7 @@ import type {
 import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { buildThreatEnrichment } from './build_threat_enrichment';
+import { alertSuppressionTypeGuard } from '../../utils/get_is_alert_suppression_active';
 export const createThreatSignal = async ({
   sharedParams,
   currentResult,
@@ -34,7 +35,6 @@ export const createThreatSignal = async ({
   threatIndexFields,
   sortOrder = 'desc',
   isAlertSuppressionActive,
-  experimentalFeatures,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const {
     exceptionFilter,
@@ -100,12 +100,14 @@ export const createThreatSignal = async ({
       trackTotalHits: false,
     };
 
-    if (isAlertSuppressionActive) {
+    if (
+      isAlertSuppressionActive &&
+      alertSuppressionTypeGuard(sharedParams.completeRule.ruleParams.alertSuppression)
+    ) {
       result = await searchAfterAndBulkCreateSuppressedAlerts({
         ...searchAfterBulkCreateParams,
         wrapSuppressedHits,
         alertSuppression: sharedParams.completeRule.ruleParams.alertSuppression,
-        experimentalFeatures,
       });
     } else {
       result = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);

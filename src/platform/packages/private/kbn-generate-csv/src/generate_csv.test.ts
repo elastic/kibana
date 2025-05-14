@@ -1424,7 +1424,7 @@ describe('CsvGenerator', () => {
     expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
       {
         ignore_unavailable: true,
-        ignore_throttled: false,
+        querystring: { ignore_throttled: false },
         index: 'logstash-*',
         keep_alive: '30s',
       },

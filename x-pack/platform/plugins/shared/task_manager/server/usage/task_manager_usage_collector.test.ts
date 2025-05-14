@@ -13,14 +13,14 @@ import {
   createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
 import { HealthStatus } from '../monitoring';
-import { MonitoredHealth } from '../routes/health';
+import type { MonitoredHealth } from '../routes/health';
 import { TaskPersistence } from '../task_events';
 import { registerTaskManagerUsageCollector } from './task_manager_usage_collector';
 import { sleep } from '../test_utils';
-import { TaskManagerUsage } from './types';
-import { MonitoredUtilization } from '../routes/background_task_utilization';
-import { MonitoredStat } from '../monitoring/monitoring_stats_stream';
-import { BackgroundTaskUtilizationStat } from '../monitoring/background_task_utilization_statistics';
+import type { TaskManagerUsage } from './types';
+import type { MonitoredUtilization } from '../routes/background_task_utilization';
+import type { MonitoredStat } from '../monitoring/monitoring_stats_stream';
+import type { BackgroundTaskUtilizationStat } from '../monitoring/background_task_utilization_statistics';
 
 describe('registerTaskManagerUsageCollector', () => {
   let collector: Collector<unknown>;

@@ -14,35 +14,137 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
+  DEFAULT_END,
+  DEFAULT_START,
+} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import type { Filter, Query } from '@kbn/es-query';
+
+import { useKibana } from '../../../common/lib/kibana';
 import { Footer } from './footer';
 import * as i18n from './translations';
 import { useSettingsView } from './hooks/use_settings_view';
 import { useTabsView } from './hooks/use_tabs_view';
-import type { FilterSettings } from './types';
+import type { AlertsSelectionSettings } from './types';
+import { MIN_FLYOUT_WIDTH } from './constants';
+import { getMaxAlerts } from './alert_selection/helpers/get_max_alerts';
+import { getDefaultQuery } from '../helpers';
+import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 export const DEFAULT_STACK_BY_FIELD = 'kibana.alert.rule.name';
 
-const MIN_WIDTH = 448; // px
+export interface Props {
+  connectorId: string | undefined;
+  end: string | undefined;
+  filters: Filter[] | undefined;
+  localStorageAttackDiscoveryMaxAlerts: string | undefined;
+  onClose: () => void;
+  onConnectorIdSelected: (connectorId: string) => void;
+  query: Query | undefined;
+  setEnd: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setFilters: React.Dispatch<React.SetStateAction<Filter[] | undefined>>;
+  setLocalStorageAttackDiscoveryMaxAlerts: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setQuery: React.Dispatch<React.SetStateAction<Query | undefined>>;
+  setStart: React.Dispatch<React.SetStateAction<string | undefined>>;
+  start: string | undefined;
+  stats: AttackDiscoveryStats | null;
+}
 
-const SettingsFlyoutComponent: React.FC<FilterSettings> = (filterSettings) => {
+const SettingsFlyoutComponent: React.FC<Props> = ({
+  connectorId,
+  end,
+  filters,
+  localStorageAttackDiscoveryMaxAlerts,
+  onClose,
+  onConnectorIdSelected,
+  query,
+  setEnd,
+  setFilters,
+  setLocalStorageAttackDiscoveryMaxAlerts,
+  setQuery,
+  setStart,
+  start,
+  stats,
+}) => {
+  const {
+    services: { featureFlags },
+  } = useKibana();
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
+
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'attackDiscoverySettingsFlyoutTitle',
   });
 
-  const isAttackDiscoverySchedulingEnabled = useIsExperimentalFeatureEnabled(
-    'assistantAttackDiscoverySchedulingEnabled'
+  const isAttackDiscoverySchedulingEnabled = featureFlags.getBooleanValue(
+    ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
+    false
   );
 
-  const { onClose } = filterSettings;
-
-  const { settingsView, actionButtons: settingsActionButtons } = useSettingsView({
-    filterSettings,
+  const [settings, setSettings] = useState<AlertsSelectionSettings>({
+    end: end ?? DEFAULT_END,
+    filters: filters ?? [],
+    query: query ?? getDefaultQuery(),
+    size: getMaxAlerts(
+      localStorageAttackDiscoveryMaxAlerts ?? `${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`
+    ),
+    start: start ?? DEFAULT_START,
   });
 
-  const { tabsContainer, actionButtons: tabsActionButtons } = useTabsView({ filterSettings });
+  const onSettingsReset = useCallback(() => {
+    // reset local state:
+    setSettings({
+      end: DEFAULT_END,
+      filters: [],
+      query: getDefaultQuery(),
+      size: getMaxAlerts(`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`),
+      start: DEFAULT_START,
+    });
+  }, []);
+
+  const onSettingsSave = useCallback(() => {
+    // copy local state:
+    setEnd(settings.end);
+    setFilters(settings.filters);
+    setQuery(settings.query);
+    setStart(settings.start);
+    setLocalStorageAttackDiscoveryMaxAlerts(`${settings.size}`);
+
+    onClose();
+  }, [
+    onClose,
+    setEnd,
+    setFilters,
+    setLocalStorageAttackDiscoveryMaxAlerts,
+    setQuery,
+    setStart,
+    settings,
+  ]);
+
+  const { settingsView, actionButtons: settingsActionButtons } = useSettingsView({
+    connectorId,
+    onConnectorIdSelected,
+    onSettingsReset,
+    onSettingsSave,
+    onSettingsChanged: setSettings,
+    settings,
+    showConnectorSelector: true,
+    stats,
+  });
+
+  const { tabsContainer, actionButtons: tabsActionButtons } = useTabsView({
+    connectorId,
+    onConnectorIdSelected,
+    onSettingsReset,
+    onSettingsSave,
+    onSettingsChanged: setSettings,
+    settings,
+    stats,
+  });
 
   const content = useMemo(() => {
     if (isAttackDiscoverySchedulingEnabled) {
@@ -58,25 +160,32 @@ const SettingsFlyoutComponent: React.FC<FilterSettings> = (filterSettings) => {
     return settingsActionButtons;
   }, [isAttackDiscoverySchedulingEnabled, settingsActionButtons, tabsActionButtons]);
 
+  const hasBorder =
+    isAttackDiscoverySchedulingEnabled || attackDiscoveryAlertsEnabled ? false : true;
+
   return (
     <EuiFlyoutResizable
       aria-labelledby={flyoutTitleId}
       data-test-subj="settingsFlyout"
-      minWidth={MIN_WIDTH}
+      minWidth={MIN_FLYOUT_WIDTH}
       onClose={onClose}
-      paddingSize="m"
+      paddingSize={attackDiscoveryAlertsEnabled ? 'l' : 'm'}
       side="right"
-      size="s"
+      size={attackDiscoveryAlertsEnabled ? 'm' : 's'}
       type="overlay"
     >
-      <EuiFlyoutHeader hasBorder={!isAttackDiscoverySchedulingEnabled}>
+      <EuiFlyoutHeader hasBorder={hasBorder}>
         <EuiTitle data-test-subj="title" size="m">
-          <h2 id={flyoutTitleId}>{i18n.ATTACK_DISCOVERY_SETTINGS}</h2>
+          <h2 id={flyoutTitleId}>
+            {attackDiscoveryAlertsEnabled
+              ? i18n.ATTACK_DISCOVERY_SETTINGS_AND_SCHEDULE
+              : i18n.ATTACK_DISCOVERY_SETTINGS}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiSpacer size="s" />
+        {attackDiscoveryAlertsEnabled ? null : <EuiSpacer size="s" />}
         {content}
       </EuiFlyoutBody>
 

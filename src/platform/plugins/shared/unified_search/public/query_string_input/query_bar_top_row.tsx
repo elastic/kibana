@@ -46,7 +46,7 @@ import type { PersistedLog } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { IUnifiedSearchPluginServices } from '../types';
-import QueryStringInputUI from './query_string_input';
+import { QueryStringInput } from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../utils/shallow_equal';
 import { AddFilterPopover } from './add_filter_popover';
@@ -685,7 +685,7 @@ export const QueryBarTopRow = React.memo(
       const filterButtonGroup = !renderFilterMenuOnly() && renderFilterButtonGroup();
       const queryInput = shouldRenderQueryInput() && (
         <EuiFlexItem data-test-subj="unifiedQueryInput">
-          <QueryStringInputUI
+          <QueryStringInput
             disableAutoFocus={props.disableAutoFocus}
             indexPatterns={props.indexPatterns!}
             query={props.query! as Query}
@@ -830,7 +830,3 @@ export const QueryBarTopRow = React.memo(
     return isQueryEqual && shallowEqual(prevProps, nextProps);
   }
 ) as GenericQueryBarTopRow;
-
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default QueryBarTopRow;

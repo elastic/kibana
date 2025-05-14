@@ -1107,8 +1107,7 @@ const updateExistingDataStream = async ({
       () =>
         esClient.indices.putMapping({
           index: dataStreamName,
-          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-          body: mappings,
+          ...mappings,
           write_index_only: true,
         }),
       { logger }
@@ -1140,9 +1139,11 @@ const updateExistingDataStream = async ({
     }
   }
 
-  const filterDimensionMappings = (templates?: Array<Record<string, MappingDynamicTemplate>>) =>
+  const filterDimensionMappings = (
+    templates?: Array<Record<string, MappingDynamicTemplate | undefined>>
+  ) =>
     templates?.filter(
-      (template) => (Object.values(template)[0].mapping as any)?.time_series_dimension
+      (template) => (Object.values(template)[0]?.mapping as any)?.time_series_dimension
     ) ?? [];
 
   const currentDynamicDimensionMappings = filterDimensionMappings(
@@ -1151,8 +1152,8 @@ const updateExistingDataStream = async ({
   const updatedDynamicDimensionMappings = filterDimensionMappings(mappings.dynamic_templates);
 
   const sortMappings = (
-    a: Record<string, MappingDynamicTemplate>,
-    b: Record<string, MappingDynamicTemplate>
+    a: Record<string, MappingDynamicTemplate | undefined>,
+    b: Record<string, MappingDynamicTemplate | undefined>
   ) => Object.keys(a)[0].localeCompare(Object.keys(b)[0]);
 
   const dynamicDimensionMappingsChanged = !deepEqual(

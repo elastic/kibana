@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { ScaleType, Settings, Tooltip, Chart, BarSeries } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { Coordinate } from '../../../common/types';
 
 export function SparkPlot({
@@ -45,6 +46,7 @@ function SparkPlotItem({
   series?: Coordinate[] | null;
 }) {
   const { euiTheme } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
   const chartSize = {
     height: euiTheme.size.l,
     width: '80px',
@@ -61,7 +63,7 @@ function SparkPlotItem({
   if (isLoading) {
     return (
       <div style={commonStyle}>
-        <EuiLoadingChart mono />
+        <EuiLoadingChart />
       </div>
     );
   }
@@ -73,7 +75,7 @@ function SparkPlotItem({
         data-test-subj="datasetQualitySparkPlot"
       >
         <Chart size={chartSize}>
-          <Settings showLegend={false} locale={i18n.getLocale()} />
+          <Settings showLegend={false} locale={i18n.getLocale()} baseTheme={chartBaseTheme} />
           <Tooltip type="none" />
           <BarSeries
             id="barseries"

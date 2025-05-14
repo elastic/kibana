@@ -10,7 +10,7 @@
 import type {
   ESQLAst,
   ESQLAstItem,
-  ESQLAstMetricsCommand,
+  ESQLAstTimeseriesCommand,
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLMessage,
@@ -30,10 +30,10 @@ export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst)
   const sources: ESQLSource[] = [];
   const metadataFields: ESQLColumn[] = [];
 
-  if (firstCommand.name === 'metrics') {
-    const metrics = firstCommand as ESQLAstMetricsCommand;
+  if (firstCommand.name === 'ts') {
+    const timeseries = firstCommand as ESQLAstTimeseriesCommand;
 
-    sources.push(...metrics.sources);
+    sources.push(...timeseries.sources);
   } else if (firstCommand.name === 'from') {
     const fromSources = mutate.commands.from.sources.list(firstCommand as any);
     const fromMetadataColumns = [...mutate.commands.from.metadata.list(firstCommand as any)].map(

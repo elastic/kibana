@@ -13,19 +13,20 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
   const findService = getService('find');
   const browser = getService('browser');
   const comboBox = getService('comboBox');
+  const retry = getService('retry');
   const selectIndex = async () => {
     await testSubjects.existOrFail('addDataSourcesButton');
     await testSubjects.click('addDataSourcesButton');
     await testSubjects.existOrFail('selectIndicesFlyout');
     await testSubjects.click('sourceIndex-0');
-    await testSubjects.click('saveButton');
+    await testSubjects.clickWhenNotDisabled('saveButton');
   };
   const selectIndexByName = async (indexName: string) => {
     await testSubjects.existOrFail('addDataSourcesButton');
     await testSubjects.click('addDataSourcesButton');
     await testSubjects.existOrFail('selectIndicesFlyout');
     await findService.clickByCssSelector(`li[title="${indexName}"]`);
-    await testSubjects.click('saveButton');
+    await testSubjects.clickWhenNotDisabled('saveButton');
   };
 
   const SESSION_KEY = 'search_playground_session';
@@ -46,8 +47,17 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
 
       async expectSession(): Promise<void> {
-        const session = (await browser.getLocalStorageItem(SESSION_KEY)) || '{}';
-        const state = JSON.parse(session);
+        let state: Record<string, unknown> = {};
+        await retry.try(
+          async () => {
+            const session = (await browser.getLocalStorageItem(SESSION_KEY)) || '{}';
+            state = JSON.parse(session);
+            expect(Object.keys(state).length).to.be.greaterThan(0, 'Session state has no keys');
+          },
+          undefined,
+          200
+        );
+
         expect(state.prompt).to.be('You are an assistant for question-answering tasks.');
         expect(state.doc_size).to.be(3);
         expect(state.elasticsearch_query).eql({
@@ -136,11 +146,11 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectSuccessButtonAfterCreatingConnector(createConnector: () => Promise<void>) {
         await createConnector();
         await browser.refresh();
-        await testSubjects.existOrFail('successConnectLLMButton');
+        await testSubjects.existOrFail('successConnectLLMText');
       },
 
-      async expectShowSuccessLLMButton() {
-        await testSubjects.existOrFail('successConnectLLMButton');
+      async expectShowSuccessLLMText() {
+        await testSubjects.existOrFail('successConnectLLMText');
       },
     },
     PlaygroundChatPage: {
@@ -219,19 +229,13 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('euiFlyoutCloseButton');
       },
 
-      async expectViewQueryHasFields() {
+      async openQueryMode() {
         await testSubjects.existOrFail('queryMode');
         await testSubjects.click('queryMode');
-        const fields = await testSubjects.findAll('fieldName');
+      },
 
-        expect(fields.length).to.be(1);
-
-        const codeBlock = await testSubjects.find('ViewElasticsearchQueryResult');
-        const code = await codeBlock.getVisibleText();
-        expect(code.replace(/ /g, '')).to.be(
-          '{\n"retriever":{\n"standard":{\n"query":{\n"multi_match":{\n"query":"{query}",\n"fields":[\n"baz"\n]\n}\n}\n}\n}\n}'
-        );
-
+      async openChatMode() {
+        await testSubjects.existOrFail('chatMode');
         await testSubjects.click('chatMode');
       },
 
@@ -260,6 +264,8 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
         await testSubjects.click('queryMode');
         await testSubjects.existOrFail('field-baz-false');
+        await testSubjects.click('field-baz-false');
+        await testSubjects.existOrFail('field-baz-true');
         await testSubjects.click('chatMode');
       },
 
@@ -362,6 +368,67 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         expect(result.length).to.be(1);
         expect(typeof result[0]).to.be('string');
         return result[0];
+      },
+    },
+    PlaygroundQueryPage: {
+      async openQueryMode() {
+        await testSubjects.existOrFail('queryMode');
+        await testSubjects.click('queryMode');
+      },
+
+      async expectQueryCodeToBe(text: string) {
+        await testSubjects.existOrFail('ViewElasticsearchQueryResult');
+        const codeEditor = await testSubjects.find('ViewElasticsearchQueryResult');
+        const editorViewDiv = await codeEditor.findByClassName('view-lines');
+        const code = await editorViewDiv.getVisibleText();
+        expect(code.replace(/ /g, '')).to.be(text);
+      },
+
+      async expectViewQueryHasFields() {
+        const fields = await testSubjects.findAll('fieldName');
+
+        expect(fields.length).to.be(1);
+
+        await this.expectQueryCodeToBe(
+          '{\n"retriever":{\n"standard":{\n"query":{\n"multi_match":{\n"query":"{query}",\n"fields":[\n"baz"\n]\n}\n}\n}\n}\n}'
+        );
+      },
+
+      async expectCanEditElasticsearchQuery(newQuery: string) {
+        await testSubjects.existOrFail('ViewElasticsearchQueryResult');
+        const codeEditor = await testSubjects.find('ViewElasticsearchQueryResult');
+        const editorTextArea = await codeEditor.findByTagName('textarea');
+        await editorTextArea.clickMouseButton();
+        await editorTextArea.clearValueWithKeyboard();
+        await editorTextArea.type(newQuery);
+        await this.expectQueryCodeToBe(newQuery);
+      },
+
+      async resetElasticsearchQuery() {
+        await testSubjects.existOrFail('ResetElasticsearchQueryButton');
+        await testSubjects.click('ResetElasticsearchQueryButton');
+      },
+
+      async setQueryModeQuestion(question: string) {
+        await testSubjects.existOrFail('searchPlaygroundChatQuestionFieldText');
+        const questionInput = await testSubjects.find('searchPlaygroundChatQuestionFieldText');
+        await questionInput.type(question);
+      },
+
+      async expectCanRunQuery() {
+        await testSubjects.existOrFail('RunElasticsearchQueryButton');
+        await testSubjects.waitForEnabled('RunElasticsearchQueryButton');
+        await testSubjects.click('RunElasticsearchQueryButton');
+
+        await testSubjects.existOrFail('ViewElasticsearchQueryResponse');
+      },
+
+      async expectQueryModeResultsContains(text: string) {
+        await testSubjects.existOrFail('ViewElasticsearchQueryResponse');
+        const codeEditor = await testSubjects.find('ViewElasticsearchQueryResponse');
+        const editorViewDiv = await codeEditor.findByClassName('view-lines');
+        const queryResponse = await editorViewDiv.getVisibleText();
+        expect(queryResponse).to.contain(text);
       },
     },
   };

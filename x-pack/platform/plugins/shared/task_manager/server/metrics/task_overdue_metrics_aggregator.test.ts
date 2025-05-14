@@ -7,7 +7,7 @@
 
 import { asOk } from '../lib/result_type';
 import { asTaskManagerMetricEvent } from '../task_events';
-import { TaskManagerMetrics } from './task_metrics_collector';
+import type { TaskManagerMetrics } from './task_metrics_collector';
 import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
 
 export const getTaskManagerMetricEvent = (value: TaskManagerMetrics) => {

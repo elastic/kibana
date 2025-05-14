@@ -11,6 +11,9 @@ import { ColorFormat } from './color';
 import { HTML_CONTEXT_TYPE } from '../content_types';
 
 describe('Color Format', () => {
+  const checkResult = (text: string | number, color: string, backgroundColor: string) =>
+    `<span style=\"color:${color};background-color:${backgroundColor};display:inline-block;padding:0 8px;border-radius:3px\">${text}</span>`;
+
   describe('field is a number', () => {
     test('should add colors if the value is in range', () => {
       const colorer = new ColorFormat(
@@ -28,12 +31,8 @@ describe('Color Format', () => {
       );
 
       expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('99');
-      expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">100</span>'
-      );
-      expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">150</span>'
-      );
+      expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(checkResult(100, 'blue', 'yellow'));
+      expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(checkResult(150, 'blue', 'yellow'));
       expect(colorer.convert(151, HTML_CONTEXT_TYPE)).toBe('151');
     });
 
@@ -72,9 +71,7 @@ describe('Color Format', () => {
         jest.fn()
       );
 
-      expect(colorer.convert(true, HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">true</span>'
-      );
+      expect(colorer.convert(true, HTML_CONTEXT_TYPE)).toBe(checkResult('true', 'blue', 'yellow'));
       expect(colorer.convert(false, HTML_CONTEXT_TYPE)).toBe('false');
     });
   });
@@ -87,8 +84,8 @@ describe('Color Format', () => {
           colors: [
             {
               regex: 'A.*',
-              text: 'blue',
-              background: 'yellow',
+              text: 'white',
+              background: 'red',
             },
           ],
         },
@@ -97,24 +94,14 @@ describe('Color Format', () => {
       const converter = colorer.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
-      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AAA</span>'
-      );
-      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AB</span>'
-      );
+      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(checkResult('AAA', 'white', 'red'));
+      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB', 'white', 'red'));
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
 
       expect(converter('B', HTML_CONTEXT_TYPE)).toBe('B');
-      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AAA</span>'
-      );
-      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AB</span>'
-      );
-      expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(
-        '<span style="color:blue;background-color:yellow">AB &lt;</span>'
-      );
+      expect(converter('AAA', HTML_CONTEXT_TYPE)).toBe(checkResult('AAA', 'white', 'red'));
+      expect(converter('AB', HTML_CONTEXT_TYPE)).toBe(checkResult('AB', 'white', 'red'));
+      expect(converter('AB <', HTML_CONTEXT_TYPE)).toBe(checkResult('AB &lt;', 'white', 'red'));
       expect(converter('a', HTML_CONTEXT_TYPE)).toBe('a');
     });
 

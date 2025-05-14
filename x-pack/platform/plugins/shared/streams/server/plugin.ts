@@ -8,6 +8,7 @@
 import {
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   KibanaRequest,
   Logger,
   Plugin,
@@ -15,6 +16,8 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
 import { streamsRouteRepository } from './routes';
 import {
@@ -26,6 +29,8 @@ import { AssetService } from './lib/streams/assets/asset_service';
 import { RouteHandlerScopedClients } from './routes/types';
 import { StreamsService } from './lib/streams/service';
 import { StreamsTelemetryService } from './lib/telemetry/service';
+import { ContentService } from './lib/content/content_service';
+import { STREAMS_API_PRIVILEGES, STREAMS_UI_PRIVILEGES } from '../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -70,7 +75,39 @@ export class StreamsPlugin
     this.telemtryService.setup(core.analytics);
 
     const assetService = new AssetService(core, this.logger);
-    const streamsService = new StreamsService(core, this.logger);
+    const streamsService = new StreamsService(core, this.logger, this.isDev);
+    const contentService = new ContentService(core, this.logger);
+
+    plugins.features.registerKibanaFeature({
+      id: 'streams',
+      name: i18n.translate('xpack.streams.featureRegistry.streamsFeatureName', {
+        defaultMessage: 'Streams',
+      }),
+      order: 600,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      app: ['streams'],
+      privileges: {
+        all: {
+          app: ['streams'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          api: [STREAMS_API_PRIVILEGES.read, STREAMS_API_PRIVILEGES.manage],
+          ui: [STREAMS_UI_PRIVILEGES.show, STREAMS_UI_PRIVILEGES.manage],
+        },
+        read: {
+          app: ['streams'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          api: [STREAMS_API_PRIVILEGES.read],
+          ui: [STREAMS_UI_PRIVILEGES.show],
+        },
+      },
+    });
 
     registerRoutes({
       repository: streamsRouteRepository,
@@ -83,9 +120,10 @@ export class StreamsPlugin
         }: {
           request: KibanaRequest;
         }): Promise<RouteHandlerScopedClients> => {
-          const [[coreStart, pluginsStart], assetClient] = await Promise.all([
+          const [[coreStart, pluginsStart], assetClient, contentClient] = await Promise.all([
             core.getStartServices(),
             assetService.getClientWithRequest({ request }),
+            contentService.getClient(),
           ]);
 
           const streamsClient = await streamsService.getClientWithRequest({ request, assetClient });
@@ -94,7 +132,14 @@ export class StreamsPlugin
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const inferenceClient = pluginsStart.inference.getClient({ request });
 
-          return { scopedClusterClient, soClient, assetClient, streamsClient, inferenceClient };
+          return {
+            scopedClusterClient,
+            soClient,
+            assetClient,
+            streamsClient,
+            inferenceClient,
+            contentClient,
+          };
         },
       },
       core,

@@ -7,38 +7,105 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { otel, generateShortId, generateLongId, OtelDocument } from '@kbn/apm-synthtrace-client';
-import { times } from 'lodash';
+import {
+  OtelInstance,
+  ApmOtelFields,
+  ApmSynthtracePipelineSchema,
+} from '@kbn/apm-synthtrace-client';
+import { apm } from '@kbn/apm-synthtrace-client/src/lib/apm';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
-const scenario: Scenario<OtelDocument> = async (runOptions) => {
+const ENVIRONMENT = getSynthtraceEnvironment(__filename);
+
+const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
   return {
-    generate: ({ range, clients: { otelEsClient } }) => {
-      const { numOtelTraces = 5 } = runOptions.scenarioOpts || {};
+    bootstrap: async ({ apmEsClient }) => {
+      apmEsClient.pipeline(apmEsClient.getPipeline(ApmSynthtracePipelineSchema.Otel));
+    },
+    generate: ({ range, clients: { apmEsClient } }) => {
+      const transactionName = 'oteldemo.AdServiceSynth/GetAds';
+
       const { logger } = runOptions;
-      const traceId = generateLongId();
-      const spanId = generateShortId();
 
-      const otelDocs = times(numOtelTraces / 2).map((index) => otel.create(traceId));
+      const edotInstance = apm
+        .otelService({
+          name: 'adservice-edot-synth',
+          namespace: ENVIRONMENT,
+          sdkLanguage: 'java',
+          sdkName: 'opentelemetry',
+          distro: 'elastic',
+        })
+        .instance('edot-instance');
 
-      const otelWithMetricsAndErrors = range
-        .interval('30s')
-        .rate(1)
-        .generator((timestamp) =>
-          otelDocs.flatMap((oteld) => {
-            return [
-              oteld.metric().timestamp(timestamp),
-              oteld.transaction(spanId).timestamp(timestamp),
-              oteld.error(spanId).timestamp(timestamp),
-            ];
-          })
+      const otelNativeInstance = apm
+        .otelService({
+          name: 'sendotlp-otel-native-synth',
+          namespace: ENVIRONMENT,
+          sdkName: 'otlp',
+          sdkLanguage: 'nodejs',
+        })
+        .instance('otel-native-instance');
+
+      const successfulTimestamps = range.interval('1m').rate(180);
+      const failedTimestamps = range.interval('1m').rate(40);
+
+      const instanceSpans = (instance: OtelInstance) => {
+        const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
+          instance
+            .span({
+              name: transactionName,
+              kind: 'Server',
+            })
+            .timestamp(timestamp)
+            .duration(1000)
+            .success()
+            .children(
+              instance
+                .dbExitSpan({
+                  name: 'GET apm-*/_search',
+                  type: 'elasticsearch',
+                })
+                .duration(1000)
+                .success()
+                .timestamp(timestamp),
+              instance
+                .span({
+                  name: 'custom_operation',
+                  kind: 'Internal',
+                })
+                .duration(100)
+                .success()
+                .timestamp(timestamp)
+            )
         );
+
+        const failedTraceEvents = failedTimestamps.generator((timestamp) =>
+          instance
+            .span({ name: transactionName, kind: 'Server' })
+            .timestamp(timestamp)
+            .duration(1000)
+            .failure()
+            .errors(
+              instance
+                .error({
+                  message: '[ResponseError] index_not_found_exception',
+                  type: 'ResponseError',
+                })
+                .timestamp(timestamp + 50)
+            )
+        );
+
+        return [successfulTraceEvents, failedTraceEvents];
+      };
 
       return [
         withClient(
-          otelEsClient,
-          logger.perf('generating_otel_trace', () => otelWithMetricsAndErrors)
+          apmEsClient,
+          logger.perf('generating_otel_trace', () =>
+            [otelNativeInstance, edotInstance].flatMap((instance) => instanceSpans(instance))
+          )
         ),
       ];
     },

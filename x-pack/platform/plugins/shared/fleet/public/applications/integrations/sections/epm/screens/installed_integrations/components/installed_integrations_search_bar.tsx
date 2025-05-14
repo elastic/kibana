@@ -19,7 +19,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 
-import type { InstalledIntegrationsFilter, InstalledPackagesUIInstallationStatus } from '../types';
+import type {
+  InstalledIntegrationsFilter,
+  InstalledPackageUIPackageListItem,
+  InstalledPackagesUIInstallationStatus,
+} from '../types';
 import { useAddUrlFilters } from '../hooks/use_url_filters';
 
 import { InstalledIntegrationsActionMenu } from './installed_integration_action_menu';
@@ -30,7 +34,8 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
   filters: InstalledIntegrationsFilter;
   countPerStatus: { [k: string]: number | undefined };
   customIntegrationsCount: number;
-}> = ({ filters, countPerStatus, customIntegrationsCount }) => {
+  selectedItems: InstalledPackageUIPackageListItem[];
+}> = ({ filters, countPerStatus, customIntegrationsCount, selectedItems }) => {
   const addUrlFilter = useAddUrlFilters();
   const theme = useEuiTheme();
   const [searchTerms, setSearchTerms] = useState(filters.q);
@@ -160,7 +165,7 @@ export const InstalledIntegrationsSearchBar: React.FunctionComponent<{
           </EuiFilterGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <InstalledIntegrationsActionMenu />
+          <InstalledIntegrationsActionMenu selectedItems={selectedItems} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

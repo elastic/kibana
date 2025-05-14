@@ -6,9 +6,13 @@
  */
 
 import React from 'react';
+import type { TypeOf } from '@kbn/typed-react-router-config';
+import { EuiLink } from '@elastic/eui';
+import type { ApmRoutes } from '../../../routing/apm_route_config';
 import type { APMQueryParams } from '../url_helpers';
-import type { APMLinkExtendProps } from './apm_link';
-import { LegacyAPMLink, useAPMHref } from './apm_link';
+import { useAPMHref } from './apm_link_hooks';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import type { APMLinkExtendProps } from './apm_link_hooks';
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'host',
@@ -19,15 +23,24 @@ const persistedFilters: Array<keyof APMQueryParams> = [
 
 export function useMetricOverviewHref(serviceName: string) {
   return useAPMHref({
-    path: `/services/${serviceName}/metrics`,
+    path: `/services/{serviceName}/metrics`,
+    pathParams: { serviceName },
     persistedFilters,
   });
 }
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
+  query: TypeOf<ApmRoutes, '/services/{serviceName}/metrics'>['query'];
 }
 
-export function MetricOverviewLink({ serviceName, ...rest }: Props) {
-  return <LegacyAPMLink path={`/services/${serviceName}/metrics`} {...rest} />;
+export function MetricOverviewLink({ serviceName, query, ...rest }: Props) {
+  const { link } = useApmRouter();
+  const metricsOverviewLink = link('/services/{serviceName}/metrics', {
+    path: {
+      serviceName,
+    },
+    query,
+  });
+  return <EuiLink data-test-subj="apmMetricsOverviewLink" href={metricsOverviewLink} {...rest} />;
 }

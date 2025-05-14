@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields } from '@kbn/apm-synthtrace-client';
+import { ApmFields, ApmOtelFields } from '@kbn/apm-synthtrace-client';
 import { createMetricAggregatorFactory } from '../../utils/create_metric_aggregator_factory';
 
 export const createApmMetricAggregator = createMetricAggregatorFactory<ApmFields>();
+export const createOtelMetricAggregator = createMetricAggregatorFactory<ApmOtelFields>();

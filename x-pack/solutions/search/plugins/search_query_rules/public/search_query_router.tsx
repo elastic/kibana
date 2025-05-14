@@ -7,12 +7,18 @@
 
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
+import { QUERY_RULESET_DETAIL_PATH, ROOT_PATH } from './routes';
+import { QueryRulesOverview } from './components/overview/overview';
+import { QueryRulesetDetail } from './components/query_ruleset_detail/query_ruleset_detail';
 
 export const QueryRulesRouter = () => {
   return (
     <Routes>
-      <Route exact path="/">
-        Query rules
+      <Route exact path={QUERY_RULESET_DETAIL_PATH}>
+        <QueryRulesetDetail />
+      </Route>
+      <Route exact path={ROOT_PATH}>
+        <QueryRulesOverview />
       </Route>
     </Routes>
   );

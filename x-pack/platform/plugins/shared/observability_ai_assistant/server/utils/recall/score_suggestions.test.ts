@@ -15,9 +15,9 @@ import { ChatEvent } from '../../../common/conversation_complete';
 import { contextualInsightsMessages, normalConversationMessages } from './recall_and_score.test';
 
 const suggestions: RecalledSuggestion[] = [
-  { id: 'doc1', text: 'Relevant document 1', score: 0.9 },
-  { id: 'doc2', text: 'Relevant document 2', score: 0.8 },
-  { id: 'doc3', text: 'Less relevant document 3', score: 0.3 },
+  { id: 'doc1', text: 'Relevant document 1', esScore: 0.9 },
+  { id: 'doc2', text: 'Relevant document 2', esScore: 0.8 },
+  { id: 'doc3', text: 'Less relevant document 3', esScore: 0.3 },
 ];
 
 const userPrompt = 'What is my favourite color?';
@@ -52,15 +52,15 @@ describe('scoreSuggestions', () => {
       logger: mockLogger,
     });
 
-    expect(result.scores).toEqual([
-      { id: 'doc1', score: 7 },
-      { id: 'doc2', score: 5 },
-      { id: 'doc3', score: 3 },
+    expect(result.llmScores).toEqual([
+      { id: 'doc1', llmScore: 7 },
+      { id: 'doc2', llmScore: 5 },
+      { id: 'doc3', llmScore: 3 },
     ]);
 
     expect(result.relevantDocuments).toEqual([
-      { id: 'doc1', text: 'Relevant document 1', score: 0.9 },
-      { id: 'doc2', text: 'Relevant document 2', score: 0.8 },
+      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9 },
+      { id: 'doc2', text: 'Relevant document 2', esScore: 0.8 },
     ]);
   });
 
@@ -117,7 +117,7 @@ describe('scoreSuggestions', () => {
     });
 
     expect(result.relevantDocuments).toEqual([
-      { id: 'doc1', text: 'Relevant document 1', score: 0.9 },
+      { id: 'doc1', text: 'Relevant document 1', esScore: 0.9 },
     ]);
   });
 
@@ -159,10 +159,10 @@ describe('scoreSuggestions', () => {
       logger: mockLogger,
     });
 
-    expect(result.scores).toEqual([
-      { id: 'doc1', score: 7 },
-      { id: 'doc2', score: 5 },
-      { id: 'doc3', score: 3 },
+    expect(result.llmScores).toEqual([
+      { id: 'doc1', llmScore: 7 },
+      { id: 'doc2', llmScore: 5 },
+      { id: 'doc3', llmScore: 3 },
     ]);
   });
 });

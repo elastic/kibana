@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { fireEvent, render, renderHook, screen } from '@testing-library/react';
+import React from 'react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useSettingsView } from './use_settings_view';
 import { TestProviders } from '../../../../common/mock';
+
+const mockFilterManager = createFilterManagerMock();
 
 jest.mock('react-router', () => ({
   matchPath: jest.fn(),
@@ -24,23 +27,25 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../sourcerer/containers');
 
 const defaultProps = {
-  end: undefined,
-  filters: undefined,
-  localStorageAttackDiscoveryMaxAlerts: undefined,
-  onClose: jest.fn(),
-  query: undefined,
-  setEnd: jest.fn(),
-  setFilters: jest.fn(),
-  setLocalStorageAttackDiscoveryMaxAlerts: jest.fn(),
-  setQuery: jest.fn(),
-  setStart: jest.fn(),
-  start: undefined,
+  connectorId: undefined,
+  onConnectorIdSelected: jest.fn(),
+  onSettingsChanged: jest.fn(),
+  onSettingsReset: jest.fn(),
+  onSettingsSave: jest.fn(),
+  settings: {
+    end: 'now',
+    filters: [],
+    query: { query: '', language: 'kuery' },
+    size: 100,
+    start: 'now-15m',
+  },
+  showConnectorSelector: true,
+  stats: null,
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
-  typeof useSourcererDataView
->;
+const mockUseSourcererDataView: jest.MockedFunction<typeof useSourcererDataView> =
+  useSourcererDataView as jest.MockedFunction<typeof useSourcererDataView>;
 
 describe('useSettingsView', () => {
   beforeEach(() => {
@@ -48,6 +53,14 @@ describe('useSettingsView', () => {
 
     mockUseKibana.mockReturnValue({
       services: {
+        data: {
+          query: {
+            filterManager: mockFilterManager,
+          },
+        },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(true),
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
@@ -69,7 +82,7 @@ describe('useSettingsView', () => {
   });
 
   it('should return the alert selection component with `AlertSelectionQuery` as settings view', () => {
-    const { result } = renderHook(() => useSettingsView({ filterSettings: defaultProps }));
+    const { result } = renderHook(() => useSettingsView(defaultProps));
 
     render(<TestProviders>{result.current.settingsView}</TestProviders>);
 
@@ -77,7 +90,7 @@ describe('useSettingsView', () => {
   });
 
   it('should return the alert selection component with `AlertSelectionRange` as settings view', () => {
-    const { result } = renderHook(() => useSettingsView({ filterSettings: defaultProps }));
+    const { result } = renderHook(() => useSettingsView(defaultProps));
 
     render(<TestProviders>{result.current.settingsView}</TestProviders>);
 
@@ -85,7 +98,7 @@ describe('useSettingsView', () => {
   });
 
   it('should return reset action button', () => {
-    const { result } = renderHook(() => useSettingsView({ filterSettings: defaultProps }));
+    const { result } = renderHook(() => useSettingsView(defaultProps));
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
@@ -93,45 +106,32 @@ describe('useSettingsView', () => {
   });
 
   it('should return save action button', () => {
-    const { result } = renderHook(() => useSettingsView({ filterSettings: defaultProps }));
+    const { result } = renderHook(() => useSettingsView(defaultProps));
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
     expect(screen.getByTestId('save')).toBeInTheDocument();
   });
 
-  describe('when the save button is clicked', () => {
-    beforeEach(() => {
-      const { result } = renderHook(() => useSettingsView({ filterSettings: defaultProps }));
+  it('when the save button is clicked - invokes onSettingsSave', () => {
+    const { result } = renderHook(() => useSettingsView(defaultProps));
 
-      render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+    render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
-      const save = screen.getByTestId('save');
-      fireEvent.click(save);
-    });
+    const save = screen.getByTestId('save');
+    fireEvent.click(save);
 
-    it('invokes setEnd', () => {
-      expect(defaultProps.setEnd).toHaveBeenCalled();
-    });
+    expect(defaultProps.onSettingsSave).toHaveBeenCalled();
+  });
 
-    it('invokes setFilters', () => {
-      expect(defaultProps.setFilters).toHaveBeenCalled();
-    });
+  it('when the reset button is clicked - invokes onSettingsReset', () => {
+    const { result } = renderHook(() => useSettingsView(defaultProps));
 
-    it('invokes setQuery', () => {
-      expect(defaultProps.setQuery).toHaveBeenCalled();
-    });
+    render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
-    it('invokes setStart', () => {
-      expect(defaultProps.setStart).toHaveBeenCalled();
-    });
+    const reset = screen.getByTestId('reset');
+    fireEvent.click(reset);
 
-    it('invokes setLocalStorageAttackDiscoveryMaxAlerts', () => {
-      expect(defaultProps.setLocalStorageAttackDiscoveryMaxAlerts).toHaveBeenCalled();
-    });
-
-    it('invokes onClose', () => {
-      expect(defaultProps.onClose).toHaveBeenCalled();
-    });
+    expect(defaultProps.onSettingsReset).toHaveBeenCalled();
   });
 });

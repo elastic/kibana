@@ -17,6 +17,7 @@ import { type as signalsMigrationType } from './lib/detection_engine/migrations/
 import { manifestType, unifiedManifestType } from './endpoint/lib/artifacts/saved_object_mappings';
 import { riskEngineConfigurationType } from './lib/entity_analytics/risk_engine/saved_object';
 import { entityEngineDescriptorType } from './lib/entity_analytics/entity_store/saved_object';
+import { privilegeMonitoringType } from './lib/entity_analytics/privilege_monitoring/saved_object/privilege_monitoring_type';
 
 const types = [
   noteType,
@@ -29,6 +30,7 @@ const types = [
   signalsMigrationType,
   riskEngineConfigurationType,
   entityEngineDescriptorType,
+  privilegeMonitoringType,
   protectionUpdatesNoteType,
   promptType,
 ];

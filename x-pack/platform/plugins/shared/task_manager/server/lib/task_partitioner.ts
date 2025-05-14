@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'elastic-apm-node';
-import { KibanaDiscoveryService } from '../kibana_discovery_service';
+import type { Logger } from 'elastic-apm-node';
+import type { KibanaDiscoveryService } from '../kibana_discovery_service';
 import { assignPodPartitions } from './assign_pod_partitions';
 
 function range(start: number, end: number) {

@@ -509,6 +509,7 @@ owner: elastic`,
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
         id: 'elasticsearch',
+        name: 'elasticsearch',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
       });
     });

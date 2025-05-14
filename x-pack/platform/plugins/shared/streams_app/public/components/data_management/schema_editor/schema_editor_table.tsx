@@ -15,9 +15,9 @@ import {
   EuiDataGridControlColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
+import { TABLE_COLUMNS, EMPTY_CONTENT, TableColumnName } from './constants';
 import { FieldActionsCell } from './field_actions';
 import { FieldParent } from './field_parent';
 import { FieldStatusBadge } from './field_status';
@@ -26,18 +26,20 @@ import { SchemaField } from './types';
 import { FieldType } from './field_type';
 
 export function FieldsTable({
-  fields,
   controls,
+  defaultColumns,
+  fields,
   stream,
   withTableActions,
 }: {
-  fields: SchemaField[];
   controls: TControls;
-  stream: WiredStreamDefinition;
+  defaultColumns: TableColumnName[];
+  fields: SchemaField[];
+  stream: Streams.ingest.all.Definition;
   withTableActions: boolean;
 }) {
   // Column visibility
-  const [visibleColumns, setVisibleColumns] = useState(Object.keys(TABLE_COLUMNS));
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultColumns);
   // Column sorting
   const [sortingColumns, setSortingColumns] = useState<EuiDataGridColumnSortingConfig[]>([]);
 
@@ -88,7 +90,10 @@ export function FieldsTable({
 }
 
 const createCellRenderer =
-  (fields: SchemaField[], stream: WiredStreamDefinition): EuiDataGridCellProps['renderCellValue'] =>
+  (
+    fields: SchemaField[],
+    stream: Streams.ingest.all.Definition
+  ): EuiDataGridCellProps['renderCellValue'] =>
   ({ rowIndex, columnId }) => {
     const field = fields[rowIndex];
     if (!field) return null;

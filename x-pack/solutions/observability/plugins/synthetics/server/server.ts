@@ -67,12 +67,12 @@ export const initSyntheticsServer = (
         router.versioned
           .get({
             access: 'public',
+            security,
             path: routeDefinition.path,
           })
           .addVersion(
             {
               version: '2023-10-31',
-              security,
               validate: validation ?? false,
             },
             handler
@@ -82,12 +82,12 @@ export const initSyntheticsServer = (
         router.versioned
           .put({
             access: 'public',
+            security,
             path: routeDefinition.path,
           })
           .addVersion(
             {
               version: '2023-10-31',
-              security,
               validate: validation ?? false,
             },
             handler
@@ -97,12 +97,12 @@ export const initSyntheticsServer = (
         router.versioned
           .post({
             access: 'public',
+            security,
             path: routeDefinition.path,
           })
           .addVersion(
             {
               version: '2023-10-31',
-              security,
               validate: validation ?? false,
             },
             handler
@@ -113,6 +113,7 @@ export const initSyntheticsServer = (
           .delete({
             access: 'public',
             path: routeDefinition.path,
+            security,
             options: {
               tags: options?.tags,
             },
@@ -120,7 +121,6 @@ export const initSyntheticsServer = (
           .addVersion(
             {
               version: '2023-10-31',
-              security,
               validate: validation ?? false,
             },
             handler

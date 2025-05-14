@@ -8,8 +8,9 @@
 import {
   FieldDefinitionConfig,
   FieldDefinitionConfigAdvancedParameters,
-  WiredStreamDefinition,
+  Streams,
 } from '@kbn/streams-schema';
+import { TableColumnName } from './constants';
 
 export type SchemaFieldStatus = 'inherited' | 'mapped' | 'unmapped';
 export type SchemaFieldType = FieldDefinitionConfig['type'];
@@ -35,12 +36,13 @@ export interface UnmappedSchemaField extends BaseSchemaField {
 export type SchemaField = MappedSchemaField | UnmappedSchemaField;
 
 export interface SchemaEditorProps {
+  defaultColumns?: TableColumnName[];
   fields: SchemaField[];
   isLoading?: boolean;
   onFieldUnmap: (fieldName: SchemaField['name']) => void;
   onFieldUpdate: (field: SchemaField) => void;
   onRefreshData?: () => void;
-  stream: WiredStreamDefinition;
+  stream: Streams.ingest.all.Definition;
   withControls?: boolean;
   withFieldSimulation?: boolean;
   withTableActions?: boolean;

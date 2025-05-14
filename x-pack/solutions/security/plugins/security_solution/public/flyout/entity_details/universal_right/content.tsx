@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import type { EsHitRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
+import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { FieldsTable } from './components/fields_table';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 
 interface UniversalEntityFlyoutContentProps {
-  source: EsHitRecord['_source'];
+  source: GenericEntityRecord;
 }
 
 export const UniversalEntityFlyoutContent = ({ source }: UniversalEntityFlyoutContentProps) => {
@@ -27,9 +28,12 @@ export const UniversalEntityFlyoutContent = ({ source }: UniversalEntityFlyoutCo
           />
         }
         expanded
-        localStorageKey={'universal_flyout:overview:fields_table'}
+        localStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION}
       >
-        <FieldsTable document={source || {}} />
+        <FieldsTable
+          document={source || {}}
+          tableStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS}
+        />
       </ExpandableSection>
     </FlyoutBody>
   );

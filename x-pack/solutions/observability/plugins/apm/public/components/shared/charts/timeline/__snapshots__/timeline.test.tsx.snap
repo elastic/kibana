@@ -88,7 +88,7 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
     </svg>
     
     <div
-      className="css-cdm8xt"
+      className="css-1oyht0a-MarkerContainer eoof5b20"
       style={
         Object {
           "left": -9955.5,
@@ -104,14 +104,14 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
       >
         
         <div
-          className="css-1ksntcu"
+          className="css-1ejn3a9-Container en0jakt1"
           disabled={false}
           onBlur={[Function]}
           onFocus={[Function]}
         >
           
           <span
-            className="css-11ohb43"
+            className="css-xbgcmn-Indicator en0jakt0"
             color="#8E9FBC"
             shape="circle"
           />
@@ -120,7 +120,7 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
     </div>
     
     <div
-      className="css-cdm8xt"
+      className="css-1oyht0a-MarkerContainer eoof5b20"
       style={
         Object {
           "left": -10955.5,
@@ -136,14 +136,14 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
       >
         
         <div
-          className="css-1ksntcu"
+          className="css-1ejn3a9-Container en0jakt1"
           disabled={false}
           onBlur={[Function]}
           onFocus={[Function]}
         >
           
           <span
-            className="css-11ohb43"
+            className="css-xbgcmn-Indicator en0jakt0"
             color="#8E9FBC"
             shape="circle"
           />
@@ -152,7 +152,7 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
     </div>
     
     <div
-      className="css-cdm8xt"
+      className="css-1oyht0a-MarkerContainer eoof5b20"
       style={
         Object {
           "left": -18955.5,
@@ -168,14 +168,14 @@ exports[`Timeline TimelineAxisContainer should render with data 1`] = `
       >
         
         <div
-          className="css-1ksntcu"
+          className="css-1ejn3a9-Container en0jakt1"
           disabled={false}
           onBlur={[Function]}
           onFocus={[Function]}
         >
           
           <span
-            className="css-11ohb43"
+            className="css-xbgcmn-Indicator en0jakt0"
             color="#8E9FBC"
             shape="circle"
           />

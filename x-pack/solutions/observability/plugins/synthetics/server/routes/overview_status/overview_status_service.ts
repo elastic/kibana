@@ -30,13 +30,14 @@ type LocationStatus = Array<{
   status: string;
   locationId: string;
   timestamp: string;
+  monitorUrl?: string;
 }>;
 
 export const SUMMARIES_PAGE_SIZE = 5000;
 
 export class OverviewStatusService {
   filterData: {
-    locationFilter?: string[] | string;
+    locationIds?: string[] | string;
     filtersStr?: string;
   } = {};
   constructor(
@@ -61,7 +62,7 @@ export class OverviewStatusService {
       disabledCount,
       disabledMonitorsCount,
       projectMonitorsCount,
-    } = processMonitors(allConfigs, this.filterData?.locationFilter);
+    } = processMonitors(allConfigs, this.filterData?.locationIds);
 
     return {
       allIds,
@@ -91,7 +92,7 @@ export class OverviewStatusService {
       projects,
       showFromAllSpaces,
     } = params;
-    const { locationFilter } = this.filterData;
+    const { locationIds } = this.filterData;
     const getTermFilter = (field: string, value: string | string[] | undefined) => {
       if (!value || isEmpty(value)) {
         return [];
@@ -120,10 +121,10 @@ export class OverviewStatusService {
       ...getTermFilter('monitor.project.id', projects),
     ];
 
-    if (scopeStatusByLocation && !isEmpty(locationFilter) && locationFilter) {
+    if (scopeStatusByLocation && !isEmpty(locationIds) && locationIds) {
       filters.push({
         terms: {
-          'observer.name': locationFilter,
+          'observer.name': locationIds,
         },
       });
     }
@@ -182,9 +183,14 @@ export class OverviewStatusService {
                 aggs: {
                   status: {
                     top_metrics: {
-                      metrics: {
-                        field: 'monitor.status',
-                      },
+                      metrics: [
+                        {
+                          field: 'monitor.status',
+                        },
+                        {
+                          field: 'url.full.keyword',
+                        },
+                      ],
                       sort: {
                         '@timestamp': 'desc',
                       },
@@ -206,11 +212,18 @@ export class OverviewStatusService {
           const monitorId = String(bKey.monitorId);
           const locationId = String(bKey.locationId);
           const status = String(statusAgg.top?.[0].metrics?.['monitor.status']);
+          const monitorUrl = statusAgg.top?.[0].metrics?.['url.full.keyword'];
+
           const timestamp = String(statusAgg.top[0].sort[0]);
           if (!monitorByIds.has(String(monitorId))) {
             monitorByIds.set(monitorId, []);
           }
-          monitorByIds.get(monitorId)?.push({ status, locationId, timestamp });
+          monitorByIds.get(monitorId)?.push({
+            status,
+            locationId,
+            timestamp,
+            monitorUrl: monitorUrl ? String(monitorUrl) : undefined,
+          });
         });
       } while (hasMoreData && afterKey);
       return monitorByIds;
@@ -218,7 +231,9 @@ export class OverviewStatusService {
   }
 
   processOverviewStatus(
-    monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>>,
+    monitors: Array<
+      SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }>
+    >,
     statusData: Map<string, LocationStatus>
   ) {
     let up = 0;
@@ -231,7 +246,7 @@ export class OverviewStatusService {
     const enabledMonitors = monitors.filter((monitor) => monitor.attributes[ConfigKey.ENABLED]);
     const disabledMonitors = monitors.filter((monitor) => !monitor.attributes[ConfigKey.ENABLED]);
 
-    const queryLocIds = this.filterData?.locationFilter;
+    const queryLocIds = this.filterData?.locationIds;
 
     disabledMonitors.forEach((monitor) => {
       const monitorQueryId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
@@ -260,12 +275,14 @@ export class OverviewStatusService {
           return;
         }
         const locData = monitorStatus?.find((loc) => loc.locationId === monLocation.id);
+        const metaInfo = this.getMonitorMeta(monitor);
         const meta = {
+          ...metaInfo,
           monitorQueryId: monitorId,
           locationId: monLocation.id,
           timestamp: locData?.timestamp,
           locationLabel: monLocation.label,
-          ...this.getMonitorMeta(monitor),
+          urls: monitor.attributes[ConfigKey.URLS] || locData?.monitorUrl,
         };
         const monLocId = `${meta.configId}-${monLocation.id}`;
         if (locData) {
@@ -314,7 +331,9 @@ export class OverviewStatusService {
 
     const { filtersStr } = this.filterData;
 
-    return await this.routeContext.monitorConfigRepository.getAll({
+    return this.routeContext.monitorConfigRepository.getAll<
+      EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }
+    >({
       showFromAllSpaces,
       search: query ? `${query}*` : '',
       filter: filtersStr,
@@ -330,11 +349,16 @@ export class OverviewStatusService {
         ConfigKey.TAGS,
         ConfigKey.PROJECT_ID,
         ConfigKey.ALERT_CONFIG,
+        ConfigKey.URLS,
       ],
     });
   }
 
-  getMonitorMeta(monitor: SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>) {
+  getMonitorMeta(
+    monitor: SavedObjectsFindResult<
+      EncryptedSyntheticsMonitorAttributes & { [ConfigKey.URLS]?: string }
+    >
+  ) {
     return {
       name: monitor.attributes[ConfigKey.NAME],
       configId: monitor.attributes[ConfigKey.CONFIG_ID],
@@ -346,6 +370,7 @@ export class OverviewStatusService {
       isStatusAlertEnabled: isStatusEnabled(monitor.attributes[ConfigKey.ALERT_CONFIG]),
       updated_at: monitor.updated_at,
       spaceId: monitor.namespaces?.[0],
+      urls: monitor.attributes[ConfigKey.URLS],
     };
   }
 }

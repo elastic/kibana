@@ -9,7 +9,7 @@ import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/e
 import React from 'react';
 import { SecurityPageName } from '../../../../../../common';
 import { useGetSecuritySolutionLinkProps } from '../../../../../common/components/links';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../common/translations';
 
 const AddPrebuiltRulesTableNoItemsMessageComponent = () => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();

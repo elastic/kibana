@@ -364,7 +364,7 @@ export class JobsListUI extends Component {
         }),
         actions: actionsMenuContent(
           this.props.kibana.services.notifications.toasts,
-          this.props.kibana.services.application,
+          this.props.kibana.services.share,
           this.mlApi,
           this.props.showEditJobFlyout,
           this.props.showDatafeedChartFlyout,

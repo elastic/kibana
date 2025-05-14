@@ -43,7 +43,7 @@ export const logSearchRequest = (searchRequest: estypes.SearchRequest): string =
   };
 
   const body = {
-    ...pick(searchRequest, [...BODY_FIELDS, 'index', 'body', 'querystring']),
+    ...pick(searchRequest, [...BODY_FIELDS, 'querystring']),
     ...(searchRequest.body as Record<string, unknown>),
   };
 

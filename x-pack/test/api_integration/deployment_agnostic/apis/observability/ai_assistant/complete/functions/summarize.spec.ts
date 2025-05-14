@@ -14,39 +14,32 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { invokeChatCompleteWithFunctionRequest } from '../../utils/conversation';
 import {
-  clearKnowledgeBase,
-  importTinyElserModel,
-  deleteInferenceEndpoint,
-  deleteKnowledgeBaseModel,
-  setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
-} from '../../utils/knowledge_base';
+  deployTinyElserAndSetupKb,
+  teardownTinyElserModelAndInferenceEndpoint,
+} from '../../utils/model_and_inference';
+import { clearKnowledgeBase, getKnowledgeBaseEntriesFromApi } from '../../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
-  const ml = getService('ml');
   const es = getService('es');
-  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('summarize', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
+    // LLM Proxy is not yet support in MKI: https://github.com/elastic/obs-ai-assistant-team/issues/199
+    this.tags(['skipCloud']);
     let proxy: LlmProxy;
     let connectorId: string;
 
     before(async () => {
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
-
+      await deployTinyElserAndSetupKb(getService);
       proxy = await createLlmProxy(log);
+
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: proxy.getPort(),
       });
 
       // intercept the LLM request and return a fixed response
-      void proxy.interceptConversation('Hello from LLM Proxy');
+      void proxy.interceptWithResponse('Hello from LLM Proxy');
 
       await invokeChatCompleteWithFunctionRequest({
         connectorId,
@@ -68,27 +61,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      proxy.close();
+      proxy?.close();
 
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
-      await deleteKnowledgeBaseModel(ml);
+      await teardownTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
-      await deleteInferenceEndpoint({ es });
     });
 
     it('persists entry in knowledge base', async () => {
-      const res = await observabilityAIAssistantAPIClient.editor({
-        endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
-        params: {
-          query: {
-            query: '',
-            sortBy: 'title',
-            sortDirection: 'asc',
-          },
-        },
-      });
+      const res = await getKnowledgeBaseEntriesFromApi({ observabilityAIAssistantAPIClient });
 
       const { role, public: isPublic, text, type, user, title } = res.body.entries[0];
 

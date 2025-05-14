@@ -37,7 +37,7 @@ import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { getDefaultConnector } from './helpers';
 
-import { LastConversation, useAssistantContext } from '../assistant_context';
+import { useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
@@ -53,6 +53,11 @@ import {
   conversationContainsAnonymizedValues,
   conversationContainsContentReferences,
 } from './conversations/utils';
+import {
+  LastConversation,
+  useAssistantLastConversation,
+  useAssistantSpaceId,
+} from './use_space_aware_context';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -90,12 +95,9 @@ const AssistantComponent: React.FC<Props> = ({
     currentAppId,
     augmentMessageCodeBlocks,
     getComments,
-    getLastConversation,
     http,
     promptContexts,
     currentUserAvatar,
-    setLastConversation,
-    spaceId,
     contentReferencesVisible,
     showAnonymizedValues,
     setContentReferencesVisible,
@@ -134,6 +136,13 @@ const AssistantComponent: React.FC<Props> = ({
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+  const spaceId = useAssistantSpaceId();
+  const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
+  const lastConversationFromLocalStorage = useMemo(
+    () => getLastConversation(),
+    [getLastConversation]
+  );
+
   const {
     currentConversation,
     currentSystemPrompt,
@@ -151,7 +160,7 @@ const AssistantComponent: React.FC<Props> = ({
     defaultConnector,
     spaceId,
     refetchCurrentUserConversations,
-    lastConversation: lastConversation ?? getLastConversation(lastConversation),
+    lastConversation: lastConversation ?? lastConversationFromLocalStorage,
     mayUpdateConversations:
       isFetchedConnectors && isFetchedCurrentUserConversations && isFetchedPrompts,
     setLastConversation,

@@ -24,11 +24,12 @@ exports[`StickyProperties should render entire component 1`] = `
     <PropertyLabel>
       <EuiToolTip
         content={
-          <Styled(span)>
+          <TooltipFieldName>
             url.full
-          </Styled(span)>
+          </TooltipFieldName>
         }
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
       >
@@ -40,12 +41,13 @@ exports[`StickyProperties should render entire component 1`] = `
     <EuiToolTip
       content="https://www.elastic.co/test"
       delay="regular"
+      disableScreenReaderOutput={false}
       display="inlineBlock"
       position="top"
     >
-      <Styled(span)>
+      <PropertyValueTruncated>
         https://www.elastic.co/test
-      </Styled(span)>
+      </PropertyValueTruncated>
     </EuiToolTip>
   </EuiFlexItem>
   <EuiFlexItem
@@ -61,11 +63,12 @@ exports[`StickyProperties should render entire component 1`] = `
     <PropertyLabel>
       <EuiToolTip
         content={
-          <Styled(span)>
+          <TooltipFieldName>
             http.request.method
-          </Styled(span)>
+          </TooltipFieldName>
         }
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
       >
@@ -91,11 +94,12 @@ exports[`StickyProperties should render entire component 1`] = `
     <PropertyLabel>
       <EuiToolTip
         content={
-          <Styled(span)>
+          <TooltipFieldName>
             error.exception.handled
-          </Styled(span)>
+          </TooltipFieldName>
         }
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
       >
@@ -121,11 +125,12 @@ exports[`StickyProperties should render entire component 1`] = `
     <PropertyLabel>
       <EuiToolTip
         content={
-          <Styled(span)>
+          <TooltipFieldName>
             user.id
-          </Styled(span)>
+          </TooltipFieldName>
         }
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
       >

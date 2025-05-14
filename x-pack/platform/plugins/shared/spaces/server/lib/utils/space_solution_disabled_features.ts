@@ -11,13 +11,17 @@ import type { SolutionView } from '../../../common';
 
 const getFeatureIdsForCategories = (
   features: KibanaFeature[],
-  categories: Array<'observability' | 'enterpriseSearch' | 'securitySolution'>
+  categories: Array<'observability' | 'enterpriseSearch' | 'securitySolution' | 'chat'>
 ) => {
   return features
     .filter((feature) =>
       feature.category
         ? categories.includes(
-            feature.category.id as 'observability' | 'enterpriseSearch' | 'securitySolution'
+            feature.category.id as
+              | 'observability'
+              | 'enterpriseSearch'
+              | 'securitySolution'
+              | 'chat'
           )
         : false
     )
@@ -32,6 +36,7 @@ const enabledFeaturesPerSolution: Record<SolutionId, string[]> = {
   es: ['observabilityAIAssistant'],
   oblt: [],
   security: [],
+  chat: [],
 };
 
 /**
@@ -59,16 +64,25 @@ export function withSpaceSolutionDisabledFeatures(
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',
       'securitySolution',
+      'chat',
     ]).filter((featureId) => !enabledFeaturesPerSolution.es.includes(featureId));
   } else if (spaceSolution === 'oblt') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'securitySolution',
+      'chat',
     ]).filter((featureId) => !enabledFeaturesPerSolution.oblt.includes(featureId));
   } else if (spaceSolution === 'security') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',
       'enterpriseSearch',
+      'chat',
     ]).filter((featureId) => !enabledFeaturesPerSolution.security.includes(featureId));
+  } else if (spaceSolution === 'chat') {
+    disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
+      'observability',
+      'securitySolution',
+      'enterpriseSearch',
+    ]).filter((featureId) => !enabledFeaturesPerSolution.chat.includes(featureId));
   }
 
   return Array.from(new Set([...disabledFeatureKeysFromSolution]));

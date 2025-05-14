@@ -84,6 +84,7 @@ export const AlertsCard: OnboardingCardComponent = ({
             items={ALERTS_CARD_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
+            cardId={OnboardingCardId.alerts}
           />
           {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>

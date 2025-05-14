@@ -16,10 +16,7 @@ import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types'
 import { defaultRiskScoreBySeverity } from '../../../../../common/detection_engine/constants';
 import type { RuleSource } from '../../../../../common/api/detection_engine';
 import { isThreatMatchRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
-import type {
-  RuleStepProps,
-  AboutStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import type { RuleStepProps, AboutStepRule } from '../../../common/types';
 import { AddItem } from '../add_item_form';
 import { StepRuleDescription } from '../description_step';
 import { AddMitreAttackThreat } from '../mitre';

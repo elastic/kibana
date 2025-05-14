@@ -8,13 +8,17 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 
-import { AssistantCallToAction } from '../call_to_action';
+import { AssistantCallToAction, type AssistantCallToActionProps } from '../call_to_action';
 import { translations } from './add_connector.translations';
+
+/** Data test subject for the add connector button. */
+export const DATA_TEST_SUBJ_ADD_CONNECTOR_BUTTON = 'aiCTAAddConnectorButton';
 
 /**
  * Props for the `AddConnector` call to action.
  */
-export interface AddConnectorProps {
+export interface AddConnectorProps
+  extends Pick<AssistantCallToActionProps, 'data-test-subj' | 'centered'> {
   /** Callback to handle adding a connector. */
   onAddConnector: () => void;
 }
@@ -22,9 +26,13 @@ export interface AddConnectorProps {
 /**
  * A pure component that renders a call to action to add a connector.
  */
-export const AddConnector = ({ onAddConnector }: AddConnectorProps) => (
-  <AssistantCallToAction description={translations.description}>
-    <EuiButton onClick={onAddConnector} iconType="plusInCircle">
+export const AddConnector = ({ onAddConnector, ...props }: AddConnectorProps) => (
+  <AssistantCallToAction description={translations.description} {...props}>
+    <EuiButton
+      onClick={onAddConnector}
+      iconType="plusInCircle"
+      data-test-subj={DATA_TEST_SUBJ_ADD_CONNECTOR_BUTTON}
+    >
       {translations.addButton}
     </EuiButton>
   </AssistantCallToAction>

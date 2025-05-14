@@ -14,11 +14,7 @@ import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
 import { handleCustomErrors } from './routes_util';
 import { GenerationErrorCode } from '../../common/constants';
-import {
-  ACTIONS_AND_CONNECTORS_ALL_ROLE,
-  FLEET_ALL_ROLE,
-  INTEGRATIONS_ALL_ROLE,
-} from '../constants';
+import { FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE } from '../constants';
 export function registerIntegrationBuilderRoutes(
   router: IRouter<AutomaticImportRouteHandlerContext>
 ) {
@@ -26,19 +22,15 @@ export function registerIntegrationBuilderRoutes(
     .post({
       path: INTEGRATION_BUILDER_PATH,
       access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_ALL_ROLE, INTEGRATIONS_ALL_ROLE],
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            requiredPrivileges: [
-              FLEET_ALL_ROLE,
-              INTEGRATIONS_ALL_ROLE,
-              ACTIONS_AND_CONNECTORS_ALL_ROLE,
-            ],
-          },
-        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(BuildIntegrationRequestBody),

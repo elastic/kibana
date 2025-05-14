@@ -30,7 +30,7 @@ import { css } from '@emotion/react';
 import { AppMountParameters } from '@kbn/core-application-browser';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { AddEmbeddableButton } from '@kbn/embeddable-examples-plugin/public';
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { GridLayout, GridLayoutData, GridSettings } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -50,6 +50,7 @@ import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './uti
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
+const DASHBOARD_DRAG_TOP_OFFSET = 150;
 
 export const GridExample = ({
   coreStart,
@@ -67,6 +68,7 @@ export const GridExample = ({
     gutterSize: DASHBOARD_MARGIN_SIZE,
     rowHeight: DASHBOARD_GRID_HEIGHT,
     columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+    keyboardDragTopLimit: DASHBOARD_DRAG_TOP_OFFSET,
   });
 
   const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
@@ -116,7 +118,7 @@ export const GridExample = ({
       const currentPanels = mockDashboardApi.panels$.getValue();
 
       return (
-        <ReactEmbeddableRenderer
+        <EmbeddableRenderer
           key={id}
           maybeId={id}
           type={currentPanels[id].type}

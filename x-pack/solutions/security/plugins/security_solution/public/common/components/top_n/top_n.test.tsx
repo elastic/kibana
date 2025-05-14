@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
 import React from 'react';
 import { screen, render, waitFor, fireEvent } from '@testing-library/react';
 
@@ -107,11 +105,10 @@ describe('TopN', () => {
     field,
     filters: [],
     from: '2020-04-14T00:31:47.695Z',
-    indexPattern: mockDataViewSpec,
+    dataViewSpec: mockDataViewSpec,
     options: defaultOptions,
     query,
     setAbsoluteRangeDatePickerTarget: InputsModelId.global,
-    setQuery: jest.fn(),
     to: '2020-04-15T00:31:47.695Z',
     toggleTopN,
   };
@@ -132,10 +129,8 @@ describe('TopN', () => {
   });
 
   describe('events view', () => {
-    let wrapper: ReactWrapper;
-
     beforeEach(() => {
-      wrapper = mount(
+      render(
         <TestProviders>
           <TopN {...testProps} />
         </TestProviders>
@@ -143,18 +138,16 @@ describe('TopN', () => {
     });
 
     test(`it renders EventsByDataset when defaultView is 'raw'`, () => {
-      expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
-        true
-      );
+      expect(screen.getByTestId('eventsByDatasetOverview-topNPanel')).toBeInTheDocument();
     });
 
     test(`it does NOT render SignalsByCategory when defaultView is 'raw'`, () => {
-      expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBe(false);
+      expect(screen.queryByTestId('alerts-histogram-panel')).not.toBeInTheDocument();
     });
   });
 
   describe('alerts view', () => {
-    beforeAll(() => {
+    beforeEach(() => {
       testProps = {
         ...testProps,
         defaultView: eventTypes.alert,
@@ -162,40 +155,34 @@ describe('TopN', () => {
     });
 
     test(`it renders SignalsByCategory when defaultView is 'alert'`, async () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <TopN {...testProps} />
         </TestProviders>
       );
-      await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBe(true);
-      });
+      expect(await screen.findByTestId('alerts-histogram-panel')).toBeInTheDocument();
     });
 
     test(`it does NOT render EventsByDataset when defaultView is 'alert'`, async () => {
-      const wrapper = mount(
+      render(
         <TestProviders>
           <TopN {...testProps} />
         </TestProviders>
       );
       await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
-          false
-        );
+        expect(screen.queryByTestId('eventsByDatasetOverview-topNPanel')).not.toBeInTheDocument();
       });
     });
   });
 
   describe('All events, a view shown only when rendered in the context of the active timeline', () => {
-    let wrapper: ReactWrapper;
-
     beforeEach(() => {
       testProps = {
         ...testProps,
         defaultView: eventTypes.all,
         options: allEvents,
       };
-      wrapper = mount(
+      render(
         <TestProviders>
           <TopN {...testProps} filterQuery={JSON.stringify(filterQuery)} />
         </TestProviders>
@@ -203,13 +190,11 @@ describe('TopN', () => {
     });
 
     test(`it renders EventsByDataset when defaultView is 'all'`, () => {
-      expect(wrapper.find('[data-test-subj="eventsByDatasetOverview-topNPanel"]').exists()).toBe(
-        true
-      );
+      expect(screen.getByTestId('eventsByDatasetOverview-topNPanel')).toBeInTheDocument();
     });
 
     test(`it does NOT render SignalsByCategory when defaultView is 'all'`, () => {
-      expect(wrapper.find('[data-test-subj="alerts-histogram-panel"]').exists()).toBe(false);
+      expect(screen.queryByTestId('alerts-histogram-panel')).not.toBeInTheDocument();
     });
   });
 });

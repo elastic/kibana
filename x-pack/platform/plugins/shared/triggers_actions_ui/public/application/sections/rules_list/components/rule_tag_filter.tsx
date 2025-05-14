@@ -17,7 +17,8 @@ import {
   EuiSelectableOption,
   EuiSpacer,
 } from '@elastic/eui';
-import { useLoadTagsQuery } from '../../../hooks/use_load_tags_query';
+import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
+import { useKibana } from '../../../../common';
 
 export interface RuleTagFilterProps {
   selectedTags: string[];
@@ -166,6 +167,12 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
     onChange = () => {},
   } = props;
 
+  const {
+    services: {
+      http,
+      notifications: { toasts },
+    },
+  } = useKibana();
   const observerRef = useRef<IntersectionObserver>();
   const [searchText, setSearchText] = useState<string>('');
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -175,7 +182,9 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
     isLoading,
     hasNextPage,
     fetchNextPage,
-  } = useLoadTagsQuery({
+  } = useGetRuleTagsQuery({
+    http,
+    toasts,
     enabled: canLoadRules,
     refresh,
     search: searchText,

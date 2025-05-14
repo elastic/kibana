@@ -17,17 +17,17 @@ export function initializeDownloadShareableWorkpadRoute(deps: RouteInitializerDe
     .get({
       path: API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is only serving static files.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because it is only serving static files.',
-          },
-        },
         validate: false,
       },
       async (_context, _request, response) => {

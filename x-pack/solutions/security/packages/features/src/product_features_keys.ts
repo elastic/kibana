@@ -8,8 +8,15 @@
 export enum ProductFeatureSecurityKey {
   /** Enables Advanced Insights (Entity Risk, GenAI) */
   advancedInsights = 'advanced_insights',
-  /** Enables Alerts Summary page for AI SOC */
-  alertsSummary = 'alerts_summary',
+
+  /** Enables Configurations page for AI SOC */
+  configurations = 'configurations',
+
+  /** Elastic endpoint detections, includes alerts, rules, investigations */
+  detections = 'detections',
+
+  /** Enables external detections for AI SOC, includes alerts_summary, basic_rules*/
+  externalDetections = 'external_detections',
   /**
    * Enables Investigation guide in Timeline
    */
@@ -23,6 +30,10 @@ export enum ProductFeatureSecurityKey {
    * running endpoint security
    */
   endpointHostManagement = 'endpoint_host_management',
+  /**
+   * Enables access to Endpoint host isolation and release actions
+   */
+  endpointHostIsolation = 'endpoint_host_isolation',
   /**
    * Enables endpoint policy views that enables user to manage endpoint security policies
    */

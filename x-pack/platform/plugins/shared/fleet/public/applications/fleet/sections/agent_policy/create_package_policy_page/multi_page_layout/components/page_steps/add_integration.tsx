@@ -34,7 +34,7 @@ import { validatePackagePolicy, validationHasErrors } from '../../../services';
 import { NotObscuredByBottomBar } from '..';
 import { StepConfigurePackagePolicy, StepDefinePackagePolicy } from '../../../components';
 import { prepareInputPackagePolicyDataset } from '../../../services/prepare_input_pkg_policy_dataset';
-import { ensurePackageKibanaAssetsInstalled } from '../../../services/ensure_kibana_assets_installed';
+import { ensurePackageKibanaAssetsInstalled } from '../../../../../../services/ensure_kibana_assets_installed';
 
 const ExpandableAdvancedSettings: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);

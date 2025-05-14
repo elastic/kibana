@@ -10,7 +10,7 @@ import { EuiFormRow, EuiRadioGroup, EuiToolTip, useEuiTheme } from '@elastic/eui
 import { css } from '@emotion/css';
 import type { FieldHook } from '../../../../../shared_imports';
 import { UseMultiFields } from '../../../../../shared_imports';
-import { AlertSuppressionDurationType } from '../../../../../detections/pages/detection_engine/rules/types';
+import { AlertSuppressionDurationType } from '../../../../common/types';
 import { DurationInput } from '../../duration_input';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
