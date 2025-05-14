@@ -33,6 +33,7 @@ import {
 } from './state_management/simulation_state_machine';
 import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
 import { isGrokProcessor } from './utils';
+import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
@@ -149,13 +150,10 @@ const OutcomePreviewTable = () => {
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
   );
-  const draftProcessor = useStreamsEnrichmentSelector((state) => {
-    const draft = state.context.processorsRefs.find((p) => p.getSnapshot().matches('draft'));
-    return {
-      processor: draft?.getSnapshot().context.processor,
-      resources: draft?.getSnapshot().context.resources,
-    };
-  });
+
+  const draftProcessor = useStreamsEnrichmentSelector((snapshot) =>
+    selectDraftProcessor(snapshot.context)
+  );
 
   const grokCollection = useStreamsEnrichmentSelector(
     (machineState) => machineState.context.grokCollection

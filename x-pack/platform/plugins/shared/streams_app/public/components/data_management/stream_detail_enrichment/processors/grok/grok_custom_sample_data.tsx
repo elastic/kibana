@@ -7,16 +7,17 @@
 
 import { DraftGrokExpression, SampleInput } from '@kbn/grok-ui';
 import React, { useState } from 'react';
-import { useWatch, Control } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { GrokFormState } from '../../types';
 import { useStreamsEnrichmentSelector } from '../../state_management/stream_enrichment_state_machine';
 
-export const CustomSampleData = ({ formControl }: { formControl: Control<GrokFormState> }) => {
+export const CustomSampleData = () => {
   const grokCollection = useStreamsEnrichmentSelector(
     (machineState) => machineState.context.grokCollection
   );
   const [sample, setSample] = useState<string>('');
-  const patterns = useWatch<GrokFormState>({ control: formControl, name: 'patterns' });
+  const { control } = useFormContext<GrokFormState>();
+  const patterns = useWatch<GrokFormState, 'patterns'>({ control, name: 'patterns' });
 
   return (
     <SampleInput

@@ -21,7 +21,7 @@ export const Expression = ({
   grokCollection: GrokCollection;
   draftGrokExpression: DraftGrokExpression;
   onChange?: (expression: DraftGrokExpression) => void;
-  height?: string;
+  height?: CodeEditorProps['height'];
 }) => {
   const [suggestionProvider] = useState(() => {
     return grokCollection.getSuggestionProvider();

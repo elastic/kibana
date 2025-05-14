@@ -19,6 +19,7 @@ import {
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
+import { GrokCollection } from '@kbn/grok-ui';
 import {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
@@ -171,7 +172,7 @@ export const streamEnrichmentMachine = setup({
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
-    grokCollection: input.grokCollection,
+    grokCollection: new GrokCollection(),
     initialProcessorsRefs: [],
     processorsRefs: [],
   }),

@@ -24,7 +24,7 @@ import { useSelector } from '@xstate5/react';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React, { useEffect, useMemo, useCallback } from 'react';
-import { useForm, SubmitHandler, FormProvider, useWatch, Control } from 'react-hook-form';
+import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { DiscardPromptOptions, useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
 import { DissectProcessorForm } from './dissect';
@@ -53,7 +53,6 @@ import { DateProcessorForm } from './date';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import { ConfigDrivenProcessorType } from './config_driven/types';
 import { selectPreviewDocuments } from '../state_management/simulation_state_machine/selectors';
-import { GrokFormState } from '../types';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();
@@ -198,9 +197,7 @@ export function AddProcessorPanel() {
             <EuiSpacer size="m" />
             {type === 'date' && <DateProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
-            {type === 'grok' && (
-              <GrokProcessorForm formControl={methods.control as Control<GrokFormState>} />
-            )}
+            {type === 'grok' && <GrokProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
             )}
@@ -409,9 +406,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
             <ProcessorTypeSelector disabled />
             <EuiSpacer size="m" />
             {type === 'date' && <DateProcessorForm />}
-            {type === 'grok' && (
-              <GrokProcessorForm formControl={methods.control as Control<GrokFormState>} />
-            )}
+            {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
             {!SPECIALISED_TYPES.includes(type) && (
               <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />

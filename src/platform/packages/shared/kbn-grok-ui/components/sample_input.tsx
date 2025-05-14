@@ -9,11 +9,11 @@
 
 import { CodeEditorProps, CodeEditor } from '@kbn/code-editor';
 import { monaco } from '@kbn/monaco';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, debounceTime } from 'rxjs';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { combineLatest } from 'rxjs';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import useDebounce from 'react-use/lib/useDebounce';
+import { debounce } from 'lodash';
 import { DraftGrokExpression, GrokCollection } from '../models';
 import { semanticNameLabel, patternNameLabel, typeNameLabel } from './constants';
 import { colourToClassName } from './utils';
@@ -32,19 +32,11 @@ export const SampleInput = ({
   sample: string;
   readOnly?: boolean;
   onChangeSample?: (sample: string) => void;
-  height?: string;
+  height?: CodeEditorProps['height'];
 }) => {
   const eui = useEuiTheme();
 
-  const [debouncedSample, setDebouncedSample] = useState(sample);
-
-  useDebounce(
-    () => {
-      setDebouncedSample(sample);
-    },
-    300,
-    [sample]
-  );
+  const debouncedProcessExpressions = useMemo(() => debounce(processExpressions, 300), []);
 
   const sampleEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
@@ -56,31 +48,31 @@ export const SampleInput = ({
     sampleEditorDecorationsCollectionRef.current = editor.createDecorationsCollection();
   };
 
-  const onSampleEditorChange: CodeEditorProps['onChange'] = (value) => {
-    onChangeSample?.(value);
-  };
-
   // Monaco doesn't support dynamic inline styles, so we need to generate static styles.
   const colourPaletteStyles = useMemo(() => {
     return grokCollection.getColourPaletteStyles();
   }, [grokCollection]);
 
   useEffect(() => {
-    const subscription = combineLatest(draftGrokExpressions.map((draft) => draft.getExpression$()))
-      .pipe(debounceTime(300))
-      .subscribe(() => {
-        processExpressions(
-          draftGrokExpressions,
-          sampleEditorRef,
-          sampleEditorDecorationsCollectionRef
-        );
-      });
+    const subscription = combineLatest(
+      draftGrokExpressions.map((draft) => draft.getExpression$())
+    ).subscribe(() => {
+      debouncedProcessExpressions(
+        draftGrokExpressions,
+        sampleEditorRef,
+        sampleEditorDecorationsCollectionRef
+      );
+    });
     return () => subscription.unsubscribe();
-  }, [draftGrokExpressions]);
+  }, [debouncedProcessExpressions, draftGrokExpressions]);
 
   useEffect(() => {
-    processExpressions(draftGrokExpressions, sampleEditorRef, sampleEditorDecorationsCollectionRef);
-  }, [debouncedSample, draftGrokExpressions]);
+    debouncedProcessExpressions(
+      draftGrokExpressions,
+      sampleEditorRef,
+      sampleEditorDecorationsCollectionRef
+    );
+  }, [debouncedProcessExpressions, draftGrokExpressions]);
 
   return (
     <>
@@ -97,7 +89,7 @@ export const SampleInput = ({
           value={sample}
           height={height}
           editorDidMount={onSampleEditorMount}
-          onChange={onSampleEditorChange}
+          onChange={onChangeSample}
           options={{ readOnly }}
         />
       </div>

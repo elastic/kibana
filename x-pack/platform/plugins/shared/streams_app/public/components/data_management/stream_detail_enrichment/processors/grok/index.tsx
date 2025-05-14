@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Control } from 'react-hook-form';
 import { GrokPatternDefinition } from './grok_pattern_definition';
 import { GrokPatternsEditor } from './grok_patterns_editor';
 import { ProcessorFieldSelector } from '../processor_field_selector';
@@ -16,9 +15,8 @@ import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
 import { CustomSampleData } from './grok_custom_sample_data';
-import { GrokFormState } from '../../types';
 
-export const GrokProcessorForm = ({ formControl }: { formControl: Control<GrokFormState> }) => {
+export const GrokProcessorForm = () => {
   return (
     <>
       <ProcessorFieldSelector />
@@ -31,7 +29,7 @@ export const GrokProcessorForm = ({ formControl }: { formControl: Control<GrokFo
           { defaultMessage: 'Custom sample data (optional)' }
         )}
       >
-        <CustomSampleData formControl={formControl} />
+        <CustomSampleData />
       </FieldsAccordion>
       <FieldsAccordion>
         <GrokPatternDefinition />

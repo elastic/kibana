@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   DragDropContextProps,
   EuiAccordion,
@@ -26,7 +26,6 @@ import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject } from 'rxjs';
-import { GrokCollection } from '@kbn/grok-ui';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DraggableProcessorListItem } from './processors_list';
@@ -73,10 +72,6 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
     };
   }, [timeState$, timefilterHook.timeState$]);
 
-  const [grokCollection] = useState(() => {
-    return new GrokCollection();
-  });
-
   return (
     <StreamEnrichmentContextProvider
       definition={props.definition}
@@ -84,7 +79,6 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
       core={core}
       streamsRepositoryClient={streamsRepositoryClient}
       timeState$={timeState$}
-      grokCollection={grokCollection}
     >
       <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>
