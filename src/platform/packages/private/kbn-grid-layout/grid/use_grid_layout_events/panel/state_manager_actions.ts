@@ -211,7 +211,7 @@ export const moveAction = (
     nextLayout = resolveSections(nextLayout);
     if (!nextLayout[targetSectionId]) {
       // resolving the sections possibly removed + renamed sections, so reset target section
-      const { order } = nextLayout[previousSection!];
+      const { order } = targetSectionId === 'main-0' ? { order: -1 } : nextLayout[previousSection!];
       targetSectionId = `main-${order + 1}`;
     }
 
