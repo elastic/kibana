@@ -15,11 +15,11 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiPanel,
-  useEuiTheme,
+  UseEuiTheme,
 } from '@elastic/eui';
 
-import { kibanaFullBodyHeightCss } from '@kbn/core/public';
-import { appRootStyles } from './styles';
+import { kibanaFullBodyHeightCss, useMemoizedStyles } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import {
   SearchProfilerTabs,
   ProfileTree,
@@ -33,6 +33,17 @@ import {
 import { useAppContext, useProfilerActionContext, useProfilerReadContext } from './contexts';
 import { hasAggregations, hasSearch } from './lib';
 import { Targets } from './types';
+
+const componentStyles = {
+  appRoot: ({ euiTheme }: UseEuiTheme) =>
+    css([
+      {
+        overflow: 'hidden',
+        flexShrink: 1,
+      }, // adding dev tool top bar to the body offset
+      kibanaFullBodyHeightCss(`(${euiTheme.size.base} * 3)`),
+    ]),
+};
 
 export const App = () => {
   const { getLicenseStatus, notifications } = useAppContext();
@@ -92,18 +103,11 @@ export const App = () => {
     return null;
   };
 
-  const euiThemeSize = useEuiTheme().euiTheme.size.base;
+  const styles = useMemoizedStyles(componentStyles);
 
   return (
     <>
-      <EuiPage
-        className="prfDevTool__page"
-        css={[
-          // adding dev tool top bar to the body offset
-          kibanaFullBodyHeightCss(`(${euiThemeSize} * 3)`),
-          appRootStyles,
-        ]}
-      >
+      <EuiPage className="prfDevTool__page" css={styles.appRoot}>
         <EuiPageBody className="prfDevTool__page__pageBody">
           {renderLicenseWarning()}
           <EuiPanel className="prfDevTool__page__pageBodyContent">
