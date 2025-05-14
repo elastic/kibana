@@ -668,7 +668,8 @@ export class ObservabilityAIAssistantClient {
   };
 
   setupKnowledgeBase = async (
-    nextInferenceId: string
+    nextInferenceId: string,
+    waitUntilComplete: boolean = false
   ): Promise<{
     reindex: boolean;
     currentInferenceId: string | undefined;
@@ -697,7 +698,7 @@ export class ObservabilityAIAssistantClient {
       inferenceId: nextInferenceId,
     });
 
-    waitForKbModel({
+    const kbSetupPromise = waitForKbModel({
       core: this.dependencies.core,
       esClient,
       logger,
@@ -731,6 +732,10 @@ export class ObservabilityAIAssistantClient {
           logger.debug(e);
         }
       });
+
+    if (waitUntilComplete) {
+      await kbSetupPromise;
+    }
 
     return { reindex: true, currentInferenceId, nextInferenceId };
   };
