@@ -20,4 +20,4 @@ export const hasPanelInteractionStartedWithKeyboard = (manager: GridLayoutStateM
   manager.activePanelEvent$.value?.sensorType === 'keyboard';
 
 export const hasRowInteractionStartedWithKeyboard = (manager: GridLayoutStateManager) =>
-  manager.activeRowEvent$.value?.sensorType === 'keyboard';
+  manager.activeSectionEvent$.value?.sensorType === 'keyboard';

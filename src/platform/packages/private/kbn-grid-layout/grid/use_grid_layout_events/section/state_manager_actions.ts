@@ -10,7 +10,8 @@
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 
-import { GridLayoutStateManager, GridSectionData, OrderedLayout } from '../../types';
+import { GridSectionData } from '../../grid_section';
+import { GridLayoutStateManager, OrderedLayout } from '../../types';
 import { getPanelKeysInOrder, getSectionsInOrder } from '../../utils/resolve_grid_section';
 import { resolveSections } from '../../utils/section_management';
 import { getSensorType } from '../sensors';
@@ -28,7 +29,7 @@ export const startAction = (
 
   startingLayout = gridLayoutStateManager.gridLayout$.getValue();
   const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
-  gridLayoutStateManager.activeRowEvent$.next({
+  gridLayoutStateManager.activeSectionEvent$.next({
     id: sectionId,
     startingPosition,
     sensorType: getSensorType(e),
@@ -39,9 +40,9 @@ export const startAction = (
   });
 };
 
-export const commitAction = ({ activeRowEvent$, headerRefs }: GridLayoutStateManager) => {
-  const event = activeRowEvent$.getValue();
-  activeRowEvent$.next(undefined);
+export const commitAction = ({ activeSectionEvent$, headerRefs }: GridLayoutStateManager) => {
+  const event = activeSectionEvent$.getValue();
+  activeSectionEvent$.next(undefined);
 
   if (!event) return;
   headerRefs.current[event.id]?.scrollIntoView({
@@ -51,7 +52,7 @@ export const commitAction = ({ activeRowEvent$, headerRefs }: GridLayoutStateMan
 };
 
 export const cancelAction = ({
-  activeRowEvent$,
+  activeSectionEvent$,
   gridLayout$,
   headerRefs,
 }: GridLayoutStateManager) => {
@@ -63,8 +64,8 @@ export const cancelAction = ({
     gridLayout$.next(startingLayout);
   }
 
-  const event = activeRowEvent$.getValue();
-  activeRowEvent$.next(undefined);
+  const event = activeSectionEvent$.getValue();
+  activeSectionEvent$.next(undefined);
   if (!event) return;
   headerRefs.current[event.id]?.scrollIntoView({
     behavior: 'smooth',
@@ -77,8 +78,8 @@ export const moveAction = (
   startingPointer: PointerPosition,
   currentPointer: PointerPosition
 ) => {
-  const currentActiveRowEvent = gridLayoutStateManager.activeRowEvent$.getValue();
-  if (!currentActiveRowEvent) return;
+  const currentActiveSectionEvent = gridLayoutStateManager.activeSectionEvent$.getValue();
+  if (!currentActiveSectionEvent) return;
 
   const {
     runtimeSettings$: { value: runtimeSettings },
@@ -89,7 +90,9 @@ export const moveAction = (
   const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
 
   // check with section ID is being targetted
-  const activeRowRect = gridHeaderElements[currentActiveRowEvent.id]?.getBoundingClientRect() ?? {
+  const activeRowRect = gridHeaderElements[
+    currentActiveSectionEvent.id
+  ]?.getBoundingClientRect() ?? {
     top: 0,
     bottom: 0,
   };
@@ -144,7 +147,7 @@ export const moveAction = (
     const anotherLayout: OrderedLayout = {};
     getSectionsInOrder(currentLayout).forEach((section) => {
       const { id } = section;
-      if (id === currentActiveRowEvent.id) return;
+      if (id === currentActiveSectionEvent.id) return;
 
       if (section.order < firstSectionOrder) {
         anotherLayout[id] = section;
@@ -174,8 +177,8 @@ export const moveAction = (
           };
           order++;
         }
-        anotherLayout[currentActiveRowEvent.id] = {
-          ...currentLayout[currentActiveRowEvent.id],
+        anotherLayout[currentActiveSectionEvent.id] = {
+          ...currentLayout[currentActiveSectionEvent.id],
           order,
         };
         order++;
@@ -201,8 +204,8 @@ export const moveAction = (
       gridLayoutStateManager.gridLayout$.next(finalLayout);
   }
   // update the dragged element
-  gridLayoutStateManager.activeRowEvent$.next({
-    ...currentActiveRowEvent,
+  gridLayoutStateManager.activeSectionEvent$.next({
+    ...currentActiveSectionEvent,
     targetSection: targetSectionId,
     translate: {
       top: currentPointer.clientY - startingPointer.clientY,

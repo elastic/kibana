@@ -13,9 +13,9 @@ import { RenderResult, act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { getGridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
-import { CollapsibleSection } from '../types';
 import { GridLayoutContext, GridLayoutContextType } from '../use_grid_layout_context';
 import { GridSectionHeader, GridSectionHeaderProps } from './grid_section_header';
+import { CollapsibleSection } from './types';
 
 describe('GridSectionHeader', () => {
   const renderGridSectionHeader = (

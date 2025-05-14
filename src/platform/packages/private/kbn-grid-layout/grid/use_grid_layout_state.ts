@@ -25,8 +25,6 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 import { useEuiTheme } from '@elastic/eui';
 
 import {
-  ActivePanelEvent,
-  ActiveRowEvent,
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
@@ -38,6 +36,8 @@ import { getGridLayout, getOrderedLayout } from './utils/conversions';
 import { isLayoutEqual } from './utils/equality_checks';
 import { shouldShowMobileView } from './utils/mobile_view';
 import { resolveGridSection } from './utils/resolve_grid_section';
+import { ActivePanelEvent } from './grid_panel';
+import { ActiveSectionEvent } from './grid_section';
 
 export const useGridLayoutState = ({
   layout,
@@ -105,11 +105,11 @@ export const useGridLayoutState = ({
     const gridLayout$ = new BehaviorSubject<OrderedLayout>(orderedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const activePanelEvent$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
-    const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);
+    const activeSectionEvent$ = new BehaviorSubject<ActiveSectionEvent | undefined>(undefined);
 
     const layoutUpdated$: Observable<GridLayoutData> = combineLatest([
       gridLayout$,
-      merge(activePanelEvent$, activeRowEvent$),
+      merge(activePanelEvent$, activeSectionEvent$),
     ]).pipe(
       // if an interaction event is happening, then ignore any "draft" layout changes
       filter(([_, event]) => !Boolean(event)),
@@ -127,7 +127,7 @@ export const useGridLayoutState = ({
       panelRefs,
       gridLayout$,
       activePanelEvent$,
-      activeRowEvent$,
+      activeSectionEvent$,
       accessMode$,
       gridDimensions$,
       runtimeSettings$,

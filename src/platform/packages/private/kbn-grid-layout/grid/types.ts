@@ -9,30 +9,17 @@
 
 import { BehaviorSubject, Observable } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
+import {
+  ActiveSectionEvent,
+  CollapsibleSection,
+  GridSectionData,
+  MainSection,
+} from './grid_section';
+import { ActivePanelEvent, GridPanelData } from './grid_panel';
 
-export interface GridCoordinate {
-  column: number;
-  row: number;
-}
-export interface GridRect extends GridCoordinate {
-  width: number;
-  height: number;
-}
-
-export interface GridPanelData extends GridRect {
-  id: string;
-}
-
-export interface GridSectionData {
-  id: string;
-  row: number; // position of section in main grid
-  title: string;
-  isCollapsed: boolean;
-  panels: {
-    [key: string]: GridPanelData;
-  };
-}
-
+/**
+ * The settings for how the grid should be rendered
+ */
 export interface GridSettings {
   gutterSize: number;
   rowHeight: number;
@@ -47,66 +34,8 @@ export interface GridSettings {
  */
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
 
-export interface ActivePanelEvent {
-  /**
-   * The type of interaction being performed.
-   */
-  type: 'click' | 'drag' | 'resize';
-
-  /**
-   * The id of the panel being interacted with.
-   */
-  id: string;
-
-  /**
-   * The index of the grid row this panel interaction is targeting.
-   */
-  targetSection: string;
-
-  /**
-   * The pixel rect of the panel being interacted with.
-   */
-  panelDiv: HTMLDivElement;
-
-  /**
-   * The pixel offsets from where the mouse was at drag start to the
-   * edges of the panel
-   */
-  sensorOffsets: {
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
-  };
-  sensorType: 'mouse' | 'touch' | 'keyboard';
-
-  /**
-   * This position of the fixed position panel
-   */
-  position: {
-    top: number;
-    left: number;
-    bottom: number;
-    right: number;
-  };
-}
-
-export interface ActiveRowEvent {
-  id: string;
-  targetSection?: string;
-  sensorType: 'mouse' | 'touch' | 'keyboard';
-  startingPosition: {
-    top: number;
-    left: number;
-  };
-  translate: {
-    top: number;
-    left: number;
-  };
-}
-
 /**
- *
+ * A grid layout can be a mix of panels and sections, and we call these "widgets" as a general term
  */
 export type GridLayoutWidget =
   | (GridPanelData & { type: 'panel' })
@@ -117,24 +46,16 @@ export interface GridLayoutData {
 }
 
 /**
- *
+ * This represents `GridLayoutData` where every panel exists in an ordered section;
+ * i.e. panels and sections are no longer mixed on the same level
  */
-export type MainSection = Omit<GridSectionData, 'row' | 'isCollapsed' | 'title'> & {
-  order: number;
-  isMainSection: true;
-};
-
-export type CollapsibleSection = Omit<GridSectionData, 'row'> & {
-  order: number;
-  isMainSection: false;
-};
-
-/** This is translated from GridLayoutData */
 export interface OrderedLayout {
   [key: string]: MainSection | CollapsibleSection;
 }
 
-/** */
+/**
+ * The GridLayoutStateManager is used for all state management
+ */
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<OrderedLayout>;
   expandedPanelId$: BehaviorSubject<string | undefined>;
@@ -144,7 +65,7 @@ export interface GridLayoutStateManager {
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
 
   activePanelEvent$: BehaviorSubject<ActivePanelEvent | undefined>;
-  activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
+  activeSectionEvent$: BehaviorSubject<ActiveSectionEvent | undefined>;
   layoutUpdated$: Observable<GridLayoutData>;
 
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;

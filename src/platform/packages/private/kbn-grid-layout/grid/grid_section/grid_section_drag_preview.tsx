@@ -22,7 +22,7 @@ export const GridSectionDragPreview = React.memo(() => {
   useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
-      const styleSubscription = gridLayoutStateManager.activeRowEvent$
+      const styleSubscription = gridLayoutStateManager.activeSectionEvent$
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
         .subscribe((activeRow) => {
           if (!dragPreviewRef.current) return;

@@ -57,8 +57,8 @@ export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) =
         }
       );
 
-      const sectionInteractionStyleSubscription = gridLayoutStateManager.activeRowEvent$.subscribe(
-        (activeSection) => {
+      const sectionInteractionStyleSubscription =
+        gridLayoutStateManager.activeSectionEvent$.subscribe((activeSection) => {
           const rowRef = gridLayoutStateManager.sectionRefs.current[sectionId];
           if (!rowRef) return;
           const targetSection = activeSection?.targetSection;
@@ -68,8 +68,7 @@ export const GridSectionWrapper = React.memo(({ sectionId }: GridSectionProps) =
           } else {
             rowRef.classList.remove('kbnGridSection--blocked');
           }
-        }
-      );
+        });
 
       return () => {
         panelInteractionStyleSubscription.unsubscribe();

@@ -11,8 +11,6 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ObservedSize } from 'use-resize-observer/polyfilled';
 import {
-  ActivePanelEvent,
-  ActiveRowEvent,
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
@@ -20,6 +18,8 @@ import {
   RuntimeGridSettings,
 } from '../types';
 import { getSampleOrderedLayout } from './sample_layout';
+import { ActiveSectionEvent } from '../grid_section';
+import { ActivePanelEvent } from '../grid_panel';
 
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
@@ -51,7 +51,7 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
     headerRefs: { current: {} },
     accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
     activePanelEvent$: new BehaviorSubject<ActivePanelEvent | undefined>(undefined),
-    activeRowEvent$: new BehaviorSubject<ActiveRowEvent | undefined>(undefined),
+    activeSectionEvent$: new BehaviorSubject<ActiveSectionEvent | undefined>(undefined),
     gridDimensions$: new BehaviorSubject<ObservedSize>({ width: 600, height: 900 }),
     ...overrides,
   } as GridLayoutStateManager;

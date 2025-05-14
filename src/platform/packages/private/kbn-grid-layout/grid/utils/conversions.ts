@@ -9,7 +9,9 @@
 
 import { cloneDeep } from 'lodash';
 
-import { GridLayoutData, GridPanelData, GridSectionData, OrderedLayout } from '../types';
+import { GridPanelData } from '../grid_panel';
+import { GridSectionData } from '../grid_section';
+import { GridLayoutData, OrderedLayout } from '../types';
 import { getLayoutInOrder, getSectionsInOrder } from './resolve_grid_section';
 
 export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {

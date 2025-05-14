@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CollapsibleSection } from '../../grid_section';
 import { getGridLayoutStateManagerMock } from '../../test_utils/mocks';
 import { getSampleOrderedLayout } from '../../test_utils/sample_layout';
-import { CollapsibleSection } from '../../types';
 import { getSectionsInOrder } from '../../utils/resolve_grid_section';
 import { moveAction } from './state_manager_actions';
 
@@ -25,7 +25,7 @@ describe('row state manager actions', () => {
           isCollapsed: true,
         } as CollapsibleSection,
       });
-      gridLayoutStateManager.activeRowEvent$.next({
+      gridLayoutStateManager.activeSectionEvent$.next({
         id: 'second',
         startingPosition: {
           top: 100,
@@ -62,7 +62,7 @@ describe('row state manager actions', () => {
         { clientX: 20, clientY: 150 },
         { clientX: 100, clientY: 10 }
       );
-      expect(gridLayoutStateManager.activeRowEvent$.getValue()).toEqual(
+      expect(gridLayoutStateManager.activeSectionEvent$.getValue()).toEqual(
         expect.objectContaining({
           id: 'second',
           startingPosition: {

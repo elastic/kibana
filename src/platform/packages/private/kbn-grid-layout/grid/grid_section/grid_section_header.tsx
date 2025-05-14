@@ -22,12 +22,12 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { CollapsibleSection } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { useGridLayoutSectionEvents } from '../use_grid_layout_events';
 import { deleteSection } from '../utils/section_management';
 import { DeleteGridSectionModal } from './delete_grid_section_modal';
 import { GridSectionTitle } from './grid_section_title';
+import { CollapsibleSection } from './types';
 
 export interface GridSectionHeaderProps {
   sectionId: string;
@@ -83,32 +83,32 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
      * This subscription is responsible for handling the drag + drop styles for
      * re-ordering grid rows
      */
-    const dragRowStyleSubscription = gridLayoutStateManager.activeRowEvent$
+    const dragRowStyleSubscription = gridLayoutStateManager.activeSectionEvent$
       .pipe(
         pairwise(),
         map(([before, after]) => {
           if (!before && after) {
-            return { type: 'init', activeRowEvent: after };
+            return { type: 'init', activeSectionEvent: after };
           } else if (before && after) {
-            return { type: 'update', activeRowEvent: after };
+            return { type: 'update', activeSectionEvent: after };
           } else {
-            return { type: 'finish', activeRowEvent: before };
+            return { type: 'finish', activeSectionEvent: before };
           }
         })
       )
-      .subscribe(({ type, activeRowEvent }) => {
+      .subscribe(({ type, activeSectionEvent }) => {
         const headerRef = gridLayoutStateManager.headerRefs.current[sectionId];
-        if (!headerRef || activeRowEvent?.id !== sectionId) return;
+        if (!headerRef || activeSectionEvent?.id !== sectionId) return;
 
         if (type === 'init') {
           setIsActive(true);
           const width = headerRef.getBoundingClientRect().width;
           headerRef.style.position = 'fixed';
           headerRef.style.width = `${width}px`;
-          headerRef.style.top = `${activeRowEvent.startingPosition.top}px`;
-          headerRef.style.left = `${activeRowEvent.startingPosition.left}px`;
+          headerRef.style.top = `${activeSectionEvent.startingPosition.top}px`;
+          headerRef.style.left = `${activeSectionEvent.startingPosition.left}px`;
         } else if (type === 'update') {
-          headerRef.style.transform = `translate(${activeRowEvent.translate.left}px, ${activeRowEvent.translate.top}px)`;
+          headerRef.style.transform = `translate(${activeSectionEvent.translate.left}px, ${activeSectionEvent.translate.top}px)`;
         } else {
           setIsActive(false);
           headerRef.style.position = ``;
