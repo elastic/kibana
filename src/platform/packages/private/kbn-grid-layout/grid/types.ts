@@ -9,13 +9,13 @@
 
 import { BehaviorSubject, Observable } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
-import {
+import type { ActivePanelEvent, GridPanelData } from './grid_panel';
+import type {
   ActiveSectionEvent,
   CollapsibleSection,
   GridSectionData,
   MainSection,
 } from './grid_section';
-import { ActivePanelEvent, GridPanelData } from './grid_panel';
 
 /**
  * The settings for how the grid should be rendered

@@ -10,9 +10,11 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 
-import { GridPanelData, GridSectionData, OrderedLayout } from '../types';
+import type { GridSectionData } from '../grid_section';
+import type { OrderedLayout } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { isGridDataEqual } from '../utils/equality_checks';
+import type { GridPanelData } from './types';
 
 export const useGridPanelState = ({
   panelId,

@@ -9,16 +9,18 @@
 
 import { cloneDeep } from 'lodash';
 
-import { GridPanelData } from '../grid_panel';
-import { GridSectionData } from '../grid_section';
-import { GridLayoutData, OrderedLayout } from '../types';
-import { getLayoutInOrder, getSectionsInOrder } from './resolve_grid_section';
+import type { GridPanelData } from '../grid_panel';
+import type { GridSectionData } from '../grid_section';
+import type { GridLayoutData, OrderedLayout } from '../types';
+import { getLayoutInOrder, getSectionsInOrder, resolveGridSection } from './resolve_grid_section';
 
 export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
   let gridLayout: GridLayoutData = {};
   let mainRow = 0;
   getSectionsInOrder(layout).forEach((section) => {
-    const panels: { [key: string]: GridPanelData & { type?: 'panel' } } = cloneDeep(section.panels);
+    const panels: { [key: string]: GridPanelData & { type?: 'panel' } } = cloneDeep(
+      resolveGridSection(section.panels)
+    );
     if (section.isMainSection) {
       const panelValues = Object.values(panels);
       const maxRow =
@@ -61,18 +63,32 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
       const startingRow = (layout[widgets[i].id] as GridPanelData).row;
       let maxRow = -Infinity;
       while (i < widgets.length && widgets[i].type === 'panel') {
-        const panel = cloneDeep(layout[widgets[i].id]) as GridPanelData;
+        const { type: drop, ...panel } = cloneDeep(layout[widgets[i].id]) as GridPanelData & {
+          type: 'panel';
+        }; // drop type
         panel.row -= startingRow;
         maxRow = Math.max(maxRow, panel.row + panel.height);
         orderedLayout[`main-${order}`].panels[panel.id] = panel;
         i++;
       }
+      orderedLayout[`main-${order}`].panels = resolveGridSection(
+        orderedLayout[`main-${order}`].panels
+      );
       i--;
       mainRow += maxRow;
     } else {
       const sectionId = id;
-      const { row, ...section } = cloneDeep(layout[sectionId]) as GridSectionData; // omit row
-      orderedLayout[sectionId] = { ...section, order, isMainSection: false };
+      const {
+        type: drop,
+        row,
+        ...section
+      } = cloneDeep(layout[sectionId]) as GridSectionData & { type: 'section' }; // drop type and row
+      orderedLayout[sectionId] = {
+        ...section,
+        order,
+        isMainSection: false,
+        panels: resolveGridSection(section.panels),
+      };
       mainRow++;
     }
     order++;

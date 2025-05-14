@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridPanelData } from '../grid_panel';
+import type { GridPanelData } from '../grid_panel';
 
 export interface GridSectionData {
   id: string;

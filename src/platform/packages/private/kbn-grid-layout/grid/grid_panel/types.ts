@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface GridCoordinate {
+interface GridCoordinate {
   column: number;
   row: number;
 }
-export interface GridRect extends GridCoordinate {
+interface GridRect extends GridCoordinate {
   width: number;
   height: number;
 }

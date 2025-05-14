@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CollapsibleSection } from '../../grid_section';
+import type { CollapsibleSection } from '../../grid_section';
 import { getGridLayoutStateManagerMock } from '../../test_utils/mocks';
 import { getSampleOrderedLayout } from '../../test_utils/sample_layout';
 import { getSectionsInOrder } from '../../utils/resolve_grid_section';

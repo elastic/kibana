@@ -8,7 +8,8 @@
  */
 import { cloneDeep } from 'lodash';
 
-import { GridSectionData, OrderedLayout } from '../types';
+import type { GridSectionData } from '../grid_section';
+import type { OrderedLayout } from '../types';
 import { getSectionsInOrder, resolveGridSection } from './resolve_grid_section';
 
 /**

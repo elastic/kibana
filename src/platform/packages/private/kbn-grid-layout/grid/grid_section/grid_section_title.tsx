@@ -22,7 +22,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { CollapsibleSection } from '../types';
+import type { CollapsibleSection } from './types';
 
 export const GridSectionTitle = React.memo(
   ({

@@ -9,7 +9,7 @@
 
 import { useCallback, useRef } from 'react';
 
-import { ActivePanelEvent, GridPanelData } from '../../types';
+import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
 import { useGridLayoutContext } from '../../use_grid_layout_context';
 import {
   getSensorPosition,
@@ -24,7 +24,7 @@ import {
   hasPanelInteractionStartedWithKeyboard,
   isLayoutInteractive,
 } from '../state_manager_selectors';
-import { UserInteractionEvent } from '../types';
+import type { UserInteractionEvent } from '../types';
 import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import { getNextKeyboardPositionForPanel } from './utils';
 /*

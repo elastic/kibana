@@ -8,7 +8,9 @@
  */
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { ActivePanelEvent, GridLayoutStateManager } from '../../types';
+
+import type { ActivePanelEvent } from '../../grid_panel';
+import type { GridLayoutStateManager } from '../../types';
 import { updateClientY } from '../keyboard_utils';
 import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
 import { KeyboardCode, type UserKeyboardEvent } from '../sensors/keyboard/types';

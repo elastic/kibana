@@ -10,12 +10,12 @@
 import deepEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
 
-import { GridSectionData } from '../../grid_section';
-import { GridLayoutStateManager, OrderedLayout } from '../../types';
+import type { GridSectionData } from '../../grid_section';
+import type { GridLayoutStateManager, OrderedLayout } from '../../types';
 import { getPanelKeysInOrder, getSectionsInOrder } from '../../utils/resolve_grid_section';
 import { resolveSections } from '../../utils/section_management';
 import { getSensorType } from '../sensors';
-import { PointerPosition, UserInteractionEvent } from '../types';
+import type { PointerPosition, UserInteractionEvent } from '../types';
 
 let startingLayout: OrderedLayout | undefined;
 

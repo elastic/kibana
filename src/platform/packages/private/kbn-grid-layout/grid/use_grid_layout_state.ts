@@ -24,7 +24,9 @@ import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfi
 
 import { useEuiTheme } from '@elastic/eui';
 
-import {
+import type { ActivePanelEvent } from './grid_panel';
+import type { ActiveSectionEvent } from './grid_section';
+import type {
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
@@ -36,8 +38,6 @@ import { getGridLayout, getOrderedLayout } from './utils/conversions';
 import { isLayoutEqual } from './utils/equality_checks';
 import { shouldShowMobileView } from './utils/mobile_view';
 import { resolveGridSection } from './utils/resolve_grid_section';
-import { ActivePanelEvent } from './grid_panel';
-import { ActiveSectionEvent } from './grid_section';
 
 export const useGridLayoutState = ({
   layout,
