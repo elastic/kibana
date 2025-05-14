@@ -55,6 +55,7 @@ export const startKeyboardInteraction = ({
       enableScroll();
     };
 
+    document.addEventListener('keydown', handleKeyPress);
     ev.target?.addEventListener('blur', handleBlur, { once: true });
   };
 
@@ -72,6 +73,7 @@ export const startKeyboardInteraction = ({
   };
 
   const handleCancel = (ev: UserKeyboardEvent) => {
+    document.removeEventListener('keydown', handleKeyPress);
     enableScroll();
     onCancel(ev);
   };
@@ -84,7 +86,5 @@ export const startKeyboardInteraction = ({
 
   if (isStartKey(e)) {
     handleStart(e);
-    document.addEventListener('keydown', handleKeyPress);
-    return;
   }
 };

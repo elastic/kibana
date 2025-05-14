@@ -99,9 +99,6 @@ export const useGridLayoutState = ({
 
   const gridLayoutStateManager = useMemo(() => {
     const orderedLayout = getOrderedLayout(layout);
-    Object.entries(orderedLayout).forEach(([sectionId, row]) => {
-      orderedLayout[sectionId].panels = resolveGridSection(row.panels);
-    });
     const gridLayout$ = new BehaviorSubject<OrderedLayout>(orderedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const activePanelEvent$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);

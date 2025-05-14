@@ -81,8 +81,8 @@ export const getNextKeyboardPositionForPanel = (
     },
   } = gridLayoutStateManager;
 
-  const { type } = activePanel || {};
-  const panelPosition = activePanel?.position || activePanel?.panelDiv.getBoundingClientRect();
+  const { type } = activePanel ?? {};
+  const panelPosition = activePanel?.position ?? activePanel?.panelDiv.getBoundingClientRect();
 
   if (!panelPosition) return handlePosition;
 

@@ -248,16 +248,12 @@ export const cancelAction = ({
   gridLayout$,
   panelRefs,
 }: GridLayoutStateManager) => {
-  /**
-   * start by setting the layout back to the starting one, **then** trigger the end of the event;
-   * note that the order is important here because of how we derive `layoutUpdated$`
-   */
+  const event = activePanelEvent$.getValue();
+  activePanelEvent$.next(undefined);
   if (startingLayout) {
     gridLayout$.next(startingLayout);
   }
 
-  const event = activePanelEvent$.getValue();
-  activePanelEvent$.next(undefined);
   if (!event) return;
   panelRefs.current[event.id]?.scrollIntoView({
     behavior: 'smooth',

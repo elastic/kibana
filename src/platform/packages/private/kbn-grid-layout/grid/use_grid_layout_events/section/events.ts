@@ -85,7 +85,7 @@ export const useGridLayoutSectionEvents = ({ sectionId }: { sectionId: string })
           onEnd,
         });
       } else if (isKeyboardEvent(e)) {
-        if (gridLayoutStateManager.activePanelEvent$.getValue()) return; // interaction has already happened, so don't start again
+        if (gridLayoutStateManager.activeSectionEvent$.getValue()) return; // interaction has already happened, so don't start again
         startKeyboardInteraction({
           e,
           onStart,
