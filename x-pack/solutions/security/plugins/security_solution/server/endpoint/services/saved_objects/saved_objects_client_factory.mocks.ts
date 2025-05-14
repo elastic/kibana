@@ -34,6 +34,28 @@ export const createSavedObjectsClientFactoryMock = (
   createInternalScopedSoClientSpy.mockReturnValue(soClient);
   createInternalUnscopedSoClientSpy.mockReturnValue(soClient);
 
+  // The SO client mock does not return promises for async methods, so we mock those here in order
+  // to avoid basic errors in tests (those where the methods are called, but the return value is
+  // never used/checked
+  [
+    'create',
+    'bulkCreate',
+    'checkConflicts',
+    'bulkUpdate',
+    'delete',
+    'bulkDelete',
+    'bulkGet',
+    'find',
+    'get',
+    'closePointInTime',
+    'createPointInTimeFinder',
+    'bulkResolve',
+    'resolve',
+    'update',
+  ].forEach((methodName) => {
+    (soClient[methodName as keyof typeof soClient] as jest.Mock).mockReturnValue(Promise.resolve());
+  });
+
   return {
     service,
     dependencies: { savedObjectsServiceStart, httpServiceSetup },

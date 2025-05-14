@@ -1127,6 +1127,7 @@ describe('Fleet integrations', () => {
 
     beforeEach(() => {
       endpointServicesMock = createMockEndpointAppContextService();
+      endpointServicesMock.getExceptionListsClient.mockReturnValue(exceptionListClient);
       removedPolicies = deletePackagePolicyMock();
       policyId = removedPolicies[0].id;
       fakeArtifact = {
@@ -1189,7 +1190,7 @@ describe('Fleet integrations', () => {
 
       expect(
         endpointServicesMock.savedObjects.createInternalScopedSoClient().delete
-      ).toBeCalledWith('policy-settings-protection-updates-note', 'id');
+      ).toBeCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
     });
   });
 });
