@@ -56,7 +56,12 @@ export const startKeyboardInteraction = ({
     };
 
     document.addEventListener('keydown', handleKeyPress);
-    ev.target?.addEventListener('blur', handleBlur, { once: true });
+    /**
+     * TODO: Blur is firing on re-render, so use `mousedown` instead
+     * This should be fixed by https://github.com/elastic/kibana/issues/220309
+     */
+    // ev.target?.addEventListener('blur', handleBlur, { once: true });
+    document.addEventListener('mousedown', handleBlur, { once: true });
   };
 
   const handleMove = (ev: UserKeyboardEvent) => {

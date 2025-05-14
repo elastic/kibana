@@ -60,13 +60,13 @@ export const useGridLayoutPanelEvents = ({
 
   const onBlur = useCallback(() => {
     const {
-      activePanelEvent$: { value: { id, type, targetSection } = {} },
+      activePanelEvent$: { value: { id, targetSection } = {} },
     } = gridLayoutStateManager;
     // make sure the user hasn't started another interaction in the meantime
-    if (id === panelId && sectionId === targetSection && type === interactionType) {
+    if (id === panelId && sectionId === targetSection) {
       commitAction(gridLayoutStateManager);
     }
-  }, [gridLayoutStateManager, panelId, sectionId, interactionType]);
+  }, [gridLayoutStateManager, panelId, sectionId]);
 
   const onCancel = useCallback(() => {
     cancelAction(gridLayoutStateManager);
