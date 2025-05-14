@@ -37,7 +37,6 @@ import type {
 import { getGridLayout, getOrderedLayout } from './utils/conversions';
 import { isLayoutEqual } from './utils/equality_checks';
 import { shouldShowMobileView } from './utils/mobile_view';
-import { resolveGridSection } from './utils/resolve_grid_section';
 
 export const useGridLayoutState = ({
   layout,
