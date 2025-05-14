@@ -89,7 +89,7 @@ export const moveAction = (
 
   const currentLayout = gridLayoutStateManager.gridLayout$.getValue();
 
-  // check with section ID is being targetted
+  // check which section ID is being targeted
   const activeRowRect = gridHeaderElements[
     currentActiveSectionEvent.id
   ]?.getBoundingClientRect() ?? {
@@ -130,7 +130,7 @@ export const moveAction = (
       gridLayoutStateManager.gridLayout$.next(orderedLayout);
     }
   } else {
-    // when a main section is being targetted, allow the header to be dropped between panels
+    // when a main section is being targeted, allow the header to be dropped between panels
     const { gutterSize, rowHeight } = runtimeSettings;
 
     const targetRow = (() => {
@@ -141,16 +141,16 @@ export const moveAction = (
       return Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
     })();
 
-    // rebuild layout by splittng the targetted sectionId into 2
+    // rebuild layout by splittng the targeted sectionId into 2
     let order = 0;
     const firstSectionOrder = currentLayout[targetSectionId].order;
-    const anotherLayout: OrderedLayout = {};
+    const splitLayout: OrderedLayout = {};
     getSectionsInOrder(currentLayout).forEach((section) => {
       const { id } = section;
       if (id === currentActiveSectionEvent.id) return;
 
       if (section.order < firstSectionOrder) {
-        anotherLayout[id] = section;
+        splitLayout[id] = section;
       } else if (section.order === firstSectionOrder) {
         // split this section into 2 - one main section above the dragged section, and one below
         const topSectionPanels: GridSectionData['panels'] = {};
@@ -169,7 +169,7 @@ export const moveAction = (
         });
 
         if (Object.keys(topSectionPanels).length > 0) {
-          anotherLayout[`main-${order}`] = {
+          splitLayout[`main-${order}`] = {
             id: `main-${order}`,
             isMainSection: true,
             order,
@@ -177,14 +177,14 @@ export const moveAction = (
           };
           order++;
         }
-        anotherLayout[currentActiveSectionEvent.id] = {
+        splitLayout[currentActiveSectionEvent.id] = {
           ...currentLayout[currentActiveSectionEvent.id],
           order,
         };
         order++;
 
         if (Object.keys(bottomSectionPanels).length > 0) {
-          anotherLayout[`main-${order}`] = {
+          splitLayout[`main-${order}`] = {
             id: `main-${order}`,
             isMainSection: true,
             order,
@@ -192,14 +192,14 @@ export const moveAction = (
           };
         }
       } else {
-        // push each other rows down
+        // push each other section down
         const sectionId = section.isMainSection ? `main-${order}` : id;
-        anotherLayout[sectionId] = { ...section, id: sectionId, order };
+        splitLayout[sectionId] = { ...section, id: sectionId, order };
       }
       order++;
     });
 
-    const finalLayout = resolveSections(anotherLayout);
+    const finalLayout = resolveSections(splitLayout);
     if (!deepEqual(currentLayout, finalLayout))
       gridLayoutStateManager.gridLayout$.next(finalLayout);
   }

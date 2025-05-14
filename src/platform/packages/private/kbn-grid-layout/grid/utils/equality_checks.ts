@@ -21,7 +21,7 @@ export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
 
 export const isOrderedSectionEqual = (a?: OrderedLayout[string], b?: OrderedLayout[string]) => {
   if (!a || !b) {
-    return a === b; // early return for if one grid row is undefined
+    return a === b; // early return for if one grid section is undefined
   }
   let isEqual =
     a.id === b.id &&
