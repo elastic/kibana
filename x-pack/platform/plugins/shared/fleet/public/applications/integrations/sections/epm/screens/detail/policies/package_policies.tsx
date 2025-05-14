@@ -26,6 +26,7 @@ import type {
   PackageInfo,
   PackagePolicy,
   NewPackagePolicyInput,
+  PackagePolicyPackage,
 } from '../../../../../types';
 import {
   useLink,
@@ -88,13 +89,17 @@ export const PackagePoliciesPage = ({
       index: number
     ) => {
       const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
-      const packageWithType = { package: { ...packagePolicy.package, type } };
+
+      const packagePolicyPackageWithType: PackagePolicyPackage = {
+        ...packagePolicy?.package,
+        type,
+      };
 
       return {
         agentPolicies,
         packagePolicy: {
           ...packagePolicy,
-          ...packageWithType,
+          package: packagePolicyPackageWithType,
           hasUpgrade,
         },
         rowIndex: index,
@@ -266,6 +271,9 @@ export const PackagePoliciesPage = ({
                       pageSizeOptions: agentlessPageSizeOptions,
                       setPagination: agentlessSetPagination,
                     }}
+                    isInputPackageDatasetUsedByMultiplePolicies={
+                      isInputPackageDatasetUsedByMultiplePolicies
+                    }
                   />
                 </EuiPanel>
               </EuiAccordion>
