@@ -7,6 +7,10 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
+import { getSoClientInfo } from '../..';
+
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 
 /**
@@ -26,12 +30,20 @@ export const calculateSavedObjectsNamespaces = async (
     return undefined;
   }
 
+  const soInfo = getSoClientInfo(soClient);
   const soClientNamespace = soClient.getCurrentNamespace();
   const spaceIds = Array.isArray(spaceId) ? spaceId : [spaceId];
 
   if (!soClientNamespace) {
     if (spaceIds.length > 0) {
       return spaceIds;
+    }
+
+    // Saved object client will always return `undefined` if the space it was initiated with is
+    // `default`. If the SO client has information indicating that is the case, then return `undefined`,
+    // thus allowing the client to operate on the `default` space
+    if (soInfo?.spaceId === DEFAULT_SPACE_ID) {
+      return undefined;
     }
 
     return ['*'];

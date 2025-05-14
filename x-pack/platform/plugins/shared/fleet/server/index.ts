@@ -7,6 +7,13 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
+export type { SavedObjectClientInfo } from './services/utils/saved_object_clients';
+export {
+  INTERNAL_SAVED_OBJECT_CLIENT_INFO,
+  setSoClientInfo,
+  getSoClientInfo,
+} from './services/utils/saved_object_clients';
+
 export { buildAgentStatusRuntimeField } from './services/agents/build_status_runtime_field';
 export type {
   AgentService,

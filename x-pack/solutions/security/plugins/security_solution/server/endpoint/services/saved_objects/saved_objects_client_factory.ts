@@ -13,6 +13,7 @@ import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { setSoClientInfo } from '@kbn/fleet-plugin/server';
 import { ManifestConstants } from '../../lib/artifacts';
 import { EndpointError } from '../../../../common/endpoint/errors';
 
@@ -90,6 +91,8 @@ export class SavedObjectsClientFactory {
       return this.toReadonly(soClient);
     }
 
+    setSoClientInfo(soClient, { isUnScoped: false, spaceId, meta: { isReadonly: readonly } });
+
     return soClient;
   }
 
@@ -112,6 +115,12 @@ export class SavedObjectsClientFactory {
     if (readonly) {
       return this.toReadonly(soClient);
     }
+
+    setSoClientInfo(soClient, {
+      isUnScoped: true,
+      spaceId: undefined,
+      meta: { isReadonly: readonly },
+    });
 
     return soClient;
   }

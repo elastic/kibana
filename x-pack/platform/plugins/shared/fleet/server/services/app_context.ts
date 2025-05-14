@@ -19,7 +19,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID, getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
@@ -49,6 +49,7 @@ import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../constants';
 import type { MessageSigningServiceInterface } from '..';
+import { setSoClientInfo } from '..';
 import type { FleetUsage } from '../collectors/register';
 
 import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
@@ -202,10 +203,17 @@ class AppContextService {
     }
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
-    return appContextService.getSavedObjects().getScopedClient(request, {
+    const soClient = appContextService.getSavedObjects().getScopedClient(request, {
       includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
+
+    setSoClientInfo(soClient, {
+      isUnScoped: false,
+      spaceId,
+    });
+
+    return soClient;
   }
 
   public getInternalUserSOClient(request?: KibanaRequest) {
@@ -222,10 +230,17 @@ class AppContextService {
     }
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
-    return appContextService.getSavedObjects().getScopedClient(request, {
+    const soClient = appContextService.getSavedObjects().getScopedClient(request, {
       includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
       excludedExtensions: [SECURITY_EXTENSION_ID],
     });
+
+    setSoClientInfo(soClient, {
+      isUnScoped: false,
+      spaceId: getSpaceIdFromPath(request.url?.pathname ?? '/').spaceId,
+    });
+
+    return soClient;
   }
 
   public getInternalUserSOClientWithoutSpaceExtension() {
@@ -240,10 +255,17 @@ class AppContextService {
     } as unknown as KibanaRequest;
 
     // soClient as kibana internal users, be careful on how you use it, security is not enabled
-    return appContextService.getSavedObjects().getScopedClient(fakeRequest, {
+    const soClient = appContextService.getSavedObjects().getScopedClient(fakeRequest, {
       excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
       includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
     });
+
+    setSoClientInfo(soClient, {
+      isUnScoped: true,
+      spaceId: undefined,
+    });
+
+    return soClient;
   }
 
   public getInternalUserESClient() {

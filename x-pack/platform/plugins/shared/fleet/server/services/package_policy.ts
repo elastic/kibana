@@ -2349,8 +2349,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     { perPage = 1000, kuery, spaceIds }: PackagePolicyClientFetchAllItemIdsOptions = {}
   ): Promise<AsyncIterable<string[]>> {
+    const logger = this.getLogger('fetchAllItemIds');
     const savedObjectType = await getPackagePolicySavedObjectType();
     const namespaces = await calculateSavedObjectsNamespaces(soClient, spaceIds);
+
+    logger.debug(
+      `fetching all items ids using soClient scoped to [${soClient.getCurrentNamespace()}] for SO namespaces [${namespaces?.join(
+        ', '
+      )}] and input kuery of: [${kuery}]`
+    );
 
     return createSoFindIterable<{}>({
       soClient,
