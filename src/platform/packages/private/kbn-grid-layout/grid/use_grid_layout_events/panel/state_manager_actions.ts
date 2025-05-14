@@ -181,8 +181,8 @@ export const moveAction = (
           nextLayout[sectionId].order += 1;
         }
       });
-      // add the new section, which will be renamed by `resolveSections` to `main-<order>`
-      targetSectionId = `main-new`;
+      // add the new section, which may be renamed by `resolveSections` to `main-<order>`
+      targetSectionId = targetSectionId ?? `main-new`;
       nextLayout[targetSectionId] = {
         id: targetSectionId,
         isMainSection: true,
@@ -211,7 +211,7 @@ export const moveAction = (
     nextLayout = resolveSections(nextLayout);
     if (!nextLayout[targetSectionId]) {
       // resolving the sections possibly removed + renamed sections, so reset target section
-      const { order } = targetSectionId === 'main-0' ? { order: -1 } : nextLayout[previousSection!];
+      const { order } = nextLayout[previousSection!];
       targetSectionId = `main-${order + 1}`;
     }
 
