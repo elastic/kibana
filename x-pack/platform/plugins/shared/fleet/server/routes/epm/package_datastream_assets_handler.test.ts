@@ -93,7 +93,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
         pkgName: 'test',
         pkgVersion: '1.0.0',
       },
-query: {
+      query: {
         packagePolicyId: 'policy1',
       },
     });

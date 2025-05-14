@@ -62,7 +62,7 @@ export const deletePackageDatastreamAssetsHandler: FleetRequestHandler<
 
   if (existingDataStreamsAreFromDifferentPackage) {
     logger.info(`Datastreams matching ${datasetName} exist on other packages and won't be removed`);
-    return response.ok({ body: { success: true } }); //?
+    return response.ok({ body: { success: true } }); // ?
   }
 
   logger.info(`Removing datastreams matching ${datasetName}`);
