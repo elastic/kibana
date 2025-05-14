@@ -464,19 +464,21 @@ export const DocViewerTable = ({
           alignItems="center"
           gutterSize="m"
         >
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
-                defaultMessage: 'Selected only',
-                description: 'Switch label to show only selected fields in the table',
-              })}
-              checked={showOnlySelectedFields ?? false}
-              disabled={isShowOnlySelectedFieldsDisabled}
-              onChange={onShowOnlySelectedFieldsChange}
-              compressed
-              data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
-            />
-          </EuiFlexItem>
+          {filter && (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
+                  defaultMessage: 'Selected only',
+                  description: 'Switch label to show only selected fields in the table',
+                })}
+                checked={showOnlySelectedFields ?? false}
+                disabled={isShowOnlySelectedFieldsDisabled}
+                onChange={onShowOnlySelectedFieldsChange}
+                compressed
+                data-test-subj="unifiedDocViewerShowOnlySelectedFieldsSwitch"
+              />
+            </EuiFlexItem>
+          )}
           {isEsqlMode && (
             <EuiFlexItem grow={false}>
               <EuiSwitch
