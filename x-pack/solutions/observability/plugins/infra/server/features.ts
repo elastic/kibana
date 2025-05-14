@@ -42,7 +42,7 @@ export const getMetricsAlertingFeatures = (
       METRICS_FEATURE_ID,
       ALERTING_FEATURE_ID,
       ...DEPRECATED_ALERTING_CONSUMERS,
-      // Add STACK_ALERTS only if in serverless and only for observability threshold and es query rules
+      // Add STACK_ALERTS only in serverless for observability threshold and ES query rules
       ...(isServerlessEnv &&
       (ruleTypeId === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID || ruleTypeId === ES_QUERY_ID)
         ? [AlertConsumers.STACK_ALERTS]
@@ -129,7 +129,7 @@ export const getLogsAlertingFeatures = (isServerlessEnv: boolean = false): Kiban
       LOGS_FEATURE_ID,
       ALERTING_FEATURE_ID,
       ...DEPRECATED_ALERTING_CONSUMERS,
-      // Only in serverless allow stackAlerts as a valid consumer for observability threshold and es query rules
+      // Add STACK_ALERTS only in serverless for observability threshold and ES query rules
       ...(isServerlessEnv &&
       (ruleTypeId === OBSERVABILITY_THRESHOLD_RULE_TYPE_ID || ruleTypeId === ES_QUERY_ID)
         ? [AlertConsumers.STACK_ALERTS]
