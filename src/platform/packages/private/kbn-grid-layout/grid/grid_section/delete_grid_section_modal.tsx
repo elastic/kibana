@@ -20,9 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { CollapsibleSection, MainSection } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { deleteSection, resolveSections } from '../utils/section_management';
+import { CollapsibleSection, MainSection } from './types';
 
 export const DeleteGridSectionModal = ({
   sectionId,
