@@ -8,6 +8,7 @@
 import React, { ReactElement } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TourCallout } from './tour_callout';
 
 export const ElasticLlmTourCallout = ({
@@ -28,17 +29,22 @@ export const ElasticLlmTourCallout = ({
         defaultMessage: 'New AI feature!',
       })}
       content={
-        <>
-          Elastic LLM is our new default, pre-configured LLM connector. It will incur{' '}
-          {/* TODO: Update link */}
-          <EuiLink href="#" target="_blank" rel="noopener noreferrer" external>
-            additional costs
-          </EuiLink>
-          . You can continue to use other LLM connectors as normal. {/* TODO: Update link */}
-          <EuiLink href="#" target="_blank" rel="noopener noreferrer" external>
-            Learn more
-          </EuiLink>
-        </>
+        <FormattedMessage
+          id="xpack.observabilityAiAssistant.tour.elasticLlmContent"
+          defaultMessage="Elastic LLM is our new default, pre-configured LLM connector (<costLink>additional costs incur</costLink>). You can continue to use other LLM connectors as normal. <learnMoreLink>Learn more</learnMoreLink>"
+          values={{
+            costLink: (...chunks: React.ReactNode[]) => (
+              <EuiLink href="#" target="_blank" rel="noopener noreferrer" external>
+                {chunks}
+              </EuiLink>
+            ),
+            learnMoreLink: (...chunks: React.ReactNode[]) => (
+              <EuiLink href="#" target="_blank" rel="noopener noreferrer" external>
+                {chunks}
+              </EuiLink>
+            ),
+          }}
+        />
       }
       step={1}
       stepsTotal={1}
