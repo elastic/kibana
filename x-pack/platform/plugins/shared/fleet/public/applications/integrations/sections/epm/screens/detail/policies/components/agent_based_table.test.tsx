@@ -9,6 +9,8 @@ import { screen, fireEvent, act } from '@testing-library/react';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../../../mock';
 
+import { getDatasetName } from '../package_policies';
+
 import { AgentBasedPackagePoliciesTable } from './agent_based_table';
 
 const mockPackagePolicies = [
@@ -54,9 +56,13 @@ const mockPagination = {
   setPagination: jest.fn(),
   pageSizeOptions: [10, 20, 50],
 };
+jest.mock('../package_policies');
+const mockedGetDatasetName = getDatasetName as jest.Mock<ReturnType<typeof getDatasetName>>;
 
 // FLAKY: https://github.com/elastic/kibana/issues/201837
 describe.skip('AgentBasedPackagePoliciesTable', () => {
+  mockedGetDatasetName.mockReturnValue('test');
+
   it('renders the table with package policies', async () => {
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(

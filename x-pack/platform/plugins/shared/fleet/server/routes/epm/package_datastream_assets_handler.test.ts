@@ -66,6 +66,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
   beforeEach(() => {
     context = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
     response = httpServerMock.createResponseFactory();
+    jest.resetAllMocks();
   });
   const testPackagePolicy = {
     id: 'test-package-policy',
@@ -101,7 +102,7 @@ describe('deletePackageDatastreamAssetsHandler', () => {
 
     mockedGetDatasetName.mockReturnValue('custom');
     mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
-      existingDataStreams: {},
+      existingDataStreams: [],
       dataStream: {},
     } as any);
     mockedCheckExistingDataStreamsAreFromDifferentPackage.mockReturnValue(false);
@@ -182,6 +183,66 @@ describe('deletePackageDatastreamAssetsHandler', () => {
       new FleetNotFoundError('Requested package test-1.0.0 is not an input package')
     );
 
+    await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('should throw not found error if package policy id does not exist', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+      type: 'input',
+      status: 'installed',
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'test',
+        pkgVersion: '1.0.0',
+      },
+      query: {
+        packagePolicyId: 'idontexist',
+      },
+    });
+    packagePolicyServiceMock.get.mockRejectedValueOnce(
+      new Error('Saved object [ingest-package-policies/idontexist] not found')
+    );
+    await expect(
+      deletePackageDatastreamAssetsHandler(context, request, response)
+    ).rejects.toThrowError('Saved object [ingest-package-policies/idontexist] not found');
+    await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
+  });
+
+  it('should throw error if the datastreams also exist on different packages', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'logs',
+      version: '1.0.0',
+      type: 'input',
+      status: 'installed',
+    } as any);
+    const request = httpServerMock.createKibanaRequest({
+      params: {
+        pkgName: 'test',
+        pkgVersion: '1.0.0',
+      },
+      query: {
+        packagePolicyId: 'policy1',
+      },
+    });
+    packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
+
+    mockedGetDatasetName.mockReturnValue('custom');
+    mockedFindDataStreamsFromDifferentPackages.mockResolvedValue({
+      existingDataStreams: [
+        { name: 'datastream1', _meta: { package: { name: 'integration-test' } } },
+      ],
+      dataStream: {},
+    } as any);
+    mockedCheckExistingDataStreamsAreFromDifferentPackage.mockReturnValue(true);
+
+    await expect(
+      deletePackageDatastreamAssetsHandler(context, request, response)
+    ).rejects.toThrowError(
+      `Datastreams matching custom exist on other packages and won't be removed`
+    );
     await expect(mockedRemoveAssetsForInputPackagePolicy).not.toHaveBeenCalled();
   });
 });

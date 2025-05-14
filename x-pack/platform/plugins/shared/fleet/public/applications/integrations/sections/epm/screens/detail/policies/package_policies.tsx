@@ -87,20 +87,16 @@ export const PackagePoliciesPage = ({
         packagePolicy,
       }: { agentPolicies: AgentPolicy[]; packagePolicy: PackagePolicy },
       index: number
-    ) => {
-      const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
-
-      const packagePolicyPackageWithType: PackagePolicyPackage = {
-        ...packagePolicy?.package,
-        type,
-      };
-
+    ): { agentPolicies: AgentPolicy[]; packagePolicy: InMemoryPackagePolicy; rowIndex: number } => {
       return {
         agentPolicies,
         packagePolicy: {
           ...packagePolicy,
-          package: packagePolicyPackageWithType,
-          hasUpgrade,
+          package: {
+            ...packagePolicy?.package,
+            type,
+          },
+          hasUpgrade: isPackagePolicyUpgradable(packagePolicy),
         },
         rowIndex: index,
       };
@@ -137,9 +133,10 @@ export const PackagePoliciesPage = ({
     }`,
   });
   useEffect(() => {
-    setAgentBasedPackageAndAgentPolicies(
-      !agentBasedData?.items ? [] : agentBasedData.items.map(mapPoliciesData)
-    );
+    const mappedPoliciesData = !agentBasedData?.items
+      ? []
+      : agentBasedData.items.map(mapPoliciesData);
+    setAgentBasedPackageAndAgentPolicies(mappedPoliciesData);
   }, [agentBasedData, mapPoliciesData]);
 
   const isInputPackageDatasetUsedByMultiplePolicies = useCallback(

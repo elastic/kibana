@@ -27,7 +27,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   defaultIsOpen?: boolean;
   upgradePackagePolicyHref?: string;
   from?: 'fleet-policy-list' | undefined;
-  isInputPackageDatasetUsedByMultiplePolicies: (datasetName: string) => boolean;
+  isInputPackageDatasetUsedByMultiplePolicies?: (datasetName: string) => boolean;
 }> = ({
   agentPolicies,
   packagePolicy,
@@ -156,6 +156,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         packagePolicyPackage={packagePolicy.package}
         shouldDeleteDatastreamAssets={
           packagePolicy.package?.type === 'input' &&
+          isInputPackageDatasetUsedByMultiplePolicies &&
           !isInputPackageDatasetUsedByMultiplePolicies(datasetName)
         }
       >

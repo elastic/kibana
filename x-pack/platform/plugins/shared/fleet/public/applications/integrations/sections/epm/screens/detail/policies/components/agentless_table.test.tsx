@@ -11,6 +11,8 @@ import { AGENTS_PREFIX } from '../../../../../../../../../common/constants';
 import { sendGetAgents } from '../../../../../../hooks';
 import { createIntegrationsTestRendererMock } from '../../../../../../../../mock';
 
+import { getDatasetName } from '../package_policies';
+
 import { AgentlessPackagePoliciesTable } from './agentless_table';
 
 jest.mock('../../../../../../hooks', () => ({
@@ -19,8 +21,11 @@ jest.mock('../../../../../../hooks', () => ({
   sendGetAgents: jest.fn(),
 }));
 
+jest.mock('../package_policies');
+
 describe('AgentlessPackagePoliciesTable', () => {
   const mockSendGetAgents = sendGetAgents as jest.MockedFunction<typeof sendGetAgents>;
+  const mockedGetDatasetName = getDatasetName as jest.Mock<ReturnType<typeof getDatasetName>>;
 
   beforeEach(() => {
     mockSendGetAgents.mockResolvedValue({
@@ -43,6 +48,7 @@ describe('AgentlessPackagePoliciesTable', () => {
       },
       error: null,
     });
+    mockedGetDatasetName.mockReturnValue('test');
   });
 
   afterEach(() => {
@@ -92,6 +98,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     ],
     packagePoliciesTotal: 1,
     refreshPackagePolicies: jest.fn(),
+    isInputPackageDatasetUsedByMultiplePolicies: jest.fn(),
     pagination: {
       pagination: { currentPage: 1, pageSize: 10 },
       setPagination: jest.fn(),

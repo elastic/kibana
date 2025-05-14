@@ -14,6 +14,8 @@ import { createIntegrationsTestRendererMock } from '../mock';
 
 import { useMultipleAgentPolicies, useLink } from '../hooks';
 
+import { getDatasetName } from '../applications/integrations/sections/epm/screens/detail/policies/package_policies';
+
 import { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 
 jest.mock('../hooks', () => {
@@ -35,6 +37,7 @@ jest.mock('../hooks', () => {
     }),
   };
 });
+jest.mock('../applications/integrations/sections/epm/screens/detail/policies/package_policies');
 
 const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
   typeof useMultipleAgentPolicies
@@ -114,6 +117,8 @@ function createMockPackagePolicy(
 describe('PackagePolicyActionsMenu', () => {
   beforeAll(() => {
     useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
+    const mockedGetDatasetName = getDatasetName as jest.Mock<ReturnType<typeof getDatasetName>>;
+    mockedGetDatasetName.mockReturnValue(undefined as any);
   });
 
   it('Should not have upgrade button if package does not have upgrade', async () => {
