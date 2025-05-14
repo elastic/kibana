@@ -55,6 +55,7 @@ async function populateMissingSemanticTextField({
       await esClient.asInternalUser.updateByQuery({
         index: resourceNames.writeIndexAlias.kb,
         requests_per_second: 100,
+        refresh: true,
         script: {
           source: `ctx._source.semantic_text = ctx._source.text`,
           lang: 'painless',
