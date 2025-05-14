@@ -9,6 +9,7 @@
 
 import { GridLayoutData, GridSectionData } from '@kbn/grid-layout';
 import { MockedDashboardPanelMap, MockedDashboardRowMap } from './types';
+import { cloneDeep } from 'lodash';
 
 export const gridLayoutToDashboardPanelMap = (
   panelState: MockedDashboardPanelMap,

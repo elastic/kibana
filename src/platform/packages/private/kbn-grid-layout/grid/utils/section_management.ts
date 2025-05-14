@@ -52,9 +52,13 @@ export const deleteSection = (layout: OrderedLayout, sectionId: string) => {
 export const resolveSections = (layout: OrderedLayout) => {
   const sortedSections = getSectionsInOrder(layout);
   const resolvedLayout: OrderedLayout = {};
-  let mainSectionCount = 0;
+  let order = 0;
   for (let i = 0; i < sortedSections.length; i++) {
     const firstSection = sortedSections[i];
+    if (firstSection.isMainSection && Object.keys(firstSection.panels).length === 0) {
+      // do not include empty main sections
+      continue;
+    }
     if (firstSection.isMainSection) {
       let combinedPanels: GridSectionData['panels'] = { ...firstSection.panels };
       while (i + 1 < sortedSections.length) {
@@ -63,16 +67,16 @@ export const resolveSections = (layout: OrderedLayout) => {
         combinedPanels = combinePanels(secondSection.panels, combinedPanels);
         i++;
       }
-      resolvedLayout[`main-${mainSectionCount}`] = {
+      resolvedLayout[`main-${order}`] = {
         ...firstSection,
-        order: i,
+        order,
         panels: combinedPanels,
-        id: `main-${mainSectionCount}`,
+        id: `main-${order}`,
       };
-      mainSectionCount++;
     } else {
-      resolvedLayout[firstSection.id] = { ...firstSection, order: i };
+      resolvedLayout[firstSection.id] = { ...firstSection, order };
     }
+    order++;
   }
   return resolvedLayout;
 };

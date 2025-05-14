@@ -43,17 +43,15 @@ export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
 };
 
 export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
-  const widgets = getLayoutInOrder(layout);
+  const widgets = cloneDeep(getLayoutInOrder(layout));
   const orderedLayout: OrderedLayout = {};
-
   let order = 0;
-  let sectionCount = 0;
   let mainRow = 0;
   for (let i = 0; i < widgets.length; i++) {
     const { type, id } = widgets[i];
     if (type === 'panel') {
-      orderedLayout[`main-${sectionCount}`] = {
-        id: `main-${sectionCount}`,
+      orderedLayout[`main-${order}`] = {
+        id: `main-${order}`,
         panels: {},
         order,
         isMainSection: true,
@@ -61,23 +59,21 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
       const startingRow = (layout[widgets[i].id] as GridPanelData).row;
       let maxRow = -Infinity;
       while (i < widgets.length && widgets[i].type === 'panel') {
-        const panel = layout[widgets[i].id] as GridPanelData;
+        const panel = cloneDeep(layout[widgets[i].id]) as GridPanelData;
         panel.row -= startingRow;
         maxRow = Math.max(maxRow, panel.row + panel.height);
-        orderedLayout[`main-${sectionCount}`].panels[panel.id] = panel;
+        orderedLayout[`main-${order}`].panels[panel.id] = panel;
         i++;
       }
       i--;
       mainRow += maxRow;
-      order++;
     } else {
       const sectionId = id;
-      const { row, ...section } = layout[sectionId] as GridSectionData; // omit row
+      const { row, ...section } = cloneDeep(layout[sectionId]) as GridSectionData; // omit row
       orderedLayout[sectionId] = { ...section, order, isMainSection: false };
       mainRow++;
-      order++;
-      sectionCount++;
     }
+    order++;
   }
 
   return orderedLayout;

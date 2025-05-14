@@ -140,7 +140,6 @@ export const moveAction = (
 
     // rebuild layout by splittng the targetted sectionId into 2
     let order = 0;
-    let mainSectionCount = 0;
     const firstSectionOrder = currentLayout[targetSectionId].order;
     const anotherLayout: OrderedLayout = {};
     getSectionsInOrder(currentLayout).forEach((section) => {
@@ -167,14 +166,13 @@ export const moveAction = (
         });
 
         if (Object.keys(topSectionPanels).length > 0) {
-          anotherLayout[`main-${mainSectionCount}`] = {
-            id: `main-${mainSectionCount}`,
+          anotherLayout[`main-${order}`] = {
+            id: `main-${order}`,
             isMainSection: true,
             order,
             panels: topSectionPanels,
           };
           order++;
-          mainSectionCount++;
         }
         anotherLayout[currentActiveRowEvent.id] = {
           ...currentLayout[currentActiveRowEvent.id],
@@ -183,8 +181,8 @@ export const moveAction = (
         order++;
 
         if (Object.keys(bottomSectionPanels).length > 0) {
-          anotherLayout[`main-${mainSectionCount}`] = {
-            id: `main-${mainSectionCount}`,
+          anotherLayout[`main-${order}`] = {
+            id: `main-${order}`,
             isMainSection: true,
             order,
             panels: bottomSectionPanels,
@@ -192,11 +190,10 @@ export const moveAction = (
         }
       } else {
         // push each other rows down
-        const sectionId = section.isMainSection ? `main-${mainSectionCount}` : id;
+        const sectionId = section.isMainSection ? `main-${order}` : id;
         anotherLayout[sectionId] = { ...section, id: sectionId, order };
       }
       order++;
-      if (section.isMainSection) mainSectionCount++;
     });
 
     const finalLayout = resolveSections(anotherLayout);

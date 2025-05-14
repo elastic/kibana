@@ -125,7 +125,7 @@ describe('row state manager actions', () => {
         const newRowOrder = getSectionsInOrder(gridLayoutStateManager.gridLayout$.getValue()).map(
           ({ id }) => id
         );
-        expect(newRowOrder).toEqual(['main-0', 'second', 'main-1', 'third']);
+        expect(newRowOrder).toEqual(['main-0', 'second', 'main-2', 'third']);
         expect(gridLayoutStateManager.gridLayout$.getValue()).toEqual({
           'main-0': expect.objectContaining({
             order: 0,
@@ -141,7 +141,7 @@ describe('row state manager actions', () => {
           second: expect.objectContaining({
             order: 1,
           }),
-          'main-1': expect.objectContaining({
+          'main-2': expect.objectContaining({
             order: 2,
             panels: {
               panel2: expect.objectContaining({

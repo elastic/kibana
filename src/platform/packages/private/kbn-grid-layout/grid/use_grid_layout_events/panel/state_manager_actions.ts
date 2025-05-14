@@ -23,6 +23,7 @@ import { resolveGridSection } from '../../utils/resolve_grid_section';
 import { getSensorType, isKeyboardEvent } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
+import { resolveSections } from '../../utils/section_management';
 
 let startingLayout: OrderedLayout | undefined;
 
@@ -90,16 +91,15 @@ export const moveAction = (
   // find the grid that the preview rect is over
   const lastSectionId = activePanel.targetSection;
   let previousSection;
-  const targetSectionId = (() => {
+  let targetSectionId = (() => {
     // TODO: temporary blocking of moving with keyboard between sections till we can fix the bug with commiting the action
     if (isResize || isKeyboardEvent(e)) return lastSectionId;
-
-    const previewBottom = previewRect.top + rowHeight;
+    // early return - target the first "main" section if the panel is dragged above the layout element
     if (previewRect.top < (gridLayoutElement?.getBoundingClientRect().top ?? 0)) {
       return `main-0`;
     }
 
-    /** TODO: we can probably just use section headers + the top of the panel for this */
+    const previewBottom = previewRect.top + rowHeight;
     let highestOverlap = -Infinity;
     let highestOverlapSectionId = '';
     Object.keys(currentLayout).forEach((sectionId) => {
@@ -120,9 +120,8 @@ export const moveAction = (
     const section = currentLayout[highestOverlapSectionId];
     if (!section.isMainSection && section.isCollapsed) {
       previousSection = highestOverlapSectionId;
-      // skip past collapsed section into next "main" section
-      const previousOrder = currentLayout[highestOverlapSectionId].order;
-      highestOverlapSectionId = `main-${previousOrder}`;
+      // skip past collapsed section and create a new main section (this will be renamed)
+      highestOverlapSectionId = `main-new`;
     }
     return highestOverlapSectionId;
   })();
@@ -173,7 +172,8 @@ export const moveAction = (
   ) {
     lastRequestedPanelPosition.current = { ...requestedPanelData };
 
-    const nextLayout = cloneDeep(currentLayout) ?? {};
+    let nextLayout = cloneDeep(currentLayout) ?? {};
+
     if (!nextLayout[targetSectionId]) {
       // section doesn't exist, so add it
       const { order: nextOrder } =
@@ -208,22 +208,16 @@ export const moveAction = (
       const originGrid = nextLayout[lastSectionId] as unknown as GridSectionData;
       const resolvedOriginGrid = resolveGridSection(originGrid.panels);
       (nextLayout[lastSectionId] as unknown as GridSectionData).panels = resolvedOriginGrid;
-
-      if (
-        nextLayout[lastSectionId].isMainSection &&
-        !Object.keys(nextLayout[lastSectionId].panels).length
-      ) {
-        // delete empty main section rows
-        const { order: prevOrder } = nextLayout[lastSectionId];
-        delete nextLayout[lastSectionId];
-        // push other sections up
-        Object.keys(nextLayout).forEach((sectionId) => {
-          if (nextLayout[sectionId].order > prevOrder) {
-            nextLayout[sectionId].order -= 1;
-          }
-        });
-      }
     }
+
+    // resolve sections to remove empty main sections + rename `main-new` (if it exists) + ensure orders are valid
+    nextLayout = resolveSections(nextLayout);
+    if (!nextLayout[targetSectionId]) {
+      // resolving the sections possibly removed + renamed sections, so reset target section
+      const { order } = nextLayout[previousSection!];
+      targetSectionId = `main-${order + 1}`;
+    }
+
     if (currentLayout && !isOrderedLayoutEqual(currentLayout, nextLayout)) {
       gridLayout$.next(nextLayout);
     }
