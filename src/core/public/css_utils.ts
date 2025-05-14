@@ -113,6 +113,6 @@ export const useMemoizedStyles = (styleMap: StyleMap) => {
       acc[key] = typeof value === 'function' ? value(euiThemeContext) : value;
       return acc;
     }, {});
-  }, [euiThemeContext]);
+  }, [euiThemeContext, styleMap]);
   return outputStyles;
 };
