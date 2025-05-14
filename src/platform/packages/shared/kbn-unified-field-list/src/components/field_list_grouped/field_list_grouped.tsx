@@ -8,7 +8,7 @@
  */
 
 import { partition, throttle } from 'lodash';
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
@@ -62,7 +62,8 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
     ([, { showInAccordion }]) => showInAccordion
   );
   const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
-  const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
+  const [scrollContainer, setScrollContainer] = useState<Element | undefined | null>(undefined);
+  const lastScrollContainerPositionRef = useRef<number>(0);
   const [storedInitiallyOpenSections, storeInitiallyOpenSections] =
     useLocalStorage<InitiallyOpenSections>(
       `${localStorageKeyPrefix ? localStorageKeyPrefix + '.' : ''}${LOCAL_STORAGE_KEY_SECTIONS}`,
@@ -86,15 +87,24 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
     // Reset the scroll if we have made material changes to the field list
     if (scrollContainer && scrollToTopResetCounter) {
       scrollContainer.scrollTop = 0;
+      lastScrollContainerPositionRef.current = 0;
       setPageSize(PAGINATION_SIZE);
     }
   }, [scrollToTopResetCounter, scrollContainer]);
 
   const lazyScroll = useCallback(() => {
     if (scrollContainer) {
+      if (scrollContainer.scrollTop === lastScrollContainerPositionRef.current) {
+        // scroll top was restored to the last position
+        return;
+      }
+
       const nearBottom =
         scrollContainer.scrollTop + scrollContainer.clientHeight >
         scrollContainer.scrollHeight * 0.9;
+
+      lastScrollContainerPositionRef.current = scrollContainer.scrollTop;
+
       if (nearBottom) {
         setPageSize(
           Math.max(
@@ -130,6 +140,16 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       className="unifiedFieldList__fieldListGrouped"
       data-test-subj={`${dataTestSubject}FieldGroups`}
       ref={(el) => {
+        if (el && !el.scrollTop && lastScrollContainerPositionRef.current) {
+          // Restore scroll position after rerendering via a portal
+          setTimeout(() => {
+            el.scrollTo?.({
+              top: lastScrollContainerPositionRef.current,
+              behavior: 'instant',
+            });
+          }, 0);
+        }
+
         if (el && !el.dataset.dynamicScroll) {
           el.dataset.dynamicScroll = 'true';
           setScrollContainer(el);
