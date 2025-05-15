@@ -8,6 +8,8 @@
 /* eslint-disable max-classes-per-file */
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
+import { isObjectLike } from 'lodash';
+
 import { FleetError } from '../../common/errors';
 
 import { isESClientError } from './utils';
@@ -22,6 +24,24 @@ export {
   OutputInvalidError as OutputInvalidError,
   AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
 } from '../../common/errors';
+
+export class FleetErrorWithStatusCode<TMeta = unknown> extends FleetError<TMeta> {
+  public readonly statusCode: number | undefined;
+
+  constructor(message?: string, statusCode?: number, public readonly meta?: TMeta) {
+    super(message, meta);
+
+    if (statusCode) {
+      this.statusCode = statusCode;
+    } else if (isObjectLike(meta)) {
+      const metaStatusCode = (meta as { statusCode?: unknown }).statusCode;
+
+      if (typeof metaStatusCode === 'number') {
+        this.statusCode = metaStatusCode;
+      }
+    }
+  }
+}
 
 export class RegistryError extends FleetError {}
 export class RegistryConnectionError extends RegistryError {}

@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import { FleetError } from '../../common';
+import { FleetErrorWithStatusCode } from '.';
 
 export function isESClientError(error: unknown): error is errors.ResponseError {
   return error instanceof errors.ResponseError;
@@ -17,8 +17,11 @@ export function isElasticsearchVersionConflictError(error: Error): boolean {
   return isESClientError(error) && error.meta.statusCode === 409;
 }
 
-export const wrapWithFleetErrorIfNeeded = (err: Error, messagePrefix?: string): FleetError => {
-  if (err instanceof FleetError) {
+export const wrapWithFleetErrorIfNeeded = (
+  err: Error,
+  messagePrefix?: string
+): FleetErrorWithStatusCode => {
+  if (err instanceof FleetErrorWithStatusCode) {
     return err;
   }
 
@@ -28,7 +31,7 @@ export const wrapWithFleetErrorIfNeeded = (err: Error, messagePrefix?: string): 
     message += ` (Status Code: [${err.statusCode}], body: [${JSON.stringify(err.body)}])`;
   }
 
-  return new FleetError(message, err);
+  return new FleetErrorWithStatusCode(message, undefined, err);
 };
 
 interface CatchAndWrapError {
