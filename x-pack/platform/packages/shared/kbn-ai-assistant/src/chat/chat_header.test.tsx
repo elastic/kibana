@@ -16,6 +16,7 @@ jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
     <div data-test-subj="elastic-llm-tour">{children}</div>
   )),
   hasElasticManagedLlmConnector: jest.fn(),
+  useElasticLlmTourCalloutDismissed: jest.fn().mockReturnValue([false, jest.fn()]),
 }));
 
 jest.mock('./chat_actions_menu', () => ({
