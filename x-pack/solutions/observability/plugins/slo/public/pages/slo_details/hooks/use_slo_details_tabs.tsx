@@ -15,6 +15,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import {
   ALERTS_TAB_ID,
   HISTORY_TAB_ID,
+  DEFINITION_TAB_ID,
   OVERVIEW_TAB_ID,
   SloTabId,
 } from '../components/slo_details';
@@ -58,6 +59,28 @@ export const useSloDetailsTabs = ({
                   slo.instanceId,
                   slo.remote?.remoteName,
                   OVERVIEW_TAB_ID
+                )}`
+              : undefined,
+          }),
+    },
+    {
+      id: DEFINITION_TAB_ID,
+      label: i18n.translate('xpack.slo.sloDetails.tab.definitionLabel', {
+        defaultMessage: 'Definition',
+      }),
+      'data-test-subj': 'definitionTab',
+      isSelected: selectedTabId === DEFINITION_TAB_ID,
+      ...(setSelectedTabId
+        ? {
+            onClick: () => setSelectedTabId(DEFINITION_TAB_ID),
+          }
+        : {
+            href: slo
+              ? `${basePath.get()}${paths.sloDetails(
+                  slo.id,
+                  slo.instanceId,
+                  slo.remote?.remoteName,
+                  DEFINITION_TAB_ID
                 )}`
               : undefined,
           }),

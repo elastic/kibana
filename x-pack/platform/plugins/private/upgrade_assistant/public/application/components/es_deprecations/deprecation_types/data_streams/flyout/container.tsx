@@ -27,7 +27,7 @@ import {
 
 import { MigrationStateContext } from '../context';
 
-import { DeprecationBadge } from '../../../../shared';
+import { DeprecationBadge, WarningLevels } from '../../../../shared';
 import {
   UIM_DATA_STREAM_REINDEX_START_CLICK,
   UIM_DATA_STREAM_REINDEX_STOP_CLICK,
@@ -271,7 +271,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
       {flyoutStep !== 'initializing' && (
         <EuiFlyoutHeader hasBorder>
           <DeprecationBadge
-            level={deprecation.level}
+            level={deprecation.level as WarningLevels}
             isResolved={status === DataStreamMigrationStatus.completed}
           />
           <EuiSpacer size="s" />

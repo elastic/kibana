@@ -100,7 +100,11 @@ export const AutoDetectPanel: FunctionComponent = () => {
                   {command}
                 </EuiCodeBlock>
                 <EuiSpacer />
-                <CopyToClipboardButton textToCopy={command} fill={status === 'notStarted'} />
+                <CopyToClipboardButton
+                  textToCopy={command}
+                  fill={status === 'notStarted'}
+                  data-onboarding-id={data?.onboardingFlow.id}
+                />
               </>
             ) : (
               <EuiSkeletonText lines={6} />

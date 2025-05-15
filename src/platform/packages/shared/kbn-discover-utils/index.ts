@@ -33,6 +33,7 @@ export {
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
+  convertValueToString,
   createLogsContextService,
   createDegradedDocsControl,
   createStacktraceControl,

@@ -393,10 +393,12 @@ export class Plugin implements InfraClientPluginClass {
           embeddable.addNewPanel<LogStreamSerializedState>(
             {
               panelType: LOG_STREAM_EMBEDDABLE,
-              initialState: {
-                title: i18n.translate('xpack.infra.logStreamEmbeddable.title', {
-                  defaultMessage: 'Log stream',
-                }),
+              serializedState: {
+                rawState: {
+                  title: i18n.translate('xpack.infra.logStreamEmbeddable.title', {
+                    defaultMessage: 'Log stream',
+                  }),
+                },
               },
             },
             true

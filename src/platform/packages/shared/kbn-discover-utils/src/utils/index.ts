@@ -21,5 +21,6 @@ export * from './nested_fields';
 export * from './get_field_value';
 export * from './calc_field_counts';
 export * from './get_visible_columns';
+export * from './convert_value_to_string';
 export { isLegacyTableEnabled } from './is_legacy_table_enabled';
 export { DiscoverFlyouts, dismissAllFlyoutsExceptFor, dismissFlyouts } from './dismiss_flyouts';

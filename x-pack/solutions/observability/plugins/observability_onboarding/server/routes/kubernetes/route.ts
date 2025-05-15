@@ -31,7 +31,14 @@ export interface HasKubernetesDataRouteResponse {
 const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/kubernetes/flow',
   params: t.type({
-    body: t.type({ pkgName: t.union([t.literal('kubernetes'), t.literal('kubernetes_otel')]) }),
+    body: t.intersection([
+      t.type({
+        pkgName: t.union([t.literal('kubernetes'), t.literal('kubernetes_otel')]),
+      }),
+      t.partial({
+        agentVersionPattern: t.string,
+      }),
+    ]),
   }),
   options: { tags: [] },
   async handler({
@@ -59,7 +66,7 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
 
     const [{ encoded: apiKeyEncoded }, elasticAgentVersionInfo] = await Promise.all([
       createShipperApiKey(client.asCurrentUser, `${params.body.pkgName}_onboarding`, true),
-      getAgentVersionInfo(fleetPluginStart, kibanaVersion),
+      getAgentVersionInfo(fleetPluginStart, kibanaVersion, params.body.agentVersionPattern),
       // System package is always required
       packageClient.ensureInstalledPackage({ pkgName: 'system' }),
       // Kubernetes package is required for both classic kubernetes and otel
