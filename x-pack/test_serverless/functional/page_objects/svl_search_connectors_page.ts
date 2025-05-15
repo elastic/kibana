@@ -40,6 +40,7 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.setValue('serverlessSearchEditDescriptionFieldText', description);
         await testSubjects.click('serverlessSearchSaveDescriptionButton');
         await testSubjects.exists('serverlessSearchConnectorDescription');
+
         expect(await testSubjects.getVisibleText('serverlessSearchConnectorDescription')).to.be(
           description
         );

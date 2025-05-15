@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { testHasEmbeddedConsole } from '../embedded_console';
 
@@ -53,6 +54,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'test description'
         );
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.editName(
+          TEST_CONNECTOR_NAME
+        );
+        const connectorDetails =
+          await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.getConnectorDetails();
+        const connectorId = connectorDetails.match(/connector_id: (.*)/)?.[1];
+        await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.expectConnectorIdToMatchUrl(
+          connectorId!
+        );
+
+        expect(await testSubjects.getVisibleText('serverlessSearchConnectorName')).to.be(
           TEST_CONNECTOR_NAME
         );
       });
