@@ -26,6 +26,7 @@ import type {
   PackageInfo,
   PackagePolicy,
   NewPackagePolicyInput,
+  PackagePolicyPackage,
 } from '../../../../../types';
 import {
   useLink,
@@ -92,7 +93,7 @@ export const PackagePoliciesPage = ({
         packagePolicy: {
           ...packagePolicy,
           package: {
-            ...packagePolicy?.package,
+            ...(packagePolicy?.package as PackagePolicyPackage),
             type,
           },
           hasUpgrade: isPackagePolicyUpgradable(packagePolicy),
