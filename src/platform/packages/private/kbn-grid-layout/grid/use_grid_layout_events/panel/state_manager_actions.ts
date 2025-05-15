@@ -25,6 +25,7 @@ let startingLayout: OrderedLayout | undefined;
 
 export const startAction = (
   e: UserInteractionEvent,
+  type: ActivePanelEvent['type'],
   gridLayoutStateManager: GridLayoutStateManager,
   sectionId: string,
   panelId: string
@@ -35,7 +36,7 @@ export const startAction = (
   startingLayout = gridLayoutStateManager.gridLayout$.getValue();
   const panelRect = panelRef.getBoundingClientRect();
   gridLayoutStateManager.activePanelEvent$.next({
-    type: 'click',
+    type,
     id: panelId,
     panelDiv: panelRef,
     targetSection: sectionId,
@@ -47,7 +48,6 @@ export const startAction = (
 
 export const moveAction = (
   e: UserInteractionEvent,
-  type: Omit<ActivePanelEvent['type'], 'click'>,
   gridLayoutStateManager: GridLayoutContextType['gridLayoutStateManager'],
   pointerPixel: PointerPosition,
   lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>
@@ -223,7 +223,6 @@ export const moveAction = (
   // re-render the active panel
   activePanelEvent$.next({
     ...activePanel,
-    type: type as ActivePanelEvent['type'],
     id: activePanel.id,
     position: previewRect,
     targetSection: targetSectionId!,

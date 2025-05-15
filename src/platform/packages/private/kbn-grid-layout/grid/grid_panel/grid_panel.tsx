@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip, tap } from 'rxjs';
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -65,7 +65,12 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
   useEffect(() => {
     /** Update the styles of the panel via a subscription to prevent re-renders */
     const activePanelStyleSubscription = combineLatest([
-      gridLayoutStateManager.activePanelEvent$,
+      gridLayoutStateManager.activePanelEvent$.pipe(
+        // filter out the first active panel event to allow "onClick" events through
+        pairwise(),
+        filter(([before]) => before !== undefined),
+        map(([, after]) => after)
+      ),
       panel$,
     ])
       .pipe(skip(1))
@@ -77,7 +82,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
 
         if (isPanelActive) {
           // allow click events through before triggering active status
-          if (activePanel.type !== 'click') ref.classList.add('kbnGridPanel--active');
+          ref.classList.add('kbnGridPanel--active');
 
           // if the current panel is active, give it fixed positioning depending on the interaction event
           const { position: draggingPosition } = activePanel;
