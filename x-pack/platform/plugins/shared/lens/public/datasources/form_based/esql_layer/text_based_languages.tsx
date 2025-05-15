@@ -9,6 +9,7 @@ import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
 import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';
@@ -672,15 +673,17 @@ export function getTextBasedDatasource({
         }
       ),
     getDatasourceInfo: async (state, references, dataViewsService) => {
-      const indexPatterns: DataView[] = [];
-      for (const { index } of Object.values(state.layers)) {
-        if (index) {
-          const dataView = await dataViewsService?.get(index);
-          if (dataView) {
-            indexPatterns.push(dataView);
-          }
-        }
+      if (!dataViewsService) {
+        return [];
       }
+      const indexPatterns: DataView[] = [];
+      const stateLayer = state.layers[0];
+      if (!stateLayer.query) {
+        return [];
+      }
+      const esqlAdhocDataview = await getESQLAdHocDataview(stateLayer.query.esql, dataViewsService);
+      indexPatterns.push(esqlAdhocDataview);
+
       return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
         const columns = Object.entries(layer.columns).map(([colId, col]) => {
           return {
