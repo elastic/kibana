@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
 
 import type { GridSectionData } from '../grid_section';
 import type { OrderedLayout } from '../types';
@@ -32,6 +32,8 @@ export const useGridPanelState = ({
     const subscription = gridLayoutStateManager.gridLayout$
       .pipe(
         map((layout) => getPanelState(layout, panelId)),
+        // filter out undefined panels
+        filter((panel) => Boolean(panel)),
         distinctUntilChanged(
           (panelA, panelB) =>
             isGridDataEqual(panelA, panelB) && panelA!.sectionId === panelB!.sectionId
@@ -61,11 +63,11 @@ const getPanelState = (
   layout: OrderedLayout,
   panelId: string
 ): (GridPanelData & { sectionId: string }) | undefined => {
-  const flattenedPanels: { [id: string]: GridPanelData & { sectionId: string } } = {};
-  Object.values(layout).forEach((section) => {
-    Object.values((section as unknown as GridSectionData).panels).forEach((panel) => {
-      flattenedPanels[panel.id] = { ...panel, sectionId: section.id, row: panel.row };
-    });
-  });
-  return flattenedPanels[panelId];
+  for (const section of Object.values(layout)) {
+    const panel = section.panels[panelId];
+    if (panel) {
+      return { ...panel, sectionId: section.id };
+    }
+  }
+  return undefined;
 };
