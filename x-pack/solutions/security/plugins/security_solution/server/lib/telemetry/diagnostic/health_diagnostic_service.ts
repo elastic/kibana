@@ -73,7 +73,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     this.logger.info('Starting health diagnostic service');
     this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient);
     this.analytics = start.analytics;
-    this.artifactService.start(
+    await this.artifactService.start(
       start.receiver,
       'https://bankc-artifacts.sde.elastic.dev/2114cf77-3ad0-4a50-b8e2-4d12caae73d9'
     );
