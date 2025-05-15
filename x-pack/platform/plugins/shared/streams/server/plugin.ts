@@ -26,6 +26,7 @@ import {
   STREAMS_FEATURE_ID,
   STREAMS_UI_PRIVILEGES,
 } from '../common/constants';
+import { ContentService } from './lib/content/content_service';
 import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
 import { StreamsService } from './lib/streams/service';
@@ -87,6 +88,7 @@ export class StreamsPlugin
 
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
+    const contentService = new ContentService(core, this.logger);
 
     plugins.features.registerKibanaFeature({
       id: STREAMS_FEATURE_ID,
@@ -147,9 +149,10 @@ export class StreamsPlugin
         }: {
           request: KibanaRequest;
         }): Promise<RouteHandlerScopedClients> => {
-          const [[coreStart, pluginsStart], assetClient] = await Promise.all([
+          const [[coreStart, pluginsStart], assetClient, contentClient] = await Promise.all([
             core.getStartServices(),
             assetService.getClientWithRequest({ request }),
+            contentService.getClient(),
           ]);
 
           const streamsClient = await streamsService.getClientWithRequest({ request, assetClient });
@@ -158,7 +161,14 @@ export class StreamsPlugin
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const inferenceClient = pluginsStart.inference.getClient({ request });
 
-          return { scopedClusterClient, soClient, assetClient, streamsClient, inferenceClient };
+          return {
+            scopedClusterClient,
+            soClient,
+            assetClient,
+            streamsClient,
+            inferenceClient,
+            contentClient,
+          };
         },
       },
       core,
