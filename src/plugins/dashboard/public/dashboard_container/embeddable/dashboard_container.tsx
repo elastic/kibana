@@ -706,7 +706,10 @@ export class DashboardContainer
       if (!child) throw new PanelNotFoundError();
       const serialized = apiHasSerializableState(child)
         ? await child.serializeState()
-        : { rawState: {} };
+        : {
+            rawState: panel.explicitInput ?? {},
+            references: getReferencesForPanelId(panelId, this.savedObjectReferences),
+          };
       return {
         type: panel.type,
         explicitInput: { ...panel.explicitInput, ...serialized.rawState },
