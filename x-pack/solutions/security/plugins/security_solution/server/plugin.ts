@@ -133,6 +133,8 @@ import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_ser
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
+import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
+import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -149,6 +151,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
   private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
+
+  private readonly healthDiagnosticService: HealthDiagnosticService;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
@@ -200,6 +204,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.logger.debug('plugin initialized');
+
+    this.healthDiagnosticService = new HealthDiagnosticServiceImpl(this.logger);
   }
 
   public setup(
@@ -559,6 +565,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       endpointContext: this.endpointContext.service,
     });
 
+    if (plugins.taskManager) {
+      this.healthDiagnosticService.setup({
+        taskManager: plugins.taskManager,
+      });
+    } else {
+      this.logger.warn('Task Manager not available, health diagnostic task not registered.');
+    }
+
     return {
       setProductFeaturesConfigurator:
         productFeaturesService.setProductFeaturesConfigurator.bind(productFeaturesService),
@@ -566,10 +580,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
   }
 
-  public start(
+  public async start(
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
-  ): SecuritySolutionPluginStart {
+  ): Promise<SecuritySolutionPluginStart> {
     const { config, logger, productFeaturesService } = this;
 
     this.ruleMonitoringService.start(core, plugins);
@@ -775,6 +789,17 @@ export class Plugin implements ISecuritySolutionPlugin {
       );
     }
 
+    if (plugins.taskManager) {
+      const serviceStart = {
+        taskManager: plugins.taskManager,
+        esClient: core.elasticsearch.client.asInternalUser,
+        analytics: core.analytics,
+      };
+
+      await this.healthDiagnosticService.start(serviceStart);
+    } else {
+      this.logger.warn('Task Manager not available, health diagnostic task not started.');
+    }
     return {};
   }
 
