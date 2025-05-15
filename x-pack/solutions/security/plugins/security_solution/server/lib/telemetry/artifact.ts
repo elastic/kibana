@@ -29,7 +29,10 @@ interface CacheEntry {
 
 export class Artifact implements IArtifact {
   private manifestUrl?: string;
-  private readonly CDN_URL = 'https://artifacts.security.elastic.co';
+  // private readonly CDN_URL = 'https://artifacts.security.elastic.co';
+  // TODO: rollback before merge
+  private readonly CDN_URL =
+    'https://bankc-artifacts.sde.elastic.dev/2114cf77-3ad0-4a50-b8e2-4d12caae73d9';
   private readonly AXIOS_TIMEOUT_MS = 10_000;
   private receiver?: ITelemetryReceiver;
   private esClusterInfo?: ESClusterInfo;

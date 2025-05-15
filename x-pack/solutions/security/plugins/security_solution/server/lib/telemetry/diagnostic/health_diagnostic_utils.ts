@@ -22,13 +22,14 @@ export function nextExecution(
   return interval.hasNext() ? interval.next().toDate() : undefined;
 }
 
-export function parseDiagnosticQueries(
-  input: Record<string, Record<string, unknown>>
-): HealthDiagnosticQuery[] {
-  return Object.values(input).map((entry) => ({
-    name: entry.name,
-    esQuery: entry.esQuery,
-    scheduleCron: entry.scheduleCron,
-    isEnabled: entry.isEnabled,
-  }));
+export function parseDiagnosticQueries(input: unknown): HealthDiagnosticQuery[] {
+  return Object.values(input as Record<string, unknown>).map((entry) => {
+    const query = entry as Record<string, unknown>;
+    return {
+      name: query.name,
+      esQuery: query.esQuery,
+      scheduleCron: query.scheduleCron,
+      isEnabled: query.isEnabled,
+    } as HealthDiagnosticQuery;
+  });
 }

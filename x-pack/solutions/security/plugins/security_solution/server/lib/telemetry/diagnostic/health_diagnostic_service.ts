@@ -20,7 +20,7 @@ import type {
   HealthDiagnosticServiceSetup,
   HealthDiagnosticServiceStart,
 } from './health_diagnostic_service.types';
-import { nextExecution } from './health_diagnostic_utils';
+import { nextExecution, parseDiagnosticQueries } from './health_diagnostic_utils';
 import type { CircuitBreaker } from './health_diagnostic_circuit_breakers.types';
 import type { CircuitBreakingQueryExecutor } from './health_diagnostic_receiver.types';
 import { CircuitBreakingQueryExecutorImpl } from './health_diagnostic_receiver';
@@ -31,6 +31,7 @@ import {
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
 } from '../event_based/events';
+import { artifactService } from '../artifact';
 
 const TASK_TYPE = 'Security Solution:Health Diagnostic';
 const TASK_ID = 'security:health-diagnostic:1.0.0';
@@ -56,60 +57,6 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       validationIntervalMs: 1000,
     },
   };
-
-  // TODO read from CDN
-  private readonly queries: HealthDiagnosticQuery[] = [
-    {
-      name: 'query-one',
-      isEnabled: true,
-      esQuery: {
-        index: '.ds-.kibana-event-log-ds*',
-        size: 5,
-        query: {
-          range: {
-            '@timestamp': {
-              lte: 'now',
-              gte: 'now-1M',
-            },
-          },
-        },
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc' as const,
-            },
-          },
-        ],
-      },
-      scheduleCron: '0 */1 * * * *',
-    },
-    {
-      name: 'query-two',
-      isEnabled: true,
-      esQuery: {
-        index: '.ds-.kibana-event-log-ds*',
-        size: 0,
-        query: {
-          range: {
-            '@timestamp': {
-              lte: 'now',
-              gte: 'now-1h',
-            },
-          },
-        },
-        aggs: {
-          by_month_day: {
-            date_histogram: {
-              field: '@timestamp',
-              calendar_interval: 'day',
-              format: 'MM-dd',
-            },
-          },
-        },
-      },
-      scheduleCron: '0 */3 * * * *',
-    },
-  ];
 
   constructor(logger: Logger) {
     this.logger = logger.get('health-diagnostic');
@@ -139,17 +86,18 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       return;
     }
 
-    const queries = this.queries.filter((query) => {
+    const healthQueries = await this.healthQueries();
+    const queriesToRun = healthQueries.filter((query) => {
       const { scheduleCron, isEnabled } = query;
-
       return nextExecution(fromDate, toDate, scheduleCron) !== undefined && (isEnabled ?? true);
     });
 
     this.logger.info('About to run health diagnostic queries', {
-      numQueries: queries.length,
+      totalQueries: healthQueries.length,
+      queriesToRun: queriesToRun.length,
     } as LogMeta);
 
-    for (const query of queries) {
+    for (const query of queriesToRun) {
       const circuitBreakers = this.buildCircuitBreakers();
       const options = { query: query.esQuery, circuitBreakers };
       let currentPage = 1;
@@ -281,10 +229,23 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     ];
   }
 
-  public reportEBT<T>(eventTypeOpts: EventTypeOpts<T>, eventData: T): void {
+  private reportEBT<T>(eventTypeOpts: EventTypeOpts<T>, eventData: T): void {
     if (!this.analytics) {
       throw Error('analytics is unavailable');
     }
     this.analytics.reportEvent(eventTypeOpts.eventType, eventData as object);
+  }
+
+  private async healthQueries(): Promise<HealthDiagnosticQuery[]> {
+    // TODO: run as part of the configuration task instead of getting the artifact each time the task runs?
+    try {
+      const artifact = await artifactService.getArtifact('health-diagnostic-query');
+      return parseDiagnosticQueries(artifact.data);
+    } catch (err) {
+      this.logger.warn('Error getting health diagnostic queries', {
+        error: err.message,
+      } as LogMeta);
+      return [];
+    }
   }
 }
