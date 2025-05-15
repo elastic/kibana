@@ -118,25 +118,25 @@ export const getPreloadedState = ({
   const state: LensAppState = {
     ...initialState,
     isLoading: true,
+    query,
     // Do not use app-specific filters from previous app,
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-    query: query as Query,
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : 'searchFilters' in initialContext && initialContext.searchFilters
       ? initialContext.searchFilters
       : data.query.filterManager.getFilters(),
-    searchSessionId: data.search.session.getSessionId() || '',
+    searchSessionId: data.search.session.getSessionId() ?? '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
-      embeddableEditorIncomingState?.originatingApp ||
-        (initialContext && 'isEmbeddable' in initialContext && initialContext?.isEmbeddable)
+      embeddableEditorIncomingState?.originatingApp ??
+        (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,
     datasourceStates,
     visualization: {
       state: null,
-      activeId: Object.keys(visualizationMap)[0] || null,
+      activeId: Object.keys(visualizationMap)[0] ?? null,
     },
   };
   return state;

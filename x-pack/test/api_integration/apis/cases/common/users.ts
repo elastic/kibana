@@ -36,6 +36,7 @@ import {
   secReadCasesAll,
   secReadCasesNone,
   secReadCasesRead,
+  secNone,
   casesV2NoReopenWithCreateComment,
   obsCasesV2NoReopenWithCreateComment,
   secCasesV2NoReopenWithCreateComment,
@@ -130,6 +131,12 @@ export const secReadUser: User = {
   username: 'sec_read_user_api_int',
   password: 'password',
   roles: [secRead.name],
+};
+
+export const secNoneUser: User = {
+  username: 'sec_none_user_api_int',
+  password: 'password',
+  roles: [secNone.name],
 };
 
 export const secReadCasesNoneUser: User = {
@@ -297,6 +304,7 @@ export const users = [
   secReadCasesAllUser,
   secReadCasesReadUser,
   secReadUser,
+  secNoneUser,
   secReadCasesNoneUser,
   casesOnlyDeleteUser,
   casesOnlyReadDeleteUser,

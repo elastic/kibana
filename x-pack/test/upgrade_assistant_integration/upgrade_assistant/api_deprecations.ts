@@ -164,6 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(hits.hits.length).to.equal(4);
       const counters = hits.hits.map((hit) => hit._source!['usage-counter']).sort();
+
       expectExpect(_.sortBy(counters, 'counterType')).toEqual(expectedSuiteUsageCounters);
     });
 

@@ -97,6 +97,13 @@ export const getSearchEmbeddableFactory = ({
       /** Build API */
       const titleManager = initializeTitleManager(initialState);
       const timeRange = initializeTimeRange(initialState);
+      const dynamicActionsApi =
+        discoverServices.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
+          uuid,
+          () => titleManager.api.title$.getValue(),
+          initialState
+        );
+      const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
       const searchEmbeddable = await initializeSearchEmbeddableApi(initialState, {
         discoverServices,
       });
@@ -126,6 +133,7 @@ export const getSearchEmbeddableFactory = ({
           savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
           serializeTitles: titleManager.serialize,
           serializeTimeRange: timeRange.serialize,
+          serializeDynamicActions: dynamicActionsApi?.serializeDynamicActions,
           savedObjectId,
         });
 
@@ -134,6 +142,7 @@ export const getSearchEmbeddableFactory = ({
           ...titleManager.api,
           ...searchEmbeddable.api,
           ...timeRange.api,
+          ...dynamicActionsApi?.dynamicActionsApi,
           ...initializeEditApi({
             uuid,
             parentApi,
@@ -178,10 +187,18 @@ export const getSearchEmbeddableFactory = ({
           getSerializedStateByReference: (newId: string) => serialize(newId),
           serializeState: () => serialize(savedObjectId$.getValue()),
           getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
+          supportedTriggers: () => {
+            // No triggers are supported, but this is still required to pass the drilldown
+            // compatibilty check and ensure top-level drilldowns (e.g. URL) work as expected
+            return [];
+          },
         },
         {
           ...titleManager.comparators,
           ...timeRange.comparators,
+          ...(dynamicActionsApi?.dynamicActionsComparator ?? {
+            enhancements: getUnchangingComparator(),
+          }),
           ...searchEmbeddable.comparators,
           rawSavedObjectAttributes: getUnchangingComparator(),
           savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
@@ -206,6 +223,7 @@ export const getSearchEmbeddableFactory = ({
             return () => {
               searchEmbeddable.cleanup();
               unsubscribeFromFetch();
+              maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
 

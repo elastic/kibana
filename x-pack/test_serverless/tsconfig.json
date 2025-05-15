@@ -14,7 +14,7 @@
   "include": [
     "**/*",
     "../../typings/**/*",
-    "../../packages/kbn-test/types/ftr_globals/**/*",
+    "../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
   ],
   "exclude": [
     "target/**/*",
@@ -89,5 +89,6 @@
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/security-plugin-types-common",
     "@kbn/data-usage-plugin",
+    "@kbn/scout-info",
   ]
 }

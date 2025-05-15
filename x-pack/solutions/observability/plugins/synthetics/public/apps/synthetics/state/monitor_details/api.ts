@@ -43,7 +43,7 @@ export const fetchMonitorRecentPings = async ({
     {
       monitorId,
       from: from ?? moment().subtract(30, 'days').toISOString(),
-      to: to ?? new Date().toISOString(),
+      to: to ?? moment().toISOString(),
       locations,
       sort,
       size,

@@ -9,12 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import {
-  FormulaPublicApi,
-  LensEmbeddableInput,
-  LensPublicStart,
-  XYState,
-} from '@kbn/lens-plugin/public';
+import { FormulaPublicApi, LensPublicStart, XYState } from '@kbn/lens-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from '@emotion/styled';
@@ -220,7 +215,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
       />
       {isSaveOpen && attributesJSON && (
         <LensSaveModalComponent
-          initialInput={attributesJSON as unknown as LensEmbeddableInput}
+          initialInput={{ attributes: attributesJSON }}
           onClose={() => setIsSaveOpen(false)}
           // if we want to do anything after the viz is saved
           // right now there is no action, so an empty function
@@ -247,6 +242,7 @@ const Wrapper = styled.div<{
 }>`
   height: ${(props) => (props.$customHeight ? `${props.$customHeight};` : `100%;`)};
   position: relative;
+  min-width: 80px;
   &&& {
     > :nth-child(2) {
       height: ${(props) =>
@@ -266,16 +262,16 @@ const Wrapper = styled.div<{
             : 'center;'};
       }
       justify-content: flex-end;
-      .legacyMtrVis__container {
+      &__container {
         padding: 0;
-        > :nth-child(2) {
+        [data-test-subj='metric_label'] {
           ${({ noLabel }) =>
             noLabel &&
             ` display: none;
         `}
         }
       }
-      .legacyMtrVis__value {
+      &__value {
         line-height: ${({ lineHeight }) => lineHeight}px !important;
         font-size: ${({ fontSize }) => fontSize}px !important;
       }

@@ -18,6 +18,7 @@ import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import type { FormatAlert } from '@kbn/alerting-plugin/server/types';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -36,17 +37,32 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 // eslint-disable-next-line no-restricted-imports
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
-import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
+import { bulkCreateFactory, wrapHitsFactory } from './factories';
 import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from './saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';
-import { getInputIndex, DataViewError } from './utils/get_input_output_index';
+import { getInputIndex } from './utils/get_input_output_index';
 import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
+import type { RuleParams } from '../rule_schema';
+import {
+  SECURITY_FROM,
+  SECURITY_IMMUTABLE,
+  SECURITY_INPUT_INDEX,
+  SECURITY_MAX_SIGNALS,
+  SECURITY_MERGE_STRATEGY,
+  SECURITY_NUM_ALERTS_CREATED,
+  SECURITY_NUM_IGNORE_FIELDS_REGEX,
+  SECURITY_NUM_IGNORE_FIELDS_STANDARD,
+  SECURITY_NUM_RANGE_TUPLES,
+  SECURITY_PARAMS,
+  SECURITY_RULE_ID,
+  SECURITY_TO,
+} from './utils/apm_field_names';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -56,6 +72,19 @@ Object.entries(aadFieldConversion).forEach(([key, value]) => {
     path: value,
   };
 });
+
+const addApmLabelsFromParams = (params: RuleParams) => {
+  agent.addLabels(
+    {
+      [SECURITY_FROM]: params.from,
+      [SECURITY_IMMUTABLE]: params.immutable,
+      [SECURITY_MAX_SIGNALS]: params.maxSignals,
+      [SECURITY_RULE_ID]: params.ruleId,
+      [SECURITY_TO]: params.to,
+    },
+    false
+  );
+};
 
 export const securityRuleTypeFieldMap = {
   ...technicalRuleFieldMap,
@@ -69,6 +98,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   ({
     lists,
     actions,
+    docLinks,
     logger,
     config,
     publicBaseUrl,
@@ -135,6 +165,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             state,
             rule,
           } = options;
+          addApmLabelsFromParams(params);
+          agent.setCustomContext({ [SECURITY_MERGE_STRATEGY]: mergeStrategy });
+          agent.setCustomContext({ [SECURITY_PARAMS]: params });
           let runState = state;
           let inputIndex: string[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -238,19 +271,26 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               inputIndex = index ?? [];
               runtimeMappings = dataViewRuntimeMappings;
             } catch (exc) {
-              const errorMessage =
-                exc instanceof DataViewError
-                  ? `Data View not found ${exc}`
-                  : `Check for indices to search failed ${exc}`;
-
-              await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum.failed,
-                message: errorMessage,
-              });
+              if (SavedObjectsErrorHelpers.isNotFoundError(exc)) {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatusEnum.failed,
+                  message: `Data View not found ${exc}`,
+                  userError: true,
+                });
+              } else {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatusEnum.failed,
+                  message: `Check for indices to search failed ${exc}`,
+                });
+              }
 
               return { state: result.state };
             }
           }
+
+          // Make a copy of `inputIndex` or else the APM agent reports it as [Circular] for most rule types because it's the same object
+          // as `index`
+          agent.setCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
 
           // check if rule has permissions to access given index pattern
           // move this collection of lines into a function in utils
@@ -267,6 +307,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   privileges,
                   ruleExecutionLogger,
                   uiSettingsClient,
+                  docLinks,
                 });
 
                 if (readIndexWarningMessage != null) {
@@ -328,6 +369,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             wrapperWarnings.push(rangeTuplesWarningMessage);
           }
 
+          agent.setCustomContext({ [SECURITY_NUM_RANGE_TUPLES]: tuples.length });
+
           if (remainingGap.asMilliseconds() > 0) {
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
             const gapErrorMessage = `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`;
@@ -373,6 +416,12 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ignoreFieldsStandard.forEach((field) => {
               ignoreFieldsObject[field] = true;
             });
+
+            agent.setCustomContext({
+              [SECURITY_NUM_IGNORE_FIELDS_STANDARD]: ignoreFieldsStandard.length,
+              [SECURITY_NUM_IGNORE_FIELDS_REGEX]: ignoreFieldsRegexes.length,
+            });
+
             const intendedTimestamp = startedAtOverridden ? startedAt : undefined;
             const wrapHits = wrapHitsFactory({
               ignoreFields: ignoreFieldsObject,
@@ -384,18 +433,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               alertTimestampOverride,
               publicBaseUrl,
               ruleExecutionLogger,
-              intendedTimestamp,
-            });
-
-            const wrapSequences = wrapSequencesFactory({
-              ruleExecutionLogger,
-              ignoreFields: [...ignoreFields, ...legacySignalFields],
-              mergeStrategy,
-              completeRule,
-              spaceId,
-              publicBaseUrl,
-              indicesToQuery: inputIndex,
-              alertTimestampOverride,
               intendedTimestamp,
             });
 
@@ -414,7 +451,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   ...options,
                   services,
                   state: runState,
-                  runOpts: {
+                  sharedParams: {
                     completeRule,
                     inputIndex,
                     exceptionFilter,
@@ -427,7 +464,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     tuple,
                     bulkCreate,
                     wrapHits,
-                    wrapSequences,
                     listClient,
                     ruleDataClient,
                     mergeStrategy,
@@ -441,6 +477,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     publicBaseUrl,
                     experimentalFeatures,
                     intendedTimestamp,
+                    spaceId,
                   },
                 });
 
@@ -486,6 +523,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             const createdSignalsCount = result.createdSignals.length;
 
+            agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
+
             if (disabledActions.length > 0) {
               const disabledActionsWarning = getDisabledActionsWarningText({
                 alertsCreated: createdSignalsCount > 0,
@@ -500,7 +539,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               // as the current status of the rule.
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: truncateList(result.warningMessages.concat(wrapperWarnings)).join(', '),
+                message: truncateList(result.warningMessages.concat(wrapperWarnings)).join('\n\n'),
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,

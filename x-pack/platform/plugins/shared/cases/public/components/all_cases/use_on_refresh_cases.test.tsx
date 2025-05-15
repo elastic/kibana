@@ -6,24 +6,23 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { casesQueriesKeys } from '../../containers/constants';
 import { useRefreshCases } from './use_on_refresh_cases';
+import { TestProviders, createTestQueryClient } from '../../common/mock';
+import React from 'react';
 
 describe('useRefreshCases', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('should refresh data on refresh', async () => {
-    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+    const queryClient = createTestQueryClient();
+    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useRefreshCases(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
 
     act(() => {

@@ -36,6 +36,8 @@ import {
   getManualCommits,
 } from './utils/git';
 
+const SKIP_RESET = false;
+
 const moveModule = async (module: Package, log: ToolingLog) => {
   const destination = calculateModuleTargetFolder(module);
   log.info(`Moving ${module.directory} to ${destination}`);
@@ -107,8 +109,6 @@ const findModules = ({ teams, paths, included, excluded }: FindModulesParams, lo
   // find modules selected by user filters
   return (
     sortBy(modules, ['directory'])
-      // exclude devOnly modules (they will remain in /packages)
-      .filter(({ manifest }) => !manifest.devOnly)
       // explicit exclusions
       .filter(({ id }) => !EXCLUDED_MODULES.includes(id) && !excluded.includes(id))
       // we don't want to move test and example modules (just yet)
@@ -181,55 +181,57 @@ export const findAndRelocateModules = async (params: RelocateModulesParams, log:
     return;
   }
 
-  if (prNumber) {
-    pr = await findPr(prNumber);
+  if (!SKIP_RESET) {
+    if (prNumber) {
+      pr = await findPr(prNumber);
 
-    if (getManualCommits(pr.commits).length > 0) {
-      const resOverride = await inquirer.prompt({
-        type: 'confirm',
-        name: 'overrideManualCommits',
-        message:
-          'Manual commits detected in the PR. The script will try to cherry-pick them, but it might require manual intervention to resolve conflicts. Continue?',
-      });
-      if (!resOverride.overrideManualCommits) {
-        log.info('Aborting');
-        return;
+      if (getManualCommits(pr.commits).length > 0) {
+        const resOverride = await inquirer.prompt({
+          type: 'confirm',
+          name: 'overrideManualCommits',
+          message:
+            'Manual commits detected in the PR. The script will try to cherry-pick them, but it might require manual intervention to resolve conflicts. Continue?',
+        });
+        if (!resOverride.overrideManualCommits) {
+          log.info('Aborting');
+          return;
+        }
       }
     }
-  }
 
-  const resConfirmReset = await inquirer.prompt({
-    type: 'confirm',
-    name: 'confirmReset',
-    message: `The script will RESET CHANGES in this repository. Proceed?`,
-  });
+    const resConfirmReset = await inquirer.prompt({
+      type: 'confirm',
+      name: 'confirmReset',
+      message: `The script will RESET CHANGES in this repository. Proceed?`,
+    });
 
-  if (!resConfirmReset.confirmReset) {
-    log.info('Aborting');
-    return;
-  }
-
-  // start with a clean repo
-  await safeExec(`git restore --staged .`);
-  await safeExec(`git restore .`);
-  await safeExec(`git clean -f -d`);
-  await safeExec(`git checkout ${baseBranch} && git pull ${upstream} ${baseBranch}`);
-
-  if (pr) {
-    // checkout existing PR, reset all commits, rebase from baseBranch
-    try {
-      await checkoutResetPr(pr, baseBranch);
-    } catch (error) {
-      log.error(`Error checking out / resetting PR #${prNumber}:`);
-      log.error(error);
+    if (!resConfirmReset.confirmReset) {
+      log.info('Aborting');
       return;
     }
-  } else {
-    // checkout new branch
-    await checkoutBranch(NEW_BRANCH);
-  }
 
-  await safeExec(`yarn kbn bootstrap`);
+    // start with a clean repo
+    await safeExec(`git restore --staged .`);
+    await safeExec(`git restore .`);
+    await safeExec(`git clean -f -d`);
+    await safeExec(`git checkout ${baseBranch} && git pull ${upstream} ${baseBranch}`);
+
+    if (pr) {
+      // checkout existing PR, reset all commits, rebase from baseBranch
+      try {
+        await checkoutResetPr(pr, baseBranch);
+      } catch (error) {
+        log.error(`Error checking out / resetting PR #${prNumber}:`);
+        log.error(error);
+        return;
+      }
+    } else {
+      // checkout new branch
+      await checkoutBranch(NEW_BRANCH);
+    }
+
+    await safeExec(`yarn kbn bootstrap`);
+  }
   await inquirer.prompt({
     type: 'confirm',
     name: 'readyRelocate',

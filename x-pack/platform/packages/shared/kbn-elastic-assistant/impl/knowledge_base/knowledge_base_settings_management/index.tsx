@@ -340,7 +340,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
 
   return (
     <>
-      <ProductDocumentationManagement />
+      <ProductDocumentationManagement status={kbStatus?.product_documentation_status} />
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
         <EuiText size={'m'}>
           <FormattedMessage

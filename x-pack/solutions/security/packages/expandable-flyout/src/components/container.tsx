@@ -215,7 +215,6 @@ export const Container: React.FC<ContainerProps> = memo(
           leftComponent={leftComponent as React.ReactElement}
           rightComponent={rightComponent as React.ReactElement}
           showLeft={showExpanded}
-          showPreview={showPreview}
         />
 
         {showPreview && (

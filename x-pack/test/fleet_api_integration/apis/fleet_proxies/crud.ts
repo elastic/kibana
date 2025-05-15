@@ -33,8 +33,7 @@ export default function (providerContext: FtrProviderContext) {
     return policyDocRes.hits.hits[0]?._source;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/207024
-  describe.skip('fleet_proxies_crud', function () {
+  describe('fleet_proxies_crud', function () {
     const existingId = 'test-default-123';
     const fleetServerHostId = 'test-fleetserver-123';
     const policyId = 'test-policy-123';
@@ -180,7 +179,7 @@ export default function (providerContext: FtrProviderContext) {
             );
           },
           {
-            retryCount: 10,
+            retryCount: 20,
             timeout: 30_1000,
           }
         );
@@ -217,7 +216,7 @@ export default function (providerContext: FtrProviderContext) {
             expect(fleetPolicyAfter?.data?.agent.download.proxy_url).to.be(undefined);
           },
           {
-            retryCount: 10,
+            retryCount: 20,
             timeout: 30_1000,
           }
         );

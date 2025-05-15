@@ -311,8 +311,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // We need to use OR condition here because of how visColors are set inconsistently
           // See https://github.com/elastic/kibana/issues/206380
           const [firstColor, secondColor] = areaColors!;
-          expect(['#16c5c0', '#54b399']).contain(firstColor); // first color in elastic palette
-          expect(['#a6edea', '#6092c0']).contain(secondColor); // second color in elastic palette
+          expect(firstColor).to.be('#16c5c0'); // first color in elastic palette
+          expect(secondColor).to.be('#a6edea'); // second color in elastic palette
           expect(areaColors).to.length(2);
           expect(firstAreaChartData).to.eql(firstAreaExpectedChartData);
           expect(secondAreaChartData).to.eql(secondAreaExpectedChartData);

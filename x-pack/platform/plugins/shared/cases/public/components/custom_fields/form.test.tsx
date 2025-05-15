@@ -8,8 +8,6 @@
 import React from 'react';
 import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { CustomFieldsForm } from './form';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
@@ -17,10 +15,9 @@ import * as i18n from './translations';
 import userEvent from '@testing-library/user-event';
 import { customFieldsConfigurationMock } from '../../containers/mock';
 import type { FormState } from '../configure_cases/flyout';
+import { renderWithTestingProviders } from '../../common/mock';
 
-// FLAKY: https://github.com/elastic/kibana/issues/208415
-describe.skip('CustomFieldsForm ', () => {
-  let appMockRender: AppMockRenderer;
+describe('CustomFieldsForm ', () => {
   const onChange = jest.fn();
 
   const props = {
@@ -30,18 +27,17 @@ describe.skip('CustomFieldsForm ', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(<CustomFieldsForm {...props} />);
+    renderWithTestingProviders(<CustomFieldsForm {...props} />);
 
     expect(await screen.findByTestId('custom-field-label-input')).toBeInTheDocument();
     expect(await screen.findByTestId('custom-field-type-selector')).toBeInTheDocument();
   });
 
   it('renders text as default custom field type', async () => {
-    appMockRender.render(<CustomFieldsForm {...props} />);
+    renderWithTestingProviders(<CustomFieldsForm {...props} />);
 
     expect(await screen.findByTestId('custom-field-type-selector')).toBeInTheDocument();
     expect(await screen.findByText('Text')).toBeInTheDocument();
@@ -50,7 +46,7 @@ describe.skip('CustomFieldsForm ', () => {
   });
 
   it('renders custom field type options', async () => {
-    appMockRender.render(<CustomFieldsForm {...props} />);
+    renderWithTestingProviders(<CustomFieldsForm {...props} />);
 
     expect(await screen.findByText('Text')).toBeInTheDocument();
     expect(await screen.findByText('Toggle')).toBeInTheDocument();
@@ -58,7 +54,7 @@ describe.skip('CustomFieldsForm ', () => {
   });
 
   it('renders toggle custom field type', async () => {
-    appMockRender.render(<CustomFieldsForm {...props} />);
+    renderWithTestingProviders(<CustomFieldsForm {...props} />);
 
     fireEvent.change(await screen.findByTestId('custom-field-type-selector'), {
       target: { value: CustomFieldTypes.TOGGLE },
@@ -73,7 +69,7 @@ describe.skip('CustomFieldsForm ', () => {
 
     const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
-    appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
+    renderWithTestingProviders(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
     await waitFor(() => {
       expect(formState).not.toBeUndefined();
@@ -103,7 +99,7 @@ describe.skip('CustomFieldsForm ', () => {
 
     const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
-    appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
+    renderWithTestingProviders(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
     await waitFor(() => {
       expect(formState).not.toBeUndefined();
@@ -130,7 +126,7 @@ describe.skip('CustomFieldsForm ', () => {
 
     const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
-    appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
+    renderWithTestingProviders(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
     await waitFor(() => {
       expect(formState).not.toBeUndefined();
@@ -165,7 +161,7 @@ describe.skip('CustomFieldsForm ', () => {
       defaultValue: null,
     };
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <CustomFieldsForm
         onChange={onChangeState}
         initialValue={
@@ -201,7 +197,7 @@ describe.skip('CustomFieldsForm ', () => {
 
     const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
-    appMockRender.render(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
+    renderWithTestingProviders(<CustomFieldsForm onChange={onChangeState} initialValue={null} />);
 
     await waitFor(() => {
       expect(formState).not.toBeUndefined();
@@ -227,7 +223,7 @@ describe.skip('CustomFieldsForm ', () => {
 
     const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <CustomFieldsForm onChange={onChangeState} initialValue={customFieldsConfigurationMock[0]} />
     );
 
@@ -259,7 +255,7 @@ describe.skip('CustomFieldsForm ', () => {
 
     const onChangeState = (state: FormState<CustomFieldConfiguration>) => (formState = state);
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <CustomFieldsForm onChange={onChangeState} initialValue={customFieldsConfigurationMock[1]} />
     );
 

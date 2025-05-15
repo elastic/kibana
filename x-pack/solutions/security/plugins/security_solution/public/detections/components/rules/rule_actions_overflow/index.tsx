@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { usePrebuiltRulesCustomizationStatus } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { useScheduleRuleRun } from '../../../../detection_engine/rule_gaps/logic/use_schedule_rule_run';
 import type { TimeRange } from '../../../../detection_engine/rule_gaps/types';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
@@ -73,7 +72,6 @@ const RuleActionsOverflowComponent = ({
     application: { navigateToApp },
     telemetry,
   } = useKibana().services;
-  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
@@ -139,9 +137,7 @@ const RuleActionsOverflowComponent = ({
             <EuiContextMenuItem
               key={i18nActions.EXPORT_RULE}
               icon="exportAction"
-              disabled={
-                !userHasPermissions || (isRulesCustomizationEnabled === false && rule.immutable)
-              }
+              disabled={!userHasPermissions}
               data-test-subj="rules-details-export-rule"
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
@@ -210,7 +206,6 @@ const RuleActionsOverflowComponent = ({
       rule,
       canDuplicateRuleWithActions,
       userHasPermissions,
-      isRulesCustomizationEnabled,
       startTransaction,
       closePopover,
       showBulkDuplicateExceptionsConfirmation,

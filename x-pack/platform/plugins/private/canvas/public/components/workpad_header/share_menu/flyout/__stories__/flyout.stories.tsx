@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ShareWebsiteFlyout } from '../flyout.component';
 import { reduxDecorator } from '../../../../../../storybook';
 
-storiesOf('components/WorkpadHeader/ShareMenu/ShareWebsiteFlyout', module)
-  .addDecorator(reduxDecorator())
-  .addParameters({
+export default {
+  title: 'components/WorkpadHeader/ShareMenu/ShareWebsiteFlyout',
+  decorators: [reduxDecorator()],
+
+  parameters: {
     info: {
       inline: true,
       styles: {
@@ -26,14 +27,23 @@ storiesOf('components/WorkpadHeader/ShareMenu/ShareWebsiteFlyout', module)
         },
       },
     },
-  })
-  .add('default', () => (
-    <ShareWebsiteFlyout onClose={action('onClose')} renderedWorkpad={{} as any} />
-  ))
-  .add('unsupported renderers', () => (
+  },
+};
+
+export const Default = {
+  render: () => <ShareWebsiteFlyout onClose={action('onClose')} renderedWorkpad={{} as any} />,
+
+  name: 'default',
+};
+
+export const UnsupportedRenderers = {
+  render: () => (
     <ShareWebsiteFlyout
       onClose={action('onClose')}
       unsupportedRenderers={['rendererOne', 'rendererTwo']}
       renderedWorkpad={{} as any}
     />
-  ));
+  ),
+
+  name: 'unsupported renderers',
+};

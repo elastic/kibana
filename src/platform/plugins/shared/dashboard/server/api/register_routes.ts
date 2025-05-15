@@ -57,6 +57,12 @@ export function registerAPIRoutes({
         stability: 'experimental',
       },
     },
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on Content Client for authorization',
+      },
+    },
   });
 
   createRoute.addVersion(
@@ -130,6 +136,12 @@ export function registerAPIRoutes({
         stability: 'experimental',
       },
     },
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on Content Client for authorization',
+      },
+    },
   });
 
   updateRoute.addVersion(
@@ -175,8 +187,7 @@ export function registerAPIRoutes({
         }
         return res.badRequest(e.message);
       }
-
-      return res.created({ body: result });
+      return res.ok({ body: result });
     }
   );
 
@@ -190,6 +201,12 @@ export function registerAPIRoutes({
       tags: ['oas-tag:Dashboards'],
       availability: {
         stability: 'experimental',
+      },
+    },
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on Content Client for authorization',
       },
     },
   });
@@ -266,6 +283,12 @@ export function registerAPIRoutes({
         stability: 'experimental',
       },
     },
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on Content Client for authorization',
+      },
+    },
   });
 
   getRoute.addVersion(
@@ -325,6 +348,12 @@ export function registerAPIRoutes({
       tags: ['oas-tag:Dashboards'],
       availability: {
         stability: 'experimental',
+      },
+    },
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on Content Client for authorization',
       },
     },
   });

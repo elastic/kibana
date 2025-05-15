@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiContextMenu } from '@elastic/eui';
 
@@ -174,7 +174,7 @@ export default {
   },
 };
 
-const Template: Story<{
+const Template: StoryFn<{
   solution: 'Generic' | 'Canvas' | 'Dashboard';
   iconButtonCount: number;
   showAddFromLibraryButton: boolean;
@@ -205,20 +205,29 @@ const Template: Story<{
   );
 };
 
-export const Generic = Template.bind({});
-Generic.args = {
-  ...Template.args,
-  solution: 'Generic',
+export const Generic = {
+  render: Template,
+
+  args: {
+    ...Template.args,
+    solution: 'Generic',
+  },
 };
 
-export const Canvas = Template.bind({});
-Canvas.args = {
-  ...Template.args,
-  solution: 'Canvas',
+export const Canvas = {
+  render: Template,
+
+  args: {
+    ...Template.args,
+    solution: 'Canvas',
+  },
 };
 
-export const Dashboard = Template.bind({});
-Dashboard.args = {
-  ...Template.args,
-  solution: 'Dashboard',
+export const Dashboard = {
+  render: Template,
+
+  args: {
+    ...Template.args,
+    solution: 'Dashboard',
+  },
 };

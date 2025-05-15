@@ -14,14 +14,13 @@ import { eqlExecutor } from './eql';
 import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
-import type { SharedParams } from '../utils/utils';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, version, licensing, scheduleNotificationResponseActionsService } =
+  const { experimentalFeatures, licensing, scheduleNotificationResponseActionsService } =
     createOptions;
   return {
     id: EQL_RULE_TYPE_ID,
@@ -62,48 +61,12 @@ export const createEqlAlertType = (
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
-      const {
-        runOpts: {
-          completeRule,
-          tuple,
-          inputIndex,
-          runtimeMappings,
-          ruleExecutionLogger,
-          bulkCreate,
-          wrapHits,
-          wrapSequences,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
-          unprocessedExceptions,
-          mergeStrategy,
-          alertTimestampOverride,
-          publicBaseUrl,
-          alertWithSuppression,
-          intendedTimestamp,
-        },
-        services,
-        state,
-        spaceId,
-      } = execOptions;
+      const { sharedParams, services, state } = execOptions;
 
       const isAlertSuppressionActive = await getIsAlertSuppressionActive({
-        alertSuppression: completeRule.ruleParams.alertSuppression,
+        alertSuppression: sharedParams.completeRule.ruleParams.alertSuppression,
         licensing,
       });
-
-      const sharedParams: SharedParams = {
-        spaceId,
-        completeRule,
-        mergeStrategy,
-        indicesToQuery: inputIndex,
-        alertTimestampOverride,
-        ruleExecutionLogger,
-        publicBaseUrl,
-        primaryTimestamp,
-        secondaryTimestamp,
-        intendedTimestamp,
-      };
 
       const wrapSuppressedHits = (
         events: SignalSourceHit[],
@@ -111,38 +74,14 @@ export const createEqlAlertType = (
       ) =>
         wrapSuppressedAlerts({
           events,
-          spaceId,
-          completeRule,
-          mergeStrategy,
-          indicesToQuery: inputIndex,
           buildReasonMessage,
-          alertTimestampOverride,
-          ruleExecutionLogger,
-          publicBaseUrl,
-          primaryTimestamp,
-          secondaryTimestamp,
-          intendedTimestamp,
+          sharedParams,
         });
 
       const { result, loggedRequests } = await eqlExecutor({
-        completeRule,
-        tuple,
-        inputIndex,
-        runtimeMappings,
-        ruleExecutionLogger,
-        services,
-        version,
-        bulkCreate,
-        wrapHits,
-        wrapSequences,
-        primaryTimestamp,
-        secondaryTimestamp,
-        exceptionFilter,
-        unprocessedExceptions,
-        wrapSuppressedHits,
         sharedParams,
-        alertTimestampOverride,
-        alertWithSuppression,
+        services,
+        wrapSuppressedHits,
         isAlertSuppressionActive,
         experimentalFeatures,
         state,

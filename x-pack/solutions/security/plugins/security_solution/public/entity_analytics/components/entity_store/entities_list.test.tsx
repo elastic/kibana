@@ -126,7 +126,7 @@ describe('EntitiesList', () => {
 
     await waitFor(() => {
       const firstPageButton = screen.getByTestId('pagination-button-0');
-      expect(firstPageButton).toHaveAttribute('aria-current', 'true');
+      expect(firstPageButton).toHaveAttribute('aria-current', 'page');
     });
   });
 

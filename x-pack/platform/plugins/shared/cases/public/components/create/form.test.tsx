@@ -22,8 +22,8 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { usePostCase } from '../../containers/use_post_case';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
+import { renderWithTestingProviders } from '../../common/mock';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
@@ -50,7 +50,7 @@ const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 describe('CreateCaseForm', () => {
   const draftStorageKey = 'cases.caseView.createCase.description.markdownEditor';
   let user: UserEvent;
-  let appMockRenderer: AppMockRenderer;
+
   let casesFormProps: CreateCaseFormProps;
 
   beforeAll(() => {
@@ -64,7 +64,7 @@ describe('CreateCaseForm', () => {
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    appMockRenderer = createAppMockRenderer();
+
     casesFormProps = {
       onCancel: jest.fn(),
       onSuccess: jest.fn(),
@@ -84,19 +84,19 @@ describe('CreateCaseForm', () => {
   });
 
   it('renders with steps', async () => {
-    appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
 
     expect(await screen.findByTestId('case-creation-form-steps')).toBeInTheDocument();
   });
 
   it('renders without steps', async () => {
-    appMockRenderer.render(<CreateCaseForm {...casesFormProps} withSteps={false} />);
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} withSteps={false} />);
 
     expect(screen.queryByText('case-creation-form-steps')).not.toBeInTheDocument();
   });
 
   it('renders all form fields except case selection', async () => {
-    appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
 
     expect(await screen.findByTestId('caseTitle')).toBeInTheDocument();
     expect(await screen.findByTestId('caseTags')).toBeInTheDocument();
@@ -108,8 +108,9 @@ describe('CreateCaseForm', () => {
   });
 
   it('renders all form fields including case selection if has permissions and no owner', async () => {
-    appMockRenderer = createAppMockRenderer({ owner: [] });
-    appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+      wrapperProps: { owner: [] },
+    });
 
     expect(await screen.findByTestId('caseTitle')).toBeInTheDocument();
     expect(await screen.findByTestId('caseTags')).toBeInTheDocument();
@@ -123,20 +124,21 @@ describe('CreateCaseForm', () => {
   it('does not render solution picker when only one owner is available', async () => {
     useAvailableOwnersMock.mockReturnValue(['securitySolution']);
 
-    appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
 
     expect(screen.queryByTestId('caseOwnerSelector')).not.toBeInTheDocument();
   });
 
   it('hides the sync alerts toggle', async () => {
-    appMockRenderer = createAppMockRenderer({ features: { alerts: { sync: false } } });
-    appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+      wrapperProps: { features: { alerts: { sync: false } } },
+    });
 
     expect(screen.queryByText('Sync alert')).not.toBeInTheDocument();
   });
 
   it('should not render the assignees on basic license', () => {
-    appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
     expect(screen.queryByTestId('createCaseAssigneesComboBox')).not.toBeInTheDocument();
   });
 
@@ -145,14 +147,15 @@ describe('CreateCaseForm', () => {
       license: { type: 'platinum' },
     });
 
-    appMockRenderer = createAppMockRenderer({ license });
-    appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+      wrapperProps: { license },
+    });
 
     expect(await screen.findByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
   });
 
   it('should not prefill the form when no initialValue provided', async () => {
-    appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
 
     const titleInput = within(await screen.findByTestId('caseTitle')).getByTestId('input');
     const descriptionInput = within(await screen.findByTestId('caseDescription')).getByRole(
@@ -174,7 +177,7 @@ describe('CreateCaseForm', () => {
       ],
     }));
 
-    appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
 
     expect(await screen.findByTestId('caseCustomFields')).toBeInTheDocument();
 
@@ -186,7 +189,7 @@ describe('CreateCaseForm', () => {
   });
 
   it('should prefill the form when provided with initialValue', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <CreateCaseForm
         {...casesFormProps}
         initialValue={{ title: 'title', description: 'description' }}
@@ -204,7 +207,7 @@ describe('CreateCaseForm', () => {
 
   describe('draft comment ', () => {
     it('should clear session storage key on cancel', async () => {
-      appMockRenderer.render(
+      renderWithTestingProviders(
         <CreateCaseForm
           {...casesFormProps}
           initialValue={{ title: 'title', description: 'description' }}
@@ -222,7 +225,7 @@ describe('CreateCaseForm', () => {
     });
 
     it('should clear session storage key on submit', async () => {
-      appMockRenderer.render(
+      renderWithTestingProviders(
         <CreateCaseForm
           {...casesFormProps}
           initialValue={{ title: 'title', description: 'description' }}
@@ -235,8 +238,9 @@ describe('CreateCaseForm', () => {
 
       await waitFor(() => {
         expect(casesFormProps.onSuccess).toHaveBeenCalled();
-        expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
       });
+
+      expect(sessionStorage.getItem(draftStorageKey)).toBe(null);
     });
   });
 
@@ -267,8 +271,9 @@ describe('CreateCaseForm', () => {
       });
       const selectedTemplate = templatesConfigurationMock[4];
 
-      appMockRenderer = createAppMockRenderer({ license });
-      appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+      renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+        wrapperProps: { license },
+      });
 
       await user.selectOptions(
         await screen.findByTestId('create-case-template-select'),
@@ -305,8 +310,9 @@ describe('CreateCaseForm', () => {
       const firstTemplate = templatesConfigurationMock[4];
       const secondTemplate = templatesConfigurationMock[2];
 
-      appMockRenderer = createAppMockRenderer({ license });
-      appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+      renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+        wrapperProps: { license },
+      });
 
       await user.selectOptions(
         await screen.findByTestId('create-case-template-select'),
@@ -381,8 +387,9 @@ describe('CreateCaseForm', () => {
       });
       const firstTemplate = templatesConfigurationMock[4];
 
-      appMockRenderer = createAppMockRenderer({ license });
-      appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
+      renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+        wrapperProps: { license },
+      });
 
       await user.selectOptions(
         await screen.findByTestId('create-case-template-select'),

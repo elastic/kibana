@@ -50,7 +50,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   },
   defaultActionMessage,
   defaultRecoveryMessage,
-  requiresAppContext: true,
+  requiresAppContext: false,
   format: ({ fields }) => ({
     reason: fields[ALERT_REASON] || '',
     link: `/app/synthetics${CERTIFICATES_ROUTE}`,

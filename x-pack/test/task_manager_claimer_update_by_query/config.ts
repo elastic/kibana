@@ -7,12 +7,14 @@
 
 import path from 'path';
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const integrationConfig = await readConfigFile(require.resolve('../api_integration/config'));
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./test_suites/task_manager')],
     services,
     servers: integrationConfig.get('servers'),

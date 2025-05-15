@@ -7,17 +7,17 @@
 
 import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import {
-  DEFAULT_TRANSLATION_RISK_SCORE,
-  DEFAULT_TRANSLATION_SEVERITY,
-  RuleTranslationResult,
-} from '../../../../../../../../common/siem_migrations/constants';
+import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { SiemMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import type { ChatModel } from '../../../util/actions_client_chat';
 import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
 import type { GraphNode } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
+import {
+  DEFAULT_TRANSLATION_RISK_SCORE,
+  DEFAULT_TRANSLATION_SEVERITY,
+} from '../../../../constants';
 
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;

@@ -45,8 +45,8 @@ export const useNavigateToHostDetails = ({
 }: UseNavigateToHostDetailsParams): UseNavigateToHostDetailsResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   telemetry.reportEvent(EntityEventTypes.RiskInputsExpandedFlyoutOpened, {

@@ -8,16 +8,12 @@
 import { waitFor, renderHook } from '@testing-library/react';
 import { useGetAllCaseConfigurations } from './use_get_all_case_configurations';
 import * as api from './api';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('./api');
 
 describe('Use get all case configurations hook', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -33,7 +29,7 @@ describe('Use get all case configurations hook', () => {
     ]);
 
     const { result } = renderHook(() => useGetAllCaseConfigurations(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(result.current.data).toEqual([
@@ -64,7 +60,7 @@ describe('Use get all case configurations hook', () => {
     spy.mockResolvedValue([]);
 
     const { result } = renderHook(() => useGetAllCaseConfigurations(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() =>

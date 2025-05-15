@@ -82,27 +82,11 @@ export const getMonitors = async (
     sortField,
     sortOrder,
     query,
-    tags,
-    monitorTypes,
-    locations,
-    filter = '',
     searchAfter,
-    projects,
-    schedules,
-    monitorQueryIds,
     showFromAllSpaces,
   } = context.request.query;
 
-  const { filtersStr } = await getMonitorFilters({
-    filter,
-    monitorTypes,
-    tags,
-    locations,
-    projects,
-    schedules,
-    monitorQueryIds,
-    context,
-  });
+  const { filtersStr } = await getMonitorFilters(context);
 
   return context.savedObjectsClient.find({
     type: syntheticsMonitorType,
@@ -127,19 +111,29 @@ interface Filters {
   projects?: string | string[];
   schedules?: string | string[];
   monitorQueryIds?: string | string[];
+  configIds?: string | string[];
 }
 
-export const getMonitorFilters = async (
-  data: {
-    context: RouteContext;
-  } & Filters
-) => {
-  const { context, locations } = data;
-  const locationFilter = await parseLocationFilter(context, locations);
+export const getMonitorFilters = async (context: RouteContext) => {
+  const {
+    tags,
+    monitorTypes,
+    filter = '',
+    projects,
+    schedules,
+    monitorQueryIds,
+    locations: queryLocations,
+  } = context.request.query;
+  const locations = await parseLocationFilter(context, queryLocations);
 
   return parseArrayFilters({
-    ...data,
-    locationFilter,
+    filter,
+    tags,
+    monitorTypes,
+    projects,
+    schedules,
+    monitorQueryIds,
+    locations,
   });
 };
 
@@ -151,17 +145,14 @@ export const parseArrayFilters = ({
   monitorTypes,
   schedules,
   monitorQueryIds,
-  locationFilter,
-}: Filters & {
-  locationFilter?: string | string[];
-  configIds?: string[];
-}) => {
+  locations,
+}: Filters) => {
   const filtersStr = [
     filter,
     getSavedObjectKqlFilter({ field: 'tags', values: tags }),
     getSavedObjectKqlFilter({ field: 'project_id', values: projects }),
     getSavedObjectKqlFilter({ field: 'type', values: monitorTypes }),
-    getSavedObjectKqlFilter({ field: 'locations.id', values: locationFilter }),
+    getSavedObjectKqlFilter({ field: 'locations.id', values: locations }),
     getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules }),
     getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds }),
     getSavedObjectKqlFilter({ field: 'config_id', values: configIds }),
@@ -169,7 +160,7 @@ export const parseArrayFilters = ({
     .filter((f) => !!f)
     .join(' AND ');
 
-  return { filtersStr, locationFilter };
+  return { filtersStr, locationIds: locations };
 };
 
 export const getSavedObjectKqlFilter = ({
@@ -206,12 +197,24 @@ export const getSavedObjectKqlFilter = ({
   return `${fieldKey}:"${escapeQuotes(values)}"`;
 };
 
-const parseLocationFilter = async (context: RouteContext, locations?: string | string[]) => {
+export const parseLocationFilter = async (
+  {
+    syntheticsMonitorClient,
+    savedObjectsClient,
+    server,
+  }: Pick<RouteContext, 'syntheticsMonitorClient' | 'savedObjectsClient' | 'server'>,
+  locations?: string | string[]
+) => {
   if (!locations || locations?.length === 0) {
     return;
   }
 
-  const { allLocations } = await getAllLocations(context);
+  const { allLocations } = await getAllLocations({
+    syntheticsMonitorClient,
+    savedObjectsClient,
+    server,
+    excludeAgentPolicies: true,
+  });
 
   if (Array.isArray(locations)) {
     return locations

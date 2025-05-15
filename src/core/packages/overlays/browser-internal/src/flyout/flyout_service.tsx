@@ -9,7 +9,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { css } from '@emotion/react';
 import { EuiFlyout, EuiFlyoutResizable } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -19,9 +18,9 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
-import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type { OverlayFlyoutOpenOptions, OverlayFlyoutStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { OverlayMountWrapper } from '../overlay_mount_wrapper';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to
@@ -129,15 +128,6 @@ export class FlyoutService {
           );
         };
 
-        const overlayMountWrapperStyle = css({
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          overflow: 'hidden',
-        });
-
-        // NOTE: The kbnOverlayMountWrapper className is used for allowing consumers to add additional styles
-        // that support drag-and-drop (padding, pointer styles). It is not used for internal styling.
         render(
           <KibanaRenderContextProvider
             analytics={analytics}
@@ -145,13 +135,7 @@ export class FlyoutService {
             theme={theme}
             userProfile={userProfile}
           >
-            {getWrapper(
-              <MountWrapper
-                mount={mount}
-                css={overlayMountWrapperStyle}
-                className="kbnOverlayMountWrapper"
-              />
-            )}
+            {getWrapper(<OverlayMountWrapper mount={mount} />)}
           </KibanaRenderContextProvider>,
           this.targetDomElement
         );

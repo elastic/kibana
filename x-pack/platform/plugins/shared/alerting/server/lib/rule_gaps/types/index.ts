@@ -6,10 +6,16 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { gapBaseSchema, findGapsParamsSchema, findGapsByIdParamsSchema } from '../schemas';
+import {
+  gapBaseSchema,
+  findGapsParamsSchema,
+  findGapsByIdParamsSchema,
+  findGapsSearchAfterParamsSchema,
+} from '../schemas';
 
 export type GapBase = TypeOf<typeof gapBaseSchema>;
 export type FindGapsParams = TypeOf<typeof findGapsParamsSchema>;
+export type FindGapsSearchAfterParams = TypeOf<typeof findGapsSearchAfterParamsSchema>;
 export type FindGapsByIdParams = TypeOf<typeof findGapsByIdParamsSchema>;
 
 export interface Interval {

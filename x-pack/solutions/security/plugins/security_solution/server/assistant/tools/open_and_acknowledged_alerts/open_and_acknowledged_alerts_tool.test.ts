@@ -12,7 +12,7 @@ import type { DynamicTool } from '@langchain/core/tools';
 import { OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL } from './open_and_acknowledged_alerts_tool';
 import type { RetrievalQAChain } from 'langchain/chains';
 import { mockAlertsFieldsApi } from '@kbn/elastic-assistant-plugin/server/__mocks__/alerts';
-import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas';
 import { loggerMock } from '@kbn/logging-mocks';
 import type {
   ContentReferencesStore,
@@ -263,29 +263,6 @@ describe('OpenAndAcknowledgedAlertsTool', () => {
       const result = await tool.func('');
 
       expect(result).toContain('Citation,{reference(exampleContentReferenceId)}');
-    });
-
-    it('does not include citations if content references store is false', async () => {
-      const tool: DynamicTool = OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL.getTool({
-        alertsIndexPattern,
-        anonymizationFields,
-        onNewReplacements: jest.fn(),
-        replacements,
-        request,
-        size: request.body.size,
-        ...rest,
-        contentReferencesStore: undefined,
-      }) as DynamicTool;
-
-      (esClient.search as jest.Mock).mockResolvedValue({
-        hits: {
-          hits: [{ _id: 4 }],
-        },
-      });
-
-      const result = await tool.func('');
-
-      expect(result).not.toContain('Citation');
     });
 
     it('returns null when alertsIndexPattern is undefined', () => {

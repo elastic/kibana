@@ -6,7 +6,7 @@ The tests and helper methods (services, page objects) defined here in
  `serverless_security` plugins.
 
  For how to set up Docker for serverless ES images, please refer to
- [packages/kbn-es/README](https://github.com/elastic/kibana/blob/main/packages/kbn-es/README.mdx).
+ [src/platform/packages/shared/kbn-es/README](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/README.mdx).
 
 ## Serverless testing structure and conventions
 
@@ -106,7 +106,7 @@ particularly when it comes to timing for API requests and UI interaction.
 
 ### Roles-based testing
 
-Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/packages/kbn-es/src/serverless_resources/project_roles)
+Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles)
 and in oder to properly test Kibana functionality, test design requires to login with
 a project-supported SAML role. FTR provides `svlUserManager` service to do SAML authentication, that allows UI tests to set
 the SAML cookie in the browser context and generates api key to use in the api integration tests. See examples below.
@@ -209,9 +209,23 @@ defining and authenticating with custom roles in both UI functional tests and AP
 
 To test role management within the Observability project, you can execute the tests using the existing [config.feature_flags.ts](x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts), where this functionality is explicitly enabled. Though the config is not run on MKI, it provides the ability to test custom roles in Kibana CI before the functionality is enabled in MKI. When roles management is enabled on MKI, these tests can be migrated to the regular FTR config and will be run on MKI.
 
-For compatibility with MKI, the role name `customRole` is reserved for use in tests. The test user is automatically assigned to this role, but before logging in via the browser, generating a cookie header, or creating an API key in each test suite, the role’s privileges must be updated.
+When running tests locally against MKI, ensure that the `.ftr/role_users.json` file includes the reserved role name `custom_role_worker_1` along with its credentials. This role name has been updated for compatibility with Scout, which supports parallel test execution and allows multiple credential pairs to be passed.
 
-Note: We are still working on a solution to run these tests against MKI. In the meantime, please tag the suite with `skipMKI`.
+```json
+{
+  "viewer": {
+    "email": ...,
+    "password": ..."
+  },
+  ...
+  "custom_role_worker_1": {
+    "email": ...,
+    "password": ...
+  }
+}
+```
+
+When using QAF to create a project with a custom native role, ensure that the role name `custom_role_worker_1` is configured as a Kibana role. While the test user is automatically assigned to the custom role, you must update the role's privileges before performing actions such as logging in via the browser, generating a cookie header, or creating an API key within each test suite.
 
 FTR UI test example:
 ```
@@ -254,7 +268,7 @@ await samlAuth.setCustomRole({
 });
 
 // Then, generate an API key with the newly defined privileges
-const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
+const roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
 
 // Remember to invalidate the API key after use and delete the custom role
 await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);

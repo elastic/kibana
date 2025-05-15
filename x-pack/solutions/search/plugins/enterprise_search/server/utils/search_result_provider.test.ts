@@ -92,7 +92,7 @@ describe('Search search provider', () => {
   };
 
   const searchAIResult = {
-    icon: 'logoEnterpriseSearch',
+    icon: 'logoElasticsearch',
     id: 'ai_search',
     score: 80,
     title: 'Search AI',

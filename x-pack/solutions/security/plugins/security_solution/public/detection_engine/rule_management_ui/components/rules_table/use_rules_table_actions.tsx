@@ -25,7 +25,6 @@ import { useDownloadExportedRules } from '../../../rule_management/logic/bulk_ac
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import type { TimeRange } from '../../../rule_gaps/types';
 import { useScheduleRuleRun } from '../../../rule_gaps/logic/use_schedule_rule_run';
-import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
 export const useRulesTableActions = ({
@@ -47,7 +46,6 @@ export const useRulesTableActions = ({
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
-  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
 
   return [
     {
@@ -118,7 +116,6 @@ export const useRulesTableActions = ({
           await downloadExportedRules(response);
         }
       },
-      enabled: (rule: Rule) => isRulesCustomizationEnabled || !rule.immutable,
     },
     {
       type: 'icon',

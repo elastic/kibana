@@ -22,7 +22,7 @@ import {
   BulkCrudActionSummary,
   PerformPromptsBulkActionRequestBody,
   PerformPromptsBulkActionResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+} from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import { ElasticAssistantPluginRouter } from '../../types';
@@ -159,7 +159,7 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,

@@ -8,6 +8,7 @@
 export enum QueryKeys {
   FetchIndex = 'fetchIndex',
   FetchMapping = 'fetchMapping',
+  FetchOnboardingToken = 'fetchOnboardingToken',
   FetchSearchIndicesStatus = 'fetchSearchIndicesStatus',
   FetchUserStartPrivileges = 'fetchUserStartPrivileges',
   SearchDocuments = 'searchDocuments',

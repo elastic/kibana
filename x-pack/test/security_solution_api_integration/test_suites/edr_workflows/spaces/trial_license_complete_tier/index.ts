@@ -57,5 +57,6 @@ export default function endpointAPIIntegrationTests(providerContext: FtrProvider
     });
 
     loadTestFile(require.resolve('./space_awareness'));
+    loadTestFile(require.resolve('./artifacts'));
   });
 }

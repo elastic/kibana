@@ -37,7 +37,7 @@ import {
 } from '../../../../../common/inventory/types';
 import { getColorPalette } from '../../lib/get_color_palette';
 import { convertBoundsToPercents } from '../../lib/convert_bounds_to_percents';
-import { SwatchLabel } from './swatch_label';
+import { ColorLabel } from './color_label';
 import { PalettePreview } from './palette_preview';
 
 interface Props {
@@ -211,6 +211,9 @@ export const LegendControls = ({
         >
           <>
             <EuiSelect
+              aria-label={i18n.translate('xpack.infra.legendControls.colorPalette.ariaLabel', {
+                defaultMessage: 'Color palette selection',
+              })}
               options={PALETTE_OPTIONS}
               value={draftLegend.palette}
               id="palette"
@@ -259,10 +262,6 @@ export const LegendControls = ({
             checked={draftLegend.reverseColors}
             onChange={handleReverseColors}
             compressed
-            style={{
-              position: 'relative',
-              top: '8px',
-            }}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -281,16 +280,13 @@ export const LegendControls = ({
             checked={draftAuto}
             onChange={handleAutoChange}
             compressed
-            style={{
-              position: 'relative',
-              top: '8px',
-            }}
           />
         </EuiFormRow>
         <EuiFormRow
           fullWidth
           label={
-            <SwatchLabel
+            <ColorLabel
+              paletteSelected={draftLegend.palette}
               color={first(paletteColors)!}
               label={i18n.translate('xpack.infra.legendControls.minLabel', {
                 defaultMessage: 'Minimum',
@@ -319,7 +315,8 @@ export const LegendControls = ({
           fullWidth
           display="columnCompressed"
           label={
-            <SwatchLabel
+            <ColorLabel
+              paletteSelected={draftLegend.palette}
               color={last(paletteColors)!}
               label={i18n.translate('xpack.infra.legendControls.maxLabel', {
                 defaultMessage: 'Maximum',
@@ -347,6 +344,9 @@ export const LegendControls = ({
         <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              aria-label={i18n.translate('xpack.infra.legendControls.cancelButton.ariaLabel', {
+                defaultMessage: 'Cancel',
+              })}
               data-test-subj="infraLegendControlsCancelButton"
               type="submit"
               size="s"

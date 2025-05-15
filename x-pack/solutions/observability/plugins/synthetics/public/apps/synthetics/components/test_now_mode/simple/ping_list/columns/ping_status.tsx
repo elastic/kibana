@@ -26,7 +26,7 @@ const getPingStatusLabel = (status: string) => {
 };
 
 export const PingStatusColumn = ({ pingStatus, item }: Props) => {
-  const timeStamp = moment(item.timestamp);
+  const timeStamp = moment(item['@timestamp']);
 
   let checkedTime = '';
 

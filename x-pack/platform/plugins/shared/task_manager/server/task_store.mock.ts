@@ -10,13 +10,16 @@ import { TaskStore } from './task_store';
 interface TaskStoreOptions {
   index?: string;
   taskManagerId?: string;
+  stateVersion?: number;
 }
 export const taskStoreMock = {
-  create({ index = '', taskManagerId = '' }: TaskStoreOptions = {}) {
+  create({ index = '', taskManagerId = '', stateVersion }: TaskStoreOptions = {}) {
     const mocked = {
       taskValidator: {
         getValidatedTaskInstanceFromReading: jest.fn().mockImplementation((task) => task),
-        getValidatedTaskInstanceForUpdating: jest.fn().mockImplementation((task) => task),
+        getValidatedTaskInstanceForUpdating: jest
+          .fn()
+          .mockImplementation((task) => ({ ...task, ...(stateVersion ? { stateVersion } : {}) })),
       },
       convertToSavedObjectIds: jest.fn(),
       update: jest.fn(),

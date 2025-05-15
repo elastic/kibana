@@ -2,6 +2,9 @@
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
+> [!TIP]
+> If you're new to prebuilt rules, get started [here](./prebuilt_rules.md) and check an overview of the features of prebuilt rules in [this section](./prebuilt_rules_common_info.md#features).
+
 ## Summary <!-- omit from toc -->
 
 This is a test plan for the workflow of:
@@ -20,8 +23,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
   - [Terminology](#terminology)
+- [Requirements](#requirements)
   - [Assumptions](#assumptions)
-  - [Functional requirements](#functional-requirements)
+  - [Technical requirements](#technical-requirements)
+  - [Product requirements](#product-requirements)
 - [Scenarios](#scenarios)
   - [Rule upgrade field preview](#rule-upgrade-field-preview)
     - [Preview non-customized field that has an upgrade (AAB)](#preview-non-customized-field-that-has-an-upgrade-aab)
@@ -68,41 +73,58 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Terminology
 
-- **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+- **CTA to upgrade the prebuilt rule**: the button to upgrade the prebuilt rule currently shown in the Rule Upgrade flyout.
 
-  - **CTA to upgrade the prebuilt rule**: the button to upgrade the prebuilt rule currently shown in the Rule Upgrade flyout.
-
-- **Non-customized field**: a prebuilt rule's field that has the original value from the originally installed prebuilt rule.
-
-- **Customized field**: a prebuilt rule's field that has a value that differs from the original field value of the originally installed prebuilt rule.
-
-- **Non-customized rule**: a prebuilt rule that doesn't have any customized fields.
-
-- **Customized rule**: a prebuilt rule that has one or more customized fields.
+## Requirements
 
 ### Assumptions
 
-- Below scenarios only apply to prebuilt detection rules.
+Assumptions about test environments and scenarios outlined in this test plan.
+
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 - A prebuilt rule is shown in the Rule Upgrade table when there's a newer version of this rule in the currently installed package with prebuilt rules.
 
-### Functional requirements
+### Technical requirements
 
-- User should be able to upgrade prebuilt rules one-by-one with the ability to preview:
-  - what updates they would receive from Elastic in the latest rule version;
-  - what user customizations they would retain in the rule;
-  - are there any conflicts between the updates from Elastic and the user customizations;
-  - what they should pay attention to in case there are any conflicts.
-- A preview should be shown in the Rule Upgrade flyout.
+Non-functional requirements for the functionality outlined in this test plan.
+
+- [Common technical requirements](./prebuilt_rules_common_info.md#common-technical-requirements).
+
+### Product requirements
+
+Functional requirements for the functionality outlined in this test plan.
+
+- [Common product requirements](./prebuilt_rules_common_info.md#common-product-requirements).
+
+User stories:
+
+- User can upgrade a single prebuilt rule to its latest version from the Rule Upgrade table with previewing incoming updates from Elastic and user customizations in the Rule Upgrade flyout. See below user stories that describe this workflow in more detail.
+- User can upgrade single prebuilt rules one-by-one via the Rule Upgrade flyout.
+
+User stories for upgrading a rule via the Rule Upgrade flyout:
+
+- User can preview what updates they would receive from Elastic in the latest rule version, per each rule field that has an update from Elastic.
+- User can preview their customizations, and which of them will be retained in the rule or overwritten by updates from Elastic, per each rule field that was customized.
+- User can compare their customizations with updates from Elastic and see if there are any conflicts between them, per each rule field.
+- User can manually resolve conflicts between their customizations and updates from Elastic, per each rule field.
+- User can edit the final field values before submitting the update.
+
+User stories for edge cases:
+
+- User can upgrade a rule if its type has been changed by Elastic in the latest version, but can only accept the incoming changes. User customizations, if the rule has any, will be lost on upgrade. We force the user to preview such changes, meaning that users can only do this via the Rule Upgrade flyout, quick upgrade right from the table is not supported.
+
+What should be inside the Rule Upgrade flyout:
+
 - The Rule Upgrade flyout should contain a few tabs:
   - The "Updates" tab.
   - The "Overview" tab.
   - The "Investigation guide" tab.
 - On the "Updates" tab:
-  - We should show the updates from Elastic and the user-customized fields.
-  - We should show only those fields that are [customizable](./shared_assets/customizable_rule_fields.md).
-  - We shouldn't show technical fields and those that are [not customizable](./shared_assets/non_customizable_rule_fields.md).
-- User should be able to upgrade a prebuilt rule that has some updates to [non-customizable fields](./shared_assets/non_customizable_rule_fields.md) in the latest version.
-- Any other fields that are not involved in the rule upgrade workflow, such as `enabled` or `exceptions`, should stay unchanged after rule upgrade.
+  - We show the updates from Elastic and the user-customized fields.
+  - We show only those fields that are [customizable](./prebuilt_rules_common_info.md#customizable-rule-fields).
+  - We don't show technical fields and those that are [not customizable](./prebuilt_rules_common_info.md#non-customizable-rule-fields). They are handled by the upgrade workflow automatically under the hood.
+  - We don't show some non-technical fields (rule parameters) as they are also handled by the upgrade workflow automatically under the hood. For example, the `enabled` or `exception_list` fields stay unchanged after upgrade (we retain their values from the current rule version).
 
 ## Scenarios
 

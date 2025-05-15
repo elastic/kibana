@@ -26,6 +26,7 @@ import { forceHTMLElementOffsetWidth } from '../../../../components/effected_pol
 import type { PolicyData, TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 
 import { EndpointDocGenerator } from '../../../../../../common/endpoint/generate_data';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -194,6 +195,14 @@ describe('Trusted apps form', () => {
     cleanup();
   });
 
+  it('should display form submission errors', () => {
+    const message = 'oh oh - failed';
+    formProps.error = new Error(message) as IHttpFetchError;
+    render();
+
+    expect(renderResult.getByTestId(`${formPrefix}-submitError`).textContent).toMatch(message);
+  });
+
   describe('Details and Conditions', () => {
     beforeEach(() => render());
 
@@ -313,29 +322,63 @@ describe('Trusted apps form', () => {
       expect(getConditionValue(getCondition()).required).toEqual(true);
     });
 
-    it('should show path malformed warning', () => {
-      render();
-      expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+    describe('IS operator', () => {
+      it('should show path malformed warning', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
 
-      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        entries: [createEntry(ConditionEntryField.PATH, 'match', 'malformed-path')],
-      };
-      formProps.item = { ...formProps.item, ...propsItem };
-      render();
-      expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          entries: [createEntry(ConditionEntryField.PATH, 'match', 'malformed-path')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+      });
+
+      it('should show path malformed path warning for linux/mac without an executable name', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', '/')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+      });
+
+      it('should show path malformed path warning for windows with no executable name', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.pathWarning(0))).toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.WINDOWS],
+          entries: [createEntry(ConditionEntryField.PATH, 'match', 'c:\\fold\\')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.pathWarning(0))).not.toBeNull();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+      });
     });
 
-    it('should show wildcard in path warning', () => {
-      render();
-      expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
+    describe('MATCHES operator', () => {
+      it('should show wildcard in path warning', () => {
+        render();
+        expect(screen.queryByText(INPUT_ERRORS.wildcardPathWarning(0))).toBeNull();
 
-      const propsItem: Partial<ArtifactFormComponentProps['item']> = {
-        os_types: [OperatingSystem.LINUX],
-        entries: [createEntry(ConditionEntryField.PATH, 'wildcard', '/sys/wil*/*.app')],
-      };
-      formProps.item = { ...formProps.item, ...propsItem };
-      render();
-      expect(screen.getByText(INPUT_ERRORS.wildcardPathWarning(0))).not.toBeNull();
+        const propsItem: Partial<ArtifactFormComponentProps['item']> = {
+          os_types: [OperatingSystem.LINUX],
+          entries: [createEntry(ConditionEntryField.PATH, 'wildcard', '/sys/wil*/*.app')],
+        };
+        formProps.item = { ...formProps.item, ...propsItem };
+        render();
+        expect(screen.getByText(INPUT_ERRORS.wildcardPathWarning(0))).not.toBeNull();
+      });
     });
 
     it('should display the `AND` button', () => {
@@ -408,6 +451,22 @@ describe('Trusted apps form', () => {
       formProps.item.tags = [formProps.policies.map((p) => `policy:${p.id}`)[0]];
       render();
       expect(renderResult.queryByTestId('loading-spinner')).not.toBeNull();
+    });
+
+    it('should preserve other tags when policies are updated', async () => {
+      formProps.item.tags = ['some:unknown_tag'];
+      const policyId = formProps.policies[0].id;
+      render();
+      await userEvent.click(renderResult.getByTestId(`${formPrefix}-effectedPolicies-perPolicy`));
+      await userEvent.click(renderResult.getByTestId(`policy-${policyId}`));
+
+      expect(formProps.onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          item: expect.objectContaining({
+            tags: ['some:unknown_tag', `policy:${policyId}`],
+          }),
+        })
+      );
     });
   });
 

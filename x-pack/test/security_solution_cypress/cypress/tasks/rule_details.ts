@@ -46,6 +46,8 @@ import {
   RULE_GAPS_STATUS_FILTER,
   RULE_GAPS_DATE_FILTER_OPTION,
   RULE_GAPS_DATE_PICKER_APPLY_REFRESH,
+  POPOVER_ACTIONS_TRIGGER_BUTTON,
+  EXPORT_RULE_ACTION_BUTTON,
 } from '../screens/rule_details';
 import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
 import {
@@ -214,6 +216,11 @@ export const refreshRuleExecutionTable = () =>
 export const filterByRunType = (ruleType: string) => {
   cy.get(EXECUTION_RUN_TYPE_FILTER).click();
   cy.get(EXECUTION_RUN_TYPE_FILTER_ITEM).contains(ruleType).click();
+};
+
+export const exportRuleFromDetailsPage = () => {
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
+  cy.get(EXPORT_RULE_ACTION_BUTTON).click();
 };
 
 export const getBackfillsTableRows = () => {

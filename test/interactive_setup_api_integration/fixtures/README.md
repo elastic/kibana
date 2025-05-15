@@ -9,7 +9,7 @@ The Elasticsearch HTTP layer keystore is supposed to mimic the PKCS12 keystore t
 __IMPORTANT:__ CA keystore (ca.p12) is not checked in intentionally, talk to @elastic/kibana-security if you need it to sign new certificates.
 
 ```bash
-ROOT_CA_PATH='packages/kbn-dev-utils/certs/ca.p12'
+ROOT_CA_PATH='src/platform/packages/shared/kbn-dev-utils/certs/ca.p12'
 ROOT_CA_NAME='root'
 INTERMEDIATE_CA_NAME='intermediate'
 INSTANCE_NAME='elasticsearch'

@@ -37,7 +37,7 @@ export const samlAuthentication = async (
   };
 
   const rolesPath =
-    '../../../../packages/kbn-es/src/serverless_resources/project_roles/security/roles.yml';
+    '../../../../src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml';
 
   // If config.env.PROXY_ORG is set, it means that proxy service is used to create projects. Define the proxy org filename to override the roles.
   const rolesFilename = config.env.PROXY_ORG ? `${config.env.PROXY_ORG}.json` : undefined;

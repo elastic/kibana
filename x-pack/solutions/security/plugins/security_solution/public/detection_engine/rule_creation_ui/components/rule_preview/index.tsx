@@ -65,7 +65,7 @@ const timeRanges = [
 ];
 
 export interface RulePreviewProps {
-  isDisabled?: boolean;
+  verifyRuleDefinition: () => Promise<boolean>;
   defineRuleData: DefineStepRule;
   aboutRuleData: AboutStepRule;
   scheduleRuleData: ScheduleStepRule;
@@ -88,7 +88,7 @@ const refreshedTimeframe = (startDate: string, endDate: string) => {
 };
 
 const RulePreviewComponent: React.FC<RulePreviewProps> = ({
-  isDisabled,
+  verifyRuleDefinition,
   defineRuleData,
   aboutRuleData,
   scheduleRuleData,
@@ -115,6 +115,8 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   const [showElasticsearchRequests, setShowElasticsearchRequests] = useState(false);
 
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
+
+  const [showRuleDefitnionInvalidWarning, setShowRuleDefinitionInvalidWarning] = useState(false);
 
   const isLoggedRequestsSupported = RULE_TYPES_SUPPORTING_LOGGED_REQUESTS.includes(ruleType);
 
@@ -189,7 +191,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     []
   );
 
-  const onTimeframeRefresh = useCallback(() => {
+  const triggerTimeFrameRefresh = useCallback(() => {
     startTransaction({ name: SINGLE_RULE_ACTIONS.PREVIEW });
     const { start, end } = refreshedTimeframe(startDate, endDate);
     setTimeframeStart(start);
@@ -217,6 +219,22 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     showElasticsearchRequests,
     isLoggedRequestsSupported,
   ]);
+
+  const onPreviewTriggered = useCallback(() => {
+    setIsRefreshing(true);
+    const doVerification = async () => {
+      const isValid = await verifyRuleDefinition();
+      if (!isValid) {
+        setShowRuleDefinitionInvalidWarning(true);
+        setIsRefreshing(false);
+        return;
+      }
+
+      setShowRuleDefinitionInvalidWarning(false);
+      triggerTimeFrameRefresh();
+    };
+    doVerification();
+  }, [triggerTimeFrameRefresh, verifyRuleDefinition]);
 
   const isDirty = useMemo(
     () =>
@@ -261,6 +279,18 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
           <EuiSpacer />
         </>
       )}
+      {showRuleDefitnionInvalidWarning && (
+        <>
+          <EuiCallOut
+            color="warning"
+            title={i18n.QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_TITLE}
+            data-test-subj="previewRuleDefinitionInvalidWarning"
+          >
+            {i18n.QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_MESSAGE}
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
       <EuiSpacer size="xs" />
       <EuiFormRow label={i18n.QUERY_PREVIEW_LABEL}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive>
@@ -268,20 +298,19 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
             <EuiSuperDatePicker
               start={startDate}
               end={endDate}
-              isDisabled={isDisabled}
               onTimeChange={onTimeChange}
               showUpdateButton={false}
               commonlyUsedRanges={timeRanges}
-              onRefresh={onTimeframeRefresh}
+              onRefresh={onPreviewTriggered}
               data-test-subj="preview-time-frame"
               width="full"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSuperUpdateButton
-              isDisabled={isDateRangeInvalid || isDisabled}
+              isDisabled={isDateRangeInvalid}
               iconType={isDirty ? 'kqlFunction' : 'refresh'}
-              onClick={onTimeframeRefresh}
+              onClick={onPreviewTriggered}
               color={isDirty ? 'success' : 'primary'}
               fill={true}
               data-test-subj="previewSubmitButton"

@@ -9,6 +9,7 @@ import React, { Fragment, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useHistory } from 'react-router-dom';
 
 import {
   useStartServices,
@@ -17,12 +18,14 @@ import {
   useConfig,
   sendGetAgents,
   useMultipleAgentPolicies,
+  useLink,
 } from '../hooks';
 import { AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy } from '../types';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
+  from?: 'fleet-policy-list' | undefined;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }
 
@@ -35,12 +38,15 @@ type OnSuccessCallback = (packagePoliciesDeleted: string[]) => void;
 
 export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   agentPolicies,
+  from,
   children,
 }) => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
+  const history = useHistory();
+  const { getPath } = useLink();
   const [packagePolicies, setPackagePolicies] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoadingAgentsCount, setIsLoadingAgentsCount] = useState<boolean>(false);
@@ -140,6 +146,9 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
           if (!!agentlessPolicy) {
             try {
               await sendDeleteAgentPolicy({ agentPolicyId: agentlessPolicy.id });
+              if (from === 'fleet-policy-list') {
+                history.push(getPath('policies_list'));
+              }
             } catch (e) {
               notifications.toasts.addDanger(
                 i18n.translate(
@@ -181,7 +190,7 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
       }
       closeModal();
     },
-    [closeModal, packagePolicies, notifications.toasts, agentPolicies]
+    [closeModal, packagePolicies, notifications.toasts, agentPolicies, getPath, history, from]
   );
 
   const renderModal = () => {

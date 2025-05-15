@@ -182,7 +182,7 @@ const setup = () => {
     ...alertsServices,
     getSearchSourceClient: jest.fn().mockResolvedValue({
       ...searchSourceCommonMock,
-      create: jest.fn(() => Promise.resolve(mockedSearchSource)),
+      createLazy: jest.fn(() => Promise.resolve(mockedSearchSource)),
     }),
   };
 
@@ -1658,6 +1658,47 @@ describe('The custom threshold alert type', () => {
             },
           },
         });
+      });
+      test('includes reason message in the recovered alert context pulled from the last active alert ', async () => {
+        setEvaluationResults([{}]);
+        const mockedSetContext = jest.fn();
+        services.alertsClient.getRecoveredAlerts.mockImplementation((params: any) => {
+          return [
+            {
+              alert: {
+                meta: [],
+                state: [],
+                context: {},
+                id: 'host-0',
+                getId: jest.fn().mockReturnValue('host-0'),
+                getUuid: jest.fn().mockReturnValue('mockedUuid'),
+                getStart: jest.fn().mockReturnValue('2024-07-18T08:09:05.697Z'),
+              },
+              hit: {
+                'host.name': 'host-0',
+                'kibana.alert.reason': 'This is reason msg for the alert',
+              },
+            },
+          ];
+        });
+        services.alertFactory.done.mockImplementation(() => {
+          return {
+            getRecoveredAlerts: jest.fn().mockReturnValue([
+              {
+                setContext: mockedSetContext,
+                getId: jest.fn().mockReturnValue('mockedId'),
+              },
+            ]),
+          };
+        });
+        await execute(COMPARATORS.GREATER_THAN, [0.9]);
+        expect(services.alertsClient.setAlertData).toBeCalledWith(
+          expect.objectContaining({
+            context: expect.objectContaining({
+              reason: 'This is reason msg for the alert',
+            }),
+          })
+        );
       });
     });
 

@@ -8,6 +8,7 @@
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 import { services } from './services';
 
@@ -33,6 +34,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: [require.resolve(`../${name}/apis/`)],
       servers: config.xpack.api.get('servers'),
       services,

@@ -48,6 +48,7 @@ export const DeepContextVariables = {
   nullJ: null,
   undefinedK: undefined,
   dateL: '2023-04-20T04:13:17.858Z',
+  encodeableUrl: 'https://www.elastic.co?foo=bar&baz= qux',
 };
 
 function getAlwaysFiringRuleType() {
@@ -794,11 +795,34 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
     isExportable: true,
     ruleTaskTimeout: '3s',
     cancelAlertsOnRuleTimeout,
+    autoRecoverAlerts: false,
+    alerts: {
+      context: 'test.patternfiring',
+      shouldWrite: true,
+      mappings: {
+        fieldMap: {
+          patternIndex: {
+            required: false,
+            type: 'long',
+          },
+          instancePattern: {
+            required: false,
+            type: 'boolean',
+            array: true,
+          },
+        },
+      },
+    },
     async executor(ruleExecutorOptions) {
       const { services, params } = ruleExecutorOptions;
       const pattern = params.pattern;
       if (!Array.isArray(pattern)) {
         throw new Error(`pattern is not an array`);
+      }
+
+      const alertsClient = services.alertsClient;
+      if (!alertsClient) {
+        throw new Error(`Expected alertsClient to be defined but it is not`);
       }
 
       // get the pattern index, return if past it
@@ -807,7 +831,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
         return { state: {} };
       }
 
-      services.alertFactory.create('alert').scheduleActions('default', {});
+      alertsClient.report({ id: `alert_${globalPatternIndex}`, actionGroup: 'default' });
 
       // run long if pattern says to
       if (pattern[globalPatternIndex++] === true) {
@@ -932,6 +956,78 @@ function getAlwaysFiringAlertAsDataRuleType() {
         fieldMap: {},
       },
       useLegacyAlerts: true,
+      shouldWrite: true,
+    },
+  };
+  return result;
+}
+
+function getAlwaysFiringAlertAsDataWithDynamicTemplatesRuleType() {
+  const paramsSchema = schema.object({
+    dynamic_fields: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+
+  const result: RuleType<
+    ParamsType,
+    never,
+    RuleTypeState,
+    {},
+    {},
+    'default',
+    'recovered',
+    { 'kibana.alert.dynamic': { [key: string]: any } }
+  > = {
+    id: 'test.always-firing-alert-as-data-with-dynamic-templates',
+    name: 'Test: Rule with dynamicTemplates and writing Alerts as Data',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'management',
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    doesSetRecoveryContext: true,
+    validate: {
+      params: paramsSchema,
+    },
+    async executor(ruleExecutorOptions) {
+      const { services, params } = ruleExecutorOptions;
+
+      services.alertsClient?.report({
+        id: '1',
+        actionGroup: 'default',
+        payload: { 'kibana.alert.dynamic': params.dynamic_fields },
+      });
+
+      return { state: {} };
+    },
+    alerts: {
+      context: 'observability.test.alerts.dynamic.templates',
+      mappings: {
+        dynamic: false,
+        fieldMap: {
+          ['kibana.alert.dynamic']: {
+            type: 'object',
+            dynamic: true,
+            array: false,
+            required: false,
+          },
+        },
+        dynamicTemplates: [
+          {
+            strings_as_keywords: {
+              path_match: 'kibana.alert.dynamic.*',
+              match_mapping_type: 'string',
+              mapping: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+            },
+          },
+        ],
+      },
+      useLegacyAlerts: false,
+      useEcs: false,
       shouldWrite: true,
     },
   };
@@ -1368,6 +1464,7 @@ export function defineRuleTypes(
   alerting.registerType(getPatternSuccessOrFailureRuleType());
   alerting.registerType(getExceedsAlertLimitRuleType());
   alerting.registerType(getAlwaysFiringAlertAsDataRuleType());
+  alerting.registerType(getAlwaysFiringAlertAsDataWithDynamicTemplatesRuleType());
   alerting.registerType(getPatternFiringAutoRecoverFalseRuleType());
   alerting.registerType(getPatternFiringAlertsAsDataRuleType());
   alerting.registerType(getWaitingRuleType(logger));

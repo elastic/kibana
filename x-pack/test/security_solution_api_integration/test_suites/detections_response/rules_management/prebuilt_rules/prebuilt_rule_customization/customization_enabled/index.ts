@@ -12,7 +12,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./is_customized_calculation'));
     loadTestFile(require.resolve('./import_rules'));
     loadTestFile(require.resolve('./rules_export'));
-    loadTestFile(require.resolve('./upgrade_perform_prebuilt_rules.all_rules_mode'));
-    loadTestFile(require.resolve('./upgrade_perform_prebuilt_rules.specific_rules_mode'));
+    loadTestFile(require.resolve('./rule_customization'));
+    loadTestFile(require.resolve('./preview_prebuilt_rules_upgrade'));
+    loadTestFile(require.resolve('./upgrade_prebuilt_rules'));
   });
 };

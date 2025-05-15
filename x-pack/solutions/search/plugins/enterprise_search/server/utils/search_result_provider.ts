@@ -41,7 +41,7 @@ export function toSearchResult({
   const newUrl = `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector`;
 
   return {
-    icon: iconPath || 'logoEnterpriseSearch',
+    icon: iconPath || 'logoElasticsearch',
     id: serviceType,
     score,
     title: name,

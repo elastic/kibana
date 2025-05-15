@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Indicator } from '@kbn/slo-schema';
+import type { Indicator, Objective } from '@kbn/slo-schema';
 
 interface SloListFilter {
   kqlQuery: string;
@@ -61,11 +61,17 @@ export const sloKeys = {
     instanceId: string | undefined,
     windows: Array<{ name: string; duration: string }>
   ) => [...sloKeys.all, 'burnRates', sloId, instanceId, windows] as const,
-  preview: (
-    indicator: Indicator,
-    range: { from: Date; to: Date },
-    groupings?: Record<string, unknown>
-  ) => [...sloKeys.all, 'preview', indicator, range, groupings] as const,
+  preview: (params: {
+    remoteName?: string;
+    groupings?: Record<string, string | number>;
+    objective?: Objective;
+    indicator: Indicator;
+    range: {
+      from: Date;
+      to: Date;
+    };
+    groupBy?: string[];
+  }) => [...sloKeys.all, 'preview', params] as const,
   burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
   groupings: (params: {
     sloId: string;

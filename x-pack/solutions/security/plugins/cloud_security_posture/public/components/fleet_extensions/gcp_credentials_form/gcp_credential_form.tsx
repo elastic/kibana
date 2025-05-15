@@ -338,17 +338,16 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFiel
     });
 
 const getSetupFormatFromInput = (
-  input: Extract<
-    NewPackagePolicyPostureInput,
-    { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_eks' | 'cloudbeat/cis_gcp' }
-  >
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
 ): SetupFormatGCP => {
-  const credentialsType = input.streams[0].vars?.setup_access?.value;
+  const credentialsType = getGcpCredentialsType(input);
+
   // Google Cloud shell is the default value
   if (!credentialsType) {
     return GCP_SETUP_ACCESS.CLOUD_SHELL;
   }
-  if (credentialsType !== GCP_SETUP_ACCESS.CLOUD_SHELL) {
+
+  if (credentialsType !== GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE) {
     return GCP_SETUP_ACCESS.MANUAL;
   }
 
@@ -474,10 +473,6 @@ export const GcpCredentialsForm = ({
 
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
-          setup_access: {
-            value: GCP_SETUP_ACCESS.CLOUD_SHELL,
-            type: 'text',
-          },
           'gcp.credentials.type': {
             value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
             type: 'text',
@@ -490,10 +485,6 @@ export const GcpCredentialsForm = ({
     } else {
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
-          setup_access: {
-            value: GCP_SETUP_ACCESS.MANUAL,
-            type: 'text',
-          },
           'gcp.credentials.type': {
             // Restoring last manual credentials type
             value: lastCredentialsType.current || GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
@@ -586,28 +577,8 @@ export const GcpInputVarFields = ({
   };
 
   const organizationIdFields = getFieldById('gcp.organization_id');
-  const organizationIdValueInvalid = fieldIsInvalid(
-    organizationIdFields?.value,
-    hasInvalidRequiredVars
-  );
-  const organizationIdError = i18n.translate(
-    'xpack.csp.cspmIntegration.integration.fieldRequired',
-    {
-      defaultMessage: '{field} is required',
-      values: {
-        field: organizationIdFields?.label,
-      },
-    }
-  );
 
   const projectIdFields = getFieldById('gcp.project_id');
-  const projectIdValueInvalid = fieldIsInvalid(projectIdFields?.value, hasInvalidRequiredVars);
-  const projectIdError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
-    defaultMessage: '{field} is required',
-    values: {
-      field: projectIdFields?.label,
-    },
-  });
 
   const credentialsTypeFields = getFieldById('gcp.credentials.type');
 
@@ -653,12 +624,7 @@ export const GcpInputVarFields = ({
     <div>
       <EuiForm component="form">
         {organizationIdFields && isOrganization && (
-          <EuiFormRow
-            fullWidth
-            label={gcpField.fields['gcp.organization_id'].label}
-            isInvalid={organizationIdValueInvalid}
-            error={organizationIdValueInvalid ? organizationIdError : undefined}
-          >
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
             <EuiFieldText
               disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
@@ -666,17 +632,11 @@ export const GcpInputVarFields = ({
               fullWidth
               value={organizationIdFields.value || ''}
               onChange={(event) => onChange(organizationIdFields.id, event.target.value)}
-              isInvalid={organizationIdValueInvalid}
             />
           </EuiFormRow>
         )}
         {projectIdFields && (
-          <EuiFormRow
-            fullWidth
-            label={gcpField.fields['gcp.project_id'].label}
-            isInvalid={projectIdValueInvalid}
-            error={projectIdValueInvalid ? projectIdError : undefined}
-          >
+          <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
             <EuiFieldText
               disabled={disabled}
               data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
@@ -684,7 +644,6 @@ export const GcpInputVarFields = ({
               fullWidth
               value={projectIdFields.value || ''}
               onChange={(event) => onChange(projectIdFields.id, event.target.value)}
-              isInvalid={projectIdValueInvalid}
             />
           </EuiFormRow>
         )}
@@ -752,8 +711,6 @@ export const GcpInputVarFields = ({
                   onChange={(value) => {
                     onChange(credentialJSONFields.id, value);
                   }}
-                  errors={credentialJSONFieldsInvalid ? [credentialJSONError] : []}
-                  forceShowErrors={false}
                   isEditPage={isEditPage}
                 />
               </Suspense>

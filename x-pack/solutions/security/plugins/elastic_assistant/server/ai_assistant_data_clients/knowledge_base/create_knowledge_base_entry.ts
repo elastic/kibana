@@ -47,7 +47,6 @@ export const createKnowledgeBaseEntry = async ({
   user,
   knowledgeBaseEntry,
   logger,
-  global = false,
   telemetry,
 }: CreateKnowledgeBaseEntryParams): Promise<KnowledgeBaseEntryResponse | null> => {
   const createdAt = new Date().toISOString();
@@ -56,7 +55,6 @@ export const createKnowledgeBaseEntry = async ({
     spaceId,
     user,
     entry: knowledgeBaseEntry as unknown as KnowledgeBaseEntryCreateProps,
-    global,
   });
   const telemetryPayload = {
     entryType: body.type,
@@ -112,22 +110,21 @@ interface TransformToUpdateSchemaProps {
   user: AuthenticatedUser;
   updatedAt: string;
   entry: KnowledgeBaseEntryUpdateProps;
-  global?: boolean;
 }
 
 export const transformToUpdateSchema = ({
   user,
   updatedAt,
   entry,
-  global = false,
 }: TransformToUpdateSchemaProps): UpdateKnowledgeBaseEntrySchema => {
   const base = {
     id: entry.id,
     updated_at: updatedAt,
-    updated_by: user.profile_uid ?? 'unknown',
+    updated_by: user.profile_uid ?? user.username ?? 'unknown',
     name: entry.name,
     type: entry.type,
-    users: global
+    global: entry.global,
+    users: entry.global
       ? []
       : [
           {
@@ -142,6 +139,7 @@ export const transformToUpdateSchema = ({
     return {
       ...base,
       ...restEntry,
+      users: restEntry.users ?? base.users,
       query_description: queryDescription,
       input_schema:
         entry.inputSchema?.map((schema) => ({
@@ -177,7 +175,6 @@ interface TransformToCreateSchemaProps {
   spaceId: string;
   user: AuthenticatedUser;
   entry: KnowledgeBaseEntryCreateProps;
-  global?: boolean;
 }
 
 export const transformToCreateSchema = ({
@@ -185,18 +182,18 @@ export const transformToCreateSchema = ({
   spaceId,
   user,
   entry,
-  global = false,
 }: TransformToCreateSchemaProps): CreateKnowledgeBaseEntrySchema => {
   const base = {
     '@timestamp': createdAt,
     created_at: createdAt,
-    created_by: user.profile_uid ?? 'unknown',
+    created_by: user.profile_uid ?? user.username ?? 'unknown',
     updated_at: createdAt,
-    updated_by: user.profile_uid ?? 'unknown',
+    updated_by: user.profile_uid ?? user.username ?? 'unknown',
     name: entry.name,
     namespace: spaceId,
     type: entry.type,
-    users: global
+    global: entry.global,
+    users: entry.global
       ? []
       : [
           {
@@ -211,6 +208,7 @@ export const transformToCreateSchema = ({
     return {
       ...base,
       ...restEntry,
+      users: restEntry.users ?? base.users,
       query_description: queryDescription,
       input_schema:
         entry.inputSchema?.map((schema) => ({

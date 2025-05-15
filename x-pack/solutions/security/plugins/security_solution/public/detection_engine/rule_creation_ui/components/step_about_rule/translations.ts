@@ -85,29 +85,40 @@ export const URL_FORMAT_INVALID = i18n.translate(
 );
 
 export const ADD_RULE_NOTE_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.noteHelpText',
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.noteHelpText',
   {
     defaultMessage: 'Add rule investigation guide...',
   }
 );
 
 export const ADD_RULE_SETUP_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.setupHelpText',
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.addRuleSetupHelpText',
   {
     defaultMessage: 'Add rule setup guide...',
   }
 );
 
-export const AUTHOR_IMMUTABLE_FIELD_TOOLTIP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.authorImmutableFieldTooltipText',
+export const AUTHOR_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAuthorLabel',
   {
-    defaultMessage: 'Author is not editable for Elastic rules',
+    defaultMessage: 'Author',
   }
 );
 
-export const LICENSE_IMMUTABLE_FIELD_TOOLTIP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.licenseImmutableFieldTooltipText',
+export const LICENSE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldLicenseLabel',
   {
-    defaultMessage: 'License is not editable for Elastic rules',
+    defaultMessage: 'License',
   }
 );
+
+export const FIELD_NOT_EDITABLE_TOOLTIP_TEXT = (fieldName: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNotEditableTooltipText',
+    {
+      defaultMessage: "{fieldName} can't be edited for Elastic rules.",
+      values: {
+        fieldName,
+      },
+    }
+  );

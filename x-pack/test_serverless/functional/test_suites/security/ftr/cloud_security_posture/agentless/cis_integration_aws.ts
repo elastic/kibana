@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
   ]);
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   describe('Serverless - Agentless CIS Integration Page', function () {
     // TODO: we need to check if the tests are running on MKI. There is a suspicion that installing csp package via Kibana server args is not working on MKI.
@@ -110,16 +111,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(true);
       });
     });
-    // FLAKY: https://github.com/elastic/kibana/issues/191017
-    describe.skip('Serverless - Agentless CIS_AWS Create flow', () => {
+
+    // turned back on after the fix for fleet form bug https://github.com/elastic/kibana/pull/211563 - need to monitor
+    describe('Serverless - Agentless CIS_AWS Create flow', () => {
       it(`user should save agentless integration policy when there are no api or validation errors and button is not disabled`, async () => {
         await cisIntegration.createAgentlessIntegration({
           cloudProvider: 'aws',
         });
-
-        expect(await cisIntegration.showSuccessfulToast('packagePolicyCreateSuccessToast')).to.be(
-          true
-        );
+        await retry.try(async () => {
+          expect(await cisIntegration.showSuccessfulToast('packagePolicyCreateSuccessToast')).to.be(
+            true
+          );
+        });
       });
     });
   });

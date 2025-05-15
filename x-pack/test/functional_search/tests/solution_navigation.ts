@@ -53,7 +53,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Web Crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Behavioral Analytics' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Other tools' });
     });
@@ -116,7 +115,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'management:index_management',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
@@ -173,20 +171,6 @@ export default function searchSolutionNavigation({
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'enterpriseSearchApplications:searchApplications',
-      });
-      // > Behavioral Analytics
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Behavioral Analytics',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchAnalytics',
       });
 
       // check Relevance
@@ -267,8 +251,8 @@ export default function searchSolutionNavigation({
         'enterpriseSearchContent:webCrawlers',
         'build',
         'searchPlayground',
+        'searchSynonyms:synonyms',
         'enterpriseSearchApplications:searchApplications',
-        'enterpriseSearchAnalytics',
         'relevance',
         'searchInferenceEndpoints:inferenceEndpoints',
         'otherTools',

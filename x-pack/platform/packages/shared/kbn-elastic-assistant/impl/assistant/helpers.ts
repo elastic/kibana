@@ -25,6 +25,7 @@ export const getMessageFromRawResponse = (
       timestamp: dateTimeString,
       isError,
       traceData: rawResponse.traceData,
+      metadata: rawResponse.metadata,
     };
   } else {
     return {

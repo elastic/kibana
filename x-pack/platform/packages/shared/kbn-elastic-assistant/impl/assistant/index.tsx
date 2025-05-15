@@ -51,6 +51,11 @@ import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
 import { AnonymizedValuesAndCitationsTour } from '../tour/anonymized_values_and_citations_tour';
+import {
+  conversationContainsAnonymizedValues,
+  conversationContainsContentReferences,
+} from './conversations/utils';
+import { useAssistantLastConversation, useAssistantSpaceId } from './use_space_aware_context';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -88,16 +93,13 @@ const AssistantComponent: React.FC<Props> = ({
     augmentMessageCodeBlocks,
     baseConversations,
     getComments,
-    getLastConversationId,
     http,
     promptContexts,
     currentUserAvatar,
-    setLastConversationId,
     contentReferencesVisible,
     showAnonymizedValues,
     setContentReferencesVisible,
     setShowAnonymizedValues,
-    assistantFeatures: { contentReferencesEnabled },
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -130,6 +132,15 @@ const AssistantComponent: React.FC<Props> = ({
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+  const spaceId = useAssistantSpaceId();
+  const { setLastConversationId, getLastConversationId } = useAssistantLastConversation({
+    spaceId,
+  });
+  const lastConversationIdFromLocalStorage = useMemo(
+    () => getLastConversationId(),
+    [getLastConversationId]
+  );
+
   const {
     currentConversation,
     currentSystemPrompt,
@@ -144,14 +155,13 @@ const AssistantComponent: React.FC<Props> = ({
     conversations,
     defaultConnector,
     refetchCurrentUserConversations,
-    conversationId: getLastConversationId(conversationTitle),
+    conversationId: conversationTitle ?? lastConversationIdFromLocalStorage,
     mayUpdateConversations:
       isFetchedConnectors &&
       isFetchedCurrentUserConversations &&
       isFetchedPrompts &&
       Object.keys(conversations).length > 0,
   });
-
   const isInitialLoad = useMemo(() => {
     if (!isAssistantEnabled) {
       return false;
@@ -227,10 +237,12 @@ const AssistantComponent: React.FC<Props> = ({
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.altKey && event.code === 'KeyC') {
+        if (!conversationContainsContentReferences(currentConversation)) return;
         event.preventDefault();
         setContentReferencesVisible(!contentReferencesVisible);
       }
       if (event.altKey && event.code === 'KeyA') {
+        if (!conversationContainsAnonymizedValues(currentConversation)) return;
         event.preventDefault();
         setShowAnonymizedValues(!showAnonymizedValues);
       }
@@ -240,6 +252,7 @@ const AssistantComponent: React.FC<Props> = ({
       contentReferencesVisible,
       setShowAnonymizedValues,
       showAnonymizedValues,
+      currentConversation,
     ]
   );
 
@@ -401,7 +414,6 @@ const AssistantComponent: React.FC<Props> = ({
             currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
             contentReferencesVisible,
-            contentReferencesEnabled,
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -432,7 +444,6 @@ const AssistantComponent: React.FC<Props> = ({
       contentReferencesVisible,
       euiTheme.size.l,
       selectedPromptContextsCount,
-      contentReferencesEnabled,
     ]
   );
 
@@ -450,9 +461,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   return (
     <>
-      {contentReferencesEnabled && (
-        <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
-      )}
+      <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
       <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
         {chatHistoryVisible && (
           <EuiFlexItem

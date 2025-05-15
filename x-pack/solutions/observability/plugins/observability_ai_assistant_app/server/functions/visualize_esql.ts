@@ -30,6 +30,7 @@ const getMessageForLLM = (
 export function registerVisualizeESQLFunction({
   functions,
   resources,
+  signal,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     visualizeESQLFunction,
@@ -43,6 +44,7 @@ export function registerVisualizeESQLFunction({
       const { columns, errorMessages, rows, error } = await runAndValidateEsqlQuery({
         query: correctedQuery,
         client: (await resources.context.core).elasticsearch.client.asCurrentUser,
+        signal,
       });
 
       const message = getMessageForLLM(intention, query, Boolean(errorMessages?.length));

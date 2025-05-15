@@ -17,6 +17,12 @@ export function registerDocumentRoutes(router: IRouter, logger: Logger) {
   router.delete(
     {
       path: INDEX_DOCUMENT_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),

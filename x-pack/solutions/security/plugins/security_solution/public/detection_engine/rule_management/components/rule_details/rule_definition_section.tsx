@@ -913,7 +913,7 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
-  const { isSuppressionEnabled } = useAlertSuppression();
+  const { isSuppressionEnabled } = useAlertSuppression(rule.type);
 
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,

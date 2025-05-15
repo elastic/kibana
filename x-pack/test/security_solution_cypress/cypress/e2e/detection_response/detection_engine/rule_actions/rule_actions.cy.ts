@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST,
+  CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_SELECTOR,
+} from '../../../../screens/common/rule_actions';
 import { RULE_NAME_HEADER } from '../../../../screens/rule_details';
 import { getIndexConnector } from '../../../../objects/connector';
 import { getSimpleCustomQueryRule } from '../../../../objects/rule';
@@ -21,6 +25,7 @@ import {
 } from '../../../../tasks/api_calls/common';
 import {
   createAndEnableRule,
+  createCasesAction,
   fillAboutRuleAndContinue,
   fillDefineCustomRuleAndContinue,
   fillRuleAction,
@@ -33,7 +38,8 @@ import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_ma
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/211959
+describe.skip(
   'Rule actions during detection rule creation',
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
@@ -105,6 +111,24 @@ describe(
 
       // UI redirects to rule creation page of a created rule
       cy.get(RULE_NAME_HEADER).should('contain', rule.name);
+    });
+
+    it('Forwards the correct rule type id to the Cases system action', () => {
+      visit(CREATE_RULE_URL);
+      fillDefineCustomRuleAndContinue(rule);
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
+      createCasesAction();
+
+      cy.get(CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_SELECTOR).click();
+      cy.get(CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST).should('be.visible');
+      cy.waitUntil(() => {
+        return cy
+          .get(`${CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST} button[role=option]`)
+          .then(($items) => {
+            return $items.length > 0;
+          });
+      });
     });
   }
 );

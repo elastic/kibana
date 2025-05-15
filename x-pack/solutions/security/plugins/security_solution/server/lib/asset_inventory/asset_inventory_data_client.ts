@@ -34,11 +34,7 @@ export class AssetInventoryDataClient {
 
   // Initializes the asset inventory by validating experimental feature flags and triggering asynchronous setup.
   public async init() {
-    const { experimentalFeatures, logger } = this.options;
-
-    if (!experimentalFeatures.assetInventoryStoreEnabled) {
-      throw new Error('Universal entity store is not enabled');
-    }
+    const { logger } = this.options;
 
     logger.debug(`Initializing asset inventory`);
 

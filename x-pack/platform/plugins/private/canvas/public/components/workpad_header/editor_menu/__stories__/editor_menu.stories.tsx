@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
@@ -47,12 +46,20 @@ const testVisTypeAliases: VisTypeAlias[] = [
   },
 ];
 
-storiesOf('components/WorkpadHeader/EditorMenu', module).add('default', () => (
-  <EditorMenu
-    addPanelActions={[]}
-    promotedVisTypes={testVisTypes}
-    visTypeAliases={testVisTypeAliases}
-    createNewVisType={() => action('createNewVisType')}
-    createNewEmbeddableFromAction={() => action('createNewEmbeddableFromAction')}
-  />
-));
+export default {
+  title: 'components/WorkpadHeader/EditorMenu',
+};
+
+export const Default = {
+  render: () => (
+    <EditorMenu
+      addPanelActions={[]}
+      promotedVisTypes={testVisTypes}
+      visTypeAliases={testVisTypeAliases}
+      createNewVisType={() => action('createNewVisType')}
+      createNewEmbeddableFromAction={() => action('createNewEmbeddableFromAction')}
+    />
+  ),
+
+  name: 'default',
+};

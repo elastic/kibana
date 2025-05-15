@@ -6,7 +6,11 @@
  */
 
 import { getChatParams } from './get_chat_params';
-import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
 import {
   OPENAI_CONNECTOR_ID,
   BEDROCK_CONNECTOR_ID,
@@ -23,6 +27,7 @@ jest.mock('@kbn/langchain/server', () => {
     ...original,
     ActionsClientChatOpenAI: jest.fn(),
     ActionsClientSimpleChatModel: jest.fn(),
+    ActionsClientChatVertexAI: jest.fn(),
   };
 });
 
@@ -74,7 +79,7 @@ describe('getChatParams', () => {
     expect(result.chatPrompt).toContain('Hello, world!');
   });
 
-  it('returns the correct chat model and prompt for Gemeni', async () => {
+  it('returns the correct chat model and prompt for Gemini', async () => {
     mockActionsClient.get.mockResolvedValue({ id: '1', actionTypeId: GEMINI_CONNECTOR_ID });
 
     const result = await getChatParams(
@@ -94,9 +99,8 @@ describe('getChatParams', () => {
     expect(QuestionRewritePrompt).toHaveBeenCalledWith({
       type: 'gemini',
     });
-    expect(ActionsClientSimpleChatModel).toHaveBeenCalledWith({
+    expect(ActionsClientChatVertexAI).toHaveBeenCalledWith({
       temperature: 0,
-      llmType: 'gemini',
       logger: expect.anything(),
       model: 'gemini-1.5-pro',
       connectorId: '1',

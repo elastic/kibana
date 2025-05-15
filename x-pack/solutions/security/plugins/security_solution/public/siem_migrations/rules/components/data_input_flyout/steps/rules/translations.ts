@@ -9,5 +9,5 @@ import { i18n } from '@kbn/i18n';
 
 export const RULES_DATA_INPUT_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.title',
-  { defaultMessage: 'Upload rule export and check for macros and lookups' }
+  { defaultMessage: 'Upload rules' }
 );

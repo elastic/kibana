@@ -54,12 +54,12 @@ export function getAlertsForNotification<
   for (const id of keys(currentRecoveredAlerts)) {
     const alert = recoveredAlerts[id];
     // if alert has not reached the alertDelay threshold don't recover the alert
-    if (alert.getActiveCount() < alertDelay) {
+    const activeCount = alert.getActiveCount();
+    if (activeCount > 0 && activeCount < alertDelay) {
       // remove from recovered alerts
       delete recoveredAlerts[id];
       delete currentRecoveredAlerts[id];
     }
-    alert.resetActiveCount();
     if (flappingSettings.enabled) {
       const flapping = alert.getFlapping();
       if (flapping) {
@@ -71,6 +71,7 @@ export function getAlertsForNotification<
           const lastActionGroupId = alert.getLastScheduledActions()?.group;
 
           const newAlert = new Alert<State, Context, ActionGroupIds>(id, alert.toRaw());
+          alert.incrementActiveCount();
           // unset the end time in the alert state
           const state = newAlert.getState();
           delete state.end;
@@ -88,10 +89,14 @@ export function getAlertsForNotification<
           delete recoveredAlerts[id];
           delete currentRecoveredAlerts[id];
         } else {
+          alert.resetActiveCount();
           alert.resetPendingRecoveredCount();
         }
+      } else {
+        alert.resetActiveCount();
       }
     } else {
+      alert.resetActiveCount();
       alert.resetPendingRecoveredCount();
     }
   }

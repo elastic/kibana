@@ -20,6 +20,7 @@ import {
   isPhrasesFilter,
 } from '@kbn/es-query';
 
+import { sourcererSelectors } from '../../../sourcerer/store';
 import {
   updateTimeline,
   startTimelineSaving,
@@ -43,6 +44,7 @@ import type {
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { refreshTimelines } from './helpers';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveTimeline> {
   return action.type === saveTimeline.type;
@@ -55,10 +57,19 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
 
     if (isSaveTimelineAction(action)) {
       const { id: localTimelineId } = action.payload;
-      const timeline = selectTimelineById(store.getState(), localTimelineId);
+      const storeState = store.getState();
+      const timeline = selectTimelineById(storeState, localTimelineId);
       const { timelineId, timelineVersion, templateTimelineId, templateTimelineVersion } =
         extractTimelineIdsAndVersions(timeline);
-      const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(store.getState());
+      const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
+      const selectedDataViewIdSourcerer = sourcererSelectors.sourcererScopeSelectedDataViewId(
+        storeState,
+        SourcererScopeName.timeline
+      );
+      const selectedPatterns = sourcererSelectors.sourcererScopeSelectedPatterns(
+        storeState,
+        SourcererScopeName.timeline
+      );
 
       store.dispatch(startTimelineSaving({ id: localTimelineId }));
 
@@ -68,6 +79,8 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
               timelineId,
               timeline: {
                 ...convertTimelineAsInput(timeline, timelineTimeRange),
+                dataViewId: selectedDataViewIdSourcerer,
+                indexNames: selectedPatterns,
                 templateTimelineId,
                 templateTimelineVersion,
               },
@@ -78,6 +91,8 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
               version: timelineVersion,
               timeline: {
                 ...convertTimelineAsInput(timeline, timelineTimeRange),
+                dataViewId: selectedDataViewIdSourcerer,
+                indexNames: selectedPatterns,
                 templateTimelineId,
                 templateTimelineVersion,
               },

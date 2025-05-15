@@ -5,35 +5,33 @@
  * 2.0.
  */
 
+import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
 import { useGetCases } from './use_get_cases';
 import * as api from './api';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer, allCasesCapabilities } from '../common/mock';
+import { TestProviders, allCasesCapabilities } from '../common/mock';
 import { useToasts } from '../common/lib/kibana/hooks';
 import { OWNERS } from '../../common/constants';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana/hooks');
 
 // Failing: See https://github.com/elastic/kibana/issues/207955
-describe.skip('useGetCases', () => {
+describe('useGetCases', () => {
   const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('calls getCases with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
     renderHook(() => useGetCases(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
@@ -57,7 +55,7 @@ describe.skip('useGetCases', () => {
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
     renderHook(() => useGetCases(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
@@ -66,10 +64,10 @@ describe.skip('useGetCases', () => {
   });
 
   it('should set all owners when no owner is provided', async () => {
-    appMockRender = createAppMockRenderer({ owner: [] });
+    const coreStart = coreMock.createStart();
 
-    appMockRender.coreStart.application.capabilities = {
-      ...appMockRender.coreStart.application.capabilities,
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
       generalCasesV3: allCasesCapabilities(),
       observabilityCasesV3: allCasesCapabilities(),
       securitySolutionCasesV3: allCasesCapabilities(),
@@ -77,7 +75,7 @@ describe.skip('useGetCases', () => {
 
     const spyOnGetCases = jest.spyOn(api, 'getCases');
     renderHook(() => useGetCases(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} owner={[]} coreStart={coreStart} />,
     });
 
     await waitFor(() => {
@@ -92,17 +90,17 @@ describe.skip('useGetCases', () => {
   });
 
   it('should set only the available owners when no owner is provided', async () => {
-    appMockRender = createAppMockRenderer({ owner: [] });
+    const coreStart = coreMock.createStart();
 
-    appMockRender.coreStart.application.capabilities = {
-      ...appMockRender.coreStart.application.capabilities,
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
       generalCasesV3: allCasesCapabilities(),
     };
 
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} owner={[]} coreStart={coreStart} />,
     });
 
     await waitFor(() => {
@@ -117,11 +115,10 @@ describe.skip('useGetCases', () => {
   });
 
   it('should use the app owner when the filter options do not specify the owner', async () => {
-    appMockRender = createAppMockRenderer({ owner: ['observability'] });
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} owner={['observability']} />,
     });
 
     await waitFor(() => {
@@ -136,11 +133,10 @@ describe.skip('useGetCases', () => {
   });
 
   it('respects the owner in the filter options if provided', async () => {
-    appMockRender = createAppMockRenderer({ owner: ['observability'] });
     const spyOnGetCases = jest.spyOn(api, 'getCases');
 
     renderHook(() => useGetCases({ filterOptions: { owner: ['my-owner'] } }), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} owner={['observability']} />,
     });
 
     await waitFor(() => {

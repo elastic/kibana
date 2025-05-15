@@ -113,8 +113,6 @@ import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../.
 import { DataLayers } from './data_layers';
 import { Tooltip as CustomTooltip } from './tooltip';
 import { XYCurrentTime } from './xy_current_time';
-
-import './xy_chart.scss';
 import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
@@ -342,7 +340,7 @@ export function XYChart({
 
   if (dataLayers.length === 0) {
     return (
-      <EmptyPlaceholder className="xyChart__empty" icon={icon} renderComplete={onRenderChange} />
+      <EmptyPlaceholder icon={icon} renderComplete={onRenderChange} css={xyChartEmptyStyles} />
     );
   }
 
@@ -817,9 +815,9 @@ export function XYChart({
           <Settings
             noResults={
               <EmptyPlaceholder
-                className="xyChart__empty"
                 icon={icon}
                 renderComplete={onRenderChange}
+                css={xyChartEmptyStyles}
               />
             }
             onRenderChange={onRenderChange}
@@ -1065,3 +1063,11 @@ function getLegendTitle(
     ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)?.name
     : defaultLegendTitle;
 }
+
+const xyChartEmptyStyles = css({
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+});

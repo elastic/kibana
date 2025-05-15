@@ -19,6 +19,7 @@ import {
   deleteConnectorSecret,
   deleteConnectorById,
   updateConnectorIndexName,
+  Connector,
 } from '@kbn/search-connectors';
 import {
   fetchConnectorByIndexName,
@@ -72,7 +73,16 @@ import { getPrefixedInferencePipelineProcessorName } from '../../utils/ml_infere
 
 export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
-    { path: '/internal/enterprise_search/search_indices', validate: false },
+    {
+      path: '/internal/enterprise_search/search_indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      validate: false,
+    },
     elasticsearchErrorHandler(log, async (context, _, response) => {
       const { client } = (await context.core).elasticsearch;
       const patterns: AlwaysShowPattern = {
@@ -91,6 +101,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         query: schema.object({
           from: schema.number({ defaultValue: 0, min: 0 }),
@@ -119,7 +135,13 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
         from,
         size
       );
-      const connectors = await fetchConnectors(client.asCurrentUser, indexNames);
+      let connectors: Connector[] = [];
+      // If the user doesn't have permissions, fetchConnectors will error out. We still want to return indices in that case.
+      try {
+        connectors = await fetchConnectors(client.asCurrentUser, indexNames);
+      } catch {
+        connectors = [];
+      }
       const enrichedIndices = indices.map((index) => ({
         ...index,
         connector: connectors.find((connector) => connector.index_name === index.name),
@@ -144,6 +166,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -155,7 +183,7 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const index = await fetchIndex(client, indexName);
+        const index = await fetchIndex(client, indexName, log);
         return response.ok({
           body: index,
           headers: { 'content-type': 'application/json' },
@@ -178,6 +206,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -189,7 +223,13 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
+        let connector: Connector | undefined;
+        // users without permissions to fetch connectors should still see a result
+        try {
+          connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
+        } catch (error) {
+          log.error(`Error fetching connector for index ${indexName}: ${error}`);
+        }
 
         if (connector) {
           if (connector.service_type === CRAWLER_SERVICE_TYPE) {
@@ -233,6 +273,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/exists',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -271,6 +317,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           is_native: schema.boolean(),
@@ -298,6 +350,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -320,6 +378,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -341,6 +405,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -367,6 +437,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/pipeline_parameters',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -387,6 +463,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -419,6 +501,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -500,6 +588,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/attach',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           pipeline_name: schema.string(),
@@ -539,6 +633,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           index_name: schema.string(),
@@ -567,11 +667,13 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
           statusCode: 409,
         });
       }
-
-      const connector = await fetchConnectorByIndexName(
-        client.asCurrentUser,
-        request.body.index_name
-      );
+      let connector: Connector | undefined;
+      // users without permissions to fetch connectors should still be able to create an index
+      try {
+        connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
+      } catch (error) {
+        log.error(`Error fetching connector for index ${indexName}: ${error}`);
+      }
 
       if (connector) {
         return createError({
@@ -599,6 +701,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           docs: schema.arrayOf(schema.any()),
@@ -661,6 +769,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate/{pipelineName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           docs: schema.arrayOf(schema.any()),
@@ -742,6 +856,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/errors',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -772,6 +892,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.put(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         body: schema.object({
           description: schema.maybe(schema.string()),
@@ -830,6 +956,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -889,6 +1021,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/history',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -916,6 +1054,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/pipelines/ml_inference',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {},
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -939,6 +1083,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/pipelines/{pipelineName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           pipelineName: schema.string(),
@@ -980,6 +1130,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.delete(
     {
       path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}/detach',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -1022,6 +1178,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/ml/models/{modelName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           modelName: schema.string(),
@@ -1063,6 +1225,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/ml/models/{modelName}/deploy',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           modelName: schema.string(),
@@ -1104,6 +1272,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/ml/models',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {},
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
@@ -1126,6 +1300,12 @@ export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/ml/models/{modelName}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           modelName: schema.string(),

@@ -47,6 +47,7 @@ import {
   useIntegrationsStateContext,
   useGetSettingsQuery,
 } from '../../../../hooks';
+import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import {
   useGetPackageInfoByKeyQuery,
@@ -135,6 +136,7 @@ export function Detail() {
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
+  const { isAgentlessIntegration } = useAgentless();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
@@ -412,6 +414,7 @@ export function Detail() {
         isFirstTimeAgentUser,
         isGuidedOnboardingActive,
         pkgkey,
+        isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
       });
 
       /** Users from Security Solution onboarding page will have onboardingLink and onboardingAppId in the query params
@@ -440,11 +443,13 @@ export function Detail() {
       hash,
       history,
       integration,
+      isAgentlessIntegration,
       isCloud,
       isFirstTimeAgentUser,
       isGuidedOnboardingActive,
       onboardingAppId,
       onboardingLink,
+      packageInfo,
       pathname,
       pkgkey,
       search,

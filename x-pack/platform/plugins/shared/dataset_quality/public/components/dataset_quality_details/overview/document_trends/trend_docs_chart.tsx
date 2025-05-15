@@ -64,7 +64,7 @@ export function TrendDocsChart({
           alignItems={isChartLoading === undefined ? 'center' : undefined}
         >
           {!attributes ? (
-            <EuiLoadingChart title={flyoutDegradedDocsTrendText} size="l" mono={true} />
+            <EuiLoadingChart title={flyoutDegradedDocsTrendText} size="l" />
           ) : (
             <lens.EmbeddableComponent
               id="datasetQualityFlyoutDegradedDocsTrend"

@@ -97,4 +97,44 @@ describe('ruleActionsConnectorsBody', () => {
       })
     );
   });
+
+  test('filters out when no connector matched action type id', async () => {
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: [
+        ...mockConnectors,
+        {
+          id: `connector-foobar-1`,
+          secrets: { secret: 'secret' },
+          actionTypeId: `actionType-foobar`,
+          name: `connector-foobar`,
+          config: { config: `config-foobar-1` },
+          isPreconfigured: true,
+          isSystemAction: false,
+          isDeprecated: false,
+        },
+      ],
+      connectorTypes: mockActionTypes,
+      aadTemplateFields: [],
+      selectedRuleType: {
+        defaultActionGroupId: 'default',
+      },
+    });
+    useRuleFormDispatch.mockReturnValue(mockOnChange);
+    render(<RuleActionsConnectorsBody onSelectConnector={mockOnSelectConnector} />);
+
+    expect(screen.queryByText('connector-foobar')).not.toBeInTheDocument();
+    expect(screen.queryByText('connector-2')).not.toBeInTheDocument();
+
+    expect(await screen.findAllByTestId('ruleActionsConnectorsModalCard')).toHaveLength(1);
+    expect(await screen.findByText('connector-1')).toBeInTheDocument();
+  });
 });

@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: SLOs
   description: OpenAPI schema for SLOs endpoints
-  version: '1.0'
+  version: '1.1'
   contact:
     name: Actionable Observability Team
   license:
@@ -81,6 +81,16 @@ paths:
           schema:
             type: string
           example: 'slo.name:latency* and slo.tags : "prod"'
+        - name: size
+          in: query
+          schema:
+            type: integer
+          example: 25
+          description: Size provided for cursor based pagination
+        - name: searchAfter
+          in: query
+          schema:
+            type: string
         - name: page
           in: query
           description: The page to use for pagination, must be greater or equal than 1
@@ -410,6 +420,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+  /s/{spaceId}/internal/observability/slos/_definitions:
+    get:
+      summary: Get the SLO definitions
+      operationId: getDefinitionsOp
+      description: |
+        You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      tags:
+        - slo
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+        - name: includeOutdatedOnly
+          in: query
+          description: Indicates if the API returns only outdated SLO or all SLO definitions
+          schema:
+            type: boolean
+          example: true
+        - name: search
+          in: query
+          description: Filters the SLOs by name
+          schema:
+            type: string
+          example: my service availability
+        - name: page
+          in: query
+          description: The page to use for pagination, must be greater or equal than 1
+          schema:
+            type: number
+          example: 1
+        - name: perPage
+          in: query
+          description: Number of SLOs returned by page
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+          example: 100
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/find_slo_definitions_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+        '401':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401_response'
+        '403':
+          description: Unauthorized response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403_response'
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
       summary: Batch delete rollup and summary data
@@ -1317,6 +1389,12 @@ components:
         A paginated response of SLOs matching the query.
       type: object
       properties:
+        size:
+          type: number
+          example: 25
+          description: Size provided for cursor based pagination
+        searchAfter:
+          type: string
         page:
           type: number
           example: 1
@@ -1589,6 +1667,25 @@ components:
           description: The internal SLO version
           type: number
           example: 2
+    find_slo_definitions_response:
+      title: Find SLO definitions response
+      description: |
+        A paginated response of SLO definitions matching the query.
+      type: object
+      properties:
+        page:
+          type: number
+          example: 2
+        perPage:
+          type: number
+          example: 100
+        total:
+          type: number
+          example: 123
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/slo_definition_response'
     delete_slo_instances_request:
       title: Delete SLO instances request
       description: |

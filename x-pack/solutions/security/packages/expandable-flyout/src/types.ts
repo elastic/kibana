@@ -90,3 +90,14 @@ export interface Panel {
    */
   component: (props: FlyoutPanelProps) => React.ReactElement;
 }
+
+export interface FlyoutPanelHistory {
+  /**
+   * Time at which the flyout was last opened
+   */
+  lastOpen: number;
+  /**
+   * Panel that was opened
+   */
+  panel: FlyoutPanelProps;
+}

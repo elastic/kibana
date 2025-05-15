@@ -35,7 +35,10 @@ export const getAlertsGroupingQuery = ({
 }: AlertsGroupingQueryParams) =>
   getGroupingQuery({
     additionalFilters,
-    from,
+    timeRange: {
+      from,
+      to,
+    },
     groupByField: selectedGroup,
     statsAggregations: !isNoneGroup([selectedGroup])
       ? getAggregationsByGroupField(selectedGroup)
@@ -45,7 +48,6 @@ export const getAlertsGroupingQuery = ({
     uniqueValue,
     size: pageSize,
     sort: [{ unitsCount: { order: 'desc' } }],
-    to,
   });
 
 const getAggregationsByGroupField = (field: string): NamedAggregation[] => {

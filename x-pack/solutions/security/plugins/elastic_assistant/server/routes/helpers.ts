@@ -34,6 +34,7 @@ import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabili
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
+import { isEmpty } from 'lodash';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { FindResponse } from '../ai_assistant_data_clients/find';
@@ -50,7 +51,7 @@ import {
 import { getLangChainMessages } from '../lib/langchain/helpers';
 
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
+import { ElasticAssistantRequestHandlerContext } from '../types';
 import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
 interface GetPluginNameFromRequestParams {
@@ -175,7 +176,7 @@ export interface AppendAssistantMessageToConversationParams {
   messageContent: string;
   replacements: Replacements;
   conversationId: string;
-  contentReferences?: ContentReferences | false;
+  contentReferences: ContentReferences;
   isError?: boolean;
   traceData?: Message['traceData'];
 }
@@ -194,10 +195,8 @@ export const appendAssistantMessageToConversation = async ({
   }
 
   const metadata: MessageMetadata = {
-    ...(contentReferences ? { contentReferences } : {}),
+    ...(!isEmpty(contentReferences) ? { contentReferences } : {}),
   };
-
-  const isMetadataPopulated = Boolean(contentReferences) !== false;
 
   await conversationsDataClient.appendConversationMessages({
     existingConversation: conversation,
@@ -207,7 +206,7 @@ export const appendAssistantMessageToConversation = async ({
           messageContent,
           replacements,
         }),
-        metadata: isMetadataPopulated ? metadata : undefined,
+        metadata: !isEmpty(metadata) ? metadata : undefined,
         traceData,
         isError,
       }),
@@ -232,7 +231,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
   isOssModel?: boolean;
@@ -249,11 +248,11 @@ export interface LangChainExecuteParams {
     traceData?: Message['traceData'],
     isError?: boolean
   ) => Promise<void>;
-  getElser: GetElser;
   response: KibanaResponseFactory;
   responseLanguage?: string;
   savedObjectsClient: SavedObjectsClientContract;
   systemPrompt?: string;
+  timeout?: number;
 }
 export const langChainExecute = async ({
   messages,
@@ -273,12 +272,12 @@ export const langChainExecute = async ({
   logger,
   conversationId,
   onLlmResponse,
-  getElser,
   response,
   responseLanguage,
   isStream = true,
   savedObjectsClient,
   systemPrompt,
+  timeout,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
   const pluginName = getPluginNameFromRequest({
@@ -340,6 +339,7 @@ export const langChainExecute = async ({
     savedObjectsClient,
     size: request.body.size,
     systemPrompt,
+    timeout,
     telemetry,
     telemetryParams: {
       actionTypeId,
@@ -440,12 +440,12 @@ type PerformChecks =
       isSuccess: false;
       response: IKibanaResponse;
     };
-export const performChecks = ({
+export const performChecks = async ({
   capability,
   context,
   request,
   response,
-}: PerformChecksParams): PerformChecks => {
+}: PerformChecksParams): Promise<PerformChecks> => {
   const assistantResponse = buildResponse(response);
 
   if (!hasAIAssistantLicense(context.licensing.license)) {
@@ -459,7 +459,7 @@ export const performChecks = ({
     };
   }
 
-  const currentUser = context.elasticAssistant.getCurrentUser();
+  const currentUser = await context.elasticAssistant.getCurrentUser();
 
   if (currentUser == null) {
     return {

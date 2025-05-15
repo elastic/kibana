@@ -55,7 +55,9 @@ export const EvaluationSettings: React.FC = React.memo(() => {
     http,
     toasts,
   });
-  const { data: evalData } = useEvaluationData({ http });
+  const { data: evalData } = useEvaluationData({
+    http,
+  });
   const defaultGraphs = useMemo(() => (evalData as GetEvaluateResponse)?.graphs ?? [], [evalData]);
   const datasets = useMemo(() => (evalData as GetEvaluateResponse)?.datasets ?? [], [evalData]);
 

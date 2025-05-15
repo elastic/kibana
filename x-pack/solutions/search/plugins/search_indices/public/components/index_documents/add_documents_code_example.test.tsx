@@ -27,6 +27,10 @@ jest.mock('../../hooks/use_elasticsearch_url', () => ({
   useElasticsearchUrl: jest.fn(),
 }));
 
+jest.mock('../../hooks/api/use_onboarding_data', () => ({
+  useOnboardingTokenQuery: jest.fn().mockReturnValue({ data: { token: 'default' } }),
+}));
+
 jest.mock('@kbn/search-api-keys-components', () => ({
   useSearchApiKey: jest.fn().mockReturnValue({ apiKey: 'test-api-key' }),
 }));

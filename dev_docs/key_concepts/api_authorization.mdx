@@ -218,6 +218,48 @@ router.get({
 }, handler);
 ```
 
+**Example 4: Complex configuration with nested `allOf`.**
+Requires (`<privilege_1>` AND `<privilege_2>`) OR (`<privilege_3>` AND `<privilege_4>`) to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [
+        { 
+          anyRequired: [
+            { allOf: ['<privilege_1>', '<privilege_2>']}, 
+            { allOf: ['<privilege_3>', '<privilege_4>']}
+          ],
+        }
+      ],
+    },
+  },
+  ...
+}, handler);
+```
+
+**Example 5: Complex configuration with nested `anyOf`.**
+Requires (`<privilege_1>` OR `<privilege_2>`) AND (`<privilege_3>` OR `<privilege_4>`) to access the route.
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: [
+        { 
+          allRequired: [
+            { anyOf: ['<privilege_1>', '<privilege_2>']}, 
+            { anyOf: ['<privilege_3>', '<privilege_4>']}
+          ],
+        }
+      ],
+    },
+  },
+  ...
+}, handler);
+```
+
 ### Versioned router security configuration examples
 Different security configurations can be applied to each version when using the Versioned Router. This allows your authorization needs to evolve in lockstep with your API.
 

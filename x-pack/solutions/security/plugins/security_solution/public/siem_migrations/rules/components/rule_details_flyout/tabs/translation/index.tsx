@@ -75,8 +75,6 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                   <EuiFlexItem grow={false}>
                     <EuiBadge
                       color={convertTranslationResultIntoColor(ruleMigration.translation_result)}
-                      onClick={() => {}}
-                      onClickAriaLabel={'Translation status badge'}
                     >
                       {isInstalled
                         ? i18n.INSTALLED_LABEL
@@ -109,19 +107,20 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
             </EuiSplitPanel.Outer>
           </EuiFlexItem>
         </EuiAccordion>
-        {ruleMigration.translation_result === RuleTranslationResult.FULL && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              color={'primary'}
-              title={i18n.CALLOUT_TRANSLATED_RULE_INFO_TITLE}
-              iconType={'iInCircle'}
-              size={'s'}
-            >
-              {i18n.CALLOUT_TRANSLATED_RULE_INFO_DESCRIPTION}
-            </EuiCallOut>
-          </>
-        )}
+        {ruleMigration.translation_result === RuleTranslationResult.FULL &&
+          !ruleMigration.elastic_rule?.id && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                color={'primary'}
+                title={i18n.CALLOUT_TRANSLATED_RULE_INFO_TITLE}
+                iconType={'iInCircle'}
+                size={'s'}
+              >
+                {i18n.CALLOUT_TRANSLATED_RULE_INFO_DESCRIPTION}
+              </EuiCallOut>
+            </>
+          )}
       </>
     );
   }

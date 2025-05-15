@@ -15,7 +15,10 @@ import { groupingBucket } from '../../mocks';
 
 const testProps: GroupingQueryArgs = {
   additionalFilters: [],
-  from: '2022-12-28T15:35:32.871Z',
+  timeRange: {
+    from: '2022-12-28T15:35:32.871Z',
+    to: '2023-02-23T06:59:59.999Z',
+  },
   groupByField: 'host.name',
   statsAggregations: [
     {
@@ -59,7 +62,6 @@ const testProps: GroupingQueryArgs = {
   runtimeMappings: {},
   uniqueValue: 'whatAGreatAndUniqueValue',
   size: 25,
-  to: '2023-02-23T06:59:59.999Z',
 };
 describe('group selector', () => {
   beforeEach(() => {

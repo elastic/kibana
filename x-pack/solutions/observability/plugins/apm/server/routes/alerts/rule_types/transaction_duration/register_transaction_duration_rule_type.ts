@@ -47,6 +47,7 @@ import {
 import type {
   THRESHOLD_MET_GROUP,
   ApmRuleParamsType,
+  AdditionalContext,
 } from '../../../../../common/rules/apm_rule_types';
 import {
   APM_SERVER_FEATURE_ID,
@@ -114,6 +115,7 @@ export function registerTransactionDurationRuleType({
     actionGroups: ruleTypeConfig.actionGroups,
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
     validate: { params: transactionDurationParamsSchema },
+    doesSetRecoveryContext: true,
     schemas: {
       params: {
         type: 'config-schema',
@@ -235,7 +237,7 @@ export function registerTransactionDurationRuleType({
 
       for (const bucket of response.aggregations.series.buckets) {
         const groupByFields = bucket.key.reduce((obj, bucketKey, bucketIndex) => {
-          obj[allGroupByFields[bucketIndex]] = bucketKey;
+          obj[allGroupByFields[bucketIndex]] = bucketKey as string;
           return obj;
         }, {} as Record<string, string>);
 
@@ -322,6 +324,57 @@ export function registerTransactionDurationRuleType({
           id: alertId,
           payload,
           context,
+        });
+      }
+      // Handle recovered alerts context
+      const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
+      for (const recoveredAlert of recoveredAlerts) {
+        const alertHits = recoveredAlert.hit as AdditionalContext;
+        const recoveredAlertId = recoveredAlert.alert.getId();
+        const alertUuid = recoveredAlert.alert.getUuid();
+        const alertDetailsUrl = getAlertDetailsUrl(basePath, spaceId, alertUuid);
+        const groupByFields: Record<string, string> = allGroupByFields.reduce(
+          (acc, sourceField: string) => {
+            if (alertHits?.[sourceField] !== undefined) {
+              acc[sourceField] = alertHits[sourceField];
+            }
+            return acc;
+          },
+          {} as Record<string, string>
+        );
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          getAlertUrlTransaction(
+            groupByFields[SERVICE_NAME],
+            getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[SERVICE_ENVIRONMENT],
+            groupByFields[TRANSACTION_TYPE]
+          )
+        );
+
+        const durationFormatter = getDurationFormatter(alertHits?.[ALERT_EVALUATION_VALUE]);
+        const transactionDurationFormatted = durationFormatter(
+          alertHits?.[ALERT_EVALUATION_VALUE]
+        ).formatted;
+        const groupByActionVariables = getGroupByActionVariables(groupByFields);
+        const recoveredContext = {
+          alertDetailsUrl,
+          interval: formatDurationFromTimeUnitChar(
+            ruleParams.windowSize,
+            ruleParams.windowUnit as TimeUnitChar
+          ),
+          reason: alertHits?.[ALERT_REASON],
+          // When group by doesn't include transaction.name, the context.transaction.name action variable will contain value of the Transaction Name filter
+          transactionName: ruleParams.transactionName,
+          threshold: ruleParams.threshold,
+          triggerValue: transactionDurationFormatted,
+          viewInAppUrl,
+          ...groupByActionVariables,
+        };
+
+        alertsClient.setAlertData({
+          id: recoveredAlertId,
+          context: recoveredContext,
         });
       }
 

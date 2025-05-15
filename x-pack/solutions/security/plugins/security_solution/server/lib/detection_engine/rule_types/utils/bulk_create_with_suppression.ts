@@ -8,20 +8,18 @@
 import { performance } from 'perf_hooks';
 import { isEmpty } from 'lodash';
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
-import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import type {
   AlertWithCommonFieldsLatest,
   SuppressionFieldsLatest,
 } from '@kbn/rule-registry-plugin/common/schemas';
 
 import { isQueryRule } from '../../../../../common/detection_engine/utils';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { makeFloatString } from './utils';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { RuleServices } from '../types';
+import type { RuleServices, SecuritySharedParams } from '../types';
 import { createEnrichEventsFunction } from './enrichments';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
@@ -40,28 +38,25 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
 export const bulkCreateWithSuppression = async <
   T extends SuppressionFieldsLatest & BaseFieldsLatest
 >({
-  alertWithSuppression,
-  ruleExecutionLogger,
+  sharedParams,
   wrappedDocs,
   services,
   suppressionWindow,
-  alertTimestampOverride,
   isSuppressionPerRuleExecution,
   maxAlerts,
   experimentalFeatures,
   ruleType,
 }: {
-  alertWithSuppression: SuppressedAlertService;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  sharedParams: SecuritySharedParams;
   wrappedDocs: Array<WrappedFieldsLatest<T> & { subAlerts?: Array<WrappedFieldsLatest<T>> }>;
   services: RuleServices;
   suppressionWindow: string;
-  alertTimestampOverride: Date | undefined;
   isSuppressionPerRuleExecution?: boolean;
   maxAlerts?: number;
   experimentalFeatures: ExperimentalFeatures;
   ruleType?: RuleType;
 }): Promise<GenericBulkCreateResponse<T>> => {
+  const { ruleExecutionLogger, alertWithSuppression, alertTimestampOverride } = sharedParams;
   if (wrappedDocs.length === 0) {
     return {
       errors: [],

@@ -28,7 +28,6 @@ import {
   fetchLocationMonitorsEffect,
   setDynamicSettingsEffect,
 } from './settings/effects';
-import { syncGlobalParamsEffect } from './settings';
 import { privateLocationsEffects } from './private_locations/effects';
 import { fetchNetworkEventsEffect } from './network_events/effects';
 import { fetchSyntheticsMonitorEffect } from './monitor_details';
@@ -63,7 +62,6 @@ export const rootEffect = function* root(): Generator {
     fork(fetchLocationMonitorsEffect),
     fork(setDynamicSettingsEffect),
     fork(fetchAlertConnectorsEffect),
-    fork(syncGlobalParamsEffect),
     fork(enableDefaultAlertingEffect),
     fork(enableMonitorAlertEffect),
     fork(updateDefaultAlertingEffect),

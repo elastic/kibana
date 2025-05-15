@@ -253,7 +253,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         const nextCandidateRoute = parseNextURL(request.url.href);
 
         const route = nextCandidateRoute === '/' ? defaultRoute : nextCandidateRoute;
-        // need to get reed of ../../ to make sure we will not be out of space basePath
+        // need to get rid of ../../ to make sure we will not be out of space basePath
         const normalizedRoute = new URL(route, 'https://localhost');
 
         const queryOnboardingToken = request.query?.onboarding_token ?? undefined;
@@ -265,6 +265,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
           : undefined;
 
         const solutionType = this.config.onboarding?.default_solution;
+
         if (queryOnboardingToken || queryOnboardingSecurity) {
           core
             .getStartServices()

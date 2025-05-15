@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service', 'universal']);
+export const EntityType = z.enum(['user', 'host', 'service']);
 export type EntityTypeEnum = typeof EntityType.enum;
 export const EntityTypeEnum = EntityType.enum;
 
@@ -104,7 +104,7 @@ export const InspectQuery = z.object({
 });
 
 /**
- * Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour.
+ * Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour. Must be less than or equal to half the duration of the lookback period,
  */
 export type Interval = z.infer<typeof Interval>;
 export const Interval = z.string().regex(/^[1-9]\d*[smh]$/);

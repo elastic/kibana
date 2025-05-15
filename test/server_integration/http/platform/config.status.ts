@@ -8,6 +8,7 @@
  */
 
 import path from 'path';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 
 /*
@@ -22,6 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const httpConfig = await readConfigFile(require.resolve('../../config.base.js'));
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     testFiles: [
       // Status test should be first to resolve manually created "unavailable" plugin
       require.resolve('./status'),

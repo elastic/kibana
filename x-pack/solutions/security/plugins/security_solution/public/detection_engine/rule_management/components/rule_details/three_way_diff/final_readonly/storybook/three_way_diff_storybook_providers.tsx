@@ -58,11 +58,7 @@ function createKibanaServicesMock(overrides?: Partial<CoreStart>) {
 function createMockStore() {
   const store = configureStore({
     reducer: {
-      app: () => ({
-        enableExperimental: {
-          prebuiltRulesCustomizationEnabled: true,
-        },
-      }),
+      app: jest.fn(),
     },
   });
 

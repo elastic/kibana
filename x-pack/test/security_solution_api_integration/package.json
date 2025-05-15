@@ -61,6 +61,9 @@
     "initialize-server:siem_migrations:trial_complete": "node ./scripts/index.js server siem_migrations trial_license_complete_tier",
     "run-tests:siem_migrations:trial_complete": "node ./scripts/index.js runner siem_migrations trial_license_complete_tier",
 
+    "genai_evals:server:ess": "npm run initialize-server:genai:trial_complete evaluations ess",
+    "genai_evals:runner:ess": "npm run run-tests:genai:trial_complete evaluations ess essEnv",
+
     "genai_kb_entries:server:serverless": "npm run initialize-server:genai:trial_complete knowledge_base/entries serverless",
     "genai_kb_entries:runner:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless serverlessEnv",
     "genai_kb_entries:qa:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless qaPeriodicEnv",
@@ -295,6 +298,13 @@
     "rule_execution_logic:general_logic:qa:serverless:release": "npm run run-tests:de rule_execution_logic/general_logic serverless qaEnv",
     "rule_execution_logic:general_logic:server:ess": "npm run initialize-server:de rule_execution_logic/general_logic ess",
     "rule_execution_logic:general_logic:runner:ess": "npm run run-tests:de rule_execution_logic/general_logic ess essEnv",
+
+    "rule_execution_logic:general_logic:essentials:server:serverless": "npm run initialize-server:de:basic_essentials rule_execution_logic/general_logic serverless",
+    "rule_execution_logic:general_logic:essentials:runner:serverless": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic serverless serverlessEnv",
+    "rule_execution_logic:general_logic:essentials:qa:serverless": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic serverless qaPeriodicEnv",
+    "rule_execution_logic:general_logic:essentials:qa:serverless:release": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic serverless qaEnv",
+    "rule_execution_logic:general_logic:basic:server:ess": "npm run initialize-server:de:basic_essentials rule_execution_logic/general_logic ess",
+    "rule_execution_logic:general_logic:basic:runner:ess": "npm run run-tests:de:basic_essentials rule_execution_logic/general_logic ess essEnv",
 
     "rule_execution_logic:indicator_match:server:serverless": "npm run initialize-server:de rule_execution_logic/indicator_match serverless",
     "rule_execution_logic:indicator_match:runner:serverless": "npm run run-tests:de rule_execution_logic/indicator_match serverless serverlessEnv",

@@ -6,15 +6,22 @@
  */
 
 import { actions } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { InitialConfigurationStep } from './initial_configuration_step';
 
-storiesOf('infra/logAnalysis/SetupInitialConfigurationStep', module)
-  .addDecorator((renderStory) => <div style={{ maxWidth: 800 }}>{renderStory()}</div>)
-  .addDecorator(decorateWithGlobalStorybookThemeProviders)
-  .add('Reconfiguration with partitioned warnings', () => {
+export default {
+  title: 'infra/logAnalysis/SetupInitialConfigurationStep',
+
+  decorators: [
+    (renderStory) => <div style={{ maxWidth: 800 }}>{renderStory()}</div>,
+    decorateWithGlobalStorybookThemeProviders,
+  ],
+} as Meta;
+
+export const ReconfigurationWithPartitionedWarnings = {
+  render: () => {
     return (
       <InitialConfigurationStep
         {...storyActions}
@@ -55,8 +62,13 @@ storiesOf('infra/logAnalysis/SetupInitialConfigurationStep', module)
         ]}
       />
     );
-  })
-  .add('Reconfiguration with unpartitioned warnings', () => {
+  },
+
+  name: 'Reconfiguration with partitioned warnings',
+};
+
+export const ReconfigurationWithUnpartitionedWarnings = {
+  render: () => {
     return (
       <InitialConfigurationStep
         {...storyActions}
@@ -97,6 +109,9 @@ storiesOf('infra/logAnalysis/SetupInitialConfigurationStep', module)
         ]}
       />
     );
-  });
+  },
+
+  name: 'Reconfiguration with unpartitioned warnings',
+};
 
 const storyActions = actions('setStartTime', 'setEndTime', 'setValidatedIndices');

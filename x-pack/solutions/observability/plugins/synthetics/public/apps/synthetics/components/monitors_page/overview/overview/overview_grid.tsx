@@ -18,6 +18,7 @@ import {
   EuiAutoSizer,
   EuiAutoSize,
 } from '@elastic/eui';
+import { MetricItem } from './metric_item/metric_item';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
 import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
 import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
@@ -40,7 +41,6 @@ import { SortFields } from './sort_fields';
 import { NoMonitorsFound } from '../../common/no_monitors_found';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
-import { MetricItem } from './metric_item';
 import { FlyoutParamProps } from './types';
 
 const ITEM_HEIGHT = 172;
@@ -150,7 +150,7 @@ export const OverviewGrid = memo(() => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <div style={{ height: listHeight }}>
+      <div style={groupField === 'none' ? { height: listHeight } : undefined}>
         {groupField === 'none' ? (
           loaded && monitorsSortedByStatus.length ? (
             <EuiAutoSizer>

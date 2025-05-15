@@ -26,24 +26,17 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
-import {
-  createOpenAIToolsAgent,
-  createStructuredChatAgent,
-  createToolCallingAgent,
-} from 'langchain/agents';
+import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
-import {
-  formatPrompt,
-  formatPromptStructured,
-} from '../../lib/langchain/graphs/default_assistant_graph/prompts';
+import { formatPrompt } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
-import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
+import { AssistantToolParams, ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -55,16 +48,18 @@ import {
 } from '../../lib/langchain/graphs/default_assistant_graph/graph';
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
+import { agentRunnableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { ConfigSchema } from '../../config_schema';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
-const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
-const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
 export const postEvaluateRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
-  getElser: GetElser
+  config?: ConfigSchema
 ) => {
+  const RESPONSE_TIMEOUT = config?.responseTimeout ?? ROUTE_HANDLER_TIMEOUT;
+
   router.versioned
     .post({
       access: INTERNAL_API_ACCESS,
@@ -76,7 +71,7 @@ export const postEvaluateRoute = (
       },
       options: {
         timeout: {
-          idleSocket: ROUTE_HANDLER_TIMEOUT,
+          idleSocket: RESPONSE_TIMEOUT,
         },
       },
     })
@@ -103,7 +98,7 @@ export const postEvaluateRoute = (
         const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
         // Perform license, authenticated user and evaluation FF checks
-        const checkResponse = performChecks({
+        const checkResponse = await performChecks({
           capability: 'assistantModelEvaluation',
           context: ctx,
           request,
@@ -211,7 +206,7 @@ export const postEvaluateRoute = (
                 alertsIndexPattern,
                 attackDiscoveryGraphs,
                 connectors: connectorsWithPrompts,
-                connectorTimeout: CONNECTOR_TIMEOUT,
+                connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
                 evaluationId,
@@ -250,10 +245,16 @@ export const postEvaluateRoute = (
                   connectorId: connector.id,
                   llmType,
                   logger,
+                  model: connector.config?.defaultModel,
                   temperature: getDefaultArguments(llmType).temperature,
                   signal: abortSignal,
                   streaming: false,
                   maxRetries: 0,
+                  convertSystemMessageToHumanContent: false,
+                  telemetryMetadata: {
+                    pluginId: 'security_ai_assistant',
+                  },
+                  timeout: ROUTE_HANDLER_TIMEOUT,
                 });
               const llm = createLlmInstance();
               const anonymizationFieldsRes =
@@ -290,13 +291,7 @@ export const postEvaluateRoute = (
                   },
                 };
 
-              const contentReferencesEnabled =
-                assistantContext.getRegisteredFeatures(
-                  DEFAULT_PLUGIN_NAME
-                ).contentReferencesEnabled;
-              const contentReferencesStore = contentReferencesEnabled
-                ? newContentReferencesStore()
-                : undefined;
+              const contentReferencesStore = newContentReferencesStore();
 
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
@@ -359,27 +354,18 @@ export const postEvaluateRoute = (
                 savedObjectsClient,
               });
 
-              const agentRunnable =
-                isOpenAI || llmType === 'inference'
-                  ? await createOpenAIToolsAgent({
-                      llm,
-                      tools,
-                      prompt: formatPrompt(defaultSystemPrompt),
-                      streamRunnable: false,
-                    })
-                  : llmType && ['bedrock', 'gemini'].includes(llmType)
-                  ? createToolCallingAgent({
-                      llm,
-                      tools,
-                      prompt: formatPrompt(defaultSystemPrompt),
-                      streamRunnable: false,
-                    })
-                  : await createStructuredChatAgent({
-                      llm,
-                      tools,
-                      prompt: formatPromptStructured(defaultSystemPrompt),
-                      streamRunnable: false,
-                    });
+              const chatPromptTemplate = formatPrompt({
+                prompt: defaultSystemPrompt,
+              });
+
+              const agentRunnable = await agentRunnableFactory({
+                llm: createLlmInstance(),
+                isOpenAI,
+                llmType,
+                tools,
+                isStream: false,
+                prompt: chatPromptTemplate,
+              });
 
               return {
                 connectorId: connector.id,
@@ -395,7 +381,6 @@ export const postEvaluateRoute = (
                   savedObjectsClient,
                   tools,
                   replacements: {},
-                  contentReferencesEnabled: Boolean(contentReferencesStore),
                 }),
               };
             })
@@ -407,14 +392,14 @@ export const postEvaluateRoute = (
             const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
 
-              const r = await graph.invoke(
+              const result = await graph.invoke(
                 {
                   input: input.input,
                   connectorId,
                   conversationId: undefined,
                   responseLanguage: 'English',
                   llmType,
-                  isStreaming: false,
+                  isStream: false,
                   isOssModel,
                 }, // TODO: Update to use the correct input format per dataset type
                 {
@@ -422,7 +407,7 @@ export const postEvaluateRoute = (
                   tags: ['evaluation'],
                 }
               );
-              const output = r.agentOutcome.returnValues.output;
+              const output = (result.agentOutcome as AgentFinish).returnValues.output;
               return output;
             };
 

@@ -23,14 +23,14 @@ import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { BODY_TEST_ID, LOADING_TEST_ID } from './test_ids';
 import { RULE_PREVIEW_FOOTER_TEST_ID } from '../preview/test_ids';
 import type {
-  FlyoutPanelProps,
-  ExpandableFlyoutState,
   ExpandableFlyoutApi,
+  ExpandableFlyoutState,
+  FlyoutPanelHistory,
 } from '@kbn/expandable-flyout';
 import {
   useExpandableFlyoutApi,
-  useExpandableFlyoutState,
   useExpandableFlyoutHistory,
+  useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 
 jest.mock('../../document_details/shared/hooks/use_rule_details_link');
@@ -51,7 +51,9 @@ const flyoutContextValue = {
   closeLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
-const flyoutHistory = [{ id: 'id1', params: {} }] as unknown as FlyoutPanelProps[];
+const flyoutHistory: FlyoutPanelHistory[] = [
+  { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
+];
 
 const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
 const rule = { name: 'rule name', description: 'rule description' } as RuleResponse;

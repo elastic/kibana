@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Story } from '@storybook/react';
+import type { StoryObj } from '@storybook/react';
 import type { ComponentType } from 'react';
 import React, { useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
@@ -40,7 +40,7 @@ export default {
   ],
 };
 
-export const CreatingInApmServiceOverview: Story<Args> = ({ ruleParams, metadata }) => {
+const CreatingInApmServiceOverviewComponent = ({ ruleParams, metadata }: Args) => {
   const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
@@ -57,23 +57,29 @@ export const CreatingInApmServiceOverview: Story<Args> = ({ ruleParams, metadata
   );
 };
 
-CreatingInApmServiceOverview.args = {
-  ruleParams: {
-    environment: 'testEnvironment',
-    serviceName: 'testServiceName',
-    threshold: 1500,
-    transactionType: 'testTransactionType',
-    transactionName: 'GET /api/customer/:id',
-    windowSize: 5,
-    windowUnit: 'm',
-  },
-  metadata: {
-    environment: ENVIRONMENT_ALL.value,
-    serviceName: undefined,
+export const CreatingInApmServiceOverview: StoryObj<Args> = {
+  render: ({ ruleParams, metadata }) => (
+    <CreatingInApmServiceOverviewComponent ruleParams={ruleParams} metadata={metadata} />
+  ),
+
+  args: {
+    ruleParams: {
+      environment: 'testEnvironment',
+      serviceName: 'testServiceName',
+      threshold: 1500,
+      transactionType: 'testTransactionType',
+      transactionName: 'GET /api/customer/:id',
+      windowSize: 5,
+      windowUnit: 'm',
+    },
+    metadata: {
+      environment: ENVIRONMENT_ALL.value,
+      serviceName: undefined,
+    },
   },
 };
 
-export const CreatingInStackManagement: Story<Args> = ({ ruleParams, metadata }) => {
+const CreatingInStackManagementComponent = ({ ruleParams, metadata }: Args) => {
   const [params, setParams] = useState<ErrorRateRuleParams>(ruleParams);
 
   function setRuleParams(property: string, value: any) {
@@ -90,12 +96,18 @@ export const CreatingInStackManagement: Story<Args> = ({ ruleParams, metadata })
   );
 };
 
-CreatingInStackManagement.args = {
-  ruleParams: {
-    environment: 'testEnvironment',
-    threshold: 1500,
-    windowSize: 5,
-    windowUnit: 'm',
+export const CreatingInStackManagement: StoryObj<Args> = {
+  render: ({ ruleParams, metadata }) => (
+    <CreatingInStackManagementComponent ruleParams={ruleParams} metadata={metadata} />
+  ),
+
+  args: {
+    ruleParams: {
+      environment: 'testEnvironment',
+      threshold: 1500,
+      windowSize: 5,
+      windowUnit: 'm',
+    },
+    metadata: undefined,
   },
-  metadata: undefined,
 };

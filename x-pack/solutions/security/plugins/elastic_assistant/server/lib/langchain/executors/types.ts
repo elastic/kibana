@@ -49,7 +49,7 @@ export interface AgentExecutorParams<T extends boolean> {
   assistantTools?: AssistantTool[];
   connectorId: string;
   conversationId?: string;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
   langChainMessages: BaseMessage[];
@@ -71,6 +71,7 @@ export interface AgentExecutorParams<T extends boolean> {
   telemetryParams?: TelemetryParams;
   traceOptions?: TraceOptions;
   responseLanguage?: string;
+  timeout?: number;
 }
 
 export interface StaticReturnType {

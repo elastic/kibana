@@ -56,6 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await privateLocationTestService.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       privateLocation = await privateLocationTestService.addTestPrivateLocation();
       await supertest
@@ -229,6 +230,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         const allMonitors = [...monitors, ...monitors];
+
         for (const mon of allMonitors) {
           await saveMonitor(
             { ...mon, name: mon.name + Date.now(), locations: [spaceScopedPrivateLocation] },

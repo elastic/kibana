@@ -29,6 +29,7 @@ export class RuleMigrationsDataClient {
     currentUser: AuthenticatedUser,
     esScopedClient: IScopedClusterClient,
     logger: Logger,
+    spaceId: string,
     dependencies: SiemRuleMigrationsClientDependencies
   ) {
     this.rules = new RuleMigrationsDataRulesClient(
@@ -59,6 +60,11 @@ export class RuleMigrationsDataClient {
       logger,
       dependencies
     );
-    this.lookups = new RuleMigrationsDataLookupsClient(currentUser, esScopedClient, logger);
+    this.lookups = new RuleMigrationsDataLookupsClient(
+      currentUser,
+      esScopedClient,
+      logger,
+      spaceId
+    );
   }
 }

@@ -82,7 +82,7 @@ export const registerSiemRuleMigrationsStartRoute = (
             });
 
             if (!exists) {
-              return res.noContent();
+              return res.notFound();
             }
 
             await siemMigrationAuditLogger.logStart({ migrationId });

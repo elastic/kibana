@@ -10,26 +10,53 @@ import type { HandleUnstructuredNodeParams, LogResult } from './types';
 import { testPipeline } from '../../util';
 import { createGrokProcessor, createPassthroughFailureProcessor } from '../../util/processors';
 
+export interface UnstructuredLogParse {
+  grokPatterns: string[];
+  unParsedSamples: string[];
+}
+
 export async function handleUnstructuredValidate({
   state,
   client,
 }: HandleUnstructuredNodeParams): Promise<Partial<UnstructuredLogState>> {
+  const currentPattern = state.currentPattern;
   const grokPatterns = state.grokPatterns;
-  const grokProcessor = createGrokProcessor(grokPatterns);
+  const grokProcessor = createGrokProcessor([...grokPatterns, currentPattern]);
   const pipeline = { processors: grokProcessor, on_failure: [createPassthroughFailureProcessor()] };
 
   const packageName = state.packageName;
   const dataStreamName = state.dataStreamName;
-  const { pipelineResults, errors } = (await testPipeline(state.logSamples, pipeline, client)) as {
-    pipelineResults: LogResult[];
-    errors: object[];
-  };
+  const validSamples: LogResult[] = [];
+  const unParsedSamples: string[] = [];
+  const errors: object[] = [];
 
-  if (errors.length > 0) {
-    return { errors, lastExecutedChain: 'unstructuredValidate' };
+  for (const sample of state.logSamples) {
+    const result = (await testPipeline([sample], pipeline, client)) as {
+      pipelineResults: LogResult[];
+      errors: object[];
+    };
+
+    if (result.errors.length > 0) {
+      unParsedSamples.push(sample);
+      errors.push(result.errors[0]);
+    } else {
+      validSamples.push(result.pipelineResults[0]);
+    }
   }
 
-  const jsonSamples = pipelineResults
+  if (validSamples.length > 0) {
+    grokPatterns.push(currentPattern);
+  }
+
+  if (unParsedSamples.length > 0) {
+    return {
+      unParsedSamples,
+      errors,
+      lastExecutedChain: 'unstructuredValidate',
+    };
+  }
+
+  const jsonSamples = validSamples
     .map((log) => log[packageName])
     .map((log) => log[dataStreamName])
     .map((log) => JSON.stringify(log));
@@ -39,7 +66,7 @@ export async function handleUnstructuredValidate({
   return {
     jsonSamples,
     additionalProcessors,
-    errors: [],
+    unParsedSamples: [],
     lastExecutedChain: 'unstructuredValidate',
   };
 }

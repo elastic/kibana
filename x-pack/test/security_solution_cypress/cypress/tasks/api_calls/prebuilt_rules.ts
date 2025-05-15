@@ -145,22 +145,16 @@ export const bulkCreateRuleAssets = ({
   const bulkIndexRequestBody = rules.reduce((body, rule) => {
     const document = JSON.stringify(rule);
     const documentId = `security-rule:${rule['security-rule'].rule_id}`;
-    const historicalDocumentId = `${documentId}_${rule['security-rule'].version}`;
+    const documentIdWithVersion = `${documentId}_${rule['security-rule'].version}`;
 
-    const indexRuleAsset = `${JSON.stringify({
-      index: {
-        _index: index,
-        _id: documentId,
-      },
-    })}\n${document}\n`;
     const indexHistoricalRuleAsset = `${JSON.stringify({
       index: {
         _index: index,
-        _id: historicalDocumentId,
+        _id: documentIdWithVersion,
       },
     })}\n${document}\n`;
 
-    return body.concat(indexRuleAsset, indexHistoricalRuleAsset);
+    return body.concat(indexHistoricalRuleAsset);
   }, '');
 
   cy.task('putMapping', index);

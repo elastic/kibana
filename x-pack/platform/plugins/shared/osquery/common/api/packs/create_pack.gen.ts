@@ -18,7 +18,7 @@ import { z } from '@kbn/zod';
 
 import {
   PackName,
-  DescriptionOrUndefined,
+  PackDescriptionOrUndefined,
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
   Shards,
@@ -28,9 +28,12 @@ import {
 export type CreatePacksRequestBody = z.infer<typeof CreatePacksRequestBody>;
 export const CreatePacksRequestBody = z.object({
   name: PackName.optional(),
-  description: DescriptionOrUndefined.optional(),
+  description: PackDescriptionOrUndefined.optional(),
   enabled: EnabledOrUndefined.optional(),
   policy_ids: PolicyIdsOrUndefined.optional(),
   shards: Shards.optional(),
   queries: ObjectQueries.optional(),
 });
+
+export type CreatePacksResponse = z.infer<typeof CreatePacksResponse>;
+export const CreatePacksResponse = z.object({});

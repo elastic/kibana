@@ -24,6 +24,12 @@ export const registerDeleteUnknownTypesRoute = (
     {
       path: '/deprecations/_delete_unknown_types',
       validate: false,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Saved Objects Client',
+        },
+      },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
       const { elasticsearch, savedObjects } = await context.core;

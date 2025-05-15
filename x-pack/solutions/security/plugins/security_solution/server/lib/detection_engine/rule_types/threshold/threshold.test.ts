@@ -12,25 +12,20 @@ import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { thresholdExecutor } from './threshold';
-import { getThresholdRuleParams, getCompleteRuleMock } from '../../rule_schema/mocks';
+import { getThresholdRuleParams } from '../../rule_schema/mocks';
 import { sampleEmptyAggsSearchResults } from '../__mocks__/es_results';
 import { getThresholdTermsHash } from './utils';
-import type { ThresholdRuleParams } from '../../rule_schema';
-import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
-import type { RunOpts } from '../types';
 import type { ExperimentalFeatures } from '../../../../../common';
+import { getSharedParamsMock } from '../__mocks__/shared_params';
 
 jest.mock('../utils/get_filter', () => ({ getFilter: jest.fn() }));
 
 describe('threshold_executor', () => {
   let alertServices: RuleExecutorServicesMock;
-  let ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create>;
+
   let mockScheduledNotificationResponseAction: jest.Mock;
-  const version = '8.0.0';
   const params = getThresholdRuleParams();
-  const thresholdCompleteRule = getCompleteRuleMock<ThresholdRuleParams>(params);
   const tuple = {
     from: dateMath.parse(params.from)!,
     to: dateMath.parse(params.to)!,
@@ -38,6 +33,27 @@ describe('threshold_executor', () => {
   };
   const licensing = licensingMock.createSetup();
 
+  const sharedParams = getSharedParamsMock({
+    ruleParams: params,
+    rewrites: {
+      tuple,
+      bulkCreate: jest.fn().mockImplementation((hits) => ({
+        errors: [],
+        success: true,
+        bulkCreateDuration: '0',
+        createdItemsCount: 0,
+        createdItems: [],
+      })),
+    },
+  });
+  const ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create> =
+    ruleExecutionLogMock.forExecutors.create({
+      ruleId: sharedParams.completeRule.alertId,
+      ruleUuid: sharedParams.completeRule.ruleParams.ruleId,
+      ruleName: sharedParams.completeRule.ruleConfig.name,
+      ruleType: sharedParams.completeRule.ruleConfig.ruleTypeId,
+    });
+  sharedParams.ruleExecutionLogger = ruleExecutionLogger;
   beforeEach(() => {
     alertServices = alertsMock.createRuleExecutorServices();
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
@@ -48,18 +64,11 @@ describe('threshold_executor', () => {
         },
       })
     );
-    ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
-      ruleId: thresholdCompleteRule.alertId,
-      ruleUuid: thresholdCompleteRule.ruleParams.ruleId,
-      ruleName: thresholdCompleteRule.ruleConfig.name,
-      ruleType: thresholdCompleteRule.ruleConfig.ruleTypeId,
-    });
     mockScheduledNotificationResponseAction = jest.fn();
   });
 
   describe('thresholdExecutor', () => {
     it('should clean up any signal history that has fallen outside the window when state is initialized', async () => {
-      const ruleDataClientMock = createRuleDataClientMock();
       const terms1 = [
         {
           field: 'host.name',
@@ -88,30 +97,10 @@ describe('threshold_executor', () => {
         },
       };
       const response = await thresholdExecutor({
-        completeRule: thresholdCompleteRule,
-        tuple,
+        sharedParams,
         services: alertServices,
         state,
-        version,
-        ruleExecutionLogger,
         startedAt: new Date(),
-        bulkCreate: jest.fn().mockImplementation((hits) => ({
-          errors: [],
-          success: true,
-          bulkCreateDuration: '0',
-          createdItemsCount: 0,
-          createdItems: [],
-        })),
-        wrapHits: jest.fn(),
-        ruleDataClient: ruleDataClientMock,
-        runtimeMappings: {},
-        inputIndex: ['auditbeat-*'],
-        primaryTimestamp: TIMESTAMP,
-        aggregatableTimestampField: TIMESTAMP,
-        exceptionFilter: undefined,
-        unprocessedExceptions: [],
-        spaceId: 'default',
-        runOpts: {} as RunOpts<ThresholdRuleParams>,
         licensing,
         experimentalFeatures: {} as ExperimentalFeatures,
         scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
@@ -125,7 +114,6 @@ describe('threshold_executor', () => {
     });
 
     it('should log a warning if unprocessedExceptions is not empty', async () => {
-      const ruleDataClientMock = createRuleDataClientMock();
       const terms1 = [
         {
           field: 'host.name',
@@ -154,30 +142,13 @@ describe('threshold_executor', () => {
         },
       };
       const result = await thresholdExecutor({
-        completeRule: thresholdCompleteRule,
-        tuple,
+        sharedParams: {
+          ...sharedParams,
+          unprocessedExceptions: [getExceptionListItemSchemaMock()],
+        },
         services: alertServices,
         state,
-        version,
-        ruleExecutionLogger,
         startedAt: new Date(),
-        bulkCreate: jest.fn().mockImplementation((hits) => ({
-          errors: [],
-          success: true,
-          bulkCreateDuration: '0',
-          createdItemsCount: 0,
-          createdItems: [],
-        })),
-        wrapHits: jest.fn(),
-        ruleDataClient: ruleDataClientMock,
-        runtimeMappings: {},
-        inputIndex: ['auditbeat-*'],
-        primaryTimestamp: TIMESTAMP,
-        aggregatableTimestampField: TIMESTAMP,
-        exceptionFilter: undefined,
-        unprocessedExceptions: [getExceptionListItemSchemaMock()],
-        spaceId: 'default',
-        runOpts: {} as RunOpts<ThresholdRuleParams>,
         licensing,
         experimentalFeatures: {} as ExperimentalFeatures,
         scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
@@ -189,36 +160,15 @@ describe('threshold_executor', () => {
       ]);
     });
     it('should call scheduleNotificationResponseActionsService', async () => {
-      const ruleDataClientMock = createRuleDataClientMock();
       const state = {
         initialized: true,
         signalHistory: {},
       };
       const result = await thresholdExecutor({
-        completeRule: thresholdCompleteRule,
-        tuple,
+        sharedParams,
         services: alertServices,
         state,
-        version,
-        ruleExecutionLogger,
         startedAt: new Date(),
-        bulkCreate: jest.fn().mockImplementation((hits) => ({
-          errors: [],
-          success: true,
-          bulkCreateDuration: '0',
-          createdItemsCount: 0,
-          createdItems: [],
-        })),
-        wrapHits: jest.fn(),
-        ruleDataClient: ruleDataClientMock,
-        runtimeMappings: {},
-        inputIndex: ['auditbeat-*'],
-        primaryTimestamp: TIMESTAMP,
-        aggregatableTimestampField: TIMESTAMP,
-        exceptionFilter: undefined,
-        unprocessedExceptions: [getExceptionListItemSchemaMock()],
-        spaceId: 'default',
-        runOpts: {} as RunOpts<ThresholdRuleParams>,
         licensing,
         experimentalFeatures: {} as ExperimentalFeatures,
         scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
@@ -226,7 +176,7 @@ describe('threshold_executor', () => {
       expect(mockScheduledNotificationResponseAction).toBeCalledWith({
         signals: result.createdSignals,
         signalsCount: result.createdSignalsCount,
-        responseActions: thresholdCompleteRule.ruleParams.responseActions,
+        responseActions: sharedParams.completeRule.ruleParams.responseActions,
       });
     });
   });

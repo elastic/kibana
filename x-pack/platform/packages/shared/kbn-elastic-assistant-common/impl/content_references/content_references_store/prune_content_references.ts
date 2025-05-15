@@ -18,11 +18,10 @@ import { ContentReferencesStore, ContentReferenceBlock } from '../types';
 export const pruneContentReferences = (
   content: string,
   contentReferencesStore: ContentReferencesStore
-): ContentReferences | undefined => {
+): ContentReferences => {
   const fullStore = contentReferencesStore.getStore();
   const prunedStore: Record<string, ContentReference> = {};
   const matches = content.matchAll(/\{reference\([0-9a-zA-Z]+\)\}/g);
-  let isPrunedStoreEmpty = true;
 
   for (const match of matches) {
     const referenceElement = match[0];
@@ -30,14 +29,9 @@ export const pruneContentReferences = (
     if (!(referenceId in prunedStore)) {
       const contentReference = fullStore[referenceId];
       if (contentReference) {
-        isPrunedStoreEmpty = false;
         prunedStore[referenceId] = contentReference;
       }
     }
-  }
-
-  if (isPrunedStoreEmpty) {
-    return undefined;
   }
 
   return prunedStore;

@@ -512,6 +512,45 @@ describe('Agentless Agent service', () => {
     );
   });
 
+  it('should upgraded agentless agent for ESS', async () => {
+    const returnValue = {
+      id: 'mocked',
+      regional_id: 'mocked',
+    };
+    (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce(returnValue);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: {
+        enabled: true,
+        api: {
+          url: 'http://api.agentless.com',
+          tls: {
+            certificate: '/path/to/cert',
+            key: '/path/to/key',
+            ca: '/path/to/ca',
+          },
+        },
+      },
+    } as any);
+    jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('8.18.0');
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+
+    await agentlessAgentService.upgradeAgentlessDeployment('mocked-agentless-agent-policy-id');
+
+    expect(axios).toHaveBeenCalledTimes(1);
+
+    expect(axios).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.anything(),
+        httpsAgent: expect.anything(),
+        method: 'PUT',
+        data: {
+          stack_version: '8.18.0',
+        },
+        url: 'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
+      })
+    );
+  });
+
   it('should delete agentless agent for serverless', async () => {
     const returnValue = {
       id: 'mocked',

@@ -194,6 +194,13 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         asStream: true,
         meta: true,
         signal: params.signal,
+        ...(params.telemetryMetadata?.pluginId
+          ? {
+              headers: {
+                'X-Elastic-Product-Use-Case': params.telemetryMetadata?.pluginId,
+              },
+            }
+          : {}),
       }
     );
     // errors should be thrown as it will not be a stream response

@@ -40,7 +40,11 @@ jest.mock('../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_cli
   createPrebuiltRuleAssetsClient: () => mockPrebuiltRuleAssetsClient,
 }));
 
-describe('Import rules route', () => {
+// Skipped in https://github.com/elastic/kibana/pull/212761
+// We have to find a way to use original detectionRulesClient.importRules() while mocking detectionRulesClient.importRule().
+// detectionRulesClient.importRules() uses detectionRulesClient.importRule() under the hood.
+// Without proper mocking this test suite will test the mock.
+describe.skip('Import rules route', () => {
   let config: ReturnType<typeof configMock.createDefault>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
@@ -57,9 +61,6 @@ describe('Import rules route', () => {
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
     clients.detectionRulesClient.importRule.mockResolvedValue(getRulesSchemaMock());
-    clients.detectionRulesClient.getRuleCustomizationStatus.mockReturnValue({
-      isRulesCustomizationEnabled: false,
-    });
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
@@ -71,7 +72,6 @@ describe('Import rules route', () => {
   describe('status codes', () => {
     test('returns 200 when importing a single rule with a valid actionClient and alertClient', async () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));
-
       expect(response.status).toEqual(200);
     });
 
@@ -202,7 +202,6 @@ describe('Import rules route', () => {
               message: `Unexpected token 'h', "this is not"... is not valid JSON`,
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
         ],
         success: false,
@@ -222,7 +221,7 @@ describe('Import rules route', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         clients.detectionRulesClient.importRule.mockRejectedValue({
-          message: 'rule_id: "rule-1" already exists',
+          message: 'Rule with this rule_id already exists',
           statusCode: 409,
         });
         const response = await server.inject(request, requestContextMock.convertContext(context));
@@ -232,7 +231,7 @@ describe('Import rules route', () => {
           errors: [
             {
               error: {
-                message: 'rule_id: "rule-1" already exists',
+                message: 'Rule with this rule_id already exists',
                 status_code: 409,
               },
               rule_id: 'rule-1',
@@ -350,14 +349,12 @@ describe('Import rules route', () => {
               message: 'rule_id: Required',
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
           {
             error: {
               message: 'rule_id: Required',
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
         ],
         success: false,
@@ -440,7 +437,7 @@ describe('Import rules route', () => {
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.detectionRulesClient.importRule.mockRejectedValueOnce({
-          message: 'rule_id: "rule-1" already exists',
+          message: 'Rule with this rule_id already exists',
           statusCode: 409,
         });
         const multiRequest = getImportRulesRequest(
@@ -455,7 +452,7 @@ describe('Import rules route', () => {
           errors: [
             {
               error: {
-                message: 'rule_id: "rule-1" already exists',
+                message: 'Rule with this rule_id already exists',
                 status_code: 409,
               },
               rule_id: 'rule-1',

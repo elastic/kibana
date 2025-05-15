@@ -29,6 +29,7 @@ interface GetInstallPkgRouteOptionsParams {
   isCloud: boolean;
   isFirstTimeAgentUser: boolean;
   isGuidedOnboardingActive: boolean;
+  isAgentlessIntegration?: boolean;
 }
 
 export type InstallPkgRouteOptions = [
@@ -50,6 +51,7 @@ export const getInstallPkgRouteOptions = ({
   isFirstTimeAgentUser,
   isCloud,
   isGuidedOnboardingActive,
+  isAgentlessIntegration,
 }: GetInstallPkgRouteOptionsParams): InstallPkgRouteOptions => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
   const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
@@ -97,7 +99,7 @@ export const getInstallPkgRouteOptions = ({
   }
 
   const state: CreatePackagePolicyRouteState = {
-    onSaveNavigateTo: redirectToPath,
+    onSaveNavigateTo: !isAgentlessIntegration ? redirectToPath : undefined,
     onSaveQueryParams,
     onCancelNavigateTo: [
       INTEGRATIONS_PLUGIN_ID,

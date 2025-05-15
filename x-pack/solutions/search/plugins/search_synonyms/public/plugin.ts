@@ -26,7 +26,7 @@ export class SearchSynonymsPlugin
     core: CoreSetup<AppPluginStartDependencies, SearchSynonymsPluginStart>,
     _: AppPluginSetupDependencies
   ): SearchSynonymsPluginSetup {
-    if (!core.settings.client.get<boolean>(SYNONYMS_UI_FLAG, false)) {
+    if (!core.settings.client.get<boolean>(SYNONYMS_UI_FLAG, true)) {
       return {};
     }
     core.application.register({

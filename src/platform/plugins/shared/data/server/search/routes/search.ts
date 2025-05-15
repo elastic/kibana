@@ -11,13 +11,21 @@ import { first } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import { IncomingMessage } from 'http';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { Logger } from '@kbn/logging';
+import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
+import apm from 'elastic-apm-node';
 import { reportSearchError } from '../report_search_error';
 import { getRequestAbortedSignal } from '../../lib';
 import type { DataPluginRouter } from '../types';
 
 export const SEARCH_API_BASE_URL = '/internal/search';
 
-export function registerSearchRoute(router: DataPluginRouter): void {
+export function registerSearchRoute(
+  router: DataPluginRouter,
+  logger: Logger,
+  executionContextSetup: ExecutionContextSetup
+): void {
   router.versioned
     .post({
       path: `${SEARCH_API_BASE_URL}/{strategy}/{id?}`,
@@ -65,39 +73,54 @@ export function registerSearchRoute(router: DataPluginRouter): void {
         const { strategy, id } = request.params;
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
+        let executionContext: KibanaExecutionContext | undefined;
+        const contextHeader = request.headers['x-kbn-context'];
         try {
-          const search = await context.search;
-          const response = await search
-            .search(
-              { ...searchRequest, id },
-              {
-                abortSignal,
-                strategy,
-                legacyHitsTotal,
-                sessionId,
-                isStored,
-                isRestore,
-                retrieveResults,
-                stream,
-              }
-            )
-            .pipe(first())
-            .toPromise();
-
-          if (response && (response.rawResponse as unknown as IncomingMessage).pipe) {
-            return res.ok({
-              body: response.rawResponse,
-              headers: {
-                'kbn-search-is-restored': response.isRestored ? '?1' : '?0',
-                'kbn-search-request-params': JSON.stringify(response.requestParams),
-              },
-            });
-          } else {
-            return res.ok({ body: response });
+          if (contextHeader != null) {
+            executionContext = JSON.parse(
+              decodeURIComponent(Array.isArray(contextHeader) ? contextHeader[0] : contextHeader)
+            );
           }
         } catch (err) {
-          return reportSearchError(res, err);
+          logger.error(`Error parsing search execution context: ${contextHeader}`);
         }
+
+        return executionContextSetup.withContext(executionContext, async () => {
+          apm.addLabels(executionContextSetup.getAsLabels());
+          try {
+            const search = await context.search;
+            const response = await search
+              .search(
+                { ...searchRequest, id },
+                {
+                  abortSignal,
+                  strategy,
+                  legacyHitsTotal,
+                  sessionId,
+                  isStored,
+                  isRestore,
+                  retrieveResults,
+                  stream,
+                }
+              )
+              .pipe(first())
+              .toPromise();
+
+            if (response && (response.rawResponse as unknown as IncomingMessage).pipe) {
+              return res.ok({
+                body: response.rawResponse,
+                headers: {
+                  'kbn-search-is-restored': response.isRestored ? '?1' : '?0',
+                  'kbn-search-request-params': JSON.stringify(response.requestParams),
+                },
+              });
+            } else {
+              return res.ok({ body: response });
+            }
+          } catch (err) {
+            return reportSearchError(res, err);
+          }
+        });
       }
     );
 

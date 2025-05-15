@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
 import { chunk, get, invert, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
@@ -31,6 +33,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
+  DocLinksServiceSetup,
   ElasticsearchClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
@@ -60,10 +63,10 @@ import type {
   SignalSourceHit,
   SimpleHit,
   WrappedEventHit,
+  SecuritySharedParams,
 } from '../types';
 import type { ShardError } from '../../../types';
 import type {
-  CompleteRule,
   EqlRuleParams,
   EsqlRuleParams,
   MachineLearningRuleParams,
@@ -84,7 +87,6 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
-import type { ConfigType } from '../../../../config';
 import type {
   ExtraFieldsForShellAlert,
   WrappedEqlShellOptionalSubAlertsType,
@@ -92,6 +94,11 @@ import type {
 import type { BuildReasonMessage } from './reason_formatters';
 import { getSuppressionTerms } from './suppression_utils';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
+import {
+  SECURITY_NUM_EXCEPTION_ITEMS,
+  SECURITY_NUM_INDICES_MATCHING_PATTERN,
+  SECURITY_QUERY_SPAN_S,
+} from './apm_field_names';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -99,35 +106,32 @@ export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
+  docLinks: DocLinksServiceSetup;
 }): Promise<string | undefined> => {
-  const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
-
+  const { privileges, ruleExecutionLogger, uiSettingsClient, docLinks } = args;
+  const apiKeyDocs = docLinks.links.alerting.authorization;
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
-
   const indexNames = Object.keys(privileges.index);
   const filteredIndexNames = isCcsPermissionWarningEnabled
     ? indexNames
     : indexNames.filter((indexName) => {
         return !isCCSRemoteIndexName(indexName);
       });
-
   const [, indexesWithNoReadPrivileges] = partition(
     filteredIndexNames,
     (indexName) => privileges.index[indexName].read
   );
-
   let warningStatusMessage;
 
   // Some indices have read privileges others do not.
   if (indexesWithNoReadPrivileges.length > 0) {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningStatusMessage = `This rule may not have the required read privileges to the following index patterns: ${indexesString}`;
+    warningStatusMessage = `This rule's API key is unable to access all indices that match the ${indexesString} pattern. To learn how to update and manage API keys, refer to ${apiKeyDocs}.`;
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,
     });
   }
-
   return warningStatusMessage;
 };
 
@@ -145,6 +149,10 @@ export const hasTimestampFields = async (args: {
 }> => {
   const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
+
+  agent.setCustomContext({
+    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices?.length,
+  });
 
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
@@ -278,36 +286,39 @@ export const getExceptions = async ({
   client: ExceptionListClient;
   lists: ListArray;
 }): Promise<ExceptionListItemSchema[]> => {
-  if (lists.length > 0) {
-    try {
-      const listIds = lists.map(({ list_id: listId }) => listId);
-      const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
+  return withSecuritySpan('getExceptions', async () => {
+    if (lists.length > 0) {
+      try {
+        const listIds = lists.map(({ list_id: listId }) => listId);
+        const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
 
-      // Stream the results from the Point In Time (PIT) finder into this array
-      let items: ExceptionListItemSchema[] = [];
-      const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
-        items = [...items, ...response.data];
-      };
+        // Stream the results from the Point In Time (PIT) finder into this array
+        let items: ExceptionListItemSchema[] = [];
+        const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
+          items = [...items, ...response.data];
+        };
 
-      await client.findExceptionListsItemPointInTimeFinder({
-        executeFunctionOnStream,
-        listId: listIds,
-        namespaceType: namespaceTypes,
-        perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
-        filter: [],
-        maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
-        sortOrder: undefined,
-        sortField: undefined,
-      });
-      return items;
-    } catch (e) {
-      throw new Error(
-        `unable to fetch exception list items, message: "${e.message}" full error: "${e}"`
-      );
+        await client.findExceptionListsItemPointInTimeFinder({
+          executeFunctionOnStream,
+          listId: listIds,
+          namespaceType: namespaceTypes,
+          perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+          filter: [],
+          maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
+          sortOrder: undefined,
+          sortField: undefined,
+        });
+        agent.setCustomContext({ [SECURITY_NUM_EXCEPTION_ITEMS]: items.length });
+        return items;
+      } catch (e) {
+        throw new Error(
+          `unable to fetch exception list items, message: "${e.message}" full error: "${e}"`
+        );
+      }
+    } else {
+      return [];
     }
-  } else {
-    return [];
-  }
+  });
 };
 
 export const generateId = (
@@ -387,6 +398,7 @@ export const getGapBetweenRuns = ({
     return moment.duration(0);
   }
   const driftTolerance = moment.duration(originalTo.diff(originalFrom));
+  agent.addLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
   const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
   return currentDuration.subtract(driftTolerance);
 };
@@ -1075,33 +1087,15 @@ export const getDisabledActionsWarningText = ({
   }
 };
 
-export interface SharedParams {
-  spaceId: string;
-  completeRule: CompleteRule<RuleWithInMemorySuppression>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  indicesToQuery: string[];
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  intendedTimestamp: Date | undefined;
-}
-
 export type RuleWithInMemorySuppression =
   | ThreatRuleParams
   | EqlRuleParams
   | MachineLearningRuleParams;
 
 export interface SequenceSuppressionTermsAndFieldsParams {
+  sharedParams: SecuritySharedParams<EqlRuleParams>;
   shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest>;
   buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
-  spaceId: string;
-  completeRule: CompleteRule<RuleWithInMemorySuppression>;
-  indicesToQuery: string[];
-  alertTimestampOverride: Date | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
 }
 
 export type SequenceSuppressionTermsAndFieldsFactory = (
@@ -1127,18 +1121,16 @@ export const stringifyAfterKey = (afterKey: Record<string, string | number | nul
 };
 
 export const buildShellAlertSuppressionTermsAndFields = ({
+  sharedParams,
   shellAlert,
   buildingBlockAlerts,
-  spaceId,
-  completeRule,
-  alertTimestampOverride,
-  primaryTimestamp,
-  secondaryTimestamp,
 }: SequenceSuppressionTermsAndFieldsParams): WrappedFieldsLatest<
   EqlShellFieldsLatest & SuppressionFieldsLatest
 > & {
   subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
 } => {
+  const { alertTimestampOverride, primaryTimestamp, secondaryTimestamp, completeRule, spaceId } =
+    sharedParams;
   const suppressionTerms = getSuppressionTerms({
     alertSuppression: completeRule?.ruleParams?.alertSuppression,
     input: shellAlert._source,

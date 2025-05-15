@@ -9,15 +9,17 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, FieldValues, Path, useFormContext } from 'react-hook-form';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 
 import { ClientPluginsStart } from '../../../../../plugin';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
 
-export const NAMESPACES_NAME = 'spaces';
+interface SpaceSelectorProps {
+  helpText: string;
+}
 
-export const SpaceSelector: React.FC = () => {
+export const SpaceSelector = <T extends FieldValues>({ helpText }: SpaceSelectorProps) => {
+  const NAMESPACES_NAME = 'spaces' as Path<T>;
   const { services } = useKibana<ClientPluginsStart>();
   const [spacesList, setSpacesList] = React.useState<Array<{ id: string; label: string }>>([]);
   const data = services.spaces?.ui.useSpaces();
@@ -26,7 +28,7 @@ export const SpaceSelector: React.FC = () => {
     control,
     formState: { isSubmitted },
     trigger,
-  } = useFormContext<PrivateLocation>();
+  } = useFormContext<T>();
   const { isTouched, error } = control.getFieldState(NAMESPACES_NAME);
 
   const showFieldInvalid = (isSubmitted || isTouched) && !!error;
@@ -49,7 +51,7 @@ export const SpaceSelector: React.FC = () => {
     <EuiFormRow
       fullWidth
       label={SPACES_LABEL}
-      helpText={HELP_TEXT}
+      helpText={helpText}
       isInvalid={showFieldInvalid}
       error={showFieldInvalid ? NAMESPACES_NAME : undefined}
     >
@@ -120,8 +122,4 @@ const allSpacesOption = {
 
 const SPACES_LABEL = i18n.translate('xpack.synthetics.privateLocation.spacesLabel', {
   defaultMessage: 'Spaces ',
-});
-
-const HELP_TEXT = i18n.translate('xpack.synthetics.privateLocation.spacesHelpText', {
-  defaultMessage: 'Select the spaces where this location will be available.',
 });
