@@ -28,7 +28,6 @@ describe('getTimeZone', () => {
     expect(
       getTimeZone({
         get: () => 'Browser',
-        isDefault: () => true,
       } as unknown as IUiSettingsClient)
     ).toEqual('America/New_York');
   });
@@ -37,7 +36,6 @@ describe('getTimeZone', () => {
     expect(
       getTimeZone({
         get: () => 'Browser',
-        isDefault: () => false,
       } as unknown as IUiSettingsClient)
     ).toEqual('America/New_York');
   });
@@ -47,7 +45,6 @@ describe('getTimeZone', () => {
     expect(
       getTimeZone({
         get: () => timezone,
-        isDefault: () => false,
       } as unknown as IUiSettingsClient)
     ).toEqual(timezone);
   });
