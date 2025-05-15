@@ -14,6 +14,7 @@ export class SharePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
 
   /**
    * @description attempt to close the share modal, if it's open
@@ -29,6 +30,14 @@ export class SharePageObject extends FtrService {
   async clickTab(content: string) {
     if (!(await this.isShareModalOpen())) {
       await this.clickShareTopNavButton();
+      await this.retry.waitFor('Share modal to open', async () => {
+        const isOpen = await this.isShareModalOpen();
+        if (isOpen) {
+          return true;
+        }
+        this.log.debug('Share modal not open yet');
+        return false;
+      });
     }
     await (await this.find.byButtonText(content)).click();
   }
@@ -42,7 +51,9 @@ export class SharePageObject extends FtrService {
   }
 
   async clickShareTopNavButton() {
-    return this.testSubjects.click('shareTopNavButton');
+    await this.testSubjects.moveMouseTo('shareTopNavButton');
+    await this.testSubjects.click('shareTopNavButton');
+    await this.browser.pressKeys(this.browser.keys.ESCAPE); // cancel the tooltip
   }
 
   async openShareModalItem(itemTitle: 'link' | 'export' | 'embed') {
