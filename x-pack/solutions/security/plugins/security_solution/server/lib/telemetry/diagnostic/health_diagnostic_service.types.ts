@@ -26,7 +26,7 @@ export interface HealthDiagnosticServiceStart {
 export interface HealthDiagnosticQuery {
   name: string;
   esQuery: SearchRequest;
-  scheduleCron: string;
+  scheduleInterval: string;
   isEnabled?: boolean;
 }
 
@@ -39,7 +39,7 @@ export interface HealthDiagnosticService {
 export interface HealthDiagnosticQuery {
   name: string;
   esQuery: SearchRequest;
-  scheduleCron: string;
+  scheduleInterval: string;
   isEnabled?: boolean;
 }
 

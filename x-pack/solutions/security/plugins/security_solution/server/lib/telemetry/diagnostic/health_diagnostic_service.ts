@@ -88,8 +88,8 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
     const healthQueries = await this.healthQueries();
     const queriesToRun = healthQueries.filter((query) => {
-      const { scheduleCron, isEnabled } = query;
-      return nextExecution(fromDate, toDate, scheduleCron) !== undefined && (isEnabled ?? true);
+      const { scheduleInterval, isEnabled } = query;
+      return nextExecution(fromDate, toDate, scheduleInterval) !== undefined && (isEnabled ?? true);
     });
 
     this.logger.info('About to run health diagnostic queries', {

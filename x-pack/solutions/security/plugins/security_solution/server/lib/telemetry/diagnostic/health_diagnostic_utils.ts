@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { CronExpressionParser } from 'cron-parser';
+import { type Interval, intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
 import type { HealthDiagnosticQuery } from './health_diagnostic_service.types';
 
 export function nextExecution(
   startDate: Date,
   endDate: Date,
-  expression: string
+  interval: Interval
 ): Date | undefined {
-  const interval = CronExpressionParser.parse(expression, {
-    tz: 'UTC',
-    currentDate: startDate,
-    endDate,
-  });
+  const nextDate = intervalFromDate(startDate, interval);
 
-  return interval.hasNext() ? interval.next().toDate() : undefined;
+  return nextDate && nextDate < endDate ? nextDate : undefined;
 }
 
 export function parseDiagnosticQueries(input: unknown): HealthDiagnosticQuery[] {
@@ -28,7 +24,7 @@ export function parseDiagnosticQueries(input: unknown): HealthDiagnosticQuery[] 
     return {
       name: query.name,
       esQuery: query.esQuery,
-      scheduleCron: query.scheduleCron,
+      scheduleInterval: query.scheduleInterval,
       isEnabled: query.isEnabled,
     } as HealthDiagnosticQuery;
   });
