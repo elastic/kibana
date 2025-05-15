@@ -147,12 +147,10 @@ export function initializePanelsManager(
   }
 
   function getDashboardPanelFromId(panelId: string) {
-    console.log('getDashboardPanelFromId');
     const panel = panels$.value[panelId];
     const child = children$.value[panelId];
     if (!child || !panel) throw new PanelNotFoundError();
     const serialized = apiHasSerializableState(child) ? child.serializeState() : { rawState: {} };
-    console.log({ ...panel.explicitInput, ...serialized.rawState });
     return {
       type: panel.type,
       explicitInput: { ...panel.explicitInput, ...serialized.rawState },
