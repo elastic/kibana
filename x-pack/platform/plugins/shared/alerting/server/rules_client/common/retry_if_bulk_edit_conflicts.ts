@@ -13,7 +13,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import type { BulkActionSkipResult } from '../../../common/bulk_edit';
+import type { BulkActionSkipResult } from '../../../common/bulk_action';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import type { BulkOperationError } from '../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';

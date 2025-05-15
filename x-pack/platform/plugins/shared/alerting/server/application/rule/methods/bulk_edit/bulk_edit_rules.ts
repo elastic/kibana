@@ -19,7 +19,7 @@ import type {
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import type { Rule, RuleAction, RuleSystemAction } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { BulkActionSkipResult } from '../../../../../common/bulk_edit';
+import type { BulkActionSkipResult } from '../../../../../common/bulk_action';
 import type { RuleTypeRegistry } from '../../../../types';
 import {
   validateRuleTypeParams,

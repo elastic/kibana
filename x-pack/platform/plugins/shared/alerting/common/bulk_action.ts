@@ -8,9 +8,10 @@
 import type { Rule } from './rule';
 
 export type BulkEditSkipReason = 'RULE_NOT_MODIFIED';
+export type BulkGapsFillingSkipReason = 'NO_GAPS_TO_FILL';
 
 export interface BulkActionSkipResult {
   id: Rule['id'];
   name?: Rule['name'];
-  skip_reason: BulkEditSkipReason;
+  skip_reason: BulkEditSkipReason | BulkGapsFillingSkipReason;
 }
