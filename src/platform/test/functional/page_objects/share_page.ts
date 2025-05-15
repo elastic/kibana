@@ -14,7 +14,6 @@ export class SharePageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
-  private readonly browser = this.ctx.getService('browser');
 
   /**
    * @description attempt to close the share modal, if it's open
