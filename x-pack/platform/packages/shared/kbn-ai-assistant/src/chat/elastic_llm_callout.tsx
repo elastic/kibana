@@ -5,26 +5,35 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, useEuiTheme } from '@elastic/eui';
-import {
-  getConnectorsManagementHref,
-  getSettingsManagementHref,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import { css } from '@emotion/css';
+import { getConnectorsManagementHref } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
 
 export const ElasticLlmCallout = () => {
-  const { http } = useKibana().services;
+  const { http, spaces } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
   const [showCallOut, setShowCallOut] = useState<boolean>(true);
+  const [currentSpaceId, setCurrentSpaceId] = useState<string>('default');
 
   const onDismiss = () => {
     setShowCallOut(false);
   };
+
+  useEffect(() => {
+    const getCurrentSpace = async () => {
+      if (spaces) {
+        const space = await spaces.getActiveSpace();
+        setCurrentSpaceId(space.id);
+      }
+    };
+
+    getCurrentSpace();
+  }, [spaces]);
 
   if (!showCallOut) {
     return;
@@ -32,6 +41,9 @@ export const ElasticLlmCallout = () => {
 
   const elasticLlmCalloutClassName = css`
     margin-bottom: ${euiTheme.size.s};
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
   `;
 
   return (
@@ -66,7 +78,9 @@ export const ElasticLlmCallout = () => {
             ),
             settingsLink: (...chunks: React.ReactNode[]) => (
               <EuiLink
-                href={getSettingsManagementHref(http!)} // TODO: update to active space edit
+                href={http!.basePath.prepend(
+                  `/app/management/kibana/spaces/edit/${currentSpaceId}`
+                )}
                 target="_blank"
                 rel="noopener noreferrer"
                 external

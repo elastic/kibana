@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { ApplicationStart, HttpStart } from '@kbn/core/public';
-
-export function getSettingsManagementHref(http: HttpStart) {
-  return http.basePath.prepend('/app/management/kibana/observabilityAiAssistantManagement');
-}
+import { ApplicationStart } from '@kbn/core/public';
 
 export function navigateToSettingsManagementApp(application: ApplicationStart) {
   application.navigateToApp('management', {
