@@ -3154,9 +3154,6 @@ describe('Package policy service', () => {
   });
 
   describe('delete', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
     // TODO: Add tests
     it('should allow to delete a package policy', async () => {});
 
