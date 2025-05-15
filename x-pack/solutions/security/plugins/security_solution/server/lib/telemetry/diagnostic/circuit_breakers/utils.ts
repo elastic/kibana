@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { CircuitBreakerResult } from '../health_diagnostic_circuit_breakers.types';
+
 // helper function to create a success result
 export function success(): CircuitBreakerResult {
   return { valid: true };
