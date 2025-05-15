@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip, tap } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
