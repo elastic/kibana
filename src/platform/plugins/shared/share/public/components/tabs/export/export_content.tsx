@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiCopy,
+  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -133,17 +134,23 @@ const ExportContentUi = ({
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={absoluteUrl ?? ''}>
               {(copy) => (
-                <EuiButtonEmpty
-                  iconType="copyClipboard"
-                  onClick={copy}
-                  data-test-subj="shareReportingCopyURL"
-                  data-share-url={absoluteUrl}
-                >
-                  <FormattedMessage
-                    id="share.modalContent.copyUrlButtonLabel"
-                    defaultMessage="Copy Post URL"
-                  />
-                </EuiButtonEmpty>
+                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="copyClipboard" size="m" color="primary" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      onClick={copy}
+                      data-test-subj="shareReportingCopyURL"
+                      data-share-url={absoluteUrl}
+                    >
+                      <FormattedMessage
+                        id="share.modalContent.copyUrlButtonLabel"
+                        defaultMessage="Copy Post URL"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               )}
             </EuiCopy>
           </EuiFlexItem>

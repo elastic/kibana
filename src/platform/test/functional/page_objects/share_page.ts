@@ -51,9 +51,7 @@ export class SharePageObject extends FtrService {
   }
 
   async clickShareTopNavButton() {
-    await this.testSubjects.moveMouseTo('shareTopNavButton');
     await this.testSubjects.click('shareTopNavButton');
-    await this.browser.pressKeys(this.browser.keys.ESCAPE); // cancel the tooltip
   }
 
   async openShareModalItem(itemTitle: 'link' | 'export' | 'embed') {
