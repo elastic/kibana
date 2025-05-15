@@ -147,10 +147,12 @@ export function initializePanelsManager(
   }
 
   function getDashboardPanelFromId(panelId: string) {
+    console.log('getDashboardPanelFromId');
     const panel = panels$.value[panelId];
     const child = children$.value[panelId];
     if (!child || !panel) throw new PanelNotFoundError();
     const serialized = apiHasSerializableState(child) ? child.serializeState() : { rawState: {} };
+    console.log({ ...panel.explicitInput, ...serialized.rawState });
     return {
       type: panel.type,
       explicitInput: { ...panel.explicitInput, ...serialized.rawState },
@@ -394,9 +396,11 @@ export function initializePanelsManager(
           const childApi = children$.value[id];
           const serializeResult = apiHasSerializableState(childApi)
             ? childApi.serializeState()
-            : { rawState: {} };
+            : {
+                rawState: panels$.value[id].explicitInput ?? {},
+                references: getReferencesForPanelId(id),
+              };
           acc[id] = { ...panels$.value[id], explicitInput: { ...serializeResult.rawState, id } };
-
           references.push(...prefixReferencesFromPanel(id, serializeResult.references ?? []));
 
           return acc;
