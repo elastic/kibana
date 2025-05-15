@@ -50,21 +50,6 @@ export const e5SmallDescription = i18n.translate(
   }
 );
 
-const e5LargeTitle = i18n.translate(
-  'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.e5largeTitle',
-  {
-    defaultMessage: 'E5-large (multilingual)',
-  }
-);
-
-const e5LargeDescription = i18n.translate(
-  'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.e5largeDescription',
-  {
-    defaultMessage:
-      'E5 is an NLP model by Elastic designed to enhance multilingual semantic search by focusing on query context rather than keywords. E5-large is an optimized version for Intel® silicon.',
-  }
-);
-
 const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
   string,
   { title: string; description: string }
@@ -73,17 +58,9 @@ const PRECONFIGURED_INFERENCE_ENDPOINT_METADATA: Record<
     title: elserTitle,
     description: elserDescription,
   },
-  [ELSER_IN_EIS_INFERENCE_ID]: {
-    title: elserTitle,
-    description: elserDescription,
-  },
   [E5_SMALL_INFERENCE_ID]: {
     title: e5SmallTitle,
     description: e5SmallDescription,
-  },
-  [E5_LARGE_IN_EIS_INFERENCE_ID]: {
-    title: e5LargeTitle,
-    description: e5LargeDescription,
   },
 };
 
