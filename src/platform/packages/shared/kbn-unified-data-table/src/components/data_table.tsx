@@ -27,6 +27,8 @@ import {
   EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
+  EuiDataGridCellValueElementProps,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -80,6 +82,7 @@ import {
   toolbarVisibility as toolbarVisibilityDefaults,
   DataGridDensity,
   DEFAULT_PAGINATION_MODE,
+  DEFAULT_CONTROL_COLUMN_WIDTH,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
@@ -95,6 +98,7 @@ import {
   getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
+import { ActionsHeader } from './actions_header';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
@@ -949,34 +953,52 @@ export const UnifiedDataTable = ({
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const defaultControlColumns = getLeadControlColumns({ rows: displayedRows, canSetExpandedDoc });
-    const internalControlColumns = controlColumnIds
-      ? // reorder the default controls as per controlColumnIds
-        controlColumnIds.reduce((acc, id) => {
-          const controlColumn = defaultControlColumns.find((col) => col.id === id);
-          if (controlColumn) {
-            acc.push(controlColumn);
-          }
-          return acc;
-        }, [] as EuiDataGridControlColumn[])
-      : defaultControlColumns;
+    const { leadColumns, leadColumnsExtraContent } = getLeadControlColumns({
+      rows: displayedRows,
+      canSetExpandedDoc,
+    });
 
-    const leadingColumns: EuiDataGridControlColumn[] = externalControlColumns
-      ? [...internalControlColumns, ...externalControlColumns]
-      : internalControlColumns;
+    leadColumns.sort((a, b) => {
+      const aIndex = controlColumnIds.indexOf(a.id);
+      const bIndex = controlColumnIds.indexOf(b.id);
+      return aIndex - bIndex;
+    });
 
     if (getRowIndicator) {
       const colorIndicatorControlColumn = getColorIndicatorControlColumn({
         getRowIndicator,
       });
-      leadingColumns.unshift(colorIndicatorControlColumn);
+      leadColumns.unshift(colorIndicatorControlColumn);
     }
 
+    const extraColumns = [...leadColumnsExtraContent];
+    if (externalControlColumns) {
+      extraColumns.push(...externalControlColumns.map((column) => column.rowCellRender));
+    }
     if (rowAdditionalLeadingControls?.length) {
-      leadingColumns.push(...getAdditionalRowControlColumns(rowAdditionalLeadingControls));
+      const additionalRowControColumns = getAdditionalRowControlColumns(
+        rowAdditionalLeadingControls
+      );
+      extraColumns.push(...additionalRowControColumns.map((column) => column.rowCellRender));
     }
 
-    return leadingColumns;
+    const gutterSize = 4 * (extraColumns.length - 1);
+    const columnWidth = DEFAULT_CONTROL_COLUMN_WIDTH * extraColumns.length + gutterSize;
+
+    const extraColumn = {
+      id: 'actions',
+      width: columnWidth,
+      rowCellRender: (props: EuiDataGridCellValueElementProps) => (
+        <EuiFlexGroup gutterSize="xs">
+          {extraColumns.map((Content, idx) => (
+            <Content key={idx} {...props} />
+          ))}
+        </EuiFlexGroup>
+      ),
+      headerCellRender: () => <ActionsHeader maxWidth={columnWidth} />,
+    };
+
+    return [...leadColumns, extraColumn] as EuiDataGridControlColumn[];
   }, [
     canSetExpandedDoc,
     controlColumnIds,

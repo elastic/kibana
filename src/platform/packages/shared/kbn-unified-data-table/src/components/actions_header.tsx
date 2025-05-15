@@ -1,0 +1,67 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useLayoutEffect, useRef, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+
+const ICON_SIZE = 16;
+const GUTTER_SIZE = 4;
+
+export const ActionsHeader = ({ maxWidth }: { maxWidth: number }) => {
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [showText, setShowText] = useState(false);
+
+  useLayoutEffect(() => {
+    if (!textRef.current) return;
+    const textWidth = textRef.current.getBoundingClientRect().width;
+    const textAndIconWidth = textWidth + ICON_SIZE + GUTTER_SIZE;
+    setShowText(textAndIconWidth < maxWidth);
+  }, [textRef, maxWidth, setShowText]);
+
+  const actionsText = i18n.translate('unifiedDataTable.controlColumnsActionHeader', {
+    defaultMessage: 'Actions',
+  });
+
+  return (
+    <>
+      <EuiScreenReaderOnly>
+        <span>
+          {i18n.translate('unifiedDataTable.controlColumnHeader', {
+            defaultMessage: 'Control column',
+          })}
+        </span>
+      </EuiScreenReaderOnly>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        {showText && (
+          <EuiFlexItem grow={false}>
+            <span>{actionsText}</span>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="iInCircle" />
+        </EuiFlexItem>
+
+        {/* Hidden measurement span */}
+        <span
+          ref={textRef}
+          css={css`
+            position: absolute;
+            visibility: hidden;
+            white-space: nowrap;
+            pointer-events: none;
+          `}
+        >
+          {actionsText}
+        </span>
+      </EuiFlexGroup>
+    </>
+  );
+};
