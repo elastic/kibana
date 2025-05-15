@@ -31,7 +31,7 @@ import {
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
 } from '../event_based/events';
-import { artifactService } from '../artifact';
+import { Artifact } from '../artifact';
 
 const TASK_TYPE = 'Security Solution:Health Diagnostic';
 const TASK_ID = 'security:health-diagnostic:1.0.0';
@@ -41,6 +41,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private readonly logger: Logger;
   private queryExecutor?: CircuitBreakingQueryExecutor;
   private analytics?: AnalyticsServiceStart;
+  private artifactService: Artifact;
 
   // TODO: allow external configuration
   private readonly circuitBreakersConfig = {
@@ -60,6 +61,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
   constructor(logger: Logger) {
     this.logger = logger.get('health-diagnostic');
+    this.artifactService = new Artifact();
   }
 
   public setup(setup: HealthDiagnosticServiceSetup) {
@@ -71,6 +73,10 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     this.logger.info('Starting health diagnostic service');
     this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient);
     this.analytics = start.analytics;
+    this.artifactService.start(
+      start.receiver,
+      'https://bankc-artifacts.sde.elastic.dev/2114cf77-3ad0-4a50-b8e2-4d12caae73d9'
+    );
 
     await this.scheduleTask(start.taskManager);
   }
@@ -239,7 +245,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private async healthQueries(): Promise<HealthDiagnosticQuery[]> {
     // TODO: run as part of the configuration task instead of getting the artifact each time the task runs?
     try {
-      const artifact = await artifactService.getArtifact('health-diagnostic-query');
+      const artifact = await this.artifactService.getArtifact('health-diagnostic-query');
       return parseDiagnosticQueries(artifact.data);
     } catch (err) {
       this.logger.warn('Error getting health diagnostic queries', {

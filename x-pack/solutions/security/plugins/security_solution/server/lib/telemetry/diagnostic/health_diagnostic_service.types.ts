@@ -12,6 +12,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { ITelemetryReceiver } from '../receiver';
 
 export interface HealthDiagnosticServiceSetup {
   taskManager: TaskManagerSetupContract;
@@ -21,6 +22,7 @@ export interface HealthDiagnosticServiceStart {
   taskManager: TaskManagerStartContract;
   esClient: ElasticsearchClient;
   analytics: AnalyticsServiceStart;
+  receiver: ITelemetryReceiver;
 }
 
 export interface HealthDiagnosticQuery {

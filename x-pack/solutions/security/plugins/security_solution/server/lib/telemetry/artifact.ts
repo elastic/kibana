@@ -27,27 +27,28 @@ interface CacheEntry {
   etag: string;
 }
 
+const DEFAULT_CDN_URL = 'https://artifacts.security.elastic.co';
+
 export class Artifact implements IArtifact {
   private manifestUrl?: string;
-  // private readonly CDN_URL = 'https://artifacts.security.elastic.co';
-  // TODO: rollback before merge
-  private readonly CDN_URL =
-    'https://bankc-artifacts.sde.elastic.dev/2114cf77-3ad0-4a50-b8e2-4d12caae73d9';
+  private cdnUrl?: string;
+
   private readonly AXIOS_TIMEOUT_MS = 10_000;
   private receiver?: ITelemetryReceiver;
   private esClusterInfo?: ESClusterInfo;
   private cache: Map<string, CacheEntry> = new Map();
 
-  public async start(receiver: ITelemetryReceiver) {
+  public async start(receiver: ITelemetryReceiver, cdnUrl: string = DEFAULT_CDN_URL) {
     this.receiver = receiver;
     this.esClusterInfo = await this.receiver.fetchClusterInfo();
+    this.cdnUrl = cdnUrl;
     if (this.esClusterInfo?.version?.number) {
       const version =
         this.esClusterInfo.version.number.substring(
           0,
           this.esClusterInfo.version.number.indexOf('-')
         ) || this.esClusterInfo.version.number;
-      this.manifestUrl = `${this.CDN_URL}/downloads/kibana/manifest/artifacts-${version}.zip`;
+      this.manifestUrl = `${cdnUrl}/downloads/kibana/manifest/artifacts-${version}.zip`;
     }
   }
 
@@ -115,7 +116,7 @@ export class Artifact implements IArtifact {
     const manifest = JSON.parse(manifestFile.getData().toString());
     const relativeUrl = manifest.artifacts[name]?.relative_url;
     if (relativeUrl) {
-      const url = `${this.CDN_URL}${relativeUrl}`;
+      const url = `${this.cdnUrl}${relativeUrl}`;
       const artifactResponse = await axios.get(url, { timeout: this.AXIOS_TIMEOUT_MS });
       return artifactResponse.data;
     } else {
