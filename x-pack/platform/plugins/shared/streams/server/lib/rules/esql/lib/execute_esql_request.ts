@@ -6,7 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ESQLSearchResponse } from '@kbn/es-types';
 
 type Response = Array<{
@@ -17,9 +17,11 @@ type Response = Array<{
 export const executeEsqlRequest = async ({
   esClient,
   esqlRequest,
+  logger,
 }: {
   esClient: ElasticsearchClient;
   esqlRequest: { query: string; filter: estypes.QueryDslQueryContainer };
+  logger: Logger;
 }): Promise<Response> => {
   const response = (await esClient.esql.query({
     query: esqlRequest.query,
@@ -35,7 +37,8 @@ export const executeEsqlRequest = async ({
   ];
 
   if (sourceIndex === -1 || idIndex === -1) {
-    throw new Error('Invalid ES|QL response format: missing _source or _id column');
+    logger.debug('Invalid ES|QL response format: missing _source or _id column');
+    return [];
   }
 
   const results = values.map((row) => ({
