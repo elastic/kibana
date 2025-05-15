@@ -124,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: 'f53be013-8a8c-4d39-b0f0-2781bb088a33',
           message: 'Unexpected error',
           stack_trace: `Error: Unexpected error
-          at Context.<anonymous> (x-pack/test/plugin_api_integration/test_suites/event_log/service_api_integration.ts:160:13)
+          at Context.<anonymous> (x-pack/platform/test/plugin_api_integration/test_suites/event_log/service_api_integration.ts:160:13)
           at Object.apply (node_modules/@kbn/test/src/functional_test_runner/lib/mocha/wrap_function.js:73:16)
           at Object.apply (node_modules/@kbn/test/src/functional_test_runner/lib/mocha/wrap_function.js:73:16)`,
           type: 'Error',
