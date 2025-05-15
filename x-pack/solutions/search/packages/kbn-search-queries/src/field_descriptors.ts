@@ -71,7 +71,7 @@ function parseField(
     );
     indexFields.semantic_fields.push({
       field: fieldName,
-      inferenceId: fieldDescriptor.inference_id,
+      inferenceId: fieldDescriptor.inference_id ?? '',
       embeddingType,
       indices: [indexName],
     });
