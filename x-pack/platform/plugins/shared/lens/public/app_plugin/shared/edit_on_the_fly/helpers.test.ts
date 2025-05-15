@@ -135,15 +135,13 @@ describe('getSuggestions', () => {
   });
 
   describe('getGridAttrs', () => {
-    const query = {
+    const newQuery = {
       esql: 'from index1 | limit 10 | stats average = avg(bytes)',
     };
-    const mockStartDependencies =
-      createMockStartDependencies() as unknown as LensPluginStartDependencies;
-    const dataViews = dataViewPluginMocks.createStartContract();
+
     dataViews.create.mockResolvedValue(mockDataViewWithTimefield);
     mockStartDependencies.data.dataViews = dataViews;
-    const dataviewSpecArr = [
+    const newdataviewSpecArr = [
       {
         id: 'd2588ae7-9ea0-4439-9f5b-f808754a3b97',
         title: 'index1',
@@ -156,7 +154,7 @@ describe('getSuggestions', () => {
         name: 'index1',
       },
     ];
-    const startDependencies = {
+    const newStartDependencies = {
       ...mockStartDependencies,
       dataViews,
     };
@@ -170,7 +168,7 @@ describe('getSuggestions', () => {
           },
         };
       });
-      const gridAttributes = await getGridAttrs(query, dataviewSpecArr, startDependencies.data);
+      const gridAttributes = await getGridAttrs(newQuery, newdataviewSpecArr, newStartDependencies);
       expect(gridAttributes.columns).toStrictEqual(queryResponseColumns);
     });
 
@@ -194,7 +192,7 @@ describe('getSuggestions', () => {
         };
       });
       mockformatESQLColumns.mockImplementation(() => emptyColumns);
-      const gridAttributes = await getGridAttrs(query, dataviewSpecArr, startDependencies.data);
+      const gridAttributes = await getGridAttrs(query, dataviewSpecArr, startDependencies);
       expect(gridAttributes.columns).toStrictEqual(emptyColumns);
     });
   });
