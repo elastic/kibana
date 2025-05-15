@@ -6,6 +6,13 @@ import {
   AppPluginStartDependencies,
 } from './types';
 import { PLUGIN_NAME } from '../common';
+import { Console } from 'console';
+
+declare global {
+  interface Window {
+    pendo: any;
+  }
+}
 
 export class KibanaPendoPlugin implements Plugin<KibanaPendoPluginSetup, KibanaPendoPluginStart> {
   public setup(core: CoreSetup): KibanaPendoPluginSetup {
@@ -23,6 +30,8 @@ export class KibanaPendoPlugin implements Plugin<KibanaPendoPluginSetup, KibanaP
       },
     });
 
+    loadPendoScript();
+
     // Return methods that should be available to other plugins
     return {
       getGreeting() {
@@ -37,8 +46,78 @@ export class KibanaPendoPlugin implements Plugin<KibanaPendoPluginSetup, KibanaP
   }
 
   public start(core: CoreStart): KibanaPendoPluginStart {
+    setupPendo();
     return {};
   }
 
   public stop() {}
+}
+
+export const loadPendoScript = () => {
+  const script = document.createElement('script');
+  script.src = 'https://cdn.pendo.io/agent/static/7c78ad3b-9857-453d-46c3-fa6fec8e6935/pendo.js';
+  script.async = true;
+  document.body.appendChild(script);
+};
+
+type User = {
+  id: string,
+  email: string,
+  firstname: string,
+  lastname: string,
+  role: string,
+  country: string,
+  region: string,
+  city: string
+};
+type Account = {
+  id: string,
+  accountName: string
+}
+
+function getUser(): User {
+  const urlParams = new URLSearchParams(location.href);
+  var user = urlParams.get('pendoVisitor');
+  var userObj = JSON.parse(user!);
+
+  return userObj;
+}
+
+function getAccount(): Account {
+  const urlParams = new URLSearchParams(location.href);
+  var account = urlParams.get('pendoAccount');
+  var accountObj = JSON.parse(account!);
+  return accountObj;
+}
+function areAnalyticsEnabled() {
+  const urlParams = new URLSearchParams(location.href);
+  var enabled = urlParams.get('analyticsEnabled');
+  console.log("is enabled: " + enabled)
+  var enabledBool = (enabled === "true")
+  console.log("is enabled as boolean: " + enabled)
+  return enabledBool;
+}
+
+export const setupPendo = () => {
+  var user = getUser();
+  var account = getAccount();
+  if (areAnalyticsEnabled() && window.pendo) {
+    window.pendo.initialize({
+      apiKey: '7c78ad3b-9857-453d-46c3-fa6fec8e6935',
+      visitor: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstname,
+        lastName: user.lastname,
+        role: user.role,
+        country: user.country,
+        region: user.region,
+        city: user.city
+      },
+      account: {
+        id: account.id,
+        accountName: account.accountName
+      }
+    });
+  }
 }

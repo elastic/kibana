@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
-    "name": "Martello",
+    "name": "Martello Technologies",
     "githubTeam": ""
   },
-  "description": "Allows us to get product analytics in iframes",
+  "description": "Provide Pendo functions to Kibana Dashboards",
   "server": false,
   "ui": true,
   "requiredPlugins": ["navigation"],

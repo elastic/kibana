@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 
@@ -10,7 +9,6 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
-  EuiPageContentHeader,
   EuiPageHeader,
   EuiTitle,
   EuiText,
@@ -20,6 +18,7 @@ import { CoreStart } from '../../../../src/core/public';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { last } from 'lodash';
 
 interface KibanaPendoAppDeps {
   basename: string;
@@ -35,11 +34,22 @@ export const KibanaPendoApp = ({
   navigation,
 }: KibanaPendoAppDeps) => {
   // Use React hooks to manage state.
-  const [timestamp, setTimestamp] = useState<string | undefined>();
+  const [init, setInit] = useState<string | undefined>();
+  const [ready, setReady] = useState<string | undefined>();
+  const [sendingEvents, setSendingEvents] = useState<string | undefined>();
+  const [user, setUser] = useState<string | undefined>();
+  const [account, setAccount] = useState<string | undefined>();
+  const [lastUpdated, setLastUpdated] = useState<string | undefined>();
 
   const onClickHandler = () => {
-    setTimestamp(new Date().toISOString());
-    notifications.toasts.addSuccess(PLUGIN_NAME);
+    setInit("" + !(typeof window.pendo === 'undefined' || window.pendo === null));
+    setReady("" + window.pendo?.isReady());
+    setSendingEvents("" + window.pendo?.isSendingEvents());
+    setUser("" + window.pendo?.visitorId);
+    setAccount("" + window.pendo?.accountId)
+    setLastUpdated("" + new Date().toISOString());
+    //setStatus(pendoInitialized + pendoReady + pendoSendingEvents + pendoUser + lastUpdated);
+    //notifications.toasts.addSuccess(PLUGIN_NAME);
   };
 
   // Render the application DOM.
@@ -49,7 +59,7 @@ export const KibanaPendoApp = ({
       <I18nProvider>
         <>
           <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
+            appName={PLUGIN_ID.toLowerCase()}
             showSearchBar={true}
             useDefaultBehaviors={true}
           />
@@ -57,44 +67,23 @@ export const KibanaPendoApp = ({
             <EuiPageBody>
               <EuiPageHeader>
                 <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="kibanaPendo.helloWorldText"
-                      defaultMessage="{name}"
-                      values={{ name: PLUGIN_NAME }}
-                    />
-                  </h1>
+                  <h1>Status of Pendo Plugin</h1>
                 </EuiTitle>
               </EuiPageHeader>
               <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
-                      <FormattedMessage
-                        id="kibanaPendo.congratulationsTitle"
-                        defaultMessage="Congratulations, you have successfully created a new Kibana Plugin!"
-                      />
-                    </h2>
-                  </EuiTitle>
-                </EuiPageContentHeader>
                 <EuiPageContentBody>
                   <EuiText>
-                    <p>
-                      <FormattedMessage
-                        id="kibanaPendo.content"
-                        defaultMessage="Look through the generated code and check out the plugin development documentation."
-                      />
-                    </p>
+                    <p>Initialized: {init}</p>
                     <EuiHorizontalRule />
-                    <p>
-                      <FormattedMessage
-                        id="kibanaPendo.timestampText"
-                        defaultMessage="Last timestamp: {time}"
-                        values={{ time: timestamp ? timestamp : 'Unknown' }}
-                      />
-                    </p>
+                    <p>Ready: {ready}</p>
+                    <p>Sending Events: {sendingEvents}</p>
+                    <p>User: {user}</p>
+                    <p>Pendo Account: {account}</p>
+                    <EuiHorizontalRule />
+                    <p>Updated: {lastUpdated}</p>
+                    <EuiHorizontalRule />
                     <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                      <FormattedMessage id="kibanaPendo.buttonText" defaultMessage="Click me" />
+                      <FormattedMessage id="kibanaPendo.buttonText" defaultMessage="Update Status" />
                     </EuiButton>
                   </EuiText>
                 </EuiPageContentBody>

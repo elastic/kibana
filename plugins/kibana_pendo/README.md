@@ -5,6 +5,8 @@ A Kibana plugin
 ---
 Notes: All front end code is in the public directory
 
+## Build
+run `yarn build`
 
 
 ## Development

@@ -18,7 +18,7 @@ The martellotech fork will be kept up to date with the elastic remote. So, all t
 # Setup
 Source: https://www.elastic.co/docs/extend/kibana/development-getting-started
 
-If running on windows Elasticsearch recomends you use wsl. 
+If running on windows Elasticsearch recommends you use wsl. 
 
 `nvm use`
 
