@@ -22,13 +22,13 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
         await esArchiver.load(
-          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_pre_aad_change'
+          'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_pre_aad_change'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_pre_aad_change'
+          'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_pre_aad_change'
         );
       });
 

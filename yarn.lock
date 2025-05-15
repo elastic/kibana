@@ -5468,7 +5468,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eso-plugin@link:x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin":
+"@kbn/eso-plugin@link:x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin":
   version "0.0.0"
   uid ""
 

@@ -26,13 +26,13 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
         await esArchiver.load(
-          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_different_key'
+          'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_different_key'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_different_key'
+          'x-pack/platform/test/encrypted_saved_objects_api_integration/fixtures/es_archiver/encrypted_saved_objects_different_key'
         );
       });
 
@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       // This validates the shouldTransformIfDecryptionFails flag
-      // (see x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
+      // (see x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin/server/index.ts)
       it('performs model version transforms even if decryption fails', async () => {
         const { body: decryptedResponse } = await supertest
           .get(

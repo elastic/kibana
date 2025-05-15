@@ -1067,7 +1067,7 @@ x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
-x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
+x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/test/functional_execution_context/plugins/alerts @elastic/kibana-core
@@ -2003,7 +2003,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/api_integration/apis/spaces/ @elastic/kibana-security
 /x-pack/platform/test/api_integration_basic/apis/security/ @elastic/kibana-security
 /x-pack/test/ui_capabilities/ @elastic/kibana-security
-/x-pack/test/encrypted_saved_objects_api_integration/ @elastic/kibana-security
+/x-pack/platform/test/encrypted_saved_objects_api_integration/ @elastic/kibana-security
 /x-pack/test/functional/apps/security/ @elastic/kibana-security
 /x-pack/test/functional/apps/spaces/ @elastic/kibana-security
 /x-pack/test/security_api_integration/ @elastic/kibana-security

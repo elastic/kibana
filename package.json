@@ -506,7 +506,7 @@
     "@kbn/es-types": "link:src/platform/packages/shared/kbn-es-types",
     "@kbn/es-ui-shared-plugin": "link:src/platform/plugins/shared/es_ui_shared",
     "@kbn/eso-model-version-example": "link:examples/eso_model_version_example",
-    "@kbn/eso-plugin": "link:x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin",
+    "@kbn/eso-plugin": "link:x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin",
     "@kbn/esql": "link:src/platform/plugins/shared/esql",
     "@kbn/esql-ast": "link:src/platform/packages/shared/kbn-esql-ast",
     "@kbn/esql-ast-inspector-plugin": "link:examples/esql_ast_inspector",
