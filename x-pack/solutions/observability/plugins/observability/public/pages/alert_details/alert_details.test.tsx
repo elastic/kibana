@@ -14,6 +14,7 @@ import { useBreadcrumbs, TagsList } from '@kbn/observability-shared-plugin/publi
 import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
 import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Chance } from 'chance';
 import React, { Fragment } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
@@ -189,7 +190,7 @@ describe('Alert details', () => {
     expect(alertDetails.queryByTestId('alertDetailsTabbedContent')?.textContent).toContain(
       'Metadata'
     );
-    alertDetails.getByText('Metadata').click();
+    await userEvent.click(alertDetails.getByText('Metadata'));
     expect(alertDetails.queryByTestId('metadataTabPanel')).toBeTruthy();
     expect(alertDetails.queryByTestId('metadataTabPanel')?.textContent).toContain(
       'kibana.alert.status'
