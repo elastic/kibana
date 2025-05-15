@@ -28,7 +28,7 @@ import { cancelAction, commitAction, moveAction, startAction } from './state_man
 import { getNextKeyboardPosition } from './utils';
 
 /*
- * This hook sets up and manages interaction logic for dragging grid sections∂.
+ * This hook sets up and manages interaction logic for dragging grid sections.
  * It initializes event handlers to start, move, and commit the interaction,
  * ensuring responsive updates to the panel's position and grid layout state.
  * The interaction behavior is dynamic and adapts to the input type (mouse, touch, or keyboard).
