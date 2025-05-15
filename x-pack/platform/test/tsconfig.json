@@ -72,5 +72,10 @@
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/utils",
     "@kbn/core",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/event-log-plugin",
+    "@kbn/task-manager-plugin",
+    "@kbn/alerting-state-types",
+    "@kbn/std",
   ]
 }
