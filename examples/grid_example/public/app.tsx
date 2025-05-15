@@ -81,23 +81,20 @@ export const GridExample = ({
   const layoutUpdated$ = useMemo(() => new Subject<void>(), []);
 
   useEffect(() => {
-    combineLatest([mockDashboardApi.panels$, mockDashboardApi.rows$])
+    combineLatest([mockDashboardApi.panels$, mockDashboardApi.sections])
       .pipe(
         debounceTime(0), // debounce to avoid subscribe being called twice when both panels$ and rows$ publish
-        map(([panels, rows]) => {
+        map(([panels, sections]) => {
           const panelIds = Object.keys(panels);
           let panelsAreEqual = true;
           for (const panelId of panelIds) {
             if (!panelsAreEqual) break;
             const currentPanel = panels[panelId];
             const savedPanel = savedState.current.panels[panelId];
-            panelsAreEqual = deepEqual(
-              { row: 'first', ...currentPanel?.gridData },
-              { row: 'first', ...savedPanel?.gridData }
-            );
+            panelsAreEqual = deepEqual(currentPanel?.gridData, savedPanel?.gridData);
           }
-          const hasChanges = !(panelsAreEqual && deepEqual(rows, savedState.current.rows));
-          return { hasChanges, updatedLayout: dashboardInputToGridLayout({ panels, rows }) };
+          const hasChanges = !(panelsAreEqual && deepEqual(sections, savedState.current.sections));
+          return { hasChanges, updatedLayout: dashboardInputToGridLayout({ panels, sections }) };
         })
       )
       .subscribe(({ hasChanges, updatedLayout }) => {
@@ -140,22 +137,22 @@ export const GridExample = ({
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
-      const { panels, rows } = gridLayoutToDashboardPanelMap(
+      const { panels, sections } = gridLayoutToDashboardPanelMap(
         mockDashboardApi.panels$.getValue(),
         newLayout
       );
       mockDashboardApi.panels$.next(panels);
-      mockDashboardApi.rows$.next(rows);
+      mockDashboardApi.sections.next(sections);
     },
-    [mockDashboardApi.panels$, mockDashboardApi.rows$]
+    [mockDashboardApi.panels$, mockDashboardApi.sections]
   );
 
   const addNewSection = useCallback(() => {
-    const rows = cloneDeep(mockDashboardApi.rows$.getValue());
+    const rows = cloneDeep(mockDashboardApi.sections.getValue());
     const id = uuidv4();
     const maxY = Math.max(
       ...Object.values({
-        ...mockDashboardApi.rows$.getValue(),
+        ...mockDashboardApi.sections.getValue(),
         ...mockDashboardApi.panels$.getValue(),
       }).map((widget) => ('gridData' in widget ? widget.gridData.y + widget.gridData.h : widget.y))
     );
@@ -168,19 +165,19 @@ export const GridExample = ({
       }),
       collapsed: false,
     };
-    mockDashboardApi.rows$.next(rows);
+    mockDashboardApi.sections.next(rows);
 
     // scroll to bottom after row is added
     layoutUpdated$.pipe(take(1)).subscribe(() => {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
-  }, [mockDashboardApi.rows$, mockDashboardApi.panels$, layoutUpdated$]);
+  }, [mockDashboardApi.sections, mockDashboardApi.panels$, layoutUpdated$]);
 
   const resetUnsavedChanges = useCallback(() => {
-    const { panels, rows } = savedState.current;
+    const { panels, sections: rows } = savedState.current;
     mockDashboardApi.panels$.next(panels);
-    mockDashboardApi.rows$.next(rows);
-  }, [mockDashboardApi.panels$, mockDashboardApi.rows$]);
+    mockDashboardApi.sections.next(rows);
+  }, [mockDashboardApi.panels$, mockDashboardApi.sections]);
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
@@ -263,7 +260,7 @@ export const GridExample = ({
                     onClick={() => {
                       const newSavedState = {
                         panels: mockDashboardApi.panels$.getValue(),
-                        rows: mockDashboardApi.rows$.getValue(),
+                        sections: mockDashboardApi.sections.getValue(),
                       };
                       savedState.current = newSavedState;
                       setHasUnsavedChanges(false);
@@ -308,8 +305,8 @@ export const renderGridExampleApp = (
 const customLayoutStyles = ({ euiTheme }: UseEuiTheme) => {
   return css({
     // removes the extra padding that EuiPageTemplate adds in order to make it look more similar to Dashboard
-    marginLeft: '-24px',
-    marginRight: '-24px',
+    marginLeft: `-${euiTheme.size.l}`,
+    marginRight: `-${euiTheme.size.l}`,
 
     // styling for what the grid row header looks like when being dragged
     '.kbnGridSectionHeader--active': {

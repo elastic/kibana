@@ -8,14 +8,14 @@
  */
 
 import { GridLayoutData, GridSectionData } from '@kbn/grid-layout';
-import { MockedDashboardPanelMap, MockedDashboardRowMap } from './types';
+import { MockedDashboardPanelMap, MockedDashboardSectionMap } from './types';
 
 export const gridLayoutToDashboardPanelMap = (
   panelState: MockedDashboardPanelMap,
   layout: GridLayoutData
-): { panels: MockedDashboardPanelMap; rows: MockedDashboardRowMap } => {
+): { panels: MockedDashboardPanelMap; sections: MockedDashboardSectionMap } => {
   const panels: MockedDashboardPanelMap = {};
-  const rows: MockedDashboardRowMap = {};
+  const sections: MockedDashboardSectionMap = {};
   Object.entries(layout).forEach(([widgetId, widget]) => {
     if (widget.type === 'panel') {
       const panelGridData = widget;
@@ -31,7 +31,7 @@ export const gridLayoutToDashboardPanelMap = (
       };
     } else {
       const { panels: rowPanels, type, isCollapsed, row, ...rest } = widget; // drop panels and type
-      rows[widgetId] = { ...rest, y: row, collapsed: isCollapsed };
+      sections[widgetId] = { ...rest, y: row, collapsed: isCollapsed };
       Object.values(rowPanels).forEach((panelGridData) => {
         panels[panelGridData.id] = {
           ...panelState[panelGridData.id],
@@ -48,18 +48,18 @@ export const gridLayoutToDashboardPanelMap = (
     }
   });
 
-  return { panels, rows };
+  return { panels, sections };
 };
 
 export const dashboardInputToGridLayout = ({
   panels,
-  rows,
+  sections,
 }: {
   panels: MockedDashboardPanelMap;
-  rows: MockedDashboardRowMap;
+  sections: MockedDashboardSectionMap;
 }): GridLayoutData => {
   const layout: GridLayoutData = {};
-  Object.values(rows).forEach((row) => {
+  Object.values(sections).forEach((row) => {
     const { collapsed, y, ...rest } = row;
     layout[row.id] = {
       ...rest,
@@ -72,23 +72,17 @@ export const dashboardInputToGridLayout = ({
 
   Object.keys(panels).forEach((panelId) => {
     const gridData = panels[panelId].gridData;
+    const panelData = {
+      id: panelId,
+      row: gridData.y,
+      column: gridData.x,
+      width: gridData.w,
+      height: gridData.h,
+    };
     if (gridData.section) {
-      (layout[gridData.section] as GridSectionData).panels[panelId] = {
-        id: panelId,
-        row: gridData.y,
-        column: gridData.x,
-        width: gridData.w,
-        height: gridData.h,
-      };
+      (layout[gridData.section] as GridSectionData).panels[panelId] = panelData;
     } else {
-      layout[panelId] = {
-        id: panelId,
-        type: 'panel',
-        row: gridData.y,
-        column: gridData.x,
-        width: gridData.w,
-        height: gridData.h,
-      };
+      layout[panelId] = { type: 'panel', ...panelData };
     }
   });
 

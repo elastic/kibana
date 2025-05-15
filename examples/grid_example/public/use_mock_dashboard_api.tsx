@@ -20,7 +20,7 @@ import {
   MockDashboardApi,
   MockSerializedDashboardState,
   MockedDashboardPanelMap,
-  MockedDashboardRowMap,
+  MockedDashboardSectionMap,
 } from './types';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
@@ -57,7 +57,7 @@ export const useMockDashboardApi = ({
       getPanelCount: () => {
         return Object.keys(panels$.getValue()).length;
       },
-      rows$: new BehaviorSubject<MockedDashboardRowMap>(savedState.rows),
+      sections: new BehaviorSubject<MockedDashboardSectionMap>(savedState.sections),
       expandedPanelId$,
       expandPanel: (id: string) => {
         if (expandedPanelId$.getValue()) {
