@@ -446,11 +446,19 @@ class AgentPolicyService {
       hasFleetServer?: boolean;
     } = {}
   ): Promise<AgentPolicy> {
+    const logger = this.getLogger('create');
+
     const savedObjectType = await getAgentPolicySavedObjectType();
     // Ensure an ID is provided, so we can include it in the audit logs below
     if (!options.id) {
       options.id = SavedObjectsUtils.generateId();
     }
+
+    logger.debug(
+      `Creating new agent policy [${agentPolicy.name}] with id [${
+        options.id
+      }] using soClient scoped to [${soClient.getCurrentNamespace()}]`
+    );
 
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
@@ -460,9 +468,6 @@ class AgentPolicyService {
     });
     await this.runExternalCallbacks('agentPolicyCreate', agentPolicy);
     this.checkTamperProtectionLicense(agentPolicy);
-
-    const logger = this.getLogger('create');
-    logger.debug(`Creating new agent policy`);
 
     if (agentPolicy?.is_protected) {
       logger.warn(
