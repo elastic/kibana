@@ -10,7 +10,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
 
-import type { GridSectionData } from '../grid_section';
 import type { OrderedLayout } from '../types';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { isGridDataEqual } from '../utils/equality_checks';
