@@ -173,7 +173,9 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
           <EuiTabs>{renderTabs()}</EuiTabs>
           <EuiSpacer size="m" />
           {React.createElement(function RenderSelectedTabContent() {
-            useLayoutEffect(onTabContentRender, []);
+            useLayoutEffect(() => {
+              setTimeout(onTabContentRender, 0);
+            }, []);
             return (
               <SelectedTabContent
                 {...{
