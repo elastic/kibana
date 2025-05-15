@@ -13,16 +13,18 @@
           "type": "date"
         },
         "description": {
-          "inference_id": ".multilingual-e5-small-elasticsearch",
-          "model_settings": {
-            "dimensions": 384,
-            "element_type": "float",
-            "service": "elasticsearch",
-            "similarity": "cosine",
-            "task_type": "text_embedding"
+          "type": "text"
+        },
+        "description_embeddings": {
+          "dims": 1536,
+          "index": true,
+          "index_options": {
+            "ef_construction": 100,
+            "m": 16,
+            "type": "int8_hnsw"
           },
-          "search_inference_id": ".multilingual-e5-small-elasticsearch",
-          "type": "semantic_text"
+          "similarity": "cosine",
+          "type": "dense_vector"
         },
         "id": {
           "fields": {
@@ -46,12 +48,7 @@
           "type": "text"
         },
         "title": {
-          "inference_id": ".elser-2-elasticsearch",
-          "model_settings": {
-            "service": "elasticsearch",
-            "task_type": "sparse_embedding"
-          },
-          "type": "semantic_text"
+          "type": "text"
         },
         "visitors": {
           "type": "float"

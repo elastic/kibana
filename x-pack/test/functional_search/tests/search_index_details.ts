@@ -9,7 +9,7 @@ import { testHasEmbeddedConsole } from './embedded_console';
 
 const archivedBooksIndex = 'x-pack/test/functional_search/fixtures/search-books';
 const archiveEmptyIndex = 'x-pack/test/functional_search/fixtures/search-empty-index';
-const archiveSemanticTextIndex = 'x-pack/test/functional_search/fixtures/search-national-parks';
+const archiveDenseVectorIndex = 'x-pack/test/functional_search/fixtures/search-national-parks';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
@@ -30,18 +30,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const createIndices = async () => {
     await esArchiver.load(archivedBooksIndex);
-    await esArchiver.load(archiveSemanticTextIndex);
+    await esArchiver.load(archiveDenseVectorIndex);
     await esArchiver.load(archiveEmptyIndex);
   };
   const deleteIndices = async () => {
     await esArchiver.unload(archivedBooksIndex);
-    await esArchiver.unload(archiveSemanticTextIndex);
+    await esArchiver.unload(archiveDenseVectorIndex);
     await esArchiver.unload(archiveEmptyIndex);
     await esDeleteAllIndices([indexDoesNotExistName]);
   };
   const indexWithDataName = 'search-books';
   const indexWithoutDataName = 'search-empty-index';
-  const indexWithSemanticTextName = 'search-national-parks';
+  const indexWithDenseVectorName = 'search-national-parks';
   const indexDoesNotExistName = 'search-not-found';
 
   describe('Search index details page', function () {
@@ -191,19 +191,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             );
           });
         });
-        describe('With semantic text data', () => {
+        describe('With dense vecotrs', () => {
           it('should have ai quick stats for index with semantic mappings', async () => {
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithSemanticTextName);
-            await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappingsToHaveSemanticFields();
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
+            await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappingsToHaveVectorFields();
           });
         });
         describe('has index actions enabled', () => {
           before(async () => {
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithSemanticTextName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
           });
 
           beforeEach(async () => {
-            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithSemanticTextName);
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithDenseVectorName);
           });
 
           it('delete document button is enabled', async () => {
