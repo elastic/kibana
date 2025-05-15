@@ -189,7 +189,7 @@ const createSemanticTextFieldsList = (
       semanticFieldsList.push(semanticField);
       return semanticFieldsList;
     } else {
-      // accept object and multi field type
+      // handle object and multi field type mappings
       createSemanticTextFieldsList(
         mappingPropertiesFilter[field].fields ||
           ('properties' in mappingPropertiesFilter[field]
@@ -247,6 +247,7 @@ export const parseFieldsCapabilities = (
   const shouldIgnoreField = (field: string) => {
     return !field.endsWith('model_id');
   };
+
   const querySourceFields = Object.keys(fields).reduce<IndicesQuerySourceFields>(
     (acc: IndicesQuerySourceFields, fieldKey) => {
       const field = fields[fieldKey];
@@ -263,6 +264,7 @@ export const parseFieldsCapabilities = (
 
         const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
         const semanticFieldMapping = getSemanticField(fieldKey, semanticTextFields);
+
         if (isFieldInIndex(field, 'text', index) && semanticFieldMapping) {
           // only use this when embeddingType and inferenceId is defined
           // this requires semantic_text field to be set up correctly and ingested
