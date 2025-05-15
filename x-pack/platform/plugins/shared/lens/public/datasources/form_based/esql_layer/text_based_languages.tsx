@@ -677,12 +677,13 @@ export function getTextBasedDatasource({
         return [];
       }
       const indexPatterns: DataView[] = [];
-      const stateLayer = state.layers[0];
-      if (!stateLayer.query) {
-        return [];
+
+      for (const { query } of Object.values(state.layers)) {
+        if (query) {
+          const esqlAdhocDataview = await getESQLAdHocDataview(query.esql, dataViewsService);
+          indexPatterns.push(esqlAdhocDataview);
+        }
       }
-      const esqlAdhocDataview = await getESQLAdHocDataview(stateLayer.query.esql, dataViewsService);
-      indexPatterns.push(esqlAdhocDataview);
 
       return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
         const columns = Object.entries(layer.columns).map(([colId, col]) => {
