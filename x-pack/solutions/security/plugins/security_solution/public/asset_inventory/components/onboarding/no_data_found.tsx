@@ -20,10 +20,12 @@ import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { AssetInventoryTitle } from '../asset_inventory_title';
 import { AssetInventoryLoading } from '../asset_inventory_loading';
 import illustration from '../../../common/images/integrations_light.png';
-import { TEST_SUBJ_ONBOARDING_NO_DATA_FOUND } from '../../constants';
+import {
+  ASSET_INVENTORY_ONBOARDING_INTEGRATIONS_TAB,
+  TEST_SUBJ_ONBOARDING_NO_DATA_FOUND,
+} from '../../constants';
 import { SecurityIntegrations } from '../../../common/lib/integrations/components';
 import { IntegrationContextProvider } from '../../../common/lib/integrations/hooks/integration_context';
-import { INTEGRATION_TABS } from '../../../common/lib/integrations/configs/integration_tabs_configs';
 
 export const NoDataFound = () => {
   const spaceId = useSpaceId();
@@ -69,8 +71,11 @@ export const NoDataFound = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
-        <IntegrationContextProvider spaceId={spaceId} integrationTabs={INTEGRATION_TABS}>
-          <SecurityIntegrations />
+        <IntegrationContextProvider
+          spaceId={spaceId}
+          integrationTabs={ASSET_INVENTORY_ONBOARDING_INTEGRATIONS_TAB}
+        >
+          <SecurityIntegrations prereleaseIntegrationsEnabled={true} />
         </IntegrationContextProvider>
       </EuiPanel>
     </>

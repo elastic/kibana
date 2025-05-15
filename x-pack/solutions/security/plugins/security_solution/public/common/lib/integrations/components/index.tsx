@@ -12,11 +12,12 @@ import type { IntegrationCardMetadata, TopCalloutRenderer } from '../types';
 export const SecurityIntegrations: React.FC<{
   checkCompleteMetadata?: IntegrationCardMetadata;
   topCalloutRenderer?: TopCalloutRenderer;
-}> = ({ checkCompleteMetadata, topCalloutRenderer }) => {
+  prereleaseIntegrationsEnabled?: boolean;
+}> = ({ checkCompleteMetadata, topCalloutRenderer, prereleaseIntegrationsEnabled = false }) => {
   return (
     <WithFilteredIntegrations
       renderChildren={IntegrationsCardGridTabs}
-      prereleaseIntegrationsEnabled={false}
+      prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
       checkCompleteMetadata={checkCompleteMetadata}
       topCalloutRenderer={topCalloutRenderer}
     />

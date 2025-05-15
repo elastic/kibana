@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { INTEGRATION_CARD_HEIGHT } from '../common/lib/integrations/constants';
+import type { Tab } from '../common/lib/integrations/types';
+import { IntegrationTabId } from '../common/lib/integrations/types';
+
 export const MAX_ASSETS_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 export const ASSET_INVENTORY_INDEX_PATTERN = 'entities-generic-latest';
@@ -69,3 +73,29 @@ export const ASSET_GROUPING_OPTIONS = {
   ENTITY_TYPE: ASSET_FIELDS.ENTITY_TYPE,
   CLOUD_ACCOUNT: ASSET_FIELDS.CLOUD_ACCOUNT_ID,
 };
+
+export const ASSET_INVENTORY_ONBOARDING_INTEGRATIONS_TAB: Tab[] = [
+  {
+    category: '',
+    iconType: 'starFilled',
+    id: IntegrationTabId.recommended,
+    label: 'Recommended',
+    overflow: 'hidden',
+    showSearchTools: false,
+    // Fleet has a default sorting for integrations by category that Security Solution does not want to apply
+    // so we need to disable the sorting for the recommended tab to allow static ordering according to the featuredCardIds
+    sortByFeaturedIntegrations: false,
+    featuredCardIds: [
+      'epr:crowdstrike',
+      'epr:cloud_asset_inventory',
+      'epr:jamf_pro',
+      'epr:entityanalytics_okta',
+      'epr:entityanalytics_entra_id',
+      'epr:servicenow',
+      'epr:entityanalytics_ad',
+      'epr:cloud_security_posture',
+      'epr:sentinel_one',
+    ],
+    height: `${INTEGRATION_CARD_HEIGHT * 3.5}px`,
+  },
+];
