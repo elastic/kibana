@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { HttpServiceSetup } from '@kbn/core/server';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
@@ -53,7 +55,18 @@ export const createSavedObjectsClientFactoryMock = (
     'resolve',
     'update',
   ].forEach((methodName) => {
-    (soClient[methodName as keyof typeof soClient] as jest.Mock).mockReturnValue(Promise.resolve());
+    let response: any;
+
+    switch (methodName) {
+      case 'find':
+      case 'bulkGet':
+        response = { saved_objects: [] };
+        break;
+    }
+
+    (soClient[methodName as keyof typeof soClient] as jest.Mock).mockReturnValue(
+      Promise.resolve(response)
+    );
   });
 
   return {

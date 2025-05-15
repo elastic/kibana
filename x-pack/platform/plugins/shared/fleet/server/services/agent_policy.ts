@@ -658,7 +658,7 @@ class AgentPolicyService {
         if (agentPolicySO.error) {
           if (options.ignoreMissing && agentPolicySO.error.statusCode === 404) {
             logger.debug(
-              `Agent policy [${agentPolicySO.id}] was not found, but 'options.ignoreMissing' is 'true`
+              `Agent policy [${agentPolicySO.id}] was not found, but 'options.ignoreMissing' is 'true'`
             );
             return null;
           } else if (agentPolicySO.error.statusCode === 404) {
