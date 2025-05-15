@@ -68,6 +68,7 @@ export const setSoClientInfo = <T>(
   info: SavedObjectClientInfo<T>
 ): void => {
   if (INTERNAL_SAVED_OBJECT_CLIENT_INFO in soClient) {
+    Object.assign(soClient[INTERNAL_SAVED_OBJECT_CLIENT_INFO] as object, info);
     return;
   }
 

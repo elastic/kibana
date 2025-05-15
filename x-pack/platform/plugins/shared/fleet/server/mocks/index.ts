@@ -24,6 +24,10 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+
+import { setSoClientInfo } from '..';
+
 import { createFleetActionsClientMock } from '../services/actions/mocks';
 
 import { createFleetFilesClientFactoryMock } from '../services/files/mocks';
@@ -59,6 +63,47 @@ export * from '../services/actions/mocks';
 
 export * from './package_policy.mocks';
 
+export const createSavedObjectClientMock = () => {
+  const soClientMock = savedObjectsClientMock.create();
+
+  // The SO client mock does not return promises for async methods, so we mock those here in order
+  // to avoid basic errors in tests (those where the methods are called, but the return value is
+  // never used/checked
+  [
+    'create',
+    'bulkCreate',
+    'checkConflicts',
+    'bulkUpdate',
+    'delete',
+    'bulkDelete',
+    'bulkGet',
+    'find',
+    'get',
+    'closePointInTime',
+    'createPointInTimeFinder',
+    'bulkResolve',
+    'resolve',
+    'update',
+  ].forEach((methodName) => {
+    let response: any;
+
+    switch (methodName) {
+      case 'find':
+      case 'bulkGet':
+        response = { saved_objects: [] };
+        break;
+    }
+
+    (soClientMock[methodName as keyof typeof soClientMock] as jest.Mock).mockReturnValue(
+      Promise.resolve(response)
+    );
+  });
+
+  setSoClientInfo(soClientMock, { spaceId: 'default', isUnScoped: false });
+
+  return soClientMock;
+};
+
 export interface MockedFleetAppContext extends FleetAppContext {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
   data: ReturnType<typeof dataPluginMock.createStartContract>;
@@ -90,9 +135,12 @@ export const createAppContextStartContractMock = (
 
   const mockedSavedObject = savedObjectsServiceMock.createStartContract();
 
-  const internalSoClient = soClients.internal ?? savedObjectsClientMock.create();
+  const internalSoClient = soClients.internal ?? createSavedObjectClientMock();
+  setSoClientInfo(internalSoClient, { isUnScoped: false, spaceId: DEFAULT_SPACE_ID });
+
   const internalSoClientWithoutSpaceExtension =
-    soClients.withoutSpaceExtensions ?? savedObjectsClientMock.create();
+    soClients.withoutSpaceExtensions ?? createSavedObjectClientMock();
+  setSoClientInfo(internalSoClientWithoutSpaceExtension, { isUnScoped: true, spaceId: undefined });
 
   mockedSavedObject.getScopedClient.mockImplementation((request, options) => {
     if (options?.excludedExtensions?.includes(SPACES_EXTENSION_ID)) {
@@ -163,7 +211,7 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
     uninstallTokenService: {
       asCurrentUser: createUninstallTokenServiceMock(),
     },
-    internalSoClient: savedObjectsClientMock.create(),
+    internalSoClient: createSavedObjectClientMock(),
     spaceId: 'default',
     limitedToPackages: undefined,
   };
