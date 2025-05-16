@@ -16,7 +16,7 @@ import type { GridLayoutContextType } from '../../use_grid_layout_context';
 import { isGridDataEqual, isOrderedLayoutEqual } from '../../utils/equality_checks';
 import { resolveGridSection } from '../../utils/resolve_grid_section';
 import { resolveSections } from '../../utils/section_management';
-import { getSensorType, isKeyboardEvent } from '../sensors';
+import { getSensorType } from '../sensors';
 import type { PointerPosition, UserInteractionEvent } from '../types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
 
