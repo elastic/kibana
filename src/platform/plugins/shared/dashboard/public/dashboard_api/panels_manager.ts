@@ -217,6 +217,9 @@ export function initializePanelsManager(
     await asyncForEach(Object.keys(layout$.value), async (id) => {
       const childApi = await getChildApi(id);
       const title = apiPublishesTitle(childApi) ? getTitle(childApi) : '';
+      // const title = apiPublishesTitle(childApi)
+      // ? getTitle(childApi)
+      // : (panels$.value[id]?.explicitInput as { title?: string }).title;
       if (title) titles.push(title);
     });
     return titles;
@@ -295,13 +298,18 @@ export function initializePanelsManager(
     const { newPanelPlacement, otherPanels } = placeClonePanel({
       width: layoutItemToDuplicate.gridData.w,
       height: layoutItemToDuplicate.gridData.h,
+      sectionId: layoutItemToDuplicate.gridData.sectionId,
       currentPanels: layout$.value,
       placeBesideId: uuidToDuplicate,
     });
     layout$.next({
       ...otherPanels,
       [uuidOfDuplicate]: {
-        gridData: { ...newPanelPlacement, i: uuidOfDuplicate },
+        gridData: {
+          ...newPanelPlacement,
+          i: uuidOfDuplicate,
+          sectionId: layoutItemToDuplicate.gridData.sectionId,
+        },
         type: layoutItemToDuplicate.type,
       },
     });

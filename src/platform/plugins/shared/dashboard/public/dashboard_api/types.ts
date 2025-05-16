@@ -47,6 +47,7 @@ import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
   DashboardLocatorParams,
   DashboardPanelMap,
+  DashboardSectionMap,
   DashboardSettings,
   DashboardState,
 } from '../../common';
@@ -168,5 +169,9 @@ export interface DashboardInternalApi {
   layout$: BehaviorSubject<DashboardLayout>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-  serializePanels: () => { references: Reference[]; panels: DashboardPanelMap };
+  serializePanels: () => {
+    references: Reference[];
+    panels: DashboardPanelMap;
+    sections?: DashboardSectionMap;
+  };
 }

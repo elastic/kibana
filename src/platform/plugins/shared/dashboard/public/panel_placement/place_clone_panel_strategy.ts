@@ -42,6 +42,7 @@ function comparePanels(a: GridData, b: GridData): number {
 export function placeClonePanel({
   width,
   height,
+  sectionId,
   currentPanels,
   placeBesideId,
 }: PanelPlacementProps & { placeBesideId: string }): PanelPlacementReturn {
@@ -51,8 +52,11 @@ export function placeClonePanel({
   }
   const beside = panelToPlaceBeside.gridData;
   const otherPanelGridData: GridData[] = [];
-  forOwn(currentPanels, (panel: DashboardLayoutItem, key: string | undefined) => {
-    otherPanelGridData.push(panel.gridData);
+  forOwn(currentPanels, (panel: DashboardPanelState) => {
+    if (panel.gridData.sectionId === sectionId) {
+      // only check against panels that are in the same section as the cloned panel
+      otherPanelGridData.push(panel.gridData);
+    }
   });
 
   const possiblePlacementDirections: IplacementDirection[] = [
@@ -109,8 +113,11 @@ export function placeClonePanel({
   for (let j = position + 1; j < grid.length; j++) {
     originalPositionInTheGrid = grid[j].i;
     const { gridData, ...movedPanel } = cloneDeep(otherPanels[originalPositionInTheGrid]);
-    const newGridData = { ...gridData, y: gridData.y + diff };
-    otherPanels[originalPositionInTheGrid] = { ...movedPanel, gridData: newGridData };
+    if (gridData.sectionId === sectionId) {
+      // only move panels in the cloned panel's section
+      const newGridData = { ...gridData, y: gridData.y + diff };
+      otherPanels[originalPositionInTheGrid] = { ...movedPanel, gridData: newGridData };
+    }
   }
   return { newPanelPlacement: bottomPlacement.grid, otherPanels };
 }

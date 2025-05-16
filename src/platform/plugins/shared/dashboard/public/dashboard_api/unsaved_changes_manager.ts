@@ -27,6 +27,7 @@ import {
 } from 'rxjs';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { initializePanelsManager } from './panels_manager';
+import { initializeSectionsManager } from './sections_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions } from './types';
 import { DashboardState } from '../../common';
@@ -41,6 +42,7 @@ const DEBOUNCE_TIME = 100;
 
 export function initializeUnsavedChangesManager({
   panelsManager,
+  sectionsManager,
   savedObjectId$,
   lastSavedState,
   settingsManager,
@@ -56,6 +58,7 @@ export function initializeUnsavedChangesManager({
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   controlGroupManager: ReturnType<typeof initializeControlGroupManager>;
   panelsManager: ReturnType<typeof initializePanelsManager>;
+  sectionsManager: ReturnType<typeof initializeSectionsManager>;
   viewModeManager: ReturnType<typeof initializeViewModeManager>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
@@ -94,6 +97,7 @@ export function initializeUnsavedChangesManager({
     settingsManager.internalApi.startComparing$(lastSavedState$),
     unifiedSearchManager.internalApi.startComparing$(lastSavedState$),
     panelsManager.internalApi.startComparing$(lastSavedState$),
+    // SECTIONS
   ]).pipe(
     map(([settings, unifiedSearch, panels]) => {
       return { ...settings, ...unifiedSearch, ...panels };
@@ -170,6 +174,7 @@ export function initializeUnsavedChangesManager({
     api: {
       asyncResetToLastSavedState: async () => {
         panelsManager.internalApi.resetPanels(lastSavedState$.value.panels);
+        sectionsManager.internalApi.reset(lastSavedState$.value.sections);
         unifiedSearchManager.internalApi.reset(lastSavedState$.value);
         settingsManager.internalApi.reset(lastSavedState$.value);
 

@@ -11,6 +11,21 @@ import { pick } from 'lodash';
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type {
+  ControlGroupAttributes as ControlGroupAttributesV2,
+  DashboardCrudTypes as DashboardCrudTypesV2,
+} from '../../../common/content_management/v2';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import {
+  transformControlGroupIn,
+  transformControlGroupOut,
+  transformOptionsOut,
+  transformPanelsIn,
+  transformPanelsOut,
+  transformSectionsIn,
+  transformSearchSourceIn,
+  transformSearchSourceOut,
+} from './transforms';
+import type {
   DashboardAttributes,
   DashboardGetOut,
   DashboardItem,
@@ -20,20 +35,6 @@ import type {
   PartialDashboardItem,
   SavedObjectToItemReturn,
 } from './types';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import type {
-  ControlGroupAttributes as ControlGroupAttributesV2,
-  DashboardCrudTypes as DashboardCrudTypesV2,
-} from '../../../common/content_management/v2';
-import {
-  transformControlGroupIn,
-  transformControlGroupOut,
-  transformOptionsOut,
-  transformPanelsIn,
-  transformPanelsOut,
-  transformSearchSourceIn,
-  transformSearchSourceOut,
-} from './transforms';
 
 export function dashboardAttributesOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
@@ -46,6 +47,7 @@ export function dashboardAttributesOut(
     kibanaSavedObjectMeta,
     optionsJSON,
     panelsJSON,
+    sections,
     refreshInterval,
     timeFrom,
     timeRestore,
@@ -129,7 +131,8 @@ export const itemAttrsToSavedObject = ({
   incomingReferences = [],
 }: ItemAttrsToSavedObjectParams): ItemAttrsToSavedObjectReturn => {
   try {
-    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } = attributes;
+    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, sections, ...rest } =
+      attributes;
     const soAttributes = {
       ...rest,
       ...(controlGroupInput && {
@@ -141,6 +144,7 @@ export const itemAttrsToSavedObject = ({
       ...(panels && {
         panelsJSON: transformPanelsIn(panels),
       }),
+      ...(sections && { sections: transformSectionsIn(sections) }),
       ...(kibanaSavedObjectMeta && {
         kibanaSavedObjectMeta: transformSearchSourceIn(kibanaSavedObjectMeta),
       }),

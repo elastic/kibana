@@ -14,6 +14,7 @@ import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
 import {
   convertPanelMapToPanelsArray,
+  convertSectionMapToSectionArray,
   generateNewPanelIds,
 } from '../../common/lib/dashboard_panel_converters';
 import { extractReferences } from '../../common/dashboard_saved_object/persistable_state/dashboard_saved_object_references';
@@ -67,6 +68,7 @@ export const getSerializedState = ({
     filters,
     timeRestore,
     description,
+    sections,
 
     // Dashboard options
     useMargins,
@@ -101,7 +103,7 @@ export const getSerializedState = ({
     hidePanelTitles,
   };
   const savedPanels = convertPanelMapToPanelsArray(panels, true);
-
+  const savedSections = convertSectionMapToSectionArray(sections);
   /**
    * Parse global time filter settings
    */
@@ -126,6 +128,7 @@ export const getSerializedState = ({
     timeRestore,
     options,
     panels: savedPanels,
+    ...(savedSections && { sections: savedSections }),
     timeFrom,
     title,
     timeTo,

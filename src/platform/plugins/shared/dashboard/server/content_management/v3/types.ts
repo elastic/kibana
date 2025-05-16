@@ -30,6 +30,7 @@ import {
   dashboardSearchResultsSchema,
   dashboardUpdateOptionsSchema,
   optionsSchema,
+  sectionSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 import { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
@@ -55,6 +56,7 @@ export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'reference
 
 export type ControlGroupAttributes = TypeOf<typeof controlGroupInputSchema>;
 export type GridData = WithRequiredProperty<TypeOf<typeof gridDataSchema>, 'i'>;
+export type DashboardSections = Array<TypeOf<typeof sectionSchema>>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
 export type DashboardGetOut = TypeOf<typeof dashboardGetResultSchema>;

@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, debounceTime, distinctUntilChanged, map, of, switchMap } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
 import {
-  apiHasUniqueId,
-  apiPublishesUnsavedChanges,
   HasUniqueId,
   PublishesUnsavedChanges,
   PublishingSubject,
+  apiHasUniqueId,
+  apiPublishesUnsavedChanges,
 } from '@kbn/presentation-publishing';
+import { combineLatest, debounceTime, map, of, switchMap } from 'rxjs';
 
 export const DEBOUNCE_TIME = 100;
 
@@ -27,7 +26,7 @@ export function childrenUnsavedChanges$<Api extends unknown = unknown>(
 ) {
   return children$.pipe(
     map((children) => Object.keys(children)),
-    distinctUntilChanged(deepEqual),
+    // https://github.com/elastic/kibana/pull/215052/files#r2025639180
 
     // children may change, so make sure we subscribe/unsubscribe with switchMap
     switchMap((newChildIds: string[]) => {

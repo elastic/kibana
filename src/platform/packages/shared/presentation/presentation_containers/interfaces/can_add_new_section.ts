@@ -7,18 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  DashboardCapabilities,
-  DashboardLocatorParams,
-  DashboardSettings,
-  DashboardState,
-} from './types';
+export interface CanAddNewSection {
+  addNewSection: () => void;
+}
 
-export type {
-  DashboardPanelMap,
-  DashboardPanelState,
-  DashboardSectionMap,
-  DashboardSectionState,
-} from './dashboard_container/types';
-
-export { type InjectExtractDeps } from './dashboard_saved_object/persistable_state/dashboard_saved_object_references';
+export const apiCanAddNewSection = (api: unknown): api is CanAddNewSection => {
+  return typeof (api as CanAddNewSection)?.addNewSection === 'function';
+};

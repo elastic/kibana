@@ -43,6 +43,7 @@ import {
   CONTROL_GROUP_EMBEDDABLE_ID,
   initializeControlGroupManager,
 } from './control_group_manager';
+import { initializeSectionsManager } from './sections_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -78,9 +79,11 @@ export function getDashboardApi({
     return panelReferences.length > 0 ? panelReferences : references$.value ?? [];
   };
 
+  const sectionsManager = initializeSectionsManager(initialState.sections);
   const panelsManager = initializePanelsManager(
     incomingEmbeddable,
     initialState.panels,
+    sectionsManager,
     trackPanel,
     getReferences
   );
@@ -108,6 +111,7 @@ export function getDashboardApi({
     controlGroupManager,
     lastSavedState: savedObjectResult?.dashboardInput ?? DEFAULT_DASHBOARD_STATE,
     panelsManager,
+    sectionsManager,
     savedObjectId$,
     settingsManager,
     unifiedSearchManager,
@@ -122,6 +126,7 @@ export function getDashboardApi({
       ...settingsManager.api.getSettings(),
       ...unifiedSearchState,
       panels,
+      sections: sectionsManager.internalApi.getState(),
       viewMode: viewModeManager.api.viewMode$.value,
     };
 
@@ -144,6 +149,7 @@ export function getDashboardApi({
     ...dataLoadingManager.api,
     ...dataViewsManager.api,
     ...panelsManager.api,
+    ...sectionsManager.api,
     ...settingsManager.api,
     ...trackPanel,
     ...unifiedSearchManager.api,
@@ -232,6 +238,7 @@ export function getDashboardApi({
 
   const internalApi: DashboardInternalApi = {
     ...panelsManager.internalApi,
+    ...sectionsManager.internalApi,
     ...unifiedSearchManager.internalApi,
     setControlGroupApi: controlGroupManager.internalApi.setControlGroupApi,
   };

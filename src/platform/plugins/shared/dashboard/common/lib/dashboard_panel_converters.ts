@@ -22,9 +22,10 @@ import {
 export const convertPanelsArrayToPanelMap = (panels?: DashboardPanel[]): DashboardPanelMap => {
   const panelsMap: DashboardPanelMap = {};
   panels?.forEach((panel, idx) => {
+    const gridData = panel.gridData ?? {};
     panelsMap![panel.panelIndex ?? String(idx)] = {
       type: panel.type,
-      gridData: panel.gridData,
+      gridData: gridData.sectionId === undefined ? omit(gridData, 'sectionId') : gridData,
       panelRefName: panel.panelRefName,
       explicitInput: {
         ...(panel.id !== undefined && { savedObjectId: panel.id }),
@@ -44,6 +45,8 @@ export const convertPanelMapToPanelsArray = (
   return Object.entries(panels).map(([panelId, panelState]) => {
     const savedObjectId = (panelState.explicitInput as { savedObjectId?: string }).savedObjectId;
     const title = (panelState.explicitInput as { title?: string }).title;
+    const gridData = panelState.gridData ?? {};
+
     return {
       /**
        * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
@@ -53,7 +56,11 @@ export const convertPanelMapToPanelsArray = (
       ...(!removeLegacyVersion ? { version: panelState.version } : {}),
 
       type: panelState.type,
-      gridData: panelState.gridData,
+      /**
+       * Removing `sectionId` if it is undefined so that `gridData` for panels in the main Dashboard section
+       * does not change shape between Kibana versions
+       */
+      gridData: gridData.sectionId === undefined ? omit(gridData, 'sectionId') : gridData,
       panelIndex: panelId,
       panelConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
       ...(title !== undefined && { title }),

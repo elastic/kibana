@@ -10,3 +10,4 @@
 export { transformControlGroupIn } from './control_group_in_transforms';
 export { transformPanelsIn } from './panels_in_transforms';
 export { transformSearchSourceIn } from './search_source_in_transforms';
+export { transformSectionsIn } from './sections_in_transforms';

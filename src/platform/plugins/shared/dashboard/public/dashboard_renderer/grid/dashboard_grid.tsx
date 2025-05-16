@@ -13,16 +13,16 @@ import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef } from 'react';
+import { default as React, useCallback, useEffect, useMemo, useRef } from 'react';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
 import { arePanelLayoutsEqual } from '../../dashboard_api/are_panel_layouts_equal';
 import { DashboardLayout } from '../../dashboard_api/types';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import {
-  DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
   DASHBOARD_GRID_HEIGHT,
   DASHBOARD_MARGIN_SIZE,
+  DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
@@ -34,6 +34,7 @@ export const DashboardGrid = ({
 }) => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
+  const layoutRef = useRef<HTMLDivElement | null>(null);
 
   const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
@@ -42,6 +43,7 @@ export const DashboardGrid = ({
   const [expandedPanelId, layout, useMargins, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.expandedPanelId$,
     dashboardInternalApi.layout$,
+    //// ADD SECTIONS
     dashboardApi.settings.useMargins$,
     dashboardApi.viewMode$
   );
@@ -127,6 +129,38 @@ export const DashboardGrid = ({
     [appFixedViewport, dashboardContainerRef, dashboardInternalApi.layout$]
   );
 
+  useEffect(() => {
+    /**
+     * ResizeObserver fires the callback on `.observe()` with the initial size of the observed
+     * element; we want to ignore this first call and scroll to the bottom on the **second**
+     * callback - i.e. after the row is actually added to the DOM
+     */
+    let first = false;
+    const scrollToBottomOnResize = new ResizeObserver(() => {
+      if (first) {
+        first = false;
+      } else {
+        dashboardInternalApi.scrollToBottom();
+        scrollToBottomOnResize.disconnect(); // once scrolled, stop observing resize events
+      }
+    });
+
+    /**
+     * When `scrollToBottom$` emits, wait for the `layoutRef` size to change then scroll
+     * to the bottom of the screen
+     */
+    const scrollToBottomSubscription = dashboardInternalApi.scrollToBottom$.subscribe(() => {
+      if (!layoutRef.current) return;
+      first = true; // ensure that only the second resize callback actually triggers scrolling
+      scrollToBottomOnResize.observe(layoutRef.current);
+    });
+
+    return () => {
+      scrollToBottomOnResize.disconnect();
+      scrollToBottomSubscription.unsubscribe();
+    };
+  }, [dashboardInternalApi]);
+
   const memoizedgridLayout = useMemo(() => {
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
@@ -183,7 +217,7 @@ export const DashboardGrid = ({
   }, [useMargins, viewMode, expandedPanelId, euiTheme.levels.toast]);
 
   return (
-    <div className={dashboardClasses} css={dashboardStyles}>
+    <div ref={layoutRef} className={dashboardClasses} css={dashboardStyles}>
       {memoizedgridLayout}
     </div>
   );

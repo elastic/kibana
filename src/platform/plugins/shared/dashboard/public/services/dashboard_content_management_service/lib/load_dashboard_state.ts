@@ -160,6 +160,7 @@ export const loadDashboardState = async ({
     version,
     timeTo,
     title,
+    sections,
   } = attributes;
 
   const timeRange =
@@ -171,6 +172,7 @@ export const loadDashboardState = async ({
       : undefined;
 
   const panelMap = convertPanelsArrayToPanelMap(panels ?? []);
+  const sectionsMap = convertSectionArrayToSectionMap(sections ?? []);
 
   return {
     managed,
@@ -187,6 +189,7 @@ export const loadDashboardState = async ({
       panels: panelMap,
       query,
       title,
+      sections: sectionsMap,
 
       viewMode: 'view', // dashboards loaded from saved object default to view mode. If it was edited recently, the view mode from session storage will override this.
       tags:

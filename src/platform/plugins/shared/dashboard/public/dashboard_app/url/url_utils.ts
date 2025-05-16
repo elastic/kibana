@@ -16,6 +16,7 @@ import { skip } from 'rxjs';
 import semverSatisfies from 'semver/functions/satisfies';
 import type { DashboardPanelMap } from '../../../common/dashboard_container/types';
 import { convertPanelsArrayToPanelMap } from '../../../common/lib/dashboard_panel_converters';
+import { convertSectionArrayToSectionMap } from '../../../common/lib/dashboard_section_converters';
 import type { DashboardState, SharedDashboardState } from '../../../common/types';
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
@@ -87,6 +88,7 @@ export const loadAndRemoveDashboardState = (
   if (!rawAppStateInUrl) return {};
 
   const panelsMap = getPanelsMap(rawAppStateInUrl.panels);
+  const sectionsMap = convertSectionArrayToSectionMap(rawAppStateInUrl.sections ?? []);
 
   const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
     delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];
@@ -94,13 +96,14 @@ export const loadAndRemoveDashboardState = (
   });
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
   const partialState: Partial<DashboardState> = {
-    ..._.omit(rawAppStateInUrl, ['controlGroupState', 'panels', 'query']),
+    ..._.omit(rawAppStateInUrl, ['controlGroupState', 'panels', 'query', 'sections']),
     ...(rawAppStateInUrl.controlGroupState
       ? {
           controlGroupInput: serializeRuntimeState(rawAppStateInUrl.controlGroupState).rawState,
         }
       : {}),
     ...(panelsMap ? { panels: panelsMap } : {}),
+    ...(sectionsMap ? { sections: sectionsMap } : {}),
     ...(rawAppStateInUrl.query ? { query: migrateLegacyQuery(rawAppStateInUrl.query) } : {}),
   };
 

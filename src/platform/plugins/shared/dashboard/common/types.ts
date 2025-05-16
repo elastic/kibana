@@ -17,7 +17,7 @@ import type {
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/common';
 
-import type { DashboardPanelMap } from './dashboard_container/types';
+import type { DashboardPanelMap, DashboardSectionState } from './dashboard_container/types';
 import type {
   DashboardAttributes,
   DashboardOptions,
@@ -78,7 +78,7 @@ export interface DashboardState extends DashboardSettings {
  * Do not change type without considering BWC of stored URLs
  */
 export type SharedDashboardState = Partial<
-  Omit<DashboardState, 'panels'> & {
+  Omit<DashboardState, 'panels' | 'sections'> & {
     controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
 
     /**
@@ -88,6 +88,8 @@ export type SharedDashboardState = Partial<
     controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord;
 
     panels: DashboardPanel[];
+
+    sections: DashboardSectionState[];
 
     references?: DashboardState['references'] & SerializableRecord;
   }

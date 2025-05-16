@@ -54,12 +54,20 @@ export const DashboardViewport = ({
     dashboardApi.setFullScreenMode(false);
   }, [dashboardApi]);
 
-  const panelCount = useMemo(() => {
-    return Object.keys(layout).length;
-  }, [layout]);
+  const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
+    const visiblePanels = Object.values(layout).filter(({ gridData }) => {
+      return !dashboardInternalApi.isSectionCollapsed(gridData.sectionId);
+    });
+    return {
+      panelCount: Object.keys(panels).length,
+      visiblePanelCount: visiblePanels.length,
+      sectionCount: Object.keys(sections ?? {}).length,
+    };
+  }, [dashboardInternalApi, panels, sections]);
 
   const classes = classNames({
     dshDashboardViewport: true,
+    'dshDashboardViewport--empty': panelCount === 0 && sectionCount === 0,
     'dshDashboardViewport--print': viewMode === 'print',
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
@@ -124,15 +132,18 @@ export const DashboardViewport = ({
           <ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />
         </EuiPortal>
       )}
-      {panelCount === 0 && <DashboardEmptyScreen />}
       <div
         className={classes}
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
-        data-shared-items-count={panelCount}
+        data-shared-items-count={visiblePanelCount}
       >
-        <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
+        {panelCount === 0 && sectionCount === 0 ? (
+          <DashboardEmptyScreen />
+        ) : (
+          <DashboardGrid dashboardContainerRef={dashboardContainerRef} />
+        )}
       </div>
     </div>
   );
