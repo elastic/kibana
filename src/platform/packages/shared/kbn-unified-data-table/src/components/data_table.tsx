@@ -27,8 +27,6 @@ import {
   EuiDataGridStyle,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
-  EuiDataGridCellValueElementProps,
-  EuiFlexGroup,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -82,7 +80,6 @@ import {
   toolbarVisibility as toolbarVisibilityDefaults,
   DataGridDensity,
   DEFAULT_PAGINATION_MODE,
-  DEFAULT_CONTROL_COLUMN_WIDTH,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
@@ -94,11 +91,10 @@ import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 import { useSelectedDocs } from '../hooks/use_selected_docs';
 import {
   getColorIndicatorControlColumn,
+  getActionsColumn,
   type ColorIndicatorControlColumnParams,
-  getAdditionalRowControlColumns,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
-import { ActionsHeader } from './actions_header';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
@@ -958,47 +954,27 @@ export const UnifiedDataTable = ({
       canSetExpandedDoc,
     });
 
-    leadColumns.sort((a, b) => {
-      const aIndex = controlColumnIds.indexOf(a.id);
-      const bIndex = controlColumnIds.indexOf(b.id);
-      return aIndex - bIndex;
-    });
+    const filteredLeadColumns = leadColumns.filter((column) =>
+      controlColumnIds.includes(column.id)
+    );
 
     if (getRowIndicator) {
       const colorIndicatorControlColumn = getColorIndicatorControlColumn({
         getRowIndicator,
       });
-      leadColumns.unshift(colorIndicatorControlColumn);
+      filteredLeadColumns.unshift(colorIndicatorControlColumn);
     }
 
-    const extraColumns = [...leadColumnsExtraContent];
-    if (externalControlColumns) {
-      extraColumns.push(...externalControlColumns.map((column) => column.rowCellRender));
-    }
-    if (rowAdditionalLeadingControls?.length) {
-      const additionalRowControColumns = getAdditionalRowControlColumns(
-        rowAdditionalLeadingControls
-      );
-      extraColumns.push(...additionalRowControColumns.map((column) => column.rowCellRender));
+    const actionsColumn = getActionsColumn({
+      baseColumns: leadColumnsExtraContent,
+      rowAdditionalLeadingControls,
+      externalControlColumns,
+    });
+    if (actionsColumn) {
+      filteredLeadColumns.push(actionsColumn);
     }
 
-    const gutterSize = 4 * (extraColumns.length - 1);
-    const columnWidth = DEFAULT_CONTROL_COLUMN_WIDTH * extraColumns.length + gutterSize;
-
-    const extraColumn = {
-      id: 'actions',
-      width: columnWidth,
-      rowCellRender: (props: EuiDataGridCellValueElementProps) => (
-        <EuiFlexGroup gutterSize="xs">
-          {extraColumns.map((Content, idx) => (
-            <Content key={idx} {...props} />
-          ))}
-        </EuiFlexGroup>
-      ),
-      headerCellRender: () => <ActionsHeader maxWidth={columnWidth} />,
-    };
-
-    return [...leadColumns, extraColumn] as EuiDataGridControlColumn[];
+    return filteredLeadColumns as EuiDataGridControlColumn[];
   }, [
     canSetExpandedDoc,
     controlColumnIds,

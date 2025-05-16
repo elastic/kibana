@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  getColorIndicatorControlColumn,
-  type ColorIndicatorControlColumnParams,
-} from './color_indicator';
-
-export { getAdditionalRowControlColumns } from './additional_row_control';
-
 export { getActionsColumn } from './actions_column';
