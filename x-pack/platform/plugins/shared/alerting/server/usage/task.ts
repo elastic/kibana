@@ -220,6 +220,8 @@ export function telemetryTaskRunner(
                 percentile_num_alerts_by_type_per_day: dailyExecutionCounts.alertsPercentilesByType,
                 count_alerts_total: totalAlertsCountAggregations.count_alerts_total,
                 count_alerts_by_rule_type: totalAlertsCountAggregations.count_alerts_by_rule_type,
+                max_ignored_fields_by_rule_type:
+                  totalAlertsCountAggregations.max_ignored_fields_by_rule_type,
               };
 
               return {
