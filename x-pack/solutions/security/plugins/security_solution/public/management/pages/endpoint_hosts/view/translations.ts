@@ -111,6 +111,12 @@ export const WORKFLOW_INSIGHTS = {
         defaultMessage: 'Failed to mark insight as remediated',
       }
     ),
+    maxFetchAttemptsReached: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.maxFetchAttemptsReached',
+      {
+        defaultMessage: 'Failed to fetch insights after multiple attempts',
+      }
+    ),
   },
 };
 
