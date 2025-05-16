@@ -8,13 +8,14 @@
 import '../../_index.scss';
 import React, { Component } from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
+import { css } from '@emotion/react';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
@@ -28,7 +29,6 @@ import { MapSettings } from '../../../common/descriptor_types';
 import { MapSettingsPanel } from '../map_settings_panel';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../classes/layers/layer';
-import { css } from '@emotion/react';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -57,6 +57,7 @@ export interface Props {
    * Visualize Embeddable handles sharing attributes so sharing attributes are not needed in the children.
    */
   isSharable: boolean;
+  euiTheme?: any;
 }
 
 interface State {
@@ -188,15 +189,6 @@ export class MapContainer extends Component<Props, State> {
       );
     }
 
-    let flyoutPanel = null;
-    if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
-      flyoutPanel = <AddLayerPanel />;
-    } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
-      flyoutPanel = <EditLayerPanel />;
-    } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
-      flyoutPanel = <MapSettingsPanel />;
-    }
-
     let exitFullScreenButton;
     if (isFullScreen) {
       exitFullScreenButton = <ExitFullScreenButton onExit={exitFullScreen} />;
@@ -238,17 +230,48 @@ export class MapContainer extends Component<Props, State> {
             <Timeslider waitForTimesliceToLoad$={this.props.waitUntilTimeLayersLoad$} />
           )}
         </EuiFlexItem>
-        <EuiFlexItem
-          className={classNames('mapMapLayerPanel', {
-            'mapMapLayerPanel-isVisible': !!flyoutPanel,
-          })}
-          grow={false}
-        >
-          {flyoutPanel}
-        </EuiFlexItem>
-
+        <FlyoutPanelWrapper flyoutDisplay={flyoutDisplay} />
         {exitFullScreenButton}
       </EuiFlexGroup>
     );
   }
 }
+
+const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) => {
+  const { euiTheme } = useEuiTheme();
+  let flyoutPanel = null;
+  if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
+    flyoutPanel = <AddLayerPanel />;
+  } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
+    flyoutPanel = <EditLayerPanel />;
+  } else if (flyoutDisplay === FLYOUT_STATE.MAP_SETTINGS_PANEL) {
+    flyoutPanel = <MapSettingsPanel />;
+  }
+  return (
+    <EuiFlexItem
+      className={classNames('mapMapLayerPanel', {
+        'mapMapLayerPanel-isVisible': !!flyoutPanel,
+      })}
+      css={css({
+        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+        width: 0,
+        overflow: 'hidden',
+        borderLeftWidth: 1,
+        borderLeftColor: euiTheme.colors.borderBaseSubdued,
+        borderLeftStyle: 'solid',
+
+        '& > *': {
+          width: `calc(${euiTheme.size.xxl} * 12)`,
+        },
+
+        '&.mapMapLayerPanel-isVisible': {
+          width: `calc(${euiTheme.size.xxl} * 12)`,
+          transition: `width ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+        },
+      })}
+      grow={false}
+    >
+      {flyoutPanel}
+    </EuiFlexItem>
+  );
+};
