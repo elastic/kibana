@@ -1,4 +1,6 @@
 project: 'Kibana docs'
+products:
+  - id: kibana
 exclude:
   - settings-gen/readme.md
   - development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.createdefaultinspectoradapters.md
