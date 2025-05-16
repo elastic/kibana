@@ -71,7 +71,6 @@ export interface GridLayoutStateManager {
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   sectionRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
   headerRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
-  footerRefs: React.MutableRefObject<{ [sectionId: string]: HTMLDivElement | null }>;
   panelRefs: React.MutableRefObject<{ [panelId: string]: HTMLDivElement | null }>;
 }
 

@@ -57,7 +57,7 @@ export const useMockDashboardApi = ({
       getPanelCount: () => {
         return Object.keys(panels$.getValue()).length;
       },
-      sections: new BehaviorSubject<MockedDashboardSectionMap>(savedState.sections),
+      sections$: new BehaviorSubject<MockedDashboardSectionMap>(savedState.sections),
       expandedPanelId$,
       expandPanel: (id: string) => {
         if (expandedPanelId$.getValue()) {

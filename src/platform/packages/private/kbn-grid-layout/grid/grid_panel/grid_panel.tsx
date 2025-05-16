@@ -8,16 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  combineLatest,
-  distinctUntilChanged,
-  filter,
-  map,
-  pairwise,
-  skip,
-  startWith,
-  withLatestFrom,
-} from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip, startWith } from 'rxjs';
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -86,8 +77,8 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       .pipe(skip(1))
       .subscribe(([activePanel, currentPanel]) => {
         if (!currentPanel) return;
-        const ref = gridLayoutStateManager.panelRefs.current[currentPanel.id];
-        const isPanelActive = activePanel?.id === currentPanel.id;
+        const ref = gridLayoutStateManager.panelRefs.current[currentPanel?.id];
+        const isPanelActive = activePanel && activePanel.id === currentPanel?.id;
         if (!ref) return;
 
         if (isPanelActive) {

@@ -50,5 +50,5 @@ export type MockDashboardApi = PresentationContainer &
   PublishesWritableViewMode &
   CanExpandPanels & {
     panels$: BehaviorSubject<MockedDashboardPanelMap>;
-    sections: BehaviorSubject<MockedDashboardSectionMap>;
+    sections$: BehaviorSubject<MockedDashboardSectionMap>;
   };

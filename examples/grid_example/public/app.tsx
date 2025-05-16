@@ -81,7 +81,7 @@ export const GridExample = ({
   const layoutUpdated$ = useMemo(() => new Subject<void>(), []);
 
   useEffect(() => {
-    combineLatest([mockDashboardApi.panels$, mockDashboardApi.sections])
+    combineLatest([mockDashboardApi.panels$, mockDashboardApi.sections$])
       .pipe(
         debounceTime(0), // debounce to avoid subscribe being called twice when both panels$ and rows$ publish
         map(([panels, sections]) => {
@@ -142,17 +142,17 @@ export const GridExample = ({
         newLayout
       );
       mockDashboardApi.panels$.next(panels);
-      mockDashboardApi.sections.next(sections);
+      mockDashboardApi.sections$.next(sections);
     },
-    [mockDashboardApi.panels$, mockDashboardApi.sections]
+    [mockDashboardApi.panels$, mockDashboardApi.sections$]
   );
 
   const addNewSection = useCallback(() => {
-    const rows = cloneDeep(mockDashboardApi.sections.getValue());
+    const rows = cloneDeep(mockDashboardApi.sections$.getValue());
     const id = uuidv4();
     const maxY = Math.max(
       ...Object.values({
-        ...mockDashboardApi.sections.getValue(),
+        ...mockDashboardApi.sections$.getValue(),
         ...mockDashboardApi.panels$.getValue(),
       }).map((widget) => ('gridData' in widget ? widget.gridData.y + widget.gridData.h : widget.y))
     );
@@ -165,19 +165,19 @@ export const GridExample = ({
       }),
       collapsed: false,
     };
-    mockDashboardApi.sections.next(rows);
+    mockDashboardApi.sections$.next(rows);
 
     // scroll to bottom after row is added
     layoutUpdated$.pipe(take(1)).subscribe(() => {
       window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     });
-  }, [mockDashboardApi.sections, mockDashboardApi.panels$, layoutUpdated$]);
+  }, [mockDashboardApi.sections$, mockDashboardApi.panels$, layoutUpdated$]);
 
   const resetUnsavedChanges = useCallback(() => {
     const { panels, sections: rows } = savedState.current;
     mockDashboardApi.panels$.next(panels);
-    mockDashboardApi.sections.next(rows);
-  }, [mockDashboardApi.panels$, mockDashboardApi.sections]);
+    mockDashboardApi.sections$.next(rows);
+  }, [mockDashboardApi.panels$, mockDashboardApi.sections$]);
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
@@ -260,7 +260,7 @@ export const GridExample = ({
                     onClick={() => {
                       const newSavedState = {
                         panels: mockDashboardApi.panels$.getValue(),
-                        sections: mockDashboardApi.sections.getValue(),
+                        sections: mockDashboardApi.sections$.getValue(),
                       };
                       savedState.current = newSavedState;
                       setHasUnsavedChanges(false);
