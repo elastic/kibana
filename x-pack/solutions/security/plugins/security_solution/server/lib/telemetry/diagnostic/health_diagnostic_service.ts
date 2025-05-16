@@ -32,10 +32,13 @@ import {
   TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
 } from '../event_based/events';
 import { Artifact } from '../artifact';
+import { newTelemetryLogger } from '../helpers';
 
-const TASK_TYPE = 'Security Solution:Health Diagnostic';
-const TASK_ID = 'security:health-diagnostic:1.0.0';
+const TASK_TYPE = 'security:health-diagnostic';
+const TASK_ID = `${TASK_TYPE}:1.0.0`;
 const INTERVAL = '1m';
+const TIMEOUT = '5m';
+const QUERY_ARTIFACT_ID = 'health-diagnostic-query';
 
 export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private readonly logger: Logger;
@@ -60,25 +63,31 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   };
 
   constructor(logger: Logger) {
-    this.logger = logger.get('health-diagnostic');
+    const mdc = { task_id: TASK_ID, task_type: TASK_TYPE };
+    this.logger = newTelemetryLogger(logger.get('health-diagnostic'), mdc);
     this.artifactService = new Artifact();
   }
 
   public setup(setup: HealthDiagnosticServiceSetup) {
     this.logger.info('Setting up health diagnostic service');
+
     this.registerTask(setup.taskManager);
   }
 
   public async start(start: HealthDiagnosticServiceStart) {
     this.logger.info('Starting health diagnostic service');
+
     this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient);
     this.analytics = start.analytics;
-    await this.artifactService.start(
-      start.receiver,
-      'https://bankc-artifacts.sde.elastic.dev/2114cf77-3ad0-4a50-b8e2-4d12caae73d9'
-    );
 
-    await this.scheduleTask(start.taskManager);
+    await Promise.all([
+      this.artifactService.start(
+        start.receiver,
+        // TODO: remove before merging!
+        'https://bankc-artifacts.sde.elastic.dev/2114cf77-3ad0-4a50-b8e2-4d12caae73d9'
+      ),
+      this.scheduleTask(start.taskManager),
+    ]);
   }
 
   public async runHealthDiagnosticQueries(fromDate: Date, toDate: Date) {
@@ -127,17 +136,18 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
           this.logger.info('Sending query result EBT', {
             name: query.name,
-            traceId: queryResult.traceId,
+            traceId: queryStats.traceId,
             currentPage,
           } as LogMeta);
 
           this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT, queryResult);
+
           currentPage++;
         }
         queryStats.passed = true;
       } catch (err) {
         queryStats.failure = err.message;
-        this.logger.error('Error running query', { queryStats } as LogMeta);
+        this.logger.error('Error running query', { error: err.message } as LogMeta);
       }
 
       queryStats.circuitBreakers = circuitBreakers.reduce((acc, cb) => {
@@ -157,19 +167,19 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   }
 
   private registerTask(taskManager: TaskManagerSetupContract) {
-    this.logger.debug('About to register task', { taskId: TASK_ID } as LogMeta);
+    this.logger.debug('About to register task');
 
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
         title: 'Security Solution - Health Diagnostic Task',
         description: 'This task periodically collects health diagnostic information.',
-        timeout: '5m',
+        timeout: TIMEOUT,
         maxAttempts: 1,
         stateSchemaByVersion: {
           1: {
             up: (state: Record<string, unknown>) => ({
               lastExecutionTime:
-                state.lastExecutionTime || new Date('2021-05-04T00:00:00').getTime(),
+                state.lastExecutionTime || new Date('2025-01-01T00:00:00.000Z').getTime(),
             }),
             schema: schema.object({
               lastExecutionTime: schema.number(),
@@ -194,7 +204,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
             },
 
             cancel: async () => {
-              this.logger?.warn('Task timed out', { taskId: TASK_ID } as LogMeta);
+              this.logger?.warn('Task timed out');
             },
           };
         },
@@ -203,7 +213,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   }
 
   private async scheduleTask(taskManager: TaskManagerStartContract): Promise<void> {
-    this.logger.info('About to schedule task', { taskId: TASK_ID, taskType: TASK_TYPE } as LogMeta);
+    this.logger.info('About to schedule task');
 
     try {
       await taskManager.ensureScheduled({
@@ -217,7 +227,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
         scope: ['securitySolution'],
       });
 
-      this.logger.info('Task scheduled', { taskId: TASK_ID, taskType: TASK_TYPE } as LogMeta);
+      this.logger.info('Task scheduled');
     } catch (e) {
       this.logger.error('Error scheduling task', {
         error: e.message,
@@ -245,7 +255,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private async healthQueries(): Promise<HealthDiagnosticQuery[]> {
     // TODO: run as part of the configuration task instead of getting the artifact each time the task runs?
     try {
-      const artifact = await this.artifactService.getArtifact('health-diagnostic-query');
+      const artifact = await this.artifactService.getArtifact(QUERY_ARTIFACT_ID);
       return parseDiagnosticQueries(artifact.data);
     } catch (err) {
       this.logger.warn('Error getting health diagnostic queries', {
