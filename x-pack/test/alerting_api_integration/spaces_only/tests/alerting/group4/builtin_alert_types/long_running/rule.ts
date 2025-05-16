@@ -7,6 +7,9 @@
 
 import expect from '@kbn/expect';
 
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import { ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
@@ -15,17 +18,25 @@ const RULE_INTERVAL_SECONDS = 3;
 
 // eslint-disable-next-line import/no-default-export
 export default function ruleTests({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const supertest = getService('supertest');
   const retry = getService('retry');
+
+  const alertsAsDataIndex = '.alerts-test.patternfiring.alerts-default';
 
   describe('long running rule', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {
       await objectRemover.removeAll();
+      await es.deleteByQuery({
+        index: alertsAsDataIndex,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
     });
 
-    it('writes event log document for timeout for each rule execution that ends in timeout - every execution times out', async () => {
+    it('writes event log document for timeout and no alerts for each rule execution that ends in timeout - every execution times out', async () => {
       const ruleId = await createRule({
         name: 'long running rule',
         ruleTypeId: 'test.patternLongRunning.cancelAlertsOnRuleTimeout',
@@ -71,6 +82,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       );
       expect(status).to.eql(200);
 
+      // no alerts should exist
+      const alertDocs = await queryForAlertDocs<Alert>();
+      expect(alertDocs.length).to.eql(0);
+
       expect(errorStatuses.length).to.be.greaterThan(0);
       const lastErrorStatus = errorStatuses.pop();
       expect(lastErrorStatus?.status).to.eql('error');
@@ -83,7 +98,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(['timeout', 'execute'].includes(lastErrorStatus?.error.reason || '')).to.eql(true);
     });
 
-    it('writes event log document for timeout for each rule execution that ends in timeout - some executions times out', async () => {
+    it('writes event log document for timeout and no alerts for each rule execution that ends in timeout - some executions times out', async () => {
       const ruleId = await createRule({
         name: 'long running rule',
         ruleTypeId: 'test.patternLongRunning.cancelAlertsOnRuleTimeout',
@@ -115,7 +130,17 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`
         );
         expect(status).to.eql(200);
-        expect(rule.execution_status.status).to.eql('active');
+        expect(rule.execution_status.status).to.eql('ok');
+      });
+
+      await retry.try(async () => {
+        const alertDocs = await queryForAlertDocs<Alert>();
+        // expect 1 alert for each execution that didn't time out
+        expect(alertDocs.length).to.eql(3);
+
+        expect(alertDocs[0]._source?.[ALERT_INSTANCE_ID]).to.eql(`alert_3`);
+        expect(alertDocs[1]._source?.[ALERT_INSTANCE_ID]).to.eql(`alert_2`);
+        expect(alertDocs[2]._source?.[ALERT_INSTANCE_ID]).to.eql(`alert_0`);
       });
     });
 
@@ -142,6 +167,17 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             ['active-instance', { gte: 3 }],
           ]),
         });
+      });
+
+      await retry.try(async () => {
+        const alertDocs = await queryForAlertDocs<Alert>();
+        // expect 1 alert for each execution bc we're writing alerts even if the rule times out
+        expect(alertDocs.length).to.eql(4);
+
+        expect(alertDocs[0]._source?.[ALERT_INSTANCE_ID]).to.eql(`alert_3`);
+        expect(alertDocs[1]._source?.[ALERT_INSTANCE_ID]).to.eql(`alert_2`);
+        expect(alertDocs[2]._source?.[ALERT_INSTANCE_ID]).to.eql(`alert_1`);
+        expect(alertDocs[3]._source?.[ALERT_INSTANCE_ID]).to.eql(`alert_0`);
       });
     });
 
@@ -174,6 +210,14 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
       return ruleId;
+    }
+
+    async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
+      const searchResult = await es.search({
+        index: alertsAsDataIndex,
+        query: { match_all: {} },
+      });
+      return searchResult.hits.hits as Array<SearchHit<T>>;
     }
   });
 }
