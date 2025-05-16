@@ -87,6 +87,8 @@ import type { GetGapsSummaryByRuleIdsParams } from '../application/rule/methods/
 import type { FindGapsParams } from '../lib/rule_gaps/types';
 import type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
 import { getGlobalExecutionSummaryWithAuth } from './methods/get_execution_summary';
+import { bulkFillGapsByRuleIds } from '../application/rule/methods/bulk_fill_gaps_by_rule_ids';
+import type { BulkFillGapsByRuleIdsParams } from '../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -224,6 +226,9 @@ export class RulesClient {
   public findGaps = (params: FindGapsParams) => findGaps(this.context, params);
 
   public fillGapById = (params: FillGapByIdParams) => fillGapById(this.context, params);
+
+  public bulkFillGapsByRuleIds = (params: BulkFillGapsByRuleIdsParams) =>
+    bulkFillGapsByRuleIds(this.context, params);
 
   public getRuleIdsWithGaps = (params: GetRuleIdsWithGapsParams) =>
     getRuleIdsWithGaps(this.context, params);
