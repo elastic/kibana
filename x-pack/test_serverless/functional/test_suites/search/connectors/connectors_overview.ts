@@ -18,6 +18,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'embeddedConsole',
   ]);
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('connectors', function () {
     before(async () => {
@@ -76,12 +78,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
           await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveItems();
 
-          // Filter the table to just our connector
-          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
-            TEST_CONNECTOR_NAME
-          );
-          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.connectorNameExists(
-            TEST_CONNECTOR_NAME
+          await retry.try(
+            async () => {
+              await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
+                TEST_CONNECTOR_NAME
+              );
+              await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.connectorNameExists(
+                TEST_CONNECTOR_NAME
+              );
+            },
+            () => browser.refresh()
           );
 
           await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.changeSearchBarTableSelectValue(
