@@ -45,6 +45,7 @@ paths:
                 - $ref: '#/components/schemas/BulkExportRules'
                 - $ref: '#/components/schemas/BulkDuplicateRules'
                 - $ref: '#/components/schemas/BulkManualRuleRun'
+                - $ref: '#/components/schemas/BulkManualRuleFillGaps'
                 - $ref: '#/components/schemas/BulkEditRules'
             examples:
               example01:
@@ -359,6 +360,18 @@ paths:
                               eventAction: trigger
                               timestamp: 2023-10-31T00:00:00Z
                             group: default3
+              
+              example27:
+                summary: Fill Gaps - Manually trigger the filling of gaps for specified rules
+                description: The following request triggers the filling of gaps for the specified rule ids and time range
+                value:
+                  action: 'fill_gaps'
+                  ids:
+                    - '748694f0-6977-4ea5-8384-cd2e39730779'
+                    - '164d0918-f720-4c9f-9f5c-c5122587cf19'
+                  run:
+                    start_date: '2025-03-01T00:00:00.000Z'
+                    end_date: '2025-03-10T23:59:59.999Z'
       responses:
         200:
           description: OK
@@ -1006,6 +1019,11 @@ components:
       type: string
       enum:
         - RULE_NOT_MODIFIED
+    
+    BulkGapsFillingSkipReason:
+      type: string
+      enum:
+        - NO_GAPS_TO_FILL
 
     BulkActionSkipResult:
       type: object
@@ -1015,7 +1033,9 @@ components:
         name:
           type: string
         skip_reason:
-          $ref: '#/components/schemas/BulkEditSkipReason'
+          oneOf:
+            - $ref: '#/components/schemas/BulkEditSkipReason'
+            - $ref: '#/components/schemas/BulkGapsFillingSkipReason'
       required:
         - id
         - skip_reason
@@ -1245,6 +1265,31 @@ components:
           required:
             - action
             - run
+    
+    BulkManualRuleFillGaps:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [fill_gaps]
+            fill_gaps:
+              type: object
+              description: Object that describes applying a manual gap fill action for the specified range.
+              properties:
+                start_date:
+                  type: string
+                  description: Start date of the manual gap fill
+                end_date:
+                  type: string
+                  description: End date of the manual gap fill
+              required:
+                - start_date
+                - end_date
+          required:
+            - action
+            - fill_gaps
 
     ThrottleForBulkActions:
       type: string
@@ -1269,6 +1314,7 @@ components:
         - duplicate
         - edit
         - run
+        - fill_gaps
 
     BulkActionEditType:
       type: string

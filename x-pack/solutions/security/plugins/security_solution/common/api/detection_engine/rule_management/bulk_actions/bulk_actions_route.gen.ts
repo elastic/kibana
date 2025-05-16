@@ -34,11 +34,14 @@ import {
 export type BulkEditSkipReason = z.infer<typeof BulkEditSkipReason>;
 export const BulkEditSkipReason = z.literal('RULE_NOT_MODIFIED');
 
+export type BulkGapsFillingSkipReason = z.infer<typeof BulkGapsFillingSkipReason>;
+export const BulkGapsFillingSkipReason = z.literal('NO_GAPS_TO_FILL');
+
 export type BulkActionSkipResult = z.infer<typeof BulkActionSkipResult>;
 export const BulkActionSkipResult = z.object({
   id: z.string(),
   name: z.string().optional(),
-  skip_reason: BulkEditSkipReason,
+  skip_reason: z.union([BulkEditSkipReason, BulkGapsFillingSkipReason]),
 });
 
 export type RuleDetailsInError = z.infer<typeof RuleDetailsInError>;
@@ -193,6 +196,26 @@ export const BulkManualRuleRun = BulkActionBase.merge(
   })
 );
 
+export type BulkManualRuleFillGaps = z.infer<typeof BulkManualRuleFillGaps>;
+export const BulkManualRuleFillGaps = BulkActionBase.merge(
+  z.object({
+    action: z.literal('fill_gaps'),
+    /**
+     * Object that describes applying a manual gap fill action for the specified range.
+     */
+    fill_gaps: z.object({
+      /**
+       * Start date of the manual gap fill
+       */
+      start_date: z.string(),
+      /**
+       * End date of the manual gap fill
+       */
+      end_date: z.string(),
+    }),
+  })
+);
+
 /**
   * Defines the maximum interval in which a rule’s actions are executed.
 > info
@@ -214,6 +237,7 @@ export const BulkActionType = z.enum([
   'duplicate',
   'edit',
   'run',
+  'fill_gaps',
 ]);
 export type BulkActionTypeEnum = typeof BulkActionType.enum;
 export const BulkActionTypeEnum = BulkActionType.enum;
@@ -407,6 +431,7 @@ export const PerformRulesBulkActionRequestBody = z.union([
   BulkExportRules,
   BulkDuplicateRules,
   BulkManualRuleRun,
+  BulkManualRuleFillGaps,
   BulkEditRules,
 ]);
 export type PerformRulesBulkActionRequestBodyInput = z.input<
