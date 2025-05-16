@@ -6,7 +6,6 @@
  */
 
 import { DataType, TableChangeType } from '../../../types';
-import { FormBasedPrivateState } from '../types';
 import { CombinedFormBasedPrivateState, TextBasedLayer, TextBasedLayerColumn } from './types';
 import { canColumnBeUsedBeInMetricDimension, isNotNumeric, isNumeric } from './utils';
 

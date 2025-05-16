@@ -19,7 +19,7 @@ import {
   parseTimeShift,
 } from '@kbn/data-plugin/common';
 import type { DateRange } from '../../../common/types';
-import { CombinedFormBasedPrivateState, isFormBasedLayer, type FormBasedLayer, type FormBasedPrivateState } from './types';
+import { CombinedFormBasedPrivateState, isFormBasedLayer, type FormBasedLayer } from './types';
 import type { FramePublicAPI, IndexPattern, UserMessage } from '../../types';
 import { TIMESHIFT_LT_INTERVAL, TIMESHIFT_NOT_MULTIPLE_INTERVAL } from '../../user_messages_ids';
 

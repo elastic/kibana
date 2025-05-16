@@ -22,6 +22,7 @@ import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
 import { generateMissingFieldMessage, getFilter, isColumnFormatted } from '../helpers';
 import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_ids';
+import { isFormBasedLayer } from '../../../types';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
@@ -231,13 +232,21 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       return true;
     },
     createCopy(layers, source, target, operationDefinitionMap) {
-      const currentColumn = layers[source.layerId].columns[
+      const layer = layers[source.layerId];
+      if (!layer || !isFormBasedLayer(layer)) {
+        return layers;
+      }
+      const currentColumn = layer.columns[
         source.columnId
       ] as FormulaIndexPatternColumn;
+      const targetLayer = layers[target.layerId];
+      if (!targetLayer || !isFormBasedLayer(targetLayer)) {
+        return layers;
+      }
       const modifiedLayer = insertOrReplaceFormulaColumn(
         target.columnId,
         currentColumn,
-        layers[target.layerId],
+        targetLayer,
         {
           indexPattern: target.dataView,
           operations: operationDefinitionMap,

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef, CombinedFormBasedPrivateState, isTextBasedLayer } from './types';
+import { TextBasedLayer, IndexPatternRef, CombinedFormBasedPrivateState, isTextBasedLayer } from './types';
 import type { OriginalColumn } from '../../../../common/types';
 
 export function getExpressionForLayer(

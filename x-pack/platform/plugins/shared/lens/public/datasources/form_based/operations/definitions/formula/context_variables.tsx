@@ -38,6 +38,7 @@ import {
   TIMERANGE_OP_DATAVIEW_NOT_TIME_BASED,
   TIMERANGE_OP_MISSING_TIME_RANGE,
 } from '../../../../../user_messages_ids';
+import { isFormBasedLayer } from '../../../types';
 
 // copied over from layer_helpers
 // TODO: split layer_helpers util into pure/non-pure functions to avoid issues with tests
@@ -252,8 +253,15 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
       ];
     },
     createCopy(layers, source, target) {
-      const currentColumn = layers[source.layerId].columns[source.columnId] as ColumnType;
+      const sourceLayer = layers[source.layerId];
+      if (!sourceLayer || !isFormBasedLayer(sourceLayer)) {
+        return layers;
+      }
+      const currentColumn = sourceLayer.columns[source.columnId] as ColumnType;
       const targetLayer = layers[target.layerId];
+      if (!targetLayer || !isFormBasedLayer(targetLayer)) {
+        return layers;
+      }
       const columns = {
         ...targetLayer.columns,
         [target.columnId]: { ...currentColumn },

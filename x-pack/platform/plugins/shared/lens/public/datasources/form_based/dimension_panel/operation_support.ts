@@ -9,7 +9,7 @@ import memoizeOne from 'memoize-one';
 import { DatasourceDimensionProps, IndexPatternMap, OperationMetadata } from '../../../types';
 import { OperationType } from '../form_based';
 import { memoizedGetAvailableOperationsByMetadata, OperationFieldTuple } from '../operations';
-import { CombinedFormBasedPrivateState, FormBasedPrivateState, isTextBasedLayer } from '../types';
+import { CombinedFormBasedPrivateState, isTextBasedLayer } from '../types';
 
 export interface OperationSupportMatrix {
   operationByField: Map<string, Set<OperationType>>;

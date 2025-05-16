@@ -42,7 +42,7 @@ import { mergeLayer } from '../state_helpers';
 import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import type { FormBasedLayer } from '../types';
+import { isFormBasedLayer, type FormBasedLayer } from '../types';
 import { FormatSelector, FormatSelectorProps } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
 import { TimeScaling, TimeScalingProps } from './time_scaling';
@@ -122,9 +122,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [temporaryState, setTemporaryState] = useState<TemporaryState>('none');
 
+  const layer = state.layers[layerId];
+  if (!layer || !isFormBasedLayer(layer)) {
+    return null;
+  }
+
   // If a layer has sampling disabled, assume the toast has already fired in the past
   const [hasRandomSamplingToastFired, setSamplingToastAsFired] = useState(
-    !isSamplingValueEnabled(state.layers[layerId])
+    !isSamplingValueEnabled(layer)
   );
 
   const [hasRankingToastFired, setRankingToastAsFired] = useState(false);
@@ -145,7 +150,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const fireOrResetOtherBucketToast = useCallback(
     (newLayer: FormBasedLayer) => {
-      if (isLayerChangingDueToOtherBucketChange(state.layers[layerId], newLayer)) {
+      if (isLayerChangingDueToOtherBucketChange(layer, newLayer)) {
         props.notifications.toasts.add({
           title: i18n.translate('xpack.lens.uiInfo.otherBucketChangeTitle', {
             defaultMessage: '“Group remaining values as Other” disabled',
@@ -165,7 +170,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const fireOrResetRandomSamplingToast = useCallback(
     (newLayer: FormBasedLayer) => {
       // if prev and current sampling state is different, show a toast to the user
-      if (isSamplingValueEnabled(state.layers[layerId]) && !isSamplingValueEnabled(newLayer)) {
+      if (isSamplingValueEnabled(layer) && !isSamplingValueEnabled(newLayer)) {
         if (newLayer.sampling != null && newLayer.sampling < 1) {
           props.notifications.toasts.add({
             title: i18n.translate('xpack.lens.uiInfo.samplingDisabledTitle', {
@@ -186,7 +191,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const fireOrResetRankingToast = useCallback(
     (newLayer: FormBasedLayer) => {
-      if (isLayerChangingDueToDecimalsPercentile(state.layers[layerId], newLayer)) {
+      if (isLayerChangingDueToDecimalsPercentile(layer, newLayer)) {
         props.notifications.toasts.add({
           title: i18n.translate('xpack.lens.uiInfo.rankingResetTitle', {
             defaultMessage: 'Ranking changed to alphabetical',
@@ -216,10 +221,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
       setter:
         | FormBasedLayer
         | ((prevLayer: FormBasedLayer) => FormBasedLayer)
-        | GenericIndexPatternColumn,
+        | GenericIndexPatternColumn, 
       options: { forceRender?: boolean } = {}
     ) => {
       const layer = state.layers[layerId];
+      if (!layer || !isFormBasedLayer(layer)) {
+        return;
+      }
       let hypotethicalLayer: FormBasedLayer;
       if (isColumn(setter)) {
         hypotethicalLayer = {
@@ -230,7 +238,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           },
         };
       } else {
-        hypotethicalLayer = typeof setter === 'function' ? setter(state.layers[layerId]) : setter;
+        hypotethicalLayer = typeof setter === 'function' ? setter(layer) : setter;
       }
       const isDimensionComplete = Boolean(hypotethicalLayer.columns[columnId]);
 
@@ -238,6 +246,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
         (prevState) => {
           let outputLayer: FormBasedLayer;
           const prevLayer = prevState.layers[layerId];
+          if (!prevLayer || !isFormBasedLayer(prevLayer)) {
+            return prevState;
+          }
           if (isColumn(setter)) {
             outputLayer = {
               ...prevLayer,
@@ -247,7 +258,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               },
             };
           } else {
-            outputLayer = typeof setter === 'function' ? setter(prevState.layers[layerId]) : setter;
+            outputLayer = typeof setter === 'function' ? setter(prevLayer) : setter;
           }
           const newLayer = adjustColumnReferencesForChangedColumn(outputLayer, columnId);
           // Fire an info toast (eventually) on layer update
@@ -268,7 +279,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     [columnId, fireOrResetToastChecks, layerId, setState, state.layers]
   );
 
-  const incompleteInfo = (state.layers[layerId].incompleteColumns ?? {})[columnId];
+  const incompleteInfo = (layer.incompleteColumns ?? {})[columnId];
   const {
     operationType: incompleteOperation,
     sourceField: incompleteField = null,
@@ -289,6 +300,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
       (!selectedColumn || selectedColumn?.operationType === staticValueOperationName));
 
   const addStaticValueColumn = (prevLayer = props.state.layers[props.layerId]) => {
+    if (!isFormBasedLayer(prevLayer)) {
+      return prevLayer;
+    }
     if (selectedColumn?.operationType !== staticValueOperationName) {
       const layer = insertOrReplaceColumn({
         layer: prevLayer,
@@ -332,7 +346,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
     if (typeof setter === 'function') {
       return setState(
         (prevState) => {
-          const layer = setter(addStaticValueColumn(prevState.layers[layerId]));
+          const prevLayer = prevState.layers[layerId];
+          if (!prevLayer || !isFormBasedLayer(prevLayer)) {
+            return prevState;
+          }
+          const layer = setter(addStaticValueColumn(prevLayer) as FormBasedLayer);
           return mergeLayer({ state: prevState, layerId, newLayer: layer });
         },
         {
@@ -383,7 +401,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     currentIndexPattern.getFieldByName(selectedColumn.sourceField);
 
   const referencedField =
-    currentField || getReferencedField(selectedColumn, currentIndexPattern, state.layers[layerId]);
+    currentField || getReferencedField(selectedColumn, currentIndexPattern, layer);
 
   // Operations are compatible if they match inputs. They are always compatible in
   // the empty state. Field-based operations are not compatible with field-less operations.
@@ -393,7 +411,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     return {
       operationType,
       compatibleWithCurrentField: canTransition({
-        layer: state.layers[layerId],
+        layer: layer,
         columnId,
         op: operationType,
         indexPattern: currentIndexPattern,
@@ -406,18 +424,18 @@ export function DimensionEditor(props: DimensionEditorProps) {
         definition.getDisabledStatus &&
         definition.getDisabledStatus(
           props.indexPatterns[state.currentIndexPatternId],
-          state.layers[layerId],
+          layer,
           layerType
         ),
       compatibleWithSampling:
-        getSamplingValue(state.layers[layerId]) === 1 ||
+        getSamplingValue(layer) === 1 ||
         (definition.getUnsupportedSettings?.()?.sampling ?? true),
       documentation: definition.quickFunctionDocumentation,
     };
   });
 
   const currentFieldIsInvalid = useMemo(
-    () => fieldIsInvalid(state.layers[layerId], columnId, currentIndexPattern),
+    () => fieldIsInvalid(layer, columnId, currentIndexPattern),
     [state.layers, layerId, columnId, currentIndexPattern]
   );
 
@@ -594,12 +612,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
             // Clear invalid state because we are reseting to a valid column
             if (selectedColumn?.operationType === operationType) {
               if (incompleteInfo) {
-                setStateWrapper(resetIncomplete(state.layers[layerId], columnId));
+                setStateWrapper(resetIncomplete(layer, columnId));
               }
               return;
             }
             const newLayer = insertOrReplaceColumn({
-              layer: props.state.layers[props.layerId],
+              layer: layer,
               indexPattern: currentIndexPattern,
               columnId,
               op: operationType,
@@ -621,17 +639,17 @@ export function DimensionEditor(props: DimensionEditorProps) {
             let newLayer: FormBasedLayer;
             if (possibleFields.size === 1) {
               newLayer = insertOrReplaceColumn({
-                layer: props.state.layers[props.layerId],
+                layer,
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
-                field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
+                field: currentIndexPattern.getFieldByName(possibleFields.values().next().value ?? ''),
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
               });
             } else {
               newLayer = insertOrReplaceColumn({
-                layer: props.state.layers[props.layerId],
+                layer,
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
@@ -654,7 +672,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
           if (selectedColumn.operationType === operationType) {
             if (incompleteInfo) {
-              setStateWrapper(resetIncomplete(state.layers[layerId], columnId));
+              setStateWrapper(resetIncomplete(layer, columnId));
             }
             return;
           }
@@ -664,7 +682,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           }
 
           const newLayer = replaceColumn({
-            layer: props.state.layers[props.layerId],
+            layer,
             indexPattern: currentIndexPattern,
             columnId,
             op: operationType,
@@ -704,7 +722,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     GenericIndexPatternColumn,
     FormBasedLayer | ((prevLayer: FormBasedLayer) => FormBasedLayer) | GenericIndexPatternColumn
   > = {
-    layer: state.layers[layerId],
+    layer: layer,
     layerId,
     activeData: props.activeData,
     paramEditorUpdater: (setter) => {
@@ -714,7 +732,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       setStateWrapper(setter, { forceRender: temporaryQuickFunction });
     },
     columnId,
-    currentColumn: state.layers[layerId].columns[columnId],
+    currentColumn: layer.columns[columnId],
     dateRange,
     indexPattern: currentIndexPattern,
     operationDefinitionMap,
@@ -758,7 +776,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
           {selectedColumn.references.map((referenceId, index) => {
             const validation = selectedOperationDefinition.requiredReferences[index];
             const layer = state.layers[layerId];
-            return (
+            if (!layer || !isFormBasedLayer(layer)) {
+              return null;
+            }
+            return (  
               <ReferenceEditor
                 operationDefinitionMap={operationDefinitionMap}
                 key={index}
@@ -855,7 +876,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
       {shouldDisplayFieldInput ? (
         <FieldInputComponent
-          layer={state.layers[layerId]}
+          layer={layer}
           selectedColumn={selectedColumn as FieldBasedIndexPatternColumn}
           columnId={columnId}
           indexPattern={currentIndexPattern}
@@ -873,7 +894,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           helpMessage={selectedOperationDefinition?.getHelpMessage?.({
             data: props.data,
             uiSettings: props.uiSettings,
-            currentColumn: state.layers[layerId].columns[columnId],
+            currentColumn: layer.columns[columnId],
           })}
           dimensionGroups={dimensionGroups}
           groupId={props.groupId}
@@ -882,7 +903,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       ) : null}
       {!isFullscreen && !incompleteInfo && !hideGrouping && temporaryState === 'none' && (
         <BucketNestingEditor
-          layer={state.layers[props.layerId]}
+          layer={layer}
           columnId={props.columnId}
           setColumns={(columnOrder) => updateLayer({ columnOrder })}
           getFieldByName={currentIndexPattern.getFieldByName}
@@ -902,13 +923,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const customParamEditor = ParamEditor ? (
     <>
       <ParamEditor
-        layer={state.layers[layerId]}
+        layer={layer}
         activeData={props.activeData}
         paramEditorUpdater={
           temporaryStaticValue ? moveDefinitelyToStaticValueAndUpdate : setStateWrapper
         }
         columnId={columnId}
-        currentColumn={state.layers[layerId].columns[columnId]}
+        currentColumn={layer.columns[columnId]}
         operationDefinitionMap={operationDefinitionMap}
         layerId={layerId}
         paramEditorCustomProps={paramEditorCustomProps}
@@ -928,7 +949,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     (newFormat) => {
       updateLayer(
         updateColumnParam({
-          layer: state.layers[layerId],
+          layer: layer,
           columnId,
           paramName: 'format',
           value: newFormat,
@@ -968,7 +989,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           return setTemporaryState(staticValueOperationName);
         }
         setTemporaryState('none');
-        setStateWrapper(addStaticValueColumn());
+        setStateWrapper(addStaticValueColumn() as FormBasedLayer);
         return;
       },
       label: i18n.translate('xpack.lens.indexPattern.staticValueLabel', {
@@ -997,7 +1018,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         setTemporaryState('none');
         if (selectedColumn?.operationType !== formulaOperationName) {
           const newLayer = insertOrReplaceColumn({
-            layer: props.state.layers[props.layerId],
+            layer,
             indexPattern: currentIndexPattern,
             columnId,
             op: formulaOperationName,
@@ -1018,8 +1039,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         selectedColumn &&
           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
             selectedColumn,
-            state.layers[layerId].columns,
-            props.indexPatterns[state.layers[layerId].indexPatternId]
+            layer.columns,
+            props.indexPatterns[layer.indexPatternId]
           )
       ),
     [layerId, selectedColumn, props.indexPatterns, state.layers]
@@ -1103,7 +1124,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 <TimeScaling
                   selectedColumn={selectedColumn}
                   columnId={columnId}
-                  layer={state.layers[layerId]}
+                  layer={layer}
                   updateLayer={updateAdvancedOption}
                 />
               ) : null,
@@ -1115,7 +1136,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   indexPattern={currentIndexPattern}
                   selectedColumn={selectedColumn}
                   columnId={columnId}
-                  layer={state.layers[layerId]}
+                  layer={layer}
                   updateLayer={updateAdvancedOption}
                   helpMessage={getHelpMessage(selectedOperationDefinition.filterable)}
                 />
@@ -1128,7 +1149,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   selectedColumn={selectedColumn}
                   columnId={columnId}
                   indexPattern={currentIndexPattern}
-                  layer={state.layers[layerId]}
+                  layer={layer}
                   updateLayer={updateAdvancedOption}
                   skipLabelUpdate={hasFormula}
                   helpMessage={getHelpMessage(selectedOperationDefinition.canReduceTimeRange)}
@@ -1140,7 +1161,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               inlineElement: Boolean(
                 selectedOperationDefinition.shiftable &&
                   (currentIndexPattern.timeFieldName ||
-                    Object.values(state.layers[layerId].columns).some(
+                    Object.values(layer.columns).some(
                       (col) => col.operationType === 'date_histogram'
                     ))
               ) ? (
@@ -1149,7 +1170,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   indexPattern={currentIndexPattern}
                   selectedColumn={selectedColumn}
                   columnId={columnId}
-                  layer={state.layers[layerId]}
+                  layer={layer}
                   updateLayer={updateAdvancedOption}
                   activeData={props.activeData}
                   layerId={layerId}
@@ -1187,15 +1208,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 onChange={(value) => {
                   updateLayer({
                     columns: {
-                      ...state.layers[layerId].columns,
+                      ...layer.columns,
                       [columnId]: {
                         ...selectedColumn,
                         label: value,
                         customLabel:
                           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
                             selectedColumn,
-                            state.layers[layerId].columns,
-                            props.indexPatterns[state.layers[layerId].indexPatternId]
+                            layer.columns,
+                            props.indexPatterns[layer.indexPatternId]
                           ) !== value,
                       },
                     },

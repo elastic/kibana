@@ -2877,7 +2877,7 @@ describe('terms', () => {
             },
           } as unknown as FramePublicAPI,
           'first'
-        );
+        ) as FormBasedLayer;
         expect(newLayer.columns.col1).toEqual(
           expect.objectContaining({
             operationType: 'filters',

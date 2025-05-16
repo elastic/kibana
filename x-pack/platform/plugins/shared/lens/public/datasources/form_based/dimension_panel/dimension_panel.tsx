@@ -15,7 +15,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../../types';
 import { GenericIndexPatternColumn } from '../form_based';
-import { CombinedFormBasedPrivateState, FormBasedPrivateState, isFormBasedLayer, isTextBasedLayer } from '../types';
+import { CombinedFormBasedPrivateState, FormBasedPrivateState, isFormBasedLayer } from '../types';
 import { DimensionEditor } from './dimension_editor';
 import { DateRange } from '../../../../common/types';
 import { getOperationSupportMatrix } from './operation_support';

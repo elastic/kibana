@@ -17,7 +17,7 @@ import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
 import { FormatSelector, FormatSelectorProps } from '../../dimension_panel/format_selector';
 import type { DatasourceDimensionEditorProps, DataType } from '../../../../types';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
-import type { CombinedFormBasedPrivateState, TextBasedPrivateState } from '../types';
+import type { CombinedFormBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
 import { isTextBasedLayer, TextBasedLayer } from '../types';
 

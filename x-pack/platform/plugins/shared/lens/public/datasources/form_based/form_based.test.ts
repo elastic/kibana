@@ -12,10 +12,13 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import {
   CombinedFormBasedPersistedState,
+  CombinedFormBasedPrivateState,
+  FormBasedLayer,
   FormBasedPersistedState,
   FormBasedPrivateState,
 } from './types';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { Ast } from '@kbn/interpreter';
@@ -201,7 +204,7 @@ const dateRange = {
 describe('IndexPattern Data Source', () => {
   let baseState: FormBasedPrivateState;
   let FormBasedDatasource: Datasource<
-    FormBasedPrivateState,
+    CombinedFormBasedPrivateState,
     CombinedFormBasedPersistedState,
     Query
   >;
@@ -223,6 +226,7 @@ describe('IndexPattern Data Source', () => {
       charts: chartPluginMock.createSetupContract(),
       dataViewFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
+      expressions: expressionsPluginMock.createStartContract(),
     });
 
     baseState = {
@@ -4182,7 +4186,7 @@ describe('IndexPattern Data Source', () => {
       });
 
       expect(
-        (newState.layers.second.columns['new-col'] as TermsIndexPatternColumn).params.orderBy
+        ((newState.layers.second as FormBasedLayer).columns['new-col'] as TermsIndexPatternColumn).params.orderBy
       ).toEqual({
         type: 'column',
         columnId: 'col1SecondLayer',

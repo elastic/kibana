@@ -14,7 +14,7 @@ import type {
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { DatasourceSuggestion } from '../../types';
 import { generateId } from '../../id_generator';
-import type { FormBasedPrivateState } from './types';
+import type { CombinedFormBasedPrivateState, FormBasedLayer, FormBasedPrivateState } from './types';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
@@ -205,7 +205,7 @@ function testInitialState(): FormBasedPrivateState {
 
 // Simplifies the debug output for failed test
 function getSuggestionSubset(
-  suggestions: IndexPatternSuggestion[]
+  suggestions: DatasourceSuggestion<CombinedFormBasedPrivateState>[]
 ): Array<Omit<IndexPatternSuggestion, 'state'>> {
   return suggestions.map((s) => {
     const newSuggestion = { ...s } as Omit<IndexPatternSuggestion, 'state'> & {
@@ -3542,7 +3542,7 @@ describe('IndexPattern Data Source suggestions', () => {
           result.some(
             (suggestion) =>
               suggestion.table.changeType === 'reduced' &&
-              isEqual(suggestion.state.layers.first.columnOrder, ['date', 'ref', 'metric'])
+              isEqual((suggestion.state.layers.first as FormBasedLayer).columnOrder, ['date', 'ref', 'metric'])
           )
         ).toBeTruthy();
 
@@ -3551,7 +3551,7 @@ describe('IndexPattern Data Source suggestions', () => {
           result.some(
             (suggestion) =>
               suggestion.table.changeType === 'reduced' &&
-              isEqual(suggestion.state.layers.first.columnOrder, ['ref', 'metric'])
+              isEqual((suggestion.state.layers.first as FormBasedLayer).columnOrder, ['ref', 'metric'])
           )
         ).toBeTruthy();
 
@@ -3560,7 +3560,7 @@ describe('IndexPattern Data Source suggestions', () => {
           result.some(
             (suggestion) =>
               suggestion.table.changeType === 'reduced' &&
-              isEqual(suggestion.state.layers.first.columnOrder, ['ref2', 'metric2'])
+              isEqual((suggestion.state.layers.first as FormBasedLayer).columnOrder, ['ref2', 'metric2'])
           )
         ).toBeTruthy();
 
@@ -3569,7 +3569,7 @@ describe('IndexPattern Data Source suggestions', () => {
           result.some(
             (suggestion) =>
               suggestion.table.changeType === 'reduced' &&
-              isEqual(suggestion.state.layers.first.columnOrder, [
+              isEqual((suggestion.state.layers.first as FormBasedLayer).columnOrder, [
                 'ref3',
                 'ref4',
                 'metric3',
@@ -3623,7 +3623,7 @@ describe('IndexPattern Data Source suggestions', () => {
         result.some(
           (suggestion) =>
             suggestion.table.changeType === 'reduced' &&
-            isEqual(suggestion.state.layers.first.columnOrder, ['ref'])
+            isEqual((suggestion.state.layers.first as FormBasedLayer).columnOrder, ['ref'])
         )
       ).toBeTruthy();
     });
@@ -3675,7 +3675,7 @@ describe('IndexPattern Data Source suggestions', () => {
 });
 
 function isTableWithBucketColumns(
-  suggestion: DatasourceSuggestion<FormBasedPrivateState>,
+  suggestion: DatasourceSuggestion<CombinedFormBasedPrivateState>,
   columnIds: string[],
   numBuckets: number
 ) {
@@ -3686,7 +3686,7 @@ function isTableWithBucketColumns(
 }
 
 function isTableWithMetricColumns(
-  suggestion: DatasourceSuggestion<FormBasedPrivateState>,
+  suggestion: DatasourceSuggestion<CombinedFormBasedPrivateState>,
   columnIds: string[]
 ) {
   expect(suggestion.table.isMultiRow).toEqual(false);

@@ -40,7 +40,6 @@ import {
   type CombinedFormBasedPersistedState,
   type CombinedFormBasedPrivateState,
   type FormBasedLayer,
-  type FormBasedPrivateState,
   type TextBasedLayer,
 } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';

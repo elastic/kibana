@@ -18,6 +18,7 @@ import type { IndexPattern } from '../../../../types';
 import { getFormatFromPreviousColumn, isValidNumber } from './helpers';
 import { getColumnOrder } from '../layer_helpers';
 import { STATIC_VALUE_NOT_VALID_NUMBER } from '../../../../user_messages_ids';
+import { isFormBasedLayer } from '../../types';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.staticValueLabelDefault', {
   defaultMessage: 'Static value',
@@ -140,10 +141,17 @@ export const staticValueOperation: OperationDefinition<
     return true;
   },
   createCopy(layers, source, target) {
-    const currentColumn = layers[source.layerId].columns[
+    const layer = layers[source.layerId];
+    if (!layer || !isFormBasedLayer(layer)) {
+      return layers;
+    }
+    const currentColumn = layer.columns[
       source.columnId
     ] as StaticValueIndexPatternColumn;
     const targetLayer = layers[target.layerId];
+    if (!targetLayer || !isFormBasedLayer(targetLayer)) {
+      return layers;
+    }
     const columns = {
       ...targetLayer.columns,
       [target.columnId]: { ...currentColumn },

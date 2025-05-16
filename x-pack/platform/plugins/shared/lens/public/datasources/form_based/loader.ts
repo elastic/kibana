@@ -20,7 +20,6 @@ import {
 import type { VisualizeEditorContext } from '../../types';
 import {
   FormBasedPersistedState,
-  FormBasedPrivateState,
   FormBasedLayer,
   CombinedFormBasedPersistedState,
   isPersistedFormBasedLayer,

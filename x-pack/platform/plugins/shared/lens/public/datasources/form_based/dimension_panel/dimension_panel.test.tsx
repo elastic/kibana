@@ -30,7 +30,7 @@ import { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kb
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { generateId } from '../../../id_generator';
-import { FormBasedPrivateState } from '../types';
+import { FormBasedLayer, FormBasedPrivateState } from '../types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import {
   FiltersIndexPatternColumn,
@@ -978,7 +978,7 @@ describe('FormBasedDimensionEditor', () => {
 
     it('should keep current state and write incomplete column when transitioning from incomplete reference-based operations to field operation', () => {
       const baseState = getStateWithColumns({
-        ...defaultProps.state.layers.first.columns,
+        ...(defaultProps.state.layers.first as FormBasedLayer).columns,
         col2: {
           label: 'Counter rate',
           dataType: 'number',
@@ -1804,10 +1804,10 @@ describe('FormBasedDimensionEditor', () => {
           ...defaultProps.state,
           layers: {
             first: {
-              ...defaultProps.state.layers.first,
+              ...(defaultProps.state.layers.first as FormBasedLayer),
               columns: {
                 col1: {
-                  ...defaultProps.state.layers.first.columns.col1,
+                  ...(defaultProps.state.layers.first as FormBasedLayer).columns.col1,
                   sourceField: 'nonexistent',
                 } as DateHistogramIndexPatternColumn,
               },

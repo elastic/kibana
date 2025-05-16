@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RandomSamplingSlider } from '@kbn/random-sampling';
 import type { DatasourceLayerSettingsProps } from '../../types';
-import { isFormBasedLayer, type CombinedFormBasedPrivateState, type FormBasedPrivateState } from './types';
+import { isFormBasedLayer, type CombinedFormBasedPrivateState } from './types';
 import { isSamplingValueEnabled } from './utils';
 import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';

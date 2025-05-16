@@ -28,7 +28,7 @@ import { convertToAbsoluteDateRange } from '../../utils';
 import type { DateRange } from '../../../common/types';
 import { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
-import { FormBasedPrivateState, FormBasedLayer, CombinedFormBasedPrivateState, isFormBasedLayer, isTextBasedLayer } from './types';
+import { FormBasedLayer, CombinedFormBasedPrivateState, isFormBasedLayer, isTextBasedLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
 import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';

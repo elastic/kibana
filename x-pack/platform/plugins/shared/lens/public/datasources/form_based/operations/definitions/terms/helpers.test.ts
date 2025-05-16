@@ -22,6 +22,7 @@ import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
 import { MovingAverageIndexPatternColumn } from '../calculations';
+import { FormBasedLayer } from '../../../types';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -253,7 +254,7 @@ describe('getDisallowedTermsMessage()', () => {
         },
       } as unknown as FramePublicAPI,
       'first'
-    );
+    ) as FormBasedLayer;
 
     expect(newLayer.columns.col1).toEqual(
       expect.objectContaining({
@@ -307,7 +308,7 @@ describe('getDisallowedTermsMessage()', () => {
         },
       } as unknown as FramePublicAPI,
       'first'
-    );
+    ) as FormBasedLayer;
 
     expect(newLayer.columns.col1).toEqual(
       expect.objectContaining({
@@ -343,7 +344,7 @@ describe('getDisallowedTermsMessage()', () => {
         },
       } as unknown as FramePublicAPI,
       'first'
-    );
+    ) as FormBasedLayer;
 
     expect(newLayer.columns.col1).toEqual(
       expect.objectContaining({
@@ -393,7 +394,7 @@ describe('getDisallowedTermsMessage()', () => {
         },
       } as unknown as FramePublicAPI,
       'first'
-    );
+    ) as FormBasedLayer;
 
     expect(newLayer.columns.col1).toEqual(
       expect.objectContaining({
