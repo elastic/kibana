@@ -69,7 +69,7 @@ export function extractReferences({ layers }: CombinedFormBasedPrivateState) {
         name: getLayerReferenceName(layerId),
       });
     } else {
-      console.error("`Layer ${layerId} is not a persisted form-based layer`);")
+      console.error('`Layer ${layerId} is not a persisted form-based layer`);');
       debugger;
     }
   });

@@ -221,7 +221,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       setter:
         | FormBasedLayer
         | ((prevLayer: FormBasedLayer) => FormBasedLayer)
-        | GenericIndexPatternColumn, 
+        | GenericIndexPatternColumn,
       options: { forceRender?: boolean } = {}
     ) => {
       const layer = state.layers[layerId];
@@ -411,7 +411,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     return {
       operationType,
       compatibleWithCurrentField: canTransition({
-        layer: layer,
+        layer,
         columnId,
         op: operationType,
         indexPattern: currentIndexPattern,
@@ -428,8 +428,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           layerType
         ),
       compatibleWithSampling:
-        getSamplingValue(layer) === 1 ||
-        (definition.getUnsupportedSettings?.()?.sampling ?? true),
+        getSamplingValue(layer) === 1 || (definition.getUnsupportedSettings?.()?.sampling ?? true),
       documentation: definition.quickFunctionDocumentation,
     };
   });
@@ -617,7 +616,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               return;
             }
             const newLayer = insertOrReplaceColumn({
-              layer: layer,
+              layer,
               indexPattern: currentIndexPattern,
               columnId,
               op: operationType,
@@ -643,7 +642,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: operationType,
-                field: currentIndexPattern.getFieldByName(possibleFields.values().next().value ?? ''),
+                field: currentIndexPattern.getFieldByName(
+                  possibleFields.values().next().value ?? ''
+                ),
                 visualizationGroups: dimensionGroups,
                 targetGroup: props.groupId,
               });
@@ -722,7 +723,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     GenericIndexPatternColumn,
     FormBasedLayer | ((prevLayer: FormBasedLayer) => FormBasedLayer) | GenericIndexPatternColumn
   > = {
-    layer: layer,
+    layer,
     layerId,
     activeData: props.activeData,
     paramEditorUpdater: (setter) => {
@@ -779,7 +780,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             if (!layer || !isFormBasedLayer(layer)) {
               return null;
             }
-            return (  
+            return (
               <ReferenceEditor
                 operationDefinitionMap={operationDefinitionMap}
                 key={index}
@@ -949,7 +950,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     (newFormat) => {
       updateLayer(
         updateColumnParam({
-          layer: layer,
+          layer,
           columnId,
           paramName: 'format',
           value: newFormat,

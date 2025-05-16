@@ -15,7 +15,8 @@ import { ChangeIndexPattern } from '../../shared_components/dataview_picker/data
 import { getSamplingValue } from './utils';
 import { getIgnoreGlobalFilterIcon } from '../../shared_components/ignore_global_filter';
 
-export interface FormBasedLayerPanelProps extends DatasourceLayerPanelProps<CombinedFormBasedPrivateState> {
+export interface FormBasedLayerPanelProps
+  extends DatasourceLayerPanelProps<CombinedFormBasedPrivateState> {
   state: CombinedFormBasedPrivateState;
   onChangeIndexPattern: (newId: string) => void;
 }
@@ -31,7 +32,7 @@ export function LayerPanel({
   if (!layer || !isFormBasedLayer(layer)) {
     return null;
   }
-  
+
   const { euiTheme } = useEuiTheme();
 
   const indexPattern = dataViews.indexPatterns[layer.indexPatternId];

@@ -145,9 +145,7 @@ export const staticValueOperation: OperationDefinition<
     if (!layer || !isFormBasedLayer(layer)) {
       return layers;
     }
-    const currentColumn = layer.columns[
-      source.columnId
-    ] as StaticValueIndexPatternColumn;
+    const currentColumn = layer.columns[source.columnId] as StaticValueIndexPatternColumn;
     const targetLayer = layers[target.layerId];
     if (!targetLayer || !isFormBasedLayer(targetLayer)) {
       return layers;

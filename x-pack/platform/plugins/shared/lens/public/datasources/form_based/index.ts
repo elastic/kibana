@@ -42,11 +42,7 @@ export interface FormBasedDatasourceStartPlugins {
 export class FormBasedDatasource {
   setup(
     core: CoreSetup<FormBasedDatasourceStartPlugins>,
-    {
-      fieldFormats: fieldFormatsSetup,
-      editorFrame,
-      charts,
-    }: FormBasedDatasourceSetupPlugins
+    { fieldFormats: fieldFormatsSetup, editorFrame, charts }: FormBasedDatasourceSetupPlugins
   ) {
     editorFrame.registerDatasource(async () => {
       const { getFormBasedDatasource, getSuffixFormatter, suffixFormatterId } = await import(
@@ -64,7 +60,16 @@ export class FormBasedDatasource {
 
       const [
         coreStart,
-        { dataViewFieldEditor, uiActions, data, fieldFormats, dataViews, unifiedSearch, share, expressions },
+        {
+          dataViewFieldEditor,
+          uiActions,
+          data,
+          fieldFormats,
+          dataViews,
+          unifiedSearch,
+          share,
+          expressions,
+        },
       ] = await core.getStartServices();
 
       return getFormBasedDatasource({

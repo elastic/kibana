@@ -107,10 +107,13 @@ export function LayerSettingsPanel({
         >
           <RandomSamplingSlider
             disabled={isSamplingValueDisabled}
-            disabledReason={i18n.translate('xpack.lens.indexPattern.randomSampling.disabledMessage', {
-              defaultMessage:
-                'In order to select a reduced sampling percentage, you must remove any maximum or minimum functions applied on this layer.',
-            })}
+            disabledReason={i18n.translate(
+              'xpack.lens.indexPattern.randomSampling.disabledMessage',
+              {
+                defaultMessage:
+                  'In order to select a reduced sampling percentage, you must remove any maximum or minimum functions applied on this layer.',
+              }
+            )}
             values={samplingValues}
             currentValue={currentValue}
             data-test-subj="lns-indexPattern-random-sampling-slider"

@@ -242,7 +242,7 @@ describe('getDisallowedTermsMessage()', () => {
       'col1',
       indexPattern
     )[0]!.fixAction!.newState;
-    const newLayer = await fixAction(
+    const newLayer = (await fixAction(
       dataMock,
       coreMock,
       {
@@ -254,7 +254,7 @@ describe('getDisallowedTermsMessage()', () => {
         },
       } as unknown as FramePublicAPI,
       'first'
-    ) as FormBasedLayer;
+    )) as FormBasedLayer;
 
     expect(newLayer.columns.col1).toEqual(
       expect.objectContaining({
@@ -290,7 +290,7 @@ describe('getDisallowedTermsMessage()', () => {
       'col1',
       indexPattern
     )[0]!.fixAction!.newState;
-    const newLayer = await fixAction(
+    const newLayer = (await fixAction(
       dataMock,
       coreMock,
       {
@@ -308,7 +308,7 @@ describe('getDisallowedTermsMessage()', () => {
         },
       } as unknown as FramePublicAPI,
       'first'
-    ) as FormBasedLayer;
+    )) as FormBasedLayer;
 
     expect(newLayer.columns.col1).toEqual(
       expect.objectContaining({
@@ -332,7 +332,7 @@ describe('getDisallowedTermsMessage()', () => {
       'col1',
       indexPattern
     )[0]!.fixAction!.newState;
-    const newLayer = await fixAction(
+    const newLayer = (await fixAction(
       dataMock,
       coreMock,
       {
@@ -344,7 +344,7 @@ describe('getDisallowedTermsMessage()', () => {
         },
       } as unknown as FramePublicAPI,
       'first'
-    ) as FormBasedLayer;
+    )) as FormBasedLayer;
 
     expect(newLayer.columns.col1).toEqual(
       expect.objectContaining({
@@ -373,7 +373,7 @@ describe('getDisallowedTermsMessage()', () => {
       'col1',
       indexPattern
     )[0]!.fixAction!.newState;
-    const newLayer = await fixAction(
+    const newLayer = (await fixAction(
       dataMock,
       coreMock,
       {
@@ -394,7 +394,7 @@ describe('getDisallowedTermsMessage()', () => {
         },
       } as unknown as FramePublicAPI,
       'first'
-    ) as FormBasedLayer;
+    )) as FormBasedLayer;
 
     expect(newLayer.columns.col1).toEqual(
       expect.objectContaining({

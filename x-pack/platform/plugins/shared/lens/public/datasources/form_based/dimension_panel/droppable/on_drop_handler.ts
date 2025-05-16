@@ -29,7 +29,12 @@ import {
 } from '../../operations';
 import { mergeLayer, mergeLayers } from '../../state_helpers';
 import { getNewOperation, getField } from './get_drop_props';
-import { FormBasedPrivateState, DataViewDragDropOperation, isFormBasedLayer, FormBasedLayer } from '../../types';
+import {
+  FormBasedPrivateState,
+  DataViewDragDropOperation,
+  isFormBasedLayer,
+  FormBasedLayer,
+} from '../../types';
 import { removeColumn } from '../../form_based';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {
@@ -341,7 +346,12 @@ function onSwapIncompatible({
 }: DropHandlerProps<DragDropOperation>) {
   const targetLayer = state.layers[target.layerId];
   const sourceLayer = state.layers[source.layerId];
-  if (!targetLayer || !isFormBasedLayer(targetLayer) || !sourceLayer || !isFormBasedLayer(sourceLayer)) {
+  if (
+    !targetLayer ||
+    !isFormBasedLayer(targetLayer) ||
+    !sourceLayer ||
+    !isFormBasedLayer(sourceLayer)
+  ) {
     return;
   }
   const indexPattern = indexPatterns[targetLayer.indexPatternId];

@@ -99,7 +99,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const updateLayer = useCallback(
     (newLayer: Partial<TextBasedLayer>) => {
       return setState((prevState) => {
-        return mergeLayer({ state: prevState, layerId, newLayer })
+        return mergeLayer({ state: prevState, layerId, newLayer });
       });
     },
     [layerId, setState]
@@ -118,7 +118,6 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     [columnId, layerId, state.layers, updateLayer]
   );
 
-  
   return (
     <>
       <EuiFormRow

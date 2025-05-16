@@ -55,8 +55,7 @@ export const FormBasedDimensionEditorComponent = function FormBasedDimensionPane
   }
   const operationSupportMatrix = getOperationSupportMatrix(props);
 
-  const selectedColumn: GenericIndexPatternColumn | null =
-    layer.columns[props.columnId] || null;
+  const selectedColumn: GenericIndexPatternColumn | null = layer.columns[props.columnId] || null;
   return (
     <DimensionEditor
       {...props}

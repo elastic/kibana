@@ -236,9 +236,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       if (!layer || !isFormBasedLayer(layer)) {
         return layers;
       }
-      const currentColumn = layer.columns[
-        source.columnId
-      ] as FormulaIndexPatternColumn;
+      const currentColumn = layer.columns[source.columnId] as FormulaIndexPatternColumn;
       const targetLayer = layers[target.layerId];
       if (!targetLayer || !isFormBasedLayer(targetLayer)) {
         return layers;

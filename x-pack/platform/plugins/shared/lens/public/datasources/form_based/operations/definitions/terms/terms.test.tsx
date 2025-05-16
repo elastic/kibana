@@ -2865,7 +2865,7 @@ describe('terms', () => {
           typeof errorMessage === 'object' ? errorMessage.fixAction!.newState : undefined
         )!;
         const dataMock = dataPluginMock.createStartContract();
-        const newLayer = await fixAction(
+        const newLayer = (await fixAction(
           dataMock,
           corePluginMock.createStart(),
           {
@@ -2877,7 +2877,7 @@ describe('terms', () => {
             },
           } as unknown as FramePublicAPI,
           'first'
-        ) as FormBasedLayer;
+        )) as FormBasedLayer;
         expect(newLayer.columns.col1).toEqual(
           expect.objectContaining({
             operationType: 'filters',

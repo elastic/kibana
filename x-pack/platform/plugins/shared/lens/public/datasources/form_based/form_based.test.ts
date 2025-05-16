@@ -4186,7 +4186,8 @@ describe('IndexPattern Data Source', () => {
       });
 
       expect(
-        ((newState.layers.second as FormBasedLayer).columns['new-col'] as TermsIndexPatternColumn).params.orderBy
+        ((newState.layers.second as FormBasedLayer).columns['new-col'] as TermsIndexPatternColumn)
+          .params.orderBy
       ).toEqual({
         type: 'column',
         columnId: 'col1SecondLayer',

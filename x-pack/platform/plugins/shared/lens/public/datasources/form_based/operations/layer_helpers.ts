@@ -30,7 +30,13 @@ import {
   type TermsIndexPatternColumn,
   type FieldBasedOperationErrorMessage,
 } from './definitions';
-import { type CombinedFormBasedPrivateState, isFormBasedLayer, type DataViewDragDropOperation, type FormBasedLayer, type TextBasedLayer } from '../types';
+import {
+  type CombinedFormBasedPrivateState,
+  isFormBasedLayer,
+  type DataViewDragDropOperation,
+  type FormBasedLayer,
+  type TextBasedLayer,
+} from '../types';
 import { getSortScoreByPriorityForField } from './operations';
 import { generateId } from '../../../id_generator';
 import {
@@ -77,7 +83,11 @@ interface ColumnCopy {
   shouldDeleteSource?: boolean;
 }
 
-export function copyColumn({ layers, source, target }: ColumnCopy): Record<string, FormBasedLayer | TextBasedLayer> {
+export function copyColumn({
+  layers,
+  source,
+  target,
+}: ColumnCopy): Record<string, FormBasedLayer | TextBasedLayer> {
   return createCopiedColumn(layers, target, source);
 }
 
@@ -357,7 +367,7 @@ export function insertNewColumn({
 
   const baseOptions = {
     indexPattern,
-    previousColumn: { ...incompleteParams, ...initialParams, ...layer.columns[columnId] as any },
+    previousColumn: { ...incompleteParams, ...initialParams, ...(layer.columns[columnId] as any) },
   };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {
@@ -1465,7 +1475,6 @@ export function deleteColumn({
     },
     indexPattern
   );
-  
 }
 
 // Column order mostly affects the visual order in the UI. It is derived

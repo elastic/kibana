@@ -12,10 +12,11 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DatasourceDimensionTriggerProps } from '../../../../types';
 import type { CombinedFormBasedPrivateState } from '../types';
 
-export type TextBasedDimensionTrigger = DatasourceDimensionTriggerProps<CombinedFormBasedPrivateState> & {
-  columnLabelMap: Record<string, string>;
-  expressions: ExpressionsStart;
-};
+export type TextBasedDimensionTrigger =
+  DatasourceDimensionTriggerProps<CombinedFormBasedPrivateState> & {
+    columnLabelMap: Record<string, string>;
+    expressions: ExpressionsStart;
+  };
 
 export function TextBasedDimensionTrigger(props: TextBasedDimensionTrigger) {
   const customLabel: string | undefined = props.columnLabelMap[props.columnId];

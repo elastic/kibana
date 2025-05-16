@@ -11,6 +11,7 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
+import { DataType, IndexPatternMap, OperationMetadata, UserMessage } from '../../../types';
 import { ValueFormatConfig } from '../operations/definitions/column_types';
 import { generateId } from '../../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
@@ -24,7 +25,6 @@ import {
 } from './types';
 import type { DataViewsState } from '../../../state_management';
 import { addColumnsToCache } from './fieldlist_cache';
-import { DataType, IndexPatternMap, OperationMetadata, UserMessage } from '@kbn/lens-plugin/public/types';
 import { TEXT_BASED_LANGUAGE_ERROR } from '../../../user_messages_ids';
 
 export const MAX_NUM_OF_COLUMNS = 5;
@@ -180,7 +180,7 @@ export function mergeLayer({
   state: CombinedFormBasedPrivateState;
   layerId: string;
   newLayer: Partial<TextBasedLayer>;
-}) : CombinedFormBasedPrivateState {
+}): CombinedFormBasedPrivateState {
   const layer = state.layers[layerId];
   if (layer && isTextBasedLayer(layer)) {
     return {
@@ -190,7 +190,7 @@ export function mergeLayer({
         [layerId]: { ...state.layers[layerId], ...newLayer } as TextBasedLayer,
       },
     };
-  } else { 
+  } else {
     return state;
   }
 }

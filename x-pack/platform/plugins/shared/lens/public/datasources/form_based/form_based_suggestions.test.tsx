@@ -205,7 +205,7 @@ function testInitialState(): FormBasedPrivateState {
 
 // Simplifies the debug output for failed test
 function getSuggestionSubset(
-  suggestions: DatasourceSuggestion<CombinedFormBasedPrivateState>[]
+  suggestions: Array<DatasourceSuggestion<CombinedFormBasedPrivateState>>
 ): Array<Omit<IndexPatternSuggestion, 'state'>> {
   return suggestions.map((s) => {
     const newSuggestion = { ...s } as Omit<IndexPatternSuggestion, 'state'> & {
@@ -3542,7 +3542,11 @@ describe('IndexPattern Data Source suggestions', () => {
           result.some(
             (suggestion) =>
               suggestion.table.changeType === 'reduced' &&
-              isEqual((suggestion.state.layers.first as FormBasedLayer).columnOrder, ['date', 'ref', 'metric'])
+              isEqual((suggestion.state.layers.first as FormBasedLayer).columnOrder, [
+                'date',
+                'ref',
+                'metric',
+              ])
           )
         ).toBeTruthy();
 
@@ -3551,7 +3555,10 @@ describe('IndexPattern Data Source suggestions', () => {
           result.some(
             (suggestion) =>
               suggestion.table.changeType === 'reduced' &&
-              isEqual((suggestion.state.layers.first as FormBasedLayer).columnOrder, ['ref', 'metric'])
+              isEqual((suggestion.state.layers.first as FormBasedLayer).columnOrder, [
+                'ref',
+                'metric',
+              ])
           )
         ).toBeTruthy();
 
@@ -3560,7 +3567,10 @@ describe('IndexPattern Data Source suggestions', () => {
           result.some(
             (suggestion) =>
               suggestion.table.changeType === 'reduced' &&
-              isEqual((suggestion.state.layers.first as FormBasedLayer).columnOrder, ['ref2', 'metric2'])
+              isEqual((suggestion.state.layers.first as FormBasedLayer).columnOrder, [
+                'ref2',
+                'metric2',
+              ])
           )
         ).toBeTruthy();
 

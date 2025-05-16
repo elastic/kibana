@@ -23,7 +23,11 @@ import { hasField } from '../../pure_utils';
 import { OperationMetadata, DraggedField } from '../../../../types';
 import { getOperationTypesForField } from '../../operations';
 import { GenericIndexPatternColumn } from '../../form_based';
-import { CombinedFormBasedPrivateState, DataViewDragDropOperation, isFormBasedLayer } from '../../types';
+import {
+  CombinedFormBasedPrivateState,
+  DataViewDragDropOperation,
+  isFormBasedLayer,
+} from '../../types';
 
 interface GetDropPropsArgs {
   state: CombinedFormBasedPrivateState;

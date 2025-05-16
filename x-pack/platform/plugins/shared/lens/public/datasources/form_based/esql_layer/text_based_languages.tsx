@@ -511,9 +511,16 @@ export function getTextBasedDatasource({
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
       const { state, setState, ...rest } = props;
-      return <TextBasedDimensionEditor {...rest} state={{ ...state, currentIndexPatternId: '' }} setState={(state) => {
-        setState(state as TextBasedPrivateState);
-      }} expressions={expressions} />;
+      return (
+        <TextBasedDimensionEditor
+          {...rest}
+          state={{ ...state, currentIndexPatternId: '' }}
+          setState={(state) => {
+            setState(state as TextBasedPrivateState);
+          }}
+          expressions={expressions}
+        />
+      );
     },
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {

@@ -106,7 +106,10 @@ export function FormBasedDataPanel({
   const activeIndexPatterns = useMemo(() => {
     return uniq(
       (
-        usedIndexPatterns ?? Object.values(state.layers).filter((layer) => isFormBasedLayer(layer) && layer.indexPatternId).map(({ indexPatternId }) => indexPatternId)
+        usedIndexPatterns ??
+        Object.values(state.layers)
+          .filter((layer) => isFormBasedLayer(layer) && layer.indexPatternId)
+          .map(({ indexPatternId }) => indexPatternId)
       ).concat(currentIndexPatternId)
     )
       .filter((id) => id && !!indexPatterns[id])
