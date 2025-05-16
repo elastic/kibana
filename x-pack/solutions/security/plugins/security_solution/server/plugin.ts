@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
@@ -581,10 +581,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
   }
 
-  public async start(
+  public start(
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
-  ): Promise<SecuritySolutionPluginStart> {
+  ): SecuritySolutionPluginStart {
     const { config, logger, productFeaturesService } = this;
 
     this.ruleMonitoringService.start(core, plugins);
@@ -798,7 +798,16 @@ export class Plugin implements ISecuritySolutionPlugin {
         receiver: this.telemetryReceiver,
       };
 
-      await this.healthDiagnosticService.start(serviceStart);
+      this.healthDiagnosticService
+        .start(serviceStart)
+        .catch((e) => {
+          this.logger.warn('Error starting health diagnostic task', {
+            error: e.message,
+          } as LogMeta);
+        })
+        .then(() => {
+          this.logger.info('Health diagnostic service started');
+        });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
