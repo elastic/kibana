@@ -37,6 +37,12 @@ export const useDragHandleApi = ({
 
   const setDragHandles = useCallback(
     (dragHandles: Array<HTMLElement | null>) => {
+      /**
+       * if new `startDrag` reference (which happens when, for example, panels change sections),
+       * then clean up the old event listeners
+       */
+      removeEventListenersRef.current?.();
+
       for (const handle of dragHandles) {
         if (handle === null) return;
         handle.addEventListener('mousedown', startDrag, { passive: true });
