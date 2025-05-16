@@ -37,7 +37,7 @@ import { newTelemetryLogger } from '../helpers';
 
 const TASK_TYPE = 'security:health-diagnostic';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
-const INTERVAL = '1m';
+const INTERVAL = '60m';
 const TIMEOUT = '5m';
 const QUERY_ARTIFACT_ID = 'health-diagnostic-query';
 
@@ -81,12 +81,10 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient);
     this.analytics = start.analytics;
 
+    // TODO: remove before merging!
+    // 'https://bankc-artifacts.sde.elastic.dev/2114cf77-3ad0-4a50-b8e2-4d12caae73d9'
     await Promise.all([
-      this.artifactService.start(
-        start.receiver,
-        // TODO: remove before merging!
-        'https://bankc-artifacts.sde.elastic.dev/2114cf77-3ad0-4a50-b8e2-4d12caae73d9'
-      ),
+      this.artifactService.start(start.receiver),
       this.scheduleTask(start.taskManager),
     ]);
   }
