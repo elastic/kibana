@@ -980,7 +980,7 @@ export function getFormBasedDatasource({
           return null;
         },
         getSourceId: () => {
-          return layer.indexPatternId || layer.index;
+          return layer.indexPatternId;
         },
         getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) => {
           if (!layer || !isFormBasedLayer(layer)) {

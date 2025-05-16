@@ -465,7 +465,7 @@ export function getTextBasedDatasource({
     removeColumn,
 
     toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) => {
-      return toExpression(state, layerId);
+      return toExpression({ ...state, currentIndexPatternId: '' }, layerId);
     },
     getSelectedFields(state) {
       return getSelectedFieldsFromColumns(
@@ -488,9 +488,11 @@ export function getTextBasedDatasource({
 
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
+      const { state, ...rest } = props;
       return (
         <TextBasedDimensionTrigger
-          {...props}
+          {...rest}
+          state={{ ...state, currentIndexPatternId: '' }}
           expressions={expressions}
           columnLabelMap={columnLabelMap}
         />
@@ -508,7 +510,10 @@ export function getTextBasedDatasource({
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
-      return <TextBasedDimensionEditor {...props} expressions={expressions} />;
+      const { state, setState, ...rest } = props;
+      return <TextBasedDimensionEditor {...rest} state={{ ...state, currentIndexPatternId: '' }} setState={(state) => {
+        setState(state as TextBasedPrivateState);
+      }} expressions={expressions} />;
     },
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {

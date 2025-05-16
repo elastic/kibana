@@ -143,7 +143,7 @@ export type TextBasedPrivateState = TextBasedPersistedState & {
 export interface CombinedFormBasedPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, FormBasedLayer | TextBasedLayer>;
-  indexPatternRefs: IndexPatternRef[];
+  indexPatternRefs?: IndexPatternRef[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
 }
 

@@ -57,18 +57,6 @@ export const createLensEmbeddableFactory = (
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       const titleManager = initializeTitleManager(initialState);
 
-      if (initialState.attributes?.state?.datasourceStates?.textBased) {
-        const datasourceStates = initialState.attributes.state.datasourceStates;
-        const textBasedState = datasourceStates.textBased as any;
-        if (textBasedState?.layers && Object.keys(textBasedState.layers).length > 0) {
-          datasourceStates.formBased = datasourceStates.textBased;
-          Object.values((datasourceStates.formBased as any).layers).forEach((layer: any) => {
-            layer.type = 'esql';
-          });
-        }
-        delete datasourceStates.textBased;
-      }
-
       /**
        * Observables and functions declared here are used internally to store mutating state values
        * This is an internal API not exposed outside of the embeddable.

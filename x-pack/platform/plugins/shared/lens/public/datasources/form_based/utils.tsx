@@ -642,8 +642,8 @@ export function getNotifiableFeatures(
   const features: UserMessage[] = [];
   const layers = Object.entries(state.layers);
   const layersWithCustomSamplingValues = layers.filter(
-    ([, layer]) => getSamplingValue(layer) !== 1
-  );
+    ([, layer]) => isFormBasedLayer(layer) && getSamplingValue(layer) !== 1
+  ) as [string, FormBasedLayer][];
   if (layersWithCustomSamplingValues.length) {
     features.push({
       uniqueId: LAYER_SETTINGS_RANDOM_SAMPLING_INFO,
@@ -662,7 +662,7 @@ export function getNotifiableFeatures(
       displayLocations: [{ id: 'embeddableBadge' }],
     });
   }
-  const layersWithIgnoreGlobalFilters = layers.filter(([, layer]) => layer.ignoreGlobalFilters);
+  const layersWithIgnoreGlobalFilters = layers.filter(([, layer]) => isFormBasedLayer(layer) && layer.ignoreGlobalFilters) as [string, FormBasedLayer][];
   if (layersWithIgnoreGlobalFilters.length) {
     features.push({
       uniqueId: LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,

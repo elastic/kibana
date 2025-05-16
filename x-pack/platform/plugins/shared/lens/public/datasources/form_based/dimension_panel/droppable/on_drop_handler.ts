@@ -29,7 +29,7 @@ import {
 } from '../../operations';
 import { mergeLayer, mergeLayers } from '../../state_helpers';
 import { getNewOperation, getField } from './get_drop_props';
-import { FormBasedPrivateState, DataViewDragDropOperation, isFormBasedLayer } from '../../types';
+import { FormBasedPrivateState, DataViewDragDropOperation, isFormBasedLayer, FormBasedLayer } from '../../types';
 import { removeColumn } from '../../form_based';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {
@@ -45,7 +45,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<FormBasedPriva
   const { target, source, dropType, state, indexPatterns } = props;
 
   const layer = state.layers[target.layerId];
-  const sourceLayer = state.layers[source.layerId];
+  const sourceLayer = state.layers[source.layerId as string];
   if (!layer || !isFormBasedLayer(layer)) {
     return;
   }
@@ -205,7 +205,7 @@ function onMoveCompatible(
     layers: state.layers,
     target,
     source,
-  });
+  }) as Record<string, FormBasedLayer>;
 
   const updatedColumnOrder = reorderByGroups(
     targetLayerDimensionGroups,

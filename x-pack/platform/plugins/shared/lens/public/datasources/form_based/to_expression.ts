@@ -575,7 +575,7 @@ export function toExpression(
       forceDSL
     );
   } else if (layer && isTextBasedLayer(layer)) {
-    return getESQLExpression(layer, layerId, state.indexPatternRefs);
+    return getESQLExpression(layer, layerId, state.indexPatternRefs ?? []);
   }
 
   return null;

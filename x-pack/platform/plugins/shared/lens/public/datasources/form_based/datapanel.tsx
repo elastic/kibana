@@ -109,9 +109,9 @@ export function FormBasedDataPanel({
         usedIndexPatterns ?? Object.values(state.layers).filter((layer) => isFormBasedLayer(layer) && layer.indexPatternId).map(({ indexPatternId }) => indexPatternId)
       ).concat(currentIndexPatternId)
     )
-      .filter((id) => !!indexPatterns[id])
+      .filter((id) => id && !!indexPatterns[id])
       .sort()
-      .map((id) => indexPatterns[id]);
+      .map((id) => indexPatterns[id!]);
   }, [usedIndexPatterns, indexPatterns, state.layers, currentIndexPatternId]);
 
   return (
