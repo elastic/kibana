@@ -170,7 +170,12 @@ const sortFields = (fields: FieldCapsResponse['fields']): FieldCapsResponse['fie
 
   return Object.fromEntries(entries);
 };
-
+const isFieldsInMappings = (mappingProperties: MappingProperty) => {
+  return 'fields' in mappingProperties ? mappingProperties.fields : undefined;
+};
+const isPropertiesInMappings = (mappingProperties: MappingProperty) => {
+  return 'properties' in mappingProperties ? mappingProperties.properties : undefined;
+};
 const createSemanticTextFieldsList = (
   mappingProperties: Record<string, MappingProperty>,
   semanticFieldsList: SemanticField[] = [],
@@ -189,16 +194,18 @@ const createSemanticTextFieldsList = (
       semanticFieldsList.push(semanticField);
       return semanticFieldsList;
     } else {
+      // to handle object and multi-field type mappings
       let fieldsOrProperties: Record<string, MappingProperty> = {};
 
-      if ('fields' in mappingProperties[field]) {
-        fieldsOrProperties = (mappingProperties[field] as unknown as any).fields;
+      const fieldsInMappings = isFieldsInMappings(mappingProperties[field]);
+      if (fieldsInMappings !== undefined) {
+        fieldsOrProperties = fieldsInMappings;
       }
-      if ('properties' in mappingProperties[field]) {
-        fieldsOrProperties = (mappingProperties[field] as unknown as any).properties;
+      const propertiesInMappings = isPropertiesInMappings(mappingProperties[field]);
+      if (propertiesInMappings !== undefined) {
+        fieldsOrProperties = propertiesInMappings;
       }
 
-      // handle object and multi field type mappings
       createSemanticTextFieldsList(fieldsOrProperties, semanticFieldsList, field);
     }
   });
