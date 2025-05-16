@@ -119,7 +119,8 @@
     "@kbn/controls-plugin",
     "@kbn/core-http-browser",
     "@kbn/object-utils",
-    "@kbn/task-manager-plugin"
+    "@kbn/task-manager-plugin",
+    "@kbn/core-saved-objects-server"
   ],
   "exclude": ["target/**/*"]
 }
