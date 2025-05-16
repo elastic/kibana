@@ -798,16 +798,11 @@ export class Plugin implements ISecuritySolutionPlugin {
         receiver: this.telemetryReceiver,
       };
 
-      this.healthDiagnosticService
-        .start(serviceStart)
-        .catch((e) => {
-          this.logger.warn('Error starting health diagnostic task', {
-            error: e.message,
-          } as LogMeta);
-        })
-        .then(() => {
-          this.logger.info('Health diagnostic service started');
-        });
+      this.healthDiagnosticService.start(serviceStart).catch((e) => {
+        this.logger.warn('Error starting health diagnostic task', {
+          error: e.message,
+        } as LogMeta);
+      });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
