@@ -1383,7 +1383,7 @@
     "@babel/types": "7.21.2",
     "@bazel/ibazel": "^0.16.2",
     "@bazel/typescript": "4.6.2",
-    "@biomejs/biome": "^1.7.3",
+    "@biomejs/biome": "^1.9.4",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/grep": "^4.0.1",
     "@cypress/webpack-preprocessor": "^6.0.2",
