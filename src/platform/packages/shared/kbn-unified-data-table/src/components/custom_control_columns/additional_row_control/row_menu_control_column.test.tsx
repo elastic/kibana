@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { getRowMenuControlColumn } from './row_menu_control_column';
 import { dataTableContextMock } from '../../../../__mocks__/table_context';
@@ -25,8 +24,7 @@ describe('getRowMenuControlColumn', () => {
     const mockClick = jest.fn();
     const props = {
       id: 'test_row_menu_control',
-      headerAriaLabel: 'row control',
-      renderControl: jest.fn((Control, rowProps) => (
+      render: jest.fn((Control, rowProps) => (
         <Control
           label={`test-${rowProps.rowIndex}`}
           tooltipContent={`test-${rowProps.rowIndex}`}
@@ -35,13 +33,11 @@ describe('getRowMenuControlColumn', () => {
         />
       )),
     };
-    const rowMenuControlColumn = getRowMenuControlColumn([
+    const RowMenuControlColumn = getRowMenuControlColumn([
       props,
       mockRowAdditionalLeadingControls[0],
       mockRowAdditionalLeadingControls[1],
     ]);
-    const RowMenuControlColumn =
-      rowMenuControlColumn.rowCellRender as React.FC<EuiDataGridCellValueElementProps>;
     render(
       <UnifiedDataTableContext.Provider value={contextMock}>
         <RowMenuControlColumn

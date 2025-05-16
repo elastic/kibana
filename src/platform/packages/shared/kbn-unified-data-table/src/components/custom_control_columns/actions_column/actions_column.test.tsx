@@ -49,8 +49,7 @@ describe('getActionsColumn', () => {
       rowAdditionalLeadingControls: [
         {
           id: 'row-control-column',
-          headerAriaLabel: '',
-          renderControl: () => <div>Row control column</div>,
+          render: () => <div>Row control column</div>,
         },
       ],
       externalControlColumns: [],
@@ -63,13 +62,11 @@ describe('getActionsColumn', () => {
       rowAdditionalLeadingControls: [
         {
           id: 'row-control-column-1',
-          headerAriaLabel: '',
-          renderControl: () => <div>Row control column 1</div>,
+          render: () => <div>Row control column 1</div>,
         },
         {
           id: 'row-control-column-2',
-          headerAriaLabel: '',
-          renderControl: () => <div>Row control column 2</div>,
+          render: () => <div>Row control column 2</div>,
         },
       ],
       externalControlColumns: [],
@@ -118,13 +115,11 @@ describe('getActionsColumn', () => {
       rowAdditionalLeadingControls: [
         {
           id: 'row-control-column-1',
-          headerAriaLabel: '',
-          renderControl: () => <div>Row control column 1</div>,
+          render: () => <div>Row control column 1</div>,
         },
         {
           id: 'row-control-column-2',
-          headerAriaLabel: '',
-          renderControl: () => <div>Row control column 2</div>,
+          render: () => <div>Row control column 2</div>,
         },
       ],
       externalControlColumns: [],
@@ -168,13 +163,11 @@ describe('getActionsColumn', () => {
       rowAdditionalLeadingControls: [
         {
           id: 'row-control-column-1',
-          headerAriaLabel: '',
-          renderControl: () => <div>Row control column 1</div>,
+          render: () => <div>Row control column 1</div>,
         },
         {
           id: 'row-control-column-2',
-          headerAriaLabel: '',
-          renderControl: () => <div>Row control column 2</div>,
+          render: () => <div>Row control column 2</div>,
         },
       ],
       externalControlColumns: [
@@ -205,13 +198,11 @@ describe('getActionsColumn', () => {
       rowAdditionalLeadingControls: [
         {
           id: 'row-control-column-1',
-          headerAriaLabel: '',
-          renderControl: () => <div>Row control column 1</div>,
+          render: () => <div>Row control column 1</div>,
         },
         {
           id: 'row-control-column-2',
-          headerAriaLabel: '',
-          renderControl: () => <div>Row control column 2</div>,
+          render: () => <div>Row control column 2</div>,
         },
       ],
       externalControlColumns: [

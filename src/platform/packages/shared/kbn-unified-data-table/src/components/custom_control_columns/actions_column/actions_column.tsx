@@ -44,7 +44,7 @@ export const getActionsColumn = ({
   }
   if (rowAdditionalLeadingControls?.length) {
     const additionalRowControColumns = getAdditionalRowControlColumns(rowAdditionalLeadingControls);
-    extraColumns.push(...additionalRowControColumns.map((column) => column.rowCellRender));
+    extraColumns.push(...additionalRowControColumns);
     columnWidth += DEFAULT_CONTROL_COLUMN_WIDTH * additionalRowControColumns.length;
   }
 
