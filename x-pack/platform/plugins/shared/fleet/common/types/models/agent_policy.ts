@@ -302,8 +302,9 @@ export interface FleetServerPolicy {
   inactivity_timeout?: number;
 }
 
-export interface AgentlessApiResponse {
-  id: string;
+export interface AgentlessApiDeploymentResponse {
+  code: string;
+  error: string | null;
 }
 
 // Definitions for agent policy outputs endpoints
