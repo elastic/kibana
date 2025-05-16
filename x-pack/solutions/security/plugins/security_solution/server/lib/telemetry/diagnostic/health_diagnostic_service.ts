@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import { cloneDeep } from 'lodash';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -90,21 +91,27 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     ]);
   }
 
-  public async runHealthDiagnosticQueries(fromDate: Date, toDate: Date) {
-    this.logger.info(`Running health diagnostic task`, {
-      fromDate: fromDate.toISOString(),
-      toDate: toDate.toISOString(),
-    } as LogMeta);
+  public async runHealthDiagnosticQueries(
+    lastExecutionByQuery: Record<string, number>
+  ): Promise<HealthDiagnosticQueryStats[]> {
+    const statistics: HealthDiagnosticQueryStats[] = [];
+    const toDate = new Date();
+
+    this.logger.info(`Running health diagnostic task`);
 
     if (this.queryExecutor === undefined) {
       this.logger.warn('CircuitBreakingQueryExecutor service is not started');
-      return;
+      return statistics;
     }
 
     const healthQueries = await this.healthQueries();
     const queriesToRun = healthQueries.filter((query) => {
-      const { scheduleInterval, isEnabled } = query;
-      return nextExecution(fromDate, toDate, scheduleInterval) !== undefined && (isEnabled ?? true);
+      const { name, scheduleInterval, isEnabled } = query;
+      const lastExecution = new Date(lastExecutionByQuery[name] ?? 0);
+
+      return (
+        nextExecution(lastExecution, toDate, scheduleInterval) !== undefined && (isEnabled ?? true)
+      );
     });
 
     this.logger.info('About to run health diagnostic queries', {
@@ -119,6 +126,8 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
       const queryStats: HealthDiagnosticQueryStats = {
         name: query.name,
+        started: toDate.toISOString(),
+        finished: new Date().toISOString(),
         traceId: randomUUID(),
         numDocs: 0,
         passed: false,
@@ -161,9 +170,12 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       } as LogMeta);
 
       this.reportEBT(TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT, queryStats);
+      statistics.push(queryStats);
     }
 
     this.logger.info('Finished running health diagnostic task');
+
+    return statistics;
   }
 
   private registerTask(taskManager: TaskManagerSetupContract) {
@@ -178,11 +190,10 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
         stateSchemaByVersion: {
           1: {
             up: (state: Record<string, unknown>) => ({
-              lastExecutionTime:
-                state.lastExecutionTime || new Date('2025-01-01T00:00:00.000Z').getTime(),
+              lastExecutionByQuery: state.lastExecutionByQuery || {},
             }),
             schema: schema.object({
-              lastExecutionTime: schema.number(),
+              lastExecutionByQuery: schema.recordOf(schema.string(), schema.number()),
             }),
           },
         },
@@ -191,14 +202,17 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
             run: async () => {
               const { state } = taskInstance;
 
-              const fromDate = new Date(state.lastExecutionTime);
-              const toDate = new Date();
-
-              await this.runHealthDiagnosticQueries(fromDate, toDate);
+              const stats = await this.runHealthDiagnosticQueries(
+                cloneDeep(state.lastExecutionByQuery)
+              );
+              const lastExecutionByQuery = stats.reduce((acc, stat) => {
+                acc[stat.name] = new Date(stat.finished).getTime();
+                return acc;
+              }, {} as Record<string, number>);
 
               return {
                 state: {
-                  lastExecutionTime: toDate.getTime(),
+                  lastExecutionByQuery: { ...state.lastExecutionByQuery, ...lastExecutionByQuery },
                 },
               };
             },
@@ -221,9 +235,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
         taskType: TASK_TYPE,
         schedule: { interval: INTERVAL },
         params: {},
-        state: {
-          lastExecutionTime: new Date().getTime(),
-        },
+        state: { lastExecutionByQuery: {} },
         scope: ['securitySolution'],
       });
 

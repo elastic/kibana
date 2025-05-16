@@ -35,7 +35,9 @@ export interface HealthDiagnosticQuery {
 export interface HealthDiagnosticService {
   setup(setup: HealthDiagnosticServiceSetup): void;
   start(start: HealthDiagnosticServiceStart): Promise<void>;
-  runHealthDiagnosticQueries(fromDate: Date, toDate: Date): Promise<void>;
+  runHealthDiagnosticQueries(
+    lastExecutionByQuery: Record<string, number>
+  ): Promise<HealthDiagnosticQueryStats[]>;
 }
 
 export interface HealthDiagnosticQuery {
@@ -54,6 +56,8 @@ export interface HealthDiagnosticQueryResult {
 
 export interface HealthDiagnosticQueryStats {
   name: string;
+  started: string;
+  finished: string;
   traceId: string;
   numDocs: number;
   passed: boolean;

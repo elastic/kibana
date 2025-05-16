@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  type Interval,
-  parseIntervalAsSecond,
-} from '@kbn/task-manager-plugin/server/lib/intervals';
+import { type Interval, intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
 import type { HealthDiagnosticQuery } from './health_diagnostic_service.types';
 
 export function nextExecution(
@@ -16,15 +13,8 @@ export function nextExecution(
   endDate: Date,
   interval: Interval
 ): Date | undefined {
-  const intervalInSeconds = parseIntervalAsSecond(interval);
-
-  const base = new Date(Date.UTC(startDate.getUTCFullYear(), 0, 1));
-  const intervalMs = intervalInSeconds * 1000;
-  const diff = startDate.getTime() + 1000 - base.getTime();
-  const intervalsPassed = Math.ceil(diff / intervalMs);
-  const next = new Date(base.getTime() + intervalsPassed * intervalMs);
-
-  return next < endDate ? next : undefined;
+  const nextDate = intervalFromDate(startDate, interval);
+  return nextDate && nextDate < endDate ? nextDate : undefined;
 }
 
 export function parseDiagnosticQueries(input: unknown): HealthDiagnosticQuery[] {

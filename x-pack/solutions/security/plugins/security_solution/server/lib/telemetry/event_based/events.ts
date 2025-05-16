@@ -921,6 +921,14 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
         type: 'boolean',
         _meta: { description: 'Indicates whether the query completed successfully.' },
       },
+      started: {
+        type: 'keyword',
+        _meta: { description: 'When the query started execution.' },
+      },
+      finished: {
+        type: 'keyword',
+        _meta: { description: 'When the query finished execution.' },
+      },
       failure: {
         type: 'keyword',
         _meta: {
