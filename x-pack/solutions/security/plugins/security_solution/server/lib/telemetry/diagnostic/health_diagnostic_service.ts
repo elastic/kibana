@@ -34,6 +34,7 @@ import {
 } from '../event_based/events';
 import { Artifact } from '../artifact';
 import { newTelemetryLogger } from '../helpers';
+import type { ITelemetryReceiver } from '../receiver';
 
 const TASK_TYPE = 'security:health-diagnostic';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
@@ -46,6 +47,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
   private queryExecutor?: CircuitBreakingQueryExecutor;
   private analytics?: AnalyticsServiceStart;
   private artifactService: Artifact;
+  private receiver?: ITelemetryReceiver;
 
   // TODO: allow external configuration
   private readonly circuitBreakersConfig = {
@@ -80,6 +82,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
 
     this.queryExecutor = new CircuitBreakingQueryExecutorImpl(start.esClient);
     this.analytics = start.analytics;
+    this.receiver = start.receiver;
 
     // TODO: remove before merging!
     // 'https://bankc-artifacts.sde.elastic.dev/2114cf77-3ad0-4a50-b8e2-4d12caae73d9'
@@ -174,6 +177,14 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     this.logger.info('Finished running health diagnostic task');
 
     return statistics;
+  }
+
+  public async updateCdnUrl(cdnUrl: string): Promise<void> {
+    if (this.receiver === undefined) {
+      this.logger.warn('Receiver is not started');
+      return;
+    }
+    await this.artifactService.start(this.receiver, cdnUrl);
   }
 
   private registerTask(taskManager: TaskManagerSetupContract) {

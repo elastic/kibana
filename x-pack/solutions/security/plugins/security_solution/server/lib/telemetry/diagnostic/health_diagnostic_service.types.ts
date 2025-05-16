@@ -38,6 +38,8 @@ export interface HealthDiagnosticService {
   runHealthDiagnosticQueries(
     lastExecutionByQuery: Record<string, number>
   ): Promise<HealthDiagnosticQueryStats[]>;
+  // TODO: remove before merge, for testing purposes
+  updateCdnUrl(cdnUrl: string): Promise<void>;
 }
 
 export interface HealthDiagnosticQuery {

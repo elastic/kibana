@@ -429,7 +429,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver,
       isServerless,
       core.docLinks,
-      this.endpointContext
+      this.endpointContext,
+      this.healthDiagnosticService
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -801,6 +802,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
+
     return {};
   }
 
