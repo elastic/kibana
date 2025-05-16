@@ -210,8 +210,16 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       },
                     },
                     dataStreamFailedDocs: {
-                      initial: 'fetchingFailedDocs',
+                      initial: 'pending',
                       states: {
+                        pending: {
+                          always: [
+                            {
+                              target: 'fetchingFailedDocs',
+                              cond: 'canReadFailureStore',
+                            },
+                          ],
+                        },
                         fetchingFailedDocs: {
                           invoke: {
                             src: 'loadFailedDocsDetails',
@@ -755,6 +763,12 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             typeof event.data === 'object' &&
             'isIntegration' in event.data &&
             event.data.isIntegration
+          );
+        },
+        canReadFailureStore: (context) => {
+          return (
+            'dataStreamSettings' in context &&
+            Boolean(context.dataStreamSettings.datasetUserPrivileges?.canReadFailureStore)
           );
         },
       },

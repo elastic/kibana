@@ -62,7 +62,8 @@ const degradedDocsTooltip = (
 // eslint-disable-next-line import/no-default-export
 export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: number }) {
   const { isFailureStoreEnabled } = useDatasetQualityDetailsContext();
-  const { timeRange, updateTimeRange, docsTrendChart } = useDatasetQualityDetailsState();
+  const { timeRange, updateTimeRange, docsTrendChart, canUserReadFailureStore } =
+    useDatasetQualityDetailsState();
   const {
     dataView,
     breakdown,
@@ -82,39 +83,40 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
     [updateTimeRange, timeRange.refresh]
   );
 
-  const accordionTitle = !isFailureStoreEnabled ? (
-    <EuiFlexItem
-      css={css`
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: flex-start;
-        gap: 4px;
-      `}
-    >
-      <EuiTitle size={'xxs'}>
-        <h5>{overviewPanelDatasetQualityIndicatorDegradedDocs}</h5>
-      </EuiTitle>
-      <EuiToolTip content={degradedDocsTooltip}>
-        <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
-      </EuiToolTip>
-    </EuiFlexItem>
-  ) : (
-    <EuiFlexItem
-      css={css`
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: flex-start;
-        gap: 4px;
-      `}
-    >
-      <EuiTitle size={'xxs'}>
-        <h5>{overviewTrendsDocsText}</h5>
-      </EuiTitle>
-      <EuiToolTip content={trendDocsTooltip}>
-        <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
-      </EuiToolTip>
-    </EuiFlexItem>
-  );
+  const accordionTitle =
+    !isFailureStoreEnabled || !canUserReadFailureStore ? (
+      <EuiFlexItem
+        css={css`
+          flex-direction: row;
+          justify-content: flex-start;
+          align-items: flex-start;
+          gap: 4px;
+        `}
+      >
+        <EuiTitle size={'xxs'}>
+          <h5>{overviewPanelDatasetQualityIndicatorDegradedDocs}</h5>
+        </EuiTitle>
+        <EuiToolTip content={degradedDocsTooltip}>
+          <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        </EuiToolTip>
+      </EuiFlexItem>
+    ) : (
+      <EuiFlexItem
+        css={css`
+          flex-direction: row;
+          justify-content: flex-start;
+          align-items: flex-start;
+          gap: 4px;
+        `}
+      >
+        <EuiTitle size={'xxs'}>
+          <h5>{overviewTrendsDocsText}</h5>
+        </EuiTitle>
+        <EuiToolTip content={trendDocsTooltip}>
+          <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        </EuiToolTip>
+      </EuiFlexItem>
+    );
 
   return (
     <EuiPanel hasBorder grow={false}>
@@ -128,7 +130,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem>
-            {isFailureStoreEnabled && (
+            {isFailureStoreEnabled && canUserReadFailureStore && (
               <EuiButtonGroup
                 data-test-subj="datasetQualityDetailsChartTypeButtonGroup"
                 legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {

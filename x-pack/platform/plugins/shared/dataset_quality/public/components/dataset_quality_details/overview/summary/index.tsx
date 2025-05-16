@@ -8,6 +8,7 @@
 import { EuiCode, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { useDatasetQualityDetailsState } from '../../../../hooks';
 import {
   overviewPanelDatasetQualityIndicatorDegradedDocs,
   overviewPanelDatasetQualityIndicatorFailedDocs,
@@ -49,6 +50,7 @@ const failedDocsColumnTooltip = (
 // eslint-disable-next-line import/no-default-export
 export default function Summary() {
   const { isFailureStoreEnabled } = useDatasetQualityDetailsContext();
+  const { canUserReadFailureStore } = useDatasetQualityDetailsState();
   const {
     isSummaryPanelLoading,
     totalDocsCount,
@@ -103,7 +105,7 @@ export default function Summary() {
           isLoading={isSummaryPanelLoading}
           tooltip={degradedDocsTooltip}
         />
-        {isFailureStoreEnabled && (
+        {isFailureStoreEnabled && canUserReadFailureStore && (
           <PanelIndicator
             label={overviewPanelDatasetQualityIndicatorFailedDocs}
             value={totalFailedDocsCount}

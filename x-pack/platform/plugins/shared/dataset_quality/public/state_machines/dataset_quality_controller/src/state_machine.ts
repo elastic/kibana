@@ -399,7 +399,12 @@ export const createPureDatasetQualityControllerStateMachine = (
         storeDataStreamStats: assign(
           (_context, event: DoneInvokeEvent<DataStreamStatServiceResponse>) => {
             const dataStreamStats = event.data.dataStreamsStats as DataStreamStat[];
-            const datasetUserPrivileges = event.data.datasetUserPrivileges;
+            const datasetUserPrivileges = {
+              ...event.data.datasetUserPrivileges,
+              canReadFailureStore:
+                event.data.datasetUserPrivileges.canReadFailureStore ||
+                dataStreamStats.some((ds) => ds.userPrivileges.canReadFailureStore),
+            };
 
             return {
               dataStreamStats,
