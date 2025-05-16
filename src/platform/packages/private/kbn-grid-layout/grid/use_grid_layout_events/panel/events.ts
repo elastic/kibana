@@ -130,5 +130,5 @@ export const useGridLayoutPanelEvents = ({
     [gridLayoutStateManager, onStart, onMove, onEnd, onBlur, onCancel]
   );
 
-  return { startDrag: startInteraction };
+  return startInteraction;
 };

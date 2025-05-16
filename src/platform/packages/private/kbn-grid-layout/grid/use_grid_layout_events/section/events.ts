@@ -91,6 +91,7 @@ export const useGridLayoutSectionEvents = ({ sectionId }: { sectionId: string })
           onStart,
           onMove,
           onEnd,
+          onBlur: onEnd,
           onCancel,
         });
       }
@@ -98,5 +99,5 @@ export const useGridLayoutSectionEvents = ({ sectionId }: { sectionId: string })
     [gridLayoutStateManager, sectionId, onEnd, onCancel]
   );
 
-  return { startDrag: startInteraction, onBlur: onEnd };
+  return startInteraction;
 };

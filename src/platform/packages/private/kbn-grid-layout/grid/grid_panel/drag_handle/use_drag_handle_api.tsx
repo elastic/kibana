@@ -27,7 +27,7 @@ export const useDragHandleApi = ({
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
 
-  const { startDrag } = useGridLayoutPanelEvents({
+  const startDrag = useGridLayoutPanelEvents({
     interactionType: 'drag',
     panelId,
     sectionId,

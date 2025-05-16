@@ -37,7 +37,7 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const { gridLayoutStateManager } = useGridLayoutContext();
-  const { startDrag, onBlur } = useGridLayoutSectionEvents({ sectionId });
+  const startDrag = useGridLayoutSectionEvents({ sectionId });
 
   const [isActive, setIsActive] = useState<boolean>(false);
   const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
@@ -257,7 +257,6 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                       onMouseDown={startDrag}
                       onTouchStart={startDrag}
                       onKeyDown={startDrag}
-                      onBlur={onBlur}
                       data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
                     />
                   </EuiFlexItem>
