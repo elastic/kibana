@@ -116,6 +116,18 @@ export const EsqlQueryExpression: React.FC<
     [setRuleParams]
   );
 
+  const clearParam = useCallback(
+    (paramField: string) => {
+      setCurrentRuleParams((currentParams) => {
+        const nextParams = { ...currentParams };
+        delete nextParams[paramField];
+        return nextParams;
+      });
+      setRuleParams(paramField, undefined);
+    },
+    [setRuleParams]
+  );
+
   const setDefaultExpressionValues = () => {
     setRuleProperty('params', currentRuleParams);
     if (esqlQuery?.esql) {
@@ -213,24 +225,17 @@ export const EsqlQueryExpression: React.FC<
       if (!timeField && timestampField) {
         setParam('timeField', timestampField);
       }
+      if (!newTimeFieldOptions.find(({ value }) => value === timeField)) {
+        clearParam('timeField');
+      }
       setDetectedTimestamp(timestampField);
     },
-    [timeField, setParam, dataViews, http]
+    [timeField, setParam, clearParam, dataViews, http]
   );
 
   return (
     <Fragment>
-      <EuiFormRow
-        id="queryEditor"
-        data-test-subj="queryEsqlEditor"
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.defineEsqlQueryPrompt"
-            defaultMessage="Define your query using ES|QL"
-          />
-        }
-      >
+      <EuiFormRow id="queryEditor" data-test-subj="queryEsqlEditor" fullWidth>
         <ESQLLangEditor
           query={query}
           onTextLangQueryChange={(q: AggregateQuery) => {
@@ -240,11 +245,12 @@ export const EsqlQueryExpression: React.FC<
           }}
           onTextLangQuerySubmit={async () => {}}
           detectedTimestamp={detectedTimestamp}
-          hideRunQueryText={true}
+          hideRunQueryText
+          hideRunQueryButton
           isLoading={isLoading}
           editorIsInline
+          expandToFitQueryOnMount
           hasOutline
-          hideRunQueryButton={true}
         />
       </EuiFormRow>
       <EuiSpacer />
