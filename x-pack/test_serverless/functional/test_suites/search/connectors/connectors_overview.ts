@@ -76,13 +76,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
           await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorTableToHaveItems();
 
-          // TESTING
-          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue('');
-          await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.connectorNameExists(
-            TEST_CONNECTOR_NAME
-          );
-          // /TESTING
-
           // Filter the table to just our connector
           await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
             TEST_CONNECTOR_NAME
