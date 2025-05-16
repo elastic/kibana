@@ -8,7 +8,16 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  pairwise,
+  skip,
+  startWith,
+  withLatestFrom,
+} from 'rxjs';
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -63,13 +72,14 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
   }, [panelId, gridLayoutStateManager]);
 
   useEffect(() => {
-    /** Update the styles of the panel via a subscription to prevent re-renders */
+    /** Update the styles of the panel as it is dragged via a subscription to prevent re-renders */
     const activePanelStyleSubscription = combineLatest([
       gridLayoutStateManager.activePanelEvent$.pipe(
         // filter out the first active panel event to allow "onClick" events through
         pairwise(),
         filter(([before]) => before !== undefined),
-        map(([, after]) => after)
+        map(([, after]) => after),
+        startWith(undefined)
       ),
       panel$,
     ])
@@ -115,13 +125,9 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
             ref.style.top = `${draggingPosition.top}px`;
             ref.style.width = `${draggingPosition.right - draggingPosition.left}px`;
             ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
-
-            // undo any "lock to grid" styles
-            ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
           }
         } else {
           ref.classList.remove('kbnGridPanel--active');
-
           ref.style.zIndex = `auto`;
 
           // if the panel is not being dragged and/or resized, undo any fixed position styles

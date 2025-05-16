@@ -196,8 +196,9 @@ export const moveAction = (
     });
 
     const finalLayout = resolveSections(splitLayout);
-    if (!deepEqual(currentLayout, finalLayout))
+    if (!deepEqual(currentLayout, finalLayout)) {
       gridLayoutStateManager.gridLayout$.next(finalLayout);
+    }
   }
   // update the dragged element
   gridLayoutStateManager.activeSectionEvent$.next({

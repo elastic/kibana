@@ -19,7 +19,7 @@ export const useGridPanelState = ({
   panelId,
 }: {
   panelId: string;
-}): BehaviorSubject<(GridPanelData & { sectionId: string }) | undefined> => {
+}): BehaviorSubject<GridPanelData & { sectionId: string }> => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   const cleanupCallback = useRef<null | (() => void)>();
 
