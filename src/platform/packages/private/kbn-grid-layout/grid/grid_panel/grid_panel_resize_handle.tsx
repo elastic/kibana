@@ -17,7 +17,7 @@ import { useGridLayoutPanelEvents } from '../use_grid_layout_events';
 
 export const ResizeHandle = React.memo(
   ({ sectionId, panelId }: { sectionId?: string; panelId: string }) => {
-    const { startDrag } = useGridLayoutPanelEvents({
+    const startDrag = useGridLayoutPanelEvents({
       interactionType: 'resize',
       panelId,
       sectionId,
