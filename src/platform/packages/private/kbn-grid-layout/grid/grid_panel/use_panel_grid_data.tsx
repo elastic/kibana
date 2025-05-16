@@ -32,14 +32,14 @@ export const useGridPanelState = ({
       .pipe(
         map((layout) => getPanelState(layout, panelId)),
         // filter out undefined panels
-        filter((panel) => Boolean(panel)),
+        filter(nonNullable),
         distinctUntilChanged(
           (panelA, panelB) =>
-            isGridDataEqual(panelA, panelB) && panelA!.sectionId === panelB!.sectionId
+            isGridDataEqual(panelA, panelB) && panelA.sectionId === panelB.sectionId
         )
       )
       .subscribe((panel) => {
-        panelSubject.next(panel as GridPanelData & { sectionId: string }); // undefined panels were filtered out
+        panelSubject.next(panel);
       });
 
     cleanupCallback.current = () => {
@@ -70,3 +70,7 @@ const getPanelState = (
   }
   return undefined;
 };
+
+function nonNullable<T>(value: T): value is NonNullable<T> {
+  return value !== null && value !== undefined;
+}

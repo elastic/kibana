@@ -8,7 +8,7 @@
  */
 import { cloneDeep } from 'lodash';
 
-import type { GridSectionData } from '../grid_section';
+import type { CollapsibleSection, GridSectionData, MainSection } from '../grid_section';
 import type { OrderedLayout } from '../types';
 import { getSectionsInOrder, resolveGridSection } from './resolve_grid_section';
 
@@ -81,3 +81,7 @@ export const resolveSections = (layout: OrderedLayout) => {
   }
   return resolvedLayout;
 };
+
+export const isCollapsibleSection = (
+  section: CollapsibleSection | MainSection
+): section is CollapsibleSection => !section.isMainSection;

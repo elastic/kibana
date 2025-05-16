@@ -21,8 +21,8 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { deleteSection, resolveSections } from '../utils/section_management';
-import { CollapsibleSection, MainSection } from './types';
+import { deleteSection, isCollapsibleSection, resolveSections } from '../utils/section_management';
+import { MainSection } from './types';
 
 export const DeleteGridSectionModal = ({
   sectionId,
@@ -66,15 +66,17 @@ export const DeleteGridSectionModal = ({
           onClick={() => {
             setDeleteModalVisible(false);
             const layout = gridLayoutStateManager.gridLayout$.getValue();
-            if (layout[sectionId].isMainSection) return; // main sections are not user deletable
+            const section = layout[sectionId];
+            if (!isCollapsibleSection(section)) return; // main sections are not user deletable
 
             // convert collapsible section to main section so that panels remain in place
             const newLayout = cloneDeep(layout);
-            const { title, isCollapsed, ...sectionAsMain } = {
-              ...(newLayout[sectionId] as CollapsibleSection),
+            const { title, isCollapsed, ...baseSectionProps } = section;
+            const sectionAsMain: MainSection = {
+              ...baseSectionProps,
               isMainSection: true,
             };
-            newLayout[sectionId] = sectionAsMain as MainSection;
+            newLayout[sectionId] = sectionAsMain;
 
             gridLayoutStateManager.gridLayout$.next(resolveSections(newLayout));
           }}
