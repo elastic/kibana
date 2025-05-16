@@ -6,16 +6,15 @@
  */
 
 import '../../_index.scss';
-import React, { Component } from 'react';
-import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut, useEuiTheme } from '@elastic/eui';
+import React, { Component, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiCallOut, useEuiTheme, UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { Observable } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
-import { css } from '@emotion/react';
+import { css, Interpolation, Theme } from '@emotion/react';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
@@ -237,9 +236,26 @@ export class MapContainer extends Component<Props, State> {
   }
 }
 
+const componentStyles = {
+  flyoutPanelWrapperStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      overflow: 'hidden',
+      borderLeftWidth: 1,
+      borderLeftColor: euiTheme.colors.borderBaseSubdued,
+      borderLeftStyle: 'solid',
+
+      '& > *': {
+        width: `calc(${euiTheme.size.xxl} * 12)`,
+      },
+    }),
+};
+
 const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) => {
-  const { euiTheme } = useEuiTheme();
   let flyoutPanel = null;
+  const { euiTheme } = useEuiTheme();
+  const isVisible = !!flyoutPanel;
+  const styles = useMemoizedStyles(componentStyles);
   if (flyoutDisplay === FLYOUT_STATE.ADD_LAYER_WIZARD) {
     flyoutPanel = <AddLayerPanel />;
   } else if (flyoutDisplay === FLYOUT_STATE.LAYER_PANEL) {
@@ -249,29 +265,37 @@ const FlyoutPanelWrapper = ({ flyoutDisplay }: { flyoutDisplay: FLYOUT_STATE }) 
   }
   return (
     <EuiFlexItem
-      className={classNames('mapMapLayerPanel', {
-        'mapMapLayerPanel-isVisible': !!flyoutPanel,
-      })}
-      css={css({
-        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        width: 0,
-        overflow: 'hidden',
-        borderLeftWidth: 1,
-        borderLeftColor: euiTheme.colors.borderBaseSubdued,
-        borderLeftStyle: 'solid',
-
-        '& > *': {
-          width: `calc(${euiTheme.size.xxl} * 12)`,
-        },
-
-        '&.mapMapLayerPanel-isVisible': {
-          width: `calc(${euiTheme.size.xxl} * 12)`,
-          transition: `width ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
-        },
-      })}
+      // css={styles.flyoutPanelWrapperStyles}
+      css={[
+        styles.flyoutPanelWrapperStyles,
+        css({
+          width: isVisible ? `calc(${euiTheme.size.xxl} * 12)` : 0,
+          transition: isVisible
+            ? `width ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`
+            : undefined,
+        }),
+      ]}
       grow={false}
     >
       {flyoutPanel}
     </EuiFlexItem>
   );
+};
+
+type StyleMap = Record<
+  string,
+  Interpolation<Theme> | ((theme: UseEuiTheme) => Interpolation<Theme>)
+>;
+
+type StaticStyleMap = Record<string, Interpolation<Theme>>;
+
+export const useMemoizedStyles = (styleMap: StyleMap) => {
+  const euiThemeContext = useEuiTheme();
+  const outputStyles = useMemo(() => {
+    return Object.entries(styleMap).reduce<StaticStyleMap>((acc, [key, value]) => {
+      acc[key] = typeof value === 'function' ? value(euiThemeContext) : value;
+      return acc;
+    }, {});
+  }, [euiThemeContext, styleMap]);
+  return outputStyles;
 };
