@@ -126,6 +126,10 @@ const stateSchemaV3 = stateSchemaV2.extends({
   count_rules_with_investigation_guide: schema.number(),
 });
 
+const stateSchemaV4 = stateSchemaV3.extends({
+  max_ignored_fields_by_rule_type: schema.recordOf(schema.string(), schema.number()),
+});
+
 export const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
@@ -232,9 +236,16 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV3,
   },
+  4: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[3].up(state),
+      max_ignored_fields_by_rule_type: state.max_ignored_fields_by_rule_type || 0,
+    }),
+    schema: stateSchemaV4,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[3].schema;
+const latestTaskStateSchema = stateSchemaByVersion[4].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
@@ -315,4 +326,5 @@ export const emptyState: LatestTaskStateSchema = {
   count_alerts_by_rule_type: {},
   count_rules_with_linked_dashboards: 0,
   count_rules_with_investigation_guide: 0,
+  max_ignored_fields_by_rule_type: {},
 };

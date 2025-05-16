@@ -12,6 +12,7 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
+import { parseMaxIgnoreRuleTypeBucket } from './parse_max_ignored_rule_type_bucket';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import type { AlertingUsage } from '../types';
 import { parseAndLogError } from './parse_and_log_error';
@@ -23,7 +24,7 @@ interface Opts {
 
 type GetTotaAlertsCountsResults = Pick<
   AlertingUsage,
-  'count_alerts_total' | 'count_alerts_by_rule_type'
+  'count_alerts_total' | 'count_alerts_by_rule_type' | 'max_ignored_fields_by_rule_type'
 > & {
   errorMessage?: string;
   hasErrors: boolean;
@@ -48,6 +49,29 @@ export async function getTotalAlertsCountAggregations({
             field: 'kibana.alert.rule.rule_type_id',
             size: NUM_ALERTING_RULE_TYPES,
           },
+          aggs: {
+            max_ignored_field: {
+              scripted_metric: {
+                init_script: 'state.sizes = [];',
+                map_script: `
+                  def list = doc['_ignored'];
+                  if (list != null && list instanceof List) {
+                    state.sizes.add(list.size());
+                  }`,
+                combine_script: 'return state.sizes;',
+                reduce_script: `
+                  def maxVal = 0;
+                  for (list in states) {
+                    for (val in list) {
+                      if (val > maxVal) {
+                        maxVal = val;
+                      }
+                    }
+                  }
+                  return maxVal;`,
+              },
+            },
+          },
         },
       },
     };
@@ -69,6 +93,9 @@ export async function getTotalAlertsCountAggregations({
       hasErrors: false,
       count_alerts_total: totalAlertsCount ?? 0,
       count_alerts_by_rule_type: parseSimpleRuleTypeBucket(aggregations?.by_rule_type_id?.buckets),
+      max_ignored_fields_by_rule_type: parseMaxIgnoreRuleTypeBucket(
+        aggregations?.by_rule_type_id?.buckets
+      ),
     };
   } catch (err) {
     const errorMessage = parseAndLogError(err, `getTotalAlertsCountAggregations`, logger);
@@ -78,6 +105,7 @@ export async function getTotalAlertsCountAggregations({
       errorMessage,
       count_alerts_total: 0,
       count_alerts_by_rule_type: {},
+      max_ignored_fields_by_rule_type: {},
     };
   }
 }
