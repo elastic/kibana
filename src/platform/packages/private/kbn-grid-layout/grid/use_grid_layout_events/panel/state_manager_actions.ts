@@ -11,7 +11,6 @@ import { cloneDeep } from 'lodash';
 import { MutableRefObject } from 'react';
 
 import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
-import type { GridSectionData } from '../../grid_section';
 import type { GridLayoutStateManager, OrderedLayout } from '../../types';
 import type { GridLayoutContextType } from '../../use_grid_layout_context';
 import { isGridDataEqual, isOrderedLayoutEqual } from '../../utils/equality_checks';
@@ -196,15 +195,15 @@ export const moveAction = (
     delete nextLayout[lastSectionId].panels[activePanel.id];
 
     // resolve destination grid
-    const destinationGrid = nextLayout[targetSectionId] as unknown as GridSectionData;
+    const destinationGrid = nextLayout[targetSectionId];
     const resolvedDestinationGrid = resolveGridSection(destinationGrid.panels, requestedPanelData);
-    (nextLayout[targetSectionId] as unknown as GridSectionData).panels = resolvedDestinationGrid;
+    nextLayout[targetSectionId].panels = resolvedDestinationGrid;
 
     // resolve origin grid
     if (hasChangedGridSection) {
-      const originGrid = nextLayout[lastSectionId] as unknown as GridSectionData;
+      const originGrid = nextLayout[lastSectionId];
       const resolvedOriginGrid = resolveGridSection(originGrid.panels);
-      (nextLayout[lastSectionId] as unknown as GridSectionData).panels = resolvedOriginGrid;
+      nextLayout[lastSectionId].panels = resolvedOriginGrid;
     }
 
     // resolve sections to remove empty main sections + ensure orders are valid
