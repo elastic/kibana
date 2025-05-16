@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-<<<<<<< HEAD
 import { expect } from 'expect';
-import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
-=======
-import expect from '@kbn/expect';
-import { expect as externalExpect } from 'expect';
 import { SupertestWithRoleScopeType } from '../../../services';
->>>>>>> a2c9cbfaabb ([ska][x-pack] relocate platform tests [4] (#219691))
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function telemetryConfigTest({ getService }: FtrProviderContext) {
