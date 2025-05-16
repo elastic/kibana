@@ -18,7 +18,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, IndicesAutocompleteResult } from '@kbn/esql-types';
 
 export interface ControlsContext {
   /** The editor supports the creation of controls,
@@ -88,16 +88,6 @@ export interface ESQLEditorProps {
   expandToFitQueryOnMount?: boolean;
 }
 
-export interface JoinIndicesAutocompleteResult {
-  indices: JoinIndexAutocompleteItem[];
-}
-
-export interface JoinIndexAutocompleteItem {
-  name: string;
-  mode: 'lookup' | string;
-  aliases: string[];
-}
-
 interface ESQLVariableService {
   areSuggestionsEnabled: boolean;
   esqlVariables: ESQLControlVariable[];
@@ -108,7 +98,8 @@ interface ESQLVariableService {
 }
 
 export interface EsqlPluginStartBase {
-  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
 }
