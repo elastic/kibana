@@ -28,6 +28,7 @@ import { MapSettings } from '../../../common/descriptor_types';
 import { MapSettingsPanel } from '../map_settings_panel';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { ILayer } from '../../classes/layers/layer';
+import { css } from '@emotion/react';
 
 const RENDER_COMPLETE_EVENT = 'renderComplete';
 
@@ -213,7 +214,7 @@ export class MapContainer extends Component<Props, State> {
     return (
       <EuiFlexGroup gutterSize="none" responsive={false} {...shareAttributes}>
         <EuiFlexItem
-          className="mapMapWrapper"
+          css={css({ position: 'relative' })}
           style={{ backgroundColor: this.props.settings.backgroundColor }}
         >
           <MBMap
