@@ -24,7 +24,9 @@ export default function (providerContext: FtrProviderContextWithServices) {
   const RETRY_DELAY = 60000; // as set in the config
   let policyId: string;
 
-  async function sleepForTaskInterval() {
+  async function waitForTask() {
+    // Sleep for the duration of the task interval.
+    // In case of test flakiness, the sleep duration can be increased.
     await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL));
   }
 
@@ -73,8 +75,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
           ],
         })
         .expect(200);
-      // Sleep to allow for task to run.
-      await sleepForTaskInterval();
+      await waitForTask();
       // Check that only the active agent was upgraded.
       let res = await supertest.get('/api/fleet/agents/agent1').set('kbn-xsrf', 'xxx').expect(200);
       expect(typeof res.body.item.upgrade_started_at).to.be('string');
@@ -105,8 +106,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
           ],
         })
         .expect(200);
-      // Sleep to allow for task to run.
-      await sleepForTaskInterval();
+      await waitForTask();
       // Check that only one agent on 8.17.0 was upgraded.
       const res = await supertest.get('/api/fleet/agents').set('kbn-xsrf', 'xxx').expect(200);
       expect(res.body.items.length).to.be(4);
@@ -140,8 +140,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
           ],
         })
         .expect(200);
-      // Sleep to allow for task to run.
-      await sleepForTaskInterval();
+      await waitForTask();
       // Check that two agents on 8.17.0 were upgraded.
       const res = await supertest
         .get('/api/fleet/agents?showInactive=true')
@@ -182,8 +181,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
           ],
         })
         .expect(200);
-      // Sleep to allow for task to run.
-      await sleepForTaskInterval();
+      await waitForTask();
       // Check that no agent was upgraded.
       let res = await supertest.get('/api/fleet/agents/agent1').set('kbn-xsrf', 'xxx').expect(200);
       expect(res.body.item.upgrade_started_at).to.be(undefined);
@@ -217,8 +215,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
           ],
         })
         .expect(200);
-      // Sleep to allow for task to run.
-      await sleepForTaskInterval();
+      await waitForTask();
       // Check that no agent was upgraded.
       let res = await supertest.get('/api/fleet/agents/agent1').set('kbn-xsrf', 'xxx').expect(200);
       expect(res.body.item.upgrade_started_at).to.be(undefined);
@@ -252,8 +249,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
           ],
         })
         .expect(200);
-      // Sleep to allow for task to run.
-      await sleepForTaskInterval();
+      await waitForTask();
       // Check that agent1 was upgraded.
       let res = await supertest.get('/api/fleet/agents/agent1').set('kbn-xsrf', 'xxx').expect(200);
       expect(res.body.item.upgrade_started_at).to.be(undefined);
