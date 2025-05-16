@@ -82,6 +82,11 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Prop to pass additional field groups to the field list
    */
   additionalFieldGroups?: AdditionalFieldGroups<DataViewField>;
+
+  /**
+   * Only maintain the internal state of the sidebar components, do not render heavy elements
+   */
+  dryRun?: boolean;
 };
 
 interface UnifiedFieldListSidebarInternalProps {
@@ -172,6 +177,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onToggleSidebar,
   additionalFieldGroups,
   additionalFilters,
+  dryRun,
 }) => {
   const { dataViews, core } = services;
 
@@ -401,6 +407,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
           >
             {showFieldList ? (
               <FieldListGrouped
+                dryRun={dryRun}
                 {...fieldListGroupedProps}
                 renderFieldItem={renderFieldItem}
                 localStorageKeyPrefix={stateService.creationOptions.localStorageKeyPrefix}

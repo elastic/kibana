@@ -412,6 +412,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       <EuiFlexItem>
         {selectedDataView ? (
           <UnifiedFieldListSidebarContainer
+            dryRun={!sidebarProps}
             additionalFieldGroups={additionalFieldGroups}
             additionalFilters={additionalFilters}
             allFields={sidebarState.allFields}
