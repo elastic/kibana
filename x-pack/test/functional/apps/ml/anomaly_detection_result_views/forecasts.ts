@@ -39,8 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/164381
-  describe.skip('forecasts', function () {
+  describe('forecasts', function () {
     this.tags(['ml']);
 
     describe('with single metric job', function () {
@@ -60,8 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('opens a job from job list link', async () => {
         await ml.testExecution.logTestStep('navigate to job list');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
         await ml.testExecution.logTestStep('open job in single metric viewer');
         await ml.jobTable.filterWithSearchString(JOB_CONFIG.job_id, 1);
@@ -88,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.forecast.assertForecastButtonExists();
         await ml.forecast.assertForecastButtonEnabled(true);
         await ml.forecast.openForecastModal();
+        await ml.forecast.assertForecastNeverExpireSwitchExists();
         await ml.forecast.assertForecastModalRunButtonEnabled(true);
 
         await ml.testExecution.logTestStep('should run the forecast and close the modal');

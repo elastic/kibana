@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { buildUp, tearDown } from '../../helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
-  describe('Alerting', () => {
+  describe('Alerting', function () {
+    this.tags('skipFIPS');
     before(async () => await buildUp(getService));
     after(async () => await tearDown(getService));
 

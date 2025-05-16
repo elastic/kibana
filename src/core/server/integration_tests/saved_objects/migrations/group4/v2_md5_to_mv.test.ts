@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -19,7 +20,7 @@ import {
   readLog,
   startElasticsearch,
 } from '../kibana_migrator_test_kit';
-import { delay, createType } from '../test_utils';
+import { createType } from '../test_utils';
 import '../jest_matchers';
 
 const logFilePath = Path.join(__dirname, 'v2_md5_to_mv.test.log');
@@ -270,6 +271,5 @@ describe('V2 algorithm', () => {
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 });

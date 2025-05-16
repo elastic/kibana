@@ -163,38 +163,45 @@ export default ({ getService }: FtrProviderContext) => {
         expect(timeRangeTitle).to.be('Last 30 days');
       });
 
-      it('handles clicking on active correctly', async () => {
+      it('handles clicking on active alerts correctly', async () => {
         const activeAlerts =
-          await observability.components.alertSummaryWidget.getCompactActiveAlertSelector();
+          await observability.components.alertSummaryWidget.getActiveAlertSelector();
         await activeAlerts.click();
 
-        const url = await browser.getCurrentUrl();
-        const from = 'rangeFrom:now-30d';
-        const to = 'rangeTo:now';
+        await retry.try(async () => {
+          const url = await browser.getCurrentUrl();
+          const from = 'rangeFrom:now-30d';
+          const to = 'rangeTo:now';
+          const status = 'selectedOptions:!(active),title:Status';
 
-        expect(url.includes('tabId=alerts')).to.be(true);
-        expect(url.includes('status%3Aactive')).to.be(true);
-        expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
-        expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
+          expect(url.includes('tabId=alerts')).to.be(true);
+          expect(url.includes(status.replaceAll(':', '%3A').replaceAll(',', '%2C'))).to.be(true);
+          expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
+          expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
+        });
       });
 
-      it('handles clicking on widget correctly', async () => {
-        const compactWidget =
-          await observability.components.alertSummaryWidget.getCompactWidgetSelector();
-        await compactWidget.click();
+      it('handles clicking on total alerts correctly', async () => {
+        const totalAlerts =
+          await observability.components.alertSummaryWidget.getTotalAlertSelector();
+        await totalAlerts.click();
 
-        const url = await browser.getCurrentUrl();
-        const from = 'rangeFrom:now-30d';
-        const to = 'rangeTo:now';
+        await retry.try(async () => {
+          const url = await browser.getCurrentUrl();
+          const from = 'rangeFrom:now-30d';
+          const to = 'rangeTo:now';
+          const status = 'selectedOptions:!(),title:Status';
 
-        expect(url.includes('tabId=alerts')).to.be(true);
-        expect(url.includes('status%3Aall')).to.be(true);
-        expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
-        expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
+          expect(url.includes('tabId=alerts')).to.be(true);
+          expect(url.includes(status.replaceAll(':', '%3A').replaceAll(',', '%2C'))).to.be(true);
+          expect(url.includes(from.replaceAll(':', '%3A'))).to.be(true);
+          expect(url.includes(to.replaceAll(':', '%3A'))).to.be(true);
+        });
       });
     });
 
-    describe('User permissions', () => {
+    describe('User permissions', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
       });

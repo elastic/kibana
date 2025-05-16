@@ -31,7 +31,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./log_rate_analysis'));
     loadTestFile(require.resolve('./log_rate_analysis_anomaly_table'));
+    loadTestFile(require.resolve('./log_rate_analysis_dashboard_embeddable'));
+    loadTestFile(require.resolve('./log_rate_analysis_cases'));
     loadTestFile(require.resolve('./change_point_detection'));
+    loadTestFile(require.resolve('./change_point_detection_dashboard'));
+    loadTestFile(require.resolve('./change_point_detection_cases'));
     loadTestFile(require.resolve('./log_pattern_analysis'));
     loadTestFile(require.resolve('./log_pattern_analysis_in_discover'));
   });

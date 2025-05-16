@@ -31,15 +31,13 @@ export default function ({ getService }: FtrProviderContext) {
   const createIndex = async () => {
     await es.indices.create({
       index: INDEX_NAME,
-      body: {
-        mappings: {
-          properties: {
-            foo: {
-              type: 'integer',
-            },
-            bar: {
-              type: 'keyword',
-            },
+      mappings: {
+        properties: {
+          foo: {
+            type: 'integer',
+          },
+          bar: {
+            type: 'keyword',
           },
         },
       },
@@ -54,12 +52,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Field preview', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       await createIndex();
     });
     after(async () => {
       await deleteIndex();
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     describe('should return the script value', () => {

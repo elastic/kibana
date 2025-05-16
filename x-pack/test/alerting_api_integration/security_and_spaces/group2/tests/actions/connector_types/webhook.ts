@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import httpProxy from 'http-proxy';
-import http from 'http';
+import type httpProxy from 'http-proxy';
+import type http from 'http';
 import expect from '@kbn/expect';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
+
 import { URL, format as formatUrl } from 'url';
 import getPort from 'get-port';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
@@ -16,7 +18,8 @@ import {
   ExternalServiceSimulator,
   getWebhookServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 const defaultValues: Record<string, any> = {
   headers: null,
@@ -36,6 +39,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
+  const retry = getService('retry');
 
   async function createWebhookAction(
     webhookSimulatorURL: string,
@@ -258,6 +262,23 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('ok');
+
+      const events: IValidatedEvent[] = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'default',
+          type: 'action',
+          id: webhookActionId,
+          provider: 'actions',
+          actions: new Map([
+            ['execute-start', { gte: 1 }],
+            ['execute', { gte: 1 }],
+          ]),
+        });
+      });
+
+      const executeEvent = events[1];
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(19);
     });
 
     it('should support the PUT method against webhook target', async () => {

@@ -10,7 +10,7 @@ import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function findBackfillTests({ getService }: FtrProviderContext) {
@@ -26,7 +26,7 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
     const end2 = moment().utc().startOf('day').subtract(10, 'day').toISOString();
 
     afterEach(async () => {
-      asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
+      await asyncForEach(backfillIds, async ({ id, spaceId }: { id: string; spaceId: string }) => {
         await supertest
           .delete(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/${id}`)
           .set('kbn-xsrf', 'foo');
@@ -164,8 +164,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(apiOptions.spaceId)}/internal/alerting/rules/backfill/_schedule`)
             .set('kbn-xsrf', 'foo')
             .send([
-              { rule_id: ruleId1, start: start1, end: end1 },
-              { rule_id: ruleId2, start: start2, end: end2 },
+              { rule_id: ruleId1, ranges: [{ start: start1, end: end1 }] },
+              { rule_id: ruleId2, ranges: [{ start: start2, end: end2 }] },
             ]);
 
           const scheduleResult = scheduleResponse.body;
@@ -278,15 +278,12 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .auth(apiOptions.username, apiOptions.password);
 
           // find backfill with end time that is after one backfill ends
+          const findEnd = moment(end2).utc().add(1, 'hour').toISOString();
           const findWithEndOneRuleResponse = await supertestWithoutAuth
             .post(
               `${getUrlPrefix(
                 apiOptions.spaceId
-              )}/internal/alerting/rules/backfill/_find?end=${moment()
-                .utc()
-                .startOf('day')
-                .subtract(9, 'days')
-                .toISOString()}`
+              )}/internal/alerting/rules/backfill/_find?end=${findEnd}`
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);

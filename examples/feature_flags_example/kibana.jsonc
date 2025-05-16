@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/feature-flags-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Plugin that shows how to make use of the feature flags core service.",
+  "plugin": {
+    "id": "featureFlagsExample",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["developerExamples"],
+    "optionalPlugins": []
+  }
+}

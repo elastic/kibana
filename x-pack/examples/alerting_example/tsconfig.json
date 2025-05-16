@@ -28,5 +28,10 @@
     "@kbn/shared-ux-router",
     "@kbn/config-schema",
     "@kbn/alerts-as-data-utils",
+    "@kbn/data-views-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/response-ops-rule-form",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/i18n-react",
   ]
 }

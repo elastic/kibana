@@ -5,21 +5,28 @@
  * 2.0.
  */
 
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import {
-  CSV_REPORT_TYPE_V2,
-  JobParamsCsvFromSavedObject,
-} from '@kbn/reporting-export-types-csv-common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { CookieCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
-  const config = getService('config');
+  const samlAuth = getService('samlAuth');
+  let cookieCredentials: CookieCredentials;
+  let internalReqHeader: InternalRequestHeader;
+
+  const archives: Record<string, { data: string; savedObjects: string }> = {
+    ecommerce: {
+      data: 'x-pack/test/functional/es_archives/reporting/ecommerce',
+      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
+    },
+  };
 
   const navigateToReportingManagement = async () => {
     log.debug(`navigating to reporting management app`);
@@ -31,63 +38,82 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   };
 
-  describe('Reporting Management app', function () {
-    // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.reporting-2020.04.19], this action is granted by the index privileges [create_index,manage,all]
-    this.tags('failsOnMKI');
-    const savedObjectsArchive = 'test/functional/fixtures/kbn_archiver/discover';
-
-    const job: JobParamsCsvFromSavedObject = {
-      browserTimezone: 'UTC',
-      objectType: 'search',
-      version: '8.10.0',
-      locatorParams: [
-        {
-          id: DISCOVER_APP_LOCATOR,
-          version: 'reporting',
-          // the create job API requires a valid savedSearchId
-          params: { savedSearchId: 'ab12e3c0-f231-11e6-9486-733b1ac9221a' },
-        },
-      ],
-    };
-
-    // Kibana CI and MKI use different users
-    const TEST_USERNAME = config.get('servers.kibana.username');
-    const TEST_PASSWORD = config.get('servers.kibana.password');
+  describe('Reporting Management app', () => {
+    let job: ReportApiJSON;
+    let path: string;
 
     before('initialize saved object archive', async () => {
+      cookieCredentials = await samlAuth.getM2MApiCookieCredentialsWithRoleScope('admin');
+      internalReqHeader = samlAuth.getInternalRequestHeader();
+
       // add test saved search object
-      await kibanaServer.importExport.load(savedObjectsArchive);
+      await esArchiver.load(archives.ecommerce.data);
+      await kibanaServer.importExport.load(archives.ecommerce.savedObjects);
+
+      // generate a test report to ensure the user is able to see it in the listing
+      ({ job, path } = await reportingAPI.createReportJobInternal(
+        'csv_searchsource',
+        {
+          browserTimezone: 'UTC',
+          objectType: 'search',
+          searchSource: {
+            fields: [
+              { field: 'order_date', include_unmapped: true },
+              { field: 'order_id', include_unmapped: true },
+              { field: 'products.product_id', include_unmapped: true },
+            ],
+            filter: [
+              {
+                meta: {
+                  field: 'order_date',
+                  index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                  params: {},
+                },
+                query: {
+                  range: {
+                    order_date: {
+                      format: 'strict_date_optional_time',
+                      gte: '2019-06-20T23:59:44.609Z',
+                      lte: '2019-06-21T00:01:06.957Z',
+                    },
+                  },
+                },
+              },
+              {
+                $state: { store: 'appState' },
+                meta: {
+                  alias: null,
+                  disabled: false,
+                  index: '5193f870-d861-11e9-a311-0fa548c5f953',
+                  key: 'products.product_id',
+                  negate: false,
+                  params: { query: 22599 },
+                  type: 'phrase',
+                },
+                query: { match_phrase: { 'products.product_id': 22599 } },
+              },
+            ],
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            query: { language: 'kuery', query: '' },
+            sort: [{ order_date: { format: 'strict_date_optional_time', order: 'desc' } }],
+          },
+          title: 'Ecommerce Data',
+          version: '8.15.0',
+        },
+        cookieCredentials,
+        internalReqHeader
+      ));
     });
 
     after('clean up archives', async () => {
-      await kibanaServer.importExport.unload(savedObjectsArchive);
+      await reportingAPI.waitForJobToFinish(path, cookieCredentials, internalReqHeader);
+      await esArchiver.unload(archives.ecommerce.data);
+      await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
     });
 
-    // Cant auth into the route as it's structured currently
-    xit(`user sees a job they've created`, async () => {
-      const {
-        job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(CSV_REPORT_TYPE_V2, job);
-
+    it(`user sees a job they've created`, async () => {
       await navigateToReportingManagement();
-      await testSubjects.existOrFail(`viewReportingLink-${jobId}`);
-    });
-
-    // Skipping test for now because functionality is not yet possible to test
-    xit(`user doesn't see a job another user has created`, async () => {
-      log.debug(`creating a csv report job as '${TEST_USERNAME}'`);
-
-      const {
-        job: { id: jobId },
-      } = await reportingAPI.createReportJobInternal(
-        CSV_REPORT_TYPE_V2,
-        job,
-        TEST_USERNAME,
-        TEST_PASSWORD
-      );
-
-      await navigateToReportingManagement();
-      await testSubjects.missingOrFail(`viewReportingLink-${jobId}`);
+      await testSubjects.existOrFail(`viewReportingLink-${job.id}`);
     });
   });
 };

@@ -59,23 +59,9 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
           case 'everything_space_all at everything_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything except spaces, monitoring, the enterprise search suite, and ES features are enabled
+            // everything except spaces, monitoring, and ES features are enabled
             // (easier to say: all "proper" Kibana features are enabled)
-            const exceptions = [
-              'monitoring',
-              'enterpriseSearch',
-              'enterpriseSearchContent',
-              'enterpriseSearchAnalytics',
-              'enterpriseSearchApplications',
-              'enterpriseSearchAISearch',
-              'enterpriseSearchVectorSearch',
-              'enterpriseSearchElasticsearch',
-              'appSearch',
-              'workplaceSearch',
-              'searchExperiences',
-              'spaces',
-              ...esFeatureExceptions,
-            ];
+            const exceptions = ['monitoring', 'spaces', ...esFeatureExceptions];
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) => !exceptions.includes(catalogueId)
@@ -93,17 +79,15 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             const exceptions = [
               'ml_file_data_visualizer',
               'monitoring',
-              'enterpriseSearch',
-              'enterpriseSearchContent',
               'enterpriseSearchAnalytics',
               'enterpriseSearchApplications',
-              'enterpriseSearchAISearch',
-              'enterpriseSearchVectorSearch',
-              'enterpriseSearchElasticsearch',
+              'searchPlayground',
+              'searchInferenceEndpoints',
+              'searchSynonyms',
+              'searchQueryRules',
               'appSearch',
               'observabilityAIAssistant',
               'workplaceSearch',
-              'searchExperiences',
               'spaces',
               ...esFeatureExceptions,
             ];

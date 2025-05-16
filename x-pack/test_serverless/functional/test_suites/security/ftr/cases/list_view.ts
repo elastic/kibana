@@ -20,10 +20,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCases = getService('svlCases');
   const svlSecNavigation = getService('svlSecNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
+  const toasts = getService('toasts');
 
   describe('Cases List', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithPrivilegedRole();
 
       await svlSecNavigation.navigateToLandingPage();
 
@@ -33,7 +34,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
       await cases.casesTable.waitForCasesToBeDeleted();
-      await svlCommonPage.forceLogout();
     });
 
     describe('empty state', () => {
@@ -218,6 +218,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('row actions', () => {
+      afterEach(async () => {
+        await toasts.dismissAll();
+      });
+
       describe('Status', () => {
         createNCasesBeforeDeleteAllAfter(1, getPageObject, getService);
 

@@ -27,12 +27,36 @@ export interface ObservabilityAIAssistantUIService {
 }
 
 const pages = {
+  kbManagementTab: {
+    table: 'knowledgeBaseTable',
+    tableTitleCell: 'knowledgeBaseTableTitleCell',
+    tableAuthorCell: 'knowledgeBaseTableAuthorCell',
+  },
   conversations: {
-    setupGenAiConnectorsButtonSelector: `observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton`,
+    setupGenAiConnectorsButtonSelector:
+      'observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton',
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
-    retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
+    installKnowledgeBaseButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
+    settingUpKnowledgeBase: 'observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseText',
+    selectModelDropdown: 'observabilityAiAssistantKnowledgeBaseModelDropdown',
+    pendingModelText: 'observabilityAiAssistantKnowledgeBaseModelPendingText',
+    redeployModelButton: 'observabilityAiAssistantKnowledgeBaseReDeployModelButton',
     conversationLink: 'observabilityAiAssistantConversationsLink',
     positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
+    connectorsErrorMsg: 'observabilityAiAssistantConnectorsError',
+    conversationsPage: 'observabilityAiAssistantConversationsPage',
+    access: {
+      shareButton: 'observabilityAiAssistantChatAccessBadge',
+      sharedOption: 'observabilityAiAssistantChatSharedOption',
+      privateOption: 'observabilityAiAssistantChatPrivateOption',
+      loadingBadge: 'observabilityAiAssistantChatAccessLoadingBadge',
+    },
+    contextMenu: {
+      button: 'observabilityAiAssistantChatContextMenuButtonIcon',
+      archiveOption: 'observabilityAiAssistantContextMenuArchive',
+      unarchiveOption: 'observabilityAiAssistantContextMenuUnarchive',
+    },
+    archivedBadge: 'observabilityAiAssistantArchivedBadge',
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',
@@ -44,14 +68,29 @@ const pages = {
     saveButton: 'create-connector-flyout-save-btn',
   },
   contextualInsights: {
+    container: 'obsAiAssistantInsightContainer',
     button: 'obsAiAssistantInsightButton',
     text: 'obsAiAssistantInsightResponse',
+  },
+  links: {
+    solutionMenuLink: 'observability-nav-observabilityAIAssistant-ai_assistant',
+    globalHeaderButton: 'observabilityAiAssistantAppNavControlButton',
+  },
+  settings: {
+    settingsPage: 'aiAssistantSettingsPage',
+    managementLink: 'aiAssistantManagementSelection',
+    logsIndexPatternInput: 'management-settings-editField-observability:logSources',
+    searchConnectorIndexPatternInput:
+      'management-settings-editField-observability:aiAssistantSearchConnectorIndexPattern',
+    saveButton: 'observabilityAiAssistantManagementBottomBarActionsButton',
+    aiAssistantCard: 'aiAssistantSelectionPageObservabilityCard',
+    resetToDefaultLink:
+      'management-settings-resetField-observability:aiAssistantSearchConnectorIndexPattern',
   },
 };
 
 export async function ObservabilityAIAssistantUIProvider({
   getPageObjects,
-  getService,
 }: InheritedFtrProviderContext): Promise<ObservabilityAIAssistantUIService> {
   const pageObjects = getPageObjects(['common', 'security']);
 

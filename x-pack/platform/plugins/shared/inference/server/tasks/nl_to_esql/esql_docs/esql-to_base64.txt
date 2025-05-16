@@ -1,0 +1,15 @@
+## TO_BASE64
+
+Encodes a string to a base64 string.
+
+### Examples
+
+```esql
+ROW a = "elastic"
+| EVAL e = TO_BASE64(a)
+```
+
+```esql
+ROW text = "Hello, World!"
+| EVAL encoded_text = TO_BASE64(text)
+```

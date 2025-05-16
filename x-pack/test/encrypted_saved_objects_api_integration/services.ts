@@ -6,9 +6,7 @@
  */
 
 import { services as commonServices } from '../common/services';
-import { services as apiIntegrationServices } from '../api_integration/services';
 
 export const services = {
   ...commonServices,
-  supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
 };

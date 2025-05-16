@@ -12,28 +12,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const inspector = getService('inspector');
-  const PageObjects = getPageObjects(['common', 'settings', 'header', 'home', 'maps']);
+  const { common, header, home, maps } = getPageObjects(['common', 'header', 'home', 'maps']);
 
   describe('Maps app Accessibility', () => {
     before(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.addSampleDataSet('flights');
-      await PageObjects.common.navigateToApp('maps');
+      await header.waitUntilLoadingHasFinished();
+      await home.addSampleDataSet('flights');
+      await common.navigateToApp('maps');
     });
 
     after(async () => {
-      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.home.removeSampleDataSet('flights');
+      await header.waitUntilLoadingHasFinished();
+      await home.removeSampleDataSet('flights');
     });
 
     it('loads  maps workpads', async function () {
-      await PageObjects.maps.loadSavedMap('[Flights] Origin Time Delayed');
+      await maps.loadSavedMap('[Flights] Origin Time Delayed');
       await a11y.testAppSnapshot();
     });
 
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('map inspector panel - view maps', async function () {
-      await PageObjects.maps.openInspectorMapView();
+      await maps.openInspectorMapView();
       await a11y.testAppSnapshot();
     });
 
@@ -78,26 +78,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('full screen button should exist', async () => {
-      await PageObjects.maps.existFullScreen();
+      await maps.existFullScreen();
       await a11y.testAppSnapshot();
     });
 
     it('displays exit full screen logo button', async () => {
-      await PageObjects.maps.enterFullScreen();
+      await maps.enterFullScreen();
       await a11y.testAppSnapshot();
     });
 
     it(`allows a map to be created`, async () => {
-      await PageObjects.maps.openNewMap();
+      await maps.openNewMap();
       await a11y.testAppSnapshot();
-      await PageObjects.maps.expectExistAddLayerButton();
+      await maps.expectExistAddLayerButton();
       await a11y.testAppSnapshot();
-      await PageObjects.maps.saveMap('my test map');
+      await maps.saveMap('my test map');
       await a11y.testAppSnapshot();
     });
 
     it('maps listing page', async function () {
-      await PageObjects.common.navigateToApp('maps');
+      await common.navigateToApp('maps');
       await retry.waitFor(
         'maps workpads visible',
         async () => await testSubjects.exists('itemsInMemTable')

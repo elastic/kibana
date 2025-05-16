@@ -39,8 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('creates new calendar that applies to all jobs', async () => {
       await ml.testExecution.logTestStep('calendar creation loads the calendar management page');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToSettings();
+      await ml.navigation.navigateToADSettings();
       await ml.settings.navigateToCalendarManagement();
 
       await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');
@@ -74,8 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('creates new calendar that applies to specific jobs', async () => {
       await ml.testExecution.logTestStep('calendar creation loads the calendar management page');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToSettings();
+      await ml.navigation.navigateToADSettings();
       await ml.settings.navigateToCalendarManagement();
 
       await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');
@@ -109,8 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
       await createSingleGroupJobs();
 
       await ml.testExecution.logTestStep('calendar creation loads the calendar management page');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToSettings();
+      await ml.navigation.navigateToADSettings();
       await ml.settings.navigateToCalendarManagement();
 
       await ml.testExecution.logTestStep('calendar creation loads the new calendar edit page');
@@ -144,10 +141,13 @@ export default function ({ getService }: FtrProviderContext) {
         'test_calendar_ad_2',
       ]);
 
-      await ml.navigation.navigateToAnomalyDetection();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
-      await ml.jobTable.assertJobRowCalendars('test_calendar_ad_1', [calendarId]);
-      await ml.jobTable.clickJobRowCalendarWithAssertion('test_calendar_ad_1', calendarId);
+      await ml.jobExpandedDetails.assertJobRowCalendars('test_calendar_ad_1', [calendarId]);
+      await ml.jobExpandedDetails.clickJobRowCalendarWithAssertion(
+        'test_calendar_ad_1',
+        calendarId
+      );
 
       await ml.testExecution.logTestStep(
         'created calendars can be connected to job groups after creation'
@@ -160,9 +160,9 @@ export default function ({ getService }: FtrProviderContext) {
         'test_calendar_ad_2',
         'multi-metric',
       ]);
-      await ml.navigation.navigateToAnomalyDetection();
-      await ml.jobTable.assertJobRowCalendars('test_calendar_ad_4', [calendarId]);
-      await ml.jobTable.assertJobRowCalendars('test_calendar_ad_3', [calendarId], false);
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
+      await ml.jobExpandedDetails.assertJobRowCalendars('test_calendar_ad_4', [calendarId]);
+      await ml.jobExpandedDetails.assertJobRowCalendars('test_calendar_ad_3', [calendarId], false);
     });
 
     async function assignJobToCalendar(
@@ -180,7 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
       await asyncForEach(
         [automatedConfig, multiMetricConfig],
         // @ts-expect-error not full interface
-        async (config) => await ml.api.createAnomalyDetectionJob(config)
+        async (config) => ml.api.createAnomalyDetectionJob(config)
       );
     }
   });

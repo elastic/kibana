@@ -50,7 +50,7 @@ export class AgentManager extends Manager {
 
     this.log.info('Running the agent');
 
-    const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
+    const artifact = `docker.elastic.co/elastic-agent/elastic-agent:${await getLatestVersion()}`;
     this.log.info(artifact);
 
     const args = [

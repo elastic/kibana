@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConfirmDeletePipelineModal component renders as expected 1`] = `
+<EuiConfirmModal
+  aria-labelledby="generated-id"
+  buttonColor="danger"
+  cancelButtonText={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Cancel"
+      id="xpack.logstash.confirmDeletePipelineModal.cancelButtonText"
+    />
+  }
+  confirmButtonText={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Delete pipeline"
+      id="xpack.logstash.confirmDeletePipelineModal.confirmButtonText"
+    />
+  }
+  defaultFocusedButton="cancel"
+  onCancel={[MockFunction]}
+  onConfirm={[MockFunction]}
+  title={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Delete pipeline {id}"
+      id="xpack.logstash.confirmDeletePipelineModal.deletePipelineTitle"
+      values={
+        Object {
+          "id": "the id",
+        }
+      }
+    />
+  }
+  titleProps={
+    Object {
+      "id": "generated-id",
+    }
+  }
+>
+  <p>
+    You cannot recover a deleted pipeline.
+  </p>
+</EuiConfirmModal>
+`;

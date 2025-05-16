@@ -9,19 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'common',
-    'dashboard',
-    'visualize',
-    'lens',
-    'timePicker',
-    'security',
-  ]);
+  const { dashboard, security } = getPageObjects(['dashboard', 'security']);
 
   const esArchiver = getService('esArchiver');
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
-  const security = getService('security');
+  const securityService = getService('security');
   const testSubjects = getService('testSubjects');
 
   describe('created_by', function () {
@@ -33,16 +26,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.forceLogout();
+      await security.forceLogout();
 
-      await security.role.create('global_dashboard_all_role', {
+      await securityService.role.create('global_dashboard_all_role', {
         elasticsearch: {
           indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
         },
@@ -57,42 +50,42 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ],
       });
 
-      await security.user.create(USERNAME_1, {
+      await securityService.user.create(USERNAME_1, {
         password: 'changeme',
         roles: ['global_dashboard_all_role'],
         full_name: 'global dashboard all user 1',
       });
-      await security.user.create(USERNAME_2, {
+      await securityService.user.create(USERNAME_2, {
         password: 'changeme',
         roles: ['global_dashboard_all_role'],
         full_name: 'global dashboard all user 2',
       });
 
-      await PageObjects.security.login(USERNAME_1, 'changeme', {
+      await security.login(USERNAME_1, 'changeme', {
         expectSpaceSelector: false,
       });
 
-      await PageObjects.dashboard.navigateToApp();
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME, {
+      await dashboard.navigateToApp();
+      await dashboard.preserveCrossAppState();
+      await dashboard.clickNewDashboard();
+      await dashboard.saveDashboard(DASHBOARD_NAME, {
         saveAsNew: true,
         waitDialogIsClosed: false,
         exitFromEditMode: false,
       });
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
-      await security.role.delete('global_dashboard_all_role');
-      await security.user.delete(USERNAME_1);
-      await security.user.delete(USERNAME_2);
+      await security.forceLogout();
+      await securityService.role.delete('global_dashboard_all_role');
+      await securityService.user.delete(USERNAME_1);
+      await securityService.user.delete(USERNAME_2);
 
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
@@ -120,20 +113,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it("doesn't override creator when editing a dashboard", async () => {
-      await PageObjects.security.forceLogout();
-      await PageObjects.security.login(USERNAME_2, 'changeme', {
+      await security.forceLogout();
+      await security.login(USERNAME_2, 'changeme', {
         expectSpaceSelector: false,
       });
-      await PageObjects.dashboard.navigateToApp();
+      await dashboard.navigateToApp();
       await testSubjects.existOrFail('tableHeaderCell_createdBy_1');
       await testSubjects.existOrFail(`userAvatarTip-${USERNAME_1}`);
-      await PageObjects.dashboard.gotoDashboardEditMode(DASHBOARD_NAME);
-      await PageObjects.dashboard.addVisualizations(['A Pie']);
-      await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME, {
+      await dashboard.gotoDashboardEditMode(DASHBOARD_NAME);
+      await dashboard.addVisualizations(['A Pie']);
+      await dashboard.saveDashboard(DASHBOARD_NAME, {
         waitDialogIsClosed: false,
         exitFromEditMode: false,
       });
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await dashboard.gotoDashboardLandingPage();
       await testSubjects.existOrFail('tableHeaderCell_createdBy_1');
       await testSubjects.missingOrFail(`userAvatarTip-${USERNAME_2}`);
     });

@@ -17,22 +17,20 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('POST /api/console/proxy', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('system indices behavior', () => {
       it('does not forward x-elastic-product-origin', async () => {
         // If we pass the header and we still get the warning back, we assume that the header was not forwarded.
-        return await supertestWithoutAuth
+        const response = await supertestWithoutAuth
           .post('/api/console/proxy?method=GET&path=/.kibana/_settings')
           .set('kbn-xsrf', 'true')
           .set(svlCommonApi.getInternalRequestHeader())
-          .set(roleAuthc.apiKeyHeader)
-          .then((response) => {
-            expect(response.header).to.have.property('warning');
-          });
+          .set(roleAuthc.apiKeyHeader);
+        expect(response.header).to.have.property('warning');
       });
     });
   });

@@ -7,13 +7,17 @@
 import type { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import type { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
 // default end date
 export const END_DATE = '2020-01-01T00:00:00Z';
 
 export const DOCUMENT_SOURCE = 'queryDataEndpointTests';
 export const DOCUMENT_REFERENCE = '-na-';
+
+// Higher than the configured yml setting to avoid race conditions
+export const TEST_CACHE_EXPIRATION_TIME = 12000;
 
 export async function createEsDocuments(
   es: Client,
@@ -134,48 +138,46 @@ export async function createDataStream(es: Client, name: string) {
   // A data stream requires an index template before it can be created.
   await es.indices.putIndexTemplate({
     name,
-    body: {
-      index_patterns: [name + '*'],
-      template: {
-        mappings: {
-          properties: {
-            '@timestamp': {
-              type: 'date',
-            },
-            source: {
-              type: 'keyword',
-            },
-            reference: {
-              type: 'keyword',
-            },
-            params: {
-              enabled: false,
-              type: 'object',
-            },
-            host: {
-              properties: {
-                hostname: {
-                  type: 'text',
-                  fields: {
-                    keyword: {
-                      type: 'keyword',
-                      ignore_above: 256,
-                    },
+    index_patterns: [name + '*'],
+    template: {
+      mappings: {
+        properties: {
+          '@timestamp': {
+            type: 'date',
+          },
+          source: {
+            type: 'keyword',
+          },
+          reference: {
+            type: 'keyword',
+          },
+          params: {
+            enabled: false,
+            type: 'object',
+          },
+          host: {
+            properties: {
+              hostname: {
+                type: 'text',
+                fields: {
+                  keyword: {
+                    type: 'keyword',
+                    ignore_above: 256,
                   },
                 },
-                id: {
-                  type: 'keyword',
-                },
-                name: {
-                  type: 'keyword',
-                },
+              },
+              id: {
+                type: 'keyword',
+              },
+              name: {
+                type: 'keyword',
               },
             },
           },
         },
       },
-      data_stream: {},
     },
+    data_stream: {},
   });
 
   await es.indices.createDataStream({ name });

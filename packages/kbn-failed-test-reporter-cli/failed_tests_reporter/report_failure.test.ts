@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import dedent from 'dedent';
@@ -36,6 +37,53 @@ describe('createFailureIssue()', () => {
         "calls": Array [
           Array [
             "Failing test: some.classname - test name",
+            "A test failed on a tracked branch
+
+      \`\`\`
+      this is the failure text
+      \`\`\`
+
+      First failure: [kibana-on-merge - main](https://build-url)
+
+      <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"some.classname\\",\\"test.name\\":\\"test name\\",\\"test.failCount\\":1}} -->",
+            Array [
+              "failed-test",
+            ],
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      }
+    `);
+  });
+
+  it('creates new github issue with title prepended', async () => {
+    const api = new GithubApi();
+
+    await createFailureIssue(
+      'https://build-url',
+      {
+        classname: 'some.classname',
+        failure: 'this is the failure text',
+        name: 'test name',
+        time: '2018-01-01T01:00:00Z',
+        likelyIrrelevant: false,
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      '[MKI][QA]'
+    );
+
+    expect(api.createIssue).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            "Failing test: [MKI][QA] some.classname - test name",
             "A test failed on a tracked branch
 
       \`\`\`

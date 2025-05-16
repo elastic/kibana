@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -13,7 +14,6 @@ import { buildPhraseFilter, Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DashboardRenderer, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 export const StaticByReferenceExample = ({
   dashboardId,
@@ -50,7 +50,7 @@ export const StaticByReferenceExample = ({
             const field = dataView.getFieldByName('machine.os.keyword');
             let filter: Filter;
             let creationOptions: DashboardCreationOptions = {
-              getInitialInput: () => ({ viewMode: ViewMode.VIEW }),
+              getInitialInput: () => ({ viewMode: 'view' }),
             };
             if (field) {
               filter = buildPhraseFilter(field, 'win xp', dataView);

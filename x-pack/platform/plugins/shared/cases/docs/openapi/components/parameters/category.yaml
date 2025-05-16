@@ -1,0 +1,7 @@
+in: query
+name: category
+description: Filters the returned cases by category.
+schema:
+  oneOf:
+    - $ref: '../schemas/case_category.yaml'
+    - $ref: '../schemas/case_categories.yaml'

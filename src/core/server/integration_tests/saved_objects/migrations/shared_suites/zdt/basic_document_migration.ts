@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs/promises';
@@ -11,7 +12,7 @@ import { range, sortBy } from 'lodash';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../../jest_matchers';
 import { getKibanaMigratorTestKit } from '../../kibana_migrator_test_kit';
-import { delay, parseLogFile } from '../../test_utils';
+import { parseLogFile } from '../../test_utils';
 import { EsRunner, EsServer } from '../../test_types';
 import {
   getBaseMigratorParams,
@@ -35,7 +36,6 @@ export function createBasicDocumentsMigrationTest({
 
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const createBaseline = async () => {

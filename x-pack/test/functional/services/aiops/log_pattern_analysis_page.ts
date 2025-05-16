@@ -8,11 +8,14 @@
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { CreateCaseParams } from '../cases/create';
 
 export function LogPatternAnalysisPageProvider({ getService, getPageObject }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
+  const dashboardPage = getPageObject('dashboard');
+  const cases = getService('cases');
 
   type RandomSamplerOption =
     | 'aiopsRandomSamplerOptionOnAutomatic'
@@ -116,11 +119,11 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
     },
 
     async clickFilterInButton(rowIndex: number) {
-      this.clickFilterButtons('in', rowIndex);
+      await this.clickFilterButtons('in', rowIndex);
     },
 
     async clickFilterOutButton(rowIndex: number) {
-      this.clickFilterButtons('out', rowIndex);
+      await this.clickFilterButtons('out', rowIndex);
     },
 
     async clickFilterButtons(buttonType: 'in' | 'out', rowIndex: number) {
@@ -131,7 +134,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
           ? 'aiopsLogPatternsActionFilterInButton'
           : 'aiopsLogPatternsActionFilterOutButton'
       );
-      button.click();
+      await button.click();
     },
 
     async getCategoryCountFromTable(rowIndex: number) {
@@ -248,6 +251,64 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
         await testSubjects.clickWhenNotDisabled('aiopsEmbeddableMenuOptionsButton');
         await testSubjects.missingOrFail('aiopsRandomSamplerOptionsFormRow', { timeout: 1000 });
       });
+    },
+
+    async openAttachmentsMenu() {
+      await testSubjects.click('aiopsLogPatternAnalysisAttachmentsMenuButton');
+    },
+
+    async clickAttachToDashboard() {
+      await testSubjects.click('aiopsLogPatternAnalysisAttachToDashboardButton');
+    },
+
+    async clickAttachToCase() {
+      await testSubjects.click('aiopsLogPatternAnalysisAttachToCaseButton');
+    },
+
+    async confirmAttachToDashboard() {
+      await testSubjects.click('aiopsLogPatternAnalysisAttachToDashboardSubmitButton');
+    },
+
+    async completeSaveToDashboardForm(createNew?: boolean) {
+      const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
+      if (createNew) {
+        const label = await dashboardSelector.findByCssSelector(
+          `label[for="new-dashboard-option"]`
+        );
+        await label.click();
+      }
+
+      await testSubjects.click('confirmSaveSavedObjectButton');
+      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+        testSubjects
+          .missingOrFail('confirmSaveSavedObjectButton')
+          .then(() => true)
+          .catch(() => false)
+      );
+
+      // make sure the dashboard page actually loaded
+      const dashboardItemCount = await dashboardPage.getSharedItemsCount();
+      expect(dashboardItemCount).to.not.eql(undefined);
+
+      const embeddable = await testSubjects.find('aiopsEmbeddablePatternAnalysis', 30 * 1000);
+      expect(await embeddable.isDisplayed()).to.eql(
+        true,
+        'Log pattern analysis chart should be displayed in dashboard'
+      );
+    },
+
+    async attachToDashboard() {
+      await this.openAttachmentsMenu();
+      await this.clickAttachToDashboard();
+      await this.confirmAttachToDashboard();
+      await this.completeSaveToDashboardForm(true);
+    },
+
+    async attachToCase(params: CreateCaseParams) {
+      await this.openAttachmentsMenu();
+      await this.clickAttachToCase();
+
+      await cases.create.createCaseFromModal(params);
     },
   };
 }

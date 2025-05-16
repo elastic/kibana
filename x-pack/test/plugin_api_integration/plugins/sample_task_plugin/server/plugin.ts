@@ -15,7 +15,6 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
-  EphemeralTask,
 } from '@kbn/task-manager-plugin/server';
 import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
 import { getDeleteTaskRunResult, TaskPriority } from '@kbn/task-manager-plugin/server/task';
@@ -39,8 +38,6 @@ export class SampleTaskManagerFixturePlugin
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const taskTestingEvents = new EventEmitter();
     taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
-
-    const tmStart = this.taskManagerStart;
 
     const defaultSampleTaskConfig = {
       timeout: '1m',
@@ -73,7 +70,7 @@ export class SampleTaskManagerFixturePlugin
           const [{ elasticsearch }] = await core.getStartServices();
           await elasticsearch.client.asInternalUser.index({
             index: '.kibana_task_manager_test_result',
-            body: {
+            document: {
               type: 'task',
               taskId: taskInstance.id,
               params: JSON.stringify(runParams),
@@ -110,6 +107,42 @@ export class SampleTaskManagerFixturePlugin
           },
         },
       },
+      sampleRecurringTask: {
+        timeout: '1m',
+        title: 'Sample Recurring Task',
+        description: 'A sample recurring task for testing the task_manager.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => ({ count: state.count }),
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const { params, state, schedule } = taskInstance;
+
+            const [{ elasticsearch }] = await core.getStartServices();
+            await elasticsearch.client.asInternalUser.index({
+              index: '.kibana_task_manager_test_result',
+              document: {
+                type: 'task',
+                taskId: taskInstance.id,
+                params: JSON.stringify(params),
+                state: JSON.stringify(state),
+                ranAt: new Date(),
+              },
+              refresh: true,
+            });
+
+            return {
+              state: {},
+              schedule,
+            };
+          },
+        }),
+      },
       singleAttemptSampleTask: {
         ...defaultSampleTaskConfig,
         title: 'Failing Sample Task',
@@ -132,6 +165,36 @@ export class SampleTaskManagerFixturePlugin
         maxConcurrency: 1,
         timeout: '60s',
         description: 'A sample task that can only have one concurrent instance.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => ({ count: state.count }),
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
+      },
+      sampleTaskSharedConcurrencyType1: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Shared Concurrency 1',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description: 'A sample task that shares concurrency with another task type.',
+        stateSchemaByVersion: {
+          1: {
+            up: (state: Record<string, unknown>) => ({ count: state.count }),
+            schema: schema.object({
+              count: schema.maybe(schema.number()),
+            }),
+          },
+        },
+      },
+      sampleTaskSharedConcurrencyType2: {
+        ...defaultSampleTaskConfig,
+        title: 'Sample Task With Shared Concurrency 2',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description: 'A sample task that shares concurrency with another task type.',
         stateSchemaByVersion: {
           1: {
             up: (state: Record<string, unknown>) => ({ count: state.count }),
@@ -344,37 +407,6 @@ export class SampleTaskManagerFixturePlugin
         description:
           'A task that can only have two concurrent instance and tracks its execution timing.',
         ...taskWithTiming,
-      },
-      taskWhichExecutesOtherTasksEphemerally: {
-        title: 'Task Which Executes Other Tasks Ephemerally',
-        description: 'A sample task used to validate how ephemeral tasks are executed.',
-        maxAttempts: 1,
-        timeout: '60s',
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
-          async run() {
-            const {
-              params: { tasks = [] },
-            } = taskInstance;
-
-            const tm = await tmStart;
-            const executions = await Promise.all(
-              (tasks as EphemeralTask[]).map(async (task) => {
-                return tm
-                  .ephemeralRunNow(task)
-                  .then((result) => ({
-                    result,
-                  }))
-                  .catch((error) => ({
-                    error,
-                  }));
-              })
-            );
-
-            return {
-              state: { executions },
-            };
-          },
-        }),
       },
     });
 

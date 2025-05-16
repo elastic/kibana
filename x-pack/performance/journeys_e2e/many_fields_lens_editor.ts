@@ -11,7 +11,7 @@ import { subj } from '@kbn/test-subj-selector';
 export const journey = new Journey({
   // Failing: See https://github.com/elastic/kibana/issues/167496
   kbnArchives: ['x-pack/performance/kbn_archives/lens_many_fields'],
-  esArchives: ['test/functional/fixtures/es_archiver/stress_test'],
+  esArchives: ['src/platform/test/functional/fixtures/es_archiver/stress_test'],
 })
   .step('Go to Visualize Library landing page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(

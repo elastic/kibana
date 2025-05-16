@@ -12,7 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('machine learning - data frame analytics', function () {
-    this.tags(['ml', 'skipFirefox']);
+    this.tags(['ml']);
 
     before(async () => {
       await ml.securityCommon.createMlRoles();

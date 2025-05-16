@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import http from 'http';
+import type http from 'http';
 
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
-import { ProxyArgs, Simulator } from './simulator';
+import type { ProxyArgs } from './simulator';
+import { Simulator } from './simulator';
 
 export class BedrockSimulator extends Simulator {
   private readonly returnError: boolean;
@@ -30,7 +31,7 @@ export class BedrockSimulator extends Simulator {
     }
 
     if (
-      request.url === '/model/anthropic.claude-3-sonnet-20240229-v1:0/invoke-with-response-stream'
+      request.url === '/model/anthropic.claude-3-5-sonnet-20240620-v1:0/invoke-with-response-stream'
     ) {
       return BedrockSimulator.sendStreamResponse(response);
     }

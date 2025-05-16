@@ -18,9 +18,7 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { login } from '../../../../tasks/login';
 
-// Currently FF are not supported on MKI environments, so this test should be skipped from MKI environments.
-// Once `manualRuleRunEnabled` FF is removed, we can remove `@skipInServerlessMKI` as well
-describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+describe('Manual rule run', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();
@@ -32,7 +30,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
     );
     manualRuleRunFromDetailsPage();
 
-    cy.get(TOASTER).should('have.text', 'Successfully scheduled backfill for 1 rule');
+    cy.get(TOASTER).should('have.text', 'Successfully scheduled manual run for 1 rule');
   });
 
   it('schedule from rules management table', () => {
@@ -42,7 +40,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
         disableAutoRefresh();
         manuallyRunFirstRule();
 
-        cy.get(TOASTER).should('have.text', 'Successfully scheduled backfill for 1 rule');
+        cy.get(TOASTER).should('have.text', 'Successfully scheduled manual run for 1 rule');
       }
     );
   });

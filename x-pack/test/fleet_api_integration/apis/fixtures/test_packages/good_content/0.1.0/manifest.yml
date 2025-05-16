@@ -1,0 +1,32 @@
+format_version: 3.2.0
+name: good_content
+title: Good content package
+description: >
+  This package is a dummy example for packages with the content type.
+  These packages contain resources that are useful with data ingested by other integrations.
+  They are not used to configure data sources.
+version: 0.1.0
+type: content
+source:
+  license: "Apache-2.0"
+conditions:
+  kibana:
+    version: '^8.16.0' #TBD
+  elastic:
+    subscription: 'basic'
+discovery:
+  fields:
+    - name: process.pid
+screenshots:
+  - src: /img/kibana-system.png
+    title: kibana system
+    size: 1220x852
+    type: image/png
+icons:
+  - src: /img/system.svg
+    title: system
+    size: 1000x1000
+    type: image/svg+xml
+owner:
+  github: elastic/ecosystem
+  type: elastic

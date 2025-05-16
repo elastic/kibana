@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Client } from '@elastic/elasticsearch';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { basename } from 'node:path';
@@ -22,7 +22,7 @@ import {
   ALERT_WORKFLOW_TAGS,
   ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -55,7 +55,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     const ruleType = 'test.waitingRule';
     const aadIndex = `.alerts-${ruleType.toLowerCase()}.alerts-default`;
 
-    describe(`should be handled for alerting framework based AaD`, () => {
+    describe(`should be handled for alerting framework based AaD`, function () {
+      this.tags('skipFIPS');
       it('for a single conflicted alert', async () => {
         const source = uuidv4();
         const count = 1;
@@ -99,7 +100,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         await esTestIndexTool.waitForDocs(source, 'rule-starting-2');
 
         log(`ad-hoc update the alert doc`);
-        await adHocUpdate(es, aadIndex, initialDocs[0]._id);
+        await adHocUpdate(es, aadIndex, initialDocs[0]._id!);
 
         log(`signal the rule to finish`);
         await esTestIndexTool.indexDoc(source, 'rule-complete-2');
@@ -157,8 +158,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         await esTestIndexTool.waitForDocs(source, 'rule-starting-2');
 
         log(`ad-hoc update the 2nd and 4th alert docs`);
-        await adHocUpdate(es, aadIndex, initialDocs[1]._id);
-        await adHocUpdate(es, aadIndex, initialDocs[3]._id);
+        await adHocUpdate(es, aadIndex, initialDocs[1]._id!);
+        await adHocUpdate(es, aadIndex, initialDocs[3]._id!);
 
         log(`signal the rule to finish`);
         await esTestIndexTool.indexDoc(source, 'rule-complete-2');
@@ -195,11 +196,9 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       const searchResult = await es.search<AlertDoc>({
         index,
         size: count,
-        body: {
-          query: {
-            bool: {
-              must: [{ term: { 'kibana.alert.rule.uuid': ruleId } }],
-            },
+        query: {
+          bool: {
+            must: [{ term: { 'kibana.alert.rule.uuid': ruleId } }],
           },
         },
       });
@@ -255,8 +254,7 @@ function compareAlertDocs(
 
 // perform an adhoc update to an alert doc
 async function adHocUpdate(es: Client, index: string, id: string) {
-  const body = { doc: DocUpdate };
-  await es.update({ index, id, body, refresh: true });
+  await es.update({ index, id, doc: DocUpdate, refresh: true });
 }
 
 // we'll do the adhoc updates with this data
@@ -287,6 +285,8 @@ const SkipFields = [
   'kibana.alert.workflow_tags',
   'kibana.alert.workflow_status',
   'kibana.alert.consecutive_matches',
+  'kibana.alert.severity_improving',
+  'kibana.alert.previous_action_group',
 ];
 
 function log(message: string) {

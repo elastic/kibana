@@ -93,7 +93,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         'The length of the tag is too long. The maximum length is 256 characters.'
       );
 
-      const category = await testSubjects.find('case-create-form-category');
+      const category = await testSubjects.find('caseCategory');
       expect(await category.getVisibleText()).contain(
         'The length of the category is too long. The maximum length is 50 characters.'
       );
@@ -150,7 +150,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await cases.create.openCreateCasePage();
 
         // verify custom fields on create case page
-        await testSubjects.existOrFail('create-case-custom-fields');
+        await testSubjects.existOrFail('caseCustomFields');
 
         await cases.create.setTitle(caseTitle);
         await cases.create.setDescription('this is a test description');
@@ -207,7 +207,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         await cases.create.openCreateCasePage();
 
         // verify custom fields on create case page
-        await testSubjects.existOrFail('create-case-custom-fields');
+        await testSubjects.existOrFail('caseCustomFields');
 
         await cases.create.setTitle(caseTitle);
         await cases.create.setDescription('this is a test description');

@@ -50,10 +50,12 @@ export class ReportingPageObject extends FtrService {
 
       return url;
     } catch (err) {
-      const errorTextEl = await this.find.byCssSelector('[data-test-errorText]');
-      const errorText = await errorTextEl.getAttribute('data-test-errorText');
-      const newError = new Error(`Test report failed: ${errorText}: ${err}`);
-      throw newError;
+      let errorText = 'Unknown error';
+      if (await this.find.existsByCssSelector('[data-test-errorText]')) {
+        const errorTextEl = await this.find.byCssSelector('[data-test-errorText]');
+        errorText = (await errorTextEl.getAttribute('data-test-errorText')) ?? errorText;
+      }
+      throw new Error(`Test report failed: ${errorText}: ${err}`, { cause: err });
     }
   }
 
@@ -202,7 +204,7 @@ export class ReportingPageObject extends FtrService {
       const titleColumn = await row.findByTestSubject('reportingListItemObjectTitle');
       const title = await titleColumn.getVisibleText();
       if (title === reportTitle) {
-        titleColumn.click();
+        await titleColumn.click();
         return;
       }
     }

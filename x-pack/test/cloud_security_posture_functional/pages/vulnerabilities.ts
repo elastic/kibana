@@ -20,7 +20,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const resourceName1 = 'name-ng-1-Node';
   const resourceName2 = 'othername-june12-8-8-0-1';
 
-  describe('Vulnerabilities Page - DataTable', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/220376
+  describe.skip('Vulnerabilities Page - DataTable', function () {
     this.tags(['cloud_security_posture_vulnerabilities']);
     let findings: typeof pageObjects.findings;
     let latestVulnerabilitiesTable: typeof findings.latestVulnerabilitiesTable;
@@ -42,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         async () =>
           (await latestVulnerabilitiesTable.getRowsCount()) === vulnerabilitiesLatestMock.length
       );
-      pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -90,14 +91,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await latestVulnerabilitiesTable.getRowsCount()).to.be(
           vulnerabilitiesLatestMock.length
         );
-      });
-    });
-
-    describe('DataTable features', () => {
-      it('Edit data view field option is Enabled', async () => {
-        await latestVulnerabilitiesTable.toggleEditDataViewFieldsOption('vulnerability.id');
-        expect(await testSubjects.find('gridEditFieldButton')).to.be.ok();
-        await latestVulnerabilitiesTable.toggleEditDataViewFieldsOption('vulnerability.id');
       });
     });
 

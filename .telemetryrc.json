@@ -1,14 +1,19 @@
 [
   {
-    "output": "src/plugins/telemetry/schema/oss_plugins.json",
+    "output": "src/platform/plugins/shared/telemetry/schema/oss_plugins.json",
     "root": "src/plugins/",
-    "exclude": [
-      "src/plugins/kibana_usage_collection/server/collectors/config_usage/register_config_usage_collector.ts"
-    ]
+    "exclude": []
   },
   {
-    "output": "src/plugins/telemetry/schema/kbn_packages.json",
+    "output": "src/platform/plugins/shared/telemetry/schema/kbn_packages.json",
     "root": "packages/",
     "exclude": []
+  },
+  {
+    "output": "src/platform/plugins/shared/telemetry/schema/oss_platform.json",
+    "root": "src/platform/",
+    "exclude": [
+      "src/platform/plugins/private/kibana_usage_collection/server/collectors/config_usage/register_config_usage_collector.ts"
+    ]
   }
 ]

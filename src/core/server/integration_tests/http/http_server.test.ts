@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Server } from 'http';
@@ -15,6 +16,11 @@ import { Router } from '@kbn/core-http-router-server-internal';
 import { HttpServer, HttpConfig } from '@kbn/core-http-server-internal';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { Logger } from '@kbn/logging';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
+
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 describe('Http server', () => {
   let server: HttpServer;
@@ -43,6 +49,7 @@ describe('Http server', () => {
         enabled: false,
       },
       shutdownTimeout: moment.duration(5, 's'),
+      restrictInternalApis: false,
     } as any;
 
     server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
@@ -58,7 +65,7 @@ describe('Http server', () => {
       innerServerListener = innerServer.listener;
 
       const router = new Router('', logger, enhanceWithContext, {
-        isDev: false,
+        env,
         versionedRouterOptions: {
           defaultHandlerResolutionStrategy: 'oldest',
         },
@@ -66,6 +73,7 @@ describe('Http server', () => {
       router.post(
         {
           path: '/',
+          security: { authz: { enabled: false, reason: '' } },
           validate: false,
           options: { body: { accepts: 'application/json' } },
         },

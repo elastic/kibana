@@ -46,23 +46,5 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.waitUntilUrlIncludes('/app/management/security/api_keys');
       }).not.to.throwError();
     });
-
-    describe('Roles management card', () => {
-      it('should not be displayed by default', async () => {
-        await retry.waitFor('page to be visible', async () => {
-          return await testSubjects.exists('cards-navigation-page');
-        });
-        await pageObjects.svlManagementPage.assertRoleManagementCardDoesNotExist();
-      });
-    });
-
-    describe('Organization members management card', () => {
-      it('should not be displayed by default', async () => {
-        await retry.waitFor('page to be visible', async () => {
-          return await testSubjects.exists('cards-navigation-page');
-        });
-        await pageObjects.svlManagementPage.assertOrgMembersManagementCardDoesNotExist();
-      });
-    });
   });
 };

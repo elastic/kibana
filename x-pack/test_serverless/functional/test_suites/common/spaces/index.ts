@@ -9,6 +9,9 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Spaces', function () {
+    this.tags(['esGate']);
+
+    loadTestFile(require.resolve('./spaces_management.ts'));
     loadTestFile(require.resolve('./spaces_selection.ts'));
   });
 };

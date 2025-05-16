@@ -1,9 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/rule-data-utils",
-  "owner": [
-    "@elastic/security-detections-response",
-    "@elastic/response-ops",
-    "@elastic/obs-ux-management-team"
-  ]
-}

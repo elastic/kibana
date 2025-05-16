@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 interface RuleSpace {
   body: any;
@@ -19,7 +19,7 @@ export default function createRuleSuggestionValuesTests({ getService }: FtrProvi
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('rules/suggestions/values', async () => {
+  describe('rules/suggestions/values', () => {
     const objectRemover = new ObjectRemover(supertest);
     const space1 = Spaces[0].id;
     const space2 = Spaces[1].id;

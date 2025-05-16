@@ -130,6 +130,6 @@ export const navigateToResponseDetails = () => {
 /**
  * Click the Response button to open the response detail tab in the left section
  */
-export const clickAnalyzerPreviewTitleToOpenTimeline = () => {
+export const clickAnalyzerPreviewTitle = () => {
   cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ANALYZER_PREVIEW_TITLE_LINK).click();
 };

@@ -10,6 +10,8 @@ export default ({ getService, loadTestFile }: FtrProviderContext) => {
   const browser = getService('browser');
 
   describe('Discover alerting', function () {
+    this.tags(['esGate']);
+
     before(async function () {
       await browser.setWindowSize(1600, 1200);
     });

@@ -7,14 +7,15 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
-import { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
 import { get } from 'lodash';
 import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '@kbn/alerting-plugin/server/saved_objects';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
 import {
   getEventLog,
@@ -22,7 +23,7 @@ import {
   getUrlPrefix,
   ObjectRemover,
 } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function apiKeyBackfillTests({ getService }: FtrProviderContext) {
@@ -61,10 +62,8 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
     async function getApiKeysPendingInvalidation() {
       const result = await es.search({
         index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-        body: {
-          query: {
-            term: { type: 'api_key_pending_invalidation' },
-          },
+        query: {
+          term: { type: 'api_key_pending_invalidation' },
         },
       });
       return result.hits.hits.map((hit) => hit._source);
@@ -125,7 +124,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
     }
 
     it('should wait to invalidate API key until backfill for rule is complete', async () => {
-      const start = moment().utc().startOf('day').subtract(7, 'days').toISOString();
+      const start = moment().utc().startOf('day').subtract(13, 'days').toISOString();
       const end = moment().utc().startOf('day').subtract(4, 'day').toISOString();
       const spaceId = SuperuserAtSpace1.space.id;
 
@@ -175,7 +174,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([{ rule_id: ruleId1, start, end }])
+        .send([{ rule_id: ruleId1, ranges: [{ start, end }] }])
         .expect(200);
 
       const result = response.body;
@@ -184,7 +183,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
 
       // check that the ad hoc run SO was created
       const adHocRunSO1 = (await getAdHocRunSO(result[0].id)) as SavedObject<AdHocRunSO>;
-      const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params');
+      const adHocRun1: AdHocRunSO = get(adHocRunSO1, 'ad_hoc_run_params')!;
       expect(typeof adHocRun1.apiKeyId).to.be('string');
       expect(typeof adHocRun1.apiKeyToUse).to.be('string');
       expect(typeof adHocRun1.createdAt).to.be('string');
@@ -252,11 +251,22 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         expect(e?.event?.outcome).to.eql('success');
       }
 
-      // invoke the invalidate task
-      await runInvalidateTask();
+      // wait for all the ad hoc run SO to be deleted
+      await retry.try(async () => {
+        try {
+          // throws when not found
+          await getAdHocRunSO(backfillId);
+          throw new Error('should have thrown');
+        } catch (e) {
+          expect(e.message).not.to.eql('should have thrown');
+        }
+      });
 
       // pending API key should now be deleted because backfill is done
       await retry.try(async () => {
+        // invoke the invalidate task
+        await runInvalidateTask();
+
         const results = await getApiKeysPendingInvalidation();
         expect(results.length).to.eql(0);
         return results;

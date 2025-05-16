@@ -6,8 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, CoreSetup, SavedObject } from '@kbn/core/server';
-import { PluginsSetup, PluginsStart } from '.';
+import type { CoreSetup, IRouter, SavedObject } from '@kbn/core/server';
+
+import type { PluginsSetup, PluginsStart } from '.';
 
 export function registerHiddenSORoutes(
   router: IRouter,
@@ -18,6 +19,12 @@ export function registerHiddenSORoutes(
   router.get(
     {
       path: '/api/hidden_saved_objects/get-decrypted-as-internal-user/{type}/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { params: (value) => ({ value }) },
     },
     async (context, request, response) => {
@@ -45,6 +52,12 @@ export function registerHiddenSORoutes(
   router.get(
     {
       path: '/api/hidden_saved_objects/create-point-in-time-finder-decrypted-as-internal-user',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { query: schema.object({ type: schema.string() }) },
     },
     async (context, request, response) => {
@@ -83,6 +96,12 @@ export function registerHiddenSORoutes(
   router.get(
     {
       path: '/api/hidden_saved_objects/_find',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         query: schema.object({
           per_page: schema.number({ min: 0, defaultValue: 20 }),
@@ -133,6 +152,12 @@ export function registerHiddenSORoutes(
   router.get(
     {
       path: '/api/hidden_saved_objects/{type}/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { params: (value) => ({ value }) },
     },
     async (context, request, response) => {
@@ -147,6 +172,12 @@ export function registerHiddenSORoutes(
   router.post(
     {
       path: '/api/hidden_saved_objects/{type}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -186,6 +217,12 @@ export function registerHiddenSORoutes(
   router.put(
     {
       path: '/api/hidden_saved_objects/{type}/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -221,6 +258,12 @@ export function registerHiddenSORoutes(
   router.post(
     {
       path: '/api/hidden_saved_objects/_bulk_get',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({
@@ -243,6 +286,12 @@ export function registerHiddenSORoutes(
   router.post(
     {
       path: '/api/hidden_saved_objects/_bulk_create',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({

@@ -1,0 +1,50 @@
+.resultField {
+  padding: 0;
+  border-bottom: 1px solid $euiColorLightShade;
+  position: relative;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  >.euiTableRow:hover {
+    background-color: $euiColorEmptyShade;
+  }
+
+  >.euiTableRowCell {
+    border-top: none;
+    border-bottom: none;
+
+    >.euiTableCellContent {
+      padding: $euiSizeS;
+      font-family: $euiCodeFontFamily;
+      color: $euiColorMediumShade;
+    }
+  }
+}
+
+.denseVectorFieldValue {
+  position: absolute;
+  right: 0;
+  top: $euiSizeS;
+  background-color: $euiColorEmptyShade;
+  padding: 0 $euiSizeS;
+}
+
+.resultExpandColumn {
+  border-left: $euiBorderThin;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100%;
+  padding: 0 0 0 $euiSizeS;
+}
+
+.resultHeader {
+  padding: 0 $euiSizeS $euiSizeXS 0;
+}
+
+.euiToken.resultField__token {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}

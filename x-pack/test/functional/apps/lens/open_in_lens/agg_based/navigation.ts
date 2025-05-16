@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
+  const { visualize, lens } = getPageObjects(['visualize', 'lens']);
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -17,13 +17,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Visualize to Lens and back', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
-    });
-
-    before(async () => {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickLineChart();
       await visualize.clickNewSearch();
-      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should let the user return back to Visualize if no changes were made', async () => {

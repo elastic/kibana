@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 import {
-  getSAMLResponse,
   getSAMLRequestId,
+  getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
-import { PluginSetupDependencies } from '.';
+
+import type { PluginSetupDependencies } from '.';
 
 export function initRoutes(
   pluginContext: PluginInitializerContext,
@@ -23,6 +24,7 @@ export function initRoutes(
       path: '/saml_provider/login',
       validate: false,
       options: { authRequired: false },
+      security: { authz: { enabled: false, reason: '' } },
     },
     async (context, request, response) => {
       const samlResponse = await getSAMLResponse({
@@ -47,7 +49,12 @@ export function initRoutes(
   );
 
   core.http.resources.register(
-    { path: '/saml_provider/login/submit.js', validate: false, options: { authRequired: false } },
+    {
+      path: '/saml_provider/login/submit.js',
+      validate: false,
+      security: { authz: { enabled: false, reason: '' } },
+      options: { authRequired: false },
+    },
     (context, request, response) => {
       return response.renderJs({ body: 'document.getElementById("loginForm").submit();' });
     }
@@ -58,6 +65,7 @@ export function initRoutes(
       path: '/saml_provider/logout',
       validate: false,
       options: { authRequired: false },
+      security: { authz: { enabled: false, reason: '' } },
     },
     async (context, request, response) => {
       return response.redirected({ headers: { location: '/logout?SAMLResponse=something' } });
@@ -75,6 +83,7 @@ export function initRoutes(
         path: '/mock_idp/login',
         validate: false,
         options: { authRequired: false },
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
         return response.redirected({
@@ -90,6 +99,7 @@ export function initRoutes(
       path: '/saml_provider/never_login',
       validate: false,
       options: { authRequired: false },
+      security: { authz: { enabled: false, reason: '' } },
     },
     async (context, request, response) => {
       return response.renderHtml({

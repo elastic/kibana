@@ -1,0 +1,24 @@
+# TO_VERSION
+
+The TO_VERSION function converts an input string into a version value.
+
+## Syntax
+
+`TO_VERSION(field)`
+
+### Parameters
+
+#### field
+
+The input value to be converted. This can be a single or multi-valued column or an expression.
+
+## Examples
+
+```esql
+ROW v = TO_VERSION("1.2.3")
+```
+
+```esql
+ROW version_string = "2.3.4"
+| EVAL version = TO_VERSION(version_string)
+```

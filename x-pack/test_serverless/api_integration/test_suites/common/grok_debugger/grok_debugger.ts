@@ -19,10 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Grok Debugger Routes', function () {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('Simulate', () => {
       it('should simulate a valid pattern', async () => {

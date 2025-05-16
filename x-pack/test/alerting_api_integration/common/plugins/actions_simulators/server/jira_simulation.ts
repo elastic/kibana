@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
@@ -17,6 +17,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.post(
     {
       path: `${path}/rest/api/2/issue`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },
@@ -37,6 +43,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.put(
     {
       path: `${path}/rest/api/2/issue/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },
@@ -54,6 +66,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.get(
     {
       path: `${path}/rest/api/2/issue/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },
@@ -80,6 +98,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.post(
     {
       path: `${path}/rest/api/2/issue/{id}/comment`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },
@@ -100,7 +124,13 @@ export function initPlugin(router: IRouter, path: string) {
 
   router.get(
     {
-      path: `${path}/rest/capabilities`,
+      path: `${path}/rest/api/2/issue/createmeta/{projectId}/issuetypes`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },
@@ -112,37 +142,14 @@ export function initPlugin(router: IRouter, path: string) {
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       return jsonResponse(res, 200, {
-        capabilities: {},
-      });
-    }
-  );
-
-  router.get(
-    {
-      path: `${path}/rest/api/2/issue/createmeta`,
-      options: {
-        authRequired: false,
-      },
-      validate: {},
-    },
-    async function (
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> {
-      return jsonResponse(res, 200, {
-        projects: [
+        issueTypes: [
           {
-            issuetypes: [
-              {
-                id: '10006',
-                name: 'Task',
-              },
-              {
-                id: '10007',
-                name: 'Sub-task',
-              },
-            ],
+            id: '10006',
+            name: 'Task',
+          },
+          {
+            id: '10007',
+            name: 'Sub-task',
           },
         ],
       });

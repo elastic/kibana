@@ -1,0 +1,128 @@
+openapi: 3.0.0
+info:
+  title: Packs Schema
+  version: '2023-10-31'
+paths:
+  /api/osquery/packs:
+    get:
+      summary: Get packs
+      description: Get a list of all query packs.
+      operationId: OsqueryFindPacks
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
+        - name: sort
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
+        - name: sortOrder
+          in: query
+          required: false
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './find_packs.schema.yaml#/components/schemas/FindPacksResponse'
+    post:
+      summary: Create a pack
+      description: Create a query pack.
+      operationId: OsqueryCreatePacks
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './create_pack.schema.yaml#/components/schemas/CreatePacksRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './create_pack.schema.yaml#/components/schemas/CreatePacksResponse'
+  /api/osquery/packs/{id}:
+    get:
+      summary: Get pack details
+      description: Get the details of a query pack using the pack ID.
+      operationId: OsqueryGetPacksDetails
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './find_packs.schema.yaml#/components/schemas/FindPackResponse'
+    delete:
+      summary: Delete a pack
+      description: Delete a query pack using the pack ID.
+      operationId: OsqueryDeletePacks
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { }
+                example: { }
+    put:
+      summary: Update a pack
+      description: |
+        Update a query pack using the pack ID.
+        > info
+        > You cannot update a prebuilt pack.
+      operationId: OsqueryUpdatePacks
+      x-codegen-enabled: true
+      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksResponse'

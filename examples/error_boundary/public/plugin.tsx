@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { EuiButton, EuiProvider } from '@elastic/eui';
 
 import React, { useState } from 'react';
@@ -77,7 +79,7 @@ export class ErrorBoundaryExamplePlugin implements Plugin<void, void, SetupDeps>
         // Using the "EuiProvider" here rather than KibanaRenderContextProvider, because KibanaRenderContextProvider
         // wraps KibanaErrorBoundaryProvider and KibanaErrorBoundary and we want to test it directly, not a wrapper.
         ReactDOM.render(
-          <EuiProvider>
+          <EuiProvider highContrastMode={false}>
             <KibanaErrorBoundaryProvider analytics={core.analytics}>
               <KibanaErrorBoundary>
                 <KibanaPageTemplate>

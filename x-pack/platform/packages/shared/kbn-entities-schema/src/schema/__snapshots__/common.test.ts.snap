@@ -1,0 +1,148 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`schemas metadataSchema should error on empty string 1`] = `
+Object {
+  "error": [ZodError: [
+  {
+    "path": [
+      "source"
+    ],
+    "code": "custom",
+    "message": "source should not be empty"
+  },
+  {
+    "path": [
+      "destination"
+    ],
+    "code": "custom",
+    "message": "destination should not be empty"
+  }
+]],
+  "success": false,
+}
+`;
+
+exports[`schemas metadataSchema should error on empty string for destination 1`] = `
+Object {
+  "error": [ZodError: [
+  {
+    "path": [
+      "destination"
+    ],
+    "code": "custom",
+    "message": "destination should not be empty"
+  }
+]],
+  "success": false,
+}
+`;
+
+exports[`schemas metadataSchema should error on empty string for source 1`] = `
+Object {
+  "error": [ZodError: [
+  {
+    "path": [
+      "source"
+    ],
+    "code": "custom",
+    "message": "source should not be empty"
+  },
+  {
+    "path": [
+      "destination"
+    ],
+    "code": "custom",
+    "message": "destination should not be empty"
+  }
+]],
+  "success": false,
+}
+`;
+
+exports[`schemas metadataSchema should error when limit is too low 1`] = `
+Object {
+  "error": [ZodError: [
+  {
+    "path": [
+      "limit"
+    ],
+    "code": "custom",
+    "message": "limit for terms aggregation should be greater than 1"
+  }
+]],
+  "success": false,
+}
+`;
+
+exports[`schemas metadataSchema should parse successfully with a source and desitination 1`] = `
+Object {
+  "data": Object {
+    "aggregation": Object {
+      "limit": 10,
+      "lookbackPeriod": undefined,
+      "type": "terms",
+    },
+    "destination": "hostName",
+    "source": "host.name",
+  },
+  "success": true,
+}
+`;
+
+exports[`schemas metadataSchema should parse successfully with an valid string 1`] = `
+Object {
+  "data": Object {
+    "aggregation": Object {
+      "limit": 10,
+      "lookbackPeriod": undefined,
+      "type": "terms",
+    },
+    "destination": "host.name",
+    "source": "host.name",
+  },
+  "success": true,
+}
+`;
+
+exports[`schemas metadataSchema should parse successfully with just a source 1`] = `
+Object {
+  "data": Object {
+    "aggregation": Object {
+      "limit": 10,
+      "lookbackPeriod": undefined,
+      "type": "terms",
+    },
+    "destination": "host.name",
+    "source": "host.name",
+  },
+  "success": true,
+}
+`;
+
+exports[`schemas metadataSchema should parse successfully with valid object 1`] = `
+Object {
+  "data": Object {
+    "aggregation": Object {
+      "limit": 10,
+      "lookbackPeriod": undefined,
+      "type": "terms",
+    },
+    "destination": "hostName",
+    "source": "host.name",
+  },
+  "success": true,
+}
+`;
+
+exports[`schemas semVerSchema should not validate with 0.9 1`] = `
+Object {
+  "error": [ZodError: [
+  {
+    "code": "custom",
+    "message": "The string does use the Semantic Versioning (Semver) format of {major}.{minor}.{patch} (e.g., 1.0.0), ensure each part contains only digits.",
+    "path": []
+  }
+]],
+  "success": false,
+}
+`;

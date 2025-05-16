@@ -9,12 +9,16 @@ import axios from 'axios';
 import semver from 'semver';
 import { map } from 'lodash';
 import { PackagePolicy, CreatePackagePolicyResponse, API_VERSIONS } from '@kbn/fleet-plugin/common';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { KbnClient } from '@kbn/test';
 import {
   GetEnrollmentAPIKeysResponse,
   CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
 import { ToolingLog } from '@kbn/tooling-log';
+import chalk from 'chalk';
+import pRetry from 'p-retry';
 
 export const DEFAULT_HEADERS = Object.freeze({
   'x-elastic-internal-product': 'security-solution',
@@ -38,10 +42,10 @@ export const getInstalledIntegration = async (kbnClient: KbnClient, integrationN
 export const createAgentPolicy = async (
   kbnClient: KbnClient,
   log: ToolingLog,
-  agentPolicyName = 'Osquery policy'
+  agentPolicyName = 'Osquery policy',
+  integrationName: string = 'osquery_manager'
 ) => {
-  log.info(`Creating "${agentPolicyName}" agent policy`);
-
+  log.info(chalk.bold(`Creating "${agentPolicyName}" agent policy`));
   const {
     data: {
       item: { id: agentPolicyId },
@@ -60,12 +64,26 @@ export const createAgentPolicy = async (
       inactivity_timeout: 1209600,
     },
   });
+  log.indent(4, () => log.info(`Created "${agentPolicyName}" agent policy`));
 
-  log.info(`Adding integration to ${agentPolicyId}`);
+  log.info(
+    chalk.bold(
+      `Adding "${integrationName}" integration to agent policy "${agentPolicyName}" with id ${agentPolicyId}`
+    )
+  );
 
-  await addIntegrationToAgentPolicy(kbnClient, agentPolicyId, agentPolicyName);
+  await addIntegrationToAgentPolicy(kbnClient, agentPolicyId, agentPolicyName, integrationName);
+  log.indent(4, () =>
+    log.info(
+      `Added "${integrationName}" integration to agent policy "${agentPolicyName}" with id ${agentPolicyId}`
+    )
+  );
 
-  log.info('Getting agent enrollment key');
+  log.info(
+    chalk.bold(
+      `Getting agent enrollment key for agent policy "${agentPolicyName}" with id ${agentPolicyId}`
+    )
+  );
   const { data: apiKeys } = await kbnClient.request<GetEnrollmentAPIKeysResponse>({
     method: 'GET',
     headers: {
@@ -73,7 +91,11 @@ export const createAgentPolicy = async (
     },
     path: '/api/fleet/enrollment_api_keys',
   });
-
+  log.indent(4, () =>
+    log.info(
+      `Got agent enrollment key for agent policy "${agentPolicyName}" with id ${agentPolicyId}`
+    )
+  );
   return apiKeys.items[0].api_key;
 };
 
@@ -119,34 +141,48 @@ const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.
 /**
  * Returns the Agent version that is available for install (will check `artifacts-api.elastic.co/v1/versions`)
  * that is equal to or less than `maxVersion`.
- * @param maxVersion
+ * @param kbnClient
+ * @param log
  */
 
-export const getLatestAvailableAgentVersion = async (kbnClient: KbnClient): Promise<string> => {
-  const kbnStatus = await kbnClient.status.get();
-  const agentVersions = await axios
-    .get('https://artifacts-api.elastic.co/v1/versions')
-    .then((response) =>
-      map(
-        response.data.versions.filter(isValidArtifactVersion),
-        (version) => version.split('-SNAPSHOT')[0]
-      )
-    );
+export const getLatestAvailableAgentVersion = async (
+  kbnClient: KbnClient,
+  log: ToolingLog
+): Promise<string> => {
+  let currentVersion: string;
 
-  let version =
-    semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
-    kbnStatus.version.number;
-
-  // Add `-SNAPSHOT` if version indicates it was from a snapshot or the build hash starts
-  // with `xxxxxxxxx` (value that seems to be present when running kibana from source)
-  if (
-    kbnStatus.version.build_snapshot ||
-    kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX')
-  ) {
-    version += '-SNAPSHOT';
+  try {
+    const kbnStatus = await kbnClient.status.get();
+    currentVersion = kbnStatus.version.number;
+  } catch {
+    log.warning(chalk.bold('Failed to get Kibana version, using package.json version'));
+    currentVersion = kibanaPackageJson.version;
   }
 
-  return version;
+  const agentVersions = await pRetry(
+    async () => {
+      const response = await axios.get('https://artifacts-api.elastic.co/v1/versions');
+      return map(
+        response.data.versions.filter(isValidArtifactVersion),
+        (version) => version.split('-SNAPSHOT')[0]
+      );
+    },
+    {
+      retries: 6,
+    }
+  ).catch(() => null);
+
+  if (!agentVersions) {
+    log.warning(
+      chalk.bold('Failed to get agent versions from artifacts-api, using package.json version')
+    );
+  }
+
+  const version = agentVersions
+    ? semver.maxSatisfying(agentVersions, `<=${currentVersion}`)
+    : currentVersion;
+
+  return `${version}-SNAPSHOT`;
 };
 
 export const generateRandomString = (length: number) => {

@@ -5,34 +5,44 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { services as apiIntegrationServices } from '../../../test/api_integration/services';
+import { services as apiIntegrationServices } from '@kbn/test-suites-xpack/api_integration/services';
+import { services as apiIntegrationDeploymentAgnosticServices } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { SecuritySolutionApiProvider } from '@kbn/test-suites-xpack/api_integration/services/security_solution_api.gen';
+import { services as platformApiIntegrationServices } from '@kbn/test-suites-xpack-platform/api_integration/services';
 
-/*
- * Some FTR services from api integration stateful tests are compatible with serverless environment
- * While adding a new one, make sure to verify that it works on both Kibana CI and MKI
- */
-const deploymentAgnosticApiIntegrationServices = _.pick(apiIntegrationServices, [
-  'deployment',
-  'es',
-  'esArchiver',
-  'esDeleteAllIndices',
-  'esSupertest',
-  'indexPatterns',
-  'ingestPipelines',
-  'indexManagement',
-  'kibanaServer',
-  'ml',
-  'randomness',
-  'retry',
-  'security',
-  'usageAPI',
-  'console',
-  'securitySolutionApi',
-]);
+// pick only services that work for any FTR config, e.g. 'samlAuth' requires SAML setup in config file
+const {
+  es,
+  esArchiver,
+  kibanaServer,
+  retry,
+  deployment,
+  randomness,
+  esDeleteAllIndices,
+  indexPatterns,
+  console,
+  esSupertest,
+  security,
+} = commonFunctionalServices;
 
 export const services = {
   // deployment agnostic FTR services
-  ...deploymentAgnosticApiIntegrationServices,
+  deployment,
+  es,
+  esArchiver,
+  esDeleteAllIndices,
+  esSupertest,
+  indexPatterns,
+  ingestPipelines: platformApiIntegrationServices.ingestPipelines,
+  indexManagement: platformApiIntegrationServices.indexManagement,
+  kibanaServer,
+  ml: apiIntegrationServices.ml,
+  randomness,
+  retry,
+  security,
+  usageAPI: platformApiIntegrationServices.usageAPI,
+  console,
+  securitySolutionApi: SecuritySolutionApiProvider,
+  alertingApi: apiIntegrationDeploymentAgnosticServices.alertingApi,
 };

@@ -16,7 +16,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
   describe('default dataView', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithRole('developer');
       await svlSearchNavigation.navigateToLandingPage();
 
       // re-create the default data view in case it has been cleaned up by another test
@@ -25,10 +25,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         name: 'default:all-data',
         title: '*,-.*',
       });
-    });
-
-    after(async () => {
-      await svlCommonPage.forceLogout();
     });
 
     it('should show discover but with no data', async () => {

@@ -1,0 +1,34 @@
+{
+  "type": "plugin",
+  "id": "@kbn/dashboard-enhanced-plugin",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "dashboardEnhanced",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "dashboardEnhanced"
+    ],
+    "requiredPlugins": [
+      "data",
+      "embeddable",
+      "share",
+      "uiActionsEnhanced",
+      "unifiedSearch"
+    ],
+    "requiredBundles": [
+      "dashboard",
+      "embeddable",
+      "embeddableEnhanced",
+      "kibanaUtils",
+      "imageEmbeddable",
+      "presentationUtil",
+      "uiActions"
+    ]
+  }
+}

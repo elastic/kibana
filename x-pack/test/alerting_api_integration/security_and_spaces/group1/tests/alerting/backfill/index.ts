@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function backfillTests({ loadTestFile }: FtrProviderContext) {
@@ -17,5 +17,6 @@ export default function backfillTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./delete_rule'));
     loadTestFile(require.resolve('./task_runner'));
+    loadTestFile(require.resolve('./task_runner_with_actions'));
   });
 }

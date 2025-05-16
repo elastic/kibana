@@ -1,0 +1,2345 @@
+openapi: 3.0.3
+info:
+  title: Data views
+  description: OpenAPI schema for data view endpoints
+  version: '0.1'
+  contact:
+    name: Kibana Core Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: https://{kibana_url}
+    variables:
+      kibana_url:
+        default: localhost:5601
+tags:
+  - name: data views
+    description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+paths:
+  /api/data_views:
+    get:
+      summary: Get all data views
+      operationId: getAllDataViewsDefault
+      tags:
+        - data views
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_view:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        namespaces:
+                          type: array
+                          items:
+                            type: string
+                        title:
+                          type: string
+                        typeMeta:
+                          type: object
+              examples:
+                getAllDataViewsResponse:
+                  $ref: '#/components/examples/get_data_views_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/data_view:
+    post:
+      summary: Create a data view
+      operationId: createDataViewDefaultw
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/create_data_view_request_object'
+            examples:
+              createDataViewRequest:
+                $ref: '#/components/examples/create_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/data_view_response_object'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/data_view/{viewId}:
+    get:
+      summary: Get a data view
+      operationId: getDataViewDefault
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/data_view_response_object'
+              examples:
+                getDataViewResponse:
+                  $ref: '#/components/examples/get_data_view_response'
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+    delete:
+      summary: Delete a data view
+      operationId: deleteDataViewDefault
+      description: |
+        WARNING: When you delete a data view, it cannot be recovered.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '204':
+          description: Indicates a successful call.
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+    post:
+      summary: Update a data view
+      operationId: updateDataViewDefault
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/view_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/update_data_view_request_object'
+            examples:
+              updateDataViewRequest:
+                $ref: '#/components/examples/update_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/data_view_response_object'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/data_view/{viewId}/fields:
+    post:
+      summary: Update data view fields metadata
+      operationId: updateFieldsMetadataDefault
+      description: |
+        Update fields presentation metadata such as count, customLabel, customDescription, and format.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/view_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fields
+              properties:
+                fields:
+                  description: The field object.
+                  type: object
+            examples:
+              updateFieldsMetadataRequest:
+                $ref: '#/components/examples/update_field_metadata_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/data_view/{viewId}/runtime_field:
+    post:
+      summary: Create a runtime field
+      operationId: createRuntimeFieldDefault
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/view_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - runtimeField
+              properties:
+                name:
+                  type: string
+                  description: |
+                    The name for a runtime field.
+                runtimeField:
+                  type: object
+                  description: |
+                    The runtime field definition object.
+            examples:
+              createRuntimeFieldRequest:
+                $ref: '#/components/examples/create_runtime_field_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+    put:
+      summary: Create or update a runtime field
+      operationId: createUpdateRuntimeFieldDefault
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - name: viewId
+          in: path
+          description: |
+            The ID of the data view fields you want to update.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - runtimeField
+              properties:
+                name:
+                  type: string
+                  description: |
+                    The name for a runtime field.
+                runtimeField:
+                  type: object
+                  description: |
+                    The runtime field definition object.
+            examples:
+              updateRuntimeFieldRequest:
+                $ref: '#/components/examples/create_runtime_field_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_view:
+                    type: object
+                  fields:
+                    type: array
+                    items:
+                      type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
+    get:
+      summary: Get a runtime field
+      operationId: getRuntimeFieldDefault
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/field_name'
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_view:
+                    type: object
+                  fields:
+                    type: array
+                    items:
+                      type: object
+              examples:
+                getRuntimeFieldResponse:
+                  $ref: '#/components/examples/get_runtime_field_response'
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+    delete:
+      summary: Delete a runtime field from a data view
+      operationId: deleteRuntimeFieldDefault
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/field_name'
+        - $ref: '#/components/parameters/view_id'
+      responses:
+        '200':
+          description: Indicates a successful call.
+        '404':
+          description: Object is not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404_response'
+    post:
+      summary: Update a runtime field
+      operationId: updateRuntimeFieldDefault
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/field_name'
+        - $ref: '#/components/parameters/view_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - runtimeField
+              properties:
+                runtimeField:
+                  type: object
+                  description: |
+                    The runtime field definition object.
+
+                    You can update following fields:
+
+                    - `type`
+                    - `script`
+            examples:
+              updateRuntimeFieldRequest:
+                $ref: '#/components/examples/update_runtime_field_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/default:
+    get:
+      summary: Get the default data view
+      operationId: getDefaultDataViewDefault
+      tags:
+        - data views
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data_view_id:
+                    type: string
+              examples:
+                getDefaultDataViewResponse:
+                  $ref: '#/components/examples/get_default_data_view_response'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+    post:
+      summary: Set the default data view
+      operationId: setDefaultDatailViewDefault
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - data_view_id
+              properties:
+                data_view_id:
+                  type: string
+                  nullable: true
+                  description: |
+                    The data view identifier. NOTE: The API does not validate whether it is a valid identifier. Use `null` to unset the default data view.
+                force:
+                  type: boolean
+                  description: Update an existing default data view identifier.
+                  default: false
+            examples:
+              setDefaultDataViewRequest:
+                $ref: '#/components/examples/set_default_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  acknowledged:
+                    type: boolean
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_response'
+  /api/data_views/swap_references:
+    post:
+      summary: Swap saved object references
+      operationId: swapDataViewsDefault
+      description: |
+        Changes saved object references from one data view identifier to another. WARNING: Misuse can break large numbers of saved objects! Practicing with a backup is recommended.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/swap_data_view_request_object'
+            examples:
+              swapDataViewRequest:
+                $ref: '#/components/examples/swap_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleteStatus:
+                    type: object
+                    properties:
+                      deletePerformed:
+                        type: boolean
+                      remainingRefs:
+                        type: integer
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: A saved object identifier.
+                        type:
+                          type: string
+                          description: The saved object type.
+  /api/data_views/swap_references/_preview:
+    post:
+      summary: Preview a saved object reference swap
+      operationId: previewSwapDataViewsDefault
+      description: |
+        Preview the impact of swapping saved object references from one data view identifier to another.
+      tags:
+        - data views
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/swap_data_view_request_object'
+            examples:
+              previewSwapDataViewRequest:
+                $ref: '#/components/examples/preview_swap_data_view_request'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: A saved object identifier.
+                        type:
+                          type: string
+                          description: The saved object type.
+components:
+  examples:
+    get_data_views_response:
+      summary: The get all data views API returns a list of data views.
+      value:
+        data_view:
+          - id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+            namespaces:
+              - default
+            title: kibana_sample_data_ecommerce
+            typeMeta: {}
+            name: Kibana Sample Data eCommerce
+          - id: d3d7af60-4c81-11e8-b3d7-01146121b73d
+            namespaces:
+              - default
+            title: kibana_sample_data_flights
+            name: Kibana Sample Data Flights
+          - id: 90943e30-9a47-11e8-b64d-95841ca0b247
+            namespaces:
+              - default
+            title: kibana_sample_data_logs
+            name: Kibana Sample Data Logs
+    create_data_view_request:
+      summary: Create a data view with runtime fields.
+      value:
+        data_view:
+          title: logstash-*
+          name: My Logstash data view
+          runtimeFieldMap:
+            runtime_shape_name:
+              type: keyword
+              script:
+                source: emit(doc['shape_name'].value)
+    get_data_view_response:
+      summary: The get data view API returns a JSON object that contains information about the data view.
+      value:
+        data_view:
+          id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+          version: WzUsMV0=
+          title: kibana_sample_data_ecommerce
+          timeFieldName: order_date
+          sourceFilters: []
+          fields:
+            _id:
+              count: 0
+              name: _id
+              type: string
+              esTypes:
+                - _id
+              scripted: false
+              searchable: true
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            _index:
+              count: 0
+              name: _index
+              type: string
+              esTypes:
+                - _index
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            _score:
+              count: 0
+              name: _score
+              type: number
+              scripted: false
+              searchable: false
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            _source:
+              count: 0
+              name: _source
+              type: _source
+              esTypes:
+                - _source
+              scripted: false
+              searchable: false
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: _source
+              shortDotsEnable: false
+              isMapped: true
+            category:
+              count: 0
+              name: category
+              type: string
+              esTypes:
+                - text
+              scripted: false
+              searchable: true
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            category.keyword:
+              count: 0
+              name: category.keyword
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              subType:
+                multi:
+                  parent: category
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            currency:
+              count: 0
+              name: currency
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            customer_birth_date:
+              count: 0
+              name: customer_birth_date
+              type: date
+              esTypes:
+                - date
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: date
+              shortDotsEnable: false
+              isMapped: true
+            customer_first_name:
+              count: 0
+              name: customer_first_name
+              type: string
+              esTypes:
+                - text
+              scripted: false
+              searchable: true
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            customer_first_name.keyword:
+              count: 0
+              name: customer_first_name.keyword
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              subType:
+                multi:
+                  parent: customer_first_name
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            customer_full_name:
+              count: 0
+              name: customer_full_name
+              type: string
+              esTypes:
+                - text
+              scripted: false
+              searchable: true
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            customer_full_name.keyword:
+              count: 0
+              name: customer_full_name.keyword
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              subType:
+                multi:
+                  parent: customer_full_name
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            customer_gender:
+              count: 0
+              name: customer_gender
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            customer_id:
+              count: 0
+              name: customer_id
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            customer_last_name:
+              count: 0
+              name: customer_last_name
+              type: string
+              esTypes:
+                - text
+              scripted: false
+              searchable: true
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            customer_last_name.keyword:
+              count: 0
+              name: customer_last_name.keyword
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              subType:
+                multi:
+                  parent: customer_last_name
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            customer_phone:
+              count: 0
+              name: customer_phone
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            day_of_week:
+              count: 0
+              name: day_of_week
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            day_of_week_i:
+              count: 0
+              name: day_of_week_i
+              type: number
+              esTypes:
+                - integer
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            email:
+              count: 0
+              name: email
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            event.dataset:
+              count: 0
+              name: event.dataset
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            geoip.city_name:
+              count: 0
+              name: geoip.city_name
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            geoip.continent_name:
+              count: 0
+              name: geoip.continent_name
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            geoip.country_iso_code:
+              count: 0
+              name: geoip.country_iso_code
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            geoip.location:
+              count: 0
+              name: geoip.location
+              type: geo_point
+              esTypes:
+                - geo_point
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: geo_point
+                params:
+                  transform: wkt
+              shortDotsEnable: false
+              isMapped: true
+            geoip.region_name:
+              count: 0
+              name: geoip.region_name
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            manufacturer:
+              count: 0
+              name: manufacturer
+              type: string
+              esTypes:
+                - text
+              scripted: false
+              searchable: true
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            manufacturer.keyword:
+              count: 0
+              name: manufacturer.keyword
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              subType:
+                multi:
+                  parent: manufacturer
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            order_date:
+              count: 0
+              name: order_date
+              type: date
+              esTypes:
+                - date
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: date
+              shortDotsEnable: false
+              isMapped: true
+            order_id:
+              count: 0
+              name: order_id
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            products._id:
+              count: 0
+              name: products._id
+              type: string
+              esTypes:
+                - text
+              scripted: false
+              searchable: true
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            products._id.keyword:
+              count: 0
+              name: products._id.keyword
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              subType:
+                multi:
+                  parent: products._id
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            products.base_price:
+              count: 0
+              name: products.base_price
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+                params:
+                  pattern: $0,0.00
+              shortDotsEnable: false
+              isMapped: true
+            products.base_unit_price:
+              count: 0
+              name: products.base_unit_price
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+                params:
+                  pattern: $0,0.00
+              shortDotsEnable: false
+              isMapped: true
+            products.category:
+              count: 0
+              name: products.category
+              type: string
+              esTypes:
+                - text
+              scripted: false
+              searchable: true
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            products.category.keyword:
+              count: 0
+              name: products.category.keyword
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              subType:
+                multi:
+                  parent: products.category
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            products.created_on:
+              count: 0
+              name: products.created_on
+              type: date
+              esTypes:
+                - date
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: date
+              shortDotsEnable: false
+              isMapped: true
+            products.discount_amount:
+              count: 0
+              name: products.discount_amount
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            products.discount_percentage:
+              count: 0
+              name: products.discount_percentage
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            products.manufacturer:
+              count: 1
+              name: products.manufacturer
+              type: string
+              esTypes:
+                - text
+              scripted: false
+              searchable: true
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            products.manufacturer.keyword:
+              count: 0
+              name: products.manufacturer.keyword
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              subType:
+                multi:
+                  parent: products.manufacturer
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            products.min_price:
+              count: 0
+              name: products.min_price
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+                params:
+                  pattern: $0,0.00
+              shortDotsEnable: false
+              isMapped: true
+            products.price:
+              count: 1
+              name: products.price
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+                params:
+                  pattern: $0,0.00
+              shortDotsEnable: false
+              isMapped: true
+            products.product_id:
+              count: 0
+              name: products.product_id
+              type: number
+              esTypes:
+                - long
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            products.product_name:
+              count: 1
+              name: products.product_name
+              type: string
+              esTypes:
+                - text
+              scripted: false
+              searchable: true
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            products.product_name.keyword:
+              count: 0
+              name: products.product_name.keyword
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              subType:
+                multi:
+                  parent: products.product_name
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            products.quantity:
+              count: 0
+              name: products.quantity
+              type: number
+              esTypes:
+                - integer
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            products.sku:
+              count: 0
+              name: products.sku
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            products.tax_amount:
+              count: 0
+              name: products.tax_amount
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            products.taxful_price:
+              count: 0
+              name: products.taxful_price
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+                params:
+                  pattern: $0,0.00
+              shortDotsEnable: false
+              isMapped: true
+            products.taxless_price:
+              count: 0
+              name: products.taxless_price
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+                params:
+                  pattern: $0,0.00
+              shortDotsEnable: false
+              isMapped: true
+            products.unit_discount_amount:
+              count: 0
+              name: products.unit_discount_amount
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            sku:
+              count: 0
+              name: sku
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            taxful_total_price:
+              count: 0
+              name: taxful_total_price
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+                params:
+                  pattern: $0,0.[00]
+              shortDotsEnable: false
+              isMapped: true
+            taxless_total_price:
+              count: 0
+              name: taxless_total_price
+              type: number
+              esTypes:
+                - half_float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+                params:
+                  pattern: $0,0.00
+              shortDotsEnable: false
+              isMapped: true
+            total_quantity:
+              count: 1
+              name: total_quantity
+              type: number
+              esTypes:
+                - integer
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            total_unique_products:
+              count: 0
+              name: total_unique_products
+              type: number
+              esTypes:
+                - integer
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            type:
+              count: 0
+              name: type
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            user:
+              count: 0
+              name: user
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+          typeMeta: {}
+          fieldFormats:
+            taxful_total_price:
+              id: number
+              params:
+                pattern: $0,0.[00]
+            products.price:
+              id: number
+              params:
+                pattern: $0,0.00
+            taxless_total_price:
+              id: number
+              params:
+                pattern: $0,0.00
+            products.taxless_price:
+              id: number
+              params:
+                pattern: $0,0.00
+            products.taxful_price:
+              id: number
+              params:
+                pattern: $0,0.00
+            products.min_price:
+              id: number
+              params:
+                pattern: $0,0.00
+            products.base_unit_price:
+              id: number
+              params:
+                pattern: $0,0.00
+            products.base_price:
+              id: number
+              params:
+                pattern: $0,0.00
+          runtimeFieldMap: {}
+          fieldAttrs:
+            products.manufacturer:
+              count: 1
+            products.price:
+              count: 1
+            products.product_name:
+              count: 1
+            total_quantity:
+              count: 1
+          allowNoIndex: false
+          name: Kibana Sample Data eCommerce
+          namespaces:
+            - default
+    update_data_view_request:
+      summary: Update some properties for a data view.
+      value:
+        data_view:
+          title: kibana_sample_data_ecommerce
+          timeFieldName: order_date
+          allowNoIndex: false
+          name: Kibana Sample Data eCommerce
+        refresh_fields: true
+    update_field_metadata_request:
+      summary: Update metadata for multiple fields.
+      value:
+        fields:
+          field1:
+            count: 123
+            customLabel: Field 1 label
+          field2:
+            customLabel: Field 2 label
+            customDescription: Field 2 description
+    create_runtime_field_request:
+      summary: Create a runtime field.
+      value:
+        name: runtimeFoo
+        runtimeField:
+          type: long
+          script:
+            source: emit(doc["foo"].value)
+    get_runtime_field_response:
+      summary: The get runtime field API returns a JSON object that contains information about the runtime field (`hour_of_day`) and the data view (`d3d7af60-4c81-11e8-b3d7-01146121b73d`).
+      value:
+        fields:
+          - count: 0
+            name: hour_of_day
+            type: number
+            esTypes:
+              - long
+            scripted: false
+            searchable: true
+            aggregatable: true
+            readFromDocValues: false
+            shortDotsEnable: false
+            runtimeField:
+              type: long
+              script:
+                source: emit(doc['timestamp'].value.getHour());
+        data_view:
+          id: d3d7af60-4c81-11e8-b3d7-01146121b73d
+          version: WzM2LDJd
+          title: kibana_sample_data_flights
+          timeFieldName: timestamp
+          sourceFilters: []
+          fields:
+            hour_of_day:
+              count: 0
+              name: hour_of_day
+              type: number
+              esTypes:
+                - long
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: false
+              format:
+                id: number
+                params:
+                  pattern: '00'
+              shortDotsEnable: false
+              runtimeField:
+                type: long
+                script:
+                  source: emit(doc['timestamp'].value.getHour());
+            AvgTicketPrice:
+              count: 0
+              name: AvgTicketPrice
+              type: number
+              esTypes:
+                - float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+                params:
+                  pattern: $0,0.[00]
+              shortDotsEnable: false
+              isMapped: true
+            Cancelled:
+              count: 0
+              name: Cancelled
+              type: boolean
+              esTypes:
+                - boolean
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: boolean
+              shortDotsEnable: false
+              isMapped: true
+            Carrier:
+              count: 0
+              name: Carrier
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            Dest:
+              count: 0
+              name: Dest
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            DestAirportID:
+              count: 0
+              name: DestAirportID
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            DestCityName:
+              count: 0
+              name: DestCityName
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            DestCountry:
+              count: 0
+              name: DestCountry
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            DestLocation:
+              count: 0
+              name: DestLocation
+              type: geo_point
+              esTypes:
+                - geo_point
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: geo_point
+                params:
+                  transform: wkt
+              shortDotsEnable: false
+              isMapped: true
+            DestRegion:
+              count: 0
+              name: DestRegion
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            DestWeather:
+              count: 0
+              name: DestWeather
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            DistanceKilometers:
+              count: 0
+              name: DistanceKilometers
+              type: number
+              esTypes:
+                - float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            DistanceMiles:
+              count: 0
+              name: DistanceMiles
+              type: number
+              esTypes:
+                - float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            FlightDelay:
+              count: 0
+              name: FlightDelay
+              type: boolean
+              esTypes:
+                - boolean
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: boolean
+              shortDotsEnable: false
+              isMapped: true
+            FlightDelayMin:
+              count: 0
+              name: FlightDelayMin
+              type: number
+              esTypes:
+                - integer
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            FlightDelayType:
+              count: 0
+              name: FlightDelayType
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            FlightNum:
+              count: 0
+              name: FlightNum
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            FlightTimeHour:
+              count: 0
+              name: FlightTimeHour
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            FlightTimeMin:
+              count: 0
+              name: FlightTimeMin
+              type: number
+              esTypes:
+                - float
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            Origin:
+              count: 0
+              name: Origin
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            OriginAirportID:
+              count: 0
+              name: OriginAirportID
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            OriginCityName:
+              count: 0
+              name: OriginCityName
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            OriginCountry:
+              count: 0
+              name: OriginCountry
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            OriginLocation:
+              count: 0
+              name: OriginLocation
+              type: geo_point
+              esTypes:
+                - geo_point
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: geo_point
+                params:
+                  transform: wkt
+              shortDotsEnable: false
+              isMapped: true
+            OriginRegion:
+              count: 0
+              name: OriginRegion
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            OriginWeather:
+              count: 0
+              name: OriginWeather
+              type: string
+              esTypes:
+                - keyword
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            _id:
+              count: 0
+              name: _id
+              type: string
+              esTypes:
+                - _id
+              scripted: false
+              searchable: true
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            _index:
+              count: 0
+              name: _index
+              type: string
+              esTypes:
+                - _index
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: false
+              format:
+                id: string
+              shortDotsEnable: false
+              isMapped: true
+            _score:
+              count: 0
+              name: _score
+              type: number
+              scripted: false
+              searchable: false
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            _source:
+              count: 0
+              name: _source
+              type: _source
+              esTypes:
+                - _source
+              scripted: false
+              searchable: false
+              aggregatable: false
+              readFromDocValues: false
+              format:
+                id: _source
+              shortDotsEnable: false
+              isMapped: true
+            dayOfWeek:
+              count: 0
+              name: dayOfWeek
+              type: number
+              esTypes:
+                - integer
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: number
+              shortDotsEnable: false
+              isMapped: true
+            timestamp:
+              count: 0
+              name: timestamp
+              type: date
+              esTypes:
+                - date
+              scripted: false
+              searchable: true
+              aggregatable: true
+              readFromDocValues: true
+              format:
+                id: date
+              shortDotsEnable: false
+              isMapped: true
+          fieldFormats:
+            hour_of_day:
+              id: number
+              params:
+                pattern: '00'
+            AvgTicketPrice:
+              id: number
+              params:
+                pattern: $0,0.[00]
+          runtimeFieldMap:
+            hour_of_day:
+              type: long
+              script:
+                source: emit(doc['timestamp'].value.getHour());
+          fieldAttrs: {}
+          allowNoIndex: false
+          name: Kibana Sample Data Flights
+    update_runtime_field_request:
+      summary: Update an existing runtime field on a data view.
+      value:
+        runtimeField:
+          script:
+            source: emit(doc["bar"].value)
+    get_default_data_view_response:
+      summary: The get default data view API returns the default data view identifier.
+      value:
+        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+    set_default_data_view_request:
+      summary: Set the default data view identifier.
+      value:
+        data_view_id: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+        force: true
+    swap_data_view_request:
+      summary: Swap references from data view ID "abcd-efg" to "xyz-123" and remove the data view that is no longer referenced.
+      value:
+        fromId: abcd-efg
+        toId: xyz-123
+        delete: true
+    preview_swap_data_view_request:
+      summary: Preview swapping references from data view ID "abcd-efg" to "xyz-123".
+      value:
+        fromId: abcd-efg
+        toId: xyz-123
+  schemas:
+    400_response:
+      title: Bad request
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      properties:
+        statusCode:
+          type: number
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+    allownoindex:
+      type: boolean
+      description: Allows the data view saved object to exist before the data is available.
+    fieldattrs:
+      type: object
+      description: A map of field attributes by field name.
+      properties:
+        count:
+          type: integer
+          description: Popularity count for the field.
+        customDescription:
+          type: string
+          description: Custom description for the field.
+          maxLength: 300
+        customLabel:
+          type: string
+          description: Custom label for the field.
+    fieldformats:
+      type: object
+      description: A map of field formats by field name.
+    namespaces:
+      type: array
+      description: An array of space identifiers for sharing the data view between multiple spaces.
+      items:
+        type: string
+        default: default
+    runtimefieldmap:
+      type: object
+      description: A map of runtime field definitions by field name.
+      required:
+        - script
+        - type
+      properties:
+        script:
+          type: object
+          properties:
+            source:
+              type: string
+              description: Script for the runtime field.
+        type:
+          type: string
+          description: Mapping type of the runtime field.
+    sourcefilters:
+      type: array
+      description: The array of field names you want to filter out in Discover.
+      items:
+        type: object
+        required:
+          - value
+        properties:
+          value:
+            type: string
+    timefieldname:
+      type: string
+      description: The timestamp field name, which you use for time-based data views.
+    title:
+      type: string
+      description: Comma-separated list of data streams, indices, and aliases that you want to search. Supports wildcards (`*`).
+    type:
+      type: string
+      description: When set to `rollup`, identifies the rollup data views.
+    typemeta:
+      type: object
+      description: When you use rollup indices, contains the field list for the rollup data view API endpoints.
+      required:
+        - aggs
+        - params
+      properties:
+        aggs:
+          type: object
+          description: A map of rollup restrictions by aggregation type and field name.
+        params:
+          type: object
+          description: Properties for retrieving rollup fields.
+    create_data_view_request_object:
+      title: Create data view request
+      type: object
+      required:
+        - data_view
+      properties:
+        data_view:
+          type: object
+          required:
+            - title
+          description: The data view object.
+          properties:
+            allowNoIndex:
+              $ref: '#/components/schemas/allownoindex'
+            fieldAttrs:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/fieldattrs'
+            fieldFormats:
+              $ref: '#/components/schemas/fieldformats'
+            fields:
+              type: object
+            id:
+              type: string
+            name:
+              type: string
+              description: The data view name.
+            namespaces:
+              $ref: '#/components/schemas/namespaces'
+            runtimeFieldMap:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/runtimefieldmap'
+            sourceFilters:
+              $ref: '#/components/schemas/sourcefilters'
+            timeFieldName:
+              $ref: '#/components/schemas/timefieldname'
+            title:
+              $ref: '#/components/schemas/title'
+            type:
+              $ref: '#/components/schemas/type'
+            typeMeta:
+              $ref: '#/components/schemas/typemeta'
+            version:
+              type: string
+        override:
+          type: boolean
+          description: Override an existing data view if a data view with the provided title already exists.
+          default: false
+    typemeta_response:
+      type: object
+      description: When you use rollup indices, contains the field list for the rollup data view API endpoints.
+      nullable: true
+      properties:
+        aggs:
+          type: object
+          description: A map of rollup restrictions by aggregation type and field name.
+        params:
+          type: object
+          description: Properties for retrieving rollup fields.
+    data_view_response_object:
+      title: Data view response properties
+      type: object
+      properties:
+        data_view:
+          type: object
+          properties:
+            allowNoIndex:
+              $ref: '#/components/schemas/allownoindex'
+            fieldAttrs:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/fieldattrs'
+            fieldFormats:
+              $ref: '#/components/schemas/fieldformats'
+            fields:
+              type: object
+            id:
+              type: string
+              example: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+            name:
+              type: string
+              description: The data view name.
+            namespaces:
+              $ref: '#/components/schemas/namespaces'
+            runtimeFieldMap:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/runtimefieldmap'
+            sourceFilters:
+              $ref: '#/components/schemas/sourcefilters'
+            timeFieldName:
+              $ref: '#/components/schemas/timefieldname'
+            title:
+              $ref: '#/components/schemas/title'
+            typeMeta:
+              $ref: '#/components/schemas/typemeta_response'
+            version:
+              type: string
+              example: WzQ2LDJd
+    404_response:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Not Found
+          enum:
+            - Not Found
+        message:
+          type: string
+          example: Saved object [index-pattern/caaad6d0-920c-11ed-b36a-874bd1548a00] not found
+        statusCode:
+          type: integer
+          example: 404
+          enum:
+            - 404
+    update_data_view_request_object:
+      title: Update data view request
+      type: object
+      required:
+        - data_view
+      properties:
+        data_view:
+          type: object
+          description: |
+            The data view properties you want to update. Only the specified properties are updated in the data view. Unspecified fields stay as they are persisted.
+          properties:
+            allowNoIndex:
+              $ref: '#/components/schemas/allownoindex'
+            fieldFormats:
+              $ref: '#/components/schemas/fieldformats'
+            fields:
+              type: object
+            name:
+              type: string
+            runtimeFieldMap:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/runtimefieldmap'
+            sourceFilters:
+              $ref: '#/components/schemas/sourcefilters'
+            timeFieldName:
+              $ref: '#/components/schemas/timefieldname'
+            title:
+              $ref: '#/components/schemas/title'
+            type:
+              $ref: '#/components/schemas/type'
+            typeMeta:
+              $ref: '#/components/schemas/typemeta'
+        refresh_fields:
+          type: boolean
+          description: Reloads the data view fields after the data view is updated.
+          default: false
+    swap_data_view_request_object:
+      title: Data view reference swap request
+      type: object
+      required:
+        - fromId
+        - toId
+      properties:
+        delete:
+          type: boolean
+          description: Deletes referenced saved object if all references are removed.
+        forId:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          description: Limit the affected saved objects to one or more by identifier.
+        forType:
+          type: string
+          description: Limit the affected saved objects by type.
+        fromId:
+          type: string
+          description: The saved object reference to change.
+        fromType:
+          type: string
+          description: |
+            Specify the type of the saved object reference to alter. The default value is `index-pattern` for data views.
+        toId:
+          type: string
+          description: New saved object reference value to replace the old value.
+  parameters:
+    kbn_xsrf:
+      schema:
+        type: string
+      in: header
+      name: kbn-xsrf
+      description: Cross-site request forgery protection
+      required: true
+    view_id:
+      in: path
+      name: viewId
+      description: An identifier for the data view.
+      required: true
+      schema:
+        type: string
+        example: ff959d40-b880-11e8-a6d9-e546fe2bba5f
+    field_name:
+      in: path
+      name: fieldName
+      description: The name of the runtime field.
+      required: true
+      schema:
+        type: string
+        example: hour_of_day

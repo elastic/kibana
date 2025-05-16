@@ -1,0 +1,149 @@
+{
+  "id": "assetInventory",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "assetInventory",
+      "id": "def-public.AssetInventoryPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AssetInventoryPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "assetInventory",
+      "id": "def-public.AssetInventoryPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AssetInventoryPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "assetInventory",
+          "id": "def-public.AssetInventoryPluginStart.getAssetInventoryPage",
+          "type": "Function",
+          "tags": [],
+          "label": "getAssetInventoryPage",
+          "description": [],
+          "signature": [
+            "(assetInventoryStartDeps: ",
+            "AppPluginStartDependencies",
+            ") => JSX.Element"
+          ],
+          "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "assetInventory",
+              "id": "def-public.AssetInventoryPluginStart.getAssetInventoryPage.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "assetInventoryStartDeps",
+              "description": [],
+              "signature": [
+                "AppPluginStartDependencies"
+              ],
+              "path": "x-pack/solutions/security/plugins/asset_inventory/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "assetInventory",
+      "id": "def-server.AssetInventoryPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AssetInventoryPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/security/plugins/asset_inventory/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "assetInventory",
+      "id": "def-server.AssetInventoryPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AssetInventoryPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/security/plugins/asset_inventory/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "assetInventory",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"assetInventory\""
+        ],
+        "path": "x-pack/solutions/security/plugins/asset_inventory/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "assetInventory",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"assetInventory\""
+        ],
+        "path": "x-pack/solutions/security/plugins/asset_inventory/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -96,11 +96,5 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         1024
       );
     });
-
-    it('case settings screenshot', async () => {
-      await cases.navigation.navigateToApp('observability/cases', 'cases-all-title');
-      await testSubjects.click('configure-case-button');
-      await commonScreenshots.takeScreenshot('add-case-connector', screenshotDirectories);
-    });
   });
 }

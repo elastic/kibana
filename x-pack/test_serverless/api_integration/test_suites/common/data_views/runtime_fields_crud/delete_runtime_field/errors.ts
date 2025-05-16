@@ -20,11 +20,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('errors', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     const basicIndex = 'b*sic_index';
     let indexPattern: any;
@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(config.name, () => {
         before(async () => {
           await esArchiver.load(
-            'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+            'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
           );
 
           indexPattern = (
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         after(async () => {
           await esArchiver.unload(
-            'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+            'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
           );
 
           if (indexPattern) {

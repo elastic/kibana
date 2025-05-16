@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { PluginStartDependencies } from '.';
+import type { CoreSetup } from '@kbn/core/server';
+
+import type { PluginStartDependencies } from '.';
 
 export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
   const router = core.http.createRouter();
   router.post(
     {
       path: '/internal/user_profiles_consumer/_suggest',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.maybe(schema.string()),

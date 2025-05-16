@@ -7,6 +7,7 @@
 
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
+import limit from 'p-limit';
 
 import type {
   Type,
@@ -229,12 +230,16 @@ export const deleteAllExceptionsByType = async (
         .set('kbn-xsrf', 'true')
         .send();
       const ids: string[] = body.data.map((exception: ExceptionList) => exception.id);
-      for await (const id of ids) {
-        await supertest
-          .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
-          .set('kbn-xsrf', 'true')
-          .send();
-      }
+      const limiter = limit(10);
+      const promises = ids.map((id) =>
+        limiter(() =>
+          supertest
+            .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
+            .set('kbn-xsrf', 'true')
+            .send()
+        )
+      );
+      await Promise.all(promises);
       const { body: finalCheck } = await supertest
         .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
         .set('kbn-xsrf', 'true')
@@ -563,10 +568,104 @@ export const createLegacyListsIndices = async (es: Client) => {
 };
 
 /**
+ * Helper function to emulate reindexed lists/items from version 7 index to version 8
+ * These indices has prefix .lists-v8-, .items-v8-, that hints they are v8 compatible after reindex
+ * @param es es client
+ */
+export const createReindexedListsIndices = async (es: Client) => {
+  await configurePolicyAndIndexTemplate(es);
+  await createReindexedBootstrapIndex(es, 'lists-default');
+  await createReindexedBootstrapIndex(es, 'items-default');
+};
+
+/**
  * Utility to create list indices, before they were migrated to data streams
  * @param es ES client
  */
 export const createListsIndices = async (es: Client) => {
+  await configurePolicyAndIndexTemplate(es);
+  await createBootstrapIndex(es, '.lists-default');
+  await createBootstrapIndex(es, '.items-default');
+};
+
+/**
+ * utility to create list directly by using ES, bypassing all checks
+ * useful, to create list in legacy indices
+ */
+export const createListBypassingChecks = async ({ es, id }: { es: Client; id: string }) => {
+  const createdAt = new Date().toISOString();
+  const document = {
+    created_at: createdAt,
+    created_by: 'mock-user',
+    description: 'mock-description',
+    name: 'mock-name',
+    tie_breaker_id: uuidv4(),
+    type: 'keyword',
+    updated_at: createdAt,
+    updated_by: 'mock-user',
+    immutable: false,
+    version: 1,
+  };
+
+  const response = await es.create({
+    document,
+    id,
+    index: '.lists-default',
+    refresh: 'wait_for',
+  });
+
+  return {
+    _version: encodeHitVersion(response),
+    id: response._id,
+    ...document,
+  };
+};
+
+/**
+ * utility to create list item directly by using ES, bypassing all checks
+ * useful, to create list item in legacy indices
+ * supports keyword only
+ */
+export const createListItemBypassingChecks = async ({
+  es,
+  listId,
+  id,
+  value,
+}: {
+  es: Client;
+  listId: string;
+  id: string;
+  value: string;
+}) => {
+  const createdAt = new Date().toISOString();
+  const document = {
+    created_at: createdAt,
+    created_by: 'mock-user',
+    tie_breaker_id: uuidv4(),
+    updated_at: createdAt,
+    updated_by: 'mock-user',
+    list_id: listId,
+    keyword: value,
+  };
+
+  const response = await es.create({
+    document,
+    id,
+    index: '.items-default',
+    refresh: 'wait_for',
+  });
+
+  return {
+    _version: encodeHitVersion(response),
+    id: response._id,
+    ...document,
+  };
+};
+
+/**
+ * Creates policies and index templates for both the Lists and List Items indices.
+ */
+const configurePolicyAndIndexTemplate = async (es: Client) => {
   await setPolicy(es, '.lists-default', testPolicy);
   await setPolicy(es, '.items-default', testPolicy);
   await setIndexTemplate(es, '.lists-default', {
@@ -607,80 +706,26 @@ export const createListsIndices = async (es: Client) => {
       },
     },
   });
-  await createBootstrapIndex(es, '.lists-default');
-  await createBootstrapIndex(es, '.items-default');
 };
 
 /**
- * utility to create list directly by using ES, bypassing all checks
- * useful, to create list in legacy indices
+ * Emulates an index that was reindexed from 7.x to 8.x
+ * 1. this index has  prefix .reindexed-v8-
+ * 2. it has 2 aliases: index and name of origjnal index(usually bootstrap index with number in the end). For example: .items-another-4, .items-another-4-000001
  */
-export const createListBypassingChecks = async ({ es, id }: { es: Client; id: string }) => {
-  const createdAt = new Date().toISOString();
-  const body = {
-    created_at: createdAt,
-    created_by: 'mock-user',
-    description: 'mock-description',
-    name: 'mock-name',
-    tie_breaker_id: uuidv4(),
-    type: 'keyword',
-    updated_at: createdAt,
-    updated_by: 'mock-user',
-    immutable: false,
-    version: 1,
-  };
-
-  const response = await es.create({
-    body,
-    id,
-    index: '.lists-default',
-    refresh: 'wait_for',
-  });
-
-  return {
-    _version: encodeHitVersion(response),
-    id: response._id,
-    ...body,
-  };
-};
-
-/**
- * utility to create list item directly by using ES, bypassing all checks
- * useful, to create list item in legacy indices
- * supports keyword only
- */
-export const createListItemBypassingChecks = async ({
-  es,
-  listId,
-  id,
-  value,
-}: {
-  es: Client;
-  listId: string;
-  id: string;
-  value: string;
-}) => {
-  const createdAt = new Date().toISOString();
-  const body = {
-    created_at: createdAt,
-    created_by: 'mock-user',
-    tie_breaker_id: uuidv4(),
-    updated_at: createdAt,
-    updated_by: 'mock-user',
-    list_id: listId,
-    keyword: value,
-  };
-
-  const response = await es.create({
-    body,
-    id,
-    index: '.items-default',
-    refresh: 'wait_for',
-  });
-
-  return {
-    _version: encodeHitVersion(response),
-    id: response._id,
-    ...body,
-  };
+const createReindexedBootstrapIndex = async (esClient: Client, index: string): Promise<unknown> => {
+  return (
+    await esClient.indices.create(
+      {
+        index: `.reindexed-v8-${index}-000001`,
+        aliases: {
+          [`.${index}`]: {
+            is_write_index: true,
+          },
+          [`.${index}-000001`]: {},
+        },
+      },
+      { meta: true }
+    )
+  ).body;
 };

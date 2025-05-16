@@ -41,8 +41,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
     await setFarequoteTimerange();
 
-    const header = await dashboardPanelActions.getPanelHeading(selectedPanelTitle);
-    await dashboardPanelActions.openContextMenuMorePanel(header);
+    await dashboardPanelActions.openContextMenuByTitle(selectedPanelTitle);
   }
 
   async function createJobInWizard(
@@ -81,8 +80,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
     await ml.jobWizardCommon.createJobAndWaitForCompletion();
 
     await ml.testExecution.logTestStep('job creation displays the created job in the job list');
-    await ml.navigation.navigateToMl();
-    await ml.navigation.navigateToJobManagement();
+    await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
     await ml.jobTable.filterWithSearchString(jobId, 1);
 
@@ -129,7 +127,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -137,7 +135,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await ml.lensVisualizations.assertNumberOfIncompatibleLensLayers(numberOfIncompatibleLayers);
 
-      ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
+      await ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
 
       await retrySwitchTab(1, 10);
       tabsCount++;
@@ -154,7 +152,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -162,7 +160,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await ml.lensVisualizations.assertNumberOfIncompatibleLensLayers(numberOfIncompatibleLayers);
 
-      ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
+      await ml.lensVisualizations.clickCreateJobFromLayerWithWizard(0);
 
       await retrySwitchTab(1, 10);
       tabsCount++;
@@ -179,7 +177,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -187,7 +185,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await ml.lensVisualizations.assertNumberOfIncompatibleLensLayers(numberOfIncompatibleLayers);
 
-      ml.lensVisualizations.clickCreateJobFromLayerWithWizard(1);
+      await ml.lensVisualizations.clickCreateJobFromLayerWithWizard(1);
 
       await retrySwitchTab(1, 10);
       tabsCount++;
@@ -202,7 +200,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      await ml.lensVisualizations.clickCreateMLJobMenuAction();
+      await ml.lensVisualizations.clickCreateMLJobMenuAction(selectedPanelTitle);
 
       await ml.lensVisualizations.assertLayerSelectorExists();
 
@@ -216,7 +214,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
       await dashboardPreparation(selectedPanelTitle);
 
-      ml.lensVisualizations.assertMLJobMenuActionDoesNotExist();
+      await ml.lensVisualizations.assertMLJobMenuActionDoesNotExist(selectedPanelTitle);
     });
   });
 }

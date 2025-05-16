@@ -1,0 +1,27 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-http-browser",
+    "@kbn/actions-types",
+    "@kbn/i18n",
+    "@kbn/core-notifications-browser",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/triggers-actions-ui-types",
+    "@kbn/alerting-types",
+  ]
+}

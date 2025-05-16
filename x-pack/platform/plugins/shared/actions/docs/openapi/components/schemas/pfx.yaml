@@ -1,0 +1,3 @@
+title: Personal information exchange
+type: string
+description: If `authType` is `webhook-authentication-ssl` and `certType` is `ssl-pfx`, it is a base64 encoded version of the PFX or P12 file.

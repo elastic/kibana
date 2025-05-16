@@ -1,7 +1,90 @@
 {
   "id": "@kbn/core-custom-branding-browser-internal",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-custom-branding-browser-internal",
+        "id": "def-public.CustomBrandingService",
+        "type": "Class",
+        "tags": [],
+        "label": "CustomBrandingService",
+        "description": [],
+        "path": "src/core/packages/custom-branding/browser-internal/src/custom_branding_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser-internal",
+            "id": "def-public.CustomBrandingService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "({ injectedMetadata }: ",
+              "CustomBrandingSetupDeps",
+              ") => ",
+              "CustomBrandingSetup"
+            ],
+            "path": "src/core/packages/custom-branding/browser-internal/src/custom_branding_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-custom-branding-browser-internal",
+                "id": "def-public.CustomBrandingService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ injectedMetadata }",
+                "description": [],
+                "signature": [
+                  "CustomBrandingSetupDeps"
+                ],
+                "path": "src/core/packages/custom-branding/browser-internal/src/custom_branding_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser-internal",
+            "id": "def-public.CustomBrandingService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => ",
+              "CustomBrandingStart"
+            ],
+            "path": "src/core/packages/custom-branding/browser-internal/src/custom_branding_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-browser-internal",
+            "id": "def-public.CustomBrandingService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/custom-branding/browser-internal/src/custom_branding_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
     "interfaces": [],
     "enums": [],
@@ -17,114 +100,7 @@
     "objects": []
   },
   "common": {
-    "classes": [
-      {
-        "parentPluginId": "@kbn/core-custom-branding-browser-internal",
-        "id": "def-common.CustomBrandingService",
-        "type": "Class",
-        "tags": [],
-        "label": "CustomBrandingService",
-        "description": [],
-        "path": "packages/core/custom-branding/core-custom-branding-browser-internal/src/custom_branding_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-custom-branding-browser-internal",
-            "id": "def-common.CustomBrandingService.setup",
-            "type": "Function",
-            "tags": [],
-            "label": "setup",
-            "description": [],
-            "signature": [
-              "({ injectedMetadata }: ",
-              {
-                "pluginId": "@kbn/core-custom-branding-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-                "section": "def-common.CustomBrandingSetupDeps",
-                "text": "CustomBrandingSetupDeps"
-              },
-              ") => ",
-              {
-                "pluginId": "@kbn/core-custom-branding-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-                "section": "def-common.CustomBrandingSetup",
-                "text": "CustomBrandingSetup"
-              }
-            ],
-            "path": "packages/core/custom-branding/core-custom-branding-browser-internal/src/custom_branding_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/core-custom-branding-browser-internal",
-                "id": "def-common.CustomBrandingService.setup.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ injectedMetadata }",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-custom-branding-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-                    "section": "def-common.CustomBrandingSetupDeps",
-                    "text": "CustomBrandingSetupDeps"
-                  }
-                ],
-                "path": "packages/core/custom-branding/core-custom-branding-browser-internal/src/custom_branding_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-custom-branding-browser-internal",
-            "id": "def-common.CustomBrandingService.start",
-            "type": "Function",
-            "tags": [],
-            "label": "start",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "@kbn/core-custom-branding-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-                "section": "def-common.CustomBrandingStart",
-                "text": "CustomBrandingStart"
-              }
-            ],
-            "path": "packages/core/custom-branding/core-custom-branding-browser-internal/src/custom_branding_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/core-custom-branding-browser-internal",
-            "id": "def-common.CustomBrandingService.stop",
-            "type": "Function",
-            "tags": [],
-            "label": "stop",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "packages/core/custom-branding/core-custom-branding-browser-internal/src/custom_branding_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "classes": [],
     "functions": [],
     "interfaces": [],
     "enums": [],

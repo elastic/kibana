@@ -42,15 +42,15 @@ export const collapseDocumentDetailsExpandableFlyoutLeftSection = () => {
 /**
  * Open the Table tab in the document details expandable flyout right section
  */
-export const openTableTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).click();
+export const openTableTab = (index = 0) => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).eq(index).click();
 };
 
 /**
  * Open the Json tab in the document details expandable flyout right section
  */
-export const openJsonTab = () => {
-  cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).click();
+export const openJsonTab = (index = 0) => {
+  cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).eq(index).click();
 };
 
 /**

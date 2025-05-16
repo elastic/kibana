@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-const testIndex = 'test-index';
+const indexName = 'my_index';
 const testQuery = {
   query: {
     match_all: {},
@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'searchProfiler']);
   const retry = getService('retry');
   const es = getService('es');
+  const browser = getService('browser');
 
   describe('Search Profiler Editor', () => {
     before(async () => {
@@ -53,10 +54,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
       };
 
-      // Since we're not actually running the query in the test,
-      // this index name is just an input placeholder and does not exist
-      const indexName = 'my_index';
-
       await PageObjects.common.navigateToUrl(
         'searchProfiler',
         PageObjects.searchProfiler.getUrlWithIndexAndQuery({ indexName, query }),
@@ -75,23 +72,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('With a test index', () => {
+    describe('With a test index', function () {
+      // see details: https://github.com/elastic/kibana/issues/215660
+      this.tags(['failsOnMKI']);
       before(async () => {
-        await es.indices.create({ index: testIndex });
+        await es.indices.create({ index: indexName });
       });
 
       after(async () => {
-        await es.indices.delete({ index: testIndex });
+        await es.indices.delete({ index: indexName });
       });
 
       it('profiles a simple query', async () => {
-        await PageObjects.searchProfiler.setIndexName(testIndex);
+        await browser.refresh();
+        await PageObjects.searchProfiler.setIndexName(indexName);
         await PageObjects.searchProfiler.setQuery(testQuery);
 
         await PageObjects.searchProfiler.clickProfileButton();
 
         const content = await PageObjects.searchProfiler.getProfileContent();
-        expect(content).to.contain(testIndex);
+        expect(content).to.contain(indexName);
       });
     });
   });

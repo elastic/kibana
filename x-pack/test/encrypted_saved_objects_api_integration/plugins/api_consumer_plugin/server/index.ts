@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { deepFreeze } from '@kbn/std';
-import {
+import { schema } from '@kbn/config-schema';
+import type {
   CoreSetup,
   PluginInitializer,
+  SavedObject,
   SavedObjectsNamespaceType,
   SavedObjectUnsanitizedDoc,
-  SavedObject,
 } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import {
+import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { deepFreeze } from '@kbn/std';
+
 import { registerHiddenSORoutes } from './hidden_saved_object_routes';
 
 const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
@@ -30,6 +31,8 @@ const SAVED_OBJECT_WITHOUT_SECRET_TYPE = 'saved-object-without-secret';
 const SAVED_OBJECT_WITH_MIGRATION_TYPE = 'saved-object-with-migration';
 
 const SAVED_OBJECT_MV_TYPE = 'saved-object-mv';
+
+const TYPE_WITH_PREDICTABLE_ID = 'type-with-predictable-ids';
 
 interface MigratedTypePre790 {
   nonEncryptedAttribute: string;
@@ -83,6 +86,30 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
     }
 
     core.savedObjects.registerType({
+      name: TYPE_WITH_PREDICTABLE_ID,
+      hidden: false,
+      namespaceType: 'single',
+      mappings: deepFreeze({
+        properties: {
+          publicProperty: { type: 'keyword' },
+          publicPropertyExcludedFromAAD: { type: 'keyword' },
+          publicPropertyStoredEncrypted: { type: 'binary' },
+          privateProperty: { type: 'binary' },
+        },
+      }),
+    });
+
+    deps.encryptedSavedObjects.registerType({
+      type: TYPE_WITH_PREDICTABLE_ID,
+      attributesToEncrypt: new Set([
+        'privateProperty',
+        { key: 'publicPropertyStoredEncrypted', dangerouslyExposeValue: true },
+      ]),
+      attributesToIncludeInAAD: new Set(['publicProperty']),
+      enforceRandomId: false,
+    });
+
+    core.savedObjects.registerType({
       name: SAVED_OBJECT_WITHOUT_SECRET_TYPE,
       hidden: false,
       namespaceType: 'single',
@@ -97,6 +124,12 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
     router.get(
       {
         path: '/api/saved_objects/get-decrypted-as-internal-user/{type}/{id}',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { params: (value) => ({ value }) },
       },
       async (context, request, response) => {
@@ -123,6 +156,12 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
     router.get(
       {
         path: '/api/saved_objects/create-point-in-time-finder-decrypted-as-internal-user',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: { query: schema.object({ type: schema.string() }) },
       },
       async (context, request, response) => {

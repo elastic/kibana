@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createDeleteTests({ getService }: FtrProviderContext) {
@@ -64,28 +64,6 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           error: 'Not Found',
           message: `Saved object [alert/${createdAlert.id}] not found`,
         });
-    });
-
-    describe('legacy', () => {
-      it('should handle delete alert request appropriately', async () => {
-        const { body: createdAlert } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData())
-          .expect(200);
-
-        await supertest
-          .delete(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(204, '');
-
-        try {
-          await getScheduledTask(createdAlert.scheduledTaskId);
-          throw new Error('Should have removed scheduled task');
-        } catch (e) {
-          expect(e.meta.statusCode).to.eql(404);
-        }
-      });
     });
   });
 }

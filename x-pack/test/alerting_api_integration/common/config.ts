@@ -8,11 +8,14 @@
 import path from 'path';
 import getPort from 'get-port';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { findTestPluginPaths } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
-import { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common/experimental_features';
+import type { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common/experimental_features';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -33,6 +36,7 @@ interface CreateTestConfigOptions {
   enableFooterInEmail?: boolean;
   maxScheduledPerMinute?: number;
   experimentalFeatures?: ExperimentalConfigKeys;
+  disabledRuleTypes?: string[];
 }
 
 // test.not-enabled is specifically not enabled
@@ -40,6 +44,7 @@ const enabledActionTypes = [
   '.bedrock',
   '.cases-webhook',
   '.email',
+  '.gemini',
   '.index',
   '.opsgenie',
   '.pagerduty',
@@ -54,8 +59,10 @@ const enabledActionTypes = [
   '.d3security',
   SENTINELONE_CONNECTOR_ID,
   CROWDSTRIKE_CONNECTOR_ID,
+  MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   '.slack',
   '.slack_api',
+  '.thehive',
   '.tines',
   '.webhook',
   '.xmatters',
@@ -75,6 +82,7 @@ const enabledActionTypes = [
   'test.system-action',
   'test.system-action-kibana-privileges',
   'test.system-action-connector-adapter',
+  'test.connector-with-hooks',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -85,7 +93,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     verificationMode = 'full',
     preconfiguredAlertHistoryEsIndex = false,
     customizeLocalHostSsl = false,
-    rejectUnauthorized = true, // legacy
     emailDomainsAllowed = undefined,
     testFiles = undefined,
     reportName = undefined,
@@ -125,7 +132,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [
           `--xpack.actions.proxyUrl=http://localhost:${proxyPort}`,
           `--xpack.actions.proxyOnlyHosts=${JSON.stringify(proxyHosts)}`,
-          '--xpack.actions.proxyRejectUnauthorizedCertificates=false',
         ]
       : [
           `--xpack.actions.proxyUrl=http://elastic.co`,
@@ -167,7 +173,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ? [`--xpack.alerting.rules.maxScheduledPerMinute=${maxScheduledPerMinute}`]
         : [];
 
+    const disabledRuleTypesSetting =
+      options.disabledRuleTypes == null
+        ? []
+        : [`--xpack.alerting.disabledRuleTypes=${JSON.stringify(options.disabledRuleTypes)}`];
+
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
       services,
@@ -207,16 +219,16 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             { id: 'test.capped', max: '1' },
           ])}`,
           `--xpack.alerting.enableFrameworkAlerts=true`,
+          `--xpack.alerting.rulesSettings.cacheInterval=10000`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
           `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,
           `--xpack.actions.ssl.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
           ...customHostSettings,
           ...emailSettings,
           ...maxScheduledPerMinuteSettings,
+          ...disabledRuleTypesSetting,
           '--xpack.eventLog.logEntries=true',
-          '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',
           ])}`,
@@ -352,6 +364,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.task_manager.allow_reading_invalid_state=false',
           '--xpack.actions.queued.max=500',
           `--xpack.stack_connectors.enableExperimental=${JSON.stringify(experimentalFeatures)}`,
+          '--xpack.uptime.service.password=test',
+          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
         ],
       },
     };

@@ -6,37 +6,21 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-capabilities-browser-mocks",
-        "id": "def-common.capabilitiesServiceMock",
+        "id": "def-public.capabilitiesServiceMock",
         "type": "Object",
         "tags": [],
         "label": "capabilitiesServiceMock",
         "description": [],
-        "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
+        "path": "src/core/packages/capabilities/browser-mocks/src/capabilities_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-browser-mocks",
-            "id": "def-common.capabilitiesServiceMock.create",
+            "id": "def-public.capabilitiesServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -54,7 +38,7 @@
               "CapabilitiesService",
               ">>"
             ],
-            "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
+            "path": "src/core/packages/capabilities/browser-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -62,7 +46,7 @@
           },
           {
             "parentPluginId": "@kbn/core-capabilities-browser-mocks",
-            "id": "def-common.capabilitiesServiceMock.createStartContract",
+            "id": "def-public.capabilitiesServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -72,7 +56,7 @@
               "CapabilitiesStart",
               ">"
             ],
-            "path": "packages/core/capabilities/core-capabilities-browser-mocks/src/capabilities_service.mock.ts",
+            "path": "src/core/packages/capabilities/browser-mocks/src/capabilities_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -82,5 +66,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

@@ -110,7 +110,7 @@ export class RollupPageObject extends FtrService {
 
   async saveJob(startImmediately: boolean) {
     if (startImmediately) {
-      const checkbox = await this.find.byCssSelector('.euiCheckbox');
+      const checkbox = await this.find.byCssSelector('.euiCheckbox__input');
       await checkbox.click();
     }
     await this.testSubjects.click('rollupJobSaveButton');

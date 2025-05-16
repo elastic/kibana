@@ -15,7 +15,7 @@ import {
   createWaitForExecutionCount,
   getEventLog,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { createEsDocuments } from '../create_test_data';
 
 const NODE_RULES_MONITORING_COLLECTION_URL = `/api/monitoring_collection/node_rules`;
@@ -123,8 +123,8 @@ export default function alertingMonitoringCollectionTests({ getService }: FtrPro
             rule_type_id: 'test.cancellableRule',
             schedule: { interval: '4s' },
             params: {
-              doLongSearch: true,
-              doLongPostProcessing: false,
+              doLongSearch: false,
+              doLongPostProcessing: true,
             },
           })
         );

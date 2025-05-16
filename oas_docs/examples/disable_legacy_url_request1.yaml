@@ -1,0 +1,9 @@
+summary: Disable legacy URL aliases
+description: >
+  This request leaves the alias intact but the legacy URL for this alias (http://localhost:5601/s/bills-space/app/dashboards#/view/123) will no longer function.
+  The dashboard still exists and you can access it with the new URL.
+value:
+  aliases:
+    - targetSpace: bills-space
+      targetType: dashboard
+      sourceId: 123

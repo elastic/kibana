@@ -1,0 +1,975 @@
+{
+  "default": {
+    "anomalies": [
+      {
+        "time": 1725840000000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.00011921600143273021,
+          "multi_bucket_impact": -5,
+          "record_score": 94.31236,
+          "initial_record_score": 91.59429607036628,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1725862500000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Men's Clothing",
+          "function": "mean",
+          "function_description": "mean",
+          "typical": [
+            15.851794819088305
+          ],
+          "actual": [
+            350
+          ],
+          "field_name": "products.price",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Men's Clothing"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "SA"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 8,
+            "lower_confidence_bound": 5.733288153284621,
+            "typical_value": 15.851794819088305,
+            "upper_confidence_bound": 41.175974376816086
+          },
+          "category.keyword": [
+            "Men's Clothing"
+          ],
+          "geoip.country_iso_code": [
+            "SA"
+          ]
+        },
+        "rowId": "1726503845974_0",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 0,
+        "severity": 94.31236,
+        "entityName": "category.keyword",
+        "entityValue": "Men's Clothing",
+        "influencers": [
+          {
+            "category.keyword": "Men's Clothing"
+          },
+          {
+            "geoip.country_iso_code": "SA"
+          }
+        ],
+        "actual": [
+          350
+        ],
+        "actualSort": 350,
+        "typical": [
+          15.851794819088305
+        ],
+        "typicalSort": 15.851794819088305,
+        "metricDescriptionSort": 22.079518691381207,
+        "detector": "mean(\"products.price\") partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      },
+      {
+        "time": 1725840000000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.03461785745665291,
+          "multi_bucket_impact": -5,
+          "record_score": 10.620156126608986,
+          "initial_record_score": 10.620156126608986,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1725862500000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Women's Clothing",
+          "function": "mean",
+          "function_description": "mean",
+          "typical": [
+            17.553578210957593
+          ],
+          "actual": [
+            45
+          ],
+          "field_name": "products.price",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Women's Clothing"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "SA"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 2,
+            "lower_confidence_bound": 7.606026510878394,
+            "typical_value": 17.553578210957593,
+            "upper_confidence_bound": 37.852824407923066
+          },
+          "category.keyword": [
+            "Women's Clothing"
+          ],
+          "geoip.country_iso_code": [
+            "SA"
+          ]
+        },
+        "rowId": "1726503845974_1",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 0,
+        "severity": 10.620156126608986,
+        "entityName": "category.keyword",
+        "entityValue": "Women's Clothing",
+        "influencers": [
+          {
+            "category.keyword": "Women's Clothing"
+          },
+          {
+            "geoip.country_iso_code": "SA"
+          }
+        ],
+        "actual": [
+          45
+        ],
+        "actualSort": 45,
+        "typical": [
+          17.553578210957593
+        ],
+        "typicalSort": 17.553578210957593,
+        "metricDescriptionSort": 2.5635798843514044,
+        "detector": "mean(\"products.price\") partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      },
+      {
+        "time": 1725926400000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.01787543314280476,
+          "multi_bucket_impact": -5,
+          "record_score": 0.6916846762237938,
+          "initial_record_score": 0.6916846762237938,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1725990300000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Men's Clothing",
+          "function": "mean",
+          "function_description": "mean",
+          "typical": [
+            15.779865757388727
+          ],
+          "actual": [
+            65
+          ],
+          "field_name": "products.price",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Men's Clothing"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "US"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 3,
+            "lower_confidence_bound": 5.889827882876367,
+            "typical_value": 15.779865757388727,
+            "upper_confidence_bound": 39.8666079359938
+          },
+          "category.keyword": [
+            "Men's Clothing"
+          ],
+          "geoip.country_iso_code": [
+            "US"
+          ]
+        },
+        "rowId": "1726503845974_2",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 0,
+        "severity": 0.6916846762237938,
+        "entityName": "category.keyword",
+        "entityValue": "Men's Clothing",
+        "influencers": [
+          {
+            "category.keyword": "Men's Clothing"
+          },
+          {
+            "geoip.country_iso_code": "US"
+          }
+        ],
+        "actual": [
+          65
+        ],
+        "actualSort": 65,
+        "typical": [
+          15.779865757388727
+        ],
+        "typicalSort": 15.779865757388727,
+        "metricDescriptionSort": 4.1191731919243075,
+        "detector": "mean(\"products.price\") partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      },
+      {
+        "time": 1726012800000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.013914839080385263,
+          "multi_bucket_impact": -5,
+          "record_score": 24.552541318692445,
+          "initial_record_score": 24.552541318692445,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1726056000000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Women's Accessories,Women's Clothing",
+          "function": "mean",
+          "function_description": "mean",
+          "typical": [
+            16.072466356993818
+          ],
+          "actual": [
+            42
+          ],
+          "field_name": "products.price",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Women's Accessories,Women's Clothing"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "AE"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 2,
+            "lower_confidence_bound": 7.901062666669044,
+            "typical_value": 16.072466356993818,
+            "upper_confidence_bound": 31.621998523165693
+          },
+          "category.keyword": [
+            "Women's Accessories,Women's Clothing"
+          ],
+          "geoip.country_iso_code": [
+            "AE"
+          ]
+        },
+        "rowId": "1726503845974_3",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 0,
+        "severity": 24.552541318692445,
+        "entityName": "category.keyword",
+        "entityValue": "Women's Accessories,Women's Clothing",
+        "influencers": [
+          {
+            "category.keyword": "Women's Accessories,Women's Clothing"
+          },
+          {
+            "geoip.country_iso_code": "AE"
+          }
+        ],
+        "actual": [
+          42
+        ],
+        "actualSort": 42,
+        "typical": [
+          16.072466356993818
+        ],
+        "typicalSort": 16.072466356993818,
+        "metricDescriptionSort": 2.613164592609273,
+        "detector": "mean(\"products.price\") partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      },
+      {
+        "time": 1726012800000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.013569993829022374,
+          "multi_bucket_impact": -5,
+          "record_score": 1.08840456688412,
+          "initial_record_score": 1.08840456688412,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1726083900000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Men's Clothing",
+          "function": "mean",
+          "function_description": "mean",
+          "typical": [
+            15.91745643577788
+          ],
+          "actual": [
+            75
+          ],
+          "field_name": "products.price",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Men's Clothing"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "AE"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 3,
+            "lower_confidence_bound": 5.831067931970601,
+            "typical_value": 15.91745643577788,
+            "upper_confidence_bound": 40.89686519101566
+          },
+          "category.keyword": [
+            "Men's Clothing"
+          ],
+          "geoip.country_iso_code": [
+            "AE"
+          ]
+        },
+        "rowId": "1726503845974_4",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 0,
+        "severity": 1.08840456688412,
+        "entityName": "category.keyword",
+        "entityValue": "Men's Clothing",
+        "influencers": [
+          {
+            "category.keyword": "Men's Clothing"
+          },
+          {
+            "geoip.country_iso_code": "AE"
+          }
+        ],
+        "actual": [
+          75
+        ],
+        "actualSort": 75,
+        "typical": [
+          15.91745643577788
+        ],
+        "typicalSort": 15.91745643577788,
+        "metricDescriptionSort": 4.711808089602902,
+        "detector": "mean(\"products.price\") partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      },
+      {
+        "time": 1726012800000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.012483410285350998,
+          "multi_bucket_impact": -5,
+          "record_score": 26.21197793819939,
+          "initial_record_score": 26.21197793819939,
+          "bucket_span": 900,
+          "detector_index": 1,
+          "is_interim": false,
+          "timestamp": 1726065000000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Men's Clothing",
+          "function": "distinct_count",
+          "function_description": "distinct_count",
+          "typical": [
+            1
+          ],
+          "actual": [
+            2
+          ],
+          "field_name": "total_unique_products",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Men's Clothing"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "FR",
+                "MA",
+                "TR"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 3,
+            "lower_confidence_bound": 0,
+            "typical_value": 0,
+            "upper_confidence_bound": 0
+          },
+          "category.keyword": [
+            "Men's Clothing"
+          ],
+          "geoip.country_iso_code": [
+            "FR",
+            "MA",
+            "TR"
+          ]
+        },
+        "rowId": "1726503845974_5",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 1,
+        "severity": 26.21197793819939,
+        "entityName": "category.keyword",
+        "entityValue": "Men's Clothing",
+        "influencers": [
+          {
+            "category.keyword": "Men's Clothing"
+          },
+          {
+            "geoip.country_iso_code": "FR"
+          },
+          {
+            "geoip.country_iso_code": "MA"
+          },
+          {
+            "geoip.country_iso_code": "TR"
+          }
+        ],
+        "actual": [
+          2
+        ],
+        "actualSort": 2,
+        "typical": [
+          1
+        ],
+        "typicalSort": 1,
+        "metricDescriptionSort": 2,
+        "detector": "distinct_count(total_unique_products) partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      },
+      {
+        "time": 1726012800000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.029221215176833293,
+          "multi_bucket_impact": -5,
+          "record_score": 13.210841360998488,
+          "initial_record_score": 13.210841360998488,
+          "bucket_span": 900,
+          "detector_index": 1,
+          "is_interim": false,
+          "timestamp": 1726065000000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Men's Clothing,Men's Shoes",
+          "function": "distinct_count",
+          "function_description": "distinct_count",
+          "typical": [
+            1
+          ],
+          "actual": [
+            2
+          ],
+          "field_name": "total_unique_products",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Men's Clothing,Men's Shoes"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "EG",
+                "US"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 2,
+            "lower_confidence_bound": 0,
+            "typical_value": 0,
+            "upper_confidence_bound": 0
+          },
+          "category.keyword": [
+            "Men's Clothing,Men's Shoes"
+          ],
+          "geoip.country_iso_code": [
+            "EG",
+            "US"
+          ]
+        },
+        "rowId": "1726503845974_6",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 1,
+        "severity": 13.210841360998488,
+        "entityName": "category.keyword",
+        "entityValue": "Men's Clothing,Men's Shoes",
+        "influencers": [
+          {
+            "category.keyword": "Men's Clothing,Men's Shoes"
+          },
+          {
+            "geoip.country_iso_code": "EG"
+          },
+          {
+            "geoip.country_iso_code": "US"
+          }
+        ],
+        "actual": [
+          2
+        ],
+        "actualSort": 2,
+        "typical": [
+          1
+        ],
+        "typicalSort": 1,
+        "metricDescriptionSort": 2,
+        "detector": "distinct_count(total_unique_products) partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      },
+      {
+        "time": 1726099200000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.01614665640555698,
+          "multi_bucket_impact": -5,
+          "record_score": 22.27855551555865,
+          "initial_record_score": 22.27855551555865,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1726133400000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Women's Accessories,Women's Shoes",
+          "function": "mean",
+          "function_description": "mean",
+          "typical": [
+            17.70351589303024
+          ],
+          "actual": [
+            65
+          ],
+          "field_name": "products.price",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Women's Accessories,Women's Shoes"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "US"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 2,
+            "lower_confidence_bound": 6.522434202795708,
+            "typical_value": 17.70351589303024,
+            "upper_confidence_bound": 44.79010478599095
+          },
+          "category.keyword": [
+            "Women's Accessories,Women's Shoes"
+          ],
+          "geoip.country_iso_code": [
+            "US"
+          ]
+        },
+        "rowId": "1726503845974_7",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 0,
+        "severity": 22.27855551555865,
+        "entityName": "category.keyword",
+        "entityValue": "Women's Accessories,Women's Shoes",
+        "influencers": [
+          {
+            "category.keyword": "Women's Accessories,Women's Shoes"
+          },
+          {
+            "geoip.country_iso_code": "US"
+          }
+        ],
+        "actual": [
+          65
+        ],
+        "actualSort": 65,
+        "typical": [
+          17.70351589303024
+        ],
+        "typicalSort": 17.70351589303024,
+        "metricDescriptionSort": 3.6715870673796545,
+        "detector": "mean(\"products.price\") partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      },
+      {
+        "time": 1726099200000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.01894227723384407,
+          "multi_bucket_impact": -5,
+          "record_score": 19.837546336871547,
+          "initial_record_score": 19.837546336871547,
+          "bucket_span": 900,
+          "detector_index": 1,
+          "is_interim": false,
+          "timestamp": 1726121700000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Men's Clothing",
+          "function": "distinct_count",
+          "function_description": "distinct_count",
+          "typical": [
+            1
+          ],
+          "actual": [
+            2
+          ],
+          "field_name": "total_unique_products",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Men's Clothing"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "AE",
+                "US"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 2,
+            "lower_confidence_bound": 0,
+            "typical_value": 0,
+            "upper_confidence_bound": 0
+          },
+          "category.keyword": [
+            "Men's Clothing"
+          ],
+          "geoip.country_iso_code": [
+            "AE",
+            "US"
+          ]
+        },
+        "rowId": "1726503845974_8",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 1,
+        "severity": 19.837546336871547,
+        "entityName": "category.keyword",
+        "entityValue": "Men's Clothing",
+        "influencers": [
+          {
+            "category.keyword": "Men's Clothing"
+          },
+          {
+            "geoip.country_iso_code": "AE"
+          },
+          {
+            "geoip.country_iso_code": "US"
+          }
+        ],
+        "actual": [
+          2
+        ],
+        "actualSort": 2,
+        "typical": [
+          1
+        ],
+        "typicalSort": 1,
+        "metricDescriptionSort": 2,
+        "detector": "distinct_count(total_unique_products) partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      },
+      {
+        "time": 1726185600000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.005452151333957955,
+          "multi_bucket_impact": -5,
+          "record_score": 38.875218910067446,
+          "initial_record_score": 38.875218910067446,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1726186500000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Men's Accessories,Men's Clothing",
+          "function": "mean",
+          "function_description": "mean",
+          "typical": [
+            15.943152908258694
+          ],
+          "actual": [
+            60
+          ],
+          "field_name": "products.price",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Men's Accessories,Men's Clothing"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "AE"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 3,
+            "lower_confidence_bound": 6.39588429144841,
+            "typical_value": 15.943152908258694,
+            "upper_confidence_bound": 37.04143942410928
+          },
+          "category.keyword": [
+            "Men's Accessories,Men's Clothing"
+          ],
+          "geoip.country_iso_code": [
+            "AE"
+          ]
+        },
+        "rowId": "1726503845974_9",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 0,
+        "severity": 38.875218910067446,
+        "entityName": "category.keyword",
+        "entityValue": "Men's Accessories,Men's Clothing",
+        "influencers": [
+          {
+            "category.keyword": "Men's Accessories,Men's Clothing"
+          },
+          {
+            "geoip.country_iso_code": "AE"
+          }
+        ],
+        "actual": [
+          60
+        ],
+        "actualSort": 60,
+        "typical": [
+          15.943152908258694
+        ],
+        "typicalSort": 15.943152908258694,
+        "metricDescriptionSort": 3.763371043686062,
+        "detector": "mean(\"products.price\") partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      },
+      {
+        "time": 1726185600000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.030245620963532376,
+          "multi_bucket_impact": -5,
+          "record_score": 12.684121118422576,
+          "initial_record_score": 12.684121118422576,
+          "bucket_span": 900,
+          "detector_index": 0,
+          "is_interim": false,
+          "timestamp": 1726225200000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Men's Clothing,Men's Shoes",
+          "function": "mean",
+          "function_description": "mean",
+          "typical": [
+            19.693271090135916
+          ],
+          "actual": [
+            75
+          ],
+          "field_name": "products.price",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Men's Clothing,Men's Shoes"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "AE"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 2,
+            "lower_confidence_bound": 6.850458655008051,
+            "typical_value": 19.693271090135916,
+            "upper_confidence_bound": 53.49007700314821
+          },
+          "category.keyword": [
+            "Men's Clothing,Men's Shoes"
+          ],
+          "geoip.country_iso_code": [
+            "AE"
+          ]
+        },
+        "rowId": "1726503845974_10",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 0,
+        "severity": 12.684121118422576,
+        "entityName": "category.keyword",
+        "entityValue": "Men's Clothing,Men's Shoes",
+        "influencers": [
+          {
+            "category.keyword": "Men's Clothing,Men's Shoes"
+          },
+          {
+            "geoip.country_iso_code": "AE"
+          }
+        ],
+        "actual": [
+          75
+        ],
+        "actualSort": 75,
+        "typical": [
+          19.693271090135916
+        ],
+        "typicalSort": 19.693271090135916,
+        "metricDescriptionSort": 3.808407433012307,
+        "detector": "mean(\"products.price\") partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      },
+      {
+        "time": 1726185600000,
+        "source": {
+          "job_id": "ecom_dect_01",
+          "result_type": "record",
+          "probability": 0.024450443154858347,
+          "multi_bucket_impact": -5,
+          "record_score": 15.93562008623777,
+          "initial_record_score": 15.93562008623777,
+          "bucket_span": 900,
+          "detector_index": 1,
+          "is_interim": false,
+          "timestamp": 1726194600000,
+          "partition_field_name": "category.keyword",
+          "partition_field_value": "Men's Clothing",
+          "function": "distinct_count",
+          "function_description": "distinct_count",
+          "typical": [
+            1
+          ],
+          "actual": [
+            2
+          ],
+          "field_name": "total_unique_products",
+          "influencers": [
+            {
+              "influencer_field_name": "category.keyword",
+              "influencer_field_values": [
+                "Men's Clothing"
+              ]
+            },
+            {
+              "influencer_field_name": "geoip.country_iso_code",
+              "influencer_field_values": [
+                "TR",
+                "US"
+              ]
+            }
+          ],
+          "anomaly_score_explanation": {
+            "single_bucket_impact": 2,
+            "lower_confidence_bound": 0,
+            "typical_value": 0,
+            "upper_confidence_bound": 0
+          },
+          "category.keyword": [
+            "Men's Clothing"
+          ],
+          "geoip.country_iso_code": [
+            "TR",
+            "US"
+          ]
+        },
+        "rowId": "1726503845974_11",
+        "jobId": "ecom_dect_01",
+        "detectorIndex": 1,
+        "severity": 15.93562008623777,
+        "entityName": "category.keyword",
+        "entityValue": "Men's Clothing",
+        "influencers": [
+          {
+            "category.keyword": "Men's Clothing"
+          },
+          {
+            "geoip.country_iso_code": "TR"
+          },
+          {
+            "geoip.country_iso_code": "US"
+          }
+        ],
+        "actual": [
+          2
+        ],
+        "actualSort": 2,
+        "typical": [
+          1
+        ],
+        "typicalSort": 1,
+        "metricDescriptionSort": 2,
+        "detector": "distinct_count(total_unique_products) partitionfield=\"category.keyword\"",
+        "isTimeSeriesViewRecord": true,
+        "isGeoRecord": false
+      }
+    ],
+    "jobIds": [
+      "ecommerce-multiple-detectors"
+    ],
+    "interval": "day",
+    "examplesByJobId": {
+      "ecommerce-multiple-detectors": {}
+    },
+    "showViewSeriesLink": true
+  }
+}

@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
 
@@ -19,10 +18,14 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_request_diagnostics', () => {
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
+
+    before(async () => {
+      await fleetAndAgents.setup();
+    });
     beforeEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
@@ -105,7 +108,7 @@ export default function (providerContext: FtrProviderContext) {
       await new Promise((resolve, reject) => {
         let attempts = 0;
         const intervalId = setInterval(async () => {
-          if (attempts > 2) {
+          if (attempts > 5) {
             clearInterval(intervalId);
             reject(new Error('action timed out'));
           }
@@ -119,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
             clearInterval(intervalId);
             resolve({});
           }
-        }, 1000);
+        }, 3000);
       }).catch((e) => {
         throw e;
       });
@@ -135,9 +138,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       const actionsRes = await es.search({
         index: '.fleet-actions',
-        body: {
-          sort: [{ '@timestamp': { order: 'desc' } }],
-        },
+        sort: [{ '@timestamp': { order: 'desc' } }],
       });
       const action: any = actionsRes.hits.hits[0]._source;
       expect(action.data.additional_metrics).contain('CPU');
@@ -155,9 +156,7 @@ export default function (providerContext: FtrProviderContext) {
 
       const actionsRes = await es.search({
         index: '.fleet-actions',
-        body: {
-          sort: [{ '@timestamp': { order: 'desc' } }],
-        },
+        sort: [{ '@timestamp': { order: 'desc' } }],
       });
       const action: any = actionsRes.hits.hits[0]._source;
       expect(action.data.additional_metrics).contain('CPU');

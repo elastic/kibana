@@ -9,55 +9,29 @@
     "objects": []
   },
   "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-        "id": "def-common.ElasticsearchClientsMetricsCollector",
+        "id": "def-server.ElasticsearchClientsMetricsCollector",
         "type": "Class",
         "tags": [],
         "label": "ElasticsearchClientsMetricsCollector",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-metrics-collectors-server-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
-            "section": "def-common.ElasticsearchClientsMetricsCollector",
-            "text": "ElasticsearchClientsMetricsCollector"
-          },
+          "ElasticsearchClientsMetricsCollector",
           " implements ",
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.MetricsCollector",
-            "text": "MetricsCollector"
-          },
+          "MetricsCollector",
           "<",
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.ElasticsearchClientsMetrics",
-            "text": "ElasticsearchClientsMetrics"
-          },
+          "ElasticsearchClientsMetrics",
           ">"
         ],
-        "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+        "path": "src/core/packages/metrics/collectors-server-internal/src/elasticsearch_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.ElasticsearchClientsMetricsCollector.Unnamed",
+            "id": "def-server.ElasticsearchClientsMetricsCollector.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -65,27 +39,21 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/elasticsearch_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-                "id": "def-common.ElasticsearchClientsMetricsCollector.Unnamed.$1",
+                "id": "def-server.ElasticsearchClientsMetricsCollector.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "agentStatsProvider",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-elasticsearch-client-server-internal",
-                    "scope": "common",
-                    "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-                    "section": "def-common.AgentStatsProvider",
-                    "text": "AgentStatsProvider"
-                  }
+                  "AgentStatsProvider"
                 ],
-                "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+                "path": "src/core/packages/metrics/collectors-server-internal/src/elasticsearch_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -95,23 +63,17 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.ElasticsearchClientsMetricsCollector.collect",
+            "id": "def-server.ElasticsearchClientsMetricsCollector.collect",
             "type": "Function",
             "tags": [],
             "label": "collect",
             "description": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.ElasticsearchClientsMetrics",
-                "text": "ElasticsearchClientsMetrics"
-              },
+              "ElasticsearchClientsMetrics",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/elasticsearch_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -119,7 +81,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.ElasticsearchClientsMetricsCollector.reset",
+            "id": "def-server.ElasticsearchClientsMetricsCollector.reset",
             "type": "Function",
             "tags": [],
             "label": "reset",
@@ -127,7 +89,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/elasticsearch_client.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/elasticsearch_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -138,44 +100,26 @@
       },
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-        "id": "def-common.EventLoopDelaysMonitor",
+        "id": "def-server.EventLoopDelaysMonitor",
         "type": "Class",
         "tags": [],
         "label": "EventLoopDelaysMonitor",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-metrics-collectors-server-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
-            "section": "def-common.EventLoopDelaysMonitor",
-            "text": "EventLoopDelaysMonitor"
-          },
+          "EventLoopDelaysMonitor",
           " implements ",
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.IEventLoopDelaysMonitor",
-            "text": "IEventLoopDelaysMonitor"
-          },
+          "IEventLoopDelaysMonitor",
           "<",
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.IntervalHistogram",
-            "text": "IntervalHistogram"
-          },
+          "IntervalHistogram",
           ">"
         ],
-        "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
+        "path": "src/core/packages/metrics/collectors-server-internal/src/event_loop_delays_monitor.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.EventLoopDelaysMonitor.Unnamed",
+            "id": "def-server.EventLoopDelaysMonitor.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -185,7 +129,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -193,7 +137,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.EventLoopDelaysMonitor.collect",
+            "id": "def-server.EventLoopDelaysMonitor.collect",
             "type": "Function",
             "tags": [],
             "label": "collect",
@@ -202,15 +146,9 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.IntervalHistogram",
-                "text": "IntervalHistogram"
-              }
+              "IntervalHistogram"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -218,7 +156,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.EventLoopDelaysMonitor.reset",
+            "id": "def-server.EventLoopDelaysMonitor.reset",
             "type": "Function",
             "tags": [],
             "label": "reset",
@@ -228,7 +166,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -236,7 +174,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.EventLoopDelaysMonitor.stop",
+            "id": "def-server.EventLoopDelaysMonitor.stop",
             "type": "Function",
             "tags": [],
             "label": "stop",
@@ -246,7 +184,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/event_loop_delays_monitor.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/event_loop_delays_monitor.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -257,44 +195,26 @@
       },
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-        "id": "def-common.OsMetricsCollector",
+        "id": "def-server.OsMetricsCollector",
         "type": "Class",
         "tags": [],
         "label": "OsMetricsCollector",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-metrics-collectors-server-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
-            "section": "def-common.OsMetricsCollector",
-            "text": "OsMetricsCollector"
-          },
+          "OsMetricsCollector",
           " implements ",
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.MetricsCollector",
-            "text": "MetricsCollector"
-          },
+          "MetricsCollector",
           "<",
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.OpsOsMetrics",
-            "text": "OpsOsMetrics"
-          },
+          "OpsOsMetrics",
           ">"
         ],
-        "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
+        "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.OsMetricsCollector.Unnamed",
+            "id": "def-server.OsMetricsCollector.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -302,27 +222,21 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-                "id": "def-common.OsMetricsCollector.Unnamed.$1",
+                "id": "def-server.OsMetricsCollector.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-metrics-collectors-server-internal",
-                    "scope": "common",
-                    "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
-                    "section": "def-common.OpsMetricsCollectorOptions",
-                    "text": "OpsMetricsCollectorOptions"
-                  }
+                  "OsMetricsCollectorOptions"
                 ],
-                "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
+                "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -332,23 +246,17 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.OsMetricsCollector.collect",
+            "id": "def-server.OsMetricsCollector.collect",
             "type": "Function",
             "tags": [],
             "label": "collect",
             "description": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.OpsOsMetrics",
-                "text": "OpsOsMetrics"
-              },
+              "OpsOsMetrics",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -356,7 +264,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.OsMetricsCollector.reset",
+            "id": "def-server.OsMetricsCollector.reset",
             "type": "Function",
             "tags": [],
             "label": "reset",
@@ -364,7 +272,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -375,89 +283,53 @@
       },
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-        "id": "def-common.ProcessMetricsCollector",
+        "id": "def-server.ProcessMetricsCollector",
         "type": "Class",
         "tags": [],
         "label": "ProcessMetricsCollector",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-metrics-collectors-server-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
-            "section": "def-common.ProcessMetricsCollector",
-            "text": "ProcessMetricsCollector"
-          },
+          "ProcessMetricsCollector",
           " implements ",
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.MetricsCollector",
-            "text": "MetricsCollector"
-          },
+          "MetricsCollector",
           "<",
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.OpsProcessMetrics",
-            "text": "OpsProcessMetrics"
-          },
+          "OpsProcessMetrics",
           "[]>"
         ],
-        "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
+        "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.ProcessMetricsCollector.getMainThreadMetrics",
+            "id": "def-server.ProcessMetricsCollector.getMainThreadMetrics",
             "type": "Function",
             "tags": [],
             "label": "getMainThreadMetrics",
             "description": [],
             "signature": [
               "(processes: ",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.OpsProcessMetrics",
-                "text": "OpsProcessMetrics"
-              },
+              "OpsProcessMetrics",
               "[]) => ",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.OpsProcessMetrics",
-                "text": "OpsProcessMetrics"
-              },
+              "OpsProcessMetrics",
               " | undefined"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-                "id": "def-common.ProcessMetricsCollector.getMainThreadMetrics.$1",
+                "id": "def-server.ProcessMetricsCollector.getMainThreadMetrics.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "processes",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-metrics-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreMetricsServerPluginApi",
-                    "section": "def-common.OpsProcessMetrics",
-                    "text": "OpsProcessMetrics"
-                  },
+                  "OpsProcessMetrics",
                   "[]"
                 ],
-                "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
+                "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -467,23 +339,17 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.ProcessMetricsCollector.collect",
+            "id": "def-server.ProcessMetricsCollector.collect",
             "type": "Function",
             "tags": [],
             "label": "collect",
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.OpsProcessMetrics",
-                "text": "OpsProcessMetrics"
-              },
+              "OpsProcessMetrics",
               "[]"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -491,7 +357,23 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.ProcessMetricsCollector.reset",
+            "id": "def-server.ProcessMetricsCollector.registerMetrics",
+            "type": "Function",
+            "tags": [],
+            "label": "registerMetrics",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
+            "id": "def-server.ProcessMetricsCollector.reset",
             "type": "Function",
             "tags": [],
             "label": "reset",
@@ -499,7 +381,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/process.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/process.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -510,44 +392,26 @@
       },
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-        "id": "def-common.ServerMetricsCollector",
+        "id": "def-server.ServerMetricsCollector",
         "type": "Class",
         "tags": [],
         "label": "ServerMetricsCollector",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-metrics-collectors-server-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsCollectorsServerInternalPluginApi",
-            "section": "def-common.ServerMetricsCollector",
-            "text": "ServerMetricsCollector"
-          },
+          "ServerMetricsCollector",
           " implements ",
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.MetricsCollector",
-            "text": "MetricsCollector"
-          },
+          "MetricsCollector",
           "<",
-          {
-            "pluginId": "@kbn/core-metrics-server",
-            "scope": "common",
-            "docId": "kibKbnCoreMetricsServerPluginApi",
-            "section": "def-common.OpsServerMetrics",
-            "text": "OpsServerMetrics"
-          },
+          "OpsServerMetrics",
           ">"
         ],
-        "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
+        "path": "src/core/packages/metrics/collectors-server-internal/src/server.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.ServerMetricsCollector.Unnamed",
+            "id": "def-server.ServerMetricsCollector.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -555,21 +419,24 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/server.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-                "id": "def-common.ServerMetricsCollector.Unnamed.$1",
+                "id": "def-server.ServerMetricsCollector.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "server",
                 "description": [],
                 "signature": [
-                  "Server"
+                  "Server",
+                  "<",
+                  "ServerApplicationState",
+                  ">"
                 ],
-                "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
+                "path": "src/core/packages/metrics/collectors-server-internal/src/server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -579,23 +446,17 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.ServerMetricsCollector.collect",
+            "id": "def-server.ServerMetricsCollector.collect",
             "type": "Function",
             "tags": [],
             "label": "collect",
             "description": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-metrics-server",
-                "scope": "common",
-                "docId": "kibKbnCoreMetricsServerPluginApi",
-                "section": "def-common.OpsServerMetrics",
-                "text": "OpsServerMetrics"
-              },
+              "OpsServerMetrics",
               ">"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/server.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -603,7 +464,7 @@
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.ServerMetricsCollector.reset",
+            "id": "def-server.ServerMetricsCollector.reset",
             "type": "Function",
             "tags": [],
             "label": "reset",
@@ -611,7 +472,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/server.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/server.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -625,18 +486,18 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-        "id": "def-common.OpsMetricsCollectorOptions",
+        "id": "def-server.OsMetricsCollectorOptions",
         "type": "Interface",
         "tags": [],
-        "label": "OpsMetricsCollectorOptions",
+        "label": "OsMetricsCollectorOptions",
         "description": [],
-        "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
+        "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.OpsMetricsCollectorOptions.logger",
+            "id": "def-server.OsMetricsCollectorOptions.logger",
             "type": "Object",
             "tags": [],
             "label": "logger",
@@ -650,13 +511,13 @@
                 "text": "Logger"
               }
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.OpsMetricsCollectorOptions.cpuPath",
+            "id": "def-server.OsMetricsCollectorOptions.cpuPath",
             "type": "string",
             "tags": [],
             "label": "cpuPath",
@@ -664,13 +525,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-metrics-collectors-server-internal",
-            "id": "def-common.OpsMetricsCollectorOptions.cpuAcctPath",
+            "id": "def-server.OsMetricsCollectorOptions.cpuAcctPath",
             "type": "string",
             "tags": [],
             "label": "cpuAcctPath",
@@ -678,7 +539,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/metrics/core-metrics-collectors-server-internal/src/os.ts",
+            "path": "src/core/packages/metrics/collectors-server-internal/src/os.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -686,6 +547,14 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

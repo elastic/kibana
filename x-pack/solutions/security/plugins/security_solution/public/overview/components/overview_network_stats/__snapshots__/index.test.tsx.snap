@@ -1,0 +1,789 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Overview Network Stat Data rendering it renders the default OverviewNetworkStats 1`] = `
+<div
+  class="css-1m8wnsx-NetworkStatsContainer es3qi1j4"
+  data-test-subj="overview-network-stats"
+>
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-xs"
+  />
+  <div
+    class="euiAccordion emotion-euiAccordion"
+  >
+    <div
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+    >
+      <button
+        aria-controls="network-stat-accordion-groupauditbeat"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
+        tabindex="-1"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="network-stat-accordion-groupauditbeat"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
+      >
+        <span
+          class="euiAccordion__buttonContent accordion-button"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+            data-test-subj="network-stat-group-auditbeat"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-m"
+              >
+                Auditbeat
+              </div>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
+                  >
+                    12
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                  >
+                    <progress
+                      aria-hidden="false"
+                      class="euiProgress emotion-euiProgress-native-m-static-primary"
+                      max="13748195"
+                      value="12"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+      id="network-stat-accordion-groupauditbeat"
+      inert=""
+      role="group"
+      style="block-size: 0;"
+    >
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
+        <div
+          class="css-16yqqti-AccordionContent es3qi1j0"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle es3qi1j3"
+                >
+                  Socket
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem es3qi1j1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="network-stat-auditbeatSocket"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft es3qi1j2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      12
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="12"
+                        value="12"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-xs"
+  />
+  <div
+    class="euiAccordion emotion-euiAccordion"
+  >
+    <div
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+    >
+      <button
+        aria-controls="network-stat-accordion-groupfilebeat"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
+        tabindex="-1"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="network-stat-accordion-groupfilebeat"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
+      >
+        <span
+          class="euiAccordion__buttonContent accordion-button"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+            data-test-subj="network-stat-group-filebeat"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-m"
+              >
+                Filebeat
+              </div>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
+                  >
+                    70,860
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                  >
+                    <progress
+                      aria-hidden="false"
+                      class="euiProgress emotion-euiProgress-native-m-static-primary"
+                      max="13748195"
+                      value="70860"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+      id="network-stat-accordion-groupfilebeat"
+      inert=""
+      role="group"
+      style="block-size: 0;"
+    >
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
+        <div
+          class="css-16yqqti-AccordionContent es3qi1j0"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle es3qi1j3"
+                >
+                  Cisco
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem es3qi1j1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="network-stat-filebeatCisco"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft es3qi1j2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      999
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="70860"
+                        value="999"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle es3qi1j3"
+                >
+                  Netflow
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem es3qi1j1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="network-stat-filebeatNetflow"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft es3qi1j2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      7,777
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="70860"
+                        value="7777"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle es3qi1j3"
+                >
+                  Palo Alto Networks
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem es3qi1j1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="network-stat-filebeatPanw"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft es3qi1j2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      66
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="70860"
+                        value="66"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle es3qi1j3"
+                >
+                  Suricata
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem es3qi1j1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="network-stat-filebeatSuricata"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft es3qi1j2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      60,015
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="70860"
+                        value="60015"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle es3qi1j3"
+                >
+                  Zeek
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem es3qi1j1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="network-stat-filebeatZeek"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft es3qi1j2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      2,003
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="70860"
+                        value="2003"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-full-xs"
+  />
+  <div
+    class="euiAccordion emotion-euiAccordion"
+  >
+    <div
+      class="euiAccordion__triggerWrapper emotion-EuiAccordionTrigger"
+    >
+      <button
+        aria-controls="network-stat-accordion-grouppacketbeat"
+        aria-expanded="false"
+        aria-hidden="true"
+        aria-labelledby="generated-id"
+        class="euiButtonIcon euiAccordion__arrow emotion-euiButtonIcon-xs-empty-text-euiAccordion__arrow-left-isClosed"
+        tabindex="-1"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="arrowRight"
+        />
+      </button>
+      <button
+        aria-controls="network-stat-accordion-grouppacketbeat"
+        aria-expanded="false"
+        class="euiAccordion__button emotion-euiAccordion__button"
+        id="generated-id"
+        type="button"
+      >
+        <span
+          class="euiAccordion__buttonContent accordion-button"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+            data-test-subj="network-stat-group-packetbeat"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-m"
+              >
+                Packetbeat
+              </div>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+              >
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="euiText emotion-euiText-m-euiTextColor-default"
+                  >
+                    13,677,323
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
+                >
+                  <div
+                    class="css-8kb6u7-ProgressContainer e1vv032p0"
+                  >
+                    <progress
+                      aria-hidden="false"
+                      class="euiProgress emotion-euiProgress-native-m-static-primary"
+                      max="13748195"
+                      value="13677323"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <div
+      aria-labelledby="generated-id"
+      class="euiAccordion__childWrapper emotion-euiAccordion__childWrapper-isClosed"
+      id="network-stat-accordion-grouppacketbeat"
+      inert=""
+      role="group"
+      style="block-size: 0;"
+    >
+      <div
+        class="euiAccordion__children emotion-euiAccordion__children"
+      >
+        <div
+          class="css-16yqqti-AccordionContent es3qi1j0"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle es3qi1j3"
+                >
+                  DNS
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem es3qi1j1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="network-stat-packetbeatDNS"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft es3qi1j2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      10,277,307
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="13677323"
+                        value="10277307"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle es3qi1j3"
+                >
+                  Flow
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem es3qi1j1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="network-stat-packetbeatFlow"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft es3qi1j2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      16
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="13677323"
+                        value="16"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <div
+                class="euiText emotion-euiText-s-euiTextColor-subdued"
+              >
+                <div
+                  class="css-1v9m46b-MoveItLeftTitle es3qi1j3"
+                >
+                  TLS
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem es3qi1j1 emotion-euiFlexItem-growZero-NoMarginTopFlexItem"
+              data-test-subj="network-stat-packetbeatTLS"
+            >
+              <div
+                class="css-kme1xc-MoveItLeft es3qi1j2"
+              >
+                <div
+                  class="euiFlexGroup emotion-euiFlexGroup-none-spaceBetween-center-row"
+                >
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="euiText emotion-euiText-s-euiTextColor-subdued"
+                    >
+                      3,400,000
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
+                  >
+                    <div
+                      class="css-8kb6u7-ProgressContainer e1vv032p0"
+                    >
+                      <progress
+                        aria-hidden="false"
+                        class="euiProgress emotion-euiProgress-native-m-static-subdued"
+                        max="13677323"
+                        value="3400000"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

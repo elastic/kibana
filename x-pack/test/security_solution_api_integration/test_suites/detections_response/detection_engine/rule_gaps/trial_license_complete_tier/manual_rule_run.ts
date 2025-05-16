@@ -42,9 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  // Currently FF are not supported on MKI environments, so this test should be skipped from MKI environments.
-  // Once `manualRuleRunEnabled` FF is removed, we can remove `@skipInServerlessMKI` as well
-  describe('@ess @serverless @skipInServerlessMKI manual_rule_run', () => {
+  describe('@ess @serverless manual_rule_run', () => {
     beforeEach(async () => {
       await createAlertsIndex(supertest, log);
     });
@@ -108,8 +106,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(results).toEqual([
           {
             error: {
-              error: 'Bad Request',
               message: `Rule ${createdRule.id} is disabled`,
+              rule: { id: `${createdRule.id}`, name: 'Custom query rule' },
             },
           },
         ]);
@@ -231,8 +229,8 @@ export default ({ getService }: FtrProviderContext) => {
             }),
             {
               error: {
-                error: 'Not Found',
                 message: `Saved object [alert/${nonExistingRuleId}] not found`,
+                rule: { id: nonExistingRuleId },
               },
             },
           ])
@@ -272,8 +270,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect.arrayContaining([
             {
               error: {
-                error: 'Bad Request',
                 message: `Rule ${createdRule1.id} is disabled`,
+                rule: { id: `${createdRule1.id}`, name: 'Custom query rule' },
               },
             },
             expect.objectContaining({

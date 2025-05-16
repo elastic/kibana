@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { getEventLog, ObjectRemover } from '../../../common/lib';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createActionTests({ getService }: FtrProviderContext) {
@@ -47,7 +47,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const actionId = response.body.id;
-      objectRemover.add('default', actionId, 'action', 'actions');
+      objectRemover.add('default', actionId, 'connector', 'actions');
 
       const actions = [];
       for (let i = 0; i < 510; i++) {

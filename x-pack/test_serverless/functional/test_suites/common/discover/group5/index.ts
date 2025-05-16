@@ -12,14 +12,19 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('discover/group5', function () {
+    this.tags(['esGate']);
+
     before(async function () {
       await browser.setWindowSize(1300, 800);
     });
 
     after(async function unloadMakelogs() {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
+    loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_url_state'));
   });
 }

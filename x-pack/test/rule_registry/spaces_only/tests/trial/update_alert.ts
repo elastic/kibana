@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { superUser } from '../../../common/lib/authentication/users';
 import type { User } from '../../../common/lib/authentication/types';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 
 // eslint-disable-next-line import/no-default-export
@@ -90,7 +90,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it(`${superUser.username} should be able to update alert ${APM_ALERT_ID} in ${SPACE2}/${APM_ALERT_INDEX}`, async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts'); // since this is a success case, reload the test data immediately beforehand
       await supertestWithoutAuth
         .post(`${getSpaceUrlPrefix(SPACE2)}${TEST_URL}`)
         .set('kbn-xsrf', 'true')

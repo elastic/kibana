@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import http from 'http';
+import type http from 'http';
 import expect from '@kbn/expect';
-import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
 import {
@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      actionsRemover.add('default', connector.id, 'connector', 'actions');
 
       // Configuration is created with no connector so the mappings are empty
       const configuration = await createConfiguration(supertest);
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      actionsRemover.add('default', connector.id, 'connector', 'actions');
 
       // Configuration is created with connector so the mappings are created
       const configuration = await createConfiguration(

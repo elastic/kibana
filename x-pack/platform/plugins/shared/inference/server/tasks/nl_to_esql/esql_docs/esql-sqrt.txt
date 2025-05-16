@@ -1,0 +1,27 @@
+# SQRT
+
+The SQRT function calculates the square root of a given number.
+
+## Syntax
+
+`SQRT(number)`
+
+### Parameters
+
+#### number
+
+This is a numeric expression.
+
+## Examples
+
+
+```esql
+ROW d = 100.0
+| EVAL s = SQRT(d)
+```
+
+```esql
+FROM employees
+| KEEP first_name, last_name, height
+| EVAL sqrt_height = SQRT(height)
+```

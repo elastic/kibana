@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { resolve } from 'path';
+import { removePackagesFromPackageMap } from '@kbn/repo-packages';
+import { resolve, join } from 'path';
 import { scanCopy, Task, deleteAll, copyAll } from '../lib';
 import { getNodeDownloadInfo } from './nodejs';
 
@@ -43,7 +45,7 @@ export const CreateArchivesSources: Task = {
         if (platform.isServerless()) {
           await deleteAll(
             [
-              'x-pack/plugins/canvas/shareable_runtime/build',
+              'x-pack/platform/plugins/private/canvas/shareable_runtime/build',
               'node_modules/@kbn/screenshotting-plugin/server/assets',
             ].map((path) => build.resolvePathForPlatform(platform, path)),
             log
@@ -52,12 +54,34 @@ export const CreateArchivesSources: Task = {
             resolve(REPO_ROOT, 'config'),
             build.resolvePathForPlatform(platform, 'config'),
             {
-              select: ['serverless.yml', 'serverless.{es,oblt,security}.yml'],
+              select: [
+                'serverless.yml',
+                'serverless.{chat,es,oblt,security}.yml',
+                'serverless.security.{search_ai_lake,essentials,complete}.yml',
+              ],
             }
           );
-          log.debug(
-            `Serverless adjustments made in serverless-${platform.getNodeArch()} specific build directory`
+          log.debug(`Adjustments made in serverless specific build directory`);
+
+          // Remove chat solution from release artifacts
+          // For now, snapshot builds support all solutions to faciliate functional testing
+        } else if (config.isRelease) {
+          const chatPlugins = config.getPrivateSolutionPackagesFromRepo('chat');
+          const chatPluginNames = chatPlugins.map((p) => p.name);
+          const chatPluginsPaths = chatPluginNames.map((name) =>
+            build.resolvePathForPlatform(platform, join('node_modules', name))
           );
+          log.debug('Removing plugins: ' + chatPluginNames.join(','));
+          await deleteAll(chatPluginsPaths, log);
+
+          removePackagesFromPackageMap(
+            chatPluginNames,
+            build.resolvePathForPlatform(
+              platform,
+              'node_modules/@kbn/repo-packages/package-map.json'
+            )
+          );
+          log.debug(`Adjustments made in stateful specific build directory`);
         }
       })
     );

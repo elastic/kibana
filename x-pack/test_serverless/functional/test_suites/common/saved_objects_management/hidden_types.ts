@@ -7,6 +7,7 @@
 
 import path from 'path';
 import expect from '@kbn/expect';
+import { byIdAscComparator } from '@kbn/core-saved-objects-import-export-server-internal/src/export/utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const fixturePaths = {
@@ -25,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('saved objects management with hidden types', () => {
     before(async () => {
       await esArchiver.load(
-        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
+        'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
       await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('management');
@@ -35,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
+        'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
       await kibanaServer.savedObjects.cleanStandardList();
     });
@@ -55,11 +56,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .expect(200)
           .then((resp) => {
             expect(
-              resp.body.saved_objects.map((obj: any) => ({
-                id: obj.id,
-                type: obj.type,
-                hidden: obj.meta.hiddenType,
-              }))
+              resp.body.saved_objects
+                .map((obj: any) => ({
+                  id: obj.id,
+                  type: obj.type,
+                  hidden: obj.meta.hiddenType,
+                }))
+                .sort(byIdAscComparator)
             ).to.eql([
               {
                 id: 'obj_1',

@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/data-view-utils",
+  "owner": [
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

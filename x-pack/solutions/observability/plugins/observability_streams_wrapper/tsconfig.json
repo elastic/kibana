@@ -1,0 +1,35 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "typings/**/*",
+    "public/**/*.json",
+    "server/**/*",
+    ".storybook/**/*"
+  ],
+  "exclude": ["target/**/*", ".storybook/**/*.js"],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/streams-plugin",
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/share-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/saved-objects-tagging-plugin",
+    "@kbn/logging",
+    "@kbn/streams-plugin",
+    "@kbn/share-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/observability-shared-plugin",
+    "@kbn/streams-app-plugin",
+    "@kbn/deeplinks-observability",
+  ]
+}

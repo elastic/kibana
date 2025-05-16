@@ -8,30 +8,30 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const inspector = getService('inspector');
   const security = getService('security');
 
   describe('layer visibility', () => {
     before(async () => {
       await security.testUser.setRoles(['test_logstash_reader', 'global_maps_all']);
-      await PageObjects.maps.loadSavedMap('document example hidden');
+      await maps.loadSavedMap('document example hidden');
     });
 
     afterEach(async () => {
       await inspector.close();
-      await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
+      await maps.refreshAndClearUnsavedChangesWarning();
       await security.testUser.restoreDefaults();
     });
 
     it('should not make any requests when layer is hidden', async () => {
-      const noRequests = await PageObjects.maps.doesInspectorHaveRequests();
+      const noRequests = await maps.doesInspectorHaveRequests();
       expect(noRequests).to.equal(true);
     });
 
     it('should fetch layer data when layer is made visible', async () => {
-      await PageObjects.maps.toggleLayerVisibility('logstash');
-      const hits = await PageObjects.maps.getHits();
+      await maps.toggleLayerVisibility('logstash');
+      const hits = await maps.getHits();
       expect(hits).to.equal('5');
     });
   });

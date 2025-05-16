@@ -12,6 +12,7 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('./management'));
+    loadTestFile(require.resolve('./csv_v2_esql'));
     loadTestFile(require.resolve('./generate_csv_discover'));
     loadTestFile(require.resolve('./datastream'));
   });

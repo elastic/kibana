@@ -27,7 +27,7 @@
         "description": [
           "Object that helps report data to the ci-stats service"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +58,7 @@
                 "text": "CiStatsReporter"
               }
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -78,7 +78,7 @@
                     "text": "SomeDevLog"
                   }
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -96,7 +96,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -117,7 +117,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -138,7 +138,7 @@
                     "text": "SomeDevLog"
                   }
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -158,7 +158,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -176,7 +176,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -202,7 +202,7 @@
               },
               ") => Promise<boolean | undefined>"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -222,7 +222,7 @@
                     "text": "TimingsOptions"
                   }
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -258,7 +258,7 @@
               },
               " | undefined) => Promise<boolean | undefined>"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -279,7 +279,7 @@
                   },
                   "[]"
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -301,7 +301,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -329,7 +329,7 @@
               },
               ") => Promise<void>"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -349,7 +349,7 @@
                     "text": "CiStatsReportTestsOptions"
                   }
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -369,7 +369,7 @@
               "PerformanceMetrics",
               ") => Promise<boolean | undefined>"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -383,7 +383,7 @@
                 "signature": [
                   "PerformanceMetrics"
                 ],
-                "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+                "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -414,7 +414,7 @@
           },
           ", group: string) => (startTime: number, id: string, meta: Record<string, any>) => Promise<void>"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/report_time.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -434,7 +434,7 @@
                 "text": "ToolingLog"
               }
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/report_time.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -449,7 +449,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/report_time.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -469,7 +469,7 @@
         "description": [
           "A ci-stats metric record"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -482,7 +482,7 @@
             "description": [
               "Top-level categorization for the metric, e.g. \"page load bundle size\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -495,7 +495,7 @@
             "description": [
               "Specific sub-set of the \"group\", e.g. \"dashboard\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -508,7 +508,7 @@
             "description": [
               "integer value recorded as the value of this metric"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -524,7 +524,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -540,7 +540,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -563,7 +563,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -579,7 +579,7 @@
         "description": [
           "Options for reporting tests to ci-stats"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -601,7 +601,7 @@
                 "text": "CiStatsTestGroupInfo"
               }
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -624,7 +624,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -638,7 +638,7 @@
         "tags": [],
         "label": "CiStatsTestGroupInfo",
         "description": [],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -651,7 +651,7 @@
             "description": [
               "\nISO-8601 formatted datetime representing when the group of tests started running"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -664,7 +664,7 @@
             "description": [
               "\nThe number of miliseconds that the tests ran for"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -677,7 +677,7 @@
             "description": [
               "\nThe type of tests run in this group, any value is valid but test groups are groupped by type in the UI so use something consistent"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -690,7 +690,7 @@
             "description": [
               "\nThe name of this specific group (within the \"type\")"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -706,7 +706,7 @@
             "signature": [
               "\"skip\" | \"fail\" | \"pass\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -728,7 +728,7 @@
                 "text": "CiStatsMetadata"
               }
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -742,7 +742,7 @@
         "tags": [],
         "label": "CiStatsTestRun",
         "description": [],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -755,7 +755,7 @@
             "description": [
               "\nISO-8601 formatted datetime representing when the tests started running"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -768,7 +768,7 @@
             "description": [
               "\nDuration of the tests in milliseconds"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -781,7 +781,7 @@
             "description": [
               "\nA sequence number, this is used to order the tests in a specific test run"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -797,7 +797,7 @@
             "signature": [
               "\"after all hook\" | \"after each hook\" | \"before all hook\" | \"before each hook\" | \"test\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -813,7 +813,7 @@
             "signature": [
               "\"skip\" | \"fail\" | \"pass\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -829,7 +829,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -842,7 +842,7 @@
             "description": [
               "\nThe name of this specific test run"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -855,7 +855,7 @@
             "description": [
               "\nRelative path from the root of the repo contianing this test"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -871,7 +871,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -887,7 +887,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -903,7 +903,7 @@
             "signature": [
               "{ name: string; base64Png: string; }[] | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -919,7 +919,7 @@
         "description": [
           "A ci-stats timing event"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -932,7 +932,7 @@
             "description": [
               "Top-level categorization for the timing, e.g. \"scripts/foo\", process type, etc."
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -945,7 +945,7 @@
             "description": [
               "Specific timing (witin the \"group\" being tracked) e.g. \"total\""
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -958,7 +958,7 @@
             "description": [
               "time in milliseconds which should be recorded"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -981,7 +981,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -997,7 +997,7 @@
         "description": [
           "Options for reporting metrics to ci-stats"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1020,7 +1020,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1036,7 +1036,7 @@
         "description": [
           "Options for reporting timings to ci-stats"
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1059,7 +1059,7 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1075,7 +1075,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1091,7 +1091,7 @@
             "signature": [
               "string | null | undefined"
             ],
-            "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
+            "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1111,7 +1111,7 @@
         "signature": [
           "\"skip\" | \"fail\" | \"pass\""
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1126,7 +1126,7 @@
         "signature": [
           "\"after all hook\" | \"after each hook\" | \"before all hook\" | \"before each hook\" | \"test\""
         ],
-        "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
+        "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

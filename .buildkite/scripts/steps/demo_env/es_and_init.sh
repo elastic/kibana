@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source "$(dirname "${0}")/config.sh"
+source "$(dirname "${0}")/../../common/util.sh"
 
 "$(dirname "${0}")/auth.sh"
 
@@ -16,7 +17,7 @@ DOCKER_EXPORT_URL=$(curl https://storage.googleapis.com/kibana-ci-es-snapshots-d
 curl "$DOCKER_EXPORT_URL" > target/elasticsearch-docker.tar.gz
 docker load < target/elasticsearch-docker.tar.gz
 docker tag "docker.elastic.co/elasticsearch/elasticsearch:$DEPLOYMENT_VERSION-SNAPSHOT" "$ES_IMAGE"
-docker push "$ES_IMAGE"
+docker_with_retry push "$ES_IMAGE"
 
 echo '--- Prepare yaml'
 

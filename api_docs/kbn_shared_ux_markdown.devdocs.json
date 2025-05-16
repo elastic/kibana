@@ -29,9 +29,9 @@
         "signature": [
           "({ ariaLabelContent, markdownContent, children, className, onRender, openLinksInNewTab, defaultValue, placeholder, height, readOnly, enableTooltipSupport, validateLinks, enableSoftLineBreaks, ...restProps }: ",
           "MarkdownProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/markdown/impl/markdown.tsx",
+        "path": "src/platform/packages/shared/shared-ux/markdown/impl/markdown.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "MarkdownProps"
             ],
-            "path": "packages/shared-ux/markdown/impl/markdown.tsx",
+            "path": "src/platform/packages/shared/shared-ux/markdown/impl/markdown.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -21,11 +21,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('scroll_count', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
     describe('scroll_count with more than 10k objects', () => {
       const importVisualizations = async ({
@@ -108,12 +108,12 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
         );
         await kibanaServer.savedObjects.cleanStandardList();
       });

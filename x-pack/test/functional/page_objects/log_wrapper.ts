@@ -6,6 +6,11 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+
+function isPromise<T>(value: unknown): value is Promise<T> {
+  return value instanceof Promise;
+}
 
 /**
  * Wraps the specified object instance with debug log statements of all method calls.
@@ -19,17 +24,48 @@ export function logWrapper<T extends Record<string, Function>>(
   log: ToolingLog,
   instance: T
 ): T {
+  const logger = prepareLogger(log, prefix);
   return Object.keys(instance).reduce((acc, prop) => {
     const baseFn = acc[prop];
     (acc as Record<string, Function>)[prop] = (...args: unknown[]) => {
-      logMethodCall(log, prefix, prop, args);
-      return baseFn.apply(instance, args);
+      logger.start(
+        prop,
+        args.map((arg) => (arg instanceof WebElementWrapper ? '[WebElement]' : arg))
+      );
+      const result = baseFn.apply(instance, args);
+      if (isPromise(result)) {
+        result.then(logger.end, logger.end);
+      } else {
+        logger.end();
+      }
+      return result;
     };
     return acc;
   }, instance);
 }
 
-function logMethodCall(log: ToolingLog, prefix: string, prop: string, args: unknown[]) {
-  const argsStr = args.map((arg) => (typeof arg === 'string' ? `'${arg}'` : arg)).join(', ');
-  log.debug(`${prefix}.${prop}(${argsStr})`);
+function prepareLogger(log: ToolingLog, prefix: string) {
+  let now = Date.now();
+  let currentContext = '';
+
+  return {
+    start: (prop: string, args: unknown[]) => {
+      if (prop === '') {
+        return;
+      }
+      currentContext = `${prop}(${args
+        .map((arg) => (typeof arg === 'string' ? `'${arg}'` : JSON.stringify(arg)))
+        .join(', ')})`;
+      log.debug(`${prefix}.${currentContext}`);
+      now = Date.now();
+    },
+    end: () => {
+      if (currentContext === '') {
+        return;
+      }
+      log.debug(`${prefix}.${currentContext} - (Took ${Date.now() - now} ms)`);
+      now = Date.now();
+      currentContext = '';
+    },
+  };
 }

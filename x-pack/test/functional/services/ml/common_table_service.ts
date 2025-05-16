@@ -50,7 +50,7 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
             .text()
             .trim();
           return acc;
-        }, {} as Record<typeof this.columns[number]['id'], string>);
+        }, {} as Record<(typeof this.columns)[number]['id'], string>);
 
         rows.push(rowObject);
       }
@@ -78,6 +78,12 @@ export function MlTableServiceProvider({ getPageObject, getService }: FtrProvide
     public async waitForTableToLoad() {
       await testSubjects.existOrFail(`~${this.tableTestSubj}`, { timeout: 60 * 1000 });
       await testSubjects.existOrFail(`${this.tableTestSubj} loaded`, { timeout: 30 * 1000 });
+    }
+
+    public async assertNonZeroRowCount() {
+      await this.waitForTableToLoad();
+      const rows = await this.parseTable();
+      expect(rows.length).to.not.eql(0, 'Table should have at least one row');
     }
 
     async getSearchInput(): Promise<WebElementWrapper> {

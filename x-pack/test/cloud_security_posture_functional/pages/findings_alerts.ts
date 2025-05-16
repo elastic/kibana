@@ -24,6 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
+        id: chance.guid(),
         tags: ['CIS', 'CIS K8S'],
         rationale: 'rationale steps for rule 1.1',
         references: '1. https://elastic.co/rules/1.1',
@@ -40,12 +41,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
+        id: chance.guid(),
         tags: ['CIS', 'CIS K8S'],
         rationale: 'rationale steps',
         references: '1. https://elastic.co',
@@ -62,12 +67,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'Another Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
       resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
       result: { evaluation: 'passed' },
       rule: {
+        id: chance.guid(),
         tags: ['CIS', 'CIS K8S'],
         rationale: 'rationale steps',
         references: '1. https://elastic.co',
@@ -84,12 +93,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
     {
       '@timestamp': new Date(Date.now() - 60 * 60 * 1000).toISOString(),
       resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
       result: { evaluation: 'failed' },
       rule: {
+        id: chance.guid(),
         tags: ['CIS', 'CIS K8S'],
         rationale: 'rationale steps',
         references: '1. https://elastic.co',
@@ -106,12 +119,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         type: 'process',
       },
       cluster_id: 'another lower case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
   ];
 
   const ruleName1 = data[0].rule.name;
 
-  describe('Findings Page - Alerts', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/168991
+  // Failing: See https://github.com/elastic/kibana/issues/220375
+  describe.skip('Findings Page - Alerts', function () {
     this.tags(['cloud_security_posture_findings_alerts']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;
@@ -140,14 +158,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
-      pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168991
-    describe.skip('Create detection rule', () => {
+    describe('Create detection rule', () => {
       it('Creates a detection rule from the Take Action button and navigates to rule page', async () => {
         await latestFindingsTable.openFlyoutAt(0);
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
+
+        const toastMessageElement = await toasts.getElementByIndex();
+        expect(toastMessageElement).to.be.ok();
+        const toastMessageTitle = await toastMessageElement.findByTestSubject(
+          'csp:toast-success-title'
+        );
+
+        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
 
         expect(
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-alert-count')
@@ -157,19 +182,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-detection-rule-count')
         ).to.be('1 detection rule');
 
-        const toastMessageElement = await toasts.getElementByIndex();
-        expect(toastMessageElement).to.be.ok();
-
-        const toastMessageTitle = await toastMessageElement.findByTestSubject(
-          'csp:toast-success-title'
-        );
-        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
-
         await testSubjects.click('csp:toast-success-link');
 
-        const rulePageTitle = await testSubjects.find('header-page-title');
-        expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async () => {
+          const rulePageTitle = await testSubjects.find('header-page-title');
+          expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        });
       });
+
       it('Creates a detection rule from the Alerts section and navigates to rule page', async () => {
         await latestFindingsTable.openFlyoutAt(0);
         const flyout = await misconfigurationsFlyout.getElement();
@@ -178,6 +199,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await flyout.findByTestSubject('csp:findings-flyout-create-detection-rule-link')
         ).click();
 
+        const toastMessage = await toasts.getElementByIndex();
+        expect(toastMessage).to.be.ok();
+
+        const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
+        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
+
         expect(
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-alert-count')
         ).to.be('0 alerts');
@@ -186,25 +213,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-detection-rule-count')
         ).to.be('1 detection rule');
 
-        const toastMessage = await toasts.getElementByIndex();
-        expect(toastMessage).to.be.ok();
-
-        const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
-        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
-
         await testSubjects.click('csp:toast-success-link');
-
-        const rulePageTitle = await testSubjects.find('header-page-title');
-        expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        // Rule page title is not immediately available, so we need to retry until it is
+        await retry.try(async () => {
+          const rulePageTitle = await testSubjects.find('header-page-title');
+          expect(await rulePageTitle.getVisibleText()).to.be(ruleName1);
+        });
       });
     });
+
     describe('Rule details', () => {
       it('The rule page contains the expected matching data', async () => {
         await latestFindingsTable.openFlyoutAt(0);
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
 
         await testSubjects.click('csp:toast-success-link');
-
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const rulePageDescription = await testSubjects.find(
           'stepAboutRuleDetailsToggleDescriptionText'
         );
@@ -217,13 +242,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await referenceUrls.getVisibleText()).to.contain('https://elastic.co/rules/1.1');
       });
     });
+
     describe('Navigation', () => {
       it('Clicking on count of Rules should navigate to the rules page with benchmark tags as a filter', async () => {
         await latestFindingsTable.openFlyoutAt(0);
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
         const flyout = await misconfigurationsFlyout.getElement();
         await (await flyout.findByTestSubject('csp:findings-flyout-detection-rule-count')).click();
-
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await (await testSubjects.find('ruleName')).getVisibleText()).to.be(ruleName1);
       });
       it('Clicking on count of Alerts should navigate to the alerts page', async () => {
@@ -231,7 +257,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await misconfigurationsFlyout.clickTakeActionCreateRuleButton();
         const flyout = await misconfigurationsFlyout.getElement();
         await (await flyout.findByTestSubject('csp:findings-flyout-alert-count')).click();
-
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await (await testSubjects.find('header-page-title')).getVisibleText()).to.be(
           'Alerts'
         );

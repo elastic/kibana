@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { API_AUTH } from './api_calls/common';
+import { ESS_API_AUTH } from './api_calls/common';
 
 interface User {
   username: string;
@@ -62,9 +62,14 @@ export const secAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
+          securitySolutionAttackDiscovery: ['all'],
           securitySolutionCases: ['all'],
+          securitySolutionCasesV2: ['all'],
+          securitySolutionCasesV3: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -94,9 +99,14 @@ export const secReadCasesAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          siemV2: ['read'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
+          securitySolutionAttackDiscovery: ['all'],
           securitySolutionCases: ['all'],
+          securitySolutionCasesV2: ['all'],
+          securitySolutionCasesV3: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -126,9 +136,14 @@ export const secAllCasesOnlyReadDelete: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
+          securitySolutionAttackDiscovery: ['all'],
           securitySolutionCases: ['cases_read', 'cases_delete'],
+          securitySolutionCasesV2: ['cases_read', 'cases_delete'],
+          securitySolutionCasesV3: ['cases_read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -158,9 +173,14 @@ export const secAllCasesNoDelete: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          siemV2: ['all'],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
           securitySolutionAssistant: ['all'],
+          securitySolutionAttackDiscovery: ['all'],
           securitySolutionCases: ['minimal_all'],
+          securitySolutionCasesV2: ['minimal_all'],
+          securitySolutionCasesV3: ['minimal_all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -189,7 +209,7 @@ export const createUsersAndRoles = (users: User[], roles: Role[]) => {
       body: role.privileges,
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'PUT',
-      auth: API_AUTH,
+      auth: ESS_API_AUTH,
       url: `/api/security/role/${role.name}`,
     })
       .its('status')
@@ -209,7 +229,7 @@ export const createUsersAndRoles = (users: User[], roles: Role[]) => {
       },
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'POST',
-      auth: API_AUTH,
+      auth: ESS_API_AUTH,
       url: `/internal/security/users/${user.username}`,
     })
       .its('status')
@@ -223,7 +243,7 @@ export const deleteUsersAndRoles = (users: User[], roles: Role[]) => {
     cy.request({
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'DELETE',
-      auth: API_AUTH,
+      auth: ESS_API_AUTH,
       url: `/internal/security/users/${user.username}`,
       failOnStatusCode: false,
     })
@@ -236,7 +256,7 @@ export const deleteUsersAndRoles = (users: User[], roles: Role[]) => {
     cy.request({
       headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
       method: 'DELETE',
-      auth: API_AUTH,
+      auth: ESS_API_AUTH,
       url: `/api/security/role/${role.name}`,
       failOnStatusCode: false,
     })

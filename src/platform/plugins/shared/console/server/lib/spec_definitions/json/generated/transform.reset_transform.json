@@ -1,0 +1,27 @@
+{
+  "transform.reset_transform": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "force": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_transform/{transform_id}/_reset"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/reset-transform.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

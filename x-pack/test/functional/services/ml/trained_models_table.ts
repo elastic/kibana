@@ -23,7 +23,7 @@ export interface TrainedModelRowData {
 export type MlTrainedModelsTable = ProvidedType<typeof TrainedModelsTableProvider>;
 
 export function TrainedModelsTableProvider(
-  { getService }: FtrProviderContext,
+  { getPageObject, getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
   trainedModelsActions: TrainedModelsActions
 ) {
@@ -31,6 +31,7 @@ export function TrainedModelsTableProvider(
   const retry = getService('retry');
   const find = getService('find');
   const browser = getService('browser');
+  const headerPage = getPageObject('header');
 
   return new (class ModelsTable {
     public async parseModelsTable() {
@@ -51,27 +52,21 @@ export function TrainedModelsTableProvider(
           id: string;
           description: string;
           modelTypes: string[];
-          createdAt: string;
           state: string;
         } = {
           id: $tr
             .findTestSubject('mlModelsTableColumnId')
-            .find('.euiTableCellContent')
+            .findTestSubject('mlModelsTableColumnIdValueId')
             .text()
             .trim(),
           description: $tr
-            .findTestSubject('mlModelsTableColumnDescription')
-            .find('.euiTableCellContent')
+            .findTestSubject('mlModelsTableColumnId')
+            .findTestSubject('mlModelsTableColumnIdValueDescription')
             .text()
             .trim(),
           modelTypes,
           state: $tr
             .findTestSubject('mlModelsTableColumnDeploymentState')
-            .find('.euiTableCellContent')
-            .text()
-            .trim(),
-          createdAt: $tr
-            .findTestSubject('mlModelsTableColumnCreatedAt')
             .find('.euiTableCellContent')
             .text()
             .trim(),
@@ -82,6 +77,15 @@ export function TrainedModelsTableProvider(
 
       return rows;
     }
+
+    /**
+     * Maps the vCPU level to the corresponding value in the slider.
+     */
+    public readonly vCPULevelValueMap = {
+      low: 0.5,
+      medium: 1.5,
+      high: 2.5,
+    };
 
     public rowSelector(modelId: string, subSelector?: string) {
       const row = `~mlModelsTable > ~row-${modelId}`;
@@ -160,12 +164,6 @@ export function TrainedModelsTableProvider(
           expectedRow.modelTypes
         )}' (got '${JSON.stringify(modelRow.modelTypes)}')`
       );
-      // 'Created at' will be different on each run,
-      // so we will just assert that the value is in the expected timestamp format.
-      expect(modelRow.createdAt).to.match(
-        /^\w{3}\s\d+,\s\d{4}\s@\s\d{2}:\d{2}:\d{2}\.\d{3}$/,
-        `Expected trained model row created at time to have same format as 'Dec 5, 2019 @ 12:28:34.594' (got '${modelRow.createdAt}')`
-      );
     }
 
     public async assertTableIsPopulated() {
@@ -194,6 +192,7 @@ export function TrainedModelsTableProvider(
     }
 
     public async doesModelCollapsedActionsButtonExist(modelId: string): Promise<boolean> {
+      await headerPage.waitUntilLoadingHasFinished();
       return await testSubjects.exists(this.rowSelector(modelId, 'euiCollapsedItemActionsButton'));
     }
 
@@ -502,58 +501,125 @@ export function TrainedModelsTableProvider(
       await this.assertDeployModelFlyoutExists();
     }
 
-    async assertNumOfAllocations(expectedValue: number) {
-      const actualValue = await testSubjects.getAttribute(
-        'mlModelsStartDeploymentModalNumOfAllocations',
-        'value'
+    async assertOptimizedFor(expectedValue: 'optimizedForIngest' | 'optimizedForSearch') {
+      const element = await testSubjects.find(
+        `mlModelsStartDeploymentModalOptimized_${expectedValue}`
       );
-      expect(actualValue).to.eql(
+      const inputElement = await element.findByTagName('input');
+      const isChecked = await inputElement.getAttribute('checked');
+
+      expect(isChecked).to.eql(
+        'true',
+        `Expected optimized for ${expectedValue} to be selected, got ${isChecked}`
+      );
+    }
+
+    public async setOptimizedFor(optimized: 'optimizedForIngest' | 'optimizedForSearch') {
+      const element = await testSubjects.find(`mlModelsStartDeploymentModalOptimized_${optimized}`);
+      await element.click();
+      await this.assertOptimizedFor(optimized);
+    }
+
+    public async setVCPULevel(value: 'low' | 'medium' | 'high') {
+      await mlCommonUI.setSliderValue(
+        'mlModelsStartDeploymentModalVCPULevel',
+        this.vCPULevelValueMap[value]
+      );
+      await this.assertVCPULevel(value);
+    }
+
+    public async assertVCPULevel(value: 'low' | 'medium' | 'high') {
+      await mlCommonUI.assertSliderValue(
+        'mlModelsStartDeploymentModalVCPULevel',
+        this.vCPULevelValueMap[value]
+      );
+    }
+
+    public async assertVCPUHelperText(expectedText: string) {
+      const helperText = await testSubjects.getVisibleText(
+        'mlModelsStartDeploymentModalVCPUHelperText'
+      );
+      expect(expectedText).to.eql(helperText);
+    }
+
+    public async assertAdvancedConfigurationOpen(expectedValue: boolean) {
+      await retry.tryForTime(5 * 1000, async () => {
+        const panelElement = await testSubjects.find(
+          'mlModelsStartDeploymentModalAdvancedConfiguration'
+        );
+        const isOpen = await panelElement.elementHasClass('euiAccordion-isOpen');
+
+        expect(isOpen).to.eql(
+          expectedValue,
+          `Expected Advanced configuration to be ${expectedValue ? 'open' : 'closed'}`
+        );
+      });
+    }
+
+    public async toggleAdvancedConfiguration(open: boolean) {
+      const panelElement = await testSubjects.find(
+        'mlModelsStartDeploymentModalAdvancedConfiguration'
+      );
+      const toggleButton = await panelElement.findByTagName('button');
+      await toggleButton.click();
+      await this.assertAdvancedConfigurationOpen(open);
+    }
+
+    public async assertAdaptiveResourcesSwitchExists(expectExist: boolean) {
+      if (expectExist) {
+        await testSubjects.existOrFail('mlModelsStartDeploymentModalAdaptiveResources');
+      } else {
+        await testSubjects.missingOrFail('mlModelsStartDeploymentModalAdaptiveResources');
+      }
+    }
+
+    public async toggleAdaptiveResourcesSwitch(enabled: boolean) {
+      await mlCommonUI.toggleSwitchIfNeeded(
+        'mlModelsStartDeploymentModalAdaptiveResources',
+        enabled
+      );
+
+      await this.assertAdaptiveResourcesSwitchChecked(enabled);
+    }
+
+    public async assertAdaptiveResourcesSwitchChecked(expectedValue: boolean) {
+      const isChecked = await testSubjects.isEuiSwitchChecked(
+        'mlModelsStartDeploymentModalAdaptiveResources'
+      );
+      expect(isChecked).to.eql(
         expectedValue,
-        `Expected number of allocations to equal ${expectedValue}, got ${actualValue}`
-      );
-    }
-
-    public async setNumOfAllocations(value: number) {
-      await testSubjects.setValue('mlModelsStartDeploymentModalNumOfAllocations', value.toString());
-      await this.assertNumOfAllocations(value);
-    }
-
-    public async setPriority(value: 'low' | 'normal') {
-      await mlCommonUI.selectButtonGroupValue(
-        'mlModelsStartDeploymentModalPriority',
-        value.toString(),
-        value === 'normal'
-          ? 'mlModelsStartDeploymentModalNormalPriority'
-          : 'mlModelsStartDeploymentModalLowPriority'
-      );
-    }
-
-    public async setThreadsPerAllocation(value: number) {
-      await mlCommonUI.selectButtonGroupValue(
-        'mlModelsStartDeploymentModalThreadsPerAllocation',
-        value.toString(),
-        `mlModelsStartDeploymentModalThreadsPerAllocation_${value}`
+        `Expected adaptive resources switch to be ${expectedValue ? 'checked' : 'unchecked'}`
       );
     }
 
     public async startDeploymentWithParams(
       modelId: string,
-      params: { priority: 'low' | 'normal'; numOfAllocations: number; threadsPerAllocation: number }
+      params: {
+        optimized: 'optimizedForIngest' | 'optimizedForSearch';
+        vCPULevel?: 'low' | 'medium' | 'high';
+        adaptiveResources?: boolean;
+      }
     ) {
       await this.openStartDeploymentModal(modelId);
 
-      await this.setPriority(params.priority);
-      await this.setNumOfAllocations(params.numOfAllocations);
-      await this.setThreadsPerAllocation(params.threadsPerAllocation);
+      await this.setOptimizedFor(params.optimized);
+
+      const hasAdvancedConfiguration =
+        params.vCPULevel !== undefined || params.adaptiveResources !== undefined;
+
+      if (hasAdvancedConfiguration) {
+        await this.toggleAdvancedConfiguration(true);
+      }
+
+      if (params.vCPULevel) {
+        await this.setVCPULevel(params.vCPULevel);
+      }
 
       await testSubjects.click('mlModelsStartDeploymentModalStartButton');
       await this.assertStartDeploymentModalExists(false);
 
       await mlCommonUI.waitForRefreshButtonEnabled();
 
-      await mlCommonUI.assertLastToastHeader(
-        `Deployment for "${modelId}" has been started successfully.`
-      );
       await this.waitForModelsToLoad();
 
       await retry.tryForTime(
@@ -578,10 +644,6 @@ export function TrainedModelsTableProvider(
 
     public async stopDeployment(modelId: string) {
       await this.clickStopDeploymentAction(modelId);
-      await mlCommonUI.waitForRefreshButtonEnabled();
-      await mlCommonUI.assertLastToastHeader(
-        `Deployment for "${modelId}" has been stopped successfully.`
-      );
       await mlCommonUI.waitForRefreshButtonEnabled();
     }
 

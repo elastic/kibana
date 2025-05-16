@@ -15,7 +15,7 @@ import { USER } from '../../../../functional/services/ml/security_common';
 const idSpaceWithMl = 'space_with_ml';
 const idSpaceNoMl = 'space_no_ml';
 
-const NUMBER_OF_CAPABILITIES = 43;
+const NUMBER_OF_CAPABILITIES = 44;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -90,6 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
           canResetJob: false,
           canUpdateJob: false,
           canForecastJob: false,
+          canDeleteForecast: false,
           canCreateDatafeed: false,
           canDeleteDatafeed: false,
           canStartStopDatafeed: false,
@@ -139,6 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
           canResetJob: false,
           canUpdateJob: false,
           canForecastJob: false,
+          canDeleteForecast: false,
           canCreateDatafeed: false,
           canDeleteDatafeed: false,
           canStartStopDatafeed: false,
@@ -188,6 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
           canResetJob: true,
           canUpdateJob: true,
           canForecastJob: true,
+          canDeleteForecast: true,
           canCreateDatafeed: true,
           canDeleteDatafeed: true,
           canStartStopDatafeed: true,
@@ -237,6 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
           canResetJob: false,
           canUpdateJob: false,
           canForecastJob: false,
+          canDeleteForecast: false,
           canCreateDatafeed: false,
           canDeleteDatafeed: false,
           canStartStopDatafeed: false,

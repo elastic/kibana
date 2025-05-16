@@ -1,0 +1,83 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useTimelineColumns augmentedColumnHeaders should return the default unified data table (udt) columns 1`] = `Array []`;
+
+exports[`useTimelineColumns augmentedColumnHeaders should return the provided columns 1`] = `
+Array [
+  Object {
+    "aggregatable": true,
+    "columnHeaderType": "not-filtered",
+    "esTypes": Array [
+      "ip",
+    ],
+    "id": "source.ip",
+    "initialWidth": 150,
+    "name": "source.ip",
+    "searchable": true,
+    "type": "ip",
+  },
+  Object {
+    "columnHeaderType": "not-filtered",
+    "id": "agent.type",
+    "initialWidth": 150,
+  },
+]
+`;
+
+exports[`useTimelineColumns getTimelineQueryFieldsFromColumns should have a width of 152 for 5 actions 1`] = `
+Array [
+  "source.ip",
+  "agent.type",
+  "@timestamp",
+  "kibana.alert.workflow_status",
+  "kibana.alert.workflow_tags",
+  "kibana.alert.workflow_assignee_ids",
+  "kibana.alert.group.id",
+  "kibana.alert.original_time",
+  "kibana.alert.building_block_type",
+  "kibana.alert.rule.from",
+  "kibana.alert.rule.name",
+  "kibana.alert.rule.to",
+  "kibana.alert.rule.uuid",
+  "kibana.alert.rule.rule_id",
+  "kibana.alert.rule.type",
+  "kibana.alert.suppression.docs_count",
+  "kibana.alert.original_event.kind",
+  "kibana.alert.original_event.module",
+  "file.path",
+  "file.Ext.code_signature.subject_name",
+  "file.Ext.code_signature.trusted",
+  "file.hash.sha256",
+  "host.os.family",
+  "event.code",
+  "process.entry_leader.entity_id",
+]
+`;
+
+exports[`useTimelineColumns getTimelineQueryFieldsFromColumns should return the list of all the fields 1`] = `
+Array [
+  "@timestamp",
+  "kibana.alert.workflow_status",
+  "kibana.alert.workflow_tags",
+  "kibana.alert.workflow_assignee_ids",
+  "kibana.alert.group.id",
+  "kibana.alert.original_time",
+  "kibana.alert.building_block_type",
+  "kibana.alert.rule.from",
+  "kibana.alert.rule.name",
+  "kibana.alert.rule.to",
+  "kibana.alert.rule.uuid",
+  "kibana.alert.rule.rule_id",
+  "kibana.alert.rule.type",
+  "kibana.alert.suppression.docs_count",
+  "kibana.alert.original_event.kind",
+  "kibana.alert.original_event.module",
+  "file.path",
+  "file.Ext.code_signature.subject_name",
+  "file.Ext.code_signature.trusted",
+  "file.hash.sha256",
+  "host.os.family",
+  "event.code",
+  "process.entry_leader.entity_id",
+]
+`;

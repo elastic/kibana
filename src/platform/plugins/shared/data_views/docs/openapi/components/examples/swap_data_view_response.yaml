@@ -1,0 +1,9 @@
+summary: The swap references API returns a list of the affected saved objects.
+value:
+  {
+    result: [{ id: "123", type: "visualization" }],
+    deleteStatus: {
+      remainingRefs: 0,
+      deletePerformed: true
+    }
+  }

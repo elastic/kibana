@@ -8,7 +8,7 @@
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../../../functional/ftr_provider_context';
 
-const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="alertsTable"] .euiDataGridRow';
+const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="alertsTableIsLoaded"] .euiDataGridRow';
 
 export class DetectionsPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
@@ -196,7 +196,7 @@ export class DetectionsPageObject extends FtrService {
    */
   async openResponseConsoleFromAlertDetails(): Promise<void> {
     await this.testSubjects.existOrFail('eventDetails');
-    await this.testSubjects.click('take-action-dropdown-btn');
+    await this.testSubjects.click('securitySolutionFlyoutFooterDropdownButton');
     await this.testSubjects.clickWhenNotDisabled('endpointResponseActions-action-item');
     await this.testSubjects.existOrFail('consolePageOverlay');
   }

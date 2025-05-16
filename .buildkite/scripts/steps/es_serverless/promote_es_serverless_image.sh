@@ -8,7 +8,7 @@ BASE_ES_SERVERLESS_REPO=docker.elastic.co/elasticsearch-ci/elasticsearch-serverl
 TARGET_IMAGE=docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
 
 SOURCE_IMAGE_OR_TAG=$1
-if [[ $SOURCE_IMAGE_OR_TAG =~ :[a-zA-Z_-]+$ ]]; then
+if [[ $SOURCE_IMAGE_OR_TAG =~ :[a-zA-Z0-9_.-]+$ ]]; then
   # $SOURCE_IMAGE_OR_TAG was a full image
   SOURCE_IMAGE=$SOURCE_IMAGE_OR_TAG
 else
@@ -31,18 +31,18 @@ ARM_64_DIGEST=$(jq -r '.manifests[] | select(.platform.architecture == "arm64") 
 AMD_64_DIGEST=$(jq -r '.manifests[] | select(.platform.architecture == "amd64") | .digest' manifests.json)
 
 echo docker pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
-docker pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
+docker_with_retry pull --platform linux/arm64 "$SOURCE_IMAGE@$ARM_64_DIGEST"
 echo linux/arm64 image pulled, with digest: $ARM_64_DIGEST
 
 echo docker pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
-docker pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
+docker_with_retry pull --platform linux/amd64 "$SOURCE_IMAGE@$AMD_64_DIGEST"
 echo linux/amd64 image pulled, with digest: $AMD_64_DIGEST
 
 docker tag "$SOURCE_IMAGE@$ARM_64_DIGEST" "$TARGET_IMAGE-arm64"
 docker tag "$SOURCE_IMAGE@$AMD_64_DIGEST" "$TARGET_IMAGE-amd64"
 
-docker push "$TARGET_IMAGE-arm64"
-docker push "$TARGET_IMAGE-amd64"
+docker_with_retry push "$TARGET_IMAGE-arm64"
+docker_with_retry push "$TARGET_IMAGE-amd64"
 
 docker manifest rm "$TARGET_IMAGE" || echo "Nothing to delete"
 
@@ -69,3 +69,15 @@ cat << EOT | buildkite-agent annotate --style "success"
   <br/>Kibana commit: <a href="https://github.com/elastic/kibana/commit/$BUILDKITE_COMMIT">$BUILDKITE_COMMIT</a>
   <br/>Elasticsearch commit: <a href="https://github.com/elastic/elasticsearch/commit/$ELASTIC_COMMIT_HASH">$ELASTIC_COMMIT_HASH</a>
 EOT
+
+cat << EOF | buildkite-agent pipeline upload
+steps:
+  - label: "Update cache for ES serverless image"
+    trigger: kibana-vm-images
+    async: true
+    build:
+      env:
+        IMAGES_CONFIG: 'kibana/image_cache.yml'
+        BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
+        RETRY: "1"
+EOF

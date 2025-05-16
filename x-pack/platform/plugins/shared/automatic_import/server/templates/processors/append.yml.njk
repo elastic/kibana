@@ -1,0 +1,25 @@
+{% if processors.type == 'categorization' %}
+{% for processor in processors.processors %}
+  - append:
+      field: {{ processor.field }}
+      value: {{ processor.value | dump }}
+      {% if processor.if %}
+      if: {{ processor.if | dump }}
+      {% endif %}
+      allow_duplicates: false
+{% endfor %}
+{% endif %}
+
+{% if processors.type == 'related' %}
+{% for processor in processors.processors %}
+  - append:
+      field: {{ processor.field }}
+      value: {% raw %}'{{{{% endraw %}{{ processor.value_field }}{% raw %}}}}'{% endraw %}
+      {% if processor.if %}
+      if: {{ processor.if | dump }}
+      {% else %}
+      if: ctx.{{ processor.value_field | replace('.', '?.') }} != null
+      {% endif %}
+      allow_duplicates: false
+{% endfor %}
+{% endif %}

@@ -10,124 +10,92 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-apps-server-internal",
-        "id": "def-common.registerRouteForBundle",
+        "id": "def-server.registerRouteForBundle",
         "type": "Function",
         "tags": [],
         "label": "registerRouteForBundle",
         "description": [],
         "signature": [
           "(router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouter",
-            "text": "IRouter"
-          },
+          "IRouter",
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ">, {\n    publicPath,\n    routePath,\n    bundlesPath,\n    fileHashCache,\n    isDist,\n  }: { publicPath: string; routePath: string; bundlesPath: string; fileHashCache: ",
           "FileHashCache",
           "; isDist: boolean; }) => void"
         ],
-        "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+        "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-apps-server-internal",
-            "id": "def-common.registerRouteForBundle.$1",
+            "id": "def-server.registerRouteForBundle.$1",
             "type": "Object",
             "tags": [],
             "label": "router",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IRouter",
-                "text": "IRouter"
-              },
+              "IRouter",
               "<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.RequestHandlerContextBase",
-                "text": "RequestHandlerContextBase"
-              },
+              "RequestHandlerContextBase",
               ">"
             ],
-            "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+            "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/core-apps-server-internal",
-            "id": "def-common.registerRouteForBundle.$2",
+            "id": "def-server.registerRouteForBundle.$2",
             "type": "Object",
             "tags": [],
             "label": "{\n    publicPath,\n    routePath,\n    bundlesPath,\n    fileHashCache,\n    isDist,\n  }",
             "description": [],
-            "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+            "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-apps-server-internal",
-                "id": "def-common.registerRouteForBundle.$2.publicPath",
+                "id": "def-server.registerRouteForBundle.$2.publicPath",
                 "type": "string",
                 "tags": [],
                 "label": "publicPath",
                 "description": [],
-                "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+                "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-apps-server-internal",
-                "id": "def-common.registerRouteForBundle.$2.routePath",
+                "id": "def-server.registerRouteForBundle.$2.routePath",
                 "type": "string",
                 "tags": [],
                 "label": "routePath",
                 "description": [],
-                "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+                "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-apps-server-internal",
-                "id": "def-common.registerRouteForBundle.$2.bundlesPath",
+                "id": "def-server.registerRouteForBundle.$2.bundlesPath",
                 "type": "string",
                 "tags": [],
                 "label": "bundlesPath",
                 "description": [],
-                "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+                "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-apps-server-internal",
-                "id": "def-common.registerRouteForBundle.$2.fileHashCache",
+                "id": "def-server.registerRouteForBundle.$2.fileHashCache",
                 "type": "Object",
                 "tags": [],
                 "label": "fileHashCache",
@@ -135,18 +103,18 @@
                 "signature": [
                   "FileHashCache"
                 ],
-                "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+                "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-apps-server-internal",
-                "id": "def-common.registerRouteForBundle.$2.isDist",
+                "id": "def-server.registerRouteForBundle.$2.isDist",
                 "type": "boolean",
                 "tags": [],
                 "label": "isDist",
                 "description": [],
-                "path": "packages/core/apps/core-apps-server-internal/src/bundle_routes/bundles_route.ts",
+                "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundles_route.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -162,7 +130,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-apps-server-internal",
-        "id": "def-common.CoreAppConfigType",
+        "id": "def-server.CoreAppConfigType",
         "type": "Type",
         "tags": [],
         "label": "CoreAppConfigType",
@@ -170,12 +138,20 @@
         "signature": [
           "{ readonly allowDynamicConfigOverrides: boolean; }"
         ],
-        "path": "packages/core/apps/core-apps-server-internal/src/core_app_config.ts",
+        "path": "src/core/packages/apps/server-internal/src/core_app_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

@@ -12,7 +12,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
+  const { common, header, dashboard, visChart } = getPageObjects([
+    'common',
+    'header',
+    'dashboard',
+    'visChart',
+  ]);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const queryBar = getService('queryBar');
   const elasticChart = getService('elasticChart');
@@ -35,36 +40,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('not delayed should load', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('dashboard');
+      await dashboard.loadSavedDashboard('Not Delayed');
+      await header.waitUntilLoadingHasFinished();
       await dashboardExpect.noErrorEmbeddablesPresent();
       await enableNewChartLibraryDebug();
-      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
+      const data = await visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
     });
 
     it('delayed should load', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('Delayed 5s');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('dashboard');
+      await dashboard.loadSavedDashboard('Delayed 5s');
+      await header.waitUntilLoadingHasFinished();
       await dashboardExpect.noErrorEmbeddablesPresent();
       await enableNewChartLibraryDebug();
-      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
+      const data = await visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
     });
 
     it('timed out should show error', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('Delayed 15s');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('dashboard');
+      await dashboard.loadSavedDashboard('Delayed 15s');
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('searchTimeoutError');
     });
 
     it('multiple searches are grouped and only single error popup is shown', async () => {
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('Multiple delayed');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await common.navigateToApp('dashboard');
+      await dashboard.loadSavedDashboard('Multiple delayed');
+      await header.waitUntilLoadingHasFinished();
 
       // but only single error toast because searches are grouped
       expect((await testSubjects.findAll('searchTimeoutError')).length).to.be(1);

@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import httpProxy from 'http-proxy';
+import type httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function pagerdutyTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
+  const retry = getService('retry');
 
   describe('pagerduty action', () => {
     let simulatedActionId = '';
@@ -173,6 +176,23 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
           status: 'success',
         },
       });
+
+      const events: IValidatedEvent[] = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'default',
+          type: 'action',
+          id: simulatedActionId,
+          provider: 'actions',
+          actions: new Map([
+            ['execute-start', { equal: 1 }],
+            ['execute', { equal: 1 }],
+          ]),
+        });
+      });
+
+      const executeEvent = events[1];
+      expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(142);
     });
 
     it('should execute successfully with links and customDetails', async () => {

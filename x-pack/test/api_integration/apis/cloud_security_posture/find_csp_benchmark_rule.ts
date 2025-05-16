@@ -9,7 +9,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
-} from '@kbn/cloud-security-posture-plugin/common/types/rules/v3';
+} from '@kbn/cloud-security-posture-common/schema/rules/v3';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createPackagePolicy } from './helper';
 

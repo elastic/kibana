@@ -25,7 +25,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   describe('list view', function () {
     let roleAuthc: RoleCredentials;
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       await svlCases.api.createCase(
         svlCases.api.getPostCaseRequest(owner, {
           title: 'Unusual processes identified',
@@ -62,24 +62,16 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
 
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     beforeEach(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     it('cases list screenshot', async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
       await pageObjects.header.waitUntilLoadingHasFinished();
       await svlCommonScreenshots.takeScreenshot('cases-home-page', screenshotDirectories);
-    });
-
-    it('case settings screenshot', async () => {
-      await navigateToCasesApp(getPageObject, getService, owner);
-      await testSubjects.click('configure-case-button');
-      await pageObjects.header.waitUntilLoadingHasFinished();
-      await svlCommonScreenshots.takeScreenshot('case-settings', screenshotDirectories);
     });
 
     it('case detail screenshot', async () => {

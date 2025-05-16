@@ -1,0 +1,7 @@
+disabled:
+  # Base config files, only necessary to inform config finding script
+
+defaultQueue: 'n2-4-spot'
+enabled:
+  - x-pack/test/functional_search/config.ts
+  - x-pack/test/functional/apps/search_playground/config.ts

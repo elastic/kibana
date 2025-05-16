@@ -8,7 +8,6 @@
 import { ruleFields } from '../../../../data/detection_engine';
 import {
   ABOUT_CONTINUE_BTN,
-  ABOUT_EDIT_BUTTON,
   CUSTOM_QUERY_INPUT,
   DEFINE_CONTINUE_BUTTON,
   DEFINE_EDIT_BUTTON,
@@ -44,10 +43,13 @@ import {
   fillThreatSubtechnique,
   fillThreatTechnique,
   importSavedQuery,
+  waitForAlertsToPopulate,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { visit } from '../../../../tasks/navigation';
+import { waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
+import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../../../screens/alerts';
 
 // This test is meant to test touching all the common various components in rule creation
 // to ensure we don't miss any changes that maybe affect one of these more obscure UI components
@@ -60,7 +62,7 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     deleteAlertsAndRules();
     createTimeline()
       .then((response) => {
-        return response.body.data.persistTimeline.timeline.savedObjectId;
+        return response.body.savedObjectId;
       })
       .as('timelineId');
     visit(CREATE_RULE_URL);
@@ -100,7 +102,6 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
 
     // expect about step to populate
-    cy.get(ABOUT_EDIT_BUTTON).click();
     cy.get(RULE_NAME_INPUT).invoke('val').should('eql', ruleFields.ruleName);
     cy.get(ABOUT_CONTINUE_BTN).should('exist').click();
     cy.get(SCHEDULE_CONTINUE_BUTTON).click();
@@ -113,5 +114,13 @@ describe('Common rule creation flows', { tags: ['@ess', '@serverless'] }, () => 
 
     cy.get(DESCRIPTION_SETUP_GUIDE_BUTTON).click();
     cy.get(DESCRIPTION_SETUP_GUIDE_CONTENT).should('contain', 'test setup markdown'); // Markdown formatting should be removed
+
+    waitForTheRuleToBeExecuted();
+    waitForAlertsToPopulate();
+
+    cy.get(ALERTS_COUNT)
+      .invoke('text')
+      .should('match', /^[1-9].+$/);
+    cy.get(ALERT_GRID_CELL).contains(ruleFields.ruleName);
   });
 });

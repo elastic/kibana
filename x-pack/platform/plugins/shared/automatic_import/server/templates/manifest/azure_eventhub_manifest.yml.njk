@@ -1,0 +1,76 @@
+- input: azure-eventhub
+  template_path: azure-eventhub.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: eventhub
+      type: text
+      title: Event Hub
+      multi: false
+      required: true
+      show_user: true
+      description: >-
+        Elastic recommends using one event hub for each integration. Visit [Create an event hub](https://docs.elastic.co/integrations/azure#create-an-event-hub) to learn more. Use event hub names up to 30 characters long to avoid compatibility issues.
+    - name: connection_string
+      type: text
+      title: Connection String
+      multi: false
+      required: true
+      show_user: true
+      description: >-
+        The connection string required to communicate with Event Hubs. See [Get an Event Hubs connection string](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-get-connection-string) to learn more.
+    - name: storage_account
+      type: text
+      title: Storage Account
+      multi: false
+      required: true
+      show_user: true
+      description: >-
+        The name of the storage account where the consumer group's state/offsets will be stored and updated.
+    - name: storage_account_key
+      type: text
+      title: Storage Account Key
+      multi: false
+      required: true
+      show_user: true
+      description: >-
+        The storage account key, this key will be used to authorize access to data in your storage account.
+    - name: consumer_group
+      type: text
+      title: Consumer Group
+      multi: false
+      required: true
+      show_user: true
+      default: $Default
+    - name: resource_manager_endpoint
+      type: text
+      title: Resource Manager Endpoint
+      multi: false
+      required: false
+      show_user: false
+    - name: storage_account_container
+      type: text
+      title: Storage Account Container
+      multi: false
+      required: false
+      show_user: false
+      description: >-
+        The storage account container where the integration stores the checkpoint data for the consumer group. It is an advanced option to use with extreme care. You MUST use a dedicated storage account container for each Azure log type (activity, sign-in, audit logs, and others). DO NOT REUSE the same container name for more than one Azure log type. See [Container Names](https://docs.microsoft.com/en-us/rest/api/storageservices/naming-and-referencing-containers--blobs--and-metadata#container-names) for details on naming rules from Microsoft. The integration generates a default container name if not specified.
+    - name: sanitize_newlines
+      type: bool
+      title: Sanitizes New Lines
+      description: Removes new lines in logs to ensure proper formatting of JSON data and avoid parsing issues during processing.
+      multi: false
+      required: false
+      show_user: false
+      default: false
+    - name: sanitize_singlequotes
+      required: true
+      show_user: false
+      title: Sanitizes Single Quotes
+      description: Replaces single quotes with double quotes (single quotes inside double quotes are omitted) in logs to ensure proper formatting of JSON data and avoid parsing issues during processing.
+      type: bool
+      multi: false
+      default: false

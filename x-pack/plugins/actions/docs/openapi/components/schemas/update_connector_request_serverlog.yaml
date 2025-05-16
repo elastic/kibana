@@ -1,8 +1,0 @@
-title: Update server log connector request
-type: object
-required:
-  - name
-properties:
-  name:
-    type: string
-    description: The display name for the connector.

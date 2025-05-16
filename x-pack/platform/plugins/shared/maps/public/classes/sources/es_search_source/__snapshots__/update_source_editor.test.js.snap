@@ -1,0 +1,188 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should enable sort order select when sort field provided 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <MemoizedFormattedMessage
+          defaultMessage="Tooltip fields"
+          id="xpack.maps.esSearch.tooltipsTitle"
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <TooltipSelector
+      fields={null}
+      onChange={[Function]}
+      tooltipFields={Array []}
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <MemoizedFormattedMessage
+          defaultMessage="Sorting"
+          id="xpack.maps.esSearch.sortTitle"
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFormRow
+      display="columnCompressed"
+      label="Field"
+    >
+      <SingleFieldSelect
+        compressed={true}
+        onChange={[Function]}
+        placeholder="Select sort field"
+        value="@timestamp"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      display="columnCompressed"
+      label="Order"
+    >
+      <EuiSelect
+        compressed={true}
+        disabled={false}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "ascending",
+              "value": "asc",
+            },
+            Object {
+              "text": "descending",
+              "value": "desc",
+            },
+          ]
+        }
+        value="DESC"
+      />
+    </EuiFormRow>
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <ScalingForm
+      clusteringDisabledReason={null}
+      filterByMapBounds={true}
+      indexPatternId="indexPattern1"
+      numberOfJoins={0}
+      onChange={[Function]}
+      scalingType="LIMIT"
+      supportsClustering={false}
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;
+
+exports[`should render update source editor 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <MemoizedFormattedMessage
+          defaultMessage="Tooltip fields"
+          id="xpack.maps.esSearch.tooltipsTitle"
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <TooltipSelector
+      fields={null}
+      onChange={[Function]}
+      tooltipFields={Array []}
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <MemoizedFormattedMessage
+          defaultMessage="Sorting"
+          id="xpack.maps.esSearch.sortTitle"
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFormRow
+      display="columnCompressed"
+      label="Field"
+    >
+      <SingleFieldSelect
+        compressed={true}
+        onChange={[Function]}
+        placeholder="Select sort field"
+      />
+    </EuiFormRow>
+    <EuiFormRow
+      display="columnCompressed"
+      label="Order"
+    >
+      <EuiSelect
+        compressed={true}
+        disabled={true}
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "text": "ascending",
+              "value": "asc",
+            },
+            Object {
+              "text": "descending",
+              "value": "desc",
+            },
+          ]
+        }
+        value="DESC"
+      />
+    </EuiFormRow>
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiPanel>
+    <ScalingForm
+      clusteringDisabledReason={null}
+      filterByMapBounds={true}
+      indexPatternId="indexPattern1"
+      numberOfJoins={0}
+      onChange={[Function]}
+      scalingType="LIMIT"
+      supportsClustering={false}
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;

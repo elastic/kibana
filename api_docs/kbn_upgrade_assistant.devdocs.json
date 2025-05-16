@@ -1,0 +1,61 @@
+{
+  "id": "@kbn/upgrade-assistant",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/upgrade-assistant",
+        "id": "def-public.DeprecationBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "DeprecationBadge",
+        "description": [],
+        "signature": [
+          "({ level, isResolved }: Props) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/src/components/deprecation_badge.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant",
+            "id": "def-public.DeprecationBadge.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ level, isResolved }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/src/components/deprecation_badge.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

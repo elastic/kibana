@@ -156,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it('data frame analytics create job additional options step for outlier job', async () => {
+        it('data frame analytics create job additional details step for outlier job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
           await ml.dataFrameAnalyticsCreation.setJobId(dfaOutlierJobId);
           await a11y.testAppSnapshot();
@@ -203,7 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it('data frame analytics create job additional options step for regression job', async () => {
+        it('data frame analytics create job additional details step for regression job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
           await ml.dataFrameAnalyticsCreation.setJobId(dfaRegressionJobId);
           await a11y.testAppSnapshot();
@@ -252,7 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it('data frame analytics create job additional options step for classification job', async () => {
+        it('data frame analytics create job additional details step for classification job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
           await ml.dataFrameAnalyticsCreation.setJobId(dfaClassificationJobId);
           await a11y.testAppSnapshot();
