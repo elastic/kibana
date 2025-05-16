@@ -172,33 +172,34 @@ const sortFields = (fields: FieldCapsResponse['fields']): FieldCapsResponse['fie
 };
 
 const createSemanticTextFieldsList = (
-  mappingPropertiesFilter: Record<string, MappingProperty>,
+  mappingProperties: Record<string, MappingProperty>,
   semanticFieldsList: SemanticField[] = [],
   semanticTextField?: string
 ): SemanticField[] => {
-  Object.keys(mappingPropertiesFilter || {}).forEach((field) => {
-    if (mappingPropertiesFilter[field].type === 'semantic_text') {
-      const semanticFieldMapping: MappingSemanticTextProperty = mappingPropertiesFilter[field];
+  Object.keys(mappingProperties || {}).forEach((field) => {
+    if (mappingProperties[field].type === 'semantic_text') {
+      const mapping = mappingProperties[field] as unknown as MappingSemanticTextProperty;
       const semanticField: SemanticField = {
         field: semanticTextField ? `${semanticTextField}.${field}` : field,
-        inferenceId: semanticFieldMapping?.inference_id,
-        embeddingType: semanticFieldMapping?.model_settings?.task_type
-          ? EMBEDDING_TYPE[semanticFieldMapping.model_settings.task_type]
+        inferenceId: mapping?.inference_id,
+        embeddingType: mapping?.model_settings?.task_type
+          ? EMBEDDING_TYPE[mapping.model_settings.task_type]
           : undefined,
       };
       semanticFieldsList.push(semanticField);
       return semanticFieldsList;
     } else {
+      let fieldsOrProperties: Record<string, MappingProperty> = {};
+
+      if ('fields' in mappingProperties[field]) {
+        fieldsOrProperties = (mappingProperties[field] as unknown as any).fields;
+      }
+      if ('properties' in mappingProperties[field]) {
+        fieldsOrProperties = (mappingProperties[field] as unknown as any).properties;
+      }
+
       // handle object and multi field type mappings
-      createSemanticTextFieldsList(
-        mappingPropertiesFilter[field].fields ||
-          ('properties' in mappingPropertiesFilter[field]
-            ? mappingPropertiesFilter[field].properties
-            : {}) ||
-          {},
-        semanticFieldsList,
-        field
-      );
+      createSemanticTextFieldsList(fieldsOrProperties, semanticFieldsList, field);
     }
   });
 
@@ -261,7 +262,6 @@ export const parseFieldsCapabilities = (
         const { fields: modelIdFields, semanticTextFields } = indexModelIdFields.find(
           (indexModelIdField) => indexModelIdField.index === index
         )!;
-
         const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
         const semanticFieldMapping = getSemanticField(fieldKey, semanticTextFields);
 
