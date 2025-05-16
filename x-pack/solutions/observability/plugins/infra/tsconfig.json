@@ -121,7 +121,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/licensing-types",
     "@kbn/ml-common-types",
-    "@kbn/ml-common-constants"
+    "@kbn/ml-common-constants",
+    "@kbn/ml-embeddables"
   ],
   "exclude": ["target/**/*"]
 }
