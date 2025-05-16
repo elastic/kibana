@@ -103,8 +103,11 @@ export const GridLayout = ({
 
   useEffect(() => {
     /**
-     * This subscription is responsible for setting both the rendered elements and the
-     * `gridTemplateString` that controls how the grid layout is rendered
+     * This subscription sets the rendered elements and the `gridTemplateString`,
+     * which defines the grid layout structure as follows:
+     * - Each grid section has two named grid lines: `start-<sectionId>` and `end-<sectionId>`,
+     *   marking the start and end of the section. Headers and footers are positioned relative to these lines.
+     * - Grid rows are named `gridRow-<sectionId>`, and panels are positioned relative to these lines.
      */
     const renderSubscription = gridLayoutStateManager.gridLayout$.subscribe((sections) => {
       const currentElementsInOrder: GridLayoutElementsInOrder = [];
