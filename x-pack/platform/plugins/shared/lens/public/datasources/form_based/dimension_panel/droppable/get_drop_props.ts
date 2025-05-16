@@ -23,10 +23,10 @@ import { hasField } from '../../pure_utils';
 import { OperationMetadata, DraggedField } from '../../../../types';
 import { getOperationTypesForField } from '../../operations';
 import { GenericIndexPatternColumn } from '../../form_based';
-import { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
+import { CombinedFormBasedPrivateState, DataViewDragDropOperation, isFormBasedLayer } from '../../types';
 
 interface GetDropPropsArgs {
-  state: FormBasedPrivateState;
+  state: CombinedFormBasedPrivateState;
   source?: DragContextState['dragging'];
   target: DragDropOperation;
   indexPatterns: IndexPatternMap;
@@ -75,10 +75,14 @@ export function getDropProps(
   if (!source) {
     return;
   }
+  const layer = state.layers[target.layerId];
+  if (!layer || !isFormBasedLayer(layer)) {
+    return;
+  }
   const targetProps: DataViewDragDropOperation = {
     ...target,
-    column: state.layers[target.layerId].columns[target.columnId],
-    dataView: indexPatterns[state.layers[target.layerId].indexPatternId],
+    column: layer.columns[target.columnId],
+    dataView: indexPatterns[layer.indexPatternId],
   };
 
   if (isDraggedDataViewField(source)) {
@@ -86,10 +90,14 @@ export function getDropProps(
   }
 
   if (isOperation(source)) {
+    const sourceLayer = state.layers[source.layerId];
+    if (!sourceLayer || !isFormBasedLayer(sourceLayer)) {
+      return;
+    }
     const sourceProps: DataViewDragDropOperation = {
       ...source,
-      column: state.layers[source.layerId]?.columns[source.columnId],
-      dataView: indexPatterns[state.layers[source.layerId]?.indexPatternId],
+      column: sourceLayer.columns[source.columnId],
+      dataView: indexPatterns[sourceLayer.indexPatternId],
     };
     if (!sourceProps.column) {
       return;
@@ -131,9 +139,12 @@ function getDropPropsForField({
   target,
   indexPatterns,
 }: GetDropPropsArgs & { source: DraggedField }): DropProps {
-  const targetColumn = state.layers[target.layerId].columns[target.columnId];
-  const isTheSameIndexPattern =
-    state.layers[target.layerId].indexPatternId === source.indexPatternId;
+  const layer = state.layers[target.layerId];
+  if (!layer || !isFormBasedLayer(layer)) {
+    return;
+  }
+  const targetColumn = layer.columns[target.columnId];
+  const isTheSameIndexPattern = layer.indexPatternId === source.indexPatternId;
   const newOperation = getNewOperation(source.field, target.filterOperations, targetColumn);
 
   if (isTheSameIndexPattern && newOperation) {
@@ -145,7 +156,7 @@ function getDropPropsForField({
       (hasField(targetColumn) && targetColumn.sourceField !== source.field.name) ||
       !hasField(targetColumn)
     ) {
-      const layerDataView = indexPatterns[state.layers[target.layerId].indexPatternId];
+      const layerDataView = indexPatterns[layer.indexPatternId];
       return hasField(targetColumn) &&
         layerDataView &&
         hasOperationSupportForMultipleFields(layerDataView, targetColumn, undefined, source.field)

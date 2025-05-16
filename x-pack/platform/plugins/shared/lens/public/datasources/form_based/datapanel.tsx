@@ -37,13 +37,13 @@ import type {
   IndexPattern,
   IndexPatternField,
 } from '../../types';
-import type { FormBasedPrivateState } from './types';
+import { isFormBasedLayer, type CombinedFormBasedPrivateState } from './types';
 import { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { FieldItem } from '../common/field_item';
 import { dataPanelStyles } from '../common/datapanel.styles';
 
 export type FormBasedDataPanelProps = Omit<
-  DatasourceDataPanelProps<FormBasedPrivateState, Query>,
+  DatasourceDataPanelProps<CombinedFormBasedPrivateState, Query>,
   'core' | 'onChangeIndexPattern'
 > & {
   data: DataPublicPluginStart;
@@ -106,7 +106,7 @@ export function FormBasedDataPanel({
   const activeIndexPatterns = useMemo(() => {
     return uniq(
       (
-        usedIndexPatterns ?? Object.values(state.layers).map(({ indexPatternId }) => indexPatternId)
+        usedIndexPatterns ?? Object.values(state.layers).filter((layer) => isFormBasedLayer(layer) && layer.indexPatternId).map(({ indexPatternId }) => indexPatternId)
       ).concat(currentIndexPatternId)
     )
       .filter((id) => !!indexPatterns[id])

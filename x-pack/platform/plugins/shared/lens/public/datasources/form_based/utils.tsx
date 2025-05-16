@@ -35,10 +35,13 @@ import type {
   VisualizationInfo,
 } from '../../types';
 import { renewIDs } from '../../utils';
-import type {
-  CombinedFormBasedPersistedState,
-  FormBasedLayer,
-  FormBasedPrivateState,
+import {
+  isFormBasedLayer,
+  type CombinedFormBasedPersistedState,
+  type CombinedFormBasedPrivateState,
+  type FormBasedLayer,
+  type FormBasedPrivateState,
+  type TextBasedLayer,
 } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
@@ -110,7 +113,10 @@ export function isSamplingValueEnabled(layer: FormBasedLayer) {
  * @param layer
  * @returns
  */
-export function getSamplingValue(layer: FormBasedLayer) {
+export function getSamplingValue(layer: FormBasedLayer | TextBasedLayer) {
+  if (!isFormBasedLayer(layer)) {
+    return 1;
+  }
   return isSamplingValueEnabled(layer) ? layer.sampling ?? 1 : 1;
 }
 
@@ -334,7 +340,7 @@ export function getSearchWarningMessages(
 }
 
 export function getUnsupportedOperationsWarningMessage(
-  state: FormBasedPrivateState,
+  state: CombinedFormBasedPrivateState,
   { dataViews }: FramePublicAPI,
   docLinks: DocLinksStart
 ) {
@@ -343,8 +349,11 @@ export function getUnsupportedOperationsWarningMessage(
     [FieldBasedIndexPatternColumn, ReferenceBasedIndexPatternColumn | undefined]
   > = Object.values(state.layers)
     // filter layers without dataView loaded yet
-    .filter(({ indexPatternId }) => dataViews.indexPatterns[indexPatternId])
+    .filter(({ indexPatternId }) => indexPatternId && dataViews.indexPatterns[indexPatternId])
     .flatMap((layer) => {
+      if (!isFormBasedLayer(layer)) {
+        return [];
+      }
       const dataView = dataViews.indexPatterns[layer.indexPatternId];
       const columnsEntries = Object.entries(layer.columns);
       return columnsEntries
@@ -447,10 +456,10 @@ export function getUnsupportedOperationsWarningMessage(
 
 export function getPrecisionErrorWarningMessages(
   datatableUtilities: DatatableUtilitiesService,
-  state: FormBasedPrivateState,
+  state: CombinedFormBasedPrivateState,
   { activeData, dataViews }: FramePublicAPI,
   docLinks: DocLinksStart,
-  setState?: StateSetter<FormBasedPrivateState>
+  setState?: StateSetter<CombinedFormBasedPrivateState>
 ) {
   const warningMessages: UserMessage[] = [];
 
@@ -462,6 +471,9 @@ export function getPrecisionErrorWarningMessages(
       }, [] as Array<{ layerId: string; column: DatatableColumn }>)
       .forEach(({ layerId, column }) => {
         const currentLayer = state.layers[layerId];
+        if (!currentLayer || !isFormBasedLayer(currentLayer)) {
+          return;
+        }
         const currentColumn = currentLayer?.columns[column.id];
         if (currentLayer && currentColumn && datatableUtilities.hasPrecisionError(column)) {
           const indexPattern = dataViews.indexPatterns[currentLayer.indexPatternId];
@@ -620,7 +632,7 @@ export function getVisualDefaultsForLayer(layer: FormBasedLayer) {
 }
 
 export function getNotifiableFeatures(
-  state: FormBasedPrivateState,
+  state: CombinedFormBasedPrivateState,
   frame: FramePublicAPI,
   visualizationInfo?: VisualizationInfo
 ): UserMessage[] {
@@ -938,7 +950,7 @@ export function getFiltersInLayer(
 }
 
 export const cloneLayer = (
-  layers: Record<string, FormBasedLayer>,
+  layers: Record<string, FormBasedLayer | TextBasedLayer>,
   layerId: string,
   newLayerId: string,
   getNewId: (id: string) => string

@@ -29,7 +29,7 @@ import {
 } from '../../operations';
 import { mergeLayer, mergeLayers } from '../../state_helpers';
 import { getNewOperation, getField } from './get_drop_props';
-import { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
+import { FormBasedPrivateState, DataViewDragDropOperation, isFormBasedLayer } from '../../types';
 import { removeColumn } from '../../form_based';
 
 interface DropHandlerProps<T = DataViewDragDropOperation> {
@@ -44,13 +44,19 @@ interface DropHandlerProps<T = DataViewDragDropOperation> {
 export function onDrop(props: DatasourceDimensionDropHandlerProps<FormBasedPrivateState>) {
   const { target, source, dropType, state, indexPatterns } = props;
 
+  const layer = state.layers[target.layerId];
+  const sourceLayer = state.layers[source.layerId];
+  if (!layer || !isFormBasedLayer(layer)) {
+    return;
+  }
+
   if (isDraggedDataViewField(source) && isFieldDropType(dropType)) {
     return onFieldDrop(
       {
         ...props,
         target: {
           ...target,
-          dataView: indexPatterns[state.layers[target.layerId].indexPatternId],
+          dataView: indexPatterns[layer.indexPatternId],
         },
         source,
         indexPatterns,
@@ -59,11 +65,11 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<FormBasedPriva
     );
   }
 
-  if (!isOperation(source)) {
+  if (!isOperation(source) || !isFormBasedLayer(sourceLayer)) {
     return;
   }
-  const sourceDataView = indexPatterns[state.layers[source.layerId].indexPatternId];
-  const targetDataView = indexPatterns[state.layers[target.layerId].indexPatternId];
+  const sourceDataView = indexPatterns[sourceLayer.indexPatternId];
+  const targetDataView = indexPatterns[layer.indexPatternId];
   if (sourceDataView !== targetDataView) {
     return;
   }
@@ -127,6 +133,11 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
   )?.prioritizedOperation;
 
   const layer = state.layers[target.layerId];
+
+  if (!layer || !isFormBasedLayer(layer)) {
+    return;
+  }
+
   const indexPattern = indexPatterns[layer.indexPatternId];
   const targetColumn = layer.columns[target.columnId];
   // discourage already used operations for a field
@@ -254,8 +265,15 @@ function onMoveIncompatible(
   shouldRemoveSource?: boolean
 ) {
   const targetLayer = state.layers[target.layerId];
+  if (!targetLayer || !isFormBasedLayer(targetLayer)) {
+    return;
+  }
   const targetColumn = targetLayer.columns[target.columnId] || null;
+
   const sourceLayer = state.layers[source.layerId];
+  if (!sourceLayer || !isFormBasedLayer(sourceLayer)) {
+    return;
+  }
   const indexPattern = indexPatterns[sourceLayer.indexPatternId];
   const sourceColumn = sourceLayer.columns[source.columnId];
   const sourceField = getField(sourceColumn, indexPattern);
@@ -323,6 +341,9 @@ function onSwapIncompatible({
 }: DropHandlerProps<DragDropOperation>) {
   const targetLayer = state.layers[target.layerId];
   const sourceLayer = state.layers[source.layerId];
+  if (!targetLayer || !isFormBasedLayer(targetLayer) || !sourceLayer || !isFormBasedLayer(sourceLayer)) {
+    return;
+  }
   const indexPattern = indexPatterns[targetLayer.indexPatternId];
   const sourceColumn = sourceLayer.columns[source.columnId];
   const targetColumn = targetLayer.columns[target.columnId];
@@ -401,6 +422,9 @@ function onSwapCompatible({
 }: DropHandlerProps<DataViewDragDropOperation>) {
   if (target.layerId === source.layerId) {
     const layer = state.layers[target.layerId];
+    if (!layer || !isFormBasedLayer(layer)) {
+      return;
+    }
     const newColumns = {
       ...layer.columns,
       [target.columnId]: { ...layer.columns[source.columnId] },
@@ -460,11 +484,17 @@ function onCombine(
   shouldRemoveSource?: boolean
 ) {
   const targetLayer = state.layers[target.layerId];
+  if (!targetLayer || !isFormBasedLayer(targetLayer)) {
+    return;
+  }
   const targetColumn = targetLayer.columns[target.columnId];
   const targetField = getField(targetColumn, target.dataView);
   const indexPattern = indexPatterns[targetLayer.indexPatternId];
 
   const sourceLayer = state.layers[source.layerId];
+  if (!sourceLayer || !isFormBasedLayer(sourceLayer)) {
+    return;
+  }
   const sourceColumn = sourceLayer.columns[source.columnId];
   const sourceField = getField(sourceColumn, indexPattern);
   // extract the field from the source column

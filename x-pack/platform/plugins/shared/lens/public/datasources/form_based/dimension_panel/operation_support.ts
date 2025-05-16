@@ -9,7 +9,7 @@ import memoizeOne from 'memoize-one';
 import { DatasourceDimensionProps, IndexPatternMap, OperationMetadata } from '../../../types';
 import { OperationType } from '../form_based';
 import { memoizedGetAvailableOperationsByMetadata, OperationFieldTuple } from '../operations';
-import { FormBasedPrivateState } from '../types';
+import { CombinedFormBasedPrivateState, FormBasedPrivateState, isTextBasedLayer } from '../types';
 
 export interface OperationSupportMatrix {
   operationByField: Map<string, Set<OperationType>>;
@@ -18,10 +18,10 @@ export interface OperationSupportMatrix {
 }
 
 type Props = Pick<
-  DatasourceDimensionProps<FormBasedPrivateState>,
+  DatasourceDimensionProps<CombinedFormBasedPrivateState>,
   'layerId' | 'columnId' | 'filterOperations'
 > & {
-  state: FormBasedPrivateState;
+  state: CombinedFormBasedPrivateState;
   indexPatterns: IndexPatternMap;
 };
 
@@ -63,7 +63,16 @@ const memoizedComputeOperationsMatrix = memoizeOne(computeOperationMatrix);
 // TODO: the support matrix should be available outside of the dimension panel
 export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix => {
   const layerId = props.layerId;
-  const currentIndexPattern = props.indexPatterns[props.state.layers[layerId].indexPatternId];
+  const layer = props.state.layers[layerId];
+  if (!layer || isTextBasedLayer(layer)) {
+    return {
+      operationByField: new Map(),
+      operationWithoutField: new Set(),
+      fieldByOperation: new Map(),
+    };
+  }
+
+  const currentIndexPattern = props.indexPatterns[layer.indexPatternId];
 
   const operationsByMetadata = memoizedGetAvailableOperationsByMetadata(currentIndexPattern);
   return memoizedComputeOperationsMatrix(operationsByMetadata, props.filterOperations);

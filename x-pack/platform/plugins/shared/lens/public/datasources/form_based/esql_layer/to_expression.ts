@@ -9,10 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
-import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
+import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef, CombinedFormBasedPrivateState, isTextBasedLayer } from './types';
 import type { OriginalColumn } from '../../../../common/types';
 
-function getExpressionForLayer(
+export function getExpressionForLayer(
   layer: TextBasedLayer,
   layerId: string,
   refs: IndexPatternRef[]
@@ -131,8 +131,8 @@ function getExpressionForLayer(
   }
 }
 
-export function toExpression(state: TextBasedPrivateState, layerId: string) {
-  if (state.layers[layerId]) {
+export function toExpression(state: CombinedFormBasedPrivateState, layerId: string) {
+  if (state.layers[layerId] && isTextBasedLayer(state.layers[layerId])) {
     return getExpressionForLayer(state.layers[layerId], layerId, state.indexPatternRefs);
   }
 

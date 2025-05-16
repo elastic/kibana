@@ -41,7 +41,7 @@ import {
   ColumnAdvancedParams,
 } from './operations';
 import { hasField } from './pure_utils';
-import type { FormBasedPrivateState, FormBasedLayer } from './types';
+import type { FormBasedPrivateState, FormBasedLayer, CombinedFormBasedPrivateState } from './types';
 import { documentField } from './document_field';
 import { OperationDefinition } from './operations/definitions';
 import { insertOrReplaceFormulaColumn } from './operations/definitions/formula';
@@ -605,7 +605,7 @@ export function getDatasourceSuggestionsFromCurrentState(
   state: FormBasedPrivateState,
   indexPatterns?: IndexPatternMap,
   filterLayers: (layerId: string) => boolean = () => true
-): Array<DatasourceSuggestion<FormBasedPrivateState>> {
+): Array<DatasourceSuggestion<CombinedFormBasedPrivateState>> {
   if (!indexPatterns) {
     return [];
   }

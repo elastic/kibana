@@ -9,7 +9,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import { createStartServicesGetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -36,6 +36,7 @@ export interface FormBasedDatasourceStartPlugins {
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViews: DataViewsPublicPluginStart;
   uiActions: UiActionsStart;
+  expressions: ExpressionsStart;
 }
 
 export class FormBasedDatasource {
@@ -43,7 +44,6 @@ export class FormBasedDatasource {
     core: CoreSetup<FormBasedDatasourceStartPlugins>,
     {
       fieldFormats: fieldFormatsSetup,
-      expressions,
       editorFrame,
       charts,
     }: FormBasedDatasourceSetupPlugins
@@ -64,7 +64,7 @@ export class FormBasedDatasource {
 
       const [
         coreStart,
-        { dataViewFieldEditor, uiActions, data, fieldFormats, dataViews, unifiedSearch, share },
+        { dataViewFieldEditor, uiActions, data, fieldFormats, dataViews, unifiedSearch, share, expressions },
       ] = await core.getStartServices();
 
       return getFormBasedDatasource({
@@ -78,6 +78,7 @@ export class FormBasedDatasource {
         charts,
         dataViewFieldEditor,
         uiActions,
+        expressions,
       });
     });
   }

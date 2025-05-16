@@ -19,7 +19,7 @@ import {
   parseTimeShift,
 } from '@kbn/data-plugin/common';
 import type { DateRange } from '../../../common/types';
-import type { FormBasedLayer, FormBasedPrivateState } from './types';
+import { CombinedFormBasedPrivateState, isFormBasedLayer, type FormBasedLayer, type FormBasedPrivateState } from './types';
 import type { FramePublicAPI, IndexPattern, UserMessage } from '../../types';
 import { TIMESHIFT_LT_INTERVAL, TIMESHIFT_NOT_MULTIPLE_INTERVAL } from '../../user_messages_ids';
 
@@ -174,12 +174,15 @@ export function getLayerTimeShiftChecks({
 
 export function getStateTimeShiftWarningMessages(
   datatableUtilities: DatatableUtilitiesService,
-  state: FormBasedPrivateState,
+  state: CombinedFormBasedPrivateState,
   { activeData, dataViews }: FramePublicAPI
 ): UserMessage[] {
   if (!state) return [];
   const warningMessages: UserMessage[] = [];
   Object.entries(state.layers).forEach(([layerId, layer]) => {
+    if (!layer || !isFormBasedLayer(layer)) {
+      return;
+    }
     const layerIndexPattern = dataViews.indexPatterns[layer.indexPatternId];
     if (!layerIndexPattern) {
       return;

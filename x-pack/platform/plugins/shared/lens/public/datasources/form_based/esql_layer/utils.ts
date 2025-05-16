@@ -14,14 +14,18 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { ValueFormatConfig } from '../operations/definitions/column_types';
 import { generateId } from '../../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
-import type {
-  IndexPatternRef,
-  TextBasedPrivateState,
-  TextBasedLayerColumn,
-  TextBasedLayer,
+import {
+  type IndexPatternRef,
+  type TextBasedPrivateState,
+  type TextBasedLayerColumn,
+  type TextBasedLayer,
+  type CombinedFormBasedPrivateState,
+  isTextBasedLayer,
 } from './types';
 import type { DataViewsState } from '../../../state_management';
 import { addColumnsToCache } from './fieldlist_cache';
+import { DataType, IndexPatternMap, OperationMetadata, UserMessage } from '@kbn/lens-plugin/public/types';
+import { TEXT_BASED_LANGUAGE_ERROR } from '../../../user_messages_ids';
 
 export const MAX_NUM_OF_COLUMNS = 5;
 
@@ -173,17 +177,22 @@ export function mergeLayer({
   layerId,
   newLayer,
 }: {
-  state: TextBasedPrivateState;
+  state: CombinedFormBasedPrivateState;
   layerId: string;
   newLayer: Partial<TextBasedLayer>;
-}) {
-  return {
-    ...state,
-    layers: {
-      ...state.layers,
-      [layerId]: { ...state.layers[layerId], ...newLayer },
-    },
-  };
+}) : CombinedFormBasedPrivateState {
+  const layer = state.layers[layerId];
+  if (layer && isTextBasedLayer(layer)) {
+    return {
+      ...state,
+      layers: {
+        ...state.layers,
+        [layerId]: { ...state.layers[layerId], ...newLayer } as TextBasedLayer,
+      },
+    };
+  } else { 
+    return state;
+  }
 }
 
 export function updateColumnLabel({
@@ -234,3 +243,64 @@ export function updateColumnFormat({
     ],
   };
 }
+
+export const getUserMessages = (state: CombinedFormBasedPrivateState) => {
+  const errors: Error[] = [];
+
+  Object.values(state.layers).forEach((layer) => {
+    if (layer.type === 'esql' && layer.errors && layer.errors.length > 0) {
+      errors.push(...layer.errors);
+    }
+  });
+  return errors.map((err) => {
+    const message: UserMessage = {
+      uniqueId: TEXT_BASED_LANGUAGE_ERROR,
+      severity: 'error',
+      fixableInEditor: true,
+      displayLocations: [{ id: 'visualization' }, { id: 'textBasedLanguagesQueryInput' }],
+      shortMessage: err.message,
+      longMessage: err.message,
+    };
+    return message;
+  });
+};
+
+export const getOperationForColumnIdESQL = (
+  state: CombinedFormBasedPrivateState,
+  layerId: string,
+  columnId: string,
+  indexPatterns: IndexPatternMap,
+  uniqueLabels: (
+    state: CombinedFormBasedPrivateState,
+    indexPatterns: IndexPatternMap
+  ) => Record<string, string>
+) => {
+  const layer = state.layers[layerId] as TextBasedLayer;
+  const column = layer?.columns?.find((c) => c.columnId === columnId);
+  const columnLabelMap = uniqueLabels(state, indexPatterns);
+  let scale: OperationMetadata['scale'] = 'ordinal';
+  switch (column?.meta?.type) {
+    case 'date':
+      scale = 'interval';
+      break;
+    case 'number':
+      scale = 'ratio';
+      break;
+    default:
+      scale = 'ordinal';
+      break;
+  }
+
+  if (column) {
+    return {
+      dataType: column?.meta?.type as DataType,
+      label: columnLabelMap[columnId] ?? column?.fieldName,
+      isBucketed: Boolean(isNotNumeric(column)),
+      inMetricDimension: column.inMetricDimension,
+      hasTimeShift: false,
+      hasReducedTimeRange: false,
+      scale,
+    };
+  }
+  return null;
+};

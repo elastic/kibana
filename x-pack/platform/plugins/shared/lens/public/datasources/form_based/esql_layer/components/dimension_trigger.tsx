@@ -10,9 +10,9 @@ import { i18n } from '@kbn/i18n';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DatasourceDimensionTriggerProps } from '../../../../types';
-import type { TextBasedPrivateState } from '../types';
+import type { CombinedFormBasedPrivateState } from '../types';
 
-export type TextBasedDimensionTrigger = DatasourceDimensionTriggerProps<TextBasedPrivateState> & {
+export type TextBasedDimensionTrigger = DatasourceDimensionTriggerProps<CombinedFormBasedPrivateState> & {
   columnLabelMap: Record<string, string>;
   expressions: ExpressionsStart;
 };
