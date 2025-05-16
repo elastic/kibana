@@ -120,7 +120,8 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/react-kibana-mount",
     "@kbn/ml-common-types",
-    "@kbn/ml-common-constants"
+    "@kbn/ml-common-constants",
+    "@kbn/ml-embeddables"
   ],
   "exclude": ["target/**/*"]
 }
