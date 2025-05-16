@@ -87,8 +87,7 @@ export const moveAction = (
   const lastSectionId = activePanel.targetSection;
   let previousSection;
   let targetSectionId: string | undefined = (() => {
-    // TODO: temporary blocking of moving with keyboard between sections till we can fix the bug with commiting the action
-    if (isResize || isKeyboardEvent(e)) return lastSectionId;
+    if (isResize) return lastSectionId;
     // early return - target the first "main" section if the panel is dragged above the layout element
     if (previewRect.top < (gridLayoutElement?.getBoundingClientRect().top ?? 0)) {
       return `main-0`;
