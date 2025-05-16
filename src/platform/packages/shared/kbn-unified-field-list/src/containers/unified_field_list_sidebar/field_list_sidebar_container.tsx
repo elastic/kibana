@@ -99,11 +99,6 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
     removedFieldName?: string;
     editedFieldName?: string;
   }) => Promise<void>;
-
-  /**
-   * Only maintain the internal state of the sidebar components, do not render heavy elements
-   */
-  dryRun?: boolean;
 };
 
 /**

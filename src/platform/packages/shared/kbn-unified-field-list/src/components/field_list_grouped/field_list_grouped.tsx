@@ -42,7 +42,6 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   screenReaderDescriptionId?: string;
   localStorageKeyPrefix?: string; // Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
   'data-test-subj'?: string;
-  dryRun?: boolean;
 }
 
 function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
@@ -54,7 +53,6 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   screenReaderDescriptionId,
   localStorageKeyPrefix,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
-  dryRun,
 }: FieldListGroupedProps<T>) {
   const hasSyncedExistingFields =
     fieldsExistenceStatus && fieldsExistenceStatus !== ExistenceFetchStatus.unknown;
@@ -142,7 +140,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       className="unifiedFieldList__fieldListGrouped"
       data-test-subj={`${dataTestSubject}FieldGroups`}
       ref={(el) => {
-        if (!dryRun && el && !el.scrollTop && lastScrollContainerPositionRef.current) {
+        if (el && !el.scrollTop && lastScrollContainerPositionRef.current) {
           // Restore scroll position after rerendering via a portal
           setTimeout(() => {
             el.scrollTo?.({
@@ -159,173 +157,171 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       }}
       onScroll={throttle(lazyScroll, 100)}
     >
-      {!dryRun && (
-        <div className="unifiedFieldList__fieldListGrouped__container">
-          {Boolean(screenReaderDescriptionId) && (
-            <EuiScreenReaderOnly>
-              <div
-                aria-live="polite"
-                id={screenReaderDescriptionId}
-                data-test-subj={`${dataTestSubject}__ariaDescription`}
-              >
-                {hasSyncedExistingFields
-                  ? [
-                      shouldIncludeGroupDescriptionInAria(fieldGroups.SelectedFields) &&
-                        i18n.translate(
-                          'unifiedFieldList.fieldListGrouped.fieldSearchForSelectedFieldsLiveRegion',
-                          {
-                            defaultMessage:
-                              '{selectedFields} selected {selectedFields, plural, one {field} other {fields}}.',
-                            values: {
-                              selectedFields: fieldGroups.SelectedFields?.fields?.length || 0,
-                            },
-                          }
-                        ),
-                      shouldIncludeGroupDescriptionInAria(fieldGroups.PopularFields) &&
-                        i18n.translate(
-                          'unifiedFieldList.fieldListGrouped.fieldSearchForPopularFieldsLiveRegion',
-                          {
-                            defaultMessage:
-                              '{popularFields} popular {popularFields, plural, one {field} other {fields}}.',
-                            values: {
-                              popularFields: fieldGroups.PopularFields?.fields?.length || 0,
-                            },
-                          }
-                        ),
-                      fieldGroups.AvailableFields?.fields &&
-                        i18n.translate(
-                          'unifiedFieldList.fieldListGrouped.fieldSearchForAvailableFieldsLiveRegion',
-                          {
-                            defaultMessage:
-                              '{availableFields} available {availableFields, plural, one {field} other {fields}}.',
-                            values: {
-                              availableFields: fieldGroups.AvailableFields.fields.length,
-                            },
-                          }
-                        ),
-                      shouldIncludeGroupDescriptionInAria(fieldGroups.UnmappedFields) &&
-                        i18n.translate(
-                          'unifiedFieldList.fieldListGrouped.fieldSearchForUnmappedFieldsLiveRegion',
-                          {
-                            defaultMessage:
-                              '{unmappedFields} unmapped {unmappedFields, plural, one {field} other {fields}}.',
-                            values: {
-                              unmappedFields: fieldGroups.UnmappedFields?.fields?.length || 0,
-                            },
-                          }
-                        ),
-                      shouldIncludeGroupDescriptionInAria(fieldGroups.EmptyFields) &&
-                        i18n.translate(
-                          'unifiedFieldList.fieldListGrouped.fieldSearchForEmptyFieldsLiveRegion',
-                          {
-                            defaultMessage:
-                              '{emptyFields} empty {emptyFields, plural, one {field} other {fields}}.',
-                            values: {
-                              emptyFields: fieldGroups.EmptyFields?.fields?.length || 0,
-                            },
-                          }
-                        ),
-                      shouldIncludeGroupDescriptionInAria(fieldGroups.MetaFields) &&
-                        i18n.translate(
-                          'unifiedFieldList.fieldListGrouped.fieldSearchForMetaFieldsLiveRegion',
-                          {
-                            defaultMessage:
-                              '{metaFields} meta {metaFields, plural, one {field} other {fields}}.',
-                            values: {
-                              metaFields: fieldGroups.MetaFields?.fields?.length || 0,
-                            },
-                          }
-                        ),
-                    ]
-                      .filter(Boolean)
-                      .join(' ')
-                  : ''}
-              </div>
-            </EuiScreenReaderOnly>
-          )}
-          {hasSpecialFields && (
-            <>
-              <ul>
-                {fieldGroupsToCollapse.flatMap(([key, { fields, fieldSearchHighlight }]) =>
-                  fields.map((field, index) => (
-                    <Fragment key={getFieldKey(field)}>
-                      {renderFieldItem({
-                        field,
-                        itemIndex: index,
-                        groupIndex: 0,
-                        groupName: key as FieldsGroupNames,
-                        hideDetails: true,
-                        fieldSearchHighlight,
-                      })}
-                    </Fragment>
-                  ))
-                )}
-              </ul>
-              <EuiSpacer size="s" />
-            </>
-          )}
-          {fieldGroupsToShow.map(([key, fieldGroup], index) => {
-            const hidden = Boolean(fieldGroup.hideIfEmpty) && !fieldGroup.fields.length;
-            if (hidden) {
-              return null;
-            }
-            return (
-              <Fragment key={key}>
-                <FieldsAccordion<T>
-                  id={`${dataTestSubject}${key}`}
-                  initialIsOpen={Boolean(accordionState[key])}
-                  label={fieldGroup.title}
-                  helpTooltip={fieldGroup.helpText}
-                  hideDetails={fieldGroup.hideDetails}
-                  hasLoaded={hasSyncedExistingFields}
-                  fieldsCount={fieldGroup.fields.length}
-                  isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
-                  fieldSearchHighlight={fieldGroup.fieldSearchHighlight}
-                  paginatedFields={paginatedFields[key]}
-                  groupIndex={index + 1}
-                  groupName={key as FieldsGroupNames}
-                  onToggle={(open) => {
-                    setAccordionState((s) => ({
-                      ...s,
-                      [key]: open,
-                    }));
-                    const displayedFieldLength = getDisplayedFieldsLength(fieldGroups, {
-                      ...accordionState,
+      <div className="unifiedFieldList__fieldListGrouped__container">
+        {Boolean(screenReaderDescriptionId) && (
+          <EuiScreenReaderOnly>
+            <div
+              aria-live="polite"
+              id={screenReaderDescriptionId}
+              data-test-subj={`${dataTestSubject}__ariaDescription`}
+            >
+              {hasSyncedExistingFields
+                ? [
+                    shouldIncludeGroupDescriptionInAria(fieldGroups.SelectedFields) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForSelectedFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{selectedFields} selected {selectedFields, plural, one {field} other {fields}}.',
+                          values: {
+                            selectedFields: fieldGroups.SelectedFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
+                    shouldIncludeGroupDescriptionInAria(fieldGroups.PopularFields) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForPopularFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{popularFields} popular {popularFields, plural, one {field} other {fields}}.',
+                          values: {
+                            popularFields: fieldGroups.PopularFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
+                    fieldGroups.AvailableFields?.fields &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForAvailableFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{availableFields} available {availableFields, plural, one {field} other {fields}}.',
+                          values: {
+                            availableFields: fieldGroups.AvailableFields.fields.length,
+                          },
+                        }
+                      ),
+                    shouldIncludeGroupDescriptionInAria(fieldGroups.UnmappedFields) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForUnmappedFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{unmappedFields} unmapped {unmappedFields, plural, one {field} other {fields}}.',
+                          values: {
+                            unmappedFields: fieldGroups.UnmappedFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
+                    shouldIncludeGroupDescriptionInAria(fieldGroups.EmptyFields) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForEmptyFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{emptyFields} empty {emptyFields, plural, one {field} other {fields}}.',
+                          values: {
+                            emptyFields: fieldGroups.EmptyFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
+                    shouldIncludeGroupDescriptionInAria(fieldGroups.MetaFields) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForMetaFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{metaFields} meta {metaFields, plural, one {field} other {fields}}.',
+                          values: {
+                            metaFields: fieldGroups.MetaFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
+                  ]
+                    .filter(Boolean)
+                    .join(' ')
+                : ''}
+            </div>
+          </EuiScreenReaderOnly>
+        )}
+        {hasSpecialFields && (
+          <>
+            <ul>
+              {fieldGroupsToCollapse.flatMap(([key, { fields, fieldSearchHighlight }]) =>
+                fields.map((field, index) => (
+                  <Fragment key={getFieldKey(field)}>
+                    {renderFieldItem({
+                      field,
+                      itemIndex: index,
+                      groupIndex: 0,
+                      groupName: key as FieldsGroupNames,
+                      hideDetails: true,
+                      fieldSearchHighlight,
+                    })}
+                  </Fragment>
+                ))
+              )}
+            </ul>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        {fieldGroupsToShow.map(([key, fieldGroup], index) => {
+          const hidden = Boolean(fieldGroup.hideIfEmpty) && !fieldGroup.fields.length;
+          if (hidden) {
+            return null;
+          }
+          return (
+            <Fragment key={key}>
+              <FieldsAccordion<T>
+                id={`${dataTestSubject}${key}`}
+                initialIsOpen={Boolean(accordionState[key])}
+                label={fieldGroup.title}
+                helpTooltip={fieldGroup.helpText}
+                hideDetails={fieldGroup.hideDetails}
+                hasLoaded={hasSyncedExistingFields}
+                fieldsCount={fieldGroup.fields.length}
+                isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
+                fieldSearchHighlight={fieldGroup.fieldSearchHighlight}
+                paginatedFields={paginatedFields[key]}
+                groupIndex={index + 1}
+                groupName={key as FieldsGroupNames}
+                onToggle={(open) => {
+                  setAccordionState((s) => ({
+                    ...s,
+                    [key]: open,
+                  }));
+                  const displayedFieldLength = getDisplayedFieldsLength(fieldGroups, {
+                    ...accordionState,
+                    [key]: open,
+                  });
+                  setPageSize(
+                    Math.max(
+                      PAGINATION_SIZE,
+                      Math.min(Math.ceil(pageSize * 1.5), displayedFieldLength)
+                    )
+                  );
+                  if (localStorageKeyPrefix) {
+                    storeInitiallyOpenSections({
+                      ...storedInitiallyOpenSections,
                       [key]: open,
                     });
-                    setPageSize(
-                      Math.max(
-                        PAGINATION_SIZE,
-                        Math.min(Math.ceil(pageSize * 1.5), displayedFieldLength)
-                      )
-                    );
-                    if (localStorageKeyPrefix) {
-                      storeInitiallyOpenSections({
-                        ...storedInitiallyOpenSections,
-                        [key]: open,
-                      });
-                    }
-                  }}
-                  showExistenceFetchError={fieldsExistenceStatus === ExistenceFetchStatus.failed}
-                  showExistenceFetchTimeout={fieldsExistenceStatus === ExistenceFetchStatus.failed} // TODO: deprecate timeout logic?
-                  renderCallout={() => (
-                    <NoFieldsCallout
-                      isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
-                      isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
-                      isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
-                      fieldsExistInIndex={!!fieldsExistInIndex}
-                      defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
-                      data-test-subj={`${dataTestSubject}${key}NoFieldsCallout`}
-                    />
-                  )}
-                  renderFieldItem={renderFieldItem}
-                />
-                <EuiSpacer size="m" />
-              </Fragment>
-            );
-          })}
-        </div>
-      )}
+                  }
+                }}
+                showExistenceFetchError={fieldsExistenceStatus === ExistenceFetchStatus.failed}
+                showExistenceFetchTimeout={fieldsExistenceStatus === ExistenceFetchStatus.failed} // TODO: deprecate timeout logic?
+                renderCallout={() => (
+                  <NoFieldsCallout
+                    isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
+                    isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
+                    isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
+                    fieldsExistInIndex={!!fieldsExistInIndex}
+                    defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
+                    data-test-subj={`${dataTestSubject}${key}NoFieldsCallout`}
+                  />
+                )}
+                renderFieldItem={renderFieldItem}
+              />
+              <EuiSpacer size="m" />
+            </Fragment>
+          );
+        })}
+      </div>
     </div>
   );
 }
