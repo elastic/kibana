@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-plugin/server';
 import { Logger } from '@kbn/logging';
 import {
   DocumentAnalysis,
@@ -13,6 +12,7 @@ import {
 } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
 import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
+import { InferenceClient } from '@kbn/inference-common';
 import {
   analyzeFetchedRelatedEntities,
   RelatedEntityFromSearchResults,

@@ -11,6 +11,7 @@ import type {
   ToolOptions,
   InferenceConnector,
   Prompt,
+  ChatCompleteMetadata,
 } from '@kbn/inference-common';
 
 export interface ChatCompleteRequestBodyBase {
@@ -22,6 +23,7 @@ export interface ChatCompleteRequestBodyBase {
   retryConfiguration?: {
     retryOn?: 'all' | 'auto';
   };
+  metadata?: ChatCompleteMetadata;
 }
 
 export type ChatCompleteRequestBody = ChatCompleteRequestBodyBase & {
@@ -31,6 +33,7 @@ export type ChatCompleteRequestBody = ChatCompleteRequestBodyBase & {
 
 export type PromptRequestBody = ChatCompleteRequestBodyBase & {
   prompt: Omit<Prompt, 'input'>;
+  prevMessages?: Message[];
   input?: unknown;
 };
 

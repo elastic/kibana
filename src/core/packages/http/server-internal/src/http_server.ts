@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Server, Request } from '@hapi/hapi';
+import { Server, Request, ServerRoute, ReqRef } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
@@ -45,6 +45,7 @@ import { identity, isNil, isObject, omitBy } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
+import { context, defaultTextMapGetter, propagation } from '@opentelemetry/api';
 import { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -239,6 +240,42 @@ export class HttpServer {
     const serverOptions = getServerOptions(config);
 
     this.server = createServer(serverOptions);
+
+    this.server.register({
+      name: 'set_opentelemetry_context',
+      register(server, options) {
+        const route = server.route.bind(server.route);
+
+        function wrapRouteHandler<T extends ReqRef>(routeOptions: ServerRoute<T>): ServerRoute<T> {
+          if (typeof routeOptions.handler === 'function') {
+            return {
+              ...routeOptions,
+              handler(request, h, error) {
+                const ctx = propagation.extract(
+                  context.active(),
+                  request.headers,
+                  defaultTextMapGetter
+                );
+                return context.with(ctx, () => {
+                  return (
+                    routeOptions.handler as Extract<typeof routeOptions.handler, Function>
+                  ).call(this, request, h, error);
+                });
+              },
+            };
+          }
+          return routeOptions;
+        }
+        server.route = (routeOptions) => {
+          const nextOptions = Array.isArray(routeOptions)
+            ? routeOptions.map((opts) => wrapRouteHandler(opts))
+            : wrapRouteHandler(routeOptions);
+
+          return route(nextOptions);
+        };
+      },
+    });
+
     await this.server.register([HapiStaticFiles]);
     if (config.compression.brotli.enabled) {
       await this.server.register({

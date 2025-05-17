@@ -10,6 +10,7 @@ import {
   getConnectorFamily,
   PromptOptions,
   PromptAPI,
+  getConnectorModel,
 } from '@kbn/inference-common';
 import { CreateChatCompleteApiOptions } from '../chat_complete/types';
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
@@ -20,7 +21,7 @@ export function createPromptApi({ request, actions, logger }: CreateChatComplete
   const callbackApi = createChatCompleteCallbackApi({ request, actions, logger });
 
   return (options: PromptOptions) => {
-    const { connectorId, stream, abortSignal, prompt, input, ...rest } = options;
+    const { connectorId, stream, abortSignal, prompt, input, prevMessages, ...rest } = options;
     return callbackApi(
       {
         connectorId,
@@ -31,16 +32,21 @@ export function createPromptApi({ request, actions, logger }: CreateChatComplete
         const connector = executor.getConnector();
         const family = getConnectorFamily(connector);
         const provider = getConnectorProvider(connector);
+        const id = getConnectorModel(connector);
+
         const { match, options: nextOptions } = promptToMessageOptions(prompt, input, {
           family,
           provider,
+          id,
         });
 
-        const template = 'chat' in match.template ? undefined : match.template.mustache.template;
+        const template =
+          'mustache' in match.template ? match.template.mustache.template : undefined;
 
         return {
           ...rest,
           ...nextOptions,
+          messages: nextOptions.messages.concat(prevMessages ?? []),
           metadata: {
             ...rest.metadata,
             attributes: {

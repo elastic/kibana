@@ -72,8 +72,9 @@ export const dissectProcessorDefinitionSchema = z.strictObject({
     z.object({
       field: NonEmptyString,
       pattern: NonEmptyString,
-      append_separator: z.optional(NonEmptyString),
+      append_separator: z.optional(z.string()),
       ignore_missing: z.optional(z.boolean()),
+      trim_values: z.optional(z.boolean()),
     })
   ),
 }) satisfies z.Schema<DissectProcessorDefinition>;
@@ -155,7 +156,7 @@ export const kvProcessorDefinitionSchema = z.strictObject({
  * GeoIP processor
  */
 
-export interface GeoIpProcessorConfig {
+export interface GeoIpProcessorConfig extends ProcessorBase {
   field: string;
   target_field?: string;
   database_file?: string;
@@ -169,14 +170,17 @@ export interface GeoIpProcessorDefinition {
 }
 
 export const geoIpProcessorDefinitionSchema = z.strictObject({
-  geoip: z.object({
-    field: NonEmptyString,
-    target_field: z.optional(NonEmptyString),
-    database_file: z.optional(NonEmptyString),
-    properties: z.optional(z.array(NonEmptyString)),
-    ignore_missing: z.optional(z.boolean()),
-    first_only: z.optional(z.boolean()),
-  }),
+  geoip: z.intersection(
+    processorBaseSchema,
+    z.object({
+      field: NonEmptyString,
+      target_field: z.optional(NonEmptyString),
+      database_file: z.optional(NonEmptyString),
+      properties: z.optional(z.array(NonEmptyString)),
+      ignore_missing: z.optional(z.boolean()),
+      first_only: z.optional(z.boolean()),
+    })
+  ),
 }) satisfies z.Schema<GeoIpProcessorDefinition>;
 
 /**
@@ -264,7 +268,7 @@ export const urlDecodeProcessorDefinitionSchema = z.strictObject({
  * User agent processor
  */
 
-export interface UserAgentProcessorConfig {
+export interface UserAgentProcessorConfig extends ProcessorBase {
   field: string;
   target_field?: string;
   regex_file?: string;
@@ -277,14 +281,55 @@ export interface UserAgentProcessorDefinition {
 }
 
 export const userAgentProcessorDefinitionSchema = z.strictObject({
-  user_agent: z.object({
-    field: NonEmptyString,
-    target_field: z.optional(NonEmptyString),
-    regex_file: z.optional(NonEmptyString),
-    properties: z.optional(z.array(NonEmptyString)),
-    ignore_missing: z.optional(z.boolean()),
-  }),
+  user_agent: z.intersection(
+    processorBaseSchema,
+    z.object({
+      field: NonEmptyString,
+      target_field: z.optional(NonEmptyString),
+      regex_file: z.optional(NonEmptyString),
+      properties: z.optional(z.array(NonEmptyString)),
+      ignore_missing: z.optional(z.boolean()),
+    })
+  ),
 }) satisfies z.Schema<UserAgentProcessorDefinition>;
+
+export interface RemoveProcessorConfig extends ProcessorBase {
+  field: string | string[];
+  ignore_missing?: boolean;
+}
+
+export interface RemoveProcessorDefinition {
+  remove: RemoveProcessorConfig;
+}
+
+export const removeProcessorDefinitionSchema = z.strictObject({
+  remove: z.intersection(
+    processorBaseSchema,
+    z.object({
+      field: z.array(z.union([NonEmptyString, NonEmptyString])),
+      ignore_missing: z.optional(z.boolean()),
+    })
+  ),
+}) satisfies z.Schema<RemoveProcessorDefinition>;
+
+export interface DotExpanderProcessorConfig extends ProcessorBase {
+  field: string | string[];
+  override?: boolean;
+}
+
+export interface DotExpanderProcessorDefinition {
+  dot_expander: DotExpanderProcessorConfig;
+}
+
+export const dotExpanderProcessorDefinitionSchema = z.strictObject({
+  dot_expander: z.intersection(
+    processorBaseSchema,
+    z.object({
+      field: NonEmptyString,
+      override: z.boolean().optional(),
+    })
+  ),
+}) satisfies z.Schema<DotExpanderProcessorDefinition>;
 
 export type ProcessorDefinition =
   | DateProcessorDefinition
@@ -295,7 +340,9 @@ export type ProcessorDefinition =
   | RenameProcessorDefinition
   | SetProcessorDefinition
   | UrlDecodeProcessorDefinition
-  | UserAgentProcessorDefinition;
+  | UserAgentProcessorDefinition
+  | RemoveProcessorDefinition
+  | DotExpanderProcessorDefinition;
 
 export type ProcessorDefinitionWithId = ProcessorDefinition & { id: string };
 
@@ -319,6 +366,8 @@ export const processorDefinitionSchema: z.ZodType<ProcessorDefinition> = z.union
   setProcessorDefinitionSchema,
   urlDecodeProcessorDefinitionSchema,
   userAgentProcessorDefinitionSchema,
+  removeProcessorDefinitionSchema,
+  dotExpanderProcessorDefinitionSchema,
 ]);
 
 export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithId> = z.union([
@@ -331,6 +380,8 @@ export const processorWithIdDefinitionSchema: z.ZodType<ProcessorDefinitionWithI
   setProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   urlDecodeProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
   userAgentProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
+  removeProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
+  dotExpanderProcessorDefinitionSchema.merge(z.object({ id: z.string() })),
 ]);
 
 export const isGrokProcessorDefinition = createIsNarrowSchema(

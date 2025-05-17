@@ -7,3 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 export { initTelemetry } from './src/init_telemetry';
+export { setDiagLogger } from './src/set_diag_logger';

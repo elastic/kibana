@@ -13,3 +13,5 @@ export type {
   GetConnectorsResponseBody,
   PromptRequestBody,
 } from './http_apis';
+
+export { createRestClient } from './rest/create_client';

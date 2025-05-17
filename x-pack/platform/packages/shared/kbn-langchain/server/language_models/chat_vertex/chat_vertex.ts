@@ -87,6 +87,7 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
     const stream = await this.caller.callWithOptions({ signal: options?.signal }, async () => {
       const systemPart: GeminiPartText | undefined = data?.systemInstruction
         ?.parts?.[0] as unknown as GeminiPartText;
+
       const systemInstruction = systemPart?.text.length
         ? { systemInstruction: systemPart?.text }
         : {};

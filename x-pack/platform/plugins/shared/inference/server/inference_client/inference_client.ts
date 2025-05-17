@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { InferenceClient } from './types';
+import { InferenceClient } from '@kbn/inference-common';
 import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { getConnectorById } from '../util/get_connector_by_id';

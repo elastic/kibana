@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   FilterCondition,
   isAlwaysCondition,
@@ -14,7 +15,7 @@ import {
   isOrCondition,
 } from '../conditions';
 
-function conditionToClause(condition: FilterCondition) {
+function conditionToClause(condition: FilterCondition): QueryDslQueryContainer {
   switch (condition.operator) {
     case 'neq':
       return { bool: { must_not: { match: { [condition.field]: condition.value } } } };
@@ -33,7 +34,7 @@ function conditionToClause(condition: FilterCondition) {
     case 'contains':
       return { wildcard: { [condition.field]: `*${condition.value}*` } };
     case 'startsWith':
-      return { prefix: { [condition.field]: condition.value } };
+      return { prefix: { [condition.field]: String(condition.value) } };
     case 'endsWith':
       return { wildcard: { [condition.field]: `*${condition.value}` } };
     case 'notExists':
@@ -43,7 +44,7 @@ function conditionToClause(condition: FilterCondition) {
   }
 }
 
-export function conditionToQueryDsl(condition: Condition): any {
+export function conditionToQueryDsl(condition: Condition): QueryDslQueryContainer {
   if (isFilterCondition(condition)) {
     return conditionToClause(condition);
   }

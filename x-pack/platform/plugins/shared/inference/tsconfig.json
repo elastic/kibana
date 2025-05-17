@@ -40,6 +40,8 @@
     "@kbn/sse-utils-server",
     "@kbn/tracing",
     "@kbn/safer-lodash-set",
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/sse-utils-client",
+    "@kbn/zod"
   ]
 }

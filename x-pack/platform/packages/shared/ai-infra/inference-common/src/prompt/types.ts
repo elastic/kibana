@@ -9,6 +9,16 @@ import { z } from '@kbn/zod';
 import { MessageRole, ToolOptions } from '../chat_complete';
 import { Model } from '../model_provider';
 
+export interface ModelMatch extends Model {
+  id?: string;
+}
+
+export interface StaticPromptTemplate {
+  static: {
+    content: string;
+  };
+}
+
 export interface MustachePromptTemplate {
   mustache: {
     template: string;
@@ -24,13 +34,14 @@ export interface ChatPromptTemplate {
   };
 }
 
-export type PromptTemplate = MustachePromptTemplate | ChatPromptTemplate;
+export type PromptTemplate = MustachePromptTemplate | ChatPromptTemplate | StaticPromptTemplate;
 
 export type PromptVersion<TToolOptions extends ToolOptions = ToolOptions> = {
-  models?: Model[];
-  system?: string;
-  template: MustachePromptTemplate | ChatPromptTemplate;
+  models?: ModelMatch[];
+  system?: string | MustachePromptTemplate;
+  template: MustachePromptTemplate | ChatPromptTemplate | StaticPromptTemplate;
   temperature?: number;
+  invokeParameters?: Record<string, any>;
 } & TToolOptions;
 
 export interface Prompt<TInput = any, TPromptVersions extends PromptVersion[] = PromptVersion[]> {

@@ -11,6 +11,8 @@ import { renameProcessorConfig } from './configs/rename';
 import { setProcessorConfig } from './configs/set';
 import { urlDecodeProcessorConfig } from './configs/url_decode';
 import { userAgentProcessorConfig } from './configs/user_agent';
+import { dotExpanderProcessorConfig } from './configs/dot_expander';
+import { removeProcessorConfig } from './configs/remove';
 
 export const configDrivenProcessors = {
   kv: kvProcessorConfig,
@@ -19,4 +21,6 @@ export const configDrivenProcessors = {
   set: setProcessorConfig,
   urldecode: urlDecodeProcessorConfig,
   user_agent: userAgentProcessorConfig,
+  dot_expander: dotExpanderProcessorConfig,
+  remove: removeProcessorConfig,
 };

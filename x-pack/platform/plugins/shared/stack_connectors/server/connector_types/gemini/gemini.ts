@@ -17,6 +17,7 @@ import type {
   ConnectorTokenClientContract,
 } from '@kbn/actions-plugin/server/types';
 
+import type { GenerationConfig } from '@google/generative-ai';
 import { HarmBlockThreshold, HarmCategory } from '@google/generative-ai';
 import {
   RunActionParamsSchema,
@@ -290,6 +291,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       timeout,
       toolConfig,
       maxOutputTokens,
+      generationConfig,
     }: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
@@ -302,6 +304,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
             temperature,
             toolConfig,
             systemInstruction,
+            generationConfig,
           })
         ),
         model,
@@ -324,13 +327,20 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       timeout,
       tools,
       systemInstruction,
+      generationConfig,
     }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIRawActionResponse> {
     const res = await this.runApi(
       {
         body: JSON.stringify({
-          ...formatGeminiPayload({ maxOutputTokens, messages, temperature, systemInstruction }),
+          ...formatGeminiPayload({
+            maxOutputTokens,
+            messages,
+            temperature,
+            systemInstruction,
+            generationConfig,
+          }),
           tools,
         }),
         model,
@@ -364,6 +374,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       timeout,
       tools,
       toolConfig,
+      generationConfig,
     }: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
@@ -376,6 +387,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
             temperature,
             toolConfig,
             systemInstruction,
+            generationConfig,
           }),
           tools,
         }),
@@ -396,18 +408,25 @@ const formatGeminiPayload = ({
   systemInstruction,
   temperature,
   toolConfig,
+  generationConfig,
 }: {
   maxOutputTokens?: number;
   messages: Array<{ role: string; content: string; parts: MessagePart[] }>;
   systemInstruction?: string;
   toolConfig?: InvokeAIActionParams['toolConfig'];
   temperature: number;
+  generationConfig?: GenerationConfig & {
+    thinkingConfig?: {
+      thinkingBudget?: number;
+    };
+  };
 }): Payload => {
   const payload: Payload = {
     contents: [],
     generation_config: {
       temperature,
       maxOutputTokens,
+      ...generationConfig,
     },
     ...(systemInstruction ? { system_instruction: { parts: [{ text: systemInstruction }] } } : {}),
     ...(toolConfig
@@ -455,5 +474,6 @@ const formatGeminiPayload = ({
     }
     previousRole = correctRole;
   }
+
   return payload;
 };

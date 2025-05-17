@@ -7,7 +7,15 @@
 
 import { MessageRole, Model, Prompt, PromptVersion } from '@kbn/inference-common';
 import { ChatCompleteOptions } from '@kbn/inference-common';
+import { orderBy } from 'lodash';
 import Mustache from 'mustache';
+import { format } from 'util';
+
+enum MatchType {
+  default = 0,
+  modelFamily = 1,
+  modelId = 2,
+}
 
 export function promptToMessageOptions(
   prompt: Prompt,
@@ -17,20 +25,29 @@ export function promptToMessageOptions(
   match: PromptVersion;
   options: Pick<
     ChatCompleteOptions,
-    'messages' | 'system' | 'tools' | 'toolChoice' | 'temperature'
+    'messages' | 'system' | 'tools' | 'toolChoice' | 'temperature' | 'invokeParameters'
   >;
 } {
-  const bestMatch =
-    prompt.versions.find((version) => {
-      return (
-        !version.models ||
-        version.models.find((versionModel) => {
-          return versionModel.family === model.family && versionModel.provider === model.provider;
-        })
-      );
-    }) ?? prompt.versions[0];
+  const matches = prompt.versions.flatMap((version) => {
+    if (!version.models) {
+      return [{ version, match: MatchType.default }];
+    }
 
-  const { system, toolChoice, tools, temperature, template } = bestMatch;
+    return version.models.flatMap((match) => {
+      if (match.id) {
+        return model.id?.includes(match.id) ? [{ version, match: MatchType.modelId }] : [];
+      }
+      return match.family === model.family ? [{ version, match: MatchType.modelFamily }] : [];
+    });
+  });
+
+  const bestMatch = orderBy(matches, (match) => match.match, 'desc')[0].version;
+
+  if (!bestMatch) {
+    throw new Error(`No model match found for ${format(model)}`);
+  }
+
+  const { toolChoice, tools, temperature, template, invokeParameters } = bestMatch;
 
   const validatedInput = prompt.input.parse(input);
 
@@ -40,9 +57,17 @@ export function promptToMessageOptions(
       : [
           {
             role: MessageRole.User as const,
-            content: Mustache.render(template.mustache.template, validatedInput),
+            content:
+              'mustache' in template
+                ? Mustache.render(template.mustache.template, validatedInput)
+                : template.static.content,
           },
         ];
+
+  const system =
+    !bestMatch.system || typeof bestMatch.system === 'string'
+      ? bestMatch.system
+      : Mustache.render(bestMatch.system.mustache.template, validatedInput);
 
   return {
     match: bestMatch,
@@ -52,6 +77,7 @@ export function promptToMessageOptions(
       tools,
       toolChoice,
       temperature,
+      invokeParameters,
     },
   };
 }

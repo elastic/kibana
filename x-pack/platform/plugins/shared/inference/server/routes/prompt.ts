@@ -55,6 +55,8 @@ export function registerPromptRoute({
       modelName,
       retryConfiguration,
       temperature,
+      metadata,
+      prevMessages,
     } = request.body;
 
     return client.prompt({
@@ -72,6 +74,8 @@ export function registerPromptRoute({
       modelName,
       retryConfiguration,
       temperature,
+      metadata,
+      prevMessages,
     });
   }
 
@@ -95,6 +99,7 @@ export function registerPromptRoute({
           body: promptResponse,
         });
       } catch (e) {
+        logger.debug(() => e);
         return response.custom({
           statusCode: isInferenceError(e) ? e.meta?.status ?? 500 : 500,
           bypassErrorFormat: true,

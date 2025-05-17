@@ -24,6 +24,7 @@ export {
   type ToolSchema,
   type UnvalidatedToolCall,
   type ToolCallsOf,
+  type ToolCallbacksOf,
   type ToolCall,
   type ToolDefinition,
   type ToolOptions,
@@ -60,6 +61,8 @@ export {
   type ChatCompleteMetadata,
   type ConnectorTelemetryMetadata,
 } from './src/chat_complete';
+
+export type { BoundInferenceClient, InferenceClient } from './src/inference_client';
 export {
   OutputEventType,
   type OutputAPI,
@@ -102,7 +105,9 @@ export {
   isInferenceRequestAbortedError,
   isInferenceProviderError,
 } from './src/errors';
-export { generateFakeToolCallId } from './src/utils';
+
+export { Tokenizer, generateFakeToolCallId, callPromptUntil, ShortIdTable } from './src/utils';
+
 export { elasticModelDictionary } from './src/const';
 
 export { truncateList } from './src/truncate_list';
@@ -129,8 +134,6 @@ export type {
   InferenceTracingLangfuseExportConfig,
   InferenceTracingPhoenixExportConfig,
 } from './src/tracing';
-
-export { Tokenizer } from './src/utils/tokenizer';
 
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';
 

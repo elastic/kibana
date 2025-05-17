@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useController } from 'react-hook-form';
 import { css } from '@emotion/react';
+import { castArray } from 'lodash';
 import { ProcessorFormState } from '../types';
 import { useSimulatorSelector } from '../state_management/stream_enrichment_state_machine';
 import { selectUnsupportedDottedFields } from '../state_management/simulation_state_machine/selectors';
@@ -48,7 +49,7 @@ export const ProcessorFieldSelector = ({
   };
 
   const isUnsupported = unsupportedFields.some((unsupportedField) =>
-    value.startsWith(unsupportedField)
+    castArray(value).some((str) => str.startsWith(unsupportedField))
   );
 
   return (

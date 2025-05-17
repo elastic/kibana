@@ -13,11 +13,38 @@ import {
 } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '../../../../common';
 import type { GenerateContentResponseChunk } from './types';
+import { createToolValidationError } from '../../../../common/chat_complete/errors';
 
 export function processVertexStream() {
   return (source: Observable<GenerateContentResponseChunk>) =>
     new Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent>((subscriber) => {
       function handleNext(value: GenerateContentResponseChunk) {
+        const finishReason = value.candidates?.[0].finishReason as string | undefined;
+
+        // 'usageMetadata' can be present as an empty object on chunks
+        // only the last chunk will have its fields populated
+        if (value.usageMetadata?.totalTokenCount) {
+          subscriber.next({
+            type: ChatCompletionEventType.ChatCompletionTokenCount,
+            tokens: {
+              prompt: value.usageMetadata.promptTokenCount,
+              completion: value.usageMetadata.candidatesTokenCount,
+              cached: value.usageMetadata.cachedContentTokenCount,
+              total: value.usageMetadata.totalTokenCount,
+            },
+          });
+        }
+
+        if (finishReason === 'UNEXPECTED_TOOL_CALL' || finishReason === 'MALFORMED_TOOL_CALL') {
+          subscriber.error(
+            createToolValidationError(finishReason, {
+              errorsText: value.candidates?.[0].finishMessage,
+              toolCalls: [],
+            })
+          );
+          return;
+        }
+
         const contentPart = value.candidates?.[0].content.parts[0];
         const completion = contentPart?.text;
         const toolCall = contentPart?.functionCall;
@@ -35,19 +62,6 @@ export function processVertexStream() {
                   },
                 ]
               : [],
-          });
-        }
-
-        // 'usageMetadata' can be present as an empty object on chunks
-        // only the last chunk will have its fields populated
-        if (value.usageMetadata?.totalTokenCount) {
-          subscriber.next({
-            type: ChatCompletionEventType.ChatCompletionTokenCount,
-            tokens: {
-              prompt: value.usageMetadata.promptTokenCount,
-              completion: value.usageMetadata.candidatesTokenCount,
-              total: value.usageMetadata.totalTokenCount,
-            },
           });
         }
       }

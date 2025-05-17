@@ -126,6 +126,11 @@ export type ChatCompleteOptions<
    * Note that defaults are very fine, so only use this if you really have a reason to do so.
    */
   retryConfiguration?: ChatCompleteRetryConfiguration;
+  /**
+   * Optional invoke parameters that are merged into `subActionParams`, for model-specific
+   * parameters
+   */
+  invokeParameters?: Record<string, any>;
 } & TToolOptions;
 
 export interface ChatCompleteRetryConfiguration {

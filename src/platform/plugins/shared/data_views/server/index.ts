@@ -22,7 +22,7 @@ export type {
 import { PluginInitializerContext } from '@kbn/core/server';
 import type { DataViewsServerPlugin } from './plugin';
 import { DataViewsServerPluginSetup, DataViewsServerPluginStart } from './types';
-export type { dataViewsServiceFactory } from './data_views_service_factory';
+export { dataViewsServiceFactory } from './data_views_service_factory';
 
 /**
  * Static code to be shared externally
