@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { last } from 'lodash';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
-import { EsqlResponse } from '@elastic/elasticsearch/lib/helpers';
+import { type EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import {
   LlmProxy,
   createLlmProxy,
@@ -190,7 +190,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         describe('the `execute_query` tool call response', () => {
-          let toolCallResponse: { columns: EsqlResponse['columns']; rows: EsqlResponse['values'] };
+          let toolCallResponse: {
+            columns: EsqlToRecords<any>['columns'];
+            rows: EsqlToRecords<any>['records'];
+          };
           before(async () => {
             toolCallResponse = JSON.parse(last(fourthRequestBody.messages)?.content as string);
           });
