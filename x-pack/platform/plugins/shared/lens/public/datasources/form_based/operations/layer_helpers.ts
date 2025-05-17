@@ -367,7 +367,11 @@ export function insertNewColumn({
 
   const baseOptions = {
     indexPattern,
-    previousColumn: { ...incompleteParams, ...initialParams, ...(layer.columns[columnId] as GenericIndexPatternColumn) },
+    previousColumn: {
+      ...incompleteParams,
+      ...initialParams,
+      ...(layer.columns[columnId] as GenericIndexPatternColumn),
+    },
   };
 
   if (operationDefinition.input === 'none' || operationDefinition.input === 'managedReference') {

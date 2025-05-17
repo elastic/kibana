@@ -29,7 +29,7 @@ export type TextBasedDimensionEditorProps =
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
   const layer = props.state.layers[props.layerId];
-  
+
   const query = 'query' in layer ? layer.query : undefined;
   const { euiTheme } = useEuiTheme();
   const {

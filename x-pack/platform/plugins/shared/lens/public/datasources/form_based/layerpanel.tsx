@@ -29,7 +29,6 @@ export function LayerPanel({
 }: FormBasedLayerPanelProps) {
   const layer = state.layers[layerId];
 
-
   const { euiTheme } = useEuiTheme();
 
   if (!layer || !isFormBasedLayer(layer)) {
