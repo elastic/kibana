@@ -150,10 +150,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
     };
   }, []);
 
-  if (!layer || !isFormBasedLayer(layer)) {
-    return null;
-  }
-
   const updateLayer = useCallback(
     (newLayer: Partial<FormBasedLayer>) =>
       setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),

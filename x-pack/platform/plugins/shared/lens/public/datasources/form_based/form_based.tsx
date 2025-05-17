@@ -192,8 +192,6 @@ export const removeColumn: Datasource<CombinedFormBasedPrivateState>['removeColu
       }),
     });
   } else {
-    console.error(`Layer ${layerId} is not a form-based layer`);
-    debugger;
     return prevState;
   }
 };
@@ -572,8 +570,6 @@ export function getFormBasedDatasource({
 
         return ret;
       } else {
-        console.error(`Layer ${layerId} is not a form-based layer`);
-        debugger;
         return state;
       }
     },
@@ -633,8 +629,6 @@ export function getFormBasedDatasource({
               layer.columns[link.from.columnId]
             );
           } else {
-            console.error(`Layer ${link.from.layerId} is not a form-based layer`);
-            debugger;
             return false;
           }
         })
