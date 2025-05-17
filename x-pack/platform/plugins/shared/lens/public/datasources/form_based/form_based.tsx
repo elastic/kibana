@@ -504,8 +504,7 @@ export function getFormBasedDatasource({
         };
       }
 
-      const linkedLayers =
-        'linkToLayers' in layer ? layer.linkToLayers : [];
+      const linkedLayers = 'linkToLayers' in layer ? layer.linkToLayers : [];
       return {
         removedLayerIds,
         newState: {
@@ -1114,13 +1113,13 @@ export function getFormBasedDatasource({
       }
 
       return isDraggedDataViewField(draggedField)
-        ? getDatasourceSuggestionsForField(
+        ? (getDatasourceSuggestionsForField(
             state,
             draggedField.indexPatternId,
             draggedField.field,
             indexPatterns,
             filterLayers
-          ) as Array<DatasourceSuggestion<CombinedFormBasedPrivateState>>
+          ) as Array<DatasourceSuggestion<CombinedFormBasedPrivateState>>)
         : [];
     },
     getDatasourceSuggestionsFromCurrentState: (state, indexPatterns, filterFn, activeData) => {
@@ -1137,11 +1136,9 @@ export function getFormBasedDatasource({
       indexPatterns
     ) => {
       if (state.initialContext || hasTextBasedLayers(state)) {
-        return getSuggestionsForVisualizeField(
-          state,
-          indexPatternId,
-          fieldName
-        ) as Array<DatasourceSuggestion<CombinedFormBasedPrivateState>>;
+        return getSuggestionsForVisualizeField(state, indexPatternId, fieldName) as Array<
+          DatasourceSuggestion<CombinedFormBasedPrivateState>
+        >;
       }
       return getDatasourceSuggestionsForVisualizeField(
         state,
@@ -1154,11 +1151,9 @@ export function getFormBasedDatasource({
       if (hasTextBasedLayers(state)) {
         return getSuggestionsForState(state);
       }
-      return getDatasourceSuggestionsForVisualizeCharts(
-        state,
-        context,
-        indexPatterns
-      ) as Array<DatasourceSuggestion<CombinedFormBasedPrivateState>>;
+      return getDatasourceSuggestionsForVisualizeCharts(state, context, indexPatterns) as Array<
+        DatasourceSuggestion<CombinedFormBasedPrivateState>
+      >;
     },
 
     getUserMessages(state, { frame: framePublicAPI, setState, visualizationInfo }) {

@@ -124,7 +124,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const layer = state.layers[layerId] as FormBasedLayer;
 
-
   // If a layer has sampling disabled, assume the toast has already fired in the past
   const [hasRandomSamplingToastFired, setSamplingToastAsFired] = useState(
     !isSamplingValueEnabled(layer)
