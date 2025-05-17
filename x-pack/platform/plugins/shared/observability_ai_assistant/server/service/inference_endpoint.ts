@@ -89,13 +89,11 @@ export async function getKbModelStatus({
   esClient,
   logger,
   config,
-  inferenceId,
 }: {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
-  inferenceId?: string;
 }): Promise<{
   enabled: boolean;
   endpoint?: InferenceInferenceEndpointInfo;
@@ -110,22 +108,19 @@ export async function getKbModelStatus({
   const concreteWriteIndex = await getConcreteWriteIndex(esClient);
   const isReIndexing = await isReIndexInProgress({ esClient, logger, core });
 
-  const currentInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(() => undefined);
-  if (!inferenceId) {
-    if (!currentInferenceId) {
-      logger.error('Inference id not provided and not found in write index');
-      return {
-        enabled,
-        errorMessage: 'Inference id not found',
-        kbState: KnowledgeBaseState.NOT_INSTALLED,
-        currentInferenceId,
-        concreteWriteIndex,
-        isReIndexing,
-      };
-    }
-
-    logger.debug(`Using current inference id "${currentInferenceId}" from write index`);
-    inferenceId = currentInferenceId;
+  let inferenceId: string;
+  try {
+    inferenceId = await getInferenceIdFromWriteIndex(esClient);
+  } catch (error) {
+    logger.error(`Unable to retrieve inference if from write index: ${error.message}`);
+    return {
+      enabled,
+      errorMessage: error.message,
+      kbState: KnowledgeBaseState.NOT_INSTALLED,
+      currentInferenceId: undefined,
+      concreteWriteIndex,
+      isReIndexing,
+    };
   }
 
   let endpoint: InferenceInferenceEndpointInfo;
@@ -144,7 +139,7 @@ export async function getKbModelStatus({
       enabled,
       errorMessage: error.message,
       kbState: KnowledgeBaseState.NOT_INSTALLED,
-      currentInferenceId,
+      currentInferenceId: inferenceId,
       concreteWriteIndex,
       isReIndexing,
     };
@@ -167,7 +162,7 @@ export async function getKbModelStatus({
       endpoint,
       errorMessage: error.message,
       kbState: KnowledgeBaseState.NOT_INSTALLED,
-      currentInferenceId,
+      currentInferenceId: inferenceId,
       concreteWriteIndex,
       isReIndexing,
     };
@@ -211,7 +206,7 @@ export async function getKbModelStatus({
     enabled,
     modelStats,
     kbState,
-    currentInferenceId,
+    currentInferenceId: inferenceId,
     concreteWriteIndex,
     isReIndexing,
   };
@@ -236,11 +231,17 @@ export async function waitForKbModel({
 
   return pRetry(
     async () => {
-      const { kbState } = await getKbModelStatus({ core, esClient, logger, config, inferenceId });
+      const { kbState, currentInferenceId } = await getKbModelStatus({
+        core,
+        esClient,
+        logger,
+        config,
+      });
 
-      if (kbState !== KnowledgeBaseState.READY) {
-        logger.debug('Knowledge base model is not yet ready. Retrying...');
-        throw new Error('Knowledge base model is not yet ready');
+      if (kbState !== KnowledgeBaseState.READY || currentInferenceId !== inferenceId) {
+        const message = `Knowledge base model is not yet ready. kbState = ${kbState}, currentInferenceId = ${currentInferenceId}`;
+        logger.debug(message);
+        throw new Error(message);
       }
     },
     { retries: 30, factor: 2, maxTimeout: 30_000 }

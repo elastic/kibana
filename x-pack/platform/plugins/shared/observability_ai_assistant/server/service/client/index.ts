@@ -70,7 +70,6 @@ import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { waitForKbModel, warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
-import { populateMissingSemanticTextFieldWithLock } from '../startup_migrations/populate_missing_semantic_text_fields';
 import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
@@ -710,12 +709,6 @@ export class ObservabilityAIAssistantClient {
           core,
           logger,
           esClient,
-        });
-        await populateMissingSemanticTextFieldWithLock({
-          core,
-          logger,
-          config: this.dependencies.config,
-          esClient: this.dependencies.esClient,
         });
       })
       .catch((e) => {
