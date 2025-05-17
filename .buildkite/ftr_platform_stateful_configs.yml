@@ -189,6 +189,7 @@ enabled:
   - x-pack/test/functional_with_es_ssl/apps/cases/group2/config.ts
   - x-pack/test/functional_with_es_ssl/apps/cases/basic/config.ts
   - x-pack/test/functional_with_es_ssl/apps/discover_ml_uptime/config.ts
+  - x-pack/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
   - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
   - x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
   - x-pack/test/functional/apps/advanced_settings/config.ts
@@ -267,7 +268,6 @@ enabled:
   - x-pack/test/functional_cloud/config.ts
   - x-pack/test/functional_cloud/saml.config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
-  - x-pack/test/functional_search/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
   - x-pack/test/plugin_api_integration/config.ts
