@@ -13,8 +13,8 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { generateAgent } from '@kbn/test-suites-xpack/fleet_api_integration/helpers';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
-import { generateAgent } from '../../../../fleet_api_integration/helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../helper';
 
