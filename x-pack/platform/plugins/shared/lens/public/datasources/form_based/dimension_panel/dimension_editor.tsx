@@ -171,7 +171,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       // resets the flag
       setHasOtherBucketToastFired(!hasOtherBucketToastFired);
     },
-    [layerId, props.notifications.toasts, state.layers, hasOtherBucketToastFired]
+    [layer, hasOtherBucketToastFired, props.notifications.toasts]
   );
 
   const fireOrResetRandomSamplingToast = useCallback(
@@ -193,7 +193,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       // reset the flag if the user switches to another supported operation
       setSamplingToastAsFired(!hasRandomSamplingToastFired);
     },
-    [hasRandomSamplingToastFired, layerId, props.notifications.toasts, state.layers]
+    [hasRandomSamplingToastFired, layer, props.notifications.toasts]
   );
 
   const fireOrResetRankingToast = useCallback(
@@ -211,7 +211,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       // reset the flag if the user switches to another supported operation
       setRankingToastAsFired(!hasRankingToastFired);
     },
-    [hasRankingToastFired, layerId, props.notifications.toasts, state.layers]
+    [hasRankingToastFired, layer, props.notifications.toasts]
   );
 
   const fireOrResetToastChecks = useCallback(
@@ -231,7 +231,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         | GenericIndexPatternColumn,
       options: { forceRender?: boolean } = {}
     ) => {
-      const layer = state.layers[layerId];
       if (!layer || !isFormBasedLayer(layer)) {
         return;
       }
@@ -283,7 +282,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         }
       );
     },
-    [columnId, fireOrResetToastChecks, layerId, setState, state.layers]
+    [columnId, fireOrResetToastChecks, layer, layerId, setState]
   );
 
   const incompleteInfo = (layer.incompleteColumns ?? {})[columnId];
@@ -311,7 +310,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       return prevLayer;
     }
     if (selectedColumn?.operationType !== staticValueOperationName) {
-      const layer = insertOrReplaceColumn({
+      const newLayer = insertOrReplaceColumn({
         layer: prevLayer,
         indexPattern: currentIndexPattern,
         columnId,
@@ -323,7 +322,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       if (value != null) {
         return updateDefaultLabels(
           updateColumnParam({
-            layer,
+            layer: newLayer,
             columnId,
             paramName: 'value',
             value: props.activeData?.[layerId]?.rows[0]?.[columnId],
@@ -331,7 +330,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           currentIndexPattern
         );
       }
-      return layer;
+      return newLayer;
     }
     return prevLayer;
   };
@@ -357,8 +356,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
           if (!prevLayer || !isFormBasedLayer(prevLayer)) {
             return prevState;
           }
-          const layer = setter(addStaticValueColumn(prevLayer) as FormBasedLayer);
-          return mergeLayer({ state: prevState, layerId, newLayer: layer });
+          const newLayer = setter(addStaticValueColumn(prevLayer) as FormBasedLayer);
+          return mergeLayer({ state: prevState, layerId, newLayer });
         },
         {
           isDimensionComplete: true,
@@ -432,7 +431,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const currentFieldIsInvalid = useMemo(
     () => fieldIsInvalid(layer, columnId, currentIndexPattern),
-    [state.layers, layerId, columnId, currentIndexPattern]
+    [layer, columnId, currentIndexPattern]
   );
 
   const shouldDisplayDots =
@@ -494,7 +493,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (!compatibleWithCurrentField) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
+            <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
               <span
                 css={css`
                   overflow: hidden;
@@ -524,7 +523,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (!compatibleWithSampling) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
+            <EuiFlexItem grow={false} css={{ marginRight: euiTheme.size.xs }}>
               {label}
             </EuiFlexItem>
             {shouldDisplayDots && (
@@ -773,7 +772,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         <>
           {selectedColumn.references.map((referenceId, index) => {
             const validation = selectedOperationDefinition.requiredReferences[index];
-            const layer = state.layers[layerId];
             if (!layer || !isFormBasedLayer(layer)) {
               return null;
             }
@@ -954,7 +952,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         })
       );
     },
-    [columnId, layerId, state.layers, updateLayer]
+    [columnId, layer, updateLayer]
   );
 
   const hasFormula =
@@ -1041,7 +1039,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             props.indexPatterns[layer.indexPatternId]
           )
       ),
-    [layerId, selectedColumn, props.indexPatterns, state.layers]
+    [selectedColumn, layer.columns, layer.indexPatternId, props.indexPatterns]
   );
 
   /**

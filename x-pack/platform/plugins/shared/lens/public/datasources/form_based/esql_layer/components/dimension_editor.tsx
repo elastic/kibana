@@ -19,7 +19,7 @@ import type { DatasourceDimensionEditorProps, DataType } from '../../../../types
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import type { CombinedFormBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
-import { isTextBasedLayer, TextBasedLayer } from '../types';
+import { TextBasedLayer } from '../types';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<CombinedFormBasedPrivateState> & {
@@ -32,16 +32,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
 
   const query = 'query' in layer ? layer.query : undefined;
   const { euiTheme } = useEuiTheme();
-  const {
-    isFullscreen,
-    columnId,
-    layerId,
-    state,
-    setState,
-    indexPatterns,
-    dateRange,
-    expressions,
-  } = props;
+  const { isFullscreen, columnId, layerId, setState, indexPatterns, dateRange, expressions } =
+    props;
 
   useEffect(() => {
     // in case the columns are not in the cache, I refetch them
@@ -92,7 +84,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const selectedField = useMemo(() => {
     const layerColumns = layer.columns;
     return layerColumns?.find((column) => column.columnId === props.columnId);
-  }, [props.columnId, props.layerId, props.state.layers]);
+  }, [layer.columns, props.columnId]);
 
   const updateLayer = useCallback(
     (newLayer: Partial<TextBasedLayer>) => {
@@ -113,7 +105,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         })
       );
     },
-    [columnId, layerId, state.layers, updateLayer]
+    [columnId, layer, updateLayer]
   );
 
   return (
