@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-plugin/server';
 import { Logger } from '@kbn/logging';
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
 import {
@@ -20,6 +19,7 @@ import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
 import { rangeQuery } from '@kbn/observability-utils-server/es/queries/range_query';
 import { chunk, isEmpty, isEqual } from 'lodash';
 import pLimit from 'p-limit';
+import { InferenceClient } from '@kbn/inference-common';
 import {
   RCA_PROMPT_DEPENDENCIES,
   RCA_PROMPT_ENTITIES,

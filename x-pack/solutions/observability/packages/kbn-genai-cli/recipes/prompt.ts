@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { ToolOptions, createPrompt } from '@kbn/inference-common';
-import { runRecipe } from '../utils/run_recipe';
+import { runRecipe } from '@kbn/inference-cli';
 
 /**
  * Simple example of how to use these recipes

@@ -19,7 +19,10 @@ import { type ESQLControlVariable } from '@kbn/esql-types';
 
 export const hasStartEndParams = (query: string) => /\?_tstart|\?_tend/i.test(query);
 
-export const getStartEndParams = (query: string, time?: TimeRange) => {
+export const getStartEndParams = (
+  query: string,
+  time?: TimeRange
+): Array<{ _tstart: string } | { _tend: string }> => {
   const startNamedParams = /\?_tstart/i.test(query);
   const endNamedParams = /\?_tend/i.test(query);
   if (time && (startNamedParams || endNamedParams)) {

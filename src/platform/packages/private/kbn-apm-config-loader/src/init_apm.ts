@@ -40,5 +40,7 @@ export const initApm = (
     });
   }
 
-  apm.start(apmConfig);
+  if (apmConfig.active) {
+    apm.start(apmConfig);
+  }
 };

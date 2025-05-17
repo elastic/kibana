@@ -27,7 +27,6 @@ export const toolCallSchema: Type<ToolCall[]> = schema.arrayOf(
 );
 
 export const messageOptionsSchema = schema.object({
-  system: schema.maybe(schema.string()),
   tools: schema.maybe(
     schema.recordOf(
       schema.string(),
@@ -65,33 +64,49 @@ export const chatCompleteBaseSchema = schema.object({
   ),
   temperature: schema.maybe(schema.number()),
   modelName: schema.maybe(schema.string()),
+  metadata: schema.maybe(
+    schema.object({
+      connectorTelemetry: schema.maybe(
+        schema.object({
+          pluginId: schema.maybe(schema.string()),
+          aggregateBy: schema.maybe(schema.string()),
+        })
+      ),
+      attributes: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    })
+  ),
+  functionCalling: schema.maybe(
+    schema.oneOf([schema.literal('auto'), schema.literal('native'), schema.literal('simulated')])
+  ),
+  invokeParameters: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
+
+const messageSchema = schema.oneOf([
+  schema.object({
+    role: schema.literal(MessageRole.Assistant),
+    content: schema.oneOf([schema.string(), schema.literal(null)]),
+    toolCalls: schema.maybe(toolCallSchema),
+  }),
+  schema.object({
+    role: schema.literal(MessageRole.User),
+    content: schema.string(),
+    name: schema.maybe(schema.string()),
+  }),
+  schema.object({
+    name: schema.string(),
+    role: schema.literal(MessageRole.Tool),
+    toolCallId: schema.string(),
+    response: schema.recordOf(schema.string(), schema.any()),
+    data: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  }),
+]);
 
 export const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.allOf([
   chatCompleteBaseSchema,
   messageOptionsSchema,
   schema.object({
-    messages: schema.arrayOf(
-      schema.oneOf([
-        schema.object({
-          role: schema.literal(MessageRole.Assistant),
-          content: schema.oneOf([schema.string(), schema.literal(null)]),
-          toolCalls: schema.maybe(toolCallSchema),
-        }),
-        schema.object({
-          role: schema.literal(MessageRole.User),
-          content: schema.string(),
-          name: schema.maybe(schema.string()),
-        }),
-        schema.object({
-          name: schema.string(),
-          role: schema.literal(MessageRole.Tool),
-          toolCallId: schema.string(),
-          response: schema.recordOf(schema.string(), schema.any()),
-          data: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-        }),
-      ])
-    ),
+    system: schema.maybe(schema.string()),
+    messages: schema.arrayOf(messageSchema),
   }),
 ]);
 
@@ -103,6 +118,16 @@ const promptSchema = schema.object({
       schema.allOf([
         messageOptionsSchema,
         schema.object({
+          system: schema.maybe(
+            schema.oneOf([
+              schema.string(),
+              schema.object({
+                mustache: schema.object({
+                  template: schema.string(),
+                }),
+              }),
+            ])
+          ),
           models: schema.maybe(
             schema.arrayOf(
               schema.object({
@@ -118,10 +143,16 @@ const promptSchema = schema.object({
                   schema.literal(ModelFamily.GPT),
                   schema.literal(ModelFamily.Gemini),
                 ]),
+                id: schema.maybe(schema.string()),
               })
             )
           ),
           template: schema.oneOf([
+            schema.object({
+              static: schema.object({
+                content: schema.string(),
+              }),
+            }),
             schema.object({
               mustache: schema.object({
                 template: schema.string(),
@@ -142,11 +173,13 @@ const promptSchema = schema.object({
             }),
           ]),
           temperature: schema.maybe(schema.number()),
+          invokeParameters: schema.maybe(schema.object({}, { unknowns: 'allow' })),
         }),
       ])
     ),
   }),
   input: schema.any(),
+  prevMessages: schema.maybe(schema.arrayOf(messageSchema)),
 });
 
 export const promptBodySchema: Type<PromptRequestBody> = schema.allOf([

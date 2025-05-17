@@ -14,20 +14,22 @@ import {
   getConnectorProvider,
   type ChatCompleteCompositeResponse,
   ToolOptions,
+  MessageRole,
 } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import { defer, from, identity, share, switchMap, throwError } from 'rxjs';
-import { withChatCompleteSpan } from '../tracing/with_chat_complete_span';
+import { withChatCompleteSpan } from '@kbn/inference-tracing';
+import { omit } from 'lodash';
 import { getInferenceAdapter } from './adapters';
 import {
   InferenceExecutor,
   chunksIntoMessage,
   getInferenceExecutor,
-  getRetryFilter,
   handleCancellation,
-  retryWithExponentialBackoff,
   streamToResponse,
 } from './utils';
+import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
+import { getRetryFilter } from '../../common/utils/error_retry_filter';
 
 interface CreateChatCompleteApiOptions {
   request: KibanaRequest;
@@ -68,7 +70,7 @@ export function createChatCompleteCallbackApi({
       switchMap((executor) => {
         const {
           system,
-          messages,
+          messages: givenMessages,
           functionCalling,
           maxRetries = 3,
           metadata,
@@ -77,7 +79,20 @@ export function createChatCompleteCallbackApi({
           temperature,
           toolChoice,
           tools,
+          invokeParameters,
         } = callback(executor);
+
+        const messages = givenMessages.map((message) => {
+          // remove empty toolCalls array, spec doesn't like it
+          if (
+            message.role === MessageRole.Assistant &&
+            message.toolCalls !== undefined &&
+            message.toolCalls.length === 0
+          ) {
+            return omit(message, 'toolCalls');
+          }
+          return message;
+        });
 
         const connector = executor.getConnector();
         const connectorType = connector.type;
@@ -113,6 +128,7 @@ export function createChatCompleteCallbackApi({
                 modelName,
                 abortSignal,
                 metadata,
+                invokeParameters,
               })
               .pipe(
                 chunksIntoMessage({

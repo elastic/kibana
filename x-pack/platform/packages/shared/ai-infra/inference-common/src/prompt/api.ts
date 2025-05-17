@@ -11,6 +11,7 @@ import {
   ChatCompleteOptions,
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
+  Message,
 } from '../chat_complete';
 import { Prompt, ToolOptionsOfPrompt } from './types';
 
@@ -41,6 +42,7 @@ export interface PromptOptions<TPrompt extends Prompt = Prompt>
   prompt: TPrompt;
   input: z.input<TPrompt['input']>;
   stream?: boolean;
+  prevMessages?: Message[];
 }
 
 /**

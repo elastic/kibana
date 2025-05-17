@@ -30,4 +30,5 @@ export enum ModelFamily {
 export interface Model {
   provider: ModelProvider;
   family: ModelFamily;
+  id?: string;
 }
