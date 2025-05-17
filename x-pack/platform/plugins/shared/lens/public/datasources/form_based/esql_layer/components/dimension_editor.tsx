@@ -19,7 +19,7 @@ import type { DatasourceDimensionEditorProps, DataType } from '../../../../types
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import type { CombinedFormBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
-import { isTextBasedLayer, TextBasedLayer } from '../types';
+import { TextBasedLayer } from '../types';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<CombinedFormBasedPrivateState> & {
