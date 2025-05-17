@@ -137,8 +137,9 @@ export function getExpressionForLayer(
 }
 
 export function toExpression(state: CombinedFormBasedPrivateState, layerId: string) {
-  if (state.layers[layerId] && isTextBasedLayer(state.layers[layerId])) {
-    return getExpressionForLayer(state.layers[layerId], layerId, state.indexPatternRefs ?? []);
+  const layer = state.layers[layerId];
+  if (layer && isTextBasedLayer(layer)) {
+    return getExpressionForLayer(layer, layerId, state.indexPatternRefs ?? []);
   }
 
   return null;

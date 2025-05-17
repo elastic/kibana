@@ -69,8 +69,7 @@ export function extractReferences({ layers }: CombinedFormBasedPrivateState) {
         name: getLayerReferenceName(layerId),
       });
     } else {
-      console.error('`Layer ${layerId} is not a persisted form-based layer`);');
-      debugger;
+      throw new Error('`Layer ${layerId} is not a persisted form-based layer`);');
     }
   });
   return { savedObjectReferences, state: persistableState };
@@ -89,7 +88,6 @@ export function injectReferences(
     if (isPersistedFormBasedLayer(persistedLayer)) {
       if (!indexPatternId) {
         throw new Error(`Missing index pattern reference for layer ${layerId}`);
-        debugger;
       }
       layers[layerId] = {
         ...persistedLayer,

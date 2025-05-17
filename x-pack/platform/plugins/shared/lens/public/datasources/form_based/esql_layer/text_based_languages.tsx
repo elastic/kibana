@@ -515,8 +515,8 @@ export function getTextBasedDatasource({
         <TextBasedDimensionEditor
           {...rest}
           state={{ ...state, currentIndexPatternId: '' }}
-          setState={(state) => {
-            setState(state as TextBasedPrivateState);
+          setState={(s) => {
+            setState(s as TextBasedPrivateState);
           }}
           expressions={expressions}
         />

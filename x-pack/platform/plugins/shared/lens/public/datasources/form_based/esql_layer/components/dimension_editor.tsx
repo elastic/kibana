@@ -29,10 +29,8 @@ export type TextBasedDimensionEditorProps =
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
   const layer = props.state.layers[props.layerId];
-  if (!layer || !isTextBasedLayer(layer)) {
-    return null;
-  }
-  const query = layer.query;
+  
+  const query = 'query' in layer ? layer.query : undefined;
   const { euiTheme } = useEuiTheme();
   const {
     isFullscreen,
@@ -90,6 +88,10 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     props.expressions,
     query,
   ]);
+
+  if (!layer || !isTextBasedLayer(layer)) {
+    return null;
+  }
 
   const selectedField = useMemo(() => {
     const layerColumns = layer.columns;

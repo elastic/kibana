@@ -458,7 +458,11 @@ export function getFormBasedDatasource({
 
       // delete layers linked to this layer
       Object.keys(newLayers).forEach((id) => {
-        const linkedLayers = 'linkToLayers' in newLayers[id] ? newLayers[id].linkToLayers : [];
+        const layer = newLayers[id];
+        if (!layer || !isFormBasedLayer(layer)) {
+          return;
+        }
+        const linkedLayers = 'linkToLayers' in layer ? layer.linkToLayers : [];
         if (linkedLayers && linkedLayers.includes(layerId)) {
           delete newLayers[id];
           removedLayerIds.push(id);
@@ -480,15 +484,30 @@ export function getFormBasedDatasource({
       const removedLayerIds: string[] = [];
       // delete layers linked to this layer
       Object.keys(newLayers).forEach((id) => {
-        const linkedLayers = 'linkToLayers' in newLayers[id] ? newLayers[id].linkToLayers : [];
+        const layer = newLayers[id];
+        if (!layer || !isFormBasedLayer(layer)) {
+          return;
+        }
+        const linkedLayers = 'linkToLayers' in layer ? layer.linkToLayers : [];
         if (linkedLayers && linkedLayers.includes(layerId)) {
           delete newLayers[id];
           removedLayerIds.push(id);
         }
       });
 
+      const layer = newLayers[layerId];
+      if (!layer || !isFormBasedLayer(layer)) {
+        return {
+          removedLayerIds,
+          newState: {
+            ...state,
+            layers: newLayers,
+          },
+        };
+      }
+
       const linkedLayers =
-        'linkToLayers' in newLayers[layerId] ? newLayers[layerId].linkToLayers : [];
+        'linkToLayers' in layer ? layer.linkToLayers : [];
       return {
         removedLayerIds,
         newState: {
@@ -1101,7 +1120,7 @@ export function getFormBasedDatasource({
       }
 
       return isDraggedDataViewField(draggedField)
-        ? (getDatasourceSuggestionsForField(
+        ? getDatasourceSuggestionsForField(
             state,
             draggedField.indexPatternId,
             draggedField.field,

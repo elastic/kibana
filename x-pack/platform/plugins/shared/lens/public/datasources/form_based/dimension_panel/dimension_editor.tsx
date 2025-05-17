@@ -122,10 +122,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const [temporaryState, setTemporaryState] = useState<TemporaryState>('none');
 
-  const layer = state.layers[layerId];
-  if (!layer || !isFormBasedLayer(layer)) {
-    return null;
-  }
+  const layer = state.layers[layerId] as FormBasedLayer;
+
 
   // If a layer has sampling disabled, assume the toast has already fired in the past
   const [hasRandomSamplingToastFired, setSamplingToastAsFired] = useState(
@@ -141,6 +139,20 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
+
+  const helpPopoverContainer = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    return () => {
+      if (helpPopoverContainer.current) {
+        ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
+        document.body.removeChild(helpPopoverContainer.current);
+      }
+    };
+  }, []);
+
+  if (!layer || !isFormBasedLayer(layer)) {
+    return null;
+  }
 
   const updateLayer = useCallback(
     (newLayer: Partial<FormBasedLayer>) =>
@@ -384,16 +396,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
       })
       .map((def) => def.type);
   }, [fieldByOperation, operationWithoutField]);
-
-  const helpPopoverContainer = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    return () => {
-      if (helpPopoverContainer.current) {
-        ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
-        document.body.removeChild(helpPopoverContainer.current);
-      }
-    };
-  }, []);
 
   const currentField =
     selectedColumn &&

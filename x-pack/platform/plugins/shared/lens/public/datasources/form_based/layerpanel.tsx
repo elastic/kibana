@@ -29,11 +29,12 @@ export function LayerPanel({
 }: FormBasedLayerPanelProps) {
   const layer = state.layers[layerId];
 
+
+  const { euiTheme } = useEuiTheme();
+
   if (!layer || !isFormBasedLayer(layer)) {
     return null;
   }
-
-  const { euiTheme } = useEuiTheme();
 
   const indexPattern = dataViews.indexPatterns[layer.indexPatternId];
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
