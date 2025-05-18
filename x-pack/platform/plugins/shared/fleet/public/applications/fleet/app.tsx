@@ -201,7 +201,7 @@ export const FleetAppContext: React.FC<{
     const XXL_BREAKPOINT = 1600;
     const darkModeObservable = useObservable(startServices.theme.theme$);
     const isDarkMode = darkModeObservable && darkModeObservable.darkMode;
-
+    console.log('isDarkMode', isDarkMode);
     return (
       <KibanaRenderContextProvider
         {...startServices}
@@ -222,7 +222,7 @@ export const FleetAppContext: React.FC<{
               <KibanaVersionContext.Provider value={kibanaVersion}>
                 {/* This should be removed since theme is passed to `KibanaRenderContextProvider`,
                 however, removing this breaks usages of `props.theme.eui` in styled components */}
-                <EuiThemeProvider darkMode={isDarkMode}>
+                <EuiThemeProvider darkMode={true}>
                   <QueryClientProvider client={queryClient}>
                     <ReactQueryDevtools initialIsOpen={false} />
                     <UIExtensionsContext.Provider value={extensions}>

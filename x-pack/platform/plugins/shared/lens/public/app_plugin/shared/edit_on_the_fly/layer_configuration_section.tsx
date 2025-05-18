@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, euiThemeCssVariables, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
@@ -88,7 +88,7 @@ export function LayerConfiguration({
   return (
     <div
       css={css`
-        padding: ${hasPadding ? euiTheme.size.s : 0};
+        padding: ${hasPadding ? euiThemeCssVariables.size.s : 0};
       `}
     >
       <EuiSpacer size="xs" />

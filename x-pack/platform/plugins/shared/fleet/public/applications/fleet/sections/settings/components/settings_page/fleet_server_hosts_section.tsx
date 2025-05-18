@@ -7,12 +7,13 @@
 
 import React from 'react';
 
-import { EuiTitle, EuiLink, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
+import { EuiTitle, EuiLink, EuiText, EuiSpacer, EuiButtonEmpty, useEuiTheme, euiThemeCssVariables } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FleetServerHost } from '../../../../types';
 import { useAuthz, useLink, useStartServices } from '../../../../hooks';
 import { FleetServerHostsTable } from '../fleet_server_hosts_table';
+import { css } from '@emotion/react';
 
 export interface FleetServerHostsSectionProps {
   fleetServerHosts: FleetServerHost[];
@@ -26,11 +27,21 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
   const authz = useAuthz();
   const { docLinks } = useStartServices();
   const { getHref } = useLink();
+  const {euiTheme} = useEuiTheme();
+
+
+  console.log(euiThemeCssVariables);
 
   return (
     <>
       <EuiTitle size="s">
-        <h4 data-test-subj="fleetServerHostHeader">
+        <h4 data-test-subj="fleetServerHostHeader" 
+        css={css`
+          margin-bottom: ${euiThemeCssVariables.size.s}; 
+          background: red;
+          padding: ${euiThemeCssVariables.size.l}
+          `}
+        >
           <FormattedMessage
             id="xpack.fleet.settings.fleetServerHostSectionTitle"
             defaultMessage="Fleet server hosts"
