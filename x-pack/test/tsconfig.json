@@ -180,6 +180,7 @@
     "@kbn/alerts-ui-shared",
     "@kbn/test-suites-xpack-observability",
     "@kbn/test-suites-xpack-platform",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
+    "@kbn/test-suites-xpack-security"
   ]
 }

@@ -22,14 +22,12 @@
     "@kbn/expect",
     "@kbn/core-http-common",
     "@kbn/scout-info",
-    "@kbn/security-plugin",
     "@kbn/ftr-common-functional-services",
-    "@kbn/fleet-plugin",
-    "@kbn/management-settings-ids",
-    "@kbn/server-route-repository",
     "@kbn/test-suites-xpack-platform",
     "@kbn/tooling-log",
-    "@kbn/utility-types",
-    "@kbn/std",
+    "@kbn/cloud-security-posture-plugin",
+    "@kbn/cloud-security-posture-common",
+    "@kbn/test-suites-xpack",
+    "@kbn/security-solution-plugin",
   ]
 }
