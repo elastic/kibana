@@ -170,7 +170,6 @@ function useDebouncedInputforParam<T extends FormatParamsKeys>(
 
 export function FormatSelector(props: FormatSelectorProps) {
   const { uiSettings } = useKibana<LensAppServices>().services;
-  const { euiTheme } = useEuiTheme();
   const { selectedColumn, onChange, docLinks } = props;
   const currentFormat = isColumnFormatted(selectedColumn)
     ? selectedColumn.params?.format
@@ -348,7 +347,7 @@ export function FormatSelector(props: FormatSelectorProps) {
                       label={
                         <EuiFormLabel
                           css={css`
-                            font-weight: ${euiTheme.font.weight.regular};
+                            font-weight: ${euiThemeCssVariables.font.weight.regular};
                           `}
                         >
                           {compactLabel}

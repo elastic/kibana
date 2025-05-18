@@ -10,9 +10,9 @@ import {
   EuiToolTip,
   EuiHorizontalRule,
   EuiTitle,
-  useEuiTheme,
   EuiButtonEmpty,
   useEuiFontSize,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +22,6 @@ import type { UserMessage } from '../../types';
 import { getLongMessage } from '../../user_messages_utils';
 
 export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }) => {
-  const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
@@ -58,19 +57,19 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
             css={css`
               color: transparent;
               font-size: ${xsFontSize};
-              height: ${euiTheme.size.l} !important;
-              padding-inline: ${euiTheme.size.xs};
+              height: ${euiThemeCssVariables.size.l} !important;
+              padding-inline: ${euiThemeCssVariables.size.xs};
               .euiButtonEmpty__content {
-                gap: ${euiTheme.size.xs};
+                gap: ${euiThemeCssVariables.size.xs};
               }
               &:hover {
-                color: ${euiTheme.colors.textParagraph};
+                color: ${euiThemeCssVariables.colors.textParagraph};
               }
               // Make the visualization modifiers icon appear only on panel hover
               .embPanel__content:hover & {
-                background: ${euiTheme.colors.backgroundBasePlain};
-                transition: color ${euiTheme.animation.slow}, background ${euiTheme.animation.slow};
-                color: ${euiTheme.colors.textParagraph};
+                background: ${euiThemeCssVariables.colors.backgroundBasePlain};
+                transition: color ${euiThemeCssVariables.animation.slow}, background ${euiThemeCssVariables.animation.slow};
+                color: ${euiThemeCssVariables.colors.textParagraph};
               }
             `}
             iconType="wrench"
@@ -100,10 +99,10 @@ export const EmbeddableFeatureBadge = ({ messages }: { messages: UserMessage[] }
               )}
               <aside
                 css={css`
-                  padding: ${euiTheme.size.base};
+                  padding: ${euiThemeCssVariables.size.base};
                 `}
               >
-                <EuiTitle size="xxs" css={css`color=${euiTheme.colors.title}`}>
+                <EuiTitle size="xxs" css={css`color=${euiThemeCssVariables.colors.title}`}>
                   <h3>{shortMessage}</h3>
                 </EuiTitle>
                 <ul

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme, EuiIconTip } from '@elastic/eui';
+import { useEuiTheme, EuiIconTip, euiThemeCssVariables } from '@elastic/eui';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -107,13 +107,13 @@ function AnnotationLayerHeaderContent({
   layerId,
   onChangeIndexPattern,
 }: VisualizationLayerHeaderContentProps<State>) {
-  const { euiTheme } = useEuiTheme();
   const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
     defaultMessage: 'Data view not found',
   });
   const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[layerIndex] as XYAnnotationLayerConfig;
   const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
+  const {euiTheme} = useEuiTheme();
 
   return (
     <ChangeIndexPattern

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { euiFontSize, euiTextBreakWord, UseEuiTheme } from '@elastic/eui';
+import { euiFontSize, euiTextBreakWord, euiThemeCssVariables, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const draggablePopoverButtonStyles = (euiThemeContext: UseEuiTheme) => {
   return css`
     ${euiTextBreakWord()};
     ${euiFontSize(euiThemeContext, 's')};
-    min-height: ${euiThemeContext.euiTheme.size.xl};
+    min-height: ${euiThemeCssVariables.size.xl};
     width: 100%;
   `;
 };

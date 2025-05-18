@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  useEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
@@ -31,7 +31,6 @@ export function InfoBadge({
   children?: React.ReactNode;
   'data-test-subj-prefix': string;
 }) {
-  const { euiTheme } = useEuiTheme();
   const hasColor = Boolean(palette);
   const hasSingleColor = palette && palette.length === 1;
   const hasMultipleColors = palette && palette.length > 1;
@@ -41,7 +40,7 @@ export function InfoBadge({
       key={`${title}-${dataView}-${index}`}
       data-test-subj={`${dataTestSubjPrefix}-${index}`}
       css={css`
-        margin: ${euiTheme.size.base} 0 0;
+        margin: ${euiThemeCssVariables.size.base} 0 0;
       `}
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -64,10 +63,10 @@ export function InfoBadge({
       {hasMultipleColors ? (
         <div
           css={css`
-            margin-top: ${euiTheme.size.xs};
+            margin-top: ${euiThemeCssVariables.size.xs};
             overflow-y: hidden;
-            height: ${euiTheme.size.xs};
-            margin-left: ${euiTheme.size.l};
+            height: ${euiThemeCssVariables.size.xs};
+            margin-left: ${euiThemeCssVariables.size.l};
           `}
         >
           <EuiColorPaletteDisplay

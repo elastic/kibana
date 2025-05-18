@@ -6,19 +6,18 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiProgress, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiProgress, EuiFlexItem, EuiLoadingChart, euiThemeCssVariables } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const ChartLoadingProgress = ({ hasTopMargin = false }: { hasTopMargin?: boolean }) => {
-  const { euiTheme } = useEuiTheme();
   return (
     <EuiProgress
       size="xs"
       color="accent"
       position="absolute"
       css={css`
-        top: ${hasTopMargin ? euiTheme.size.l : 0};
-        z-index: ${Number(euiTheme.levels.header) - 1};
+        top: ${hasTopMargin ? euiThemeCssVariables.size.l : 0};
+        z-index: ${Number(euiThemeCssVariables.levels.header) - 1};
       `}
     />
   );

@@ -14,6 +14,7 @@ import {
   type UseEuiTheme,
   euiFontSize,
   useEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -96,21 +97,20 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
 };
 
 const toolbarButtonStyles = (euiThemeContext: UseEuiTheme) => {
-  const { euiTheme } = euiThemeContext;
   return css`
     &.kbnToolbarButton {
-      line-height: ${euiTheme.size.xxl}; // Keeps alignment of text and chart icon
+      line-height: ${euiThemeCssVariables.size.xxl}; // Keeps alignment of text and chart icon
 
       // todo: once issue https://github.com/elastic/eui/issues/4730 is merged, this code might be safe to remove
       // Some toolbar buttons are just icons, but EuiButton comes with margin and min-width that need to be removed
       min-width: 0;
-      border-width: ${euiTheme.border.width.thin};
+      border-width: ${euiThemeCssVariables.border.width.thin};
       border-style: solid;
-      border-color: ${euiTheme.border.color}; // Lighten the border color for all states
+      border-color: ${euiThemeCssVariables.border.color}; // Lighten the border color for all states
 
       // Override background color for non-disabled buttons
       &:not(:disabled) {
-        background-color: ${euiTheme.colors.backgroundBasePlain};
+        background-color: ${euiThemeCssVariables.colors.backgroundBasePlain};
       }
 
       &.kbnToolbarButton__text > svg {
@@ -148,11 +148,11 @@ const toolbarButtonStyles = (euiThemeContext: UseEuiTheme) => {
     }
 
     &.kbnToolbarButton--bold {
-      font-weight: ${euiTheme.font.weight.bold};
+      font-weight: ${euiThemeCssVariables.font.weight.bold};
     }
 
     &.kbnToolbarButton--normal {
-      font-weight: ${euiTheme.font.weight.regular};
+      font-weight: ${euiThemeCssVariables.font.weight.regular};
     }
 
     &.kbnToolbarButton--s {

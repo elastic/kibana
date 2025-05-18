@@ -15,6 +15,7 @@ import {
   useEuiTheme,
   euiBreakpoint,
   type UseEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -121,13 +122,13 @@ export function FrameLayout(props: FrameLayoutProps) {
                 // Leave out bottom padding so the suggestions scrollbar stays flush to window edge
                 // Leave out left padding so the left sidebar's focus states are visible outside of content bounds
                 // This also means needing to add same amount of margin to page content and suggestion items
-                padding: ${euiTheme.size.base} ${euiTheme.size.base} 0;
+                padding: ${euiThemeCssVariables.size.base} ${euiThemeCssVariables.size.base} 0;
                 position: relative;
                 z-index: 1;
-                border-left: ${euiTheme.border.thin};
-                border-right: ${euiTheme.border.thin};
+                border-left: ${euiThemeCssVariables.border.thin};
+                border-right: ${euiThemeCssVariables.border.thin};
                 &:first-child {
-                  padding-left: ${euiTheme.size.base};
+                  padding-left: ${euiThemeCssVariables.size.base};
                 }
                 ${isFullscreen &&
                 `

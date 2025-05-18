@@ -18,7 +18,7 @@ import {
   htmlIdGenerator,
   EuiButtonGroup,
   EuiText,
-  useEuiTheme,
+  euiThemeCssVariables,
   EuiTitle,
   EuiTextColor,
 } from '@elastic/eui';
@@ -707,8 +707,6 @@ The top values of a specified field ranked by the chosen metric.
       ? currentColumn.params.secondaryFields.length
       : 0;
 
-    const { euiTheme } = useEuiTheme();
-
     return (
       <>
         <ValuesInput
@@ -1010,14 +1008,14 @@ The top values of a specified field ranked by the chosen metric.
             <EuiSpacer size="m" />
             <EuiAccordion
               css={css`
-                color: ${euiTheme.colors.primary};
+                color: ${euiThemeCssVariables.colors.primary};
               `}
               id="lnsTermsAdvanced"
               arrowProps={{ color: 'primary' }}
               buttonContent={
                 <EuiTitle size="xxs">
                   <h5>
-                    <EuiTextColor color={euiTheme.colors.primary}>
+                    <EuiTextColor color={euiThemeCssVariables.colors.primary}>
                       {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
                         defaultMessage: 'Advanced',
                       })}

@@ -14,8 +14,8 @@ import {
   euiPaletteColorBlind,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
   EuiColorPalettePicker,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { LayoutDirection } from '@elastic/charts';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -809,7 +809,6 @@ export function DimensionEditorAdditionalSection({
   accessor,
   frame,
 }: VisualizationDimensionEditorProps<MetricVisualizationState>) {
-  const { euiTheme } = useEuiTheme();
 
   const { isNumeric: isMetricNumeric } = getAccessorType(datasource, accessor);
   if (accessor !== state.metricAccessor || !isMetricNumeric) {
@@ -869,7 +868,7 @@ export function DimensionEditorAdditionalSection({
       <EuiText
         size="s"
         css={css`
-          margin-bottom: ${euiTheme.size.base};
+          margin-bottom: ${euiThemeCssVariables.size.base};
         `}
       >
         <h4>

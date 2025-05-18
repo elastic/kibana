@@ -119,7 +119,7 @@ export const FlyoutWrapper = ({
           // styles needed to display extra drop targets that are outside of the config panel main area
           overflow-y: auto;
           padding-left: ${euiThemeVars.euiFormMaxWidth};
-          margin-left: -${euiThemeVars.euiFormMaxWidth};
+          margin-left: calc(-1 * ${euiThemeVars.euiFormMaxWidth});
           pointer-events: none;
           .euiFlyoutBody__overflow {
             transform: initial;

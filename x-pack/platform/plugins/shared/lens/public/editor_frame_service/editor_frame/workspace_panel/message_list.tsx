@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   type UseEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, SerializedStyles } from '@emotion/react';
@@ -144,13 +145,13 @@ const workspaceWarningListStyles = {
     max-height: 320px;
     width: 256px;
   `,
-  item: ({ euiTheme }: UseEuiTheme) => `
+  item: css`
     & + & {
-      border-top: 1px solid ${euiTheme.colors.lightShade};
+      border-top: 1px solid ${euiThemeCssVariables.colors.lightShade};
     }
   `,
-  textItem: ({ euiTheme }: UseEuiTheme) => `
-     padding: ${euiTheme.size.base}
+  textItem: css`
+     padding: ${euiThemeCssVariables.size.base}
   `,
   description: css`
     overflow-wrap: break-word;

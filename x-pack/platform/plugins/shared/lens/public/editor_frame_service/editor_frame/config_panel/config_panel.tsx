@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, memo, useCallback } from 'react';
-import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
+import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll, euiThemeCssVariables } from '@elastic/eui';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
@@ -64,7 +64,6 @@ export function LayerPanels(
   );
 
   const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
 
   const dispatchLens = useLensDispatch();
 
@@ -259,12 +258,12 @@ export function LayerPanels(
     <EuiForm
       css={css`
         .lnsApp & {
-          padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
-            calc(400px + ${euiTheme.size.base});
+          padding: ${euiThemeCssVariables.size.base} ${euiThemeCssVariables.size.base} ${euiThemeCssVariables.size.xl}
+            calc(400px + ${euiThemeCssVariables.size.base});
           margin-left: -400px;
           ${useEuiOverflowScroll('y')}
           ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
-            padding-left: ${euiTheme.size.base};
+            padding-left: ${euiThemeCssVariables.size.base};
             margin-left: 0;
           }
         }

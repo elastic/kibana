@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import { euiThemeCssVariables } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const operationsButtonStyles = ({ euiTheme }: UseEuiTheme) => {
-  return css`
+export const operationsButtonStyles = css`
     > button {
       padding-top: 0;
       padding-bottom: 0;
-      min-block-size: ${euiTheme.size.l};
+      min-block-size: ${euiThemeCssVariables.size.l};
     }
   `;
-};

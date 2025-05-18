@@ -18,8 +18,8 @@ import {
   EuiFocusTrap,
   EuiOutsideClickDetector,
   EuiPortal,
-  type UseEuiTheme,
   useEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { flyoutContainerStyles } from './flyout.styles';
@@ -79,12 +79,12 @@ export function SettingWithSiblingFlyout({
                 data-test-subj={dataTestSubj}
                 css={[
                   flyoutContainerStyles(euiThemeContext),
-                  siblingflyoutContainerStyles.self(euiThemeContext),
+                  siblingflyoutContainerStyles.self,
                 ]}
               >
                 <EuiFlyoutHeader
                   hasBorder
-                  css={siblingflyoutContainerStyles.header(euiThemeContext)}
+                  css={siblingflyoutContainerStyles.header}
                 >
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
@@ -118,7 +118,7 @@ export function SettingWithSiblingFlyout({
                   </div>
                 )}
 
-                <EuiFlyoutFooter css={siblingflyoutContainerStyles.footer(euiThemeContext)}>
+                <EuiFlyoutFooter css={siblingflyoutContainerStyles.footer}>
                   <EuiButtonEmpty flush="left" size="s" iconType="sortLeft" onClick={closeFlyout}>
                     {i18n.translate('xpack.lens.settingWithSiblingFlyout.back', {
                       defaultMessage: 'Back',
@@ -135,19 +135,19 @@ export function SettingWithSiblingFlyout({
 }
 
 const siblingflyoutContainerStyles = {
-  self: ({ euiTheme }: UseEuiTheme) => css`
+  self: css`
     position: absolute;
     right: 0;
     left: 0;
     top: 0;
     bottom: 0;
     // making just a bit higher than the dimension flyout to stack on top of it
-    z-index: ${euiTheme.levels.menu};
+    z-index: ${euiThemeCssVariables.levels.menu};
   `,
-  header: ({ euiTheme }: UseEuiTheme) => css`
-    padding: ${euiTheme.size.base};
+  header: css`
+    padding: ${euiThemeCssVariables.size.base};
   `,
-  footer: ({ euiTheme }: UseEuiTheme) => css`
-    padding: ${euiTheme.size.base};
+  footer: css`
+    padding: ${euiThemeCssVariables.size.base};
   `,
 };

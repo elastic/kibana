@@ -102,7 +102,6 @@ export function FormBasedDataPanel({
   const { indexPatterns, indexPatternRefs } = frame.dataViews;
   const { currentIndexPatternId } = state;
 
-  const euiThemeContext = useEuiTheme();
   const activeIndexPatterns = useMemo(() => {
     return uniq(
       (
@@ -119,7 +118,7 @@ export function FormBasedDataPanel({
       {Object.keys(indexPatterns).length === 0 && indexPatternRefs.length === 0 ? (
         <EuiFlexGroup
           gutterSize="m"
-          css={dataPanelStyles(euiThemeContext)}
+          css={dataPanelStyles}
           direction="column"
           responsive={false}
         >
@@ -402,7 +401,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
 
   return (
     <FieldList
-      css={dataPanelStyles(euiThemeContext)}
+      css={dataPanelStyles}
       isProcessing={isProcessing}
       prepend={<FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsIndexPattern" />}
     >

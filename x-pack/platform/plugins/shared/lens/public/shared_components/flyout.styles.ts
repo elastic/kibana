@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseEuiTheme, euiShadow } from '@elastic/eui';
+import { UseEuiTheme, euiShadow, euiThemeCssVariables } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 
 const flyoutOpenCloseAnimation = keyframes`
@@ -20,26 +20,26 @@ const flyoutOpenCloseAnimation = keyframes`
 `;
 
 export const flyoutContainerStyles = (euiThemeContext: UseEuiTheme) => css`
-  border-left: ${euiThemeContext.euiTheme.border.thin};
+  border-left: ${euiThemeCssVariables.border.thin};
   ${euiShadow(euiThemeContext, 'xl')};
   position: fixed;
   top: 0;
   bottom: 0;
   right: 0;
   height: 100%;
-  z-index: ${euiThemeContext.euiTheme.levels.flyout};
-  background: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+  z-index: ${euiThemeCssVariables.levels.flyout};
+  background: ${euiThemeCssVariables.colors.backgroundBasePlain};
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  animation: ${flyoutOpenCloseAnimation} ${euiThemeContext.euiTheme.animation.normal}
-    ${euiThemeContext.euiTheme.animation.resistance};
+  animation: ${flyoutOpenCloseAnimation} ${euiThemeCssVariables.animation.normal}
+    ${euiThemeCssVariables.animation.resistance};
   .lnsIndexPatternDimensionEditor--padded {
-    padding: ${euiThemeContext.euiTheme.size.base};
+    padding: ${euiThemeCssVariables.size.base};
   }
   .lnsIndexPatternDimensionEditor--collapseNext {
-    margin-bottom: -${euiThemeContext.euiTheme.size.l};
-    border-top: ${euiThemeContext.euiTheme.border.thin};
+    margin-bottom: calc(-${euiThemeCssVariables.size.l});
+    border-top: ${euiThemeCssVariables.border.thin};
     margin-top: 0 !important;
   }
 `;

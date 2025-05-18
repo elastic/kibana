@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton, useEuiTheme } from '@elastic/eui';
+import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton, useEuiTheme, euiThemeCssVariables } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -120,9 +120,6 @@ export function WorkspacePanelWrapper({
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
 
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
-
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
 
@@ -176,13 +173,13 @@ export function WorkspacePanelWrapper({
             gutterSize="s"
             direction="row"
             css={css`
-              margin-bottom: ${euiTheme.size.xs};
+              margin-bottom: ${euiThemeCssVariables.size.xs};
               ${isFullscreen &&
               `
-                background-color: ${euiTheme.colors.emptyShade};
+                background-color: ${euiThemeCssVariables.colors.emptyShade};
                 justify-content: flex-end;
                 margin-bottom: 0;
-                padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
+                padding: ${euiThemeCssVariables.size.s} ${euiThemeCssVariables.size.s} 0;
               `}
             `}
             responsive={false}
@@ -243,7 +240,7 @@ export function WorkspacePanelWrapper({
         className={classNames('lnsWorkspacePanelWrapper stretch-for-sharing')}
         css={css`
           height: 100%;
-          margin-bottom: ${euiTheme.size.base};
+          margin-bottom: ${euiThemeCssVariables.size.base};
           display: flex;
           flex-direction: column;
           position: relative; // For positioning the dnd overlay
@@ -260,7 +257,7 @@ export function WorkspacePanelWrapper({
           `
             margin-bottom: 0; 
             .lnsWorkspacePanelWrapper__content {
-              padding: ${euiTheme.size.s}
+              padding: ${euiThemeCssVariables.size.s}
             }
           `}
         `}

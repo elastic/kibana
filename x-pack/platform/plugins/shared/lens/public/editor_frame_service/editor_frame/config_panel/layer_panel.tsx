@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiIconTip,
   useEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -367,7 +368,7 @@ export function LayerPanel(props: LayerPanelProps) {
         tabIndex={-1}
         ref={registerLayerRef}
         css={css`
-          margin-bottom: ${euiTheme.size.base};
+          margin-bottom: ${euiThemeCssVariables.size.base};
           // disable focus ring for mouse clicks, leave it for keyboard users
           &:focus:not(:focus-visible) {
             animation: none !important; // sass-lint:disable-line no-important
@@ -379,8 +380,8 @@ export function LayerPanel(props: LayerPanelProps) {
           <header
             className="lnsLayerPanel__layerHeader"
             css={css`
-              padding: ${euiTheme.size.base};
-              border-bottom: ${euiTheme.border.thin};
+              padding: ${euiThemeCssVariables.size.base};
+              border-bottom: ${euiThemeCssVariables.border.thin};
             `}
           >
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
@@ -503,15 +504,15 @@ export function LayerPanel(props: LayerPanelProps) {
               return (
                 <EuiFormRow
                   css={css`
-                    padding: ${euiTheme.size.base};
+                    padding: ${euiThemeCssVariables.size.base};
                     &:last-child {
-                      border-radius: 0 0 ${euiTheme.border.radius.medium}
-                        ${euiTheme.border.radius.medium};
+                      border-radius: 0 0 ${euiThemeCssVariables.border.radius.medium}
+                        ${euiThemeCssVariables.border.radius.medium};
                     }
 
                     // Add border to the top of the next same panel
                     & + & {
-                      border-top: ${euiTheme.border.thin};
+                      border-top: ${euiThemeCssVariables.border.thin};
                       margin-top: 0;
                     }
 
@@ -523,7 +524,7 @@ export function LayerPanel(props: LayerPanelProps) {
                     &,
                     .euiFormRow__fieldWrapper {
                       & > * + * {
-                        margin-top: ${euiTheme.size.s};
+                        margin-top: ${euiThemeCssVariables.size.s};
                       }
                     }
                   `}
@@ -567,8 +568,8 @@ export function LayerPanel(props: LayerPanelProps) {
                       <ReorderProvider
                         dataTestSubj="lnsDragDrop"
                         css={css`
-                          margin: -${euiTheme.size.xs} -${euiTheme.size.base};
-                          padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+                          margin: calc(${euiThemeCssVariables.size.xs} * -1) calc(${euiThemeCssVariables.size.base} * -1);
+                          padding: ${euiThemeCssVariables.size.xs} ${euiThemeCssVariables.size.base};
                         `}
                       >
                         {group.accessors.map((accessorConfig, accessorIndex) => {
@@ -838,7 +839,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 <>
                   <div
                     css={css`
-                      padding: ${euiTheme.size.base};
+                      padding: ${euiThemeCssVariables.size.base};
                     `}
                   >
                     <activeVisualization.DimensionEditorComponent

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiTextColor } from '@elastic/eui';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiTextColor, euiThemeCssVariables } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { ToolbarButton, ToolbarButtonProps } from './toolbar_button';
@@ -28,7 +28,6 @@ export type ChangeIndexPatternTriggerProps = ToolbarButtonProps &
   };
 
 function TriggerLabel({ label, extraIcons }: TriggerLabelProps) {
-  const { euiTheme } = useEuiTheme();
 
   if (!extraIcons?.length) {
     return <>{label}</>;
@@ -66,7 +65,7 @@ function TriggerLabel({ label, extraIcons }: TriggerLabelProps) {
               <EuiFlexItem grow={false}>{icon.component}</EuiFlexItem>
               {icon.value ? (
                 <EuiFlexItem grow={false}>
-                  <EuiTextColor color={euiTheme.colors.disabledText}>{icon.value}</EuiTextColor>
+                  <EuiTextColor color={euiThemeCssVariables.colors.disabledText}>{icon.value}</EuiTextColor>
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>

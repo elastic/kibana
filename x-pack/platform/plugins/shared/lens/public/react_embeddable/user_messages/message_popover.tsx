@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiTheme, useEuiFontSize } from '@elastic/eui';
+import {  useEuiFontSize, euiThemeCssVariables } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import React from 'react';
@@ -13,7 +13,6 @@ import { MessageList } from '../../editor_frame_service/editor_frame/workspace_p
 import { UserMessage } from '../../types';
 
 export const MessagesPopover = ({ messages }: { messages: UserMessage[] }) => {
-  const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   if (!messages.length) {
@@ -24,11 +23,11 @@ export const MessagesPopover = ({ messages }: { messages: UserMessage[] }) => {
     <MessageList
       messages={messages}
       customButtonStyles={css`
-        block-size: ${euiTheme.size.l};
+        block-size: ${euiThemeCssVariables.size.l};
         font-size: ${xsFontSize};
-        padding: 0 ${euiTheme.size.xs};
+        padding: 0 ${euiThemeCssVariables.size.xs};
         & > * {
-          gap: ${euiTheme.size.xs};
+          gap: ${euiThemeCssVariables.size.xs};
         }
       `}
     />

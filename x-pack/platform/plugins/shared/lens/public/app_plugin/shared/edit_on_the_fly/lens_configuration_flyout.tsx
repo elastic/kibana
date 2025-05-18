@@ -346,7 +346,7 @@ export function LensEditConfigurationFlyout({
               overflow-y: auto !important;
               pointer-events: none;
               padding-left: ${euiThemeVars.euiFormMaxWidth};
-              margin-left: -${euiThemeVars.euiFormMaxWidth};
+              margin-left: calc(-1 * ${euiThemeVars.euiFormMaxWidth});
               > * {
                 pointer-events: auto;
               }

@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiBetaBadge,
   useEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -292,7 +293,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   return (
     <EuiFlexGroup
       css={css`
-        width: ${euiTheme.breakpoint.m};
+        width: ${euiThemeCssVariables.breakpoint.m};
         height: 100%;
 
         .euiModalBody {

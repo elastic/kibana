@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, useEuiTheme, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiText, euiThemeCssVariables } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { fetchFieldsFromESQL } from '@kbn/esql-editor';
@@ -29,7 +29,6 @@ export type TextBasedDimensionEditorProps =
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
   const query = props.state.layers[props.layerId]?.query;
-  const { euiTheme } = useEuiTheme();
   const {
     isFullscreen,
     columnId,
@@ -183,7 +182,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           <EuiText
             size="s"
             css={css`
-              margin-bottom: ${euiTheme.size.base};
+              margin-bottom: ${euiThemeCssVariables.size.base};
             `}
           >
             <h4>

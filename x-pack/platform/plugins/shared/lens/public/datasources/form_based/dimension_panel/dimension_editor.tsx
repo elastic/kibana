@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   type UseEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 import { NameInput } from '@kbn/visualization-ui-components';
@@ -480,7 +481,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (!compatibleWithCurrentField) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs, minWidth: 0 }}>
+            <EuiFlexItem grow={false} style={{ marginRight: euiThemeCssVariables.size.xs, minWidth: 0 }}>
               <span
                 css={css`
                   overflow: hidden;
@@ -501,7 +502,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   position="left"
                   size="s"
                   type="dot"
-                  color={euiTheme.colors.warning}
+                  color={euiThemeCssVariables.colors.warning}
                 />
               </EuiFlexItem>
             )}
@@ -510,7 +511,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       } else if (!compatibleWithSampling) {
         label = (
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false} style={{ marginRight: euiTheme.size.xs }}>
+            <EuiFlexItem grow={false} style={{ marginRight: euiThemeCssVariables.size.xs }}>
               {label}
             </EuiFlexItem>
             {shouldDisplayDots && (
@@ -535,7 +536,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         isActive,
         size: 's',
         isDisabled: !!disabledStatus,
-        css: operationsButtonStyles(euiThemeContext),
+        css: operationsButtonStyles,
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
@@ -741,7 +742,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         fullWidth
       >
         <EuiListGroup
-          css={sideNavItems.length > 3 ? operationsTwoColumnsStyles(euiThemeContext) : undefined}
+          css={sideNavItems.length > 3 ? operationsTwoColumnsStyles : undefined}
           gutterSize="none"
           color="primary"
           listItems={
@@ -1066,7 +1067,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         <EuiText
           size="s"
           css={css`
-            margin-bottom: ${euiTheme.size.base};
+            margin-bottom: ${euiThemeCssVariables.size.base};
           `}
         >
           <h4>
@@ -1169,7 +1170,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             <EuiText
               size="s"
               css={css`
-                margin-bottom: ${euiTheme.size.base};
+                margin-bottom: ${euiThemeCssVariables.size.base};
               `}
             >
               <h4>
@@ -1221,10 +1222,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   );
 }
 
-const operationsTwoColumnsStyles = ({ euiTheme }: UseEuiTheme) => {
-  return css`
-    display: block;
-    column-count: 2;
-    column-gap: ${euiTheme.size.m};
-  `;
-};
+const operationsTwoColumnsStyles = css`
+  display: block;
+  column-count: 2;
+  column-gap: ${euiThemeCssVariables.size.m};
+`;

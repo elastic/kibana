@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText, UseEuiTheme } from '@elastic/eui';
+import { EuiText, euiThemeCssVariables } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { UiActionsStart, VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -16,6 +16,7 @@ import { IndexPattern } from '../../../types';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { APP_ID } from '../../../../common/constants';
 import { pageContentBodyStyles, promptIllustrationStyle } from './workspace_panel';
+import { css } from '@emotion/react';
 
 interface Props {
   fieldType: string;
@@ -75,10 +76,8 @@ export function GeoFieldWorkspacePanel(props: Props) {
   );
 }
 
-const droppableStyles = ({ euiTheme }: UseEuiTheme) => {
-  return `
-    padding: ${euiTheme.size.xxl} ${euiTheme.size.xxxl};
-    border: ${euiTheme.border.thin};
-    border-radius: ${euiTheme.border.radius};
-  `;
-};
+const droppableStyles = css`
+  padding: ${euiThemeCssVariables.size.xxl} ${euiThemeCssVariables.size.xxxl};
+  border: ${euiThemeCssVariables.border.thin};
+  border-radius: ${euiThemeCssVariables.border.radius};
+`;

@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import { euiThemeCssVariables } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const dataPanelStyles = ({ euiTheme }: UseEuiTheme) => {
-  return css`
-    padding: ${euiTheme.size.base} ${euiTheme.size.base} 0;
+export const dataPanelStyles =  css`
+    padding: ${euiThemeCssVariables.size.base} ${euiThemeCssVariables.size.base} 0;
     .unifiedFieldListItemButton.kbnFieldButton {
       background: none;
       box-shadow: none;
-      margin-bottom: calc(${euiTheme.size.xs} / 2);
+      margin-bottom: calc(${euiThemeCssVariables.size.xs} / 2);
     }
     .unifiedFieldListItemButton__dragging {
-      background: ${euiTheme.colors.backgroundBasePlain};
+      background: ${euiThemeCssVariables.colors.backgroundBasePlain};
     }
   `;
-};

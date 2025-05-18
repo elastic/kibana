@@ -15,6 +15,7 @@ import {
   IconType,
   useEuiTheme,
   EuiIconTip,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -72,19 +73,17 @@ export const getDataLossWarning = (dataLoss: 'nothing' | 'layers' | 'everything'
 };
 
 const CheckIcon = () => {
-  const { euiTheme } = useEuiTheme();
-  return <EuiIcon type="check" color={euiTheme.colors.darkestShade} />;
+  return <EuiIcon type="check" color={euiThemeCssVariables.colors.darkestShade} />;
 };
 
 const DataLossWarning = ({ content, id }: { content?: string; id: string }) => {
-  const { euiTheme } = useEuiTheme();
   if (!content) return null;
   return (
     <EuiIconTip
       size="m"
       aria-label={content}
       type="dot"
-      color={euiTheme.colors.warning}
+      color={euiThemeCssVariables.colors.warning}
       content={content}
       iconProps={{
         'data-test-subj': `lnsChartSwitchPopoverAlert_${id}`,

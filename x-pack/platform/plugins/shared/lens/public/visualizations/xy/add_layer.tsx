@@ -17,6 +17,7 @@ import {
   transparentize,
   type UseEuiTheme,
   useEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -276,32 +277,31 @@ const ChartOptionWrapper = ({
   onClick: () => void;
   type: string;
 }) => {
-  const euiThemeContext = useEuiTheme();
   return (
     <button
       data-test-subj={`lnsXY_seriesType-${type}`}
       onClick={onClick}
       className="euiContextMenuItem"
-      css={chartOptionWrapperStyles(euiThemeContext)}
+      css={chartOptionWrapperStyles}
     >
       <ChartOption option={{ icon, label, description }} />
     </button>
   );
 };
 
-const chartOptionWrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
-  padding: ${euiTheme.size.s};
-  border-bottom: ${euiTheme.border.thin};
-  border-bottom-color: ${euiTheme.colors.backgroundBaseSubdued};
+const chartOptionWrapperStyles = css`
+  padding: ${euiThemeCssVariables.size.s};
+  border-bottom: ${euiThemeCssVariables.border.thin};
+  border-bottom-color: ${euiThemeCssVariables.colors.backgroundBaseSubdued};
   width: 100%;
   &:hover,
   &:focus {
-    color: ${euiTheme.colors.primary};
-    background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
+    color: ${euiThemeCssVariables.colors.primary};
+    // background-color: ${transparentize(euiThemeCssVariables.colors.primary, 0.1)};
     span,
     .euiText {
       text-decoration: underline;
-      color: ${euiTheme.colors.primary};
+      color: ${euiThemeCssVariables.colors.primary};
     }
   }
 `;

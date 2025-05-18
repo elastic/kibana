@@ -21,6 +21,7 @@ import {
   useEuiTheme,
   EuiSpacer,
   type UseEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -205,8 +206,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const visualizationRenderStartTime = useRef<number>(NaN);
   const dataReceivedTime = useRef<number>(NaN);
   const esTookTime = useRef<number>(0);
-
-  const { euiTheme } = useEuiTheme();
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
@@ -514,9 +513,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             aria-hidden={true}
             css={[
               css`
-                filter: drop-shadow(0 6px 12px ${transparentize(euiTheme.colors.shadow, 0.2)})
-                  drop-shadow(0 4px 4px ${transparentize(euiTheme.colors.shadow, 0.2)})
-                  drop-shadow(0 2px 2px ${transparentize(euiTheme.colors.shadow, 0.2)});
+                filter: drop-shadow(0 2px 4px ${euiThemeCssVariables.colors.backgroundBaseFormsControlDisabled})
+                  drop-shadow(0 4px 4px ${euiThemeCssVariables.colors.backgroundBaseFormsControlDisabled})
+                  drop-shadow(0 2px 2px ${euiThemeCssVariables.colors.backgroundBaseFormsControlDisabled});
               `,
               promptIllustrationStyle,
             ]}
@@ -537,7 +536,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               css={css`
                 .domDroppable--active & {
                   filter: blur(5px);
-                  transition: filter ${euiTheme.animation.fast} ease-in-out;
+                  transition: filter ${euiThemeCssVariables.animation.fast} ease-in-out;
                 }
               `}
             >
@@ -800,9 +799,9 @@ export const VisualizationWrapper = ({
         lnsExpressionRendererStyle,
         `
        .domDroppable--active & {
-          filter: blur(${euiTheme.size.xs}) !important;
+          filter: blur(${euiThemeCssVariables.size.xs}) !important;
           opacity: .25 !important;
-          transition: filter ${euiTheme.animation.normal} ease-in-out, opacity ${euiTheme.animation.normal} ease-in-out;
+          transition: filter ${euiThemeCssVariables.animation.normal} ease-in-out, opacity ${euiThemeCssVariables.animation.normal} ease-in-out;
         }`,
       ]}
       data-shared-items-container
@@ -846,28 +845,25 @@ export const VisualizationWrapper = ({
   );
 };
 
-export const promptIllustrationStyle = ({ euiTheme }: UseEuiTheme) => {
-  return css`
+export const promptIllustrationStyle = css`
     overflow: visible; // Shows arrow animation when it gets out of bounds
     margin-top: 0;
-    margin-bottom: -${euiTheme.size.base};
+    margin-bottom: calc(-1 * ${euiThemeCssVariables.size.base});
 
     margin-right: auto;
     margin-left: auto;
     max-width: 176px;
     max-height: 176px;
   `;
-};
 
-export const pageContentBodyStyles = ({ euiTheme }: UseEuiTheme) => {
-  return css`
+export const pageContentBodyStyles = css`
     flex-grow: 1;
     display: flex;
     align-items: stretch;
     justify-content: stretch;
-    border: ${euiTheme.border.thin};
-    border-radius: ${euiTheme.border.radius.medium};
-    background: ${euiTheme.colors.emptyShade};
+    border: ${euiThemeCssVariables.border.thin};
+    border-radius: ${euiThemeCssVariables.border.radius.medium};
+    background: ${euiThemeCssVariables.colors.emptyShade};
     height: 100%;
     overflow: hidden;
     & > * {
@@ -877,4 +873,3 @@ export const pageContentBodyStyles = ({ euiTheme }: UseEuiTheme) => {
       justify-content: center;
     }
   `;
-};

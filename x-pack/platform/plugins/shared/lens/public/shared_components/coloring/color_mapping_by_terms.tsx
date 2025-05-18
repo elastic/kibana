@@ -35,6 +35,7 @@ import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePicker } from '../palette_picker';
 import { PalettePanelContainer } from './palette_panel_container';
 import { getPaletteDisplayColors } from './utils';
+import { euiThemeCssVariables } from '@elastic/eui';
 
 interface ColorMappingByTermsProps {
   isDarkMode: boolean;
@@ -65,7 +66,6 @@ export function ColorMappingByTerms({
   formatter,
   allowCustomMatch,
 }: ColorMappingByTermsProps) {
-  const { euiTheme } = useEuiTheme();
   const [useNewColorMapping, setUseNewColorMapping] = useState(Boolean(colorMapping));
 
   return (
@@ -121,7 +121,7 @@ export function ColorMappingByTerms({
                           position="top"
                           size="s"
                           type="dot"
-                          color={euiTheme.colors.warning}
+                          color={euiThemeCssVariables.colors.warning}
                         />
                       )}{' '}
                       <EuiBadge color="hollow">

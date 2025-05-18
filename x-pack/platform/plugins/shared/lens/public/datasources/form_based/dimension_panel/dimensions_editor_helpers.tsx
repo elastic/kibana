@@ -20,6 +20,7 @@ import {
   EuiFormRow,
   type UseEuiTheme,
   useEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { nonNullable } from '../../../utils';
@@ -161,7 +162,7 @@ export const CalloutWarning = ({
     return (
       <>
         <EuiCallOut
-          css={dimensionEditorWarningStyles(euiThemeContext)}
+          css={dimensionEditorWarningStyles}
           size="s"
           title={i18n.translate('xpack.lens.indexPattern.staticValueWarning', {
             defaultMessage: 'Static value currently applied',
@@ -181,7 +182,7 @@ export const CalloutWarning = ({
   return (
     <>
       <EuiCallOut
-        css={dimensionEditorWarningStyles(euiThemeContext)}
+        css={dimensionEditorWarningStyles}
         size="s"
         title={i18n.translate('xpack.lens.indexPattern.formulaWarning', {
           defaultMessage: 'Formula currently applied',
@@ -260,9 +261,7 @@ export const DimensionEditorButtonGroups = ({
   );
 };
 
-const dimensionEditorWarningStyles = ({ euiTheme }: UseEuiTheme) => {
-  return css`
-    margin-bottom: ${euiTheme.size.base};
-    margin-top: ${euiTheme.size.s};
+const dimensionEditorWarningStyles =  css`
+    margin-bottom: ${euiThemeCssVariables.size.base};
+    margin-top: ${euiThemeCssVariables.size.s};
   `;
-};

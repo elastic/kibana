@@ -20,12 +20,11 @@ import {
   EuiAccordion,
   EuiText,
   EuiNotificationBadge,
-  type UseEuiTheme,
   useEuiTheme,
   euiFocusRing,
   useEuiFontSize,
   euiTextTruncate,
-  transparentize,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
@@ -129,10 +128,8 @@ const PreviewRenderer = ({
   hasError: boolean;
   onRender: () => void;
 }) => {
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
   const onErrorMessage = (
-    <div css={suggestionStyles.icon(euiThemeContext)}>
+    <div css={suggestionStyles.icon}>
       <EuiIconTip
         size="xl"
         color="danger"
@@ -153,7 +150,7 @@ const PreviewRenderer = ({
         height: 100%;
         width: 100%;
         pointer-events: none;
-        ${withLabel ? `height: calc(100% - ${euiTheme.size.l});` : ''}
+        ${withLabel ? `height: calc(100% - ${euiThemeCssVariables.size.l});` : ''}
       `}
     >
       {!expression || hasError ? (
@@ -198,7 +195,6 @@ const SuggestionPreview = ({
   wrapSuggestions?: boolean;
 }) => {
   const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
   const xsFontSize = useEuiFontSize('xs');
   return (
     <EuiToolTip
@@ -223,10 +219,10 @@ const SuggestionPreview = ({
             position: relative; // Let the expression progress indicator position itself against the button
             flex: 0 0 auto;
             height: 100px;
-            margin-right: ${euiTheme.size.s};
-            margin-left: ${euiTheme.size.xxs};
-            margin-bottom: ${euiTheme.size.xxs};
-            padding: 0 ${euiTheme.size.s};
+            margin-right: ${euiThemeCssVariables.size.s};
+            margin-left: ${euiThemeCssVariables.size.xxs};
+            margin-bottom: ${euiThemeCssVariables.size.xxs};
+            padding: 0 ${euiThemeCssVariables.size.s};
             box-shadow: none !important; // sass-lint:disable-line no-important
 
             &:focus {
@@ -236,10 +232,10 @@ const SuggestionPreview = ({
             ${selected
               ? `
               background-color: ${
-                euiTheme.colors.lightestShade
+                euiThemeCssVariables.colors.lightestShade
               } !important; // sass-lint:disable-line no-important
               border-color: ${
-                euiTheme.colors.mediumShade
+                euiThemeCssVariables.colors.mediumShade
               } !important; // sass-lint:disable-line no-important
 
               &:not(:focus) {
@@ -278,7 +274,7 @@ const SuggestionPreview = ({
               onRender={onRender}
             />
           ) : (
-            <span css={suggestionStyles.icon(euiThemeContext)}>
+            <span css={suggestionStyles.icon}>
               <EuiIcon size="xxl" type={preview.icon} />
             </span>
           )}
@@ -287,7 +283,7 @@ const SuggestionPreview = ({
               css={css`
                 ${euiTextTruncate()}
                 ${xsFontSize};
-                font-weight: ${euiTheme.font.weight.bold};
+                font-weight: ${euiThemeCssVariables.font.weight.bold};
                 display: block;
                 text-align: center;
                 flex-grow: 0;
@@ -511,7 +507,7 @@ export function SuggestionPanel({
         align-items: center;
         justify-content: center;
         height: 100px;
-        background-color: ${euiTheme.colors.lightestShade} !important;
+        background-color: ${euiThemeCssVariables.colors.lightestShade} !important;
       `}
     >
       <EuiText size="s" color="subdued" className="lnsSuggestionPanel__applyChangesMessage">
@@ -665,17 +661,17 @@ export function SuggestionPanel({
         tabIndex={0}
         css={css`
           flex-wrap: ${wrapSuggestions ? 'wrap' : 'nowrap'};
-          gap: ${wrapSuggestions ? euiTheme.size.base : 0};
+          gap: ${wrapSuggestions ? euiThemeCssVariables.size.base : 0};
           overflow-x: scroll;
           overflow-y: hidden;
           display: flex;
-          padding-top: ${euiTheme.size.xs};
+          padding-top: ${euiThemeCssVariables.size.xs};
           mask-image: linear-gradient(
             to right,
-            ${transparentize(euiTheme.colors.danger, 0.1)} 0%,
-            ${euiTheme.colors.danger} 5px,
-            ${euiTheme.colors.danger} calc(100% - 5px),
-            ${transparentize(euiTheme.colors.danger, 0.1)} 100%
+            ${euiThemeCssVariables.colors.backgroundBaseDanger} 0%,
+            ${euiThemeCssVariables.colors.danger} 5px,
+            ${euiThemeCssVariables.colors.danger} calc(100% - 5px),
+            ${euiThemeCssVariables.colors.backgroundBaseDanger} 100%
           );
         `}
       >
@@ -789,16 +785,16 @@ function preparePreviewExpression(
 }
 
 const suggestionStyles = {
-  icon: ({ euiTheme }: UseEuiTheme) => css`
-    color: ${euiTheme.colors.darkShade};
+  icon: css`
+    color: ${euiThemeCssVariables.colors.darkShade};
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: ${euiTheme.size.s};
+    padding: ${euiThemeCssVariables.size.s};
     &:not(:only-child) {
-      height: calc(100% - ${euiTheme.size.l});
+      height: calc(100% - ${euiThemeCssVariables.size.l});
     }
   `,
 };

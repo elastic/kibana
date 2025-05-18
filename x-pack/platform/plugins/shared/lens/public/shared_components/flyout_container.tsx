@@ -19,6 +19,7 @@ import {
   type UseEuiTheme,
   euiBreakpoint,
   useEuiTheme,
+  euiThemeCssVariables,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../utils';
@@ -120,7 +121,7 @@ export function FlyoutContainer({
             }
           }}
         >
-          <EuiFlyoutHeader hasBorder css={dimensionContainerStyles.header(euiThemeContext)}>
+          <EuiFlyoutHeader hasBorder css={dimensionContainerStyles.header}>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               {isInlineEditing && (
                 <EuiFlexItem grow={false}>
@@ -170,7 +171,7 @@ export function FlyoutContainer({
           </div>
 
           {customFooter || (
-            <EuiFlyoutFooter css={dimensionContainerStyles.footer(euiThemeContext)}>
+            <EuiFlyoutFooter css={dimensionContainerStyles.footer}>
               <EuiButtonEmpty
                 flush="left"
                 size="s"
@@ -207,10 +208,10 @@ const dimensionContainerStyles = {
       }
     `;
   },
-  header: ({ euiTheme }: UseEuiTheme) => css`
-    padding: ${euiTheme.size.base};
+  header: css`
+    padding: ${euiThemeCssVariables.size.base};
   `,
-  footer: ({ euiTheme }: UseEuiTheme) => css`
-    padding: ${euiTheme.size.base};
+  footer: css`
+    padding: ${euiThemeCssVariables.size.base};
   `,
 };

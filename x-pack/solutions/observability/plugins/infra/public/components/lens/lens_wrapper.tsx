@@ -7,7 +7,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { euiThemeCssVariables, useEuiTheme } from '@elastic/eui';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { ChartLoadingProgress, ChartPlaceholder } from './chart_placeholder';
@@ -23,7 +23,6 @@ export const LensWrapper = ({
   lastReloadRequestTime,
   ...props
 }: LensWrapperProps) => {
-  const { euiTheme } = useEuiTheme();
   const [intersectionObserverEntry, setIntersectionObserverEntry] =
     useState<IntersectionObserverEntry>();
   const [embeddableLoaded, setEmbeddableLoaded] = useState(false);
@@ -94,7 +93,7 @@ export const LensWrapper = ({
         position: relative;
         height: 100%;
         .echMetric {
-          border-radius: ${euiTheme.border.radius.medium};
+          border-radius: ${euiThemeCssVariables.border.radius.medium};
           pointer-events: none;
         }
       `}
