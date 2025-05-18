@@ -27,7 +27,7 @@ describe('Disabled features', { tags: '@serverless' }, () => {
     visit(LENS_URL);
     cy.get(APP_NOT_FOUND_PAGE).should('exist');
   });
-  it('lens app should not be available', () => {
+  it('dashboards app should not be available', () => {
     visit(DASHBOARD_URL);
     cy.get(APP_NOT_FOUND_PAGE).should('exist');
   });
