@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 import { useFormWithWarnings } from '../../../common/hooks/use_form_with_warnings';
-import { isThreatMatchRule } from '../../../../common/detection_engine/utils';
 import type {
   AboutStepRule,
   ActionsStepRule,
   DefineStepRule,
   ScheduleStepRule,
-} from '../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../detections/pages/detection_engine/rules/types';
+} from '../../common/types';
+import { DataSourceType } from '../../common/types';
 import { useKibana } from '../../../common/lib/kibana';
 import type { FormHook } from '../../../shared_imports';
 import { useFormData } from '../../../shared_imports';
 import { schema as defineRuleSchema } from '../components/step_define_rule/schema';
-import {
-  schema as aboutRuleSchema,
-  threatMatchAboutSchema,
-} from '../components/step_about_rule/schema';
+import { schema as aboutRuleSchema } from '../components/step_about_rule/schema';
 import { schema as scheduleRuleSchema } from '../components/step_schedule_rule/schema';
 import { getSchema as getActionsRuleSchema } from '../../rule_creation/components/step_rule_actions/get_schema';
 import { useFetchIndex } from '../../../common/containers/source';
@@ -62,14 +58,10 @@ export const useRuleForms = ({
   );
 
   // ABOUT STEP FORM
-  const typeDependentAboutRuleSchema = useMemo(
-    () => (isThreatMatchRule(defineStepData.ruleType) ? threatMatchAboutSchema : aboutRuleSchema),
-    [defineStepData.ruleType]
-  );
   const { form: aboutStepForm } = useFormWithWarnings<AboutStepRule>({
     defaultValue: aboutStepDefault,
     options: { stripEmptyFields: false, warningValidationCodes: VALIDATION_WARNING_CODES },
-    schema: typeDependentAboutRuleSchema,
+    schema: aboutRuleSchema,
   });
   const [aboutStepFormData] = useFormData<AboutStepRule | {}>({
     form: aboutStepForm,

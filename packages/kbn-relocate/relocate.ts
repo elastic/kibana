@@ -11,7 +11,7 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { rename, mkdir, rm } from 'fs/promises';
 import inquirer from 'inquirer';
-import { orderBy } from 'lodash';
+import { sortBy } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -36,6 +36,8 @@ import {
   getManualCommits,
 } from './utils/git';
 
+const SKIP_RESET = false;
+
 const moveModule = async (module: Package, log: ToolingLog) => {
   const destination = calculateModuleTargetFolder(module);
   log.info(`Moving ${module.directory} to ${destination}`);
@@ -52,6 +54,12 @@ const moveModule = async (module: Package, log: ToolingLog) => {
 
 const relocateModules = async (toMove: Package[], log: ToolingLog): Promise<number> => {
   let relocated: number = 0;
+
+  // filter out modules that are not categorised (lacking group, visibility)
+  toMove = toMove.filter(
+    (module) => module.group && module.group !== 'common' && module.visibility
+  );
+
   for (let i = 0; i < toMove.length; ++i) {
     const module = toMove[i];
 
@@ -96,33 +104,53 @@ export interface RelocateModulesParams {
 const findModules = ({ teams, paths, included, excluded }: FindModulesParams, log: ToolingLog) => {
   // get all modules
   const modules = getPackages(REPO_ROOT);
+  const moduleFilters = teams.length > 0 || paths.length > 0 || included.length > 0;
 
   // find modules selected by user filters
-  return orderBy(
-    modules
-      // exclude devOnly modules (they will remain in /packages)
-      .filter(({ manifest }) => !manifest.devOnly)
-      // exclude modules that do not specify a group
-      .filter(({ manifest }) => manifest.group)
+  return (
+    sortBy(modules, ['directory'])
       // explicit exclusions
       .filter(({ id }) => !EXCLUDED_MODULES.includes(id) && !excluded.includes(id))
-      // we don't want to move test modules (just yet)
+      // we don't want to move test and example modules (just yet)
       .filter(
         ({ directory }) =>
           !directory.includes(`/${KIBANA_FOLDER}/test/`) &&
-          !directory.includes(`/${KIBANA_FOLDER}/x-pack/test/`)
+          !directory.includes(`/${KIBANA_FOLDER}/x-pack/test/`) &&
+          !directory.includes(`/${KIBANA_FOLDER}/examples/`) &&
+          !directory.includes(`/${KIBANA_FOLDER}/x-pack/examples/`)
       )
       // the module is under the umbrella specified by the user
       .filter(
         (module) =>
+          !moduleFilters ||
           included.includes(module.id) ||
           teams.some((team) => belongsTo(module, team)) ||
           paths.some((path) => module.directory.includes(path))
       )
       // the module is not explicitly excluded
       .filter(({ id }) => !excluded.includes(id))
+      // exclude modules that don't define a group/visibility
+      .filter((module) => {
+        if (!module.group || module.group === 'common' || !module.visibility) {
+          log.info(`The module ${module.id} does not specify 'group' or 'visibility'. Skipping`);
+          return false;
+        } else {
+          return true;
+        }
+      })
       // exclude modules that are in the correct folder
-      .filter((module) => !isInTargetFolder(module, log))
+      .filter((module) => {
+        if (isInTargetFolder(module)) {
+          log.info(
+            `The module ${
+              module.id
+            } is already in the correct folder: '${calculateModuleTargetFolder(module)}'. Skipping`
+          );
+          return false;
+        } else {
+          return true;
+        }
+      })
   );
 };
 
@@ -153,6 +181,63 @@ export const findAndRelocateModules = async (params: RelocateModulesParams, log:
     return;
   }
 
+  if (!SKIP_RESET) {
+    if (prNumber) {
+      pr = await findPr(prNumber);
+
+      if (getManualCommits(pr.commits).length > 0) {
+        const resOverride = await inquirer.prompt({
+          type: 'confirm',
+          name: 'overrideManualCommits',
+          message:
+            'Manual commits detected in the PR. The script will try to cherry-pick them, but it might require manual intervention to resolve conflicts. Continue?',
+        });
+        if (!resOverride.overrideManualCommits) {
+          log.info('Aborting');
+          return;
+        }
+      }
+    }
+
+    const resConfirmReset = await inquirer.prompt({
+      type: 'confirm',
+      name: 'confirmReset',
+      message: `The script will RESET CHANGES in this repository. Proceed?`,
+    });
+
+    if (!resConfirmReset.confirmReset) {
+      log.info('Aborting');
+      return;
+    }
+
+    // start with a clean repo
+    await safeExec(`git restore --staged .`);
+    await safeExec(`git restore .`);
+    await safeExec(`git clean -f -d`);
+    await safeExec(`git checkout ${baseBranch} && git pull ${upstream} ${baseBranch}`);
+
+    if (pr) {
+      // checkout existing PR, reset all commits, rebase from baseBranch
+      try {
+        await checkoutResetPr(pr, baseBranch);
+      } catch (error) {
+        log.error(`Error checking out / resetting PR #${prNumber}:`);
+        log.error(error);
+        return;
+      }
+    } else {
+      // checkout new branch
+      await checkoutBranch(NEW_BRANCH);
+    }
+
+    await safeExec(`yarn kbn bootstrap`);
+  }
+  await inquirer.prompt({
+    type: 'confirm',
+    name: 'readyRelocate',
+    message: `Ready to relocate! You can commit changes previous to the relocation at this point. Confirm to proceed with the relocation`,
+  });
+
   const toMove = findModules(findParams, log);
   if (!toMove.length) {
     log.info(
@@ -166,7 +251,7 @@ export const findAndRelocateModules = async (params: RelocateModulesParams, log:
   const resConfirmPlan = await inquirer.prompt({
     type: 'confirm',
     name: 'confirmPlan',
-    message: `The script will RESET CHANGES in this repository, relocate the modules above and update references. Proceed?`,
+    message: `The script will relocate the modules above and update references. Proceed?`,
   });
 
   if (!resConfirmPlan.confirmPlan) {
@@ -174,55 +259,12 @@ export const findAndRelocateModules = async (params: RelocateModulesParams, log:
     return;
   }
 
-  if (prNumber) {
-    pr = await findPr(prNumber);
-
-    if (getManualCommits(pr.commits).length > 0) {
-      const resOverride = await inquirer.prompt({
-        type: 'confirm',
-        name: 'overrideManualCommits',
-        message: 'Detected manual commits in the PR, do you want to override them?',
-      });
-      if (!resOverride.overrideManualCommits) {
-        return;
-      }
-    }
-  }
-
-  // start with a clean repo
-  await safeExec(`git restore --staged .`);
-  await safeExec(`git restore .`);
-  await safeExec(`git clean -f -d`);
-  await safeExec(`git checkout ${baseBranch} && git pull ${upstream} ${baseBranch}`);
-
-  if (pr) {
-    // checkout existing PR, reset all commits, rebase from baseBranch
-    try {
-      await checkoutResetPr(pr, baseBranch);
-    } catch (error) {
-      log.error(`Error checking out / resetting PR #${prNumber}:`);
-      log.error(error);
-      return;
-    }
-  } else {
-    // checkout new branch
-    await checkoutBranch(NEW_BRANCH);
-  }
-
-  // push changes in the branch
-  await inquirer.prompt({
-    type: 'confirm',
-    name: 'readyRelocate',
-    message: `Ready to relocate! You can commit changes previous to the relocation at this point. Confirm to proceed with the relocation`,
-  });
-
   // relocate modules
-  await safeExec(`yarn kbn bootstrap`);
   const movedCount = await relocateModules(toMove, log);
 
   if (movedCount === 0) {
     log.warning(
-      'No modules were relocated, aborting operation to prevent force-pushing empty changes (this would close the existing PR!)'
+      'No modules were relocated, aborting operation to prevent force-pushing empty changes'
     );
     return;
   }

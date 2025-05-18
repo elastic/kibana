@@ -15,13 +15,13 @@ interface Props {
   contextId: string;
   endgameExitCode: string | null | undefined;
   eventId: string;
-  isDraggable?: boolean;
   processExitCode: number | null | undefined;
   text: string | null | undefined;
+  scopeId: string;
 }
 
 export const ExitCodeDraggable = React.memo<Props>(
-  ({ contextId, endgameExitCode, eventId, isDraggable, processExitCode, text }) => {
+  ({ contextId, endgameExitCode, eventId, processExitCode, text, scopeId }) => {
     if (isNillEmptyOrNotFinite(processExitCode) && isNillEmptyOrNotFinite(endgameExitCode)) {
       return null;
     }
@@ -37,10 +37,10 @@ export const ExitCodeDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processExitCode) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.exit_code"
-              isDraggable={isDraggable}
               value={`${processExitCode}`}
               fieldType="number"
               isAggregatable={true}
@@ -51,10 +51,10 @@ export const ExitCodeDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(endgameExitCode) && (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.exit_code"
-              isDraggable={isDraggable}
               value={endgameExitCode}
               fieldType="number"
               isAggregatable={true}

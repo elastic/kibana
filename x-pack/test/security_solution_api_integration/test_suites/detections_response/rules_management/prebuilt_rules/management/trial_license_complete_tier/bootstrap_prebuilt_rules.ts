@@ -11,18 +11,25 @@ import {
 } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import expect from 'expect';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { deletePrebuiltRulesFleetPackage } from '../../../../utils';
-import { deleteEndpointFleetPackage } from '../../../../utils/rules/prebuilt_rules/delete_endpoint_fleet_package';
+import {
+  deleteAllPrebuiltRuleAssets,
+  deleteEndpointFleetPackage,
+  deletePrebuiltRulesFleetPackage,
+} from '../../../../utils';
 
 export default ({ getService }: FtrProviderContext): void => {
+  const es = getService('es');
+  const log = getService('log');
   const supertest = getService('supertest');
+  const retryService = getService('retry');
   const securitySolutionApi = getService('securitySolutionApi');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/203632
+  // FLAKY: https://github.com/elastic/kibana/issues/202037
   describe.skip('@ess @serverless @skipInServerlessMKI Bootstrap Prebuilt Rules', () => {
     beforeEach(async () => {
-      await deletePrebuiltRulesFleetPackage(supertest);
-      await deleteEndpointFleetPackage(supertest);
+      await deleteAllPrebuiltRuleAssets(es, log);
+      await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
+      await deleteEndpointFleetPackage({ supertest, es, log, retryService });
     });
 
     it('should install fleet packages required for detection engine to function', async () => {

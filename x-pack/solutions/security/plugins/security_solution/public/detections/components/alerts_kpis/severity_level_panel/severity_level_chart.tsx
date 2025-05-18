@@ -4,36 +4,58 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback, useMemo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLoadingSpinner,
+  useEuiTheme,
+} from '@elastic/eui';
+import { TOTAL_COUNT_OF_ALERTS } from '../../alerts_table/translations';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { ChartLabel } from '../../../../overview/components/detection_response/alerts_by_status/chart_label';
-import { getSeverityTableColumns } from './columns';
+import { useGetSeverityTableColumns } from './columns';
 import { getSeverityColor } from './helpers';
-import { TOTAL_COUNT_OF_ALERTS } from '../../alerts_table/translations';
 
 const DONUT_HEIGHT = 150;
 
 const StyledEuiLoadingSpinner = styled(EuiLoadingSpinner)`
   margin: auto;
 `;
+
 export interface SeverityLevelProps {
+  /**
+   * Chart data
+   */
   data: SeverityData[];
+  /**
+   * If true, shows a EuiSpinner
+   */
   isLoading: boolean;
+  /**
+   * Callback to allow the charts to add filters to the SiemSearchBar
+   */
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
+  /**
+   * If true, render the last column for cell actions (like filter for, out, add to timeline, copy...)
+   */
+  showCellActions: boolean;
 }
 
 export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
   data,
   isLoading,
   addFilter,
+  showCellActions,
 }) => {
-  const columns = useMemo(() => getSeverityTableColumns(), []);
+  const { euiTheme } = useEuiTheme();
+  const columns = useGetSeverityTableColumns(showCellActions);
 
   const count = useMemo(() => {
     return data
@@ -43,16 +65,10 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
       : 0;
   }, [data]);
 
-  const fillColor: FillColor = useCallback((dataName: string) => {
-    return getSeverityColor(dataName);
-  }, []);
-
-  const sorting: { sort: { field: keyof SeverityData; direction: SortOrder } } = {
-    sort: {
-      field: 'value',
-      direction: 'desc',
-    },
-  };
+  const fillColor: FillColor = useCallback(
+    (dataName: string) => getSeverityColor(dataName, euiTheme),
+    [euiTheme]
+  );
 
   const onDonutPartitionClicked = useCallback(
     (level: string) => {
@@ -64,14 +80,13 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="s" data-test-subj="severity-level-chart">
+    <EuiFlexGroup gutterSize="none" data-test-subj="severity-level-chart">
       <EuiFlexItem>
         <EuiInMemoryTable
           data-test-subj="severity-level-table"
           columns={columns}
           items={data}
           loading={isLoading}
-          sorting={sorting}
         />
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="severity-level-donut">

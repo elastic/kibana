@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MarkdownOptions should match snapshot 1`] = `
+<EuiFlexGroup
+  className="mkdEditor"
+  direction="column"
+  gutterSize="m"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      alignItems="baseline"
+      gutterSize="none"
+      justifyContent="spaceBetween"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiTitle
+          size="xs"
+        >
+          <h2>
+            <label
+              htmlFor="markdownVisInput"
+            >
+              Markdown
+            </label>
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiText
+          size="xs"
+        >
+          <EuiLink
+            href="https://docs.github.com/en/get-started/writing-on-github/"
+            target="_blank"
+          >
+            <MemoizedFormattedMessage
+              defaultMessage="Help"
+              id="visTypeMarkdown.params.helpLinkLabel"
+            />
+          </EuiLink>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem>
+    <EuiTextArea
+      className="visEditor--markdown__textarea"
+      data-test-subj="markdownTextarea"
+      fullWidth={true}
+      id="markdownVisInput"
+      onChange={[Function]}
+      resize="none"
+      value="hello from 2020 🥳"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

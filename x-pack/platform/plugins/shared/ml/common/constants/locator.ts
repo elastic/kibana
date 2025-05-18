@@ -7,11 +7,34 @@
 
 export const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
 
+/**
+ * @deprecated since 9.1, kept here to redirect old bookmarks
+ */
+export const DEPRECATED_ML_ROUTE_TO_NEW_ROUTE = {
+  jobs: 'anomaly_detection',
+  data_frame_analytics: 'analytics',
+  trained_models: 'trained_models',
+  notifications: 'overview?_g=(tab:notifications)&',
+  memory_usage: 'overview',
+  supplied_configurations: 'anomaly_detection/ad_supplied_configurations',
+  settings: 'ad_settings',
+  'settings/calendars_list': 'ad_settings/calendars_list',
+  'settings/calendars_list/new_calendar': 'ad_settings/calendars_list/new_calendar',
+  'settings/calendars_dst_list': 'ad_settings/calendars_dst_list',
+  'settings/calendars_dst_list/new_calendar': 'ad_settings/calendars_dst_list/new_calendar',
+  'settings/filter_lists': 'ad_settings/filter_lists',
+  'settings/filter_lists/new_filter_list': 'ad_settings/filter_lists/new_filter_list',
+  nodes: 'overview',
+  'jobs/new_job/step/index_or_search': 'anomaly_detection/jobs/new_job/step/select_source',
+};
+
 export const ML_PAGES = {
-  ANOMALY_DETECTION_JOBS_MANAGE: 'jobs',
+  ANOMALY_DETECTION_JOBS_MANAGE: '',
+  ANOMALY_DETECTION_JOBS_MANAGE_FOR_URL: 'jobs',
   ANOMALY_EXPLORER: 'explorer',
   SINGLE_METRIC_VIEWER: 'timeseriesexplorer',
-  DATA_FRAME_ANALYTICS_JOBS_MANAGE: 'data_frame_analytics',
+  DATA_FRAME_ANALYTICS_JOBS_MANAGE: '',
+  DATA_FRAME_ANALYTICS_JOBS_MANAGE_FOR_URL: 'data_frame_analytics',
   DATA_FRAME_ANALYTICS_SOURCE_SELECTION: 'data_frame_analytics/source_selection',
   DATA_FRAME_ANALYTICS_CREATE_JOB: 'data_frame_analytics/new_job',
   TRAINED_MODELS_MANAGE: 'trained_models',
@@ -22,7 +45,7 @@ export const ML_PAGES = {
   MEMORY_USAGE: 'memory_usage',
   DATA_FRAME_ANALYTICS_EXPLORATION: 'data_frame_analytics/exploration',
   DATA_FRAME_ANALYTICS_MAP: 'data_frame_analytics/map',
-  SUPPLIED_CONFIGURATIONS: 'supplied_configurations',
+  SUPPLIED_CONFIGURATIONS: 'ad_supplied_configurations',
   /**
    * Page: Data Visualizer
    */
@@ -53,23 +76,23 @@ export const ML_PAGES = {
   ANOMALY_DETECTION_CREATE_JOB_CATEGORIZATION: 'jobs/new_job/categorization',
   ANOMALY_DETECTION_CREATE_JOB_RARE: 'jobs/new_job/rare',
   ANOMALY_DETECTION_CREATE_JOB_GEO: 'jobs/new_job/geo',
-  ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED: 'jobs/new_job/convert_to_advanced',
+  ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED: 'jobs/new_job/advanced',
   ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: 'jobs/new_job/step/job_type',
-  ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: 'jobs/new_job/step/index_or_search',
+  ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: 'jobs/new_job/step/select_source',
   ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: 'jobs/new_job/from_lens',
   ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS: 'jobs/new_job/from_pattern_analysis',
   ANOMALY_DETECTION_CREATE_JOB_FROM_MAP: 'jobs/new_job/from_map',
   ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE: 'modules/check_view_or_create',
-  SETTINGS: 'settings',
-  CALENDARS_MANAGE: 'settings/calendars_list',
-  CALENDARS_DST_MANAGE: 'settings/calendars_dst_list',
-  CALENDARS_NEW: 'settings/calendars_list/new_calendar',
-  CALENDARS_DST_NEW: 'settings/calendars_dst_list/new_calendar',
-  CALENDARS_EDIT: 'settings/calendars_list/edit_calendar',
-  CALENDARS_DST_EDIT: 'settings/calendars_dst_list/edit_calendar',
-  FILTER_LISTS_MANAGE: 'settings/filter_lists',
-  FILTER_LISTS_NEW: 'settings/filter_lists/new_filter_list',
-  FILTER_LISTS_EDIT: 'settings/filter_lists/edit_filter_list',
+  SETTINGS: '',
+  CALENDARS_MANAGE: 'calendars_list',
+  CALENDARS_DST_MANAGE: 'calendars_dst_list',
+  CALENDARS_NEW: 'calendars_list/new_calendar',
+  CALENDARS_DST_NEW: 'calendars_dst_list/new_calendar',
+  CALENDARS_EDIT: 'calendars_list/edit_calendar',
+  CALENDARS_DST_EDIT: 'calendars_dst_list/edit_calendar',
+  FILTER_LISTS_MANAGE: 'filter_lists',
+  FILTER_LISTS_NEW: 'filter_lists/new_filter_list',
+  FILTER_LISTS_EDIT: 'filter_lists/edit_filter_list',
   OVERVIEW: 'overview',
   NOTIFICATIONS: 'notifications',
   AIOPS: 'aiops',

@@ -5,17 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  Chart,
-  Datum,
-  LEGACY_LIGHT_THEME,
-  PartialTheme,
-  Partition,
-  PartitionLayout,
-  Settings,
-} from '@elastic/charts';
+import { Chart, Datum, PartialTheme, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,8 +13,11 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { formatMillisecond } from '../common/network_data/data_formatting';
 
 import { useNetworkTimings } from '../hooks/use_network_timings';
@@ -46,7 +39,8 @@ const themeOverrides: PartialTheme = {
 export const NetworkTimingsDonut = () => {
   const networkTimings = useNetworkTimings();
 
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   if (!networkTimings) {
     return <EuiLoadingSpinner size="xl" />;
@@ -70,8 +64,7 @@ export const NetworkTimingsDonut = () => {
       <Chart size={{ height: 240 }}>
         <Settings
           theme={[themeOverrides]}
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-          baseTheme={LEGACY_LIGHT_THEME}
+          baseTheme={chartBaseTheme}
           showLegend={false}
           locale={i18n.getLocale()}
         />
@@ -87,9 +80,9 @@ export const NetworkTimingsDonut = () => {
               nodeLabel: (d: Datum) => d,
               shape: {
                 fillColor: (dataName, index) => {
-                  return (theme.eui as unknown as Record<string, string>)[
-                    `euiColorVis${index + 1}`
-                  ];
+                  // @ts-ignore
+                  const color = euiTheme.colors.vis[`euiColorVis${index + 1}`];
+                  return color;
                 },
               },
             },

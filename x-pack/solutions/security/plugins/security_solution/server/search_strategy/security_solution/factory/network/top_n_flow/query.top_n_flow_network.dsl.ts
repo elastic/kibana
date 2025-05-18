@@ -46,18 +46,16 @@ export const buildTopNFlowQuery = ({
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
-    body: {
-      aggregations: getFlowTargetAggs(sort, flowTarget, querySize),
-      query,
-      _source: false,
-      fields: [
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
-        },
-      ],
-      size: 0,
-    },
+    aggregations: getFlowTargetAggs(sort, flowTarget, querySize),
+    query,
+    _source: false,
+    fields: [
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
+    size: 0,
     track_total_hits: false,
   };
   return dslQuery;
@@ -75,12 +73,10 @@ export const buildTopNFlowCountQuery = ({
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
-    body: {
-      aggregations: getCountAgg(flowTarget),
-      query,
-      _source: false,
-      size: 0,
-    },
+    aggregations: getCountAgg(flowTarget),
+    query,
+    _source: false,
+    size: 0,
     track_total_hits: false,
   };
   return dslQuery;

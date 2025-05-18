@@ -11,7 +11,7 @@ import type {
   ActionsClient,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type { InferenceConnector } from '../../../common/connectors';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { getConnectorById } from '../../util/get_connector_by_id';
 
 export interface InferenceInvokeOptions {
@@ -28,7 +28,7 @@ export type InferenceInvokeResult<Data = unknown> = ActionTypeExecutorResult<Dat
  */
 export interface InferenceExecutor {
   getConnector: () => InferenceConnector;
-  invoke(params: InferenceInvokeOptions): Promise<InferenceInvokeResult>;
+  invoke<Data = unknown>(params: InferenceInvokeOptions): Promise<InferenceInvokeResult<Data>>;
 }
 
 export const createInferenceExecutor = ({
@@ -40,7 +40,7 @@ export const createInferenceExecutor = ({
 }): InferenceExecutor => {
   return {
     getConnector: () => connector,
-    async invoke({ subAction, subActionParams }): Promise<InferenceInvokeResult> {
+    async invoke({ subAction, subActionParams }): Promise<InferenceInvokeResult<any>> {
       return await actionsClient.execute({
         actionId: connector.connectorId,
         params: {

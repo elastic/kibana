@@ -14,8 +14,11 @@ import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserProfileService } from '@kbn/core/public';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { of } from 'rxjs';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
+import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -27,6 +30,7 @@ window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 export const mockAssistantAvailability: AssistantAvailability = {
+  hasSearchAILakeConfigurations: false,
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
@@ -64,6 +68,9 @@ export const TestProvidersComponent: React.FC<Props> = ({
     },
   });
 
+  const chrome = chromeServiceMock.createStartContract();
+  chrome.getChromeStyle$.mockReturnValue(of('classic'));
+
   return (
     <I18nProvider>
       <ThemeProvider>
@@ -79,13 +86,16 @@ export const TestProvidersComponent: React.FC<Props> = ({
             }}
             getComments={mockGetComments}
             http={mockHttp}
-            baseConversations={{}}
             navigateToApp={mockNavigateToApp}
             {...providerContext}
             currentAppId={'test'}
+            productDocBase={{
+              installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
+            }}
             userProfileService={jest.fn() as unknown as UserProfileService}
+            chrome={chrome}
           >
-            {children}
+            <AssistantSpaceIdProvider spaceId="default">{children}</AssistantSpaceIdProvider>
           </AssistantProvider>
         </QueryClientProvider>
       </ThemeProvider>

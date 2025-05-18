@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs, useEuiBackgroundColor } from '@elastic/eui';
+import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
@@ -38,6 +38,7 @@ export interface PanelHeaderProps {
  */
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ selectedTabId, setSelectedTabId, tabs }) => {
+    const { euiTheme } = useEuiTheme();
     const { getFieldsData } = useDocumentDetailsContext();
     const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
 
@@ -56,7 +57,7 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
     return (
       <FlyoutHeader
         css={css`
-          background-color: ${useEuiBackgroundColor('subdued')};
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
           padding-bottom: 0 !important;
           border-block-end: none !important;
         `}

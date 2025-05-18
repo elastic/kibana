@@ -19,7 +19,8 @@ ROW a=[3, 5, 1, 6]
 | EVAL avg_a = MV_AVG(a)
 ```
 
+**Retrieving the average value from a multivalued field**
 ```esql
-ROW scores=[10, 20, 30, 40]
-| EVAL average_score = MV_AVG(scores)
+FROM bag_of_numbers
+| EVAL min = MV_AVG(numbers)
 ```

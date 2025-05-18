@@ -13,12 +13,15 @@ import {
   SearchResponse,
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
 import type { CspClientPluginStartDeps, UseCspOptions } from '../types';
 import { showErrorToast } from '../..';
-import { getVulnerabilitiesAggregationCount, getVulnerabilitiesQuery } from '../utils/hooks_utils';
+import {
+  getVulnerabilitiesAggregationCount,
+  getVulnerabilitiesQuery,
+} from '../utils/findings_query_builders';
 
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
@@ -42,7 +45,7 @@ export const useVulnerabilitiesPreview = (options: UseCspOptions) => {
         rawResponse: { aggregations },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getVulnerabilitiesQuery(options, true),
+          params: getVulnerabilitiesQuery(options, true) as LatestFindingsRequest['params'],
         })
       );
 

@@ -14,11 +14,6 @@
       "snapshots": [
         "10"
       ],
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
       "threads": [
         "3"
       ],

@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
+  useEuiTheme,
   EuiButtonEmpty,
   EuiCheckbox,
   EuiDatePicker,
@@ -40,7 +41,6 @@ import {
   Axis,
   Chart,
   CurveType,
-  LEGACY_LIGHT_THEME,
   LineAnnotation,
   LineSeries,
   Position,
@@ -51,6 +51,7 @@ import {
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import type {
   CombinedJobWithStats,
@@ -60,7 +61,7 @@ import type {
 import type { JobMessage } from '../../../../../../common/types/audit_message';
 import type { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { useCurrentThemeVars, useMlApi } from '../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
@@ -86,7 +87,7 @@ interface DatafeedChartFlyoutProps {
   jobId: string;
   end: number;
   onClose: () => void;
-  onModelSnapshotAnnotationClick: (modelSnapshot: ModelSnapshot) => void;
+  onModelSnapshotAnnotationClick?: (modelSnapshot: ModelSnapshot) => void;
 }
 
 function setLineAnnotationHeader(
@@ -142,11 +143,21 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const canStartStopDatafeed = useMemo(() => checkPermission('canStartStopDatafeed'), []);
 
   const {
+    services: {
+      charts: {
+        theme: { useChartsBaseTheme },
+      },
+    },
+  } = useMlKibana();
+
+  const baseTheme = useChartsBaseTheme();
+
+  const {
     getModelSnapshots,
     results: { getDatafeedResultChartData },
   } = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
   const handleChange = (date: moment.Moment) => setEndDate(date);
   const handleEndDateChange = (direction: ChartDirectionType) => {
     if (data.bucketSpan === undefined) return;
@@ -355,21 +366,23 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           onChange={() => setShowAnnotations(!showAnnotations)}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiCheckbox
-                          id={checkboxIdModelSnapshot}
-                          label={
-                            <EuiText size={'xs'}>
-                              <FormattedMessage
-                                id="xpack.ml.jobsList.datafeedChart.showModelSnapshotsCheckboxLabel"
-                                defaultMessage="Show model snapshots"
-                              />
-                            </EuiText>
-                          }
-                          checked={showModelSnapshots}
-                          onChange={() => setShowModelSnapshots(!showModelSnapshots)}
-                        />
-                      </EuiFlexItem>
+                      {onModelSnapshotAnnotationClick ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiCheckbox
+                            id={checkboxIdModelSnapshot}
+                            label={
+                              <EuiText size={'xs'}>
+                                <FormattedMessage
+                                  id="xpack.ml.jobsList.datafeedChart.showModelSnapshotsCheckboxLabel"
+                                  defaultMessage="Show model snapshots"
+                                />
+                              </EuiText>
+                            }
+                            checked={showModelSnapshots}
+                            onChange={() => setShowModelSnapshots(!showModelSnapshots)}
+                          />
+                        </EuiFlexItem>
+                      ) : null}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -420,10 +433,17 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             )
                               return;
 
-                            onModelSnapshotAnnotationClick(
-                              // @ts-expect-error property 'modelSnapshot' does not exist on type
-                              annotations.lines[0].datum.modelSnapshot
-                            );
+                            if (
+                              onModelSnapshotAnnotationClick &&
+                              isPopulatedObject<string, ModelSnapshot>(
+                                annotations.lines?.[0]?.datum,
+                                ['modelSnapshot']
+                              )
+                            ) {
+                              onModelSnapshotAnnotationClick(
+                                annotations.lines[0].datum.modelSnapshot
+                              );
+                            }
                           }}
                           theme={{
                             lineSeriesStyle: {
@@ -431,9 +451,11 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                                 visible: 'never',
                               },
                             },
+                            chartMargins: {
+                              top: 10,
+                            },
                           }}
-                          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                          baseTheme={LEGACY_LIGHT_THEME}
+                          baseTheme={baseTheme}
                           locale={i18n.getLocale()}
                         />
                         <Axis
@@ -479,7 +501,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                               style={{
                                 line: {
                                   strokeWidth: 3,
-                                  stroke: euiTheme.euiColorDangerText,
+                                  stroke: euiTheme.colors.textDanger,
                                   opacity: 0.5,
                                 },
                               }}
@@ -494,7 +516,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                                   defaultMessage: 'Annotations rectangle result',
                                 }
                               )}
-                              style={{ fill: euiTheme.euiColorDangerText }}
+                              style={{ fill: euiTheme.colors.textDanger }}
                             />
                           </>
                         ) : null}
@@ -514,7 +536,11 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             style={{
                               line: {
                                 strokeWidth: 3,
-                                stroke: euiTheme.euiColorVis1,
+                                // Amsterdam: euiTheme.colors.vis.euiColorVis1
+                                // Borealis:  euiTheme.colors.vis.euiColorVis2
+                                stroke: euiTheme.flags.hasVisColorAdjustment
+                                  ? euiTheme.colors.vis.euiColorVis1
+                                  : euiTheme.colors.vis.euiColorVis2,
                                 opacity: 0.5,
                               },
                             }}
@@ -537,7 +563,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                               style={{
                                 line: {
                                   strokeWidth: 3,
-                                  stroke: euiTheme.euiColorAccent,
+                                  stroke: euiTheme.colors.accent,
                                   opacity: 0.5,
                                 },
                               }}
@@ -546,7 +572,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                         ) : null}
                         <LineSeries
                           key={'source-results'}
-                          color={euiTheme.euiColorPrimary}
+                          color={euiTheme.colors.primary}
                           id={i18n.translate('xpack.ml.jobsList.datafeedChart.sourceSeriesId', {
                             defaultMessage: 'Source indices document count',
                           })}
@@ -559,7 +585,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                         />
                         <LineSeries
                           key={'job-results'}
-                          color={euiTheme.euiColorAccentText}
+                          color={euiTheme.colors.textAccent}
                           id={i18n.translate('xpack.ml.jobsList.datafeedChart.bucketSeriesId', {
                             defaultMessage: 'Datafeed document count',
                           })}

@@ -241,9 +241,13 @@ FROM employees
 
 The `::` operator provides a convenient alternative syntax to the `TO_<type>` conversion functions.
 
-Example:
+Examples:
 
 ```esql
 FROM employees
 | EVAL salary = salary::double
+```
+
+```esql
+ROW ver = CONCAT(("0"::INT + 1)::STRING, ".2.3")::VERSION
 ```

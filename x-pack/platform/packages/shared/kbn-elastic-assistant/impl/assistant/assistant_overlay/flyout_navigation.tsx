@@ -6,11 +6,17 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 
 export interface FlyoutNavigationProps {
@@ -26,7 +32,7 @@ const VerticalSeparator = styled.div`
   :before {
     content: '';
     height: 100%;
-    border-left: 1px solid ${euiThemeVars.euiColorLightShade};
+    border-left: ${(props) => props.theme.euiTheme.border.thin};
   }
 `;
 
@@ -44,6 +50,8 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
     onConversationCreate,
     isAssistantEnabled,
   }) => {
+    const { euiTheme } = useEuiTheme();
+
     const onToggle = useCallback(
       () => setIsExpanded && setIsExpanded(!isExpanded),
       [isExpanded, setIsExpanded]
@@ -84,7 +92,7 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
         paddingSize="s"
         grow={false}
         css={css`
-          border-bottom: 1px solid ${euiThemeVars.euiColorLightShade};
+          border-bottom: ${euiTheme.border.thin};
         `}
       >
         <EuiFlexGroup

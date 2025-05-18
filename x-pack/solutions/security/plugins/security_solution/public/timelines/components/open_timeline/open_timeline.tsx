@@ -10,6 +10,7 @@ import type { EuiBasicTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import styled from 'styled-components';
+import type { ImportTimelineResult } from '../../../../common/api/timeline';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../../common/api/timeline';
 import { ImportDataModal } from '../../../common/components/import_data_modal';
 import {
@@ -30,6 +31,8 @@ import { TimelinesTable } from './timelines_table';
 import * as i18n from './translations';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import type { OpenTimelineProps, ActionTimelineToShow, OpenTimelineResult } from './types';
+import { formatError } from './utils';
+import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 
 const QueryText = styled.span`
   white-space: normal;
@@ -78,13 +81,15 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       onCompleteEditTimelineAction,
     } = useEditTimelineActions();
     const tableRef = useRef<EuiBasicTable<OpenTimelineResult> | null>(null);
-    const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+    const { timelinePrivileges } = useUserPrivileges();
     const { getBatchItemsPopoverContent } = useEditTimelineBatchActions({
-      deleteTimelines: kibanaSecuritySolutionsPrivileges.crud ? deleteTimelines : undefined,
+      deleteTimelines: timelinePrivileges.crud ? deleteTimelines : undefined,
       selectedItems,
       tableRef,
       timelineType,
     });
+
+    const { addError, addSuccess } = useAppToasts();
 
     const nTemplates = useMemo(
       () => (
@@ -146,17 +151,29 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       }
     }, [setImportDataModalToggle]);
 
-    const handleComplete = useCallback(() => {
-      if (setImportDataModalToggle != null) {
-        setImportDataModalToggle(false);
-      }
-      if (refetch != null) {
-        refetch();
-      }
-    }, [setImportDataModalToggle, refetch]);
+    const handleComplete = useCallback(
+      (importResponse: ImportTimelineResult) => {
+        if (importResponse.success_count && importResponse.success_count > 0) {
+          addSuccess(i18n.SUCCESSFULLY_IMPORTED_TIMELINES(importResponse.success_count));
+        }
+
+        if (importResponse.errors && importResponse.errors.length > 0) {
+          const ruleError = formatError(importResponse);
+          addError(ruleError, { title: i18n.IMPORT_FAILED(importResponse.errors.length) });
+        }
+
+        if (setImportDataModalToggle != null) {
+          setImportDataModalToggle(false);
+        }
+        if (refetch != null) {
+          refetch();
+        }
+      },
+      [setImportDataModalToggle, refetch, addSuccess, addError]
+    );
 
     const actionTimelineToShow = useMemo<ActionTimelineToShow[]>(() => {
-      if (kibanaSecuritySolutionsPrivileges.crud) {
+      if (timelinePrivileges.crud) {
         const createRule: ActionTimelineToShow[] = ['createRule'];
         const createRuleFromEql: ActionTimelineToShow[] = ['createRuleFromEql'];
         const timelineActions: ActionTimelineToShow[] = [
@@ -192,7 +209,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
       timelineStatus,
       onDeleteSelected,
       deleteTimelines,
-      kibanaSecuritySolutionsPrivileges,
+      timelinePrivileges,
     ]);
 
     const SearchRowContent = useMemo(() => <>{templateTimelineFilter}</>, [templateTimelineFilter]);
@@ -209,19 +226,15 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           title={actionItem?.title ?? i18n.UNTITLED_TIMELINE}
         />
         <ImportDataModal
-          checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
+          isModalVisible={importDataModalToggle ?? false}
           closeModal={handleCloseModal}
-          description={i18n.SELECT_TIMELINE}
-          errorMessage={i18n.IMPORT_FAILED}
-          failedDetailed={i18n.IMPORT_FAILED_DETAILED}
-          importComplete={handleComplete}
-          importData={importTimelines}
-          successMessage={i18n.SUCCESSFULLY_IMPORTED_TIMELINES}
-          showCheckBox={false}
-          showModal={importDataModalToggle ?? false}
-          submitBtnText={i18n.IMPORT_TIMELINE_BTN_TITLE}
-          subtitle={i18n.INITIAL_PROMPT_TEXT}
           title={i18n.IMPORT_TIMELINE}
+          filePickerPrompt={i18n.INITIAL_PROMPT_TEXT}
+          description={i18n.SELECT_TIMELINE}
+          submitBtnText={i18n.IMPORT_TIMELINE_BTN_TITLE}
+          errorMessage={i18n.IMPORT_FAILED}
+          importData={importTimelines}
+          onImportComplete={handleComplete}
         />
 
         <div data-test-subj="timelines-page-container" className={OPEN_TIMELINE_CLASS_NAME}>

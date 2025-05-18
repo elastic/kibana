@@ -13,7 +13,7 @@ import type {
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 /**
- * It's check for index existatnce, and create index
+ * It's check for index existence, and create index
  * or update existing index mappings
  */
 export const createOrUpdateIndex = async ({
@@ -40,7 +40,7 @@ export const createOrUpdateIndex = async ({
           indices.map(async (index) => {
             try {
               await retryTransientEsErrors(
-                () => esClient.indices.putMapping({ index, body: options.mappings }),
+                () => esClient.indices.putMapping({ index, ...options.mappings }),
                 { logger }
               );
               logger.info(`Update mappings for ${index}`);

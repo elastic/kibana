@@ -18,24 +18,32 @@ interface RuleUpgradeInfoBarProps {
   totalNumOfFields: number;
   numOfFieldsWithUpdates: number;
   numOfConflicts: number;
+  currentVersionNumber: number;
+  targetVersionNumber: number;
 }
 
 export function RuleUpgradeInfoBar({
   totalNumOfFields,
   numOfFieldsWithUpdates,
   numOfConflicts,
+  currentVersionNumber,
+  targetVersionNumber,
 }: RuleUpgradeInfoBarProps): JSX.Element {
   return (
     <UtilityBar>
       <UtilityBarSection>
         <UtilityBarGroup>
           <UtilityBarText dataTestSubj="showingRules">
-            {i18n.TOTAL_NUM_OF_FIELDS(totalNumOfFields)}
+            {i18n.VERSION_UPDATE_INFO(
+              numOfFieldsWithUpdates,
+              currentVersionNumber,
+              targetVersionNumber
+            )}
           </UtilityBarText>
         </UtilityBarGroup>
         <UtilityBarGroup>
           <UtilityBarText dataTestSubj="showingRules">
-            {i18n.NUM_OF_FIELDS_WITH_UPDATES(numOfFieldsWithUpdates)}
+            {i18n.TOTAL_NUM_OF_FIELDS(totalNumOfFields)}
           </UtilityBarText>
         </UtilityBarGroup>
         <UtilityBarGroup>

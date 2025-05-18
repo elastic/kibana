@@ -6,15 +6,15 @@
  */
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { getAlertsIndex } from '../../../../../common/utils/risk_score_modules';
 import type { RiskEngineConfiguration } from '../../types';
 import { riskEngineConfigurationTypeName } from '../saved_object';
+import { getAlertsIndex } from '../../utils/get_alerts_index';
 
 export interface SavedObjectsClientArg {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
-const getDefaultRiskEngineConfiguration = ({
+export const getDefaultRiskEngineConfiguration = ({
   namespace,
 }: {
   namespace: string;
@@ -26,6 +26,10 @@ const getDefaultRiskEngineConfiguration = ({
   interval: '1h',
   pageSize: 3_500,
   range: { start: 'now-30d', end: 'now' },
+  _meta: {
+    // Upgrade this property when changing mappings
+    mappingsVersion: 3,
+  },
 });
 
 const getConfigurationSavedObject = async ({
@@ -41,12 +45,7 @@ export const updateSavedObjectAttribute = async ({
   savedObjectsClient,
   attributes,
 }: SavedObjectsClientArg & {
-  attributes: {
-    enabled?: boolean;
-    excludeAlertIds?: string[];
-    range?: { start: string; end: string };
-    excludeAlertTags?: string[];
-  };
+  attributes: Partial<RiskEngineConfiguration>;
 }) => {
   const savedObjectConfiguration = await getConfigurationSavedObject({
     savedObjectsClient,

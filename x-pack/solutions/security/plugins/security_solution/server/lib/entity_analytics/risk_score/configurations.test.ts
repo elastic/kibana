@@ -12,6 +12,7 @@ describe('getTransformOptions', () => {
     const options = getTransformOptions({
       dest: 'dest',
       source: ['source'],
+      namespace: 'tests',
     });
 
     expect(options).toMatchInlineSnapshot(`
@@ -19,7 +20,8 @@ describe('getTransformOptions', () => {
         "_meta": Object {
           "managed": true,
           "managed_by": "security-entity-analytics",
-          "version": 2,
+          "space_id": "tests",
+          "version": 3,
         },
         "dest": Object {
           "index": "dest",
@@ -30,6 +32,7 @@ describe('getTransformOptions', () => {
           "unique_key": Array [
             "host.name",
             "user.name",
+            "service.name",
           ],
         },
         "settings": Object {
@@ -39,6 +42,19 @@ describe('getTransformOptions', () => {
           "index": Array [
             "source",
           ],
+          "query": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "range": Object {
+                    "@timestamp": Object {
+                      "gte": "now-24h",
+                    },
+                  },
+                },
+              ],
+            },
+          },
         },
         "sync": Object {
           "time": Object {

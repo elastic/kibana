@@ -8,7 +8,7 @@
 import { chunk } from 'lodash';
 import { queue } from 'async';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
 import type {

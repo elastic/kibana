@@ -7,7 +7,7 @@
 
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import { getMappedNonEcsValue, useGetMappedNonEcsValue } from './get_mapped_non_ecs_value';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 describe('getMappedNonEcsValue', () => {
   it('should return the correct value', () => {

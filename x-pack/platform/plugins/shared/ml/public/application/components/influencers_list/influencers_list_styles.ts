@@ -6,24 +6,24 @@
  */
 
 import { css } from '@emotion/react';
-import { useCurrentEuiThemeVars } from '@kbn/ml-kibana-theme';
-import { mlColors } from '../../styles';
-import { useMlKibana } from '../../contexts/kibana';
+
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
+
+import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils';
 
 export const useInfluencersListStyles = () => {
-  const {
-    services: { theme },
-  } = useMlKibana();
-  const { euiTheme } = useCurrentEuiThemeVars(theme);
+  const { euiTheme } = useEuiTheme();
+  const euiFontSizeXS = useEuiFontSize('xs').fontSize;
+  const euiFontSizeM = useEuiFontSize('m').fontSize;
 
   return {
     influencersList: css({
       lineHeight: 1.45,
     }),
     fieldLabel: css({
-      fontSize: euiTheme.euiFontSizeXS,
+      fontSize: euiFontSizeXS,
       textAlign: 'left',
-      maxHeight: euiTheme.euiFontSizeS,
+      maxHeight: euiFontSizeM,
       maxWidth: 'calc(100% - 102px)',
     }),
     progress: css({
@@ -32,7 +32,7 @@ export const useInfluencersListStyles = () => {
       height: '22px',
       minWidth: '70px',
       marginBottom: 0,
-      color: euiTheme.euiColorDarkShade,
+      color: euiTheme.colors.darkShade,
       backgroundColor: 'transparent',
     }),
     progressBarHolder: css({
@@ -40,9 +40,9 @@ export const useInfluencersListStyles = () => {
     }),
     progressBar: (severity: string, barScore: number) =>
       css({
-        height: `calc(${euiTheme.euiSizeXS} / 2)`,
+        height: `calc(${euiTheme.size.xs} / 2)`,
         float: 'left',
-        marginTop: euiTheme.euiSizeM,
+        marginTop: euiTheme.size.m,
         textAlign: 'right',
         lineHeight: '18px',
         display: 'inline-block',
@@ -50,41 +50,41 @@ export const useInfluencersListStyles = () => {
         width: `${barScore}%`,
         backgroundColor:
           severity === 'critical'
-            ? mlColors.critical
+            ? ML_SEVERITY_COLORS.CRITICAL
             : severity === 'major'
-            ? mlColors.major
+            ? ML_SEVERITY_COLORS.MAJOR
             : severity === 'minor'
-            ? mlColors.minor
-            : mlColors.warning,
+            ? ML_SEVERITY_COLORS.MINOR
+            : ML_SEVERITY_COLORS.WARNING,
       }),
     scoreLabel: (severity: string) =>
       css({
         textAlign: 'center',
         lineHeight: '14px',
         whiteSpace: 'nowrap',
-        fontSize: euiTheme.euiFontSizeXS,
-        marginLeft: euiTheme.euiSizeXS,
+        fontSize: euiFontSizeXS,
+        marginLeft: euiTheme.size.xs,
         display: 'inline',
         borderColor:
           severity === 'critical'
-            ? mlColors.critical
+            ? ML_SEVERITY_COLORS.CRITICAL
             : severity === 'major'
-            ? mlColors.major
+            ? ML_SEVERITY_COLORS.MAJOR
             : severity === 'minor'
-            ? mlColors.minor
-            : mlColors.warning,
+            ? ML_SEVERITY_COLORS.MINOR
+            : ML_SEVERITY_COLORS.WARNING,
       }),
     totalScoreLabel: css({
-      width: euiTheme.euiSizeXL,
+      width: euiTheme.size.xl,
       verticalAlign: 'top',
       textAlign: 'center',
-      color: euiTheme.euiColorDarkShade,
+      color: euiTheme.colors.darkShade,
       fontSize: '11px',
       lineHeight: '14px',
-      borderRadius: euiTheme.euiBorderRadius,
-      padding: `calc(${euiTheme.euiSizeXS} / 2)`,
+      borderRadius: euiTheme.border.radius.small,
+      padding: `calc(${euiTheme.size.xs} / 2)`,
       display: 'inline-block',
-      border: euiTheme.euiBorderThin,
+      border: euiTheme.border.thin,
     }),
   };
 };

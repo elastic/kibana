@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   EuiButton,
   EuiCard,
@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiPageHeader,
   useEuiTheme,
-  type EuiThemeComputed,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -33,44 +32,53 @@ const imgUrls = {
   endpoint: endpointSvg,
 };
 
-const headerCardStyles = css`
-  span.euiTitle {
-    font-size: 36px;
-    line-height: 100%;
-  }
-`;
-
-const pageHeaderStyles = css`
-  h1 {
-    font-size: 18px;
-  }
-`;
-
-const getFlexItemStyles = (euiTheme: EuiThemeComputed) => css`
-  background: ${euiTheme.colors.lightestShade};
-  padding: 20px;
-`;
-
-const cardStyles = css`
-  img {
-    margin-top: 20px;
-    max-width: 400px;
-  }
-`;
-
-const footerStyles = css`
-  span.euiTitle {
-    font-size: 36px;
-    line-height: 100%;
-  }
-  max-width: 600px;
-  display: block;
-  margin: 20px auto 0;
-`;
-
-export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) => {
+const useEmptyPromptStyles = () => {
   const { euiTheme } = useEuiTheme();
 
+  const headerCardStyles = css`
+    span.euiTitle {
+      font-size: ${euiTheme.base * 2.25}px;
+      line-height: 100%;
+    }
+  `;
+
+  const pageHeaderStyles = css`
+    h1 {
+      font-size: ${euiTheme.base * 1.125}px;
+    }
+  `;
+
+  const flexItemStyles = css`
+    background: ${euiTheme.colors.backgroundBaseSubdued};
+    padding: ${euiTheme.base * 1.25}px;
+  `;
+
+  const cardStyles = css`
+    img {
+      margin-top: ${euiTheme.base * 1.25}px;
+      max-width: ${euiTheme.components.forms.maxWidth};
+    }
+  `;
+
+  const footerStyles = css`
+    span.euiTitle {
+      font-size: ${euiTheme.base * 2.25}px;
+      line-height: 100%;
+    }
+    max-width: 600px;
+    display: block;
+    margin: ${euiTheme.base * 1.25}px auto 0;
+  `;
+
+  return useMemo(
+    () => ({ headerCardStyles, pageHeaderStyles, flexItemStyles, cardStyles, footerStyles }),
+    [cardStyles, flexItemStyles, footerStyles, headerCardStyles, pageHeaderStyles]
+  );
+};
+
+export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) => {
+  const { headerCardStyles, pageHeaderStyles, flexItemStyles, cardStyles, footerStyles } =
+    useEmptyPromptStyles();
   const { navigateTo } = useNavigateTo();
 
   const navigateToAddIntegrations = useCallback(() => {
@@ -123,7 +131,7 @@ export const EmptyPromptComponent = memo(({ onSkip }: { onSkip?: () => void }) =
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem css={getFlexItemStyles(euiTheme)}>
+      <EuiFlexItem css={flexItemStyles}>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <EuiCard

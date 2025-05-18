@@ -18,7 +18,11 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       return await testSubjects.getVisibleText('appTitle');
     },
 
-    async expectToBeOnIndicesManagement() {
+    async expectToBeOnSearchIndexManagement() {
+      await testSubjects.existOrFail('elasticsearchIndexManagement');
+    },
+
+    async expectToBeOnIndexManagement() {
       const headingText = await testSubjects.getVisibleText('appTitle');
       expect(headingText).to.be('Index Management');
     },
@@ -36,6 +40,32 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
       const policyDetailsLinks = await testSubjects.findAll('enrichPolicyDetailsLink');
       await policyDetailsLinks[indexOfRow].click();
+    },
+
+    async clickIndexTemplate(name: string): Promise<void> {
+      const indexTemplateLinks = await testSubjects.findAll('templateDetailsLink');
+
+      for (const link of indexTemplateLinks) {
+        if ((await link.getVisibleText()).includes(name)) {
+          await link.click();
+          return;
+        }
+      }
+    },
+
+    async clickBulkEditDataRetention(dataStreamNames: string[]): Promise<void> {
+      for (const dsName of dataStreamNames) {
+        const checkbox = await testSubjects.find(`checkboxSelectRow-${dsName}`);
+        if (!(await checkbox.isSelected())) {
+          await checkbox.click();
+        }
+      }
+      await testSubjects.click('dataStreamActionsPopoverButton');
+      await testSubjects.click('bulkEditDataRetentionButton');
+    },
+
+    async clickIndexTemplateNameLink(name: string): Promise<void> {
+      await find.clickByLinkText(name);
     },
 
     async clickDataStreamNameLink(name: string): Promise<void> {
@@ -142,6 +172,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async clickNextButton() {
       await testSubjects.click('nextButton');
     },
+
     indexDetailsPage: {
       async openIndexDetailsPage(indexOfRow: number) {
         const indexList = await testSubjects.findAll('indexTableIndexNameLink');
@@ -181,6 +212,13 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       ) {
         await testSubjects.click(tab);
       },
+      async expectBreadcrumbNavigationToHaveBreadcrumbName(breadcrumbName: string) {
+        await testSubjects.existOrFail('euiBreadcrumb');
+        expect(await testSubjects.getVisibleText('breadcrumb first')).to.contain(
+          'Stack Management'
+        );
+        expect(await testSubjects.getVisibleText('breadcrumb last')).to.contain(breadcrumbName);
+      },
     },
     async clickCreateIndexButton() {
       await testSubjects.click('createIndexButton');
@@ -188,6 +226,10 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async setCreateIndexName(value: string) {
       await testSubjects.existOrFail('createIndexNameFieldText');
       await testSubjects.setValue('createIndexNameFieldText', value);
+    },
+    async setCreateIndexMode(value: string) {
+      await testSubjects.existOrFail('indexModeField');
+      await testSubjects.selectValue('indexModeField', value);
     },
     async clickCreateIndexSaveButton() {
       await testSubjects.existOrFail('createIndexSaveButton');

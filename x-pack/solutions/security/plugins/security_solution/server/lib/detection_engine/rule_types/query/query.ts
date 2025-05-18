@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
-
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { getFilter } from '../utils/get_filter';
@@ -19,33 +13,29 @@ import { groupAndBulkCreate } from './alert_suppression/group_and_bulk_create';
 import { searchAfterAndBulkCreate } from '../utils/search_after_bulk_create';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import type { UnifiedQueryRuleParams } from '../../rule_schema';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../utils/reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import type { CreateRuleOptions, RunOpts } from '../types';
+import type { SecurityRuleServices, SecuritySharedParams } from '../types';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 export const queryExecutor = async ({
-  runOpts,
-  experimentalFeatures,
+  sharedParams,
   eventsTelemetry,
   services,
-  version,
-  spaceId,
   bucketHistory,
   scheduleNotificationResponseActionsService,
   licensing,
+  isLoggedRequestsEnabled,
 }: {
-  runOpts: RunOpts<UnifiedQueryRuleParams>;
-  experimentalFeatures: ExperimentalFeatures;
+  sharedParams: SecuritySharedParams<UnifiedQueryRuleParams>;
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  version: string;
-  spaceId: string;
+  services: SecurityRuleServices;
   bucketHistory?: BucketHistory[];
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
   licensing: LicensingPluginSetup;
+  isLoggedRequestsEnabled: boolean;
 }) => {
-  const completeRule = runOpts.completeRule;
+  const { completeRule } = sharedParams;
   const ruleParams = completeRule.ruleParams;
 
   return withSecuritySpan('queryExecutor', async () => {
@@ -56,8 +46,8 @@ export const queryExecutor = async ({
       query: ruleParams.query,
       savedId: ruleParams.savedId,
       services,
-      index: runOpts.inputIndex,
-      exceptionFilter: runOpts.exceptionFilter,
+      index: sharedParams.inputIndex,
+      exceptionFilter: sharedParams.exceptionFilter,
       loadFields: true,
     });
 
@@ -68,35 +58,25 @@ export const queryExecutor = async ({
       // TODO: replace this with getIsAlertSuppressionActive function
       ruleParams.alertSuppression?.groupBy != null && hasPlatinumLicense
         ? await groupAndBulkCreate({
-            runOpts,
+            sharedParams,
             services,
-            spaceId,
             filter: esFilter,
             buildReasonMessage: buildReasonMessageForQueryAlert,
             bucketHistory,
             groupByFields: ruleParams.alertSuppression.groupBy,
             eventsTelemetry,
-            experimentalFeatures,
+            isLoggedRequestsEnabled,
           })
         : {
             ...(await searchAfterAndBulkCreate({
-              tuple: runOpts.tuple,
-              exceptionsList: runOpts.unprocessedExceptions,
+              sharedParams,
               services,
-              listClient: runOpts.listClient,
-              ruleExecutionLogger: runOpts.ruleExecutionLogger,
               eventsTelemetry,
-              inputIndexPattern: runOpts.inputIndex,
-              pageSize: runOpts.searchAfterSize,
               filter: esFilter,
               buildReasonMessage: buildReasonMessageForQueryAlert,
-              bulkCreate: runOpts.bulkCreate,
-              wrapHits: runOpts.wrapHits,
-              runtimeMappings: runOpts.runtimeMappings,
-              primaryTimestamp: runOpts.primaryTimestamp,
-              secondaryTimestamp: runOpts.secondaryTimestamp,
+              isLoggedRequestsEnabled,
             })),
-            state: {},
+            state: { isLoggedRequestsEnabled },
           };
 
     scheduleNotificationResponseActionsService({

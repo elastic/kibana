@@ -8,13 +8,7 @@
 import React, { memo } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAccordion, EuiCommentList, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import * as i18n from '../translations';
-
-const accordionCss = css`
-  color: ${euiThemeVars.euiColorPrimary};
-`;
 
 export interface ExceptionItemCardCommentsProps {
   comments: EuiCommentProps[];
@@ -29,14 +23,14 @@ export const ExceptionItemCardComments = memo<ExceptionItemCardCommentsProps>(
         <EuiAccordion
           id="exceptionItemCardComments"
           buttonContent={
-            <EuiText size="s" css={accordionCss} data-test-subj={`${dataTestSubj || ''}TextButton`}>
+            <EuiText size="s" data-test-subj={`${dataTestSubj || ''}TextButton`}>
               {i18n.exceptionItemCardCommentsAccordion(comments.length)}
             </EuiText>
           }
           arrowDisplay="none"
           data-test-subj="exceptionItemCardComments"
         >
-          <EuiPanel data-test-subj="accordionContentPanel" hasBorder hasShadow paddingSize="m">
+          <EuiPanel data-test-subj="accordionContentPanel" paddingSize="m">
             <EuiCommentList data-test-subj="accordionCommentList" comments={comments} />
           </EuiPanel>
         </EuiAccordion>

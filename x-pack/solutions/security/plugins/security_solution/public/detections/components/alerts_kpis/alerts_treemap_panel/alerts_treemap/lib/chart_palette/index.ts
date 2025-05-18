@@ -7,15 +7,13 @@
 
 import { clamp } from 'lodash/fp';
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
-  RISK_COLOR_LOW,
-  RISK_COLOR_MEDIUM,
-  RISK_COLOR_HIGH,
-  RISK_COLOR_CRITICAL,
   RISK_SCORE_MEDIUM,
   RISK_SCORE_HIGH,
   RISK_SCORE_CRITICAL,
-} from '../../../../../../../common/constants';
+} from '../../../../../../../../common/detection_engine/constants';
+import { getRiskSeverityColors } from '../../../../../../../common/utils/risk_color_palette';
 
 /**
  * The detection engine creates risk scores in the range 1 - 100.
@@ -34,20 +32,22 @@ export const RISK_SCORE_STEPS = 101;
  * This pallet has the same type as `EuiPalette`, which is not exported by
  * EUI at the time of this writing.
  */
-export const getRiskScorePalette = (steps: number): string[] =>
-  Array(steps)
+export const getRiskScorePalette = (steps: number, euiTheme: EuiThemeComputed): string[] => {
+  const palette = getRiskSeverityColors(euiTheme);
+  return Array(steps)
     .fill(0)
     .map((_, i) => {
       if (i >= RISK_SCORE_CRITICAL) {
-        return RISK_COLOR_CRITICAL;
+        return palette.critical;
       } else if (i >= RISK_SCORE_HIGH) {
-        return RISK_COLOR_HIGH;
+        return palette.high;
       } else if (i >= RISK_SCORE_MEDIUM) {
-        return RISK_COLOR_MEDIUM;
+        return palette.medium;
       } else {
-        return RISK_COLOR_LOW;
+        return palette.low;
       }
     });
+};
 
 /** Returns a fill color based on the index of the risk score in the color palette */
 export const getFillColor = ({

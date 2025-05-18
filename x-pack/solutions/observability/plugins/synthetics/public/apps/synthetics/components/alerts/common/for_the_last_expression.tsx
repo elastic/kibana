@@ -7,7 +7,8 @@
 import { EuiExpression, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getConditionType, StatusRuleCondition } from '../../../../../../common/rules/status_rule';
+import { StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { getConditionType } from '../../../../../../common/rules/status_rule';
 import { StatusRuleParamsProps } from '../status_rule_ui';
 
 interface Props {
@@ -138,16 +139,12 @@ export const ForTheLastExpression = ({ ruleParams, setRuleParams }: Props) => {
             case 'checksWindow':
               setRuleParams('condition', {
                 ...ruleParams.condition,
-                downThreshold: 5,
-                locationsThreshold: 1,
                 window: { numberOfChecks: 5 },
               });
               break;
             case 'timeWindow':
               setRuleParams('condition', {
                 ...ruleParams.condition,
-                downThreshold: 5,
-                locationsThreshold: 1,
                 window: { time: { unit: 'm', size: 5 } },
               });
               break;

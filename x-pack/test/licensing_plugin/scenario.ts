@@ -70,9 +70,30 @@ export function createScenario({ getService, getPageObjects }: FtrProviderContex
       expect(response.body.trial_was_started).to.be(true);
     },
 
-    // FIXME: enterprise license is not available for tests
-    // https://github.com/elastic/kibana/issues/53575
-    async startEnterprise() {},
+    async startEnterprise() {
+      const response = await esSupertestWithoutAuth
+        .post('/_license/?acknowledge=true')
+        .send({
+          license: {
+            uid: '89e98f2b-c33e-4b86-b2fc-e2a9c50b7e48',
+            type: 'enterprise',
+            issue_date_in_millis: 1732060800000,
+            expiry_date_in_millis: 1798761599999,
+            max_nodes: null,
+            max_resource_units: 250,
+            issued_to:
+              'Elastic - INTERNAL (development environments) (non-production environments)',
+            issuer: 'API',
+            signature:
+              'AAAABQAAAA3qRa8oxcCGYexwpCR8AAAAIAo5/x6hrsGh1GqqrJmy4qgmEC7gK0U4zQ6q5ZEMhm4jAAABADNu1nLWe1tBP0/JMebh0StSAfu7pN/YtKi7IUG3dITPAWw63pMLyDUMSTkgR1FP4LOzPVYtYhliALt/ho/xBUsnjFfhEfTbdDwFrs70bzZ3U9nDsAvpZe6BjwSyuKpJTZW6Ebd2ZbZfZ3ZyuzPl8SNXUckSwd3TzrrmZzi7VD5vILMrgrAGJtlhzXirnLRoIA8hoRLzoHsMV/KiofmLLuWFP7YemdM2/l7KxJyz0HfdPhl89v/m3GumyX1QCmHOGNF0Vs1F6Rum79g4iZjGCp0SSOMQfQIaMMc0YgBIa5AdiuWQV5RtAYHxjZ4oidSADyVWnGQIAm9KLVhO3Y5HBGw=',
+            start_date_in_millis: 1732060800000,
+          },
+        })
+        .auth('license_manager_user', 'license_manager_user-password')
+        .expect(200);
+
+      expect(response.body.license_status).to.be('valid');
+    },
 
     async deleteLicense() {
       const response = await esSupertestWithoutAuth

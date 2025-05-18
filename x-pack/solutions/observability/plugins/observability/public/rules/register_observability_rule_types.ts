@@ -16,7 +16,7 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type {
   CustomMetricExpressionParams,
@@ -44,7 +44,9 @@ const thresholdDefaultActionMessage = i18n.translate(
 const thresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultRecoveryMessage',
   {
-    defaultMessage: `'{{rule.name}}' has recovered.
+    defaultMessage: `Recovered: '{{context.reason}}'
+    
+    '{{rule.name}}' has recovered.
 
 [View alert details]('{{context.alertDetailsUrl}}')
 `,
@@ -59,7 +61,7 @@ const getDataViewId = (searchConfiguration?: SearchConfigurationWithExtractedRef
 export const registerObservabilityRuleTypes = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   uiSettings: IUiSettingsClient,
-  logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>
+  logsLocator?: LocatorPublic<DiscoverAppLocatorParams>
 ) => {
   const validateCustomThresholdWithUiSettings = ({
     criteria,
@@ -102,7 +104,7 @@ export const registerObservabilityRuleTypes = (
         link: getViewInAppUrl({
           dataViewId,
           groups,
-          logsExplorerLocator,
+          logsLocator,
           metrics,
           searchConfiguration,
           startedAt: fields[ALERT_START],

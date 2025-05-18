@@ -8,33 +8,25 @@
 import { i18n } from '@kbn/i18n';
 
 import type {
-  FormSchema,
-  ValidationFunc,
   ERROR_CODE,
+  FormSchema,
   ValidationError,
+  ValidationFunc,
 } from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators, VALIDATION_TYPES } from '../../../../shared_imports';
-import type {
-  AboutStepRiskScore,
-  AboutStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
-import { OptionalFieldLabel } from '../optional_field_label';
+import type { AboutStepRiskScore, AboutStepRule } from '../../../common/types';
+import { OptionalFieldLabel } from '../../../rule_creation/components/optional_field_label';
 import { isUrlInvalid } from '../../../../common/utils/validators';
-import * as I18n from './translations';
 import { defaultRiskScoreValidator } from '../../validators/default_risk_score_validator';
 import { maxSignalsValidatorFactory } from '../../validators/max_signals_validator_factory';
+import * as I18n from './translations';
 
 const { emptyField } = fieldValidators;
 
 export const schema: FormSchema<AboutStepRule> = {
   author: {
     type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAuthorLabel',
-      {
-        defaultMessage: 'Author',
-      }
-    ),
+    label: I18n.AUTHOR_FIELD_LABEL,
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAuthorHelpText',
       {
@@ -209,12 +201,7 @@ export const schema: FormSchema<AboutStepRule> = {
   },
   license: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldLicenseLabel',
-      {
-        defaultMessage: 'License',
-      }
-    ),
+    label: I18n.LICENSE_FIELD_LABEL,
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldLicenseHelpText',
       {
@@ -249,23 +236,7 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
-  threatIndicatorPath: {
-    type: FIELD_TYPES.TEXT,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
-      {
-        defaultMessage: 'Indicator prefix override',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
-      {
-        defaultMessage:
-          'Specify the document prefix containing your indicator fields. Used for enrichment of indicator match alerts.',
-      }
-    ),
-    labelAppend: OptionalFieldLabel,
-  },
+  threatIndicatorPath: {},
   timestampOverride: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate(
@@ -359,39 +330,4 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
-};
-
-const threatIndicatorPathRequiredSchemaValue = {
-  type: FIELD_TYPES.TEXT,
-  label: i18n.translate(
-    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
-    {
-      defaultMessage: 'Indicator prefix override',
-    }
-  ),
-  helpText: i18n.translate(
-    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathHelpText',
-    {
-      defaultMessage:
-        'Specify the document prefix containing your indicator fields. Used for enrichment of indicator match alerts.',
-    }
-  ),
-  validations: [
-    {
-      validator: emptyField(
-        i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.threatIndicatorPathFieldEmptyError',
-          {
-            defaultMessage: 'Indicator prefix override must not be empty',
-          }
-        )
-      ),
-      type: VALIDATION_TYPES.FIELD,
-    },
-  ],
-};
-
-export const threatMatchAboutSchema = {
-  ...schema,
-  threatIndicatorPath: threatIndicatorPathRequiredSchemaValue,
 };

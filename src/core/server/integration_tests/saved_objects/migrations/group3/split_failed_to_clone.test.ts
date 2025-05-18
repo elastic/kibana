@@ -27,7 +27,7 @@ import {
 import { delay } from '../test_utils';
 import '../jest_matchers';
 
-// mock clone_index from packages/core
+// mock clone_index from src/core/packages/saved-objects
 jest.mock('@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index', () => {
   const realModule = jest.requireActual(
     '@kbn/core-saved-objects-migration-server-internal/src/actions/clone_index'
@@ -65,7 +65,6 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
     migratorTestKitFactory = () =>
       getRelocatingMigratorTestKit({
         logFilePath,
-        filterDeprecated: true,
         relocateTypes: {
           // move 'basic' to a new index
           basic: kibanaSplitIndex,

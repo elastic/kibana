@@ -153,6 +153,7 @@ If you belong to one of the teams listed in the table, please add new e2e specs 
 | `e2e/detection_response/detection_engine` | Detection Engine |
 | `e2e/ai_assistant` | AI Assistant |
 | `e2e/entity_analytics` | Entity Analytics |
+| `e2e/asset_inventory` | Cloud Security Posture |
 
 
 ### fixtures/
@@ -223,13 +224,13 @@ We use es_archiver to manage the data that our Cypress tests need.
 3. When you are sure that you have all the data you need run the following command from: `x-pack/test/security_solution_cypress`
 
 ```sh
-node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/security_solution_cypress/es_archives --config ../../../src/platform/test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
 ```
 
 Example:
 
 ```sh
-node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
+node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/security_solution_cypress/es_archives --config ../../../src/platform/test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
 ```
 
 Note that the command will create the folder if it does not exist.
@@ -306,8 +307,86 @@ Per the way we set the environment during the execution process on CI, the above
 
 For test developing or test debugging purposes, you need to modify the configuration but without committing and pushing the changes in `x-pack/test/security_solution_cypress/serverless_config.ts`.
 
+#### Custom Roles
 
-### Running serverless tests locally pointing to a MKI project created in QA environment (Kibana QA quality gate)
+Custom roles for serverless is currently supported only for stateless environments (non MKI environments).
+
+##### Creating a Custom Role
+
+To create a custom role, use the Cypress task `createServerlessCustomRole`. This task requires two parameters:
+- **`roleDescriptor`**: Defines the permissions and access for the role.
+- **`roleName`**: A unique name for the custom role.
+
+Example:
+
+```typescript
+const roleDescriptor = {
+  elasticsearch: {
+    cluster: ['monitor'],
+    indices: [{ names: ['*'], privileges: ['read'] }],
+  },
+  kibana: [
+    {
+      base: ['all'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};
+
+cy.task('createServerlessCustomRole', { roleDescriptor, roleName: 'customRole' });
+```
+
+##### Using a Custom Role
+
+Once the custom role is created, you can log in to the application using your regular `login`` method and passing the name of the role.
+
+```typescript
+login('customRole');
+```
+
+
+##### Deleting a Custom Role
+
+After your tests, always delete the custom role to ensure a clean environment. Use the `deleteServerlessCustomRole` task and provide the name of the role as the parameter.
+
+```typescript
+cy.task('deleteServerlessCustomRole', 'customRole');
+```
+
+##### Full workflow
+
+Here’s the complete workflow for creating, using, and deleting a custom role:
+
+```typescript
+const roleDescriptor = {
+  elasticsearch: {
+    cluster: ['monitor'],
+    indices: [{ names: ['*'], privileges: ['read'] }],
+  },
+  kibana: [
+    {
+      base: ['all'],
+      feature: {},
+      spaces: ['*'],
+    },
+  ],
+};
+
+before(() => {
+  cy.task('createServerlessCustomRole', { roleDescriptor, roleName: 'customRole' });
+});
+
+beforeEach(() => {
+  login('customRole');
+});
+
+after(() => {
+  cy.task('deleteServerlessCustomRole', 'customRole');
+});
+```
+
+### Running serverless tests locally pointing to a MKI project created in QA environment
 
 Note that when using any of the below scripts, the tests are going to be executed through an MKI project with the version that is currently available in QA. If you need to use
 a specific commit (i.e. debugging a failing tests on the periodic pipeline), check the section: `Running serverless tests locally pointing to a MKI project created in QA environment with an overridden image`.

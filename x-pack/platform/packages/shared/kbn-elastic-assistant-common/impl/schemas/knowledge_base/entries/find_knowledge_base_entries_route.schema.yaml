@@ -1,13 +1,11 @@
 openapi: 3.0.0
 info:
   title: Find Knowledge Base Entries API endpoint
-  version: '1'
+  version: '2023-10-31'
 paths:
-  /internal/elastic_assistant/knowledge_base/entries/_find:
+  /api/security_ai_assistant/knowledge_base/entries/_find:
     get:
       x-codegen-enabled: true
-      # Targeted to update to public by 8.18
-      x-internal: true
       x-labels: [ess, serverless]
       operationId: FindKnowledgeBaseEntries
       description: Finds Knowledge Base Entries that match the given query.
@@ -18,48 +16,55 @@ paths:
         - name: 'fields'
           in: query
           required: false
+          description: A list of fields to include in the response. If not provided, all fields will be included.
           schema:
             type: array
             items:
               type: string
+            example: ['title', 'created_at']
         - name: 'filter'
           in: query
-          description: Search query
+          description: Search query to filter Knowledge Base Entries by specific criteria.
           required: false
           schema:
             type: string
+            example: 'error handling'
         - name: 'sort_field'
           in: query
-          description: Field to sort by
+          description: Field to sort the Knowledge Base Entries by.
           required: false
           schema:
             $ref: '#/components/schemas/FindKnowledgeBaseEntriesSortField'
+            example: 'created_at'
         - name: 'sort_order'
           in: query
-          description: Sort order
+          description: Sort order for the results, either asc or desc.
           required: false
           schema:
             $ref: '../../common_attributes.schema.yaml#/components/schemas/SortOrder'
+            example: 'asc'
         - name: 'page'
           in: query
-          description: Page number
+          description: Page number for paginated results. Defaults to 1.
           required: false
           schema:
             type: integer
             minimum: 1
             default: 1
+            example: 2
         - name: 'per_page'
           in: query
-          description: Knowledge Base Entries per page
+          description: Number of Knowledge Base Entries to return per page. Defaults to 20.
           required: false
           schema:
             type: integer
             minimum: 0
             default: 20
+            example: 10
 
       responses:
         200:
-          description: Successful response
+          description: Successful response containing the paginated Knowledge Base Entries.
           content:
             application/json:
               schema:
@@ -67,12 +72,19 @@ paths:
                 properties:
                   page:
                     type: integer
+                    description: The current page number.
+                    example: 1
                   perPage:
                     type: integer
+                    description: The number of Knowledge Base Entries returned per page.
+                    example: 20
                   total:
                     type: integer
+                    description: The total number of Knowledge Base Entries available.
+                    example: 100
                   data:
                     type: array
+                    description: The list of Knowledge Base Entries for the current page.
                     items:
                       $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
                 required:
@@ -81,7 +93,7 @@ paths:
                   - total
                   - data
         400:
-          description: Generic Error
+          description: Generic Error indicating an issue with the request.
           content:
             application/json:
               schema:
@@ -89,17 +101,25 @@ paths:
                 properties:
                   statusCode:
                     type: number
+                    description: The HTTP status code of the error.
+                    example: 400
                   error:
                     type: string
+                    description: A short description of the error.
+                    example: 'Bad Request'
                   message:
                     type: string
+                    description: A detailed message explaining the error.
+                    example: 'Invalid query parameter: sort_order'
 
 components:
   schemas:
     FindKnowledgeBaseEntriesSortField:
       type: string
+      description: Fields available for sorting Knowledge Base Entries.
       enum:
         - 'created_at'
         - 'is_default'
         - 'title'
         - 'updated_at'
+      example: 'title'

@@ -30,13 +30,7 @@
         "label": "MlNodeDefinition",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NodeDefinition",
-            "text": "NodeDefinition"
-          },
+          "NodeDefinition",
           "<",
           {
             "pluginId": "@kbn/deeplinks-ml",
@@ -62,13 +56,7 @@
             "text": "NavigationID"
           },
           "> & { children: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.NodeDefinition",
-            "text": "NodeDefinition"
-          },
+          "NodeDefinition",
           "<",
           {
             "pluginId": "@kbn/deeplinks-ml",
@@ -108,7 +96,7 @@
         "label": "NavigationID",
         "description": [],
         "signature": [
-          "\"data_frame_analytics\" | \"root\" | \"rootNav:ml\" | \"anomaly_detection\" | \"model_management\" | \"data_visualizer\" | \"aiops_labs\""
+          "\"data_frame_analytics\" | \"anomaly_detection\" | \"root\" | \"rootNav:ml\" | \"model_management\" | \"data_visualizer\" | \"aiops_labs\""
         ],
         "path": "src/platform/packages/private/default-nav/ml/default_navigation.ts",
         "deprecated": false,
@@ -172,7 +160,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "({ link: \"ml:overview\"; } | { link: \"ml:notifications\"; } | { link: \"ml:memoryUsage\"; } | { title: string; link: \"ml:anomalyDetection\"; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:anomalyDetection\"; breadcrumbStatus: \"hidden\"; } | { link: \"ml:anomalyExplorer\"; } | { link: \"ml:singleMetricViewer\"; } | { link: \"ml:suppliedConfigurations\"; } | { link: \"ml:settings\"; })[]; } | { link: \"ml:dataFrameAnalytics\"; title: string; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:dataFrameAnalytics\"; breadcrumbStatus: \"hidden\"; } | { link: \"ml:resultExplorer\"; } | { link: \"ml:analyticsMap\"; })[]; } | { id: \"model_management\"; title: string; renderAs: \"accordion\"; children: ({ link: \"ml:nodesOverview\"; } | { link: \"ml:nodes\"; })[]; } | { id: \"data_visualizer\"; title: string; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:fileUpload\"; } | { title: string; link: \"ml:indexDataVisualizer\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
+              "({ link: \"ml:overview\"; } | { title: string; link: \"ml:anomalyDetection\"; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:anomalyDetection\"; breadcrumbStatus: \"hidden\"; } | { link: \"ml:anomalyExplorer\"; } | { link: \"ml:singleMetricViewer\"; } | { link: \"ml:suppliedConfigurations\"; } | { link: \"ml:settings\"; })[]; } | { link: \"ml:dataFrameAnalytics\"; title: string; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:dataFrameAnalytics\"; breadcrumbStatus: \"hidden\"; } | { link: \"ml:resultExplorer\"; } | { link: \"ml:analyticsMap\"; })[]; } | { id: \"model_management\"; title: string; renderAs: \"accordion\"; children: ({ link: \"ml:nodesOverview\"; } | { link: \"ml:nodes\"; })[]; } | { id: \"data_visualizer\"; title: string; renderAs: \"accordion\"; children: ({ title: string; link: \"ml:fileUpload\"; } | { title: string; link: \"ml:indexDataVisualizer\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
               "Location",
               "<unknown>; prepend: (path: string) => string; }) => boolean; } | { title: string; link: \"ml:esqlDataVisualizer\"; getIsActive: ({ pathNameSerialized, prepend }: { pathNameSerialized: string; location: ",
               "Location",

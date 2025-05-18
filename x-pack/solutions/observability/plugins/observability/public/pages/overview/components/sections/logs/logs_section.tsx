@@ -73,6 +73,7 @@ export function LogsSection({ bucketSize }: Props) {
 
     // `forceUpdate` and `lastUpdated` trigger a reload
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, lastUpdated]
   );
 
@@ -101,7 +102,7 @@ export function LogsSection({ bucketSize }: Props) {
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.logs.appLink', {
-          defaultMessage: 'Show Logs Explorer',
+          defaultMessage: 'Show logs',
         }),
         prependBasePath: false,
       }}

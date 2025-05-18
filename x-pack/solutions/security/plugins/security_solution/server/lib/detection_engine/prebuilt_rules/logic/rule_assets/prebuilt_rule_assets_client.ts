@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
-import type { AggregationsTopHitsAggregate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { uniqBy } from 'lodash';
+import type {
+  AggregationsMultiBucketAggregateBase,
+  AggregationsTopHitsAggregate,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
@@ -72,10 +75,14 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
-    fetchLatestVersions: (ruleIds: string[] = []): Promise<RuleVersionSpecifier[]> => {
+    fetchLatestVersions: (ruleIds?: string[]): Promise<RuleVersionSpecifier[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
+        if (ruleIds && ruleIds.length === 0) {
+          return [];
+        }
+
         const filter = ruleIds
-          .map((ruleId) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: ${ruleId}`)
+          ?.map((ruleId) => `${PREBUILT_RULE_ASSETS_SO_TYPE}.attributes.rule_id: ${ruleId}`)
           .join(' OR ');
 
         const findResult = await savedObjectsClient.find<
@@ -141,6 +148,9 @@ export const createPrebuiltRuleAssetsClient = (
           .map((v) => `(${attr}.rule_id: ${v.rule_id} AND ${attr}.version: ${v.version})`)
           .join(' OR ');
 
+        // Usage of savedObjectsClient.bulkGet() is ~25% more performant and
+        // simplifies deduplication but too many tests get broken.
+        // See https://github.com/elastic/kibana/issues/218198
         const findResult = await savedObjectsClient.find<PrebuiltRuleAsset>({
           type: PREBUILT_RULE_ASSETS_SO_TYPE,
           filter,
@@ -148,7 +158,11 @@ export const createPrebuiltRuleAssetsClient = (
         });
 
         const ruleAssets = findResult.saved_objects.map((so) => so.attributes);
-        return validatePrebuiltRuleAssets(ruleAssets);
+        // Rule assets may have duplicates we have to get rid of.
+        // In particular prebuilt rule assets package v8.17.1 has duplicates.
+        const uniqueRuleAssets = uniqBy(ruleAssets, 'rule_id');
+
+        return validatePrebuiltRuleAssets(uniqueRuleAssets);
       });
     },
   };

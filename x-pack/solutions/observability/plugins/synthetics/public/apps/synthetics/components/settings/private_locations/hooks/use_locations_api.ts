@@ -5,75 +5,45 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { NewLocation } from '../add_location_flyout';
-import { getServiceLocations } from '../../../../state/service_locations';
 import {
+  createPrivateLocationAction,
+  deletePrivateLocationAction,
   getPrivateLocationsAction,
-  selectPrivateLocations,
-  selectPrivateLocationsLoading,
-  setAddingNewPrivateLocation,
-} from '../../../../state/private_locations';
-import {
-  addSyntheticsPrivateLocations,
-  deleteSyntheticsPrivateLocations,
-} from '../../../../state/private_locations/api';
+} from '../../../../state/private_locations/actions';
+import { selectPrivateLocationsState } from '../../../../state/private_locations/selectors';
 
 export const usePrivateLocationsAPI = () => {
-  const [formData, setFormData] = useState<NewLocation>();
-  const [deleteId, setDeleteId] = useState<string>();
-
   const dispatch = useDispatch();
 
-  const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
-  const privateLocations = useSelector(selectPrivateLocations);
-  const fetchLoading = useSelector(selectPrivateLocationsLoading);
+  const { loading, createLoading, deleteLoading, data } = useSelector(selectPrivateLocationsState);
 
   useEffect(() => {
     dispatch(getPrivateLocationsAction.get());
   }, [dispatch]);
 
-  const { loading: saveLoading } = useFetcher(async () => {
-    if (formData) {
-      const result = await addSyntheticsPrivateLocations(formData);
-      setFormData(undefined);
-      setIsAddingNew(false);
-      dispatch(getServiceLocations());
+  useEffect(() => {
+    if (data === null) {
       dispatch(getPrivateLocationsAction.get());
-      return result;
     }
-    // FIXME: Dario thinks there is a better way to do this but
-    // he's getting tired and maybe the Synthetics folks can fix it
-  }, [formData]);
+  }, [data, dispatch]);
 
-  const onSubmit = (data: NewLocation) => {
-    setFormData(data);
+  const onSubmit = (newLoc: NewLocation) => {
+    dispatch(createPrivateLocationAction.get(newLoc));
   };
 
   const onDelete = (id: string) => {
-    setDeleteId(id);
+    dispatch(deletePrivateLocationAction.get(id));
   };
 
-  const { loading: deleteLoading } = useFetcher(async () => {
-    if (deleteId) {
-      const result = await deleteSyntheticsPrivateLocations(deleteId);
-      setDeleteId(undefined);
-      dispatch(getServiceLocations());
-      dispatch(getPrivateLocationsAction.get());
-      return result;
-    }
-    // FIXME: Dario thinks there is a better way to do this but
-    // he's getting tired and maybe the Synthetics folks can fix it
-  }, [deleteId]);
-
   return {
-    formData,
     onSubmit,
     onDelete,
-    deleteLoading: Boolean(deleteLoading),
-    loading: Boolean(fetchLoading || saveLoading),
-    privateLocations,
+    deleteLoading,
+    loading,
+    createLoading,
+    privateLocations: data ?? [],
   };
 };

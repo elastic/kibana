@@ -11,7 +11,7 @@
         "tags": [],
         "label": "GuidedOnboardingApi",
         "description": [],
-        "path": "src/plugins/guided_onboarding/public/types.ts",
+        "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,16 +24,10 @@
             "description": [],
             "signature": [
               "(httpClient: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              },
+              "HttpSetup",
               ", isCloudEnabled: boolean) => void"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -45,15 +39,9 @@
                 "label": "httpClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpSetup",
-                    "text": "HttpSetup"
-                  }
+                  "HttpSetup"
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -68,7 +56,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -96,7 +84,7 @@
               },
               " | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -120,7 +108,7 @@
               },
               "[]; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -160,7 +148,7 @@
               },
               "; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -171,7 +159,7 @@
                 "tags": [],
                 "label": "state",
                 "description": [],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -192,7 +180,7 @@
                       },
                       " | undefined"
                     ],
-                    "path": "src/plugins/guided_onboarding/public/types.ts",
+                    "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -213,7 +201,7 @@
                       },
                       " | undefined"
                     ],
-                    "path": "src/plugins/guided_onboarding/public/types.ts",
+                    "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -229,7 +217,7 @@
                 "signature": [
                   "boolean"
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -271,7 +259,7 @@
               },
               "; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -291,7 +279,7 @@
                     "text": "GuideId"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -313,7 +301,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -347,7 +335,7 @@
               },
               "; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -367,7 +355,7 @@
                     "text": "GuideState"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -401,7 +389,7 @@
               },
               "; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -421,7 +409,7 @@
                     "text": "GuideId"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -457,7 +445,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -477,7 +465,7 @@
                     "text": "GuideId"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -498,7 +486,7 @@
                     "text": "GuideStepIds"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -534,7 +522,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -554,7 +542,7 @@
                     "text": "GuideId"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -575,7 +563,7 @@
                     "text": "GuideStepIds"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -617,7 +605,7 @@
               },
               "; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -637,7 +625,7 @@
                     "text": "GuideId"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -658,7 +646,7 @@
                     "text": "GuideStepIds"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -708,7 +696,7 @@
               },
               "; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -728,7 +716,7 @@
                     "text": "GuideId"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -749,7 +737,7 @@
                     "text": "GuideStepIds"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -771,7 +759,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -791,7 +779,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -805,7 +793,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -831,7 +819,7 @@
               },
               "; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -845,7 +833,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -871,7 +859,7 @@
               },
               "; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -888,7 +876,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -903,7 +891,7 @@
               "Observable",
               "<boolean>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -933,7 +921,7 @@
               },
               " | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -953,7 +941,7 @@
                     "text": "GuideId"
                   }
                 ],
-                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -968,7 +956,7 @@
             "tags": [],
             "label": "isEnabled",
             "description": [],
-            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -986,7 +974,7 @@
       "tags": [],
       "label": "GuidedOnboardingPluginSetup",
       "description": [],
-      "path": "src/plugins/guided_onboarding/public/types.ts",
+      "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1006,7 +994,7 @@
               "text": "CloudSetup"
             }
           ],
-          "path": "src/plugins/guided_onboarding/public/types.ts",
+          "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1021,7 +1009,7 @@
       "tags": [],
       "label": "GuidedOnboardingPluginStart",
       "description": [],
-      "path": "src/plugins/guided_onboarding/public/types.ts",
+      "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1042,7 +1030,7 @@
             },
             " | undefined"
           ],
-          "path": "src/plugins/guided_onboarding/public/types.ts",
+          "path": "src/platform/plugins/shared/guided_onboarding/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1065,7 +1053,7 @@
       "tags": [],
       "label": "GuidedOnboardingPluginSetup",
       "description": [],
-      "path": "src/plugins/guided_onboarding/server/types.ts",
+      "path": "src/platform/plugins/shared/guided_onboarding/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1095,7 +1083,7 @@
             },
             ") => void"
           ],
-          "path": "src/plugins/guided_onboarding/server/types.ts",
+          "path": "src/platform/plugins/shared/guided_onboarding/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1115,7 +1103,7 @@
                   "text": "GuideId"
                 }
               ],
-              "path": "src/plugins/guided_onboarding/server/types.ts",
+              "path": "src/platform/plugins/shared/guided_onboarding/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1136,7 +1124,7 @@
                   "text": "GuideConfig"
                 }
               ],
-              "path": "src/plugins/guided_onboarding/server/types.ts",
+              "path": "src/platform/plugins/shared/guided_onboarding/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1155,7 +1143,7 @@
       "tags": [],
       "label": "GuidedOnboardingPluginStart",
       "description": [],
-      "path": "src/plugins/guided_onboarding/server/types.ts",
+      "path": "src/platform/plugins/shared/guided_onboarding/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1174,7 +1162,7 @@
         "tags": [],
         "label": "PluginState",
         "description": [],
-        "path": "src/plugins/guided_onboarding/common/types.ts",
+        "path": "src/platform/plugins/shared/guided_onboarding/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1188,7 +1176,7 @@
             "signature": [
               "\"error\" | \"complete\" | \"not_started\" | \"in_progress\" | \"quit\" | \"skipped\""
             ],
-            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1199,7 +1187,7 @@
             "tags": [],
             "label": "isActivePeriod",
             "description": [],
-            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1220,7 +1208,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "path": "src/platform/plugins/shared/guided_onboarding/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1240,7 +1228,7 @@
         "signature": [
           "\"/internal/guided_onboarding\""
         ],
-        "path": "src/plugins/guided_onboarding/common/constants.ts",
+        "path": "src/platform/plugins/shared/guided_onboarding/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1262,14 +1250,6 @@
             "text": "GuideConfig"
           },
           "; kubernetes: ",
-          {
-            "pluginId": "@kbn/guided-onboarding",
-            "scope": "common",
-            "docId": "kibKbnGuidedOnboardingPluginApi",
-            "section": "def-common.GuideConfig",
-            "text": "GuideConfig"
-          },
-          "; appSearch: ",
           {
             "pluginId": "@kbn/guided-onboarding",
             "scope": "common",
@@ -1303,7 +1283,7 @@
           },
           "; }"
         ],
-        "path": "src/plugins/guided_onboarding/common/types.ts",
+        "path": "src/platform/plugins/shared/guided_onboarding/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1318,7 +1298,7 @@
         "signature": [
           "\"guidedOnboarding\""
         ],
-        "path": "src/plugins/guided_onboarding/common/constants.ts",
+        "path": "src/platform/plugins/shared/guided_onboarding/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1333,7 +1313,7 @@
         "signature": [
           "\"guidedOnboarding\""
         ],
-        "path": "src/plugins/guided_onboarding/common/constants.ts",
+        "path": "src/platform/plugins/shared/guided_onboarding/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1350,7 +1330,7 @@
         "signature": [
           "\"error\" | \"complete\" | \"not_started\" | \"in_progress\" | \"quit\" | \"skipped\""
         ],
-        "path": "src/plugins/guided_onboarding/common/types.ts",
+        "path": "src/platform/plugins/shared/guided_onboarding/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

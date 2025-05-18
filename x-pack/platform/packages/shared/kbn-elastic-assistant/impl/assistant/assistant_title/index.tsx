@@ -8,9 +8,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiInlineEditTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { DataStreamApis } from '../use_data_stream_apis';
 import type { Conversation } from '../../..';
-import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
 import { useConversation } from '../use_conversation';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 
@@ -23,7 +23,12 @@ export const AssistantTitle: React.FC<{
   title?: string;
   selectedConversation: Conversation | undefined;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
-}> = ({ title, selectedConversation, refetchCurrentUserConversations, isDisabled = false }) => {
+}> = ({
+  title = NEW_CHAT,
+  selectedConversation,
+  refetchCurrentUserConversations,
+  isDisabled = false,
+}) => {
   const [newTitle, setNewTitle] = useState(title);
   const [newTitleError, setNewTitleError] = useState(false);
   const { updateConversationTitle } = useConversation();
@@ -51,7 +56,7 @@ export const AssistantTitle: React.FC<{
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center">
       <EuiFlexItem grow={false}>
-        <AssistantAvatar data-test-subj="titleIcon" size={'s'} />
+        <AssistantIcon data-test-subj="titleIcon" size="l" />
       </EuiFlexItem>
       <EuiFlexItem
         css={css`
@@ -62,10 +67,10 @@ export const AssistantTitle: React.FC<{
           data-test-subj="conversationTitle"
           heading="h2"
           inputAriaLabel="Edit text inline"
-          value={newTitle ?? NEW_CHAT}
+          value={newTitle}
           size="xs"
           isInvalid={!!newTitleError}
-          isReadOnly={isDisabled || selectedConversation?.isDefault}
+          isReadOnly={isDisabled}
           onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
           onCancel={() => setNewTitle(title)}
           onSave={handleUpdateTitle}

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook, act } from '@testing-library/react-hooks';
+
+import { renderHook, act } from '@testing-library/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useSaveToLibrary } from './use_save_to_library';
 import { useKibana } from '../../lib/kibana';
@@ -33,7 +34,7 @@ const mockUseKibana = useKibana as jest.Mock;
 
 describe('useSaveToLibrary hook', () => {
   const mockStartServices = {
-    application: { capabilities: { visualize: { save: true } } },
+    application: { capabilities: { visualize_v2: { save: true } } },
     lens: { SaveModalComponent: jest.fn() },
   };
 
@@ -57,7 +58,7 @@ describe('useSaveToLibrary hook', () => {
   it('should disable visualizations if user cannot save', () => {
     const noSaveCapabilities = {
       ...mockStartServices,
-      application: { capabilities: { visualize: { save: false } } },
+      application: { capabilities: { visualize_v2: { save: false } } },
     };
     mockUseKibana.mockReturnValue({ services: noSaveCapabilities });
 

@@ -30,12 +30,6 @@ import type {
   CtiDataSourceStrategyResponse,
 } from './cti';
 
-import type {
-  RiskQueries,
-  KpiRiskScoreStrategyResponse,
-  HostsRiskScoreStrategyResponse,
-  UsersRiskScoreStrategyResponse,
-} from './risk_score';
 import type { UsersQueries } from './users';
 import type { ObservedUserDetailsStrategyResponse } from './users/observed_details';
 
@@ -48,6 +42,7 @@ import type { UsersRelatedHostsStrategyResponse } from './related_entities/relat
 import type { HostsRelatedUsersStrategyResponse } from './related_entities/related_users';
 
 import type {
+  EntityRiskQueries,
   EventEnrichmentRequestOptions,
   EventEnrichmentRequestOptionsInput,
   FirstLastSeenRequestOptions,
@@ -80,6 +75,8 @@ import type {
   NetworkTopNFlowRequestOptionsInput,
   NetworkUsersRequestOptions,
   NetworkUsersRequestOptionsInput,
+  ObservedServiceDetailsRequestOptions,
+  ObservedServiceDetailsRequestOptionsInput,
   ObservedUserDetailsRequestOptions,
   ObservedUserDetailsRequestOptionsInput,
   RelatedHostsRequestOptions,
@@ -90,6 +87,7 @@ import type {
   RiskScoreKpiRequestOptionsInput,
   RiskScoreRequestOptions,
   RiskScoreRequestOptionsInput,
+  ServicesQueries,
   ThreatIntelSourceRequestOptions,
   ThreatIntelSourceRequestOptionsInput,
   UserAuthenticationsRequestOptions,
@@ -97,12 +95,19 @@ import type {
   UsersRequestOptions,
   UsersRequestOptionsInput,
 } from '../../api/search_strategy';
+import type {
+  KpiRiskScoreStrategyResponse,
+  EntityType,
+  RiskScoreStrategyResponse,
+} from './risk_score';
+import type { ObservedServiceDetailsStrategyResponse } from './services';
 
 export * from './cti';
 export * from './hosts';
 export * from './risk_score';
 export * from './network';
 export * from './users';
+export * from './services';
 export * from './first_last_seen';
 export * from './related_entities';
 
@@ -110,7 +115,8 @@ export type FactoryQueryTypes =
   | HostsQueries
   | UsersQueries
   | NetworkQueries
-  | RiskQueries
+  | ServicesQueries
+  | EntityRiskQueries
   | CtiQueries
   | typeof FirstLastSeenQuery
   | RelatedEntitiesQueries;
@@ -133,6 +139,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? UserAuthenticationsStrategyResponse
   : T extends UsersQueries.users
   ? UsersStrategyResponse
+  : T extends ServicesQueries.observedDetails
+  ? ObservedServiceDetailsStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -155,11 +163,9 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? CtiEventEnrichmentStrategyResponse
   : T extends CtiQueries.dataSource
   ? CtiDataSourceStrategyResponse
-  : T extends RiskQueries.hostsRiskScore
-  ? HostsRiskScoreStrategyResponse
-  : T extends RiskQueries.usersRiskScore
-  ? UsersRiskScoreStrategyResponse
-  : T extends RiskQueries.kpiRiskScore
+  : T extends EntityRiskQueries.list
+  ? RiskScoreStrategyResponse<EntityType>
+  : T extends EntityRiskQueries.kpi
   ? KpiRiskScoreStrategyResponse
   : T extends RelatedEntitiesQueries.relatedUsers
   ? HostsRelatedUsersStrategyResponse
@@ -185,6 +191,8 @@ export type StrategyRequestInputType<T extends FactoryQueryTypes> = T extends Ho
   ? ManagedUserDetailsRequestOptionsInput
   : T extends UsersQueries.users
   ? UsersRequestOptionsInput
+  : T extends ServicesQueries.observedDetails
+  ? ObservedServiceDetailsRequestOptionsInput
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptionsInput
   : T extends NetworkQueries.dns
@@ -207,11 +215,9 @@ export type StrategyRequestInputType<T extends FactoryQueryTypes> = T extends Ho
   ? EventEnrichmentRequestOptionsInput
   : T extends CtiQueries.dataSource
   ? ThreatIntelSourceRequestOptionsInput
-  : T extends RiskQueries.hostsRiskScore
+  : T extends EntityRiskQueries.list
   ? RiskScoreRequestOptionsInput
-  : T extends RiskQueries.usersRiskScore
-  ? RiskScoreRequestOptionsInput
-  : T extends RiskQueries.kpiRiskScore
+  : T extends EntityRiskQueries.kpi
   ? RiskScoreKpiRequestOptionsInput
   : T extends RelatedEntitiesQueries.relatedHosts
   ? RelatedHostsRequestOptionsInput
@@ -237,6 +243,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? ManagedUserDetailsRequestOptions
   : T extends UsersQueries.users
   ? UsersRequestOptions
+  : T extends ServicesQueries.observedDetails
+  ? ObservedServiceDetailsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
@@ -259,11 +267,9 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? EventEnrichmentRequestOptions
   : T extends CtiQueries.dataSource
   ? ThreatIntelSourceRequestOptions
-  : T extends RiskQueries.hostsRiskScore
+  : T extends EntityRiskQueries.list
   ? RiskScoreRequestOptions
-  : T extends RiskQueries.usersRiskScore
-  ? RiskScoreRequestOptions
-  : T extends RiskQueries.kpiRiskScore
+  : T extends EntityRiskQueries.kpi
   ? RiskScoreKpiRequestOptions
   : T extends RelatedEntitiesQueries.relatedHosts
   ? RelatedHostsRequestOptions

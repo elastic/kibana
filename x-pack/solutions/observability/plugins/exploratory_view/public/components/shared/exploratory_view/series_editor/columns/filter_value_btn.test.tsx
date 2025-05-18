@@ -51,7 +51,8 @@ describe('FilterValueButton', function () {
         expect(screen.getByText('Not Chrome')).toBeInTheDocument();
         expect(screen.getByTitle('Not Chrome')).toBeInTheDocument();
         const btn = screen.getByRole('button');
-        expect(btn.classList[4]).toContain('empty-danger');
+
+        expect(btn.classList[3]).toContain('empty-danger');
       });
     });
 
@@ -191,7 +192,9 @@ describe('FilterValueButton', function () {
         allSelectedValues={['Chrome', 'Firefox']}
         nestedField={USER_AGENT_VERSION}
         series={mockUxSeries}
-      />
+      />,
+      // TODO: fails with concurrent mode due to `.toHaveBeenCalledTimes(5);`
+      { renderOptions: { legacyRoot: true } }
     );
 
     await waitFor(() => {

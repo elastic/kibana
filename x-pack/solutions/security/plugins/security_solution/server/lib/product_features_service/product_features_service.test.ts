@@ -10,11 +10,11 @@ import { ProductFeatures } from './product_features';
 import type {
   ProductFeaturesConfig,
   BaseKibanaFeatureConfig,
+  ProductFeaturesConfigurator,
 } from '@kbn/security-solution-features';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ExperimentalFeatures } from '../../../common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import type { ProductFeaturesConfigurator } from './types';
 import type {
   AssistantSubFeatureId,
   CasesSubFeatureId,
@@ -41,11 +41,16 @@ const productFeature = {
 };
 const mockGetFeature = jest.fn().mockReturnValue(productFeature);
 jest.mock('@kbn/security-solution-features/product_features', () => ({
-  getAttackDiscoveryFeature: () => mockGetFeature(),
-  getAssistantFeature: () => mockGetFeature(),
+  getSecurityFeature: () => mockGetFeature(),
+  getSecurityV2Feature: () => mockGetFeature(),
   getCasesFeature: () => mockGetFeature(),
   getCasesV2Feature: () => mockGetFeature(),
-  getSecurityFeature: () => mockGetFeature(),
+  getCasesV3Feature: () => mockGetFeature(),
+  getAttackDiscoveryFeature: () => mockGetFeature(),
+  getAssistantFeature: () => mockGetFeature(),
+  getTimelineFeature: () => mockGetFeature(),
+  getNotesFeature: () => mockGetFeature(),
+  getSiemMigrationsFeature: () => mockGetFeature(),
 }));
 
 describe('ProductFeaturesService', () => {
@@ -57,8 +62,8 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     new ProductFeaturesService(loggerMock.create(), experimentalFeatures);
 
-    expect(mockGetFeature).toHaveBeenCalledTimes(5);
-    expect(MockedProductFeatures).toHaveBeenCalledTimes(5);
+    expect(mockGetFeature).toHaveBeenCalledTimes(10);
+    expect(MockedProductFeatures).toHaveBeenCalledTimes(10);
   });
 
   it('should init all ProductFeatures when initialized', () => {
@@ -90,12 +95,18 @@ describe('ProductFeaturesService', () => {
     const mockCasesConfig = new Map() as ProductFeaturesConfig<CasesSubFeatureId>;
     const mockAssistantConfig = new Map() as ProductFeaturesConfig<AssistantSubFeatureId>;
     const mockAttackDiscoveryConfig = new Map() as ProductFeaturesConfig;
+    const mockSiemMigrationsConfig = new Map() as ProductFeaturesConfig;
+    const mockTimelineConfig = new Map() as ProductFeaturesConfig;
+    const mockNotesConfig = new Map() as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
-      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
+      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
+      siemMigrations: jest.fn(() => mockSiemMigrationsConfig),
+      timeline: jest.fn(() => mockTimelineConfig),
+      notes: jest.fn(() => mockNotesConfig),
     };
     productFeaturesService.setProductFeaturesConfigurator(configurator);
 
@@ -103,6 +114,7 @@ describe('ProductFeaturesService', () => {
     expect(configurator.cases).toHaveBeenCalled();
     expect(configurator.securityAssistant).toHaveBeenCalled();
     expect(configurator.attackDiscovery).toHaveBeenCalled();
+    expect(configurator.siemMigrations).toHaveBeenCalled();
 
     expect(MockedProductFeatures.mock.instances[0].setConfig).toHaveBeenCalledWith(
       mockSecurityConfig
@@ -113,6 +125,9 @@ describe('ProductFeaturesService', () => {
     );
     expect(MockedProductFeatures.mock.instances[3].setConfig).toHaveBeenCalledWith(
       mockAttackDiscoveryConfig
+    );
+    expect(MockedProductFeatures.mock.instances[3].setConfig).toHaveBeenCalledWith(
+      mockSiemMigrationsConfig
     );
   });
 
@@ -139,12 +154,20 @@ describe('ProductFeaturesService', () => {
     const mockAttackDiscoveryConfig = new Map([
       [ProductFeatureKey.attackDiscovery, {}],
     ]) as ProductFeaturesConfig;
+    const mockSiemMigrationsConfig = new Map([
+      [ProductFeatureKey.siemMigrations, {}],
+    ]) as ProductFeaturesConfig;
+    const mockTimelineConfig = new Map([[ProductFeatureKey.timeline, {}]]) as ProductFeaturesConfig;
+    const mockNotesConfig = new Map([[ProductFeatureKey.notes, {}]]) as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
-      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
+      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
+      siemMigrations: jest.fn(() => mockSiemMigrationsConfig),
+      timeline: jest.fn(() => mockTimelineConfig),
+      notes: jest.fn(() => mockNotesConfig),
     };
     productFeaturesService.setProductFeaturesConfigurator(configurator);
 
@@ -153,6 +176,7 @@ describe('ProductFeaturesService', () => {
     expect(productFeaturesService.isEnabled(ProductFeatureKey.casesConnectors)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.assistant)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.attackDiscovery)).toEqual(true);
+    expect(productFeaturesService.isEnabled(ProductFeatureKey.siemMigrations)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.externalRuleActions)).toEqual(false);
   });
 
@@ -376,6 +400,25 @@ describe('ProductFeaturesService', () => {
               expect(toolkit.next).toHaveBeenCalledTimes(1);
             });
 
+            it('should allow access when all actions are registered with nested anyOf', async () => {
+              const req = getReq([
+                {
+                  allRequired: [
+                    { anyOf: ['securitySolution-enabled', 'securitySolution-enabled2'] },
+                    'securitySolution-enabled3',
+                  ],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled3');
+
+              expect(res.notFound).not.toHaveBeenCalled();
+              expect(toolkit.next).toHaveBeenCalledTimes(1);
+            });
+
             it('should restrict access if one action is not registered', async () => {
               const req = getReq([
                 {
@@ -421,6 +464,25 @@ describe('ProductFeaturesService', () => {
               expect(res.notFound).toHaveBeenCalledTimes(1);
               expect(toolkit.next).not.toHaveBeenCalled();
             });
+
+            it('should restrict only based on security privileges and ignore non-security with nested anyOf', async () => {
+              const req = getReq([
+                {
+                  allRequired: [
+                    { anyOf: ['securitySolution-disabled', 'securitySolution-disabled2'] },
+                    'notSecurityPrivilege',
+                  ],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled2');
+
+              expect(res.notFound).toHaveBeenCalledTimes(1);
+              expect(toolkit.next).not.toHaveBeenCalled();
+            });
           });
 
           describe('when using anyRequired', () => {
@@ -444,10 +506,49 @@ describe('ProductFeaturesService', () => {
               expect(toolkit.next).toHaveBeenCalledTimes(1);
             });
 
+            it('should allow access when one action is registered with nested allOf', async () => {
+              const req = getReq([
+                {
+                  anyRequired: [
+                    { allOf: ['securitySolution-disabled2', 'securitySolution-disabled'] },
+                    'securitySolution-enabled',
+                    'securitySolution-notCalled',
+                  ],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled2');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled');
+
+              expect(res.notFound).not.toHaveBeenCalled();
+              expect(toolkit.next).toHaveBeenCalledTimes(1);
+            });
+
             it('should restrict access when no action is registered', async () => {
               const req = getReq([
                 {
                   anyRequired: ['securitySolution-disabled', 'securitySolution-disabled2'],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled2');
+
+              expect(res.notFound).toHaveBeenCalledTimes(1);
+              expect(toolkit.next).not.toHaveBeenCalled();
+            });
+
+            it('should restrict access when no action is registered with nested allOf', async () => {
+              const req = getReq([
+                {
+                  anyRequired: [
+                    { allOf: ['notSecurityPrivilege', 'securitySolution-disabled2'] },
+                    { allOf: ['notSecurityPrivilege2', 'securitySolution-disabled'] },
+                  ],
                 },
               ]);
               await lastRegisteredFn(req, res, toolkit);

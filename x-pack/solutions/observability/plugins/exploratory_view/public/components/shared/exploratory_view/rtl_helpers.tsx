@@ -20,7 +20,7 @@ import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiThemeProvider } from '@elastic/eui';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -159,7 +159,7 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
 
   return (
     <KibanaContextProvider services={{ ...core }} {...kibanaProps}>
-      <EuiThemeProvider darkMode={false}>
+      <EuiThemeProvider>
         <I18nProvider>
           <DataViewContextProvider>{children}</DataViewContextProvider>
         </I18nProvider>

@@ -9,7 +9,7 @@
         "tags": [],
         "label": "CoreAppsService",
         "description": [],
-        "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+        "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,7 +23,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -37,7 +37,7 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+                "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -54,16 +54,10 @@
             "description": [],
             "signature": [
               "({ application, http, injectedMetadata, notifications }: ",
-              {
-                "pluginId": "@kbn/core-apps-browser-internal",
-                "scope": "public",
-                "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                "section": "def-public.CoreAppsServiceSetupDeps",
-                "text": "CoreAppsServiceSetupDeps"
-              },
+              "CoreAppsServiceSetupDeps",
               ") => void"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -75,15 +69,9 @@
                 "label": "{ application, http, injectedMetadata, notifications }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-apps-browser-internal",
-                    "scope": "public",
-                    "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                    "section": "def-public.CoreAppsServiceSetupDeps",
-                    "text": "CoreAppsServiceSetupDeps"
-                  }
+                  "CoreAppsServiceSetupDeps"
                 ],
-                "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+                "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -100,16 +88,10 @@
             "description": [],
             "signature": [
               "({ application, docLinks, http, notifications, uiSettings, ...startDeps }: ",
-              {
-                "pluginId": "@kbn/core-apps-browser-internal",
-                "scope": "public",
-                "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                "section": "def-public.CoreAppsServiceStartDeps",
-                "text": "CoreAppsServiceStartDeps"
-              },
+              "CoreAppsServiceStartDeps",
               ") => void"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -121,15 +103,9 @@
                 "label": "{\n    application,\n    docLinks,\n    http,\n    notifications,\n    uiSettings,\n    ...startDeps\n  }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-apps-browser-internal",
-                    "scope": "public",
-                    "docId": "kibKbnCoreAppsBrowserInternalPluginApi",
-                    "section": "def-public.CoreAppsServiceStartDeps",
-                    "text": "CoreAppsServiceStartDeps"
-                  }
+                  "CoreAppsServiceStartDeps"
                 ],
-                "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+                "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -147,7 +123,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -166,7 +142,7 @@
         "tags": [],
         "label": "CoreAppsServiceSetupDeps",
         "description": [],
-        "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+        "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -180,7 +156,7 @@
             "signature": [
               "InternalApplicationSetup"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,18 +169,12 @@
             "description": [],
             "signature": [
               "Omit<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              },
+              "HttpSetup",
               ", \"staticAssets\"> & { staticAssets: ",
               "InternalStaticAssets",
               "; }"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -218,7 +188,7 @@
             "signature": [
               "InternalInjectedMetadataSetup"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -230,15 +200,9 @@
             "label": "notifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsSetup",
-                "text": "NotificationsSetup"
-              }
+              "NotificationsSetup"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -252,7 +216,7 @@
         "tags": [],
         "label": "CoreAppsServiceStartDeps",
         "description": [],
-        "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+        "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -266,7 +230,7 @@
             "signature": [
               "InternalApplicationStart"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -278,15 +242,9 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-public.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -299,18 +257,12 @@
             "description": [],
             "signature": [
               "Omit<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              },
+              "HttpSetup",
               ", \"staticAssets\"> & { staticAssets: ",
               "InternalStaticAssets",
               "; }"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -322,15 +274,9 @@
             "label": "notifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsStart",
-                "text": "NotificationsStart"
-              }
+              "NotificationsStart"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -342,15 +288,9 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -370,7 +310,7 @@
               "TelemetryCounter",
               ">; }"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -382,15 +322,9 @@
             "label": "i18n",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -402,15 +336,9 @@
             "label": "theme",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -422,15 +350,9 @@
             "label": "userProfile",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              }
+              "UserProfileService"
             ],
-            "path": "packages/core/apps/core-apps-browser-internal/src/core_app.ts",
+            "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -452,7 +374,7 @@
         "signature": [
           "2000 | 25000"
         ],
-        "path": "packages/core/apps/core-apps-browser-internal/src/errors/url_overflow.tsx",
+        "path": "src/core/packages/apps/browser-internal/src/errors/url_overflow.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

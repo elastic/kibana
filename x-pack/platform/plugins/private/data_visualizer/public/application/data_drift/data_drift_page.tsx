@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -45,7 +45,6 @@ import { useDataDriftStateManagerContext } from './use_state_manager';
 import { useData } from '../common/hooks/use_data';
 import type { DVKey, DVStorageMapped } from '../index_data_visualizer/types/storage';
 import { DV_FROZEN_TIER_PREFERENCE } from '../index_data_visualizer/types/storage';
-import { useCurrentEuiTheme } from '../common/hooks/use_current_eui_theme';
 import type { DataComparisonFullAppState } from './types';
 import { getDefaultDataComparisonState } from './types';
 import { useDataSource } from '../common/hooks/data_source_context';
@@ -55,6 +54,7 @@ import { COMPARISON_LABEL, REFERENCE_LABEL } from './constants';
 import { SearchPanelContent } from '../index_data_visualizer/components/search_panel/search_bar';
 import { useSearch } from '../common/hooks/use_search';
 import { DocumentCountWithBrush } from './document_count_with_brush';
+import { useDataDriftColors } from './use_data_drift_colors';
 
 const dataViewTitleHeader = css({
   minWidth: '300px',
@@ -115,7 +115,6 @@ export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate }) => {
           isAutoRefreshOnly={!hasValidTimeField}
           showRefresh={!hasValidTimeField}
           width="full"
-          flexGroup={!hasValidTimeField}
           onRefresh={onRefresh}
           needsUpdate={needsUpdate}
         />,
@@ -264,12 +263,7 @@ export const DataDriftPage: FC<Props> = ({ initialSettings }) => {
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
-  const euiTheme = useCurrentEuiTheme();
-  const colors = {
-    referenceColor: euiTheme.euiColorVis2,
-    comparisonColor: euiTheme.euiColorVis1,
-    overlapColor: '#490771',
-  };
+  const colors = useDataDriftColors();
 
   const [brushRanges, setBrushRanges] = useState<WindowParameters | undefined>();
 

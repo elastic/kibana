@@ -15,11 +15,6 @@ import { UsersType } from '../../store/model';
 
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../entity_analytics/api/hooks/use_risk_engine_status', () => ({
-  useIsNewRiskScoreModuleInstalled: jest
-    .fn()
-    .mockReturnValue({ isLoading: false, installed: true }),
-}));
 
 const mockSearch = jest.fn();
 

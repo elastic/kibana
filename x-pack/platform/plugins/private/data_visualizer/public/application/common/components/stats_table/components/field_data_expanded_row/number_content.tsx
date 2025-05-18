@@ -7,20 +7,34 @@
 
 import type { FC, ReactNode } from 'react';
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+
 import type { HorizontalAlignment } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexItem, EuiText, LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiBasicTable,
+  EuiFlexItem,
+  EuiText,
+  LEFT_ALIGNMENT,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { FieldDataRowProps } from '../../types/field_data_row';
-import { kibanaFieldFormat, numberAsOrdinal } from '../../../utils';
-import { MetricDistributionChart, buildChartDataFromStats } from '../metric_distribution_chart';
+
 import { TopValues } from '../../../top_values';
+import { kibanaFieldFormat, numberAsOrdinal } from '../../../utils';
+
+import type { FieldDataRowProps } from '../../types/field_data_row';
+
+import { MetricDistributionChart, buildChartDataFromStats } from '../metric_distribution_chart';
 import { ExpandedRowFieldHeader } from '../expanded_row_field_header';
+
 import { DocumentStatsTable } from './document_stats';
 import { ExpandedRowContent } from './expanded_row_content';
 import { ExpandedRowPanel } from './expanded_row_panel';
+import { useBarColor } from './use_bar_color';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 260;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 200;
@@ -32,12 +46,21 @@ interface SummaryTableItem {
 }
 
 export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const metricDistributionChartContainer = css({
+    paddingTop: euiTheme.size.xs,
+    width: '100%',
+  });
+
   const { stats } = config;
 
   const distributionChartData = useMemo(
     () => buildChartDataFromStats(stats?.distribution, METRIC_DISTRIBUTION_CHART_WIDTH),
     [stats?.distribution]
   );
+
+  const barColor = useBarColor();
 
   if (stats === undefined) return null;
   const { min, median, max, distribution } = stats;
@@ -119,7 +142,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =>
         <TopValues
           stats={stats}
           fieldFormat={fieldFormat}
-          barColor="accentSecondary"
+          barColor={barColor}
           compressed={true}
           onAddFilter={onAddFilter}
         />
@@ -141,7 +164,7 @@ export const NumberContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =>
               </ExpandedRowFieldHeader>
             </EuiFlexItem>
 
-            <EuiFlexItem className={'metricDistributionChartContainer'}>
+            <EuiFlexItem css={metricDistributionChartContainer}>
               <MetricDistributionChart
                 width={METRIC_DISTRIBUTION_CHART_WIDTH}
                 height={METRIC_DISTRIBUTION_CHART_HEIGHT}

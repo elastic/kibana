@@ -17,6 +17,12 @@ export const registerStopRoute = ({
   router.post(
     {
       path: addBasePath('/stop'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: schema.object({
           jobIds: schema.arrayOf(schema.string()),

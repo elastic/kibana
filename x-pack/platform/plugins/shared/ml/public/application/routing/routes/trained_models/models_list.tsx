@@ -5,39 +5,32 @@
  * 2.0.
  */
 
-import { type FC, useCallback } from 'react';
+import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ML_PAGES } from '../../../../locator';
-import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { basicResolvers } from '../../resolvers';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { basicResolvers, initSavedObjects } from '../../resolvers';
+import { type NavigateToApp, getStackManagementBreadcrumb } from '../../breadcrumbs';
 import { MlPageHeader } from '../../../components/page_header';
-import { useSavedObjectsApiService } from '../../../services/ml_api_service/saved_objects';
 
 const ModelsList = dynamic(async () => ({
   default: (await import('../../../model_management/models_list')).ModelsList,
 }));
 
-export const modelsListRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const modelsListRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   id: 'trained_models',
-  path: createPath(ML_PAGES.TRAINED_MODELS_MANAGE),
+  path: '/',
   title: i18n.translate('xpack.ml.modelManagement.trainedModels.docTitle', {
     defaultMessage: 'Trained Models',
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
-    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-    getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
+    getStackManagementBreadcrumb(navigateToApp),
     {
       text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.trainedModelsLabel', {
         defaultMessage: 'Trained Models',
@@ -49,21 +42,10 @@ export const modelsListRouteFactory = (
 });
 
 const PageWrapper: FC = () => {
-  const { initSavedObjects } = useSavedObjectsApiService();
-
-  const initSavedObjectsWrapper = useCallback(async () => {
-    try {
-      await initSavedObjects();
-    } catch (error) {
-      // ignore error as user may not have permission to sync
-    }
-  }, [initSavedObjects]);
-
   const { context } = useRouteResolver('full', ['canGetTrainedModels'], {
     ...basicResolvers(),
-    initSavedObjectsWrapper,
+    initSavedObjects,
   });
-
   return (
     <PageLoader context={context}>
       <MlPageHeader>
@@ -76,6 +58,8 @@ const PageWrapper: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
+
+      <EuiSpacer size="m" />
       <ModelsList />
     </PageLoader>
   );

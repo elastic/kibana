@@ -7,8 +7,7 @@
 
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { renderHook } from '@testing-library/react-hooks';
-import { getUseCellActionsHook } from './use_cell_actions';
+import { useCellActionsOptions } from './use_cell_actions';
 import { columns as mockColumns, data as mockData } from './mock/data';
 import type {
   EuiDataGridColumn,
@@ -17,13 +16,12 @@ import type {
   EuiDataGridRefProps,
 } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, renderHook } from '@testing-library/react';
 import type { ComponentProps, JSXElementConstructor, PropsWithChildren } from 'react';
 import React from 'react';
 import { makeAction } from '../../../common/components/cell_actions/mocks';
 import { VIEW_SELECTION } from '../../../../common/constants';
-
-const useCellActions = getUseCellActionsHook(TableId.test);
+import type { LegacyField } from '@kbn/alerting-types';
 
 const mockDataGridRef: {
   current: EuiDataGridRefProps;
@@ -86,13 +84,12 @@ const TestProviderWithCustomStateAndActions = withCustomPropsAndCellActions({
 
 describe('getUseCellActionsHook', () => {
   it('should render cell actions correctly for gridView view', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
-        useCellActions({
+        useCellActionsOptions(TableId.test, {
           columns: mockColumns as unknown as EuiDataGridColumn[],
-          data: mockData,
+          oldAlertsData: mockData as LegacyField[][],
           dataGridRef: mockDataGridRef,
-          ecsData: [],
           pageSize: 10,
           pageIndex: 0,
         }),
@@ -101,23 +98,22 @@ describe('getUseCellActionsHook', () => {
       }
     );
 
-    await waitForNextUpdate();
+    await waitFor(() => {
+      const cellAction = result.current.getCellActionsForColumn('host.name', 0)[0];
 
-    const cellAction = result.current.getCellActions('host.name', 0)[0];
+      renderCellAction(cellAction);
 
-    renderCellAction(cellAction);
-
-    expect(screen.getByTestId('dataGridColumnCellAction-action1')).toBeInTheDocument();
+      expect(screen.getByTestId('dataGridColumnCellAction-action1')).toBeInTheDocument();
+    });
   });
 
   it('should not render cell actions correctly for eventRendered view', async () => {
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () =>
-        useCellActions({
+        useCellActionsOptions(TableId.test, {
           columns: mockColumns as unknown as EuiDataGridColumn[],
-          data: mockData,
+          oldAlertsData: mockData as LegacyField[][],
           dataGridRef: mockDataGridRef,
-          ecsData: [],
           pageSize: 10,
           pageIndex: 0,
         }),
@@ -126,10 +122,8 @@ describe('getUseCellActionsHook', () => {
       }
     );
 
-    const cellAction = result.current.getCellActions('host.name', 0);
+    const cellAction = result.current.getCellActionsForColumn('host.name', 0);
 
-    await waitForNextUpdate();
-
-    expect(cellAction).toHaveLength(0);
+    await waitFor(() => expect(cellAction).toHaveLength(0));
   });
 });

@@ -6,18 +6,18 @@
  */
 
 import { CASE_CONFIGURE_URL } from '@kbn/cases-plugin/common/constants';
-import {
+import type {
   ConfigurationPatchRequest,
   ConfigurationRequest,
 } from '@kbn/cases-plugin/common/types/api';
-import {
+import type {
   CaseConnector,
   Configuration,
   Configurations,
-  ConnectorTypes,
 } from '@kbn/cases-plugin/common/types/domain';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import type SuperTest from 'supertest';
-import { User } from '../authentication/types';
+import type { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -56,6 +56,7 @@ export const getConfigurationOutput = (update = false, overwrite = {}): Partial<
     created_by: { email: null, full_name: null, username: 'elastic' },
     updated_by: update ? { email: null, full_name: null, username: 'elastic' } : null,
     customFields: [],
+    observableTypes: [],
     ...overwrite,
   };
 };

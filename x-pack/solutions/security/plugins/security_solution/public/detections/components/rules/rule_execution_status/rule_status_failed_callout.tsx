@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
+import { css } from '@emotion/react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import { NewChat } from '@kbn/elastic-assistant';
@@ -15,10 +16,10 @@ import type { RuleExecutionStatus } from '../../../../../common/api/detection_en
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import * as i18n from './translations';
-import * as i18nAssistant from '../../../pages/detection_engine/rules/translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 
 interface RuleStatusFailedCallOutProps {
+  ruleNameForChat: string;
   ruleName?: string | undefined;
   dataSources?: string[] | undefined;
   date: string;
@@ -28,6 +29,7 @@ interface RuleStatusFailedCallOutProps {
 
 const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> = ({
   ruleName,
+  ruleNameForChat,
   dataSources,
   date,
   message,
@@ -42,13 +44,18 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         : `Error message: ${message}`,
     [message, ruleName, dataSources]
   );
+
+  const chatTitle = useMemo(() => {
+    return `${ruleNameForChat} - ${title} ${date}`;
+  }, [date, title, ruleNameForChat]);
+
   if (!shouldBeDisplayed) {
     return null;
   }
 
   return (
     <div
-      css={`
+      css={css`
         pre {
           margin-block-end: 0;
           margin-right: 24px; // Otherwise the copy button overlaps the scrollbar
@@ -79,7 +86,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
           <NewChat
             category="detection-rules"
             color={color}
-            conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+            conversationTitle={chatTitle}
             description={i18n.ASK_ASSISTANT_DESCRIPTION}
             getPromptContext={getPromptContext}
             suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}

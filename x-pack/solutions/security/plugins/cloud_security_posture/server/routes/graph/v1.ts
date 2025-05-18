@@ -40,6 +40,7 @@ interface GraphEdge {
 interface LabelEdges {
   source: string;
   target: string;
+  edgeType: EdgeDataModel['type'];
 }
 
 interface GraphContextServices {
@@ -259,7 +260,17 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
       break;
     }
 
-    const { ips, hosts, users, actorIds, action, targetIds, isOriginAlert, eventOutcome } = record;
+    const {
+      ips,
+      hosts,
+      users,
+      actorIds,
+      action,
+      targetIds,
+      isOrigin,
+      isOriginAlert,
+      eventOutcome,
+    } = record;
     const actorIdsArray = castArray(actorIds);
     const targetIdsArray = castArray(targetIds);
     const unknownTargets: string[] = [];
@@ -307,7 +318,11 @@ const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap
 
         nodesMap[labelNode.id] = labelNode;
         edgeLabelsNodes[edgeId].push(labelNode.id);
-        labelEdges[labelNode.id] = { source: actorId, target: targetId };
+        labelEdges[labelNode.id] = {
+          source: actorId,
+          target: targetId,
+          edgeType: isOrigin ? 'solid' : 'dashed',
+        };
       }
     }
   }
@@ -320,7 +335,7 @@ const determineEntityNodeShape = (
   users: string[]
 ): {
   shape: EntityNodeDataModel['shape'];
-  icon: string;
+  icon?: string;
 } => {
   // If actor is a user return ellipse
   if (users.includes(actorId)) {
@@ -337,7 +352,7 @@ const determineEntityNodeShape = (
     return { shape: 'diamond', icon: 'globe' };
   }
 
-  return { shape: 'hexagon', icon: 'questionInCircle' };
+  return { shape: 'hexagon' };
 };
 
 const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
@@ -368,7 +383,8 @@ const createEdgesAndGroups = (context: ParseContext) => {
         nodesMap,
         labelEdges[edgeLabelId].source,
         edgeLabelId,
-        labelEdges[edgeLabelId].target
+        labelEdges[edgeLabelId].target,
+        labelEdges[edgeLabelId].edgeType
       );
     } else {
       const groupNode: GroupNodeDataModel = {
@@ -377,10 +393,18 @@ const createEdgesAndGroups = (context: ParseContext) => {
       };
       nodesMap[groupNode.id] = groupNode;
       let groupEdgesColor: Color = 'primary';
+      let groupEdgesType: EdgeDataModel['type'] = 'dashed';
 
       edgeLabelsIds.forEach((edgeLabelId) => {
         (nodesMap[edgeLabelId] as Writable<LabelNodeDataModel>).parentId = groupNode.id;
-        connectEntitiesAndLabelNode(edgesMap, nodesMap, groupNode.id, edgeLabelId, groupNode.id);
+        connectEntitiesAndLabelNode(
+          edgesMap,
+          nodesMap,
+          groupNode.id,
+          edgeLabelId,
+          groupNode.id,
+          labelEdges[edgeLabelId].edgeType
+        );
 
         if ((nodesMap[edgeLabelId] as LabelNodeDataModel).color === 'danger') {
           groupEdgesColor = 'danger';
@@ -391,6 +415,10 @@ const createEdgesAndGroups = (context: ParseContext) => {
           // Use warning only if there's no danger color
           groupEdgesColor = 'warning';
         }
+
+        if (labelEdges[edgeLabelId].edgeType === 'solid') {
+          groupEdgesType = 'solid';
+        }
       });
 
       connectEntitiesAndLabelNode(
@@ -399,6 +427,7 @@ const createEdgesAndGroups = (context: ParseContext) => {
         labelEdges[edgeLabelsIds[0]].source,
         groupNode.id,
         labelEdges[edgeLabelsIds[0]].target,
+        groupEdgesType,
         groupEdgesColor
       );
     }
@@ -411,11 +440,12 @@ const connectEntitiesAndLabelNode = (
   sourceNodeId: string,
   labelNodeId: string,
   targetNodeId: string,
+  edgeType: EdgeDataModel['type'] = 'solid',
   colorOverride?: Color
 ) => {
   [
-    connectNodes(nodesMap, sourceNodeId, labelNodeId, colorOverride),
-    connectNodes(nodesMap, labelNodeId, targetNodeId, colorOverride),
+    connectNodes(nodesMap, sourceNodeId, labelNodeId, edgeType, colorOverride),
+    connectNodes(nodesMap, labelNodeId, targetNodeId, edgeType, colorOverride),
   ].forEach((edge) => {
     edgesMap[edge.id] = edge;
   });
@@ -425,6 +455,7 @@ const connectNodes = (
   nodesMap: Record<string, NodeDataModel>,
   sourceNodeId: string,
   targetNodeId: string,
+  edgeType: EdgeDataModel['type'] = 'solid',
   colorOverride?: Color
 ): EdgeDataModel => {
   const sourceNode = nodesMap[sourceNodeId];
@@ -441,5 +472,6 @@ const connectNodes = (
     source: sourceNodeId,
     target: targetNodeId,
     color: colorOverride ?? color,
+    type: edgeType,
   };
 };

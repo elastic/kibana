@@ -7,24 +7,19 @@
 
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { SecurityProductTypes } from '../config';
-import { ProductTier } from '../product';
 import { PLI_PRODUCT_FEATURES } from './pli_config';
 
 /**
  * Returns the U (union) of all PLIs from the enabled productTypes in a single array.
  */
-export const getProductProductFeatures = (
+export const getEnabledProductFeatures = (
   productTypes: SecurityProductTypes
 ): ProductFeatureKeys => {
-  const productFeatureKeys = productTypes.reduce<ProductFeatureKeys>(
+  return productTypes.reduce<ProductFeatureKeys>(
     (productFeatures, { product_line: line, product_tier: tier }) => {
-      if (tier === ProductTier.complete) {
-        productFeatures.push(...PLI_PRODUCT_FEATURES[line][ProductTier.essentials]);
-      }
       productFeatures.push(...PLI_PRODUCT_FEATURES[line][tier]);
       return productFeatures;
     },
     []
   );
-  return productFeatureKeys;
 };

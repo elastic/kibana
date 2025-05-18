@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, MouseEvent } from 'react';
 import { EuiBadge, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -32,13 +32,16 @@ export function SLOCardItemInstanceBadge({ slo }: Props) {
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);
             }}
+            onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
+              e.stopPropagation(); // stops propagation of metric onElementClick
+            }}
             onClickAriaLabel={i18n.translate('xpack.slo.instances.seeAllBadge', {
               defaultMessage: 'see all instance ids',
             })}
             data-test-subj="o11ySlosSeeAllInstanceIdsBadge"
           >
             {`${i18n.translate('xpack.slo.extraInstanceIds.badge', {
-              defaultMessage: '+{count, plural, one {# more instance} other {# more instances}}',
+              defaultMessage: '+{count, plural, one {# instance} other {# instances}}',
               values: {
                 count: entries.length - 1,
               },
@@ -46,7 +49,9 @@ export function SLOCardItemInstanceBadge({ slo }: Props) {
           </EuiBadge>
         }
       >
-        <SLOGroupings slo={slo} direction="column" truncate={false} />
+        <div onMouseDownCapture={(e: MouseEvent<HTMLDivElement>) => e.stopPropagation()}>
+          <SLOGroupings slo={slo} direction="column" truncate={false} />
+        </div>
       </EuiPopover>
     </EuiFlexItem>
   );

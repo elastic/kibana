@@ -7,11 +7,10 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
 import { i18n } from '@kbn/i18n';
 import { getSupportedFieldType } from '../../../common/components/fields_stats_grid/get_field_names';
-import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 
 interface Props {
   type: string | undefined;
@@ -20,7 +19,9 @@ interface Props {
 }
 
 export const FieldBadge: FC<Props> = ({ type, value, name }) => {
-  const { euiColorLightestShade, euiColorLightShade } = useCurrentEuiTheme();
+  const { euiTheme } = useEuiTheme();
+  const euiColorLightestShade = euiTheme.colors.lightestShade;
+  const euiColorLightShade = euiTheme.colors.lightShade;
   const supportedType = getSupportedFieldType(type ?? 'unknown');
   const tooltip = type
     ? i18n.translate('xpack.dataVisualizer.file.fileContents.fieldBadge.tooltip', {

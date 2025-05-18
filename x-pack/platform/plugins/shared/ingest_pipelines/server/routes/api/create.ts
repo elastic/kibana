@@ -25,6 +25,12 @@ export const registerCreateRoute = ({
   router.post(
     {
       path: API_BASE_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },
@@ -61,13 +67,11 @@ export const registerCreateRoute = ({
       try {
         const response = await clusterClient.asCurrentUser.ingest.putPipeline({
           id: name,
-          body: {
-            description,
-            processors,
-            version,
-            on_failure,
-            _meta,
-          },
+          description,
+          processors,
+          version,
+          on_failure,
+          _meta,
         });
 
         return res.ok({ body: response });

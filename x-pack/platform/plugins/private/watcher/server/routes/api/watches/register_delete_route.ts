@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
@@ -51,6 +51,12 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
   router.post(
     {
       path: '/api/watcher/watches/delete',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

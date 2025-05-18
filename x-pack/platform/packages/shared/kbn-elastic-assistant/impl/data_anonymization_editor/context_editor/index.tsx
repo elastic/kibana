@@ -9,36 +9,25 @@ import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import styled from '@emotion/styled';
 import { getColumns } from './get_columns';
 import { getRows } from './get_rows';
 import { Toolbar } from './toolbar';
 import * as i18n from './translations';
-import { BatchUpdateListItem, ContextEditorRow, FIELDS, SortConfig } from './types';
+import { BatchUpdateListItem, ContextEditorRow, FIELDS } from './types';
 import { useAssistantContext } from '../../assistant_context';
-import { useSessionPagination } from '../../assistant/common/components/assistant_settings_management/pagination/use_session_pagination';
+import {
+  getDefaultTableOptions,
+  useSessionPagination,
+} from '../../assistant/common/components/assistant_settings_management/pagination/use_session_pagination';
 import { ANONYMIZATION_TABLE_SESSION_STORAGE_KEY } from '../../assistant_context/constants';
-
-const DEFAULT_PAGE_SIZE = 10;
 
 const Wrapper = styled.div`
   > div > .euiSpacer {
     block-size: 16px;
   }
 `;
-
-const defaultSort: SortConfig = {
-  sort: {
-    direction: 'asc',
-    field: FIELDS.FIELD,
-  },
-};
-
-export const DEFAULT_TABLE_OPTIONS = {
-  page: { size: DEFAULT_PAGE_SIZE, index: 0 },
-  ...defaultSort,
-};
 
 export interface Props {
   anonymizationFields: FindAnonymizationFieldsResponse;
@@ -114,8 +103,12 @@ const ContextEditorComponent: React.FC<Props> = ({
     setSelection(rows);
   }, [rows]);
 
-  const { onTableChange, pagination, sorting } = useSessionPagination({
-    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
+  const { onTableChange, pagination, sorting } = useSessionPagination<ContextEditorRow, true>({
+    defaultTableOptions: getDefaultTableOptions<ContextEditorRow>({
+      pageSize: 10,
+      sortDirection: 'asc',
+      sortField: 'field',
+    }),
     nameSpace,
     storageKey: ANONYMIZATION_TABLE_SESSION_STORAGE_KEY,
   });

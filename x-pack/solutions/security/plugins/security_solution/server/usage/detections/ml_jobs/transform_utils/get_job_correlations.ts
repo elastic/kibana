@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  MlDatafeedStats,
-  MlJob,
-  MlJobStats,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlDatafeedStats, MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/types';
 import type { MlJobMetric } from '../types';
 
 export interface GetJobCorrelations {
@@ -60,11 +56,11 @@ export const getJobCorrelations = ({
       datafeed_id: datafeed?.datafeed_id,
       state: datafeed?.state,
       timing_stats: {
-        bucket_count: datafeed?.timing_stats.bucket_count,
+        bucket_count: datafeed?.timing_stats?.bucket_count,
         exponential_average_search_time_per_hour_ms:
-          datafeed?.timing_stats.exponential_average_search_time_per_hour_ms,
-        search_count: datafeed?.timing_stats.search_count,
-        total_search_time_ms: datafeed?.timing_stats.total_search_time_ms,
+          datafeed?.timing_stats?.exponential_average_search_time_per_hour_ms,
+        search_count: datafeed?.timing_stats?.search_count,
+        total_search_time_ms: datafeed?.timing_stats?.total_search_time_ms,
       },
     },
   };

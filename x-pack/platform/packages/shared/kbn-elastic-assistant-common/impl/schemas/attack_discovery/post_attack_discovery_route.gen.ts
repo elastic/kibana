@@ -16,25 +16,10 @@
 
 import { z } from '@kbn/zod';
 
-import { AnonymizationFieldResponse } from '../anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { ApiConfig, Replacements } from '../conversations/common_attributes.gen';
-import { AttackDiscoveryResponse } from './common_attributes.gen';
+import { AttackDiscoveryGenerationConfig, AttackDiscoveryResponse } from './common_attributes.gen';
 
 export type AttackDiscoveryPostRequestBody = z.infer<typeof AttackDiscoveryPostRequestBody>;
-export const AttackDiscoveryPostRequestBody = z.object({
-  alertsIndexPattern: z.string(),
-  anonymizationFields: z.array(AnonymizationFieldResponse),
-  /**
-   * LLM API configuration.
-   */
-  apiConfig: ApiConfig,
-  langSmithProject: z.string().optional(),
-  langSmithApiKey: z.string().optional(),
-  model: z.string().optional(),
-  replacements: Replacements.optional(),
-  size: z.number(),
-  subAction: z.enum(['invokeAI', 'invokeStream']),
-});
+export const AttackDiscoveryPostRequestBody = AttackDiscoveryGenerationConfig;
 export type AttackDiscoveryPostRequestBodyInput = z.input<typeof AttackDiscoveryPostRequestBody>;
 
 export type AttackDiscoveryPostResponse = z.infer<typeof AttackDiscoveryPostResponse>;

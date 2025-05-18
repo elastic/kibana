@@ -12,9 +12,14 @@ import {
   RISK_SCORE_INDEX_PATTERN,
   type CriticalityLevels,
 } from '../../../../../common/constants';
-import type { RiskSeverity } from '../../../../../common/search_strategy';
+import {
+  EntityTypeToLevelField,
+  RiskScoreFields,
+  type RiskSeverity,
+} from '../../../../../common/search_strategy';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { EntitySourceTag } from '../types';
+import { useEntityStoreTypes } from '../../../hooks/use_enabled_entity_types';
 
 interface UseEntitiesListFiltersParams {
   selectedSeverities: RiskSeverity[];
@@ -28,6 +33,7 @@ export const useEntitiesListFilters = ({
   selectedSources,
 }: UseEntitiesListFiltersParams) => {
   const { filterQuery: globalQuery } = useGlobalFilterQuery();
+  const enabledEntityTypes = useEntityStoreTypes();
 
   return useMemo(() => {
     const criticalityFilter: QueryDslQueryContainer[] = selectedCriticalities.length
@@ -58,18 +64,15 @@ export const useEntitiesListFilters = ({
       ? [
           {
             bool: {
-              should: selectedSeverities.flatMap((value) => [
-                {
-                  term: {
-                    'host.risk.calculated_level': value,
+              should: enabledEntityTypes
+                .filter((type) => {
+                  return EntityTypeToLevelField[type] !== RiskScoreFields.unsupported;
+                })
+                .map((type) => ({
+                  terms: {
+                    [EntityTypeToLevelField[type]]: selectedSeverities,
                   },
-                },
-                {
-                  term: {
-                    'user.risk.calculated_level': value,
-                  },
-                },
-              ]),
+                })),
             },
           },
         ]
@@ -84,7 +87,7 @@ export const useEntitiesListFilters = ({
       filterList.push(globalQuery);
     }
     return filterList;
-  }, [globalQuery, selectedCriticalities, selectedSeverities, selectedSources]);
+  }, [enabledEntityTypes, globalQuery, selectedCriticalities, selectedSeverities, selectedSources]);
 };
 
 const getSourceTagFilterQuery = (tag: EntitySourceTag): QueryDslQueryContainer => {

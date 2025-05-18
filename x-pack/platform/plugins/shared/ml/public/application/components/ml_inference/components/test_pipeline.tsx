@@ -8,10 +8,10 @@
 import type { FC } from 'react';
 import React, { memo, useEffect, useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
+  useEuiTheme,
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
@@ -30,7 +30,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import type { IngestSimulateDocument } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestDocument } from '@elastic/elasticsearch/lib/api/types';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 
 import { i18n } from '@kbn/i18n';
@@ -58,6 +58,7 @@ interface Props {
 }
 
 export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
+  const { euiTheme } = useEuiTheme();
   const [simulatePipelineResult, setSimulatePipelineResult] = useState<
     undefined | estypes.IngestSimulateResponse
   >();
@@ -90,7 +91,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
     try {
       const result = await mlApi.trainedModels.trainedModelPipelineSimulate(
         pipelineConfig,
-        JSON.parse(sampleDocsString) as IngestSimulateDocument[]
+        JSON.parse(sampleDocsString) as IngestDocument[]
       );
       setSimulatePipelineResult(result);
     } catch (error) {
@@ -124,7 +125,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
 
   const getDocs = useCallback(
     async (body: any) => {
-      let records: IngestSimulateDocument[] = [];
+      let records: IngestDocument[] = [];
       let resp;
       try {
         resp = await mlApi.esSearch(body);
@@ -391,7 +392,7 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
             <EuiResizableContainer
               direction={isSmallerViewport ? 'vertical' : 'horizontal'}
               css={css`
-                min-height: calc(${euiThemeVars.euiSizeXL} * 10);
+                min-height: calc(${euiTheme.size.xl} * 10);
               `}
             >
               {(EuiResizablePanel, EuiResizableButton) => (

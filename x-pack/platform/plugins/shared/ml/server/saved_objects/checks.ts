@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, KibanaRequest, SavedObjectsFindResult } from '@kbn/core/server';
 import type {
   MLSavedObjectService,
@@ -319,8 +319,8 @@ export function checksFactory(
       }, {} as DeleteMLSpaceAwareItemsCheckResponse);
     }
     const canCreateGlobalMlSavedObjects = await mlSavedObjectService.canCreateGlobalMlSavedObjects(
-      mlSavedObjectType,
-      request
+      request,
+      mlSavedObjectType
     );
 
     const savedObjects =

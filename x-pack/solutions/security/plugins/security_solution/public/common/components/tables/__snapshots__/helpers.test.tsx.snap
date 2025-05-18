@@ -1,69 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`] = `
-<Fragment>
-  <Popover
-    count={2}
-    idPrefix="idPrefix"
+<div
+  class="css-19lowmu-subtext"
+>
+  <div
+    class="euiPopover emotion-euiPopover-inline-block"
+    id="idPrefix-popover"
   >
-    <EuiText
-      size="xs"
+    <button
+      class="euiLink emotion-euiLink-primary"
+      data-test-subj="overflow-button"
+      type="button"
     >
-      <MoreContainer
-        fieldName="attrName"
-        idPrefix="idPrefix"
-        moreMaxHeight="none"
-        overflowIndexStart={1}
-        values={
-          Array [
-            "item1",
-            "item2",
-          ]
-        }
-      />
-    </EuiText>
-    <EuiFlexGroup
-      css={
-        Object {
-          "paddingTop": "12px",
-        }
-      }
-      data-test-subj="popover-additional-overflow"
-    >
-      <EuiFlexItem>
-        <EuiText
-          size="xs"
-        >
-          <EuiTextColor
-            color="subdued"
-          >
-            1
-             
-            <MemoizedFormattedMessage
-              data-test-subj="popover-additional-overflow-text"
-              defaultMessage="more not shown"
-              id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
-            />
-          </EuiTextColor>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </Popover>
-</Fragment>
+      +2 More
+    </button>
+  </div>
+</div>
 `;
 
-exports[`Table Helpers OverflowField it returns correctly against snapshot 1`] = `
+exports[`Table Helpers OverflowField it renders 1`] = `
 <span>
   This string is exactly fifty-one chars in length!!
-  <EuiToolTip
-    content="This string is exactly fifty-one chars in length!!!"
-    delay="regular"
-    display="inlineBlock"
-    position="top"
+  <span
+    class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
   >
-    <MoreRowItems
-      type="boxesHorizontal"
+    <span
+      class="css-1mvq9d1-MoreRowItems e1v2bxdw1"
+      data-euiicon-type="boxesHorizontal"
     />
-  </EuiToolTip>
+  </span>
 </span>
 `;

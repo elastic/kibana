@@ -18,8 +18,8 @@ describe('ManagedUser', () => {
     managedUser: mockManagedUserData,
     contextID: '',
     scopeId: '',
-    isDraggable: false,
     openDetailsPanel: () => {},
+    isLinkEnabled: true,
   };
 
   it('renders', () => {

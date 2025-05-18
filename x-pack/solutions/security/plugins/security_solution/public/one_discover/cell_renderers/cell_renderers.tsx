@@ -52,7 +52,6 @@ export const getCellRendererForGivenRecord: SecuritySolutionRowCellRendererGette
         eventId={props.row.id}
         header={header}
         isDetails={props.isDetails}
-        isDraggable={false}
         isTimeline={false}
         linkValues={undefined}
         rowRenderers={undefined}

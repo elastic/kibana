@@ -27,6 +27,12 @@ export function registerDeleteRoute({
   router.delete(
     {
       path: '/api/watcher/watch/{watchId}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

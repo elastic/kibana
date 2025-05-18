@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
+  OpenPointInTimeResponse,
   AggregationsCompositeAggregation,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';

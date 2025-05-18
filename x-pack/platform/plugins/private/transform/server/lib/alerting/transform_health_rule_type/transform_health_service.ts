@@ -7,11 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { keyBy, memoize, partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { TransformHealthRuleParams } from '@kbn/response-ops-rule-params/transform_health';
 import type { TransformStats } from '../../../../common/types/transform_stats';
 import {
   ALL_TRANSFORMS_SELECTION,
@@ -22,11 +23,11 @@ import {
   TRANSFORM_RULE_TYPE,
   TRANSFORM_STATE,
 } from '../../../../common/constants';
-import type { TransformHealthRuleParams } from './schema';
 import { getResultTestConfig } from '../../../../common/utils/alerts';
 import type {
   ErrorMessagesTransformResponse,
   TransformHealthAlertContext,
+  TransformHealthAlertState,
   TransformStateReportResponse,
 } from './register_transform_health_rule_type';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
@@ -44,6 +45,11 @@ type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthA
 
 const maxPathComponentLength = 2000;
 
+const TRANSFORM_PAGE_SIZE = 1000;
+
+/** Number of transforms IDs mentioned in the context message */
+const TRANSFORMS_IDS_MESSAGE_LIMIT = 10;
+
 export function transformHealthServiceProvider({
   esClient,
   rulesClient,
@@ -60,47 +66,56 @@ export function transformHealthServiceProvider({
    * @param includeTransforms
    * @param excludeTransforms
    */
-  const getResultsTransformIds = async (
+  const getResultsTransformIds = (
+    transforms: Transform[],
     includeTransforms: string[],
     excludeTransforms: string[] | null
-  ): Promise<Set<string>> => {
-    const includeAll = includeTransforms.some((id) => id === ALL_TRANSFORMS_SELECTION);
+  ): Set<string> => {
+    const continuousTransforms: Transform[] = transforms.filter(isContinuousTransform);
 
-    let resultTransformIds: string[] = [];
-
-    // Fetch transforms to make sure assigned transforms exists.
-    const transformsResponse = (
-      await esClient.transform.getTransform({
-        ...(includeAll ? {} : { transform_id: includeTransforms.join(',') }),
-        allow_no_match: true,
-        size: 1000,
-      })
-    ).transforms as Transform[];
-
-    transformsResponse.forEach((t) => {
+    continuousTransforms.forEach((t) => {
       transformsDict.set(t.id, t);
-      // Include only continuously running transforms.
-      if (isContinuousTransform(t)) {
-        resultTransformIds.push(t.id);
-      }
     });
 
-    if (excludeTransforms && excludeTransforms.length > 0) {
-      let excludeIdsSet = new Set(excludeTransforms);
-      if (excludeTransforms.some((id) => id.includes('*'))) {
-        const excludeTransformResponse = (
-          await esClient.transform.getTransform({
-            transform_id: excludeTransforms.join(','),
-            allow_no_match: true,
-            size: 1000,
-          })
-        ).transforms as Transform[];
-        excludeIdsSet = new Set(excludeTransformResponse.map((t) => t.id));
-      }
-      resultTransformIds = resultTransformIds.filter((id) => !excludeIdsSet.has(id));
-    }
+    return new Set(
+      continuousTransforms
+        .filter(
+          (t) =>
+            includeTransforms.some((includedTransformId) =>
+              new RegExp('^' + includedTransformId.replace(/\*/g, '.*') + '$').test(t.id)
+            ) &&
+            (Array.isArray(excludeTransforms) && excludeTransforms.length > 0
+              ? excludeTransforms.every(
+                  (excludedTransformId) =>
+                    new RegExp('^' + excludedTransformId.replace(/\*/g, '.*') + '$').test(t.id) ===
+                    false
+                )
+              : true)
+        )
+        .map((t) => t.id)
+    );
+  };
 
-    return new Set(resultTransformIds);
+  /**
+   * Returns a string with transform IDs for the context message.
+   */
+  const getContextMessageTransformIds = (transformIds: string[]): string => {
+    const count = transformIds.length;
+    let transformsString = transformIds.join(', ');
+    if (transformIds.length > TRANSFORMS_IDS_MESSAGE_LIMIT) {
+      transformsString = i18n.translate(
+        'xpack.transform.alertTypes.transformHealth.truncatedTransformIdsMessage',
+        {
+          defaultMessage:
+            '{truncatedTransformIds} and {restCount, plural, one {# other} other {# others}}',
+          values: {
+            truncatedTransformIds: transformIds.slice(0, TRANSFORMS_IDS_MESSAGE_LIMIT).join(', '),
+            restCount: count - TRANSFORMS_IDS_MESSAGE_LIMIT,
+          },
+        }
+      );
+    }
+    return transformsString;
   };
 
   const getTransformStats = memoize(
@@ -113,6 +128,7 @@ export function transformHealthServiceProvider({
             transform_id: transformIdsString,
             // @ts-expect-error `basic` query option not yet in @elastic/elasticsearch
             basic: true,
+            size: transformIds.size,
           })
         ).transforms as TransformStats[];
       } else {
@@ -123,6 +139,7 @@ export function transformHealthServiceProvider({
               // @ts-expect-error `basic` query option not yet in @elastic/elasticsearch
               basic: true,
               transform_id: '_all',
+              size: TRANSFORM_PAGE_SIZE,
             })
           ).transforms as TransformStats[]
         ).filter((t) => transformIds.has(t.id));
@@ -269,8 +286,22 @@ export function transformHealthServiceProvider({
      * Returns results of the transform health checks
      * @param params
      */
-    async getHealthChecksResults(params: TransformHealthRuleParams) {
-      const transformIds = await getResultsTransformIds(
+    async getHealthChecksResults(
+      params: TransformHealthRuleParams,
+      previousState: TransformHealthAlertState
+    ) {
+      const includeAll = params.includeTransforms.some((id) => id === ALL_TRANSFORMS_SELECTION);
+
+      const transforms = (
+        await esClient.transform.getTransform({
+          ...(includeAll ? {} : { transform_id: params.includeTransforms.join(',') }),
+          allow_no_match: true,
+          size: TRANSFORM_PAGE_SIZE,
+        })
+      ).transforms as Transform[];
+
+      const transformIds = getResultsTransformIds(
+        transforms,
         params.includeTransforms,
         params.excludeTransforms
       );
@@ -284,30 +315,37 @@ export function transformHealthServiceProvider({
           transformIds
         );
 
+        const prevNotStartedSet: Set<string> = new Set(previousState?.notStarted ?? []);
+        const recoveredTransforms = startedTransforms.filter((t) =>
+          prevNotStartedSet.has(t.transform_id)
+        );
+
         const isHealthy = notStartedTransform.length === 0;
 
-        const count = isHealthy ? startedTransforms.length : notStartedTransform.length;
-        const transformsString = (isHealthy ? startedTransforms : notStartedTransform)
-          .map((t) => t.transform_id)
-          .join(', ');
+        // if healthy, mention transforms that were not started
+        const count = isHealthy ? recoveredTransforms.length : notStartedTransform.length;
+
+        const transformsString = getContextMessageTransformIds(
+          (isHealthy ? recoveredTransforms : notStartedTransform).map((t) => t.transform_id)
+        );
 
         result.push({
           isHealthy,
           name: TRANSFORM_HEALTH_CHECK_NAMES.notStarted.name,
           context: {
-            results: isHealthy ? startedTransforms : notStartedTransform,
+            results: isHealthy ? recoveredTransforms : notStartedTransform,
             message: isHealthy
               ? i18n.translate(
                   'xpack.transform.alertTypes.transformHealth.notStartedRecoveryMessage',
                   {
                     defaultMessage:
-                      '{count, plural, one {Transform} other {Transform}} {transformsString} {count, plural, one {is} other {are}} started.',
+                      '{count, plural, =0 {All transforms are started} one {Transform {transformsString} is started} other {# transforms are started: {transformsString}}}.',
                     values: { count, transformsString },
                   }
                 )
               : i18n.translate('xpack.transform.alertTypes.transformHealth.notStartedMessage', {
                   defaultMessage:
-                    '{count, plural, one {Transform} other {Transform}} {transformsString} {count, plural, one {is} other {are}} not started.',
+                    '{count, plural, one {Transform {transformsString} is not started} other {# transforms are not started: {transformsString}}}.',
                   values: { count, transformsString },
                 }),
           },
@@ -347,8 +385,12 @@ export function transformHealthServiceProvider({
       if (testsConfig.healthCheck.enabled) {
         const response = await this.getUnhealthyTransformsReport(transformIds);
         const isHealthy = response.length === 0;
-        const count = response.length;
-        const transformsString = response.map((t) => t.transform_id).join(', ');
+        const count: number = isHealthy ? previousState?.unhealthy?.length ?? 0 : response.length;
+
+        const transformsString = getContextMessageTransformIds(
+          isHealthy ? previousState?.unhealthy ?? [] : response.map((t) => t.transform_id)
+        );
+
         result.push({
           isHealthy,
           name: TRANSFORM_HEALTH_CHECK_NAMES.healthCheck.name,
@@ -359,13 +401,13 @@ export function transformHealthServiceProvider({
                   'xpack.transform.alertTypes.transformHealth.healthCheckRecoveryMessage',
                   {
                     defaultMessage:
-                      '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} healthy.',
+                      '{count, plural, =0 {All transforms are healthy} one {Transform {transformsString} is healthy} other {# transforms are healthy: {transformsString}}}.',
                     values: { count, transformsString },
                   }
                 )
               : i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckMessage', {
                   defaultMessage:
-                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} unhealthy.',
+                    '{count, plural, one {Transform {transformsString} is unhealthy} other {# transforms are unhealthy: {transformsString}}}.',
                   values: { count, transformsString },
                 }),
           },
@@ -406,21 +448,10 @@ export function transformHealthServiceProvider({
         // Retrieve result transform IDs
         const { includeTransforms, excludeTransforms } = ruleInstance.params;
 
-        const resultTransformIds = new Set(
-          transforms
-            .filter(
-              (t) =>
-                includeTransforms.some((includedTransformId) =>
-                  new RegExp(includedTransformId.replace(/\*/g, '.*')).test(t.id)
-                ) &&
-                (Array.isArray(excludeTransforms) && excludeTransforms.length > 0
-                  ? excludeTransforms.every(
-                      (excludedTransformId) =>
-                        new RegExp(excludedTransformId.replace(/\*/g, '.*')).test(t.id) === false
-                    )
-                  : true)
-            )
-            .map((t) => t.id)
+        const resultTransformIds = getResultsTransformIds(
+          transforms,
+          includeTransforms,
+          excludeTransforms
         );
 
         resultTransformIds.forEach((transformId) => {

@@ -14,7 +14,7 @@ import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../common/translations';
 import type { Rule } from '../../../../rule_management/logic';
 import { useUserData } from '../../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
@@ -110,8 +110,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 const createInstallButtonColumn = (
   installOneRule: AddPrebuiltRulesTableActions['installOneRule'],
   loadingRules: RuleSignatureId[],
-  isDisabled: boolean,
-  isInstallingAllRules: boolean
+  isDisabled: boolean
 ): TableColumn => ({
   field: 'rule_id',
   name: <RulesTableEmptyColumnName name={i18n.INSTALL_RULE_BUTTON} />,
@@ -122,7 +121,6 @@ const createInstallButtonColumn = (
       installOneRule={installOneRule}
       loadingRules={loadingRules}
       isDisabled={isDisabled}
-      isInstallingAllRules={isInstallingAllRules}
     />
   ),
   width: '10%',
@@ -166,23 +164,9 @@ export const useAddPrebuiltRulesTableColumns = (): TableColumn[] => {
         width: '12%',
       },
       ...(hasCRUDPermissions
-        ? [
-            createInstallButtonColumn(
-              installOneRule,
-              loadingRules,
-              isDisabled,
-              isInstallingAllRules
-            ),
-          ]
+        ? [createInstallButtonColumn(installOneRule, loadingRules, isDisabled)]
         : []),
     ],
-    [
-      hasCRUDPermissions,
-      installOneRule,
-      loadingRules,
-      isDisabled,
-      showRelatedIntegrations,
-      isInstallingAllRules,
-    ]
+    [hasCRUDPermissions, installOneRule, loadingRules, isDisabled, showRelatedIntegrations]
   );
 };

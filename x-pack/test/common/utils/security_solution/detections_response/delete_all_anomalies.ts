@@ -19,10 +19,8 @@ export const deleteAllAnomalies = async (
     async () => {
       await es.deleteByQuery({
         index,
-        body: {
-          query: {
-            match_all: {},
-          },
+        query: {
+          match_all: {},
         },
         refresh: true,
       });

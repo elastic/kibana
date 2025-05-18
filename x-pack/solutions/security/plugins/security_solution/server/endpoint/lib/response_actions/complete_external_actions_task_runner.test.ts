@@ -19,6 +19,12 @@ import {
   COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION,
 } from './complete_external_actions_task';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { fetchSpaceIdsWithMaybePendingActions as _fetchSpaceIdsWithMaybePendingActionsMock } from '../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions';
+
+jest.mock('../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions');
+
+const fetchSpaceIdsWithMaybePendingActionsMock =
+  _fetchSpaceIdsWithMaybePendingActionsMock as jest.Mock;
 
 describe('CompleteExternalTaskRunner class', () => {
   let endpointContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -46,6 +52,14 @@ describe('CompleteExternalTaskRunner class', () => {
         );
         return clientMock;
       }
+    );
+  });
+
+  afterEach(() => {
+    fetchSpaceIdsWithMaybePendingActionsMock.mockRestore();
+    fetchSpaceIdsWithMaybePendingActionsMock.mockImplementation(
+      jest.requireActual('../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions')
+        .fetchSpaceIdsWithMaybePendingActions
     );
   });
 
@@ -110,18 +124,55 @@ describe('CompleteExternalTaskRunner class', () => {
     );
   });
 
+  it('should process each agent type per space when space awareness is enabled', async () => {
+    fetchSpaceIdsWithMaybePendingActionsMock.mockResolvedValue(['foo', 'bar']);
+    await runnerInstance.run();
+    const getInternalResponseActionsClientMock =
+      endpointContextServicesMock.getInternalResponseActionsClient as jest.Mock;
+
+    RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => agentType !== 'endpoint').forEach(
+      (agentType) => {
+        expect(getInternalResponseActionsClientMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            agentType,
+            spaceId: 'foo',
+          })
+        );
+        expect(getInternalResponseActionsClientMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            agentType,
+            spaceId: 'bar',
+          })
+        );
+      }
+    );
+  });
+
   it('should call ES to create action response documents', async () => {
     await runnerInstance.run();
 
     expect(esClientMock.bulk).toHaveBeenCalledWith({
       index: ENDPOINT_ACTION_RESPONSES_INDEX,
+      // Array below will have records for each type of external EDR, so as new ones are
+      // added, a new response should be added to the array below
       operations: [
+        // for SentinelOne
         { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
         expect.objectContaining({
           '@timestamp': expect.any(String),
           EndpointActions: expect.any(Object),
           agent: expect.any(Object),
         }),
+
+        // for crowdstrike
+        { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
+        expect.objectContaining({
+          '@timestamp': expect.any(String),
+          EndpointActions: expect.any(Object),
+          agent: expect.any(Object),
+        }),
+
+        // for Microsoft Defender
         { create: { _index: ENDPOINT_ACTION_RESPONSES_INDEX } },
         expect.objectContaining({
           '@timestamp': expect.any(String),

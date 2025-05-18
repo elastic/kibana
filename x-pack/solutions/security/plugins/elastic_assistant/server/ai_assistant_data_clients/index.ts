@@ -9,7 +9,7 @@ import { AuditLogger, AuthenticatedUser, ElasticsearchClient, Logger } from '@kb
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { IIndexPatternString } from '../types';
 import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
 import { DocumentsDataWriter } from '../lib/data_stream/documents_data_writer';
@@ -100,6 +100,7 @@ export class AIAssistantDataClient {
     sortOrder,
     filter,
     fields,
+    index,
     aggs,
     mSearch,
   }: {
@@ -109,6 +110,7 @@ export class AIAssistantDataClient {
     sortOrder?: string;
     filter?: string;
     fields?: string[];
+    index?: string;
     aggs?: Record<string, estypes.AggregationsAggregationContainer>;
     mSearch?: {
       filter: string;
@@ -123,7 +125,7 @@ export class AIAssistantDataClient {
       perPage,
       filter,
       sortField,
-      index: this.indexTemplateAndPattern.alias,
+      index: index ?? this.indexTemplateAndPattern.alias,
       sortOrder: sortOrder as estypes.SortOrder,
       logger: this.options.logger,
       aggs,

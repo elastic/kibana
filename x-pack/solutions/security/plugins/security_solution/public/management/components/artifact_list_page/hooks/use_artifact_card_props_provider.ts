@@ -6,11 +6,13 @@
  */
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
+import type { PolicyData } from '../../../../../common/endpoint/types';
+import { useBulkFetchFleetIntegrationPolicies } from '../../../hooks/policy/use_bulk_fetch_fleet_integration_policies';
+import { getPolicyIdsFromArtifact } from '../../../../../common/endpoint/service/artifacts';
 import type { AnyArtifact, ArtifactEntryCardProps } from '../../artifact_entry_card';
 import { useEndpointPoliciesToArtifactPolicies } from '../../artifact_entry_card';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import { getLoadPoliciesError } from '../../../common/translations';
 import { useToasts } from '../../../../common/lib/kibana';
 
@@ -44,11 +46,14 @@ export const useArtifactCardPropsProvider = ({
   const getTestId = useTestIdGenerator(dataTestSubj);
   const toasts = useToasts();
 
-  const { data: policyData } = useGetEndpointSpecificPolicies({
-    onError: (error) => {
-      toasts.addDanger(getLoadPoliciesError(error));
-    },
-  });
+  const itemsPolicyIds = useMemo(() => {
+    return items.map((item) => getPolicyIdsFromArtifact(item)).flat();
+  }, [items]);
+
+  const { data: policyData, error } = useBulkFetchFleetIntegrationPolicies<PolicyData>(
+    { ids: itemsPolicyIds },
+    { enabled: itemsPolicyIds.length > 0 }
+  );
 
   const policies: ArtifactEntryCardProps['policies'] = useEndpointPoliciesToArtifactPolicies(
     policyData?.items
@@ -106,6 +111,12 @@ export const useArtifactCardPropsProvider = ({
     onAction,
     cardActionDeleteLabel,
   ]);
+
+  useEffect(() => {
+    if (error) {
+      toasts.addDanger(getLoadPoliciesError(error));
+    }
+  }, [error, toasts]);
 
   return useCallback(
     (artifactItem: ExceptionListItemSchema) => {

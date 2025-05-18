@@ -11,11 +11,11 @@ import { DashboardToolBar } from './dashboard_tool_bar';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { APP_NAME } from '../../../common/constants';
 import { NavigationProvider, SecurityPageName } from '@kbn/security-solution-navigation';
 import { TestProviders } from '../../common/mock';
 import { useNavigation } from '../../common/lib/kibana';
+import { BehaviorSubject } from 'rxjs';
 
 const mockDashboardTopNav = DashboardTopNav as jest.Mock;
 
@@ -34,7 +34,9 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
 const mockCore = coreMock.createStart();
 const mockNavigateTo = jest.fn();
 const mockGetAppUrl = jest.fn();
-const mockDashboardContainer = {} as unknown as DashboardApi;
+const mockDashboardContainer = {
+  viewMode$: new BehaviorSubject('view'),
+} as unknown as DashboardApi;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>
@@ -60,7 +62,7 @@ describe('DashboardToolBar', () => {
   });
 
   it('should render the DashboardToolBar component with the correct props for view mode', () => {
-    expect(mockOnLoad).toHaveBeenCalledWith(ViewMode.VIEW);
+    expect(mockOnLoad).toHaveBeenCalledWith('view');
   });
 
   it('should render the DashboardTopNav component with the correct redirect to listing url', () => {

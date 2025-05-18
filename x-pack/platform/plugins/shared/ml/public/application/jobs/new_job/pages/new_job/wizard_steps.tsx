@@ -74,7 +74,7 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
   function getSummaryStepTitle() {
     if (dataSourceContext.selectedSavedSearch) {
       return i18n.translate('xpack.ml.newJob.wizard.stepComponentWrapper.summaryTitleSavedSearch', {
-        defaultMessage: 'New job from saved search {title}',
+        defaultMessage: 'New job from saved Discover session {title}',
         values: { title: dataSourceContext.selectedSavedSearch.title ?? '' },
       });
     } else if (dataSourceContext.selectedDataView.id !== undefined) {
@@ -123,7 +123,6 @@ export const WizardSteps: FC<Props> = ({ currentStep, setCurrentStep }) => {
             fieldStatsServices={fieldStatsServices}
             timeRangeMs={timeRangeMs}
             dslQuery={jobCreator.query}
-            theme={services.theme}
           >
             <>
               <EuiFlexGroup gutterSize="s">

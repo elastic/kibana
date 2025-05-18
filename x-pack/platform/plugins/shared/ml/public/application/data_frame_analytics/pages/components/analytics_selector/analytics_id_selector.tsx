@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTabbedContent,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -120,6 +121,9 @@ export function AnalyticsIdSelector({
   const [selected, setSelected] = useState<
     { model_id?: string; job_id?: string; analysis_type?: string } | undefined
   >();
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'jobSelectorFlyout',
+  });
   const [analyticsJobs, setAnalyticsJobs] = useState<DataFrameAnalyticsConfig[]>([]);
   const [trainedModels, setTrainedModels] = useState<TrainedModelConfigResponse[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -268,11 +272,11 @@ export function AnalyticsIdSelector({
     <EuiFlyout
       onClose={closeFlyout}
       data-test-subj="mlFlyoutJobSelector"
-      aria-labelledby="jobSelectorFlyout"
+      aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id="flyoutTitle">
+          <h2 id={flyoutTitleId}>
             {i18n.translate('xpack.ml.analyticsSelector.flyoutTitle', {
               defaultMessage: 'Analytics selection',
             })}
@@ -281,7 +285,18 @@ export function AnalyticsIdSelector({
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>{renderTabs()}</EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              data-test-subj="mlFlyoutAnalyticsSelectorButtonClose"
+            >
+              {i18n.translate('xpack.ml.analyticsSelector.closeFlyoutButton', {
+                defaultMessage: 'Close',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={applySelection}
@@ -294,17 +309,6 @@ export function AnalyticsIdSelector({
                 defaultMessage="Apply"
               />
             </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="cross"
-              onClick={closeFlyout}
-              data-test-subj="mlFlyoutAnalyticsSelectorButtonClose"
-            >
-              {i18n.translate('xpack.ml.analyticsSelector.closeFlyoutButton', {
-                defaultMessage: 'Close',
-              })}
-            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

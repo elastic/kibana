@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -19,7 +19,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { NotificationsSetup } from '@kbn/core/public';
+import { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { LanguageSelectorModal } from './language_selector_modal';
@@ -38,7 +38,11 @@ interface Props {
   getRequests: () => Promise<EditorRequest[]>;
   getDocumentation: () => Promise<string | null>;
   autoIndent: (ev: React.MouseEvent) => void;
-  notifications: NotificationsSetup;
+  notifications: Pick<NotificationsStart, 'toasts'>;
+  /* A function that returns true if any of the selected requests is an internal Kibana request
+   * (starting with the kbn: prefix). This is needed here as we display only the curl language
+   * for internal Kibana requests since the other languages are not supported yet. */
+  getIsKbnRequestSelected: () => Promise<boolean | null>;
 }
 
 const styles = {
@@ -66,17 +70,29 @@ export const ContextMenu = ({
   getDocumentation,
   autoIndent,
   notifications,
+  getIsKbnRequestSelected,
 }: Props) => {
   // Get default language from local storage
   const {
     services: { storage, esHostService },
   } = useServicesContext();
-  const defaultLanguage = storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);
   const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
+  const [isKbnRequestSelected, setIsKbnRequestSelected] = useState<boolean | null>(null);
+  const [defaultLanguage, setDefaultLanguage] = useState(
+    storage.get(StorageKeys.DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)
+  );
   const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
+
+  useEffect(() => {
+    if (isKbnRequestSelected) {
+      setCurrentLanguage(DEFAULT_LANGUAGE);
+    } else {
+      setCurrentLanguage(defaultLanguage);
+    }
+  }, [defaultLanguage, isKbnRequestSelected]);
 
   const copyText = async (text: string) => {
     if (window.navigator?.clipboard) {
@@ -138,6 +154,10 @@ export const ContextMenu = ({
     await copyText(requestsAsCode);
   };
 
+  const checkIsKbnRequestSelected = async () => {
+    setIsKbnRequestSelected(await getIsKbnRequestSelected());
+  };
+
   const onCopyAsSubmit = async (language?: string) => {
     const withLanguage = language || currentLanguage;
 
@@ -165,7 +185,10 @@ export const ContextMenu = ({
       storage.set(StorageKeys.DEFAULT_LANGUAGE, language);
     }
 
-    setCurrentLanguage(language);
+    setDefaultLanguage(language);
+    if (!isKbnRequestSelected) {
+      setCurrentLanguage(language);
+    }
   };
 
   const closePopover = () => {
@@ -193,7 +216,10 @@ export const ContextMenu = ({
 
   const button = (
     <EuiButtonIcon
-      onClick={() => setIsPopoverOpen((prev) => !prev)}
+      onClick={() => {
+        setIsPopoverOpen((prev) => !prev);
+        checkIsKbnRequestSelected();
+      }}
       data-test-subj="toggleConsoleMenu"
       aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
         defaultMessage: 'Request options',
@@ -238,17 +264,21 @@ export const ContextMenu = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {isRequestConverterLoading ? (
-            <EuiLoadingSpinner size="s" />
-          ) : (
-            // The EuiContextMenuItem renders itself as a button already, so we need to
-            // force the link to not be a button in order to prevent A11Y issues.
-            <EuiLink href="" data-name="changeLanguage" data-test-subj="changeLanguageButton">
-              Change
-            </EuiLink>
-          )}
-        </EuiFlexItem>
+        {!isKbnRequestSelected && (
+          <EuiFlexItem grow={false}>
+            {isRequestConverterLoading ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              // The EuiContextMenuItem renders itself as a button already, so we need to
+              // force the link to not be a button in order to prevent A11Y issues.
+              <EuiLink href="" data-name="changeLanguage" data-test-subj="changeLanguageButton">
+                {i18n.translate('console.consoleMenu.changeLanguageButtonLabel', {
+                  defaultMessage: 'Change',
+                })}
+              </EuiLink>
+            )}
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiContextMenuItem>,
     <EuiContextMenuItem

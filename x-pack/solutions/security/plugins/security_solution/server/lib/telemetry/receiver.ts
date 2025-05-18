@@ -22,7 +22,17 @@ import type {
   OpenPointInTimeResponse,
   SearchRequest,
   SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+  SearchHit,
+  SearchRequest as ESSearchRequest,
+  SortResults,
+  IndicesGetDataStreamRequest,
+  IndicesStatsRequest,
+  IlmGetLifecycleRequest,
+  IndicesGetRequest,
+  NodesStatsRequest,
+  Duration,
+  IndicesGetIndexTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   EQL_RULE_TYPE_ID,
@@ -35,15 +45,6 @@ import {
   THRESHOLD_RULE_TYPE_ID,
   ESQL_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import type {
-  SearchHit,
-  SearchRequest as ESSearchRequest,
-  SortResults,
-  IndicesGetDataStreamRequest,
-  IndicesStatsRequest,
-  IlmGetLifecycleRequest,
-  IndicesGetRequest,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { AgentPolicy, Installation } from '@kbn/fleet-plugin/common';
 import type {
@@ -99,9 +100,17 @@ import type {
   IlmPolicy,
   IlmStats,
   Index,
+  IndexSettings,
   IndexStats,
+  IndexTemplateInfo,
 } from './indices.metadata.types';
 import { chunkStringsByMaxLength } from './collections_helpers';
+import type {
+  NodeIngestPipelinesStats,
+  Pipeline,
+  Processor,
+  Totals,
+} from './ingest_pipelines_stats.types';
 
 export interface ITelemetryReceiver {
   start(
@@ -254,11 +263,14 @@ export interface ITelemetryReceiver {
 
   setNumDocsToSample(n: number): void;
 
-  getIndices(): Promise<string[]>;
+  getIndices(): Promise<IndexSettings[]>;
   getDataStreams(): Promise<DataStream[]>;
-  getIndicesStats(indices: string[]): AsyncGenerator<IndexStats, void, unknown>;
-  getIlmsStats(indices: string[]): AsyncGenerator<IlmStats, void, unknown>;
-  getIlmsPolicies(ilms: string[]): AsyncGenerator<IlmPolicy, void, unknown>;
+  getIndicesStats(indices: string[], chunkSize: number): AsyncGenerator<IndexStats, void, unknown>;
+  getIlmsStats(indices: string[], chunkSize: number): AsyncGenerator<IlmStats, void, unknown>;
+  getIndexTemplatesStats(): Promise<IndexTemplateInfo[]>;
+  getIlmsPolicies(ilms: string[], chunkSize: number): AsyncGenerator<IlmPolicy, void, unknown>;
+
+  getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -365,45 +377,43 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.policy*`,
       ignore_unavailable: false,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        query: {
-          range: {
-            '@timestamp': {
-              gte: executeFrom,
-              lt: executeTo,
-            },
+      size: 0, // no query results required - only aggregation quantity
+      query: {
+        range: {
+          '@timestamp': {
+            gte: executeFrom,
+            lt: executeTo,
           },
         },
-        aggs: {
-          policy_responses: {
-            terms: {
-              size: this.maxRecords,
-              field: 'agent.id',
-            },
-            aggs: {
-              latest_response: {
-                top_hits: {
-                  size: 1,
-                  _source: {
-                    includes: [
-                      'agent',
-                      'event',
-                      'Endpoint.policy.applied.status',
-                      'Endpoint.policy.applied.actions',
-                      'Endpoint.policy.applied.artifacts.global',
-                      'Endpoint.configuration',
-                      'Endpoint.state',
-                    ],
-                  },
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc' as const,
-                      },
-                    },
+      },
+      aggs: {
+        policy_responses: {
+          terms: {
+            size: this.maxRecords,
+            field: 'agent.id',
+          },
+          aggs: {
+            latest_response: {
+              top_hits: {
+                size: 1,
+                _source: {
+                  includes: [
+                    'agent',
+                    'event',
+                    'Endpoint.policy.applied.status',
+                    'Endpoint.policy.applied.actions',
+                    'Endpoint.policy.applied.artifacts.global',
+                    'Endpoint.configuration',
+                    'Endpoint.state',
                   ],
                 },
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'desc' as const,
+                    },
+                  },
+                ],
               },
             },
           },
@@ -431,42 +441,40 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: ENDPOINT_METRICS_INDEX,
       ignore_unavailable: false,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        query: {
-          range: {
-            '@timestamp': {
-              gte: executeFrom,
-              lt: executeTo,
-            },
+      size: 0, // no query results required - only aggregation quantity
+      query: {
+        range: {
+          '@timestamp': {
+            gte: executeFrom,
+            lt: executeTo,
           },
         },
-        aggs: {
-          endpoint_agents: {
-            terms: {
-              field: 'agent.id',
-              size: this.maxRecords,
-            },
-            aggs: {
-              latest_metrics: {
-                top_hits: {
-                  size: 1,
-                  _source: false,
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc' as const,
-                      },
+      },
+      aggs: {
+        endpoint_agents: {
+          terms: {
+            field: 'agent.id',
+            size: this.maxRecords,
+          },
+          aggs: {
+            latest_metrics: {
+              top_hits: {
+                size: 1,
+                _source: false,
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'desc' as const,
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },
-          endpoint_count: {
-            cardinality: {
-              field: 'agent.id',
-            },
+        },
+        endpoint_count: {
+          cardinality: {
+            field: 'agent.id',
           },
         },
       },
@@ -508,37 +516,35 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.metadata-*`,
       ignore_unavailable: false,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        query: {
-          range: {
-            '@timestamp': {
-              gte: executeFrom,
-              lt: executeTo,
-            },
+      size: 0, // no query results required - only aggregation quantity
+      query: {
+        range: {
+          '@timestamp': {
+            gte: executeFrom,
+            lt: executeTo,
           },
         },
-        aggs: {
-          endpoint_metadata: {
-            terms: {
-              field: 'agent.id',
-              size: this.maxRecords,
-            },
-            aggs: {
-              latest_metadata: {
-                top_hits: {
-                  size: 1,
-                  _source: {
-                    includes: ['@timestamp', 'agent', 'Endpoint.capabilities', 'elastic.agent'],
-                  },
-                  sort: [
-                    {
-                      '@timestamp': {
-                        order: 'desc' as const,
-                      },
-                    },
-                  ],
+      },
+      aggs: {
+        endpoint_metadata: {
+          terms: {
+            field: 'agent.id',
+            size: this.maxRecords,
+          },
+          aggs: {
+            latest_metadata: {
+              top_hits: {
+                size: 1,
+                _source: {
+                  includes: ['@timestamp', 'agent', 'Endpoint.capabilities', 'elastic.agent'],
                 },
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'desc' as const,
+                    },
+                  },
+                ],
               },
             },
           },
@@ -704,41 +710,39 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: this.getIndexForType?.('alert'),
       ignore_unavailable: true,
-      body: {
-        size: this.maxRecords,
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  filter: {
-                    terms: {
-                      'alert.alertTypeId': [
-                        SIGNALS_ID,
-                        EQL_RULE_TYPE_ID,
-                        ESQL_RULE_TYPE_ID,
-                        ML_RULE_TYPE_ID,
-                        QUERY_RULE_TYPE_ID,
-                        SAVED_QUERY_RULE_TYPE_ID,
-                        INDICATOR_RULE_TYPE_ID,
-                        THRESHOLD_RULE_TYPE_ID,
-                        NEW_TERMS_RULE_TYPE_ID,
-                      ],
-                    },
+      size: this.maxRecords,
+      query: {
+        bool: {
+          must: [
+            {
+              bool: {
+                filter: {
+                  terms: {
+                    'alert.alertTypeId': [
+                      SIGNALS_ID,
+                      EQL_RULE_TYPE_ID,
+                      ESQL_RULE_TYPE_ID,
+                      ML_RULE_TYPE_ID,
+                      QUERY_RULE_TYPE_ID,
+                      SAVED_QUERY_RULE_TYPE_ID,
+                      INDICATOR_RULE_TYPE_ID,
+                      THRESHOLD_RULE_TYPE_ID,
+                      NEW_TERMS_RULE_TYPE_ID,
+                    ],
                   },
                 },
               },
-              {
-                bool: {
-                  filter: {
-                    terms: {
-                      'alert.params.immutable': [true],
-                    },
+            },
+            {
+              bool: {
+                filter: {
+                  terms: {
+                    'alert.params.immutable': [true],
                   },
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       },
     };
@@ -1101,34 +1105,32 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: [`${this.alertsIndex}*`, 'logs-*'],
       ignore_unavailable: true,
-      body: {
-        size: 100,
-        _source: {
-          include: [
-            '@timestamp',
-            'process',
-            'event',
-            'file',
-            'network',
-            'dns',
-            'kibana.rule.alert.uuid',
+      size: 100,
+      _source: {
+        include: [
+          '@timestamp',
+          'process',
+          'event',
+          'file',
+          'network',
+          'dns',
+          'kibana.rule.alert.uuid',
+        ],
+      },
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'process.entity_id': nodeIds,
+              },
+            },
+            {
+              term: {
+                'event.category': 'process',
+              },
+            },
           ],
-        },
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'process.entity_id': nodeIds,
-                },
-              },
-              {
-                term: {
-                  'event.category': 'process',
-                },
-              },
-            ],
-          },
         },
       },
     };
@@ -1141,19 +1143,17 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: '.lists-*',
       ignore_unavailable: true,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        aggs: {
-          total_value_list_count: {
-            cardinality: {
-              field: 'name',
-            },
+      size: 0, // no query results required - only aggregation quantity
+      aggs: {
+        total_value_list_count: {
+          cardinality: {
+            field: 'name',
           },
-          type_breakdown: {
-            terms: {
-              field: 'type',
-              size: 50,
-            },
+        },
+        type_breakdown: {
+          terms: {
+            field: 'type',
+            size: 50,
           },
         },
       },
@@ -1162,14 +1162,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: '.items-*',
       ignore_unavailable: true,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        aggs: {
-          value_list_item_count: {
-            terms: {
-              field: 'list_id',
-              size: 100,
-            },
+      size: 0, // no query results required - only aggregation quantity
+      aggs: {
+        value_list_item_count: {
+          terms: {
+            field: 'list_id',
+            size: 100,
           },
         },
       },
@@ -1178,18 +1176,16 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: this.getIndexForType?.('exception-list'),
       ignore_unavailable: true,
-      body: {
-        size: 0, // no query results required - only aggregation quantity
-        query: {
-          bool: {
-            must: [{ match: { 'exception-list.entries.type': 'list' } }],
-          },
+      size: 0, // no query results required - only aggregation quantity
+      query: {
+        bool: {
+          must: [{ match: { 'exception-list.entries.type': 'list' } }],
         },
-        aggs: {
-          vl_included_in_exception_lists_count: {
-            cardinality: {
-              field: 'exception-list.entries.list.id',
-            },
+      },
+      aggs: {
+        vl_included_in_exception_lists_count: {
+          cardinality: {
+            field: 'exception-list.entries.list.id',
           },
         },
       },
@@ -1198,18 +1194,16 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       expand_wildcards: ['open' as const, 'hidden' as const],
       index: this.getIndexForType?.('alert'),
       ignore_unavailable: true,
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
-          },
+      size: 0,
+      query: {
+        bool: {
+          must: [{ prefix: { 'alert.params.threatIndex': '.items' } }],
         },
-        aggs: {
-          vl_used_in_indicator_match_rule_count: {
-            cardinality: {
-              field: 'alert.params.ruleId',
-            },
+      },
+      aggs: {
+        vl_used_in_indicator_match_rule_count: {
+          cardinality: {
+            field: 'alert.params.ruleId',
           },
         },
       },
@@ -1341,7 +1335,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return this._esClient;
   }
 
-  public async getIndices(): Promise<string[]> {
+  public async getIndices(): Promise<IndexSettings[]> {
     const es = this.esClient();
 
     this.logger.l('Fetching indices');
@@ -1349,12 +1343,28 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const request: IndicesGetRequest = {
       index: '*',
       expand_wildcards: ['open', 'hidden'],
-      filter_path: ['*.settings.index.provided_name'],
+      filter_path: [
+        '*.mappings._source.mode',
+        '*.settings.index.default_pipeline',
+        '*.settings.index.final_pipeline',
+        '*.settings.index.mode',
+        '*.settings.index.provided_name',
+      ],
     };
 
     return es.indices
       .get(request)
-      .then((indices) => Array.from(Object.keys(indices)))
+      .then((indices) =>
+        Object.entries(indices).map(([index, value]) => {
+          return {
+            index_name: index,
+            default_pipeline: value.settings?.index?.default_pipeline,
+            final_pipeline: value.settings?.index?.final_pipeline,
+            index_mode: value.settings?.index?.mode,
+            source_mode: value.mappings?._source?.mode,
+          } as IndexSettings;
+        })
+      )
       .catch((error) => {
         this.logger.warn('Error fetching indices', { error_message: error } as LogMeta);
         throw error;
@@ -1369,7 +1379,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     const request: IndicesGetDataStreamRequest = {
       name: '*',
       expand_wildcards: ['open', 'hidden'],
-      filter_path: ['data_streams.name', 'data_streams.indices'],
+      filter_path: [
+        'data_streams.ilm_policy',
+        'data_streams.indices.ilm_policy',
+        'data_streams.indices.index_name',
+        'data_streams.name',
+        'data_streams.template',
+      ],
     };
 
     return es.indices
@@ -1378,6 +1394,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         response.data_streams.map((ds) => {
           return {
             datastream_name: ds.name,
+            ilm_policy: ds.ilm_policy,
+            template: ds.template,
             indices:
               ds.indices?.map((index) => {
                 return {
@@ -1394,12 +1412,13 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       });
   }
 
-  public async *getIndicesStats(indices: string[]) {
+  public async *getIndicesStats(indices: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
     this.logger.l('Fetching indices stats');
 
-    const groupedIndices = chunkStringsByMaxLength(indices);
+    const groupedIndices = chunkStringsByMaxLength(indices, safeChunkSize);
 
     this.logger.l('Splitted indices into groups', {
       groups: groupedIndices.length,
@@ -1410,14 +1429,22 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       const request: IndicesStatsRequest = {
         index: group,
         level: 'indices',
-        metric: ['docs', 'search', 'store'],
+        metric: ['docs', 'search', 'store', 'indexing'],
         expand_wildcards: ['open', 'hidden'],
         filter_path: [
           'indices.*.total.search.query_total',
           'indices.*.total.search.query_time_in_millis',
+
           'indices.*.total.docs.count',
           'indices.*.total.docs.deleted',
           'indices.*.total.store.size_in_bytes',
+
+          'indices.*.primaries.docs.count',
+          'indices.*.primaries.docs.deleted',
+          'indices.*.primaries.store.size_in_bytes',
+
+          'indices.*.total.indexing.index_failed',
+          'indices.*.total.indexing.index_failed_due_to_version_conflict',
         ],
       };
 
@@ -1426,11 +1453,22 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         for (const [indexName, stats] of Object.entries(response.indices ?? {})) {
           yield {
             index_name: indexName,
+
             query_total: stats.total?.search?.query_total,
             query_time_in_millis: stats.total?.search?.query_time_in_millis,
+
             docs_count: stats.total?.docs?.count,
             docs_deleted: stats.total?.docs?.deleted,
             docs_total_size_in_bytes: stats.total?.store?.size_in_bytes,
+
+            index_failed: stats.total?.indexing?.index_failed,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            index_failed_due_to_version_conflict: (stats.total?.indexing as any)
+              ?.index_failed_due_to_version_conflict,
+
+            docs_count_primaries: stats.primaries?.docs?.count,
+            docs_deleted_primaries: stats.primaries?.docs?.deleted,
+            docs_total_size_in_bytes_primaries: stats.primaries?.store?.size_in_bytes,
           } as IndexStats;
         }
       } catch (error) {
@@ -1440,10 +1478,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async *getIlmsStats(indices: string[]) {
+  public async *getIlmsStats(indices: string[], chunkSize: number) {
     const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
-    const groupedIndices = chunkStringsByMaxLength(indices);
+    const groupedIndices = chunkStringsByMaxLength(indices, safeChunkSize);
 
     this.logger.l('Splitted ilms into groups', {
       groups: groupedIndices.length,
@@ -1477,8 +1516,57 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async *getIlmsPolicies(ilms: string[]) {
+  public async getIndexTemplatesStats(): Promise<IndexTemplateInfo[]> {
     const es = this.esClient();
+
+    this.logger.l('Fetching datstreams');
+
+    const request: IndicesGetIndexTemplateRequest = {
+      name: '*',
+      filter_path: [
+        'index_templates.name',
+        'index_templates.index_template.template.settings.index.mode',
+        'index_templates.index_template.data_stream',
+        'index_templates.index_template._meta.package.name',
+        'index_templates.index_template._meta.managed_by',
+        'index_templates.index_template._meta.beat',
+        'index_templates.index_template._meta.managed',
+        'index_templates.index_template.composed_of',
+        'index_templates.index_template.template.mappings._source.enabled',
+        'index_templates.index_template.template.mappings._source.includes',
+        'index_templates.index_template.template.mappings._source.excludes',
+      ],
+    };
+
+    return es.indices
+      .getIndexTemplate(request)
+      .then((response) =>
+        response.index_templates.map((props) => {
+          const datastream = props.index_template?.data_stream !== undefined;
+          return {
+            template_name: props.name,
+            index_mode: props.index_template.template?.settings?.index?.mode,
+            package_name: props.index_template._meta?.package?.name,
+            datastream,
+            managed_by: props.index_template._meta?.managed_by,
+            beat: props.index_template._meta?.beat,
+            is_managed: props.index_template._meta?.managed,
+            composed_of: props.index_template.composed_of,
+            source_enabled: props.index_template.template?.mappings?._source?.enabled,
+            source_includes: props.index_template.template?.mappings?._source?.includes ?? [],
+            source_excludes: props.index_template.template?.mappings?._source?.excludes ?? [],
+          } as IndexTemplateInfo;
+        })
+      )
+      .catch((error) => {
+        this.logger.warn('Error fetching index templates', { error_message: error } as LogMeta);
+        throw error;
+      });
+  }
+
+  public async *getIlmsPolicies(ilms: string[], chunkSize: number) {
+    const es = this.esClient();
+    const safeChunkSize = Math.min(chunkSize, 3000);
 
     const phase = (obj: unknown): Nullable<IlmPhase> => {
       let value: Nullable<IlmPhase>;
@@ -1490,7 +1578,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       return value;
     };
 
-    const groupedIlms = chunkStringsByMaxLength(ilms);
+    const groupedIlms = chunkStringsByMaxLength(ilms, safeChunkSize);
 
     this.logger.l('Splitted ilms into groups', {
       groups: groupedIlms.length,
@@ -1533,5 +1621,77 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         throw error;
       }
     }
+  }
+
+  public async getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]> {
+    const es = this.esClient();
+
+    this.logger.l('Fetching ingest pipelines stats');
+
+    const request: NodesStatsRequest = {
+      metric: 'ingest',
+      filter_path: [
+        'nodes.*.ingest.total',
+        'nodes.*.ingest.pipelines.*.count',
+        'nodes.*.ingest.pipelines.*.time_in_millis',
+        'nodes.*.ingest.pipelines.*.failed',
+        'nodes.*.ingest.pipelines.*.current',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.count',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.time_in_millis',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.failed',
+        'nodes.*.ingest.pipelines.*.processors.*.stats.current',
+      ],
+      timeout,
+    };
+
+    return es.nodes
+      .stats(request)
+      .then((response) => {
+        return Object.entries(response.nodes).map(([nodeName, node]) => {
+          return {
+            name: nodeName,
+            totals: {
+              count: node.ingest?.total?.count ?? 0,
+              time_in_millis: node.ingest?.total?.time_in_millis ?? 0,
+              current: node.ingest?.total?.current ?? 0,
+              failed: node.ingest?.total?.failed ?? 0,
+            } as Totals,
+            pipelines: Object.entries(node.ingest?.pipelines ?? []).map(
+              ([pipelineName, pipeline]) => {
+                return {
+                  name: pipelineName,
+                  totals: {
+                    count: pipeline.count,
+                    time_in_millis: pipeline.time_in_millis,
+                    current: pipeline.current,
+                    failed: pipeline.failed,
+                  } as Totals,
+                  processors: (pipeline.processors ?? [])
+                    .map((processors) => {
+                      return Object.entries(processors).map(([processorName, processor]) => {
+                        return {
+                          name: processorName,
+                          totals: {
+                            count: processor.stats?.count ?? 0,
+                            time_in_millis: processor.stats?.time_in_millis ?? 0,
+                            current: processor.stats?.current ?? 0,
+                            failed: processor.stats?.failed ?? 0,
+                          } as Totals,
+                        } as Processor;
+                      });
+                    })
+                    .flat(),
+                } as Pipeline;
+              }
+            ),
+          } as NodeIngestPipelinesStats;
+        });
+      })
+      .catch((error) => {
+        this.logger.warn('Error fetching ingest pipelines stats', {
+          error_message: error,
+        } as LogMeta);
+        throw error;
+      });
   }
 }

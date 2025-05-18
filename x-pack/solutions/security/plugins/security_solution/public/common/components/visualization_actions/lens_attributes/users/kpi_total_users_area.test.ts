@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
 
 import { useLensAttributes } from '../../use_lens_attributes';
 
-import { kpiTotalUsersAreaLensAttributes } from './kpi_total_users_area';
+import { getKpiTotalUsersAreaLensAttributes } from './kpi_total_users_area';
 
 jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
@@ -31,12 +31,12 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
   ]),
 }));
 
-describe('kpiTotalUsersAreaLensAttributes', () => {
+describe('getKpiTotalUsersAreaLensAttributes', () => {
   it('should render', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
-          lensAttributes: kpiTotalUsersAreaLensAttributes,
+          getLensAttributes: getKpiTotalUsersAreaLensAttributes,
           stackByField: 'event.dataset',
         }),
       { wrapper }

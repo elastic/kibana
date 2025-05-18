@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiHorizontalRule } from '@elastic/eui';
 import {
@@ -357,48 +357,56 @@ export const LogCategorizationPage: FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={false} css={{ minWidth: '410px' }}>
-          <EuiFormRow
-            label={i18n.translate('xpack.aiops.logCategorization.categoryFieldSelect', {
-              defaultMessage: 'Category field',
-            })}
-          >
-            <EuiComboBox
-              isDisabled={loading === true}
-              options={fields}
-              onChange={onFieldChange}
-              selectedOptions={selectedField === undefined ? undefined : [{ label: selectedField }]}
-              singleSelection={{ asPlainText: true }}
-              data-test-subj="aiopsLogPatternAnalysisCategoryField"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
-          {loading === false ? (
-            <EuiButton
-              disabled={selectedField === undefined}
-              onClick={() => {
-                loadCategories();
-              }}
-              data-test-subj="aiopsLogPatternAnalysisRunButton"
+      <EuiFlexGroup>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false} css={{ minWidth: '400px' }}>
+            <EuiFormRow
+              label={i18n.translate('xpack.aiops.logCategorization.categoryFieldSelect', {
+                defaultMessage: 'Category field',
+              })}
             >
-              <FormattedMessage
-                id="xpack.aiops.logCategorization.runButton"
-                defaultMessage="Run pattern analysis"
+              <EuiComboBox
+                isDisabled={loading === true}
+                options={fields}
+                onChange={onFieldChange}
+                selectedOptions={
+                  selectedField === undefined ? undefined : [{ label: selectedField }]
+                }
+                singleSelection={{ asPlainText: true }}
+                data-test-subj="aiopsLogPatternAnalysisCategoryField"
               />
-            </EuiButton>
-          ) : (
-            <EuiButton
-              data-test-subj="aiopsLogCategorizationPageCancelButton"
-              onClick={() => cancelRequest()}
-            >
-              Cancel
-            </EuiButton>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem />
-        <EuiFlexGroup css={{ marginTop: 'auto' }} alignItems="center" justifyContent="flexEnd">
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
+            {loading === false ? (
+              <EuiButton
+                disabled={selectedField === undefined}
+                onClick={() => {
+                  loadCategories();
+                }}
+                data-test-subj="aiopsLogPatternAnalysisRunButton"
+              >
+                <FormattedMessage
+                  id="xpack.aiops.logCategorization.runButton"
+                  defaultMessage="Run pattern analysis"
+                />
+              </EuiButton>
+            ) : (
+              <EuiButton
+                data-test-subj="aiopsLogCategorizationPageCancelButton"
+                onClick={() => cancelRequest()}
+              >
+                Cancel
+              </EuiButton>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup
+          css={{ marginTop: 'auto' }}
+          alignItems="center"
+          justifyContent="flexEnd"
+          gutterSize="s"
+        >
           <EuiFlexItem grow={false}>
             <SamplingMenu randomSampler={randomSampler} reload={() => loadCategories()} />
           </EuiFlexItem>

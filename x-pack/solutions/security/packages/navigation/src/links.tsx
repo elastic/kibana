@@ -8,10 +8,17 @@
 import type { HTMLAttributeAnchorTarget } from 'react';
 import React, { type MouseEventHandler, type MouseEvent, useCallback } from 'react';
 import { EuiButton, EuiLink, type EuiLinkProps } from '@elastic/eui';
+import type { SecurityPageName } from '@kbn/deeplinks-security';
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { useGetAppUrl, useNavigateTo } from './navigation';
+import { SECURITY_UI_APP_ID } from './constants';
 
 export interface BaseLinkProps {
-  id: string;
+  /** The Kibana application of the link. Defaults to Security Solution */
+  app?: string;
+  /** The id of the link. The deepLink id without the application id prefix */
+  id?: string;
+  /** Extra path of the link. */
   path?: string;
   urlState?: string;
   target?: HTMLAttributeAnchorTarget | undefined;
@@ -28,16 +35,17 @@ export type WrappedLinkProps = BaseLinkProps & {
    **/
   onClick?: MouseEventHandler;
 };
-export type GetLinkProps = (
-  params: WrappedLinkProps & {
-    /**
-     * Optional `overrideNavigation` boolean prop.
-     * It overrides the default browser navigation action with history navigation using kibana tools.
-     * It is `true` by default.
-     **/
-    overrideNavigation?: boolean;
-  }
-) => LinkProps;
+
+export interface GetLinkPropsParams extends WrappedLinkProps {
+  /**
+   * It skips the Kibana history navigation deferring the navigation action to the browser via the `href` attribute.
+   * This is useful when the link is used in a component that already handles the navigation or when the link contains `target="_blank"`.
+   *
+   * Default: `false`
+   **/
+  skipKibanaNavigation?: boolean;
+}
+export type GetLinkProps = (params: GetLinkPropsParams) => LinkProps;
 
 export interface LinkProps {
   onClick: MouseEventHandler;
@@ -51,11 +59,9 @@ export const useGetLinkUrl = () => {
   const { getAppUrl } = useGetAppUrl();
 
   const getLinkUrl = useCallback<GetLinkUrl>(
-    ({ id, path: subPath = '', absolute = false, urlState }) => {
-      const { appId, deepLinkId, path: mainPath = '' } = getAppIdsFromId(id);
-      const path = concatPaths(mainPath, subPath);
+    ({ app, id, path = '', absolute = false, urlState }) => {
       const formattedPath = urlState ? formatPath(path, urlState) : path;
-      return getAppUrl({ deepLinkId, appId, path: formattedPath, absolute });
+      return getAppUrl({ appId: app, deepLinkId: id, path: formattedPath, absolute });
     },
     [getAppUrl]
   );
@@ -71,18 +77,18 @@ export const useGetLinkProps = (): GetLinkProps => {
   const { navigateTo } = useNavigateTo();
 
   const getLinkProps = useCallback<GetLinkProps>(
-    ({ id, path, urlState, onClick: onClickProps, overrideNavigation = true }) => {
-      const url = getLinkUrl({ id, path, urlState });
+    ({ app, id, path, urlState, onClick: onClickProps, skipKibanaNavigation = false }) => {
+      const url = getLinkUrl({ app, id, path, urlState });
       return {
         href: url,
         onClick: (ev: MouseEvent) => {
-          if (isModified(ev)) {
+          if (isModifiedEvent(ev)) {
             return;
           }
           if (onClickProps) {
             onClickProps(ev);
           }
-          if (overrideNavigation) {
+          if (!skipKibanaNavigation) {
             ev.preventDefault();
             navigateTo({ url });
           }
@@ -101,14 +107,12 @@ export const useGetLinkProps = (): GetLinkProps => {
 export const withLink = <T extends Partial<LinkProps>>(
   Component: React.ComponentType<T>
 ): React.FC<Omit<T, keyof LinkProps> & WrappedLinkProps> =>
-  React.memo(function WithLink({ id, path, urlState, onClick: _onClick, ...rest }) {
+  React.memo(function WithLink({ app, id, path, urlState, onClick: _onClick, ...rest }) {
     const getLink = useGetLinkProps();
+    const getLinkPropsParams: GetLinkPropsParams = { app, id, path, urlState, onClick: _onClick };
     const { onClick, href } = getLink({
-      id,
-      path,
-      urlState,
-      onClick: _onClick,
-      ...(rest.target === '_blank' && { overrideNavigation: false }),
+      ...getLinkPropsParams,
+      ...(rest.target === '_blank' && { skipKibanaNavigation: true }),
     });
     return <Component onClick={onClick} href={href} {...(rest as unknown as T)} />;
   });
@@ -129,31 +133,6 @@ export const LinkAnchor = withLink<EuiLinkProps>(EuiLink);
 
 // Utils
 
-// External IDs are in the format `appId:deepLinkId` to match the Chrome NavLinks format.
-// Internal Security Solution ids are the deepLinkId, the appId is omitted for convenience.
-export const isSecurityId = (id: string): boolean => !id.includes(':');
-
-// External links may contain an optional `path` in addition to the `appId` and `deepLinkId`.
-// Format: `<appId>:<deepLinkId>/<path>`
-export const getAppIdsFromId = (
-  id: string
-): { appId?: string; deepLinkId?: string; path?: string } => {
-  const [linkId, strippedPath] = id.split(/\/(.*)/); // split by the first `/` character
-  const path = strippedPath ? `/${strippedPath}` : '';
-  if (!isSecurityId(linkId)) {
-    const [appId, deepLinkId] = linkId.split(':');
-    return { appId, deepLinkId, path };
-  }
-  return { deepLinkId: linkId, path }; // undefined `appId` for internal Security Solution links
-};
-
-export const concatPaths = (path: string | undefined, subPath: string | undefined) => {
-  if (path && subPath) {
-    return `${path.replace(/\/$/, '')}/${subPath.replace(/^\//, '')}`;
-  }
-  return path || subPath || '';
-};
-
 export const formatPath = (path: string, urlState: string) => {
   const urlStateClean = urlState.replace('?', '');
   const [urlPath, parameterPath] = path.split('?');
@@ -168,5 +147,9 @@ export const formatPath = (path: string, urlState: string) => {
   return `${urlPath}${queryParams}`;
 };
 
-export const isModified = (event: MouseEvent) =>
+export const isModifiedEvent = (event: MouseEvent) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
+
+export const securityLink = (pageName: SecurityPageName): AppDeepLinkId => {
+  return `${SECURITY_UI_APP_ID}:${pageName}`;
+};

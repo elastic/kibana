@@ -31,4 +31,12 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
       SecurityPageName.exploreLanding,
     ],
   },
+  {
+    type: LinkCategoryType.separator,
+    linkIds: [SecurityPageName.entityAnalyticsLanding],
+  },
+  {
+    type: LinkCategoryType.separator,
+    linkIds: [SecurityPageName.assetInventory],
+  },
 ];

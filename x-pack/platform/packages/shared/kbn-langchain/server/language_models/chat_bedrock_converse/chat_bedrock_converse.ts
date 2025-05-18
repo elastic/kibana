@@ -9,6 +9,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { Logger } from '@kbn/logging';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { BedrockRuntimeClient } from './bedrock_runtime_client';
 import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION } from '../../utils/bedrock';
 
@@ -18,6 +19,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   logger: Logger;
   signal?: AbortSignal;
   model?: string;
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 /**
@@ -45,6 +47,7 @@ export class ActionsClientChatBedrockConverse extends ChatBedrockConverse {
       connectorId,
       streaming: this.streaming,
       region: DEFAULT_BEDROCK_REGION,
+      telemetryMetadata: fields?.telemetryMetadata,
     });
   }
 }

@@ -7,17 +7,23 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { useEuiTheme } from '@elastic/eui';
 import type { Phase } from '../../../../../common/types';
 
-const phaseToIndicatorColors = {
-  hot: euiThemeVars.euiColorVis9,
-  warm: euiThemeVars.euiColorVis5,
-  cold: euiThemeVars.euiColorVis1,
-  frozen: euiThemeVars.euiColorVis4,
-  delete: euiThemeVars.euiColorLightShade,
-};
 export const PhaseIndicator = ({ phase }: { phase: Phase }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
+
+  // Changing the mappings for the phases in Borealis as a mid-term solution. See https://github.com/elastic/kibana/issues/203664#issuecomment-2536593361.
+  const phaseToIndicatorColors = {
+    hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVis9,
+    warm: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis5,
+    cold: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiTheme.colors.vis.euiColorVis1,
+    frozen: euiTheme.colors.vis.euiColorVis4,
+    delete: euiTheme.colors.lightShade,
+  };
+
   return (
     <div
       css={css`

@@ -6,20 +6,17 @@
  */
 
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import type { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
+import type { Entry, ThreatMapEntries, FormattedEntry } from './types';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import moment from 'moment-timezone';
 
 import {
-  filterItems,
   getEntryOnFieldChange,
   getFormattedEntries,
   getFormattedEntry,
   getUpdatedEntriesOnDelete,
-  customValidators,
 } from './helpers';
-import type { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
@@ -51,67 +48,123 @@ describe('Helpers', () => {
   });
 
   describe('#getFormattedEntry', () => {
-    test('it returns entry with a value when "item.field" is of type "text" and matching keyword field exists', () => {
-      const payloadIndexPattern: DataViewBase = {
-        ...getMockIndexPattern(),
+    test('returns fields found in dataViews', () => {
+      const dataView: DataViewBase = {
+        title: 'test1-*',
         fields: [
-          ...fields,
           {
-            name: 'machine.os.raw.text',
+            name: 'fieldA.name',
             type: 'string',
             esTypes: ['text'],
-            count: 0,
-            scripted: false,
-            searchable: false,
-            aggregatable: false,
-            readFromDocValues: true,
           },
         ],
-      } as DataViewBase;
-      const payloadItem: Entry = {
-        field: 'machine.os.raw.text',
-        type: 'mapping',
-        value: 'some os',
       };
-      const output = getFormattedEntry(payloadIndexPattern, payloadIndexPattern, payloadItem, 0);
-      const expected: FormattedEntry = {
-        entryIndex: 0,
-        id: '123',
+      const threatMatchDataView: DataViewBase = {
+        title: 'test2-*',
+        fields: [
+          {
+            name: 'fieldB.name',
+            type: 'string',
+            esTypes: ['text'],
+          },
+        ],
+      };
+
+      const payloadItem: Entry = {
+        field: 'fieldA.name',
+        type: 'mapping',
+        value: 'fieldB.name',
+      };
+
+      expect(getFormattedEntry(dataView, threatMatchDataView, payloadItem, 0)).toMatchObject({
         field: {
-          name: 'machine.os.raw.text',
+          name: 'fieldA.name',
           type: 'string',
           esTypes: ['text'],
-          count: 0,
-          scripted: false,
-          searchable: false,
-          aggregatable: false,
-          readFromDocValues: true,
-        } as FieldSpec,
-        type: 'mapping',
-        value: undefined,
+        },
+        value: {
+          name: 'fieldB.name',
+          type: 'string',
+          esTypes: ['text'],
+        },
+      });
+    });
+
+    test('returns fallback values when fields not found in dataViews', () => {
+      const dataView: DataViewBase = {
+        title: 'test1-*',
+        fields: [],
       };
-      expect(output).toEqual(expected);
+      const threatMatchDataView: DataViewBase = {
+        title: 'test2-*',
+        fields: [],
+      };
+
+      const payloadItem: Entry = {
+        field: 'fieldA.name',
+        type: 'mapping',
+        value: 'fieldB.name',
+      };
+
+      expect(getFormattedEntry(dataView, threatMatchDataView, payloadItem, 0)).toMatchObject({
+        field: {
+          name: 'fieldA.name',
+          type: 'string',
+        },
+        value: {
+          name: 'fieldB.name',
+          type: 'string',
+        },
+      });
+    });
+
+    test('returns entry parameters', () => {
+      const dataView: DataViewBase = {
+        title: 'test1-*',
+        fields: [],
+      };
+      const threatMatchDataView: DataViewBase = {
+        title: 'test2-*',
+        fields: [],
+      };
+
+      const payloadItem: Entry = {
+        field: 'unknown',
+        type: 'mapping',
+        value: 'unknown',
+      };
+
+      expect(getFormattedEntry(dataView, threatMatchDataView, payloadItem, 3)).toMatchObject({
+        entryIndex: 3,
+        type: 'mapping',
+      });
     });
   });
 
   describe('#getFormattedEntries', () => {
-    test('it returns formatted entry with field and value undefined if it unable to find a matching index pattern field', () => {
+    test('returns formatted entry with fallback field and value if it unable to find a matching index pattern field', () => {
       const payloadIndexPattern = getMockIndexPattern();
-      const payloadItems: Entry[] = [{ field: 'field.one', type: 'mapping', value: 'field.one' }];
+      const payloadItems: Entry[] = [{ field: 'field.one', type: 'mapping', value: 'field.two' }];
       const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
           id: '123',
           entryIndex: 0,
-          field: undefined,
-          value: undefined,
+          field: {
+            name: 'field.one',
+            type: 'string',
+          },
+          value: {
+            name: 'field.two',
+            type: 'string',
+          },
           type: 'mapping',
         },
       ];
       expect(output).toEqual(expected);
     });
 
-    test('it returns "undefined" value if cannot match a pattern field', () => {
+    test('it returns a fallback value if cannot match a pattern field', () => {
       const payloadIndexPattern = getMockIndexPattern();
       const payloadItems: Entry[] = [{ field: 'machine.os', type: 'mapping', value: 'yolo' }];
       const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
@@ -129,7 +182,10 @@ describe('Helpers', () => {
             aggregatable: true,
             readFromDocValues: false,
           } as FieldSpec,
-          value: undefined,
+          value: {
+            name: 'yolo',
+            type: 'string',
+          },
           type: 'mapping',
         },
       ];
@@ -271,41 +327,6 @@ describe('Helpers', () => {
         },
       };
       expect(output).toEqual(expected);
-    });
-  });
-
-  describe('#filterItems', () => {
-    test('it removes entry items with "value" of "undefined"', () => {
-      const entry: ThreatMapEntry = { field: 'host.name', type: 'mapping', value: 'host.name' };
-      const mockEmpty: EmptyEntry = {
-        field: 'host.name',
-        type: 'mapping',
-        value: undefined,
-      };
-      const items = filterItems([
-        {
-          entries: [entry],
-        },
-        {
-          entries: [mockEmpty],
-        },
-      ]);
-      expect(items).toEqual([{ entries: [entry] }]);
-    });
-  });
-
-  describe('customValidators.forbiddenField', () => {
-    const FORBIDDEN = '*';
-
-    test('it returns expected value when a forbidden value is passed in', () => {
-      expect(customValidators.forbiddenField('*', FORBIDDEN)).toEqual({
-        code: 'ERR_FIELD_FORMAT',
-        message: 'The index pattern cannot be *. Please choose a more specific index pattern.',
-      });
-    });
-
-    test('it returns undefined when a non-forbidden value is passed in', () => {
-      expect(customValidators.forbiddenField('.test-index', FORBIDDEN)).not.toBeDefined();
     });
   });
 });

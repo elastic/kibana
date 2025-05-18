@@ -8,17 +8,14 @@
 import path from 'path';
 
 import {
+  fleetPackageRegistryDockerImage,
   FtrConfigProviderContext,
   defineDockerServersConfig,
   getKibanaCliLoggers,
 } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 const getFullPath = (relativePath: string) => path.join(path.dirname(__filename), relativePath);
-// Docker image to use for Fleet API integration tests.
-// This hash comes from the latest successful build of the Production Distribution of the Package Registry, for
-// example: https://internal-ci.elastic.co/blue/organizations/jenkins/package_storage%2Findexing-job/detail/main/1884/pipeline/147.
-// It should be updated any time there is a new package published.
-export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite';
 
 export const BUNDLED_PACKAGE_DIR = '/tmp/fleet_bundled_packages';
 
@@ -46,7 +43,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     ? defineDockerServersConfig({
         registry: {
           enabled: !!registryPort,
-          image: dockerImage,
+          image: fleetPackageRegistryDockerImage,
           portInContainer: 8080,
           port: registryPort,
           args: dockerArgs,
@@ -57,11 +54,14 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
     : undefined;
 
   if (skipRunningDockerRegistry) {
-    const cmd = `docker run ${dockerArgs.join(' ')} -p ${registryPort}:8080 ${dockerImage}`;
+    const cmd = `docker run ${dockerArgs.join(
+      ' '
+    )} -p ${registryPort}:8080 ${fleetPackageRegistryDockerImage}`;
     log.warning(`Not running docker registry, you can run it with the following command: ${cmd}`);
   }
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     servers: xPackAPITestsConfig.get('servers'),
     dockerServers,
     services: xPackAPITestsConfig.get('services'),
@@ -86,10 +86,8 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         )}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
         `--xpack.fleet.enableExperimental=${JSON.stringify([
-          'outputSecretsStorage',
-          'agentTamperProtectionEnabled',
-          'enableStrictKQLValidation',
-          'subfeaturePrivileges',
+          'enableAutomaticAgentUpgrades',
+          'installedIntegrationsTabularUI',
         ])}`,
         `--xpack.cloud.id='123456789'`,
         `--xpack.fleet.agentless.enabled=true`,
@@ -97,6 +95,8 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.fleet.agentless.api.tls.certificate=./config/node.crt`,
         `--xpack.fleet.agentless.api.tls.key=./config/node.key`,
         `--xpack.fleet.agentless.api.tls.ca=./config/ca.crt`,
+        `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
+        `--xpack.fleet.internal.registry.spec.min=1.0`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
 

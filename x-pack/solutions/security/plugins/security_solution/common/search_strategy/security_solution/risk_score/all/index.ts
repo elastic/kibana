@@ -7,20 +7,18 @@
 
 import type { IEsSearchResponse } from '@kbn/search-types';
 
-import { EntityRiskLevels, EntityRiskLevelsEnum } from '../../../../api/entity_analytics/common';
-import type { EntityRiskScoreRecord } from '../../../../api/entity_analytics/common';
+import { EntityIdentifierFields, EntityType } from '../../../../entity_analytics/types';
+import { EntityRiskLevelsEnum } from '../../../../api/entity_analytics/common';
+import type {
+  EntityRiskScoreRecord,
+  EntityRiskLevels,
+} from '../../../../api/entity_analytics/common';
 import type { Inspect, Maybe, SortField } from '../../../common';
 
-export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
+export interface RiskScoreStrategyResponse<T extends EntityType> extends IEsSearchResponse {
   inspect?: Maybe<Inspect>;
   totalCount: number;
-  data: HostRiskScore[] | undefined;
-}
-
-export interface UsersRiskScoreStrategyResponse extends IEsSearchResponse {
-  inspect?: Maybe<Inspect>;
-  totalCount: number;
-  data: UserRiskScore[] | undefined;
+  data: Array<EntityRiskScore<T>> | undefined;
 }
 
 export interface RiskStats extends EntityRiskScoreRecord {
@@ -28,28 +26,18 @@ export interface RiskStats extends EntityRiskScoreRecord {
   multipliers: string[];
 }
 
-export const RiskSeverity = EntityRiskLevels.enum;
+export const RiskSeverity = EntityRiskLevelsEnum;
 export type RiskSeverity = EntityRiskLevels;
 
-export interface HostRiskScore {
+export type EntityRiskScore<T extends EntityType> = {
   '@timestamp': string;
-  host: {
-    name: string;
-    risk: RiskStats;
-  };
   alertsCount?: number;
   oldestAlertTimestamp?: string;
-}
+} & Record<T, { name: string; risk: RiskStats }>;
 
-export interface UserRiskScore {
-  '@timestamp': string;
-  user: {
-    name: string;
-    risk: RiskStats;
-  };
-  alertsCount?: number;
-  oldestAlertTimestamp?: string;
-}
+export type HostRiskScore = EntityRiskScore<EntityType.host>;
+export type UserRiskScore = EntityRiskScore<EntityType.user>;
+export type ServiceRiskScore = EntityRiskScore<EntityType.service>;
 
 export interface RuleRisk {
   rule_name: string;
@@ -61,33 +49,37 @@ export type RiskScoreSortField = SortField<RiskScoreFields>;
 
 export enum RiskScoreFields {
   timestamp = '@timestamp',
-  hostName = 'host.name',
+  hostName = EntityIdentifierFields.hostName,
   hostRiskScore = 'host.risk.calculated_score_norm',
   hostRisk = 'host.risk.calculated_level',
-  userName = 'user.name',
+  userName = EntityIdentifierFields.userName,
   userRiskScore = 'user.risk.calculated_score_norm',
   userRisk = 'user.risk.calculated_level',
+  serviceName = EntityIdentifierFields.serviceName,
+  serviceRiskScore = 'service.risk.calculated_score_norm',
+  serviceRisk = 'service.risk.calculated_level',
   alertsCount = 'alertsCount',
+  unsupported = 'unsupported', // Temporary value used while we don't support the universal entity
 }
 
 export interface RiskScoreItem {
   _id?: Maybe<string>;
   [RiskScoreFields.hostName]: Maybe<string>;
   [RiskScoreFields.userName]: Maybe<string>;
+  [RiskScoreFields.serviceName]: Maybe<string>;
 
   [RiskScoreFields.timestamp]: Maybe<string>;
 
   [RiskScoreFields.hostRisk]: Maybe<EntityRiskLevels>;
   [RiskScoreFields.userRisk]: Maybe<EntityRiskLevels>;
+  [RiskScoreFields.serviceRisk]: Maybe<EntityRiskLevels>;
 
   [RiskScoreFields.hostRiskScore]: Maybe<number>;
   [RiskScoreFields.userRiskScore]: Maybe<number>;
+  [RiskScoreFields.serviceRiskScore]: Maybe<number>;
 
   [RiskScoreFields.alertsCount]: Maybe<number>;
 }
-
-export const isUserRiskScore = (risk: HostRiskScore | UserRiskScore): risk is UserRiskScore =>
-  'user' in risk;
 
 export const EMPTY_SEVERITY_COUNT = {
   [EntityRiskLevelsEnum.Critical]: 0,
@@ -95,4 +87,18 @@ export const EMPTY_SEVERITY_COUNT = {
   [EntityRiskLevelsEnum.Low]: 0,
   [EntityRiskLevelsEnum.Moderate]: 0,
   [EntityRiskLevelsEnum.Unknown]: 0,
+};
+
+export const EntityTypeToLevelField: Record<EntityType, RiskScoreFields> = {
+  [EntityType.host]: RiskScoreFields.hostRisk,
+  [EntityType.user]: RiskScoreFields.userRisk,
+  [EntityType.service]: RiskScoreFields.serviceRisk,
+  [EntityType.generic]: RiskScoreFields.unsupported, // We don't calculate risk for the generic entity
+};
+
+export const EntityTypeToScoreField: Record<EntityType, RiskScoreFields> = {
+  [EntityType.host]: RiskScoreFields.hostRiskScore,
+  [EntityType.user]: RiskScoreFields.userRiskScore,
+  [EntityType.service]: RiskScoreFields.serviceRiskScore,
+  [EntityType.generic]: RiskScoreFields.unsupported, // We don't calculate risk for the generic entity
 };

@@ -21,7 +21,7 @@
         "description": [
           "\nThe server-side Feature Flags Service"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+        "path": "src/core/packages/feature-flags/server-internal/src/feature_flags_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,7 +37,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+            "path": "src/core/packages/feature-flags/server-internal/src/feature_flags_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -53,7 +53,7 @@
                 "signature": [
                   "CoreContext"
                 ],
-                "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+                "path": "src/core/packages/feature-flags/server-internal/src/feature_flags_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -72,15 +72,9 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-feature-flags-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreFeatureFlagsServerInternalPluginApi",
-                "section": "def-server.InternalFeatureFlagsSetup",
-                "text": "InternalFeatureFlagsSetup"
-              }
+              "InternalFeatureFlagsSetup"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+            "path": "src/core/packages/feature-flags/server-internal/src/feature_flags_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -97,15 +91,9 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-feature-flags-server",
-                "scope": "server",
-                "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-                "section": "def-server.FeatureFlagsStart",
-                "text": "FeatureFlagsStart"
-              }
+              "FeatureFlagsStart"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+            "path": "src/core/packages/feature-flags/server-internal/src/feature_flags_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -123,7 +111,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+            "path": "src/core/packages/feature-flags/server-internal/src/feature_flags_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -147,23 +135,11 @@
           "\nCore-internal contract for the setup lifecycle step."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-feature-flags-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreFeatureFlagsServerInternalPluginApi",
-            "section": "def-server.InternalFeatureFlagsSetup",
-            "text": "InternalFeatureFlagsSetup"
-          },
+          "InternalFeatureFlagsSetup",
           " extends ",
-          {
-            "pluginId": "@kbn/core-feature-flags-server",
-            "scope": "server",
-            "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
-            "section": "def-server.FeatureFlagsSetup",
-            "text": "FeatureFlagsSetup"
-          }
+          "FeatureFlagsSetup"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+        "path": "src/core/packages/feature-flags/server-internal/src/feature_flags_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -179,7 +155,7 @@
             "signature": [
               "() => Record<string, unknown>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_service.ts",
+            "path": "src/core/packages/feature-flags/server-internal/src/feature_flags_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -203,7 +179,7 @@
         "description": [
           "\nConfig descriptor for the feature flags service"
         ],
-        "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_config.ts",
+        "path": "src/core/packages/feature-flags/server-internal/src/feature_flags_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -216,7 +192,7 @@
             "description": [
               "/**\n   * All config is prefixed by `feature_flags`\n   */"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_config.ts",
+            "path": "src/core/packages/feature-flags/server-internal/src/feature_flags_config.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -247,7 +223,7 @@
               },
               "<Record<string, any> | undefined>; }>"
             ],
-            "path": "packages/core/feature-flags/core-feature-flags-server-internal/src/feature_flags_config.ts",
+            "path": "src/core/packages/feature-flags/server-internal/src/feature_flags_config.ts",
             "deprecated": false,
             "trackAdoption": false
           }

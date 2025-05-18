@@ -42,19 +42,10 @@ import * as i18n from './translations';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { initializeTimelineSettings } from '../../../store/actions';
 import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
-import { fetchNotesBySavedObjectIds, selectSortedNotesBySavedObjectId } from '../../../../notes';
+import { fetchNotesBySavedObjectIds, makeSelectNotesBySavedObjectId } from '../../../../notes';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
-
-const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
-  ({ $isVisible = false, isOverflowYScroll = false }) => ({
-    style: {
-      display: $isVisible ? 'flex' : 'none',
-      overflow: isOverflowYScroll ? 'hidden scroll' : 'hidden',
-    },
-  })
-)<{ $isVisible: boolean; isOverflowYScroll?: boolean }>`
-  flex: 1;
-`;
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { LazyTimelineTabRenderer, TimelineTabFallback } from './lazy_timeline_tab_renderer';
 
 /**
  * A HOC which supplies React.Suspense with a fallback component
@@ -75,13 +66,35 @@ const tabWithSuspense = <P extends {}, R = {}>(
   return Comp;
 };
 
-const QueryTab = tabWithSuspense(lazy(() => import('./query')));
-const EqlTab = tabWithSuspense(lazy(() => import('./eql')));
-const GraphTab = tabWithSuspense(lazy(() => import('./graph')));
-const NotesTab = tabWithSuspense(lazy(() => import('./notes')));
-const PinnedTab = tabWithSuspense(lazy(() => import('./pinned')));
-const SessionTab = tabWithSuspense(lazy(() => import('./session')));
-const EsqlTab = tabWithSuspense(lazy(() => import('./esql')));
+const QueryTab = tabWithSuspense(
+  lazy(() => import('./query')),
+  <TimelineTabFallback />
+);
+const EqlTab = tabWithSuspense(
+  lazy(() => import('./eql')),
+  <TimelineTabFallback />
+);
+const GraphTab = tabWithSuspense(
+  lazy(() => import('./graph')),
+  <TimelineTabFallback />
+);
+const NotesTab = tabWithSuspense(
+  lazy(() => import('./notes')),
+  <TimelineTabFallback />
+);
+const PinnedTab = tabWithSuspense(
+  lazy(() => import('./pinned')),
+  <TimelineTabFallback />
+);
+const SessionTab = tabWithSuspense(
+  lazy(() => import('./session')),
+  <TimelineTabFallback />
+);
+const EsqlTab = tabWithSuspense(
+  lazy(() => import('./esql')),
+  <TimelineTabFallback />
+);
+
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -107,20 +120,14 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     timelineType,
     showTimeline,
   }) => {
-    const { isTimelineEsqlEnabledByFeatureFlag, isEsqlAdvancedSettingEnabled } =
-      useEsqlAvailability();
+    const { isEsqlAdvancedSettingEnabled } = useEsqlAvailability();
     const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
       selectTimelineESQLSavedSearchId(state, timelineId)
     );
-    const shouldShowESQLTab = useMemo(() => {
-      // disabling esql feature from feature flag should unequivocally hide the tab
-      // irrespective of the fact that the advanced setting is enabled or
-      // not or existing esql query is present or not
-      if (!isTimelineEsqlEnabledByFeatureFlag) {
-        return false;
-      }
-      return isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null;
-    }, [isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag, timelineESQLSavedSearch]);
+    const shouldShowESQLTab = useMemo(
+      () => isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null,
+      [isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
+    );
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -143,60 +150,60 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       [activeTimelineTab]
     );
 
-    /* Future developer -> why are we doing that
-     * It is really expansive to re-render the QueryTab because the drag/drop
-     * Therefore, we are only hiding its dom when switching to another tab
-     * to avoid mounting/un-mounting === re-render
-     */
     return (
       <>
-        <HideShowContainer
-          $isVisible={TimelineTabs.query === activeTimelineTab}
-          data-test-subj={`timeline-tab-content-${TimelineTabs.query}`}
+        <LazyTimelineTabRenderer
+          timelineId={timelineId}
+          shouldShowTab={TimelineTabs.query === activeTimelineTab}
+          dataTestSubj={`timeline-tab-content-${TimelineTabs.query}`}
         >
           <QueryTab
             renderCellValue={renderCellValue}
             rowRenderers={rowRenderers}
             timelineId={timelineId}
           />
-        </HideShowContainer>
+        </LazyTimelineTabRenderer>
         {showTimeline && shouldShowESQLTab && activeTimelineTab === TimelineTabs.esql && (
-          <HideShowContainer
-            $isVisible={true}
-            data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
+          <LazyTimelineTabRenderer
+            timelineId={timelineId}
+            shouldShowTab={true}
+            dataTestSubj={`timeline-tab-content-${TimelineTabs.esql}`}
           >
             <EsqlTab timelineId={timelineId} />
-          </HideShowContainer>
+          </LazyTimelineTabRenderer>
         )}
-        <HideShowContainer
-          $isVisible={TimelineTabs.pinned === activeTimelineTab}
-          data-test-subj={`timeline-tab-content-${TimelineTabs.pinned}`}
+        <LazyTimelineTabRenderer
+          timelineId={timelineId}
+          shouldShowTab={TimelineTabs.pinned === activeTimelineTab}
+          dataTestSubj={`timeline-tab-content-${TimelineTabs.pinned}`}
         >
           <PinnedTab
             renderCellValue={renderCellValue}
             rowRenderers={rowRenderers}
             timelineId={timelineId}
           />
-        </HideShowContainer>
+        </LazyTimelineTabRenderer>
         {timelineType === TimelineTypeEnum.default && (
-          <HideShowContainer
-            $isVisible={TimelineTabs.eql === activeTimelineTab}
-            data-test-subj={`timeline-tab-content-${TimelineTabs.eql}`}
+          <LazyTimelineTabRenderer
+            timelineId={timelineId}
+            shouldShowTab={TimelineTabs.eql === activeTimelineTab}
+            dataTestSubj={`timeline-tab-content-${TimelineTabs.eql}`}
           >
             <EqlTab
               renderCellValue={renderCellValue}
               rowRenderers={rowRenderers}
               timelineId={timelineId}
             />
-          </HideShowContainer>
+          </LazyTimelineTabRenderer>
         )}
-        <HideShowContainer
-          $isVisible={isGraphOrNotesTabs}
+        <LazyTimelineTabRenderer
+          timelineId={timelineId}
+          shouldShowTab={isGraphOrNotesTabs}
           isOverflowYScroll={activeTimelineTab === TimelineTabs.session}
-          data-test-subj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
+          dataTestSubj={`timeline-tab-content-${TimelineTabs.graph}-${TimelineTabs.notes}`}
         >
-          {isGraphOrNotesTabs && getTab(activeTimelineTab)}
-        </HideShowContainer>
+          {isGraphOrNotesTabs ? getTab(activeTimelineTab) : null}
+        </LazyTimelineTabRenderer>
       </>
     );
   }
@@ -246,8 +253,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const getAppNotes = useMemo(() => getNotesSelector(), []);
   const getTimelineNoteIds = useMemo(() => getNoteIdsSelector(), []);
   const getTimelinePinnedEventNotes = useMemo(() => getEventIdToNoteIdsSelector(), []);
-  const { isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag } =
-    useEsqlAvailability();
+  const { isEsqlAdvancedSettingEnabled } = useEsqlAvailability();
 
   const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
     selectTimelineESQLSavedSearchId(state, timelineId)
@@ -263,15 +269,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
-  const shouldShowESQLTab = useMemo(() => {
-    // disabling esql feature from feature flag should unequivocally hide the tab
-    // irrespective of the fact that the advanced setting is enabled or
-    // not or existing esql query is present or not
-    if (!isTimelineEsqlEnabledByFeatureFlag) {
-      return false;
-    }
-    return isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null;
-  }, [isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag, timelineESQLSavedSearch]);
+  const shouldShowESQLTab = useMemo(
+    () => isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null,
+    [isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
+  );
 
   const numberOfPinnedEvents = useShallowEqualSelector((state) =>
     getNumberOfPinnedEvents(state, timelineId)
@@ -309,6 +310,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     [timelineSavedObjectId]
   );
 
+  const {
+    notesPrivileges: { read: canSeeNotes },
+    timelinePrivileges: { read: canSeePinnedTab },
+  } = useUserPrivileges();
+
   // new note system
   const fetchNotes = useCallback(
     () => dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: [timelineSavedObjectId] })),
@@ -320,11 +326,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     }
   }, [fetchNotes, isTimelineSaved]);
 
+  const selectNotesBySavedObjectId = useMemo(() => makeSelectNotesBySavedObjectId(), []);
+
   const notesNewSystem = useSelector((state: State) =>
-    selectSortedNotesBySavedObjectId(state, {
-      savedObjectId: timelineSavedObjectId,
-      sort: { field: 'created', direction: 'asc' },
-    })
+    selectNotesBySavedObjectId(state, timelineSavedObjectId)
   );
   const numberOfNotesNewSystem = useMemo(
     () => notesNewSystem.length + (isEmpty(timelineDescription) ? 0 : 1),
@@ -445,7 +450,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}
             isSelected={activeTab === TimelineTabs.notes}
-            disabled={timelineType === TimelineTypeEnum.template}
+            disabled={!canSeeNotes || timelineType === TimelineTypeEnum.template}
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
@@ -456,7 +461,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
             onClick={setPinnedAsActiveTab}
-            disabled={timelineType === TimelineTypeEnum.template}
+            disabled={!canSeePinnedTab || timelineType === TimelineTypeEnum.template}
             isSelected={activeTab === TimelineTabs.pinned}
             key={TimelineTabs.pinned}
           >

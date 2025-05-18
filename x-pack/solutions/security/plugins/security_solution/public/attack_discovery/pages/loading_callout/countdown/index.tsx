@@ -15,23 +15,31 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
-import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getTimerPrefix } from './last_times_popover/helpers';
-
 import { InfoPopoverBody } from '../info_popover_body';
+import { getTimerPrefix } from './last_times_popover/helpers';
+import * as i18n from '../translations';
+import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 
 const TEXT_COLOR = '#343741';
 
 interface Props {
   approximateFutureTime: Date | null;
+  averageSuccessfulDurationNanoseconds?: number;
   connectorIntervals: GenerationInterval[];
+  successfulGenerations?: number;
 }
 
-const CountdownComponent: React.FC<Props> = ({ approximateFutureTime, connectorIntervals }) => {
+const CountdownComponent: React.FC<Props> = ({
+  approximateFutureTime,
+  averageSuccessfulDurationNanoseconds,
+  connectorIntervals,
+  successfulGenerations,
+}) => {
   // theming:
   const { euiTheme } = useEuiTheme();
   const { theme } = useKibana().services;
@@ -45,6 +53,8 @@ const CountdownComponent: React.FC<Props> = ({ approximateFutureTime, connectorI
   // state for the timer prefix, and timer text:
   const [prefix, setPrefix] = useState<string>(getTimerPrefix(approximateFutureTime));
   const [timerText, setTimerText] = useState('');
+
+  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
 
   useEffect(() => {
     // periodically update the formatted date as time passes:
@@ -69,11 +79,16 @@ const CountdownComponent: React.FC<Props> = ({ approximateFutureTime, connectorI
   }, [approximateFutureTime]);
 
   const iconInQuestionButton = useMemo(
-    () => <EuiButtonIcon iconType="questionInCircle" onClick={onClick} />,
+    () => (
+      <EuiButtonIcon aria-label={i18n.INFORMATION} iconType="questionInCircle" onClick={onClick} />
+    ),
     [onClick]
   );
 
-  if (connectorIntervals.length === 0) {
+  if (
+    (!attackDiscoveryAlertsEnabled && connectorIntervals.length === 0) ||
+    (attackDiscoveryAlertsEnabled && approximateFutureTime == null)
+  ) {
     return null; // don't render anything if there's no data
   }
 
@@ -93,7 +108,11 @@ const CountdownComponent: React.FC<Props> = ({ approximateFutureTime, connectorI
             data-test-subj="infoPopover"
             isOpen={isPopoverOpen}
           >
-            <InfoPopoverBody connectorIntervals={connectorIntervals} />
+            <InfoPopoverBody
+              averageSuccessfulDurationNanoseconds={averageSuccessfulDurationNanoseconds}
+              connectorIntervals={connectorIntervals}
+              successfulGenerations={successfulGenerations}
+            />
           </EuiPopover>
         </EuiOutsideClickDetector>
       </EuiFlexItem>

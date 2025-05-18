@@ -7,13 +7,15 @@
 import { i18n } from '@kbn/i18n';
 import type { CriticalityLevels } from './constants';
 import { ValidCriticalityLevels } from './constants';
-import type { AssetCriticalityUpsert, CriticalityLevel } from './types';
+import { type AssetCriticalityUpsertForBulkUpload, type CriticalityLevel } from './types';
+import { EntityTypeToIdentifierField, type EntityType } from '../types';
+import { getEntityAnalyticsEntityTypes } from '../utils';
 
 const MAX_COLUMN_CHARS = 1000;
 
 interface ValidRecord {
   valid: true;
-  record: AssetCriticalityUpsert;
+  record: AssetCriticalityUpsertForBulkUpload;
 }
 interface InvalidRecord {
   valid: false;
@@ -98,16 +100,20 @@ export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
     );
   }
 
-  if (entityType !== 'host' && entityType !== 'user') {
+  const enabledEntityTypes = getEntityAnalyticsEntityTypes();
+  if (!enabledEntityTypes.includes(entityType as EntityType)) {
     return validationErrorWithMessage(
       i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.invalidEntityTypeError', {
-        defaultMessage: 'Invalid entity type "{entityType}", expected host or user',
-        values: { entityType: trimColumn(entityType) },
+        defaultMessage: 'Invalid entity type "{entityType}", expected to be one of: {validTypes}',
+        values: {
+          entityType: trimColumn(entityType),
+          validTypes: enabledEntityTypes.join(', '),
+        },
       })
     );
   }
 
-  const idField = entityType === 'host' ? 'host.name' : 'user.name';
+  const idField = EntityTypeToIdentifierField[entityType as EntityType];
 
   return {
     valid: true,

@@ -35,7 +35,8 @@ export async function upgradeBuiltInEntityDefinitions({
     );
   }
 
-  const { esClient, soClient } = getClientsFromAPIKey({ apiKey, server });
+  const { clusterClient, soClient } = getClientsFromAPIKey({ apiKey, server });
+  const esClient = clusterClient.asCurrentUser;
 
   logger.debug(`Starting built-in definitions upgrade`);
   const upgradedDefinitions = await installBuiltInEntityDefinitions({

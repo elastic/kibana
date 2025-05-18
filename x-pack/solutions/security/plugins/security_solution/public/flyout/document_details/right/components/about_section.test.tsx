@@ -16,6 +16,7 @@ import {
   REASON_TITLE_TEST_ID,
   MITRE_ATTACK_TITLE_TEST_ID,
   EVENT_RENDERER_TEST_ID,
+  WORKFLOW_STATUS_TITLE_TEST_ID,
 } from './test_ids';
 import { TestProviders } from '../../../../common/mock';
 import { AboutSection } from './about_section';
@@ -106,6 +107,7 @@ describe('<AboutSection />', () => {
       expect(queryByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(REASON_TITLE_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(MITRE_ATTACK_TITLE_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(WORKFLOW_STATUS_TITLE_TEST_ID)).not.toBeInTheDocument();
 
       expect(getByTestId(EVENT_KIND_DESCRIPTION_TEST_ID)).toBeInTheDocument();
 
@@ -135,6 +137,7 @@ describe('<AboutSection />', () => {
       expect(queryByTestId(ALERT_DESCRIPTION_TITLE_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(REASON_TITLE_TEST_ID)).not.toBeInTheDocument();
       expect(queryByTestId(MITRE_ATTACK_TITLE_TEST_ID)).not.toBeInTheDocument();
+      expect(queryByTestId(WORKFLOW_STATUS_TITLE_TEST_ID)).not.toBeInTheDocument();
 
       expect(queryByTestId(EVENT_KIND_DESCRIPTION_TEST_ID)).not.toBeInTheDocument();
 

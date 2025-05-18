@@ -16,24 +16,24 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { size, colors, font, border } = euiTheme;
 
     const getHighlightColors = () => {
       let bgColor = 'none';
-      let hoverBgColor = `${transparentize(colors.primary, 0.04)}`;
+      let hoverBgColor = `${transparentize(colors.primary, 0.04)}`; // TODO: Borealis migration - replace transparentize with color token
 
       if (isInvestigated && isSelected) {
-        bgColor = `${transparentize(colors.danger, 0.08)}`;
-        hoverBgColor = `${transparentize(colors.danger, 0.12)}`;
+        bgColor = `${transparentize(colors.danger, 0.08)}`; // TODO: Borealis migration - replace transparentize with color token
+        hoverBgColor = `${transparentize(colors.danger, 0.12)}`; // TODO: Borealis migration - replace transparentize with color token
       } else if (isInvestigated) {
-        bgColor = `${transparentize(colors.danger, 0.04)}`;
-        hoverBgColor = `${transparentize(colors.danger, 0.12)}`;
+        bgColor = `${transparentize(colors.danger, 0.04)}`; // TODO: Borealis migration - replace transparentize with color token
+        hoverBgColor = `${transparentize(colors.danger, 0.12)}`; // TODO: Borealis migration - replace transparentize with color token
       } else if (isSelected) {
-        bgColor = `${transparentize(colors.primary, 0.08)}`;
-        hoverBgColor = `${transparentize(colors.primary, 0.12)}`;
+        bgColor = `${transparentize(colors.primary, 0.08)}`; // TODO: Borealis migration - replace transparentize with color token
+        hoverBgColor = `${transparentize(colors.primary, 0.12)}`; // TODO: Borealis migration - replace transparentize with color token
       }
 
       return { bgColor, hoverBgColor };
@@ -56,7 +56,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
         flexShrink: 0,
         marginRight: size.xs,
         '&:hover, &:focus, &:focus-within': {
-          backgroundColor: transparentize(euiVars.buttonsBackgroundNormalDefaultPrimary, 0.2),
+          backgroundColor: transparentize(euiTheme.colors.backgroundFilledPrimary, 0.2), // TODO: Borealis migration - replace transparentize with color token
         },
       },
       '&& .euiFlexItem': {
@@ -100,7 +100,7 @@ export const useStyles = ({ isInvestigated, isSelected }: StylesDeps) => {
       processPanel,
       processAlertDisplayContainer,
     };
-  }, [euiTheme, isInvestigated, isSelected, euiVars]);
+  }, [euiTheme, isInvestigated, isSelected]);
 
   return cached;
 };

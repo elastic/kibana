@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+
+import { renderHook } from '@testing-library/react';
 import { mockExtraFilter, wrapper } from '../../../mocks';
 
 import { useLensAttributes } from '../../../use_lens_attributes';
@@ -12,7 +13,7 @@ import { useLensAttributes } from '../../../use_lens_attributes';
 import { getAlertsByStatusAttributes } from './alerts_by_status_donut';
 
 jest.mock('uuid', () => ({
-  v4: jest.fn().mockReturnValue('b9b43606-7ff7-46ae-a47c-85bed80fab9a'),
+  v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
 jest.mock('../../../../../../sourcerer/containers', () => ({

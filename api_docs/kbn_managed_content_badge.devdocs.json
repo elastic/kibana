@@ -15,7 +15,7 @@
           "EuiToolTipProps",
           " | undefined; }"
         ],
-        "path": "packages/kbn-managed-content-badge/index.ts",
+        "path": "src/platform/packages/private/kbn-managed-content-badge/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-managed-content-badge/index.ts",
+            "path": "src/platform/packages/private/kbn-managed-content-badge/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -44,7 +44,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-managed-content-badge/index.ts",
+            "path": "src/platform/packages/private/kbn-managed-content-badge/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false

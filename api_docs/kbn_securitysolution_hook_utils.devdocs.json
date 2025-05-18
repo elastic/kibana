@@ -39,7 +39,7 @@
           },
           "<Args, Result>"
         ],
-        "path": "packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -55,7 +55,7 @@
             "signature": [
               "(...args: Args) => Promise<Result>"
             ],
-            "path": "packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_async/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -78,7 +78,7 @@
         "signature": [
           "() => GetIsMounted"
         ],
-        "path": "packages/kbn-securitysolution-hook-utils/src/use_is_mounted/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_is_mounted/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -109,7 +109,7 @@
           },
           "<Args, Result>"
         ],
-        "path": "packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -127,7 +127,7 @@
               "Observable",
               "<Result>"
             ],
-            "path": "packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -158,7 +158,7 @@
           },
           "<Args>) => Result"
         ],
-        "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -174,7 +174,7 @@
             "signature": [
               "(args: Args) => Result"
             ],
-            "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -206,7 +206,7 @@
           },
           "<Args, Result>"
         ],
-        "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -217,7 +217,7 @@
             "tags": [],
             "label": "loading",
             "description": [],
-            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -231,7 +231,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -245,7 +245,7 @@
             "signature": [
               "Result | undefined"
             ],
-            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -259,7 +259,7 @@
             "signature": [
               "(...args: Args) => void"
             ],
-            "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -273,7 +273,7 @@
                 "signature": [
                   "Args"
                 ],
-                "path": "packages/kbn-securitysolution-hook-utils/src/types.ts",
+                "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -297,7 +297,7 @@
         "signature": [
           "{ type: \"setResult\"; result: T; } | { type: \"setError\"; error: unknown; } | { type: \"load\"; }"
         ],
-        "path": "packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/use_observable/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -312,7 +312,7 @@
         "signature": [
           "Omit<Args, \"signal\"> & Partial<SignalArgs>"
         ],
-        "path": "packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-hook-utils/src/with_optional_signal/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

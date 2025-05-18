@@ -63,6 +63,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -94,6 +95,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName={null}
               id="[id-123]"
@@ -123,6 +125,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -152,6 +155,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -181,6 +185,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -210,6 +215,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -241,6 +247,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -272,6 +279,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -303,6 +311,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -334,6 +343,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -365,6 +375,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -396,6 +407,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -427,6 +439,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -458,6 +471,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -489,6 +503,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"
@@ -520,6 +535,7 @@ describe('SystemGenericDetails', () => {
         <TestProviders>
           <div>
             <SystemGenericLine
+              scopeId="some_scope"
               contextId="[context-123]"
               hostName="[hostname-123]"
               id="[id-123]"

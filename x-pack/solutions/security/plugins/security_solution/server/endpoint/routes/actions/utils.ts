@@ -29,51 +29,61 @@ const COMMANDS_WITH_ACCESS_TO_FILES: CommandsWithFileAccess = deepFreeze<Command
     endpoint: true,
     sentinel_one: true,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   execute: {
     endpoint: true,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   'running-processes': {
     endpoint: false,
     sentinel_one: true,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   upload: {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   scan: {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   isolate: {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   unisolate: {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   'kill-process': {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   'suspend-process': {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
   runscript: {
     endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
+    microsoft_defender_endpoint: false,
   },
 });
 
@@ -91,16 +101,17 @@ export const ensureUserHasAuthzToFilesForAction = async (
   context: SecuritySolutionRequestHandlerContext,
   request: KibanaRequest
 ): Promise<void> => {
-  const userAuthz = await (await context.securitySolution).getEndpointAuthz();
-  const coreContext = await context.core;
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const securitySolution = await context.securitySolution;
+  const spaceId = securitySolution.getSpaceId();
+  const endpointService = securitySolution.getEndpointService();
+  const userAuthz = await securitySolution.getEndpointAuthz();
   const { action_id: actionId } = request.params as { action_id: string };
   const {
     EndpointActions: {
       data: { command },
       input_type: agentType,
     },
-  } = await fetchActionRequestById(esClient, actionId);
+  } = await fetchActionRequestById(endpointService, spaceId, actionId);
 
   // Check if command is supported by the agent type
   if (!isActionSupportedByAgentType(agentType, command, 'manual')) {

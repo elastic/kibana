@@ -8,6 +8,7 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
+import type { UserItem } from '../../../../common/search_strategy';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
@@ -16,27 +17,27 @@ import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_sum
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { ManagedUser } from './components/managed_user';
 import type { ManagedUserData } from './types';
-import type { RiskScoreEntity, UserItem } from '../../../../common/search_strategy';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ObservedEntity } from '../shared/components/observed_entity';
 import type { ObservedEntityData } from '../shared/components/observed_entity/types';
 import { useObservedUserItems } from './hooks/use_observed_user_items';
-import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
 
 interface UserPanelContentProps {
   userName: string;
   observedUser: ObservedEntityData<UserItem>;
   managedUser: ManagedUserData;
-  riskScoreState: RiskScoreState<RiskScoreEntity.user>;
+  riskScoreState: RiskScoreState<EntityType.user>;
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
-  isDraggable: boolean;
   onAssetCriticalityChange: () => void;
-  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode?: boolean;
+  isLinkEnabled: boolean;
 }
 
 export const UserPanelContent = ({
@@ -47,17 +48,17 @@ export const UserPanelContent = ({
   recalculatingScore,
   contextID,
   scopeId,
-  isDraggable,
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
+  isLinkEnabled,
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
   const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
 
   return (
     <FlyoutBody>
-      {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
+      {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary
             riskScoreData={riskScoreState}
@@ -65,20 +66,27 @@ export const UserPanelContent = ({
             queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
+            isLinkEnabled={isLinkEnabled}
+            entityType={EntityType.user}
           />
           <EuiHorizontalRule />
         </>
       )}
       <AssetCriticalityAccordion
-        entity={{ name: userName, type: 'user' }}
+        entity={{ name: userName, type: EntityType.user }}
         onChange={onAssetCriticalityChange}
       />
-      <EntityInsight value={userName} field={'user.name'} isPreviewMode={isPreviewMode} />
+      <EntityInsight
+        value={userName}
+        field={EntityIdentifierFields.userName}
+        isPreviewMode={isPreviewMode}
+        isLinkEnabled={isLinkEnabled}
+        openDetailsPanel={openDetailsPanel}
+      />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}
         scopeId={scopeId}
-        isDraggable={isDraggable}
         observedFields={observedFields}
         queryId={OBSERVED_USER_QUERY_ID}
       />
@@ -87,8 +95,9 @@ export const UserPanelContent = ({
         <ManagedUser
           managedUser={managedUser}
           contextID={contextID}
-          isDraggable={isDraggable}
           openDetailsPanel={openDetailsPanel}
+          isPreviewMode={isPreviewMode}
+          isLinkEnabled={isLinkEnabled}
         />
       )}
     </FlyoutBody>

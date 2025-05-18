@@ -79,7 +79,7 @@ export const deserializeValue = ({
   deserializer: DeserializerOrUndefined;
   defaultValueDeserializer: string;
   defaultDeserializer: string;
-  value: string | object | undefined;
+  value: string | object | number | undefined;
 }): string | null => {
   if (esDataTypeRange.is(value)) {
     const template =

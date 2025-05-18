@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
       await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickVisType('metrics');
+      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('metrics');
       await testSubjects.click('visualizesaveAndReturnButton');
       await panelActions.saveToLibrary(visTitle);
 

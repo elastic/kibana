@@ -9,6 +9,17 @@ import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { i18n } from '@kbn/i18n';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
 
+interface BuildEntityAlertsQueryParams {
+  field: string;
+  to: string;
+  from: string;
+  queryValue?: string;
+  size?: number;
+  severity?: string;
+  sortField?: string;
+  sortDirection?: string;
+}
+
 export const defaultErrorMessage = i18n.translate(
   'sharedPlatformPackages.csp.common.utils.helpers.unknownError',
   {
@@ -106,17 +117,20 @@ export const buildVulnerabilityEntityFlyoutPreviewQuery = (
   return buildGenericEntityFlyoutPreviewQuery(field, queryValue, status, queryField);
 };
 
-export const buildEntityAlertsQuery = (
-  field: string,
-  to: string,
-  from: string,
-  queryValue?: string,
-  size?: number,
-  severity?: string
-) => {
+export const buildEntityAlertsQuery = ({
+  field,
+  to,
+  from,
+  queryValue = '',
+  size = 0,
+  severity,
+  sortField,
+  sortDirection,
+}: BuildEntityAlertsQueryParams) => {
   return {
     size: size || 0,
     _source: false,
+    sort: sortField ? [{ [sortField]: sortDirection }] : [],
     fields: [
       '_id',
       '_index',

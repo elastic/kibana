@@ -44,10 +44,8 @@ function UnifiedDocViewerExamplesApp({ data }: { data: DataPublicPluginStart }) 
         .search({
           params: {
             index: dataView?.getIndexPattern(),
-            body: {
-              fields: ['*'],
-              _source: false,
-            },
+            fields: ['*'],
+            _source: false,
           },
         })
         .toPromise();

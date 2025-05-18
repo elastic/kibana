@@ -22,13 +22,7 @@
             "text": "FieldInputProps"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           "> & React.RefAttributes<",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -89,13 +83,7 @@
             ],
             "signature": [
               "{ toasts: Pick<",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              },
+              "IToasts",
               ", \"addDanger\">; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
@@ -111,13 +99,7 @@
             "description": [],
             "signature": [
               "{ client: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
+              "IUiSettingsClient",
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",

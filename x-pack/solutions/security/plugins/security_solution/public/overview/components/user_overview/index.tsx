@@ -9,12 +9,14 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { buildUserNamesFilter } from '../../../../common/search_strategy';
+import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
-import { buildUserNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import type { DescriptionList } from '../../../../common/utility_types';
 import { useDarkMode } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
@@ -37,7 +39,6 @@ import * as i18n from './translations';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
-import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_onboarding/risk_score_header_title';
 import { RiskScoreDocTooltip } from '../common';
 
 export interface UserSummaryProps {
@@ -45,7 +46,6 @@ export interface UserSummaryProps {
   scopeId?: string;
   data: UserItem;
   id: string;
-  isDraggable?: boolean;
   isInDetailsSidePanel: boolean;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
@@ -58,8 +58,10 @@ export interface UserSummaryProps {
   jobNameById: Record<string, string | undefined>;
 }
 
-const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
-  padding-top: ${({ theme }) => theme.eui.euiSizeM};
+const UserRiskOverviewWrapper = styled(EuiFlexGroup, {
+  shouldForwardProp: (prop) => prop !== '$width',
+})`
+  padding-top: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   width: ${({ $width }: { $width: string }) => $width};
 `;
 
@@ -72,7 +74,6 @@ export const UserOverview = React.memo<UserSummaryProps>(
     scopeId,
     data,
     id,
-    isDraggable = false,
     isInDetailsSidePanel = false, // Rather than duplicate the component, alter the structure based on it's location
     isLoadingAnomaliesData,
     loading,
@@ -101,7 +102,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
     } = useRiskScore({
       filterQuery,
       skip: userName == null,
-      riskEntity: RiskScoreEntity.user,
+      riskEntity: EntityType.user,
       onlyLatest: false,
       pagination: FIRST_RECORD_PAGINATION,
     });
@@ -121,11 +122,10 @@ export const UserOverview = React.memo<UserSummaryProps>(
           rowItems={getOr([], fieldName, fieldData)}
           attrName={fieldName}
           idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
-          isDraggable={isDraggable}
           scopeId={scopeId}
         />
       ),
-      [contextID, isDraggable, scopeId]
+      [contextID, scopeId]
     );
 
     const [userRiskScore, userRiskLevel] = useMemo(() => {
@@ -133,10 +133,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
       return [
         {
           title: (
-            <RiskScoreHeaderTitle
-              title={i18n.USER_RISK_SCORE}
-              riskScoreEntity={RiskScoreEntity.user}
-            />
+            <RiskScoreHeaderTitle title={i18n.USER_RISK_SCORE} riskScoreEntity={EntityType.user} />
           ),
           description: (
             <>
@@ -152,7 +149,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
               <EuiFlexItem grow={false}>
                 <RiskScoreHeaderTitle
                   title={i18n.USER_RISK_LEVEL}
-                  riskScoreEntity={RiskScoreEntity.user}
+                  riskScoreEntity={EntityType.user}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -268,23 +265,13 @@ export const UserOverview = React.memo<UserSummaryProps>(
                 attrName={'host.ip'}
                 idPrefix={contextID ? `user-overview-${contextID}` : 'user-overview'}
                 scopeId={scopeId}
-                isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
             ),
           },
         ],
       ],
-      [
-        data,
-        indexPatterns,
-        getDefaultRenderer,
-        contextID,
-        scopeId,
-        isDraggable,
-        userName,
-        firstColumn,
-      ]
+      [data, indexPatterns, getDefaultRenderer, contextID, scopeId, userName, firstColumn]
     );
     return (
       <>

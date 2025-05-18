@@ -15,18 +15,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import avcBannerBackground from './avc_banner_background.svg';
 
-// Logic to hide banner at EOY 2024
-export const useIsStillYear2024: () => boolean = () => {
+// Logic to hide banner at EOY 2025
+export const useIsStillYear2025: () => boolean = () => {
   return useMemo(() => {
-    return new Date().getFullYear() === 2024;
+    return new Date().getFullYear() === 2025;
   }, []);
 };
 
-export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
+export const AVCResultsBanner: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
   const { docLinks } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const bannerTitle = i18n.translate('avcBanner.title', {
-    defaultMessage: '100% protection with zero false positives.',
+    defaultMessage: 'Proven defense with zero false positives',
   });
 
   const calloutStyles = css({

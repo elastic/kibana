@@ -17,14 +17,14 @@ async function addLifecyclePolicy(
   policyName: string,
   alias: string
 ) {
-  const body = {
+  const settings = {
     lifecycle: {
       name: policyName,
       rollover_alias: alias,
     },
   };
 
-  return client.indices.putSettings({ index: indexName, body });
+  return client.indices.putSettings({ index: indexName, settings });
 }
 
 const bodySchema = schema.object({
@@ -39,7 +39,16 @@ export function registerAddPolicyRoute({
   lib: { handleEsError },
 }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/index/add'), validate: { body: bodySchema } },
+    {
+      path: addBasePath('/index/add'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { body: bodySchema },
+    },
     license.guardApiRoute(async (context, request, response) => {
       const body = request.body as typeof bodySchema.type;
       const { indexName, policyName, alias = '' } = body;

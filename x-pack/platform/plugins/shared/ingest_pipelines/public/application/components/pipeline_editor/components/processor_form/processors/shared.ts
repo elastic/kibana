@@ -8,10 +8,16 @@
 import type { FunctionComponent } from 'react';
 import * as rt from 'io-ts';
 import { i18n } from '@kbn/i18n';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 
 import { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
-import { FieldConfig, ValidationFunc, fieldValidators } from '../../../../../../shared_imports';
+import { isPlainObject } from 'lodash';
+import {
+  FieldConfig,
+  ValidationFunc,
+  fieldValidators,
+  isJSON,
+} from '../../../../../../shared_imports';
 import { collapseEscapedStrings } from '../../../utils';
 
 const { emptyField, isJsonField } = fieldValidators;
@@ -204,3 +210,10 @@ export type FieldsConfig = Record<string, FieldConfig<any>>;
 export type FormFieldsComponent = FunctionComponent<{
   initialFieldValues?: Record<string, any>;
 }>;
+
+export const isXJsonValue = (value: any) => {
+  if (typeof value === 'string') {
+    return isJSON(collapseEscapedStrings(value));
+  }
+  return isPlainObject(value);
+};

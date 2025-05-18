@@ -80,7 +80,6 @@ export const PageHeader: FC = () => {
           isAutoRefreshOnly={!hasValidTimeField}
           showRefresh={!hasValidTimeField}
           width="full"
-          flexGroup={!hasValidTimeField}
         />,
         hasValidTimeField && (
           <FullTimeRangeSelector

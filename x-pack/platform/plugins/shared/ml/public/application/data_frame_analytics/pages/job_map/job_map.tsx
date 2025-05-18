@@ -9,32 +9,39 @@ import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  useEuiTheme,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  type EuiThemeComputed,
+} from '@elastic/eui';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
-import { useCurrentThemeVars, useMlKibana, useMlLocator } from '../../../contexts/kibana';
+import { useMlKibana } from '../../../contexts/kibana';
 import { Controls, Cytoscape, JobMapLegend } from './components';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import type { EuiThemeType } from '../../../components/color_range_legend';
 import { useRefresh } from '../../../routing/use_refresh';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
+import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
 
-const getCytoscapeDivStyle = (theme: EuiThemeType) => ({
+const getCytoscapeDivStyle = (theme: EuiThemeComputed) => ({
   background: `linear-gradient(
   90deg,
-  ${theme.euiPageBackgroundColor}
-    calc(${theme.euiSizeL} - calc(${theme.euiSizeXS} / 2)),
+  ${theme.colors.backgroundBasePlain}
+    calc(${theme.size.l} - calc(${theme.size.xs} / 2)),
   transparent 1%
 )
 center,
 linear-gradient(
-  ${theme.euiPageBackgroundColor}
-    calc(${theme.euiSizeL} - calc(${theme.euiSizeXS} / 2)),
+  ${theme.colors.backgroundBasePlain}
+    calc(${theme.size.l} - calc(${theme.size.xs} / 2)),
   transparent 1%
 )
 center,
-${theme.euiColorLightShade}`,
-  backgroundSize: `${theme.euiSizeL} ${theme.euiSizeL}`,
+${theme.colors.lightShade}`,
+  backgroundSize: `${theme.size.l} ${theme.size.l}`,
   marginTop: 0,
 });
 
@@ -61,19 +68,15 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
   } = useFetchAnalyticsMapData();
 
   const {
-    services: {
-      notifications,
-      application: { navigateToUrl },
-    },
+    services: { notifications },
   } = useMlKibana();
-  const locator = useMlLocator()!;
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
   const refresh = useRefresh();
 
-  const redirectToAnalyticsManagementPage = async () => {
-    const url = await locator.getUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
-    await navigateToUrl(url);
-  };
+  const redirectToAnalyticsManagementPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    'analytics'
+  );
 
   const updateElements = (nodeId: string, nodeLabel: string, destIndexNode?: string) => {
     // If removing the root job just go back to the jobs list
@@ -162,7 +165,7 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <JobMapLegend theme={euiTheme} hasMissingJobNode={hasMissingJobNode} />
+          <JobMapLegend hasMissingJobNode={hasMissingJobNode} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -178,9 +181,8 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div style={{ height: h - parseInt(euiTheme.euiSizeL, 10) - 20 }} ref={ref}>
+      <div style={{ height: h - parseInt(euiTheme.size.l, 10) - 20 }} ref={ref}>
         <Cytoscape
-          theme={euiTheme}
           height={h - 20}
           elements={elements}
           width={width}

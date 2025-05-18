@@ -227,6 +227,11 @@ describe('ActionsClientSimpleChatModel', () => {
         temperature: 0,
         stopSequences: ['\n'],
         maxTokens: 333,
+        model: undefined,
+        telemetryMetadata: {
+          aggregateBy: undefined,
+          pluginId: undefined,
+        },
       });
 
       expect(result).toEqual(mockActionResponse.message);
@@ -252,6 +257,11 @@ describe('ActionsClientSimpleChatModel', () => {
 
       expect(rest).toEqual({
         temperature: 0,
+        model: undefined,
+        telemetryMetadata: {
+          aggregateBy: undefined,
+          pluginId: undefined,
+        },
       });
 
       expect(result).toEqual(mockActionResponse.message);

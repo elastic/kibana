@@ -6,6 +6,7 @@
  */
 
 import {
+  useEuiTheme,
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -18,7 +19,6 @@ import type { PropsWithChildren } from 'react';
 import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { PanelHeaderItems } from './panel_header_items';
-import { useCurrentThemeVars } from '../../contexts/kibana';
 
 export interface CollapsiblePanelProps {
   isOpen: boolean;
@@ -26,6 +26,7 @@ export interface CollapsiblePanelProps {
   header: React.ReactElement;
   headerItems?: React.ReactElement[];
   ariaLabel: string;
+  dataTestSubj?: string;
 }
 
 export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
@@ -35,16 +36,18 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
   header,
   headerItems,
   ariaLabel,
+  dataTestSubj,
 }) => {
-  const { euiTheme } = useCurrentThemeVars();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiSplitPanel.Outer
+      data-test-subj={dataTestSubj}
       grow
       hasShadow={false}
       css={{
-        border: `${euiTheme.euiBorderWidthThin} solid ${
-          isOpen ? euiTheme.euiBorderColor : 'transparent'
+        border: `${euiTheme.border.width.thin} solid ${
+          isOpen ? euiTheme.border.color : 'transparent'
         }`,
       }}
     >
@@ -88,7 +91,7 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
       </EuiSplitPanel.Inner>
       {isOpen ? (
         <EuiSplitPanel.Inner
-          css={{ borderTop: `${euiTheme.euiBorderWidthThin} solid ${euiTheme.euiBorderColor}` }}
+          css={{ borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}` }}
           grow={false}
         >
           {children}
@@ -100,7 +103,7 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
 
 export interface StatEntry {
   label: string;
-  value: number;
+  value: number | string;
   'data-test-subj'?: string;
 }
 

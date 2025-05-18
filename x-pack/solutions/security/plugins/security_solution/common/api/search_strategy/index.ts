@@ -35,9 +35,8 @@ import {
 } from './related_entities/related_entities';
 
 import {
-  hostsRiskScoreRequestOptionsSchema,
+  riskScoreRequestOptionsSchema,
   riskScoreKpiRequestOptionsSchema,
-  usersRiskScoreRequestOptionsSchema,
 } from './risk_score/risk_score';
 
 import {
@@ -46,12 +45,15 @@ import {
   userAuthenticationsSchema,
   usersSchema,
 } from './users/users';
+import { observedServiceDetailsSchema } from './services';
 
 export * from './first_seen_last_seen/first_seen_last_seen';
 
 export * from './hosts/hosts';
 
 export * from './users/users';
+
+export * from './services';
 
 export * from './network/network';
 
@@ -77,8 +79,8 @@ export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryTyp
   observedUserDetailsSchema,
   managedUserDetailsSchema,
   userAuthenticationsSchema,
-  hostsRiskScoreRequestOptionsSchema,
-  usersRiskScoreRequestOptionsSchema,
+  observedServiceDetailsSchema,
+  riskScoreRequestOptionsSchema,
   riskScoreKpiRequestOptionsSchema,
   relatedHostsRequestOptionsSchema,
   relatedUsersRequestOptionsSchema,

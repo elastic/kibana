@@ -6,7 +6,7 @@
  */
 import { uniqBy } from 'lodash';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import {
@@ -23,7 +23,7 @@ import { getRequestBase } from './get_request_base';
 import type { FetchTopOptions } from './fetch_top_types';
 
 // TODO Consolidate with duplicate `fetchDurationFieldCandidates` in
-// `x-pack/plugins/observability_solution/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
+// `x-pack/solutions/observability/plugins/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
 
 const TOP_TERM_AGG_PREFIX = 'top_terms_';
 
@@ -79,7 +79,7 @@ export const getTopTermRequest = (
 
   return {
     ...getRequestBase(params),
-    body,
+    ...body,
   };
 };
 

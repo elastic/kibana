@@ -15,6 +15,12 @@ export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
   router.post(
     {
       path: '/internal/user_profiles_consumer/_suggest',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.maybe(schema.string()),

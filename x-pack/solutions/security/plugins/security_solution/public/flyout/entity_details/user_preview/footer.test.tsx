@@ -7,10 +7,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { UserPanelKey } from '../user_right';
 import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_context';
 import type { UserPreviewPanelFooterProps } from './footer';
 import { UserPreviewPanelFooter } from './footer';
+import { UserPanelKey } from '../shared/constants';
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -18,7 +18,6 @@ const mockProps: UserPreviewPanelFooterProps = {
   userName: 'test',
   contextID: 'test-user-panel',
   scopeId: 'test-scope-id',
-  isDraggable: false,
 };
 
 describe('<UserPreviewPanelFooter />', () => {

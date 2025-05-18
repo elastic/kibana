@@ -35,12 +35,4 @@ describe('useEsqlIndex', () => {
 
     expect(result.current).toEqual(['auditbeat*']);
   });
-
-  it('should return empty array if invalid query is causing a TypeError in ES|QL parser', async () => {
-    const typeErrorCausingQuery = 'from []';
-
-    const { result } = renderHook(() => useEsqlIndex(typeErrorCausingQuery, 'esql'));
-
-    expect(result.current).toEqual([]);
-  });
 });

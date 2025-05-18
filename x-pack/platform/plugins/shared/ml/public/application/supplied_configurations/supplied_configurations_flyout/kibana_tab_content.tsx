@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { asyncForEach } from '@kbn/std';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Module } from '../../../../common/types/modules';
 import { useDashboardService } from '../../services/dashboard_service';
 import { useMlKibana } from '../../contexts/kibana';
@@ -53,7 +52,7 @@ export const KibanaTabContent: FC<Props> = ({ module, selectedKibanaSubTab }) =>
           const result = await dashboardService.fetchDashboardsById(dashboardIds);
 
           await asyncForEach(result, async ({ id }) => {
-            const url = await dashboardService.getDashboardUrl(id, ViewMode.VIEW);
+            const url = await dashboardService.getDashboardUrl(id, 'view');
             if (url) {
               allUrls[id] = url;
             }

@@ -10,4 +10,5 @@ export type DescribeFn = (text: string, fn: () => void) => void;
 export interface TestDefinitionAuthentication {
   username?: string;
   password?: string;
+  role: string;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type {
@@ -20,7 +20,7 @@ import { BaseDataGenerator } from './base_data_generator';
 import { ENDPOINT_ERROR_CODES } from '../constants';
 
 // List of computed (as in, done in code is kibana via
-// https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/services/agent_status.ts#L13-L44
+// https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fleet/common/services/agent_status.ts#L13-L44
 const agentStatusList: readonly AgentStatus[] = [
   'offline',
   'error',
@@ -59,7 +59,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
     const hit = this.generateEsHit();
 
     // The mapping below is identical to `searchHitToAgent()` located in
-    // `x-pack/plugins/fleet/server/services/agents/helpers.ts:19`
+    // `x-pack/platform/plugins/shared/fleet/server/services/agents/helpers.ts:19`
     return merge(
       {
         // Casting here is needed because several of the attributes in `FleetServerAgent` are
@@ -200,7 +200,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
     const esHit = this.generateEsHit(overrides);
 
     // Basically: reverse engineer the Fleet agent status runtime field:
-    // https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/server/services/agents/build_status_runtime_field.ts
+    // https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fleet/server/services/agents/build_status_runtime_field.ts
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const fleetServerAgent = esHit._source!;
@@ -226,7 +226,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
       case 'inactive':
       case 'offline':
         // current fleet timeout interface for offline is 5 minutes
-        // https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/services/agent_status.ts#L11
+        // https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/fleet/common/services/agent_status.ts#L11
         fleetServerAgent.last_checkin = moment().subtract(6, 'minutes').toISOString();
         break;
 

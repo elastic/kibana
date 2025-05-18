@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../../../common/constants';
 import { GroupSummary } from '@kbn/slo-schema';
 import { useGroupName } from './use_group_name';
 
@@ -57,18 +57,14 @@ describe('useGroupName', () => {
   });
 
   it('returns the group name for local index', () => {
-    const groupName = useGroupName(
-      '_index',
-      SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-      {} as GroupSummary
-    );
+    const groupName = useGroupName('_index', SUMMARY_DESTINATION_INDEX_PATTERN, {} as GroupSummary);
     expect(groupName).toBe('Local Kibana');
   });
 
   it('returns the group name for remote index', () => {
     const groupName = useGroupName(
       '_index',
-      `my-remote-cluster:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`,
+      `my-remote-cluster:${SUMMARY_DESTINATION_INDEX_PATTERN}`,
       {} as GroupSummary
     );
     expect(groupName).toBe('Remote Cluster: my-remote-cluster');

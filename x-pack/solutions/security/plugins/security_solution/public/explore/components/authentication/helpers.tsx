@@ -24,8 +24,7 @@ import type {
   MatrixHistogramConfigs,
   MatrixHistogramOption,
 } from '../../../common/components/matrix_histogram/types';
-import type { LensAttributes } from '../../../common/components/visualization_actions/types';
-import { authenticationLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/authentication';
+import { getAuthenticationLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/authentication';
 
 export const getHostDetailsAuthenticationColumns = (): AuthTableColumns => [
   USER_COLUMN,
@@ -199,5 +198,5 @@ export const histogramConfigs: MatrixHistogramConfigs = {
     authenticationsStackByOptions[0],
   stackByOptions: authenticationsStackByOptions,
   title: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
-  lensAttributes: authenticationLensAttributes as LensAttributes,
+  getLensAttributes: getAuthenticationLensAttributes,
 };

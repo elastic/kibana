@@ -6,8 +6,8 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { css } from '@emotion/css';
-import { EuiFieldNumber, EuiFormRow, EuiSelect, transparentize, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFieldNumber, EuiFormRow, EuiSelect, useEuiTheme } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 import * as I18n from './translations';
@@ -18,6 +18,7 @@ interface DurationInputProps {
   minimumValue?: number;
   isDisabled: boolean;
   durationUnitOptions?: Array<{ value: 's' | 'm' | 'h' | 'd'; text: string }>;
+  'aria-label'?: string;
 }
 
 // This component is similar to the ScheduleItem component, but instead of combining the value
@@ -33,6 +34,7 @@ export const DurationInput = memo(function DurationInputComponent({
     { value: 'm', text: I18n.MINUTES },
     { value: 'h', text: I18n.HOURS },
   ],
+  'aria-label': ariaLabel,
   ...props
 }: DurationInputProps): JSX.Element {
   const { euiTheme } = useEuiTheme();
@@ -68,23 +70,35 @@ export const DurationInput = memo(function DurationInputComponent({
   `;
   const durationUnitSelectStyle = css`
     min-width: 106px; // Preserve layout when disabled & dropdown arrow is not rendered
-    box-shadow: none;
-    background: ${transparentize(
-      euiTheme.colors.primary,
-      0.1
-    )} !important; // Override focus states etc.
+    box-shadow: none !important; // Override disabled state
+    background: ${euiTheme.colors.backgroundBasePrimary} !important;
     color: ${euiTheme.colors.primary};
+
+    &:disabled {
+      border-left: ${euiTheme.border.thin};
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+  `;
+  const durationInputStyle = css`
+    box-shadow: none !important; // Override disabled state
   `;
 
   // EUI missing some props
   const rest = { disabled: isDisabled, ...props };
 
   return (
-    <EuiFormRow className={durationFormRowStyle} error={errorMessage} isInvalid={isInvalid}>
+    <EuiFormRow
+      css={durationFormRowStyle}
+      error={errorMessage}
+      isInvalid={isInvalid}
+      isDisabled={isDisabled}
+    >
       <EuiFieldNumber
+        css={durationInputStyle}
         append={
           <EuiSelect
-            className={durationUnitSelectStyle}
+            css={durationUnitSelectStyle}
             options={durationUnitOptions}
             onChange={onChangeTimeType}
             value={durationUnit}
@@ -98,6 +112,7 @@ export const DurationInput = memo(function DurationInputComponent({
         onChange={onChangeTimeVal}
         value={durationValue}
         data-test-subj="interval"
+        aria-label={ariaLabel}
         {...rest}
       />
     </EuiFormRow>

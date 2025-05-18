@@ -19,6 +19,12 @@ export const registerPermissionsRoute = ({
   router.get(
     {
       path: addBasePath('/permissions'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
@@ -38,9 +44,7 @@ export const registerPermissionsRoute = ({
       try {
         const { has_all_requested: hasPermission, cluster } =
           await client.asCurrentUser.security.hasPrivileges({
-            body: {
-              cluster: ['manage', 'manage_ccr'],
-            },
+            cluster: ['manage', 'manage_ccr'],
           });
 
         const missingClusterPrivileges = Object.keys(cluster).reduce(

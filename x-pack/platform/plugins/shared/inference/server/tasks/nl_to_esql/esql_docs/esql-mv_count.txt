@@ -19,7 +19,8 @@ ROW a=["foo", "zoo", "bar"]
 | EVAL count_a = MV_COUNT(a)
 ```
 
+**Counting the number of element in a multivalued field**
 ```esql
-ROW b=["apple", "banana", "cherry", "date"]
-| EVAL count_b = MV_COUNT(b)
+FROM bag_of_numbers
+| EVAL count = MV_COUNT(numbers)
 ```

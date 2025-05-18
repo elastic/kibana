@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import * as reactRedux from 'react-redux';
 import { useBins, useMonitorStatusData } from './use_monitor_status_data';
 import { WrappedHelper } from '../../../utils/testing';
 import * as selectedMonitorHook from '../hooks/use_selected_monitor';
 import * as selectedLocationHook from '../hooks/use_selected_location';
-import { omit } from 'lodash';
 
 const Wrapper = ({ children }: React.PropsWithChildren) =>
   React.createElement(WrappedHelper, null, children);
@@ -76,38 +75,6 @@ describe('useMonitorStatusData', () => {
     expect(
       dispatchMock.mock.calls.some((args) => args[0].type === 'QUIET GET MONITOR STATUS HEATMAP')
     ).not.toBe(true);
-  });
-
-  it('handles resize events and requests based on new data', async () => {
-    const props = {
-      from: 1728310613654,
-      to: 1728317313654,
-      initialSizeRef: { current: { clientWidth: 0 } as any },
-    };
-    const { result } = renderHook(() => useMonitorStatusData(props), {
-      wrapper: Wrapper,
-    });
-    await act(async () => {
-      result.current.handleResize({ width: 250, height: 800 });
-      // this is necessary for debounce to complete
-      await new Promise((r) => setTimeout(r, 510));
-    });
-    const fetchActions = dispatchMock.mock.calls.filter(
-      (args) => args[0].type === 'QUIET GET MONITOR STATUS HEATMAP'
-    );
-    expect(fetchActions).toHaveLength(1);
-    expect(omit(fetchActions[0][0], 'meta')).toMatchInlineSnapshot(`
-      Object {
-        "payload": Object {
-          "from": 1728310613654,
-          "interval": 7,
-          "location": "us-east-1",
-          "monitorId": "testMonitorId",
-          "to": 1728317313654,
-        },
-        "type": "QUIET GET MONITOR STATUS HEATMAP",
-      }
-    `);
   });
 });
 

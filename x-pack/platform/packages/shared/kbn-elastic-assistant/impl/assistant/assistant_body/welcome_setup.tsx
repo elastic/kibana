@@ -8,14 +8,14 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { Conversation } from '../../..';
-import { AssistantAnimatedIcon } from '../assistant_animated_icon';
 import { ConnectorSetup } from '../../connectorland/connector_setup';
 import * as i18n from '../translations';
 
 interface Props {
   currentConversation: Conversation | undefined;
-  handleOnConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
 }
 
 export const WelcomeSetup: React.FC<Props> = ({
@@ -38,7 +38,7 @@ export const WelcomeSetup: React.FC<Props> = ({
             data-test-subj="welcome-setup"
           >
             <EuiFlexItem grow={false}>
-              <AssistantAnimatedIcon />
+              <AssistantBeacon backgroundColor="emptyShade" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText>

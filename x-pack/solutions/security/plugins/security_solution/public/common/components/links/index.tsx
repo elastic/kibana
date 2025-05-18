@@ -11,6 +11,7 @@ import type { SyntheticEvent, MouseEvent } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { isArray, isNil } from 'lodash/fp';
 import type { NavigateToAppOptions } from '@kbn/core-application-browser';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
@@ -95,7 +96,7 @@ const UserDetailsLinkComponent: React.FC<{
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'user' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: EntityType.user });
       const callback = onClickParam ?? goToUsersDetails;
       callback(e);
     },
@@ -120,6 +121,34 @@ const UserDetailsLinkComponent: React.FC<{
 };
 
 export const UserDetailsLink = React.memo(UserDetailsLinkComponent);
+
+const ServiceDetailsLinkComponent: React.FC<{
+  children?: React.ReactNode;
+  serviceName?: string;
+  onClick?: (e: SyntheticEvent) => void;
+}> = ({ children, onClick: onClickParam, serviceName }) => {
+  const { telemetry } = useKibana().services;
+
+  const onClick = useCallback(
+    (e: SyntheticEvent) => {
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: EntityType.service });
+      if (onClickParam) {
+        onClickParam(e);
+      }
+    },
+    [onClickParam, telemetry]
+  );
+
+  return onClickParam ? (
+    <LinkAnchor data-test-subj="service-link-anchor" onClick={onClick}>
+      {children ? children : serviceName}
+    </LinkAnchor>
+  ) : (
+    serviceName
+  );
+};
+
+export const ServiceDetailsLink = React.memo(ServiceDetailsLinkComponent);
 
 export interface HostDetailsLinkProps {
   children?: React.ReactNode;
@@ -172,7 +201,7 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
 
   const onClick = useCallback(
     (e: SyntheticEvent) => {
-      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: 'host' });
+      telemetry.reportEvent(EntityEventTypes.EntityDetailsClicked, { entity: EntityType.host });
 
       const callback = onClickParam ?? goToHostDetails;
       callback(e);
@@ -199,6 +228,34 @@ const HostDetailsLinkComponent: React.FC<HostDetailsLinkProps> = ({
 };
 
 export const HostDetailsLink = React.memo(HostDetailsLinkComponent);
+
+export interface EntityDetailsLinkProps {
+  children?: React.ReactNode;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  entityName: string;
+  isButton?: boolean;
+  onClick?: (e: SyntheticEvent) => void;
+  tab?: HostsTableType | UsersTableType;
+  title?: string;
+  entityType: EntityType;
+}
+export const EntityDetailsLink = ({
+  entityType,
+  tab,
+  entityName,
+  ...props
+}: EntityDetailsLinkProps) => {
+  if (entityType === EntityType.host) {
+    return <HostDetailsLink {...props} hostTab={tab as HostsTableType} hostName={entityName} />;
+  } else if (entityType === EntityType.user) {
+    return <UserDetailsLink {...props} userTab={tab as UsersTableType} userName={entityName} />;
+  } else if (entityType === EntityType.service) {
+    return <ServiceDetailsLink serviceName={entityName} onClick={props.onClick} />;
+  }
+
+  return entityName;
+};
 
 const allowedUrlSchemes = ['http://', 'https://'];
 export const ExternalLink = React.memo<{
@@ -241,58 +298,81 @@ export interface NetworkDetailsLinkProps {
   ip: string | string[];
   flowTarget?: FlowTarget | FlowTargetSourceDest;
   isButton?: boolean;
-  onClick?: (e: SyntheticEvent) => void | undefined;
+  onClick?: (ip: string) => void;
   title?: string;
 }
 
-const NetworkDetailsLinkComponent: React.FC<NetworkDetailsLinkProps> = ({
-  Component,
-  children,
-  ip,
-  flowTarget = FlowTarget.source,
-  isButton,
-  onClick,
-  title,
-}) => {
-  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+const NetworkDetailsLinkComponent: React.FC<NetworkDetailsLinkProps> = ({ ip, ...restProps }) => {
+  // We see that sometimes the `ip` is passed as a string value of "IP1,IP2".
+  // Therefore we're breaking up this string into individual IPs first.
+  const actualIp = useMemo(() => {
+    if (typeof ip === 'string' && ip.includes(',')) {
+      return ip.split(',').map((str) => str.trim());
+    } else {
+      return ip;
+    }
+  }, [ip]);
 
-  const getLink = useCallback(
-    (cIp: string, i: number) => {
-      const { onClick: onClickNavigation, href } = getSecuritySolutionLinkProps({
-        deepLinkId: SecurityPageName.network,
-        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget),
-      });
-
-      const onLinkClick = onClick ?? ((e: SyntheticEvent) => onClickNavigation(e as MouseEvent));
-
-      return isButton ? (
-        <GenericLinkButton
-          Component={Component}
-          key={`${cIp}-${i}`}
-          dataTestSubj="data-grid-network-details"
-          onClick={onLinkClick}
-          href={href}
-          title={title ?? cIp}
-        >
-          {children}
-        </GenericLinkButton>
-      ) : (
-        <LinkAnchor
-          key={`${cIp}-${i}`}
-          onClick={onLinkClick}
-          href={href}
-          data-test-subj="network-details"
-        >
-          {children ? children : cIp}
-        </LinkAnchor>
-      );
-    },
-    [children, Component, flowTarget, getSecuritySolutionLinkProps, onClick, isButton, title]
+  return isArray(actualIp) ? (
+    actualIp.map((currentIp, index) => (
+      <span key={`${currentIp}-${index}`}>
+        <IpLinkComponent ip={currentIp} {...restProps} />
+        {index === actualIp.length - 1 ? '' : ', '}
+      </span>
+    ))
+  ) : (
+    <IpLinkComponent ip={actualIp} {...restProps} />
   );
-  return isArray(ip) ? <>{ip.map(getLink)}</> : getLink(ip, 0);
 };
 
 export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
+
+type IpLinkComponentProps = Omit<NetworkDetailsLinkProps, 'ip'> & { ip: string };
+
+const IpLinkComponent: React.FC<IpLinkComponentProps> = ({
+  isButton,
+  onClick,
+  ip: ipAddress,
+  flowTarget = FlowTarget.source,
+  Component,
+  title,
+  children,
+}) => {
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+  const { onClick: onClickNavigation, href } = getSecuritySolutionLinkProps({
+    deepLinkId: SecurityPageName.network,
+    path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ipAddress)), flowTarget),
+  });
+
+  const onLinkClick = useCallback(
+    (e: SyntheticEvent) => {
+      if (onClick) {
+        e.preventDefault();
+        onClick(ipAddress);
+      } else {
+        onClickNavigation(e as MouseEvent);
+      }
+    },
+    [onClick, onClickNavigation, ipAddress]
+  );
+
+  return isButton ? (
+    <GenericLinkButton
+      Component={Component}
+      key={ipAddress}
+      dataTestSubj="data-grid-network-details"
+      onClick={onLinkClick}
+      href={href}
+      title={title ?? ipAddress}
+    >
+      {children}
+    </GenericLinkButton>
+  ) : (
+    <LinkAnchor key={ipAddress} onClick={onLinkClick} href={href} data-test-subj="network-details">
+      {children ? children : ipAddress}
+    </LinkAnchor>
+  );
+};
 
 export interface CaseDetailsLinkComponentProps {
   children?: React.ReactNode;
@@ -539,7 +619,6 @@ const ReputationLinkComponent: React.FC<{
                 idx={id}
                 overflowIndexStart={overflowIndexStart}
                 url={urlTemplate}
-                data-test-subj="externalLinkComponent"
                 key={`reputationLink-${id}`}
               >
                 <>{showDomain ? domain : name ?? domain}</>

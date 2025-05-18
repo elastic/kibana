@@ -18,7 +18,7 @@ export const useStyles = () => {
     };
 
     const executableAction: CSSObject = {
-      fontWeight: euiTheme.font.weight.semiBold,
+      fontWeight: euiTheme.font.weight.bold,
       paddingLeft: euiTheme.size.xs,
     };
 

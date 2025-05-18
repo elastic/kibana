@@ -8,10 +8,9 @@
 import { EuiFieldSearch, EuiFilterGroup, EuiProgress, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { Fragment, useState } from 'react';
 import { rgba } from 'polished';
-import styled from 'styled-components';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { FilterValueButton } from '../columns/filter_value_btn';
 import { FilterProps, NestedFilterOpen } from '../columns/filter_expanded';
 import { UrlFilter } from '../../types';
@@ -123,17 +122,17 @@ const getSearchLabel = (label: string) =>
     values: { label },
   });
 
-const ListWrapper = euiStyled.div`
+const ListWrapper = styled.div`
   height: 370px;
   overflow-y: auto;
   &::-webkit-scrollbar {
-    height: ${({ theme }) => theme.eui.euiScrollBar};
-    width: ${({ theme }) => theme.eui.euiScrollBar};
+    height: ${({ theme }) => theme.euiTheme.size.base};
+    width: ${({ theme }) => theme.euiTheme.size.base};
   }
   &::-webkit-scrollbar-thumb {
     background-clip: content-box;
-    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
-    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
+    background-color: ${({ theme }) => rgba(theme.euiTheme.colors.darkShade, 0.5)};
+    border: ${({ theme }) => theme.euiTheme.border.radius.small} solid transparent;
   }
   &::-webkit-scrollbar-corner,
   &::-webkit-scrollbar-track {

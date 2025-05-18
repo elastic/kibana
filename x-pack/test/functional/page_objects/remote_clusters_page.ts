@@ -9,8 +9,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function RemoteClustersPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const comboBox = getService('comboBox');
   const retry = getService('retry');
+
+  enum ConnectionType {
+    'cert' = 'setupTrustCertMode',
+    'api' = 'setupTrustApiMode',
+  }
 
   return {
     async remoteClusterCreateButton() {
@@ -18,25 +22,33 @@ export function RemoteClustersPageProvider({ getService }: FtrProviderContext) {
     },
     async createNewRemoteCluster(
       name: string,
-      seedNode: string,
-      proxyMode?: boolean,
-      nodeConnections?: number,
-      skipIfUnavailable?: boolean
+      host: string,
+      isCloud: boolean,
+      trustMode: 'cert' | 'api' = 'cert'
     ) {
       await (await this.remoteClusterCreateButton()).click();
-      await retry.waitFor('remote cluster form to be visible', async () => {
-        return await testSubjects.isDisplayed('remoteClusterFormNameInput');
+      await retry.waitFor('setup trust tab to be visible', async () => {
+        return await testSubjects.isDisplayed('remoteClusterTrustNextButton');
       });
+      await testSubjects.click(ConnectionType[trustMode]);
+      await testSubjects.click('remoteClusterTrustNextButton');
+
+      await retry.waitFor('form tab to be visible', async () => {
+        return await testSubjects.isDisplayed('remoteClusterFormNextButton');
+      });
+
       await testSubjects.setValue('remoteClusterFormNameInput', name);
-      await comboBox.setCustom('comboBoxInput', seedNode);
+      const hostFieldId = isCloud
+        ? 'remoteClusterFormRemoteAddressInput'
+        : 'remoteClusterFormSeedsInput';
+      await testSubjects.setValue(hostFieldId, host);
+      await testSubjects.click('remoteClusterFormNextButton');
 
+      await retry.waitFor('review tab to be visible', async () => {
+        return await testSubjects.isDisplayed('remoteClusterReviewtNextButton');
+      });
       // Submit config form
-      await testSubjects.click('remoteClusterFormSaveButton');
-
-      // Complete trust setup
-      await testSubjects.click('setupTrustDoneButton');
-      await testSubjects.setCheckbox('remoteClusterTrustCheckboxLabel', 'check');
-      await testSubjects.click('remoteClusterTrustSubmitButton');
+      await testSubjects.click('remoteClusterReviewtNextButton');
     },
     async getRemoteClustersList() {
       const table = await testSubjects.find('remoteClusterListTable');

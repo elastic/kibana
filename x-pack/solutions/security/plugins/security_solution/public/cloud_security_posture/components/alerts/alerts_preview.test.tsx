@@ -9,11 +9,9 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AlertsPreview } from './alerts_preview';
 import { TestProviders } from '../../../common/mock/test_providers';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ParsedAlertsData } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
-import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 
 const mockAlertsData: ParsedAlertsData = {
   open: {
@@ -35,18 +33,14 @@ const mockAlertsData: ParsedAlertsData = {
 // Mock hooks
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
-jest.mock('../../../entity_analytics/api/hooks/use_risk_score');
-jest.mock('@kbn/expandable-flyout');
 
 describe('AlertsPreview', () => {
   const mockOpenLeftPanel = jest.fn();
 
   beforeEach(() => {
-    (useExpandableFlyoutApi as jest.Mock).mockReturnValue({ openLeftPanel: mockOpenLeftPanel });
     (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({
       data: { count: { CRITICAL: 0, HIGH: 1, MEDIUM: 1, LOW: 0, UNKNOWN: 0 } },
     });
-    (useRiskScore as jest.Mock).mockReturnValue({ data: [{ host: { risk: 75 } }] });
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({
       data: { count: { passed: 1, failed: 1 } },
     });
@@ -58,7 +52,11 @@ describe('AlertsPreview', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} value="host1" field="host.name" />
+        <AlertsPreview
+          alertsData={mockAlertsData}
+          isLinkEnabled={true}
+          openDetailsPanel={mockOpenLeftPanel}
+        />
       </TestProviders>
     );
 
@@ -68,7 +66,11 @@ describe('AlertsPreview', () => {
   it('renders correct alerts number', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} value="host1" field="host.name" />
+        <AlertsPreview
+          alertsData={mockAlertsData}
+          isLinkEnabled={true}
+          openDetailsPanel={mockOpenLeftPanel}
+        />
       </TestProviders>
     );
 
@@ -78,7 +80,11 @@ describe('AlertsPreview', () => {
   it('should render the correct number of distribution bar section based on the number of severities', () => {
     const { queryAllByTestId } = render(
       <TestProviders>
-        <AlertsPreview alertsData={mockAlertsData} value="host1" field="host.name" />
+        <AlertsPreview
+          alertsData={mockAlertsData}
+          isLinkEnabled={true}
+          openDetailsPanel={mockOpenLeftPanel}
+        />
       </TestProviders>
     );
 

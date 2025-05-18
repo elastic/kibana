@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { EuiCallOut, EuiSpacer, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -151,7 +151,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
                   link: (
                     <EuiLink
                       href={
-                        'https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-node.html#ml-node'
+                        'https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#ml-node'
                       }
                     >
                       <FormattedMessage

@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiAvatar, EuiAvatarProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { AssistantIcon } from './icon';
-import { useStyles } from './avatar.styles';
 
 /**
  * Avatar component for the AI Assistant.
@@ -19,15 +19,19 @@ export type AssistantAvatarProps = Omit<
   'iconType' | 'initials' | 'initialsLength' | 'imageUrl'
 >;
 
+const aiAssistantName = i18n.translate('xpack.aiAssistant.avatar.aiAssistantLabel', {
+  defaultMessage: 'AI Assistant',
+});
+
 /**
  * A `EuiAvatar` component customized for the AI Assistant.
  */
 export const AssistantAvatar = ({
-  css,
   color = 'plain',
   size = 'm',
   ...props
 }: AssistantAvatarProps) => {
-  const { root } = useStyles();
-  return <EuiAvatar {...{ ...props, color, size }} css={[root, css]} iconType={AssistantIcon} />;
+  return (
+    <EuiAvatar {...{ ...props, color, size }} name={aiAssistantName} iconType={AssistantIcon} />
+  );
 };

@@ -15,8 +15,7 @@ import supertest from 'supertest';
 import { Subtract } from 'utility-types';
 import { format } from 'url';
 import { Config } from '@kbn/test';
-import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
-import { InheritedFtrProviderContext } from '../../../../services';
+import { InheritedFtrProviderContext, SupertestWithRoleScopeType } from '../../../../services';
 import type { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 
 export function getObservabilityAIAssistantApiClient({
@@ -24,7 +23,7 @@ export function getObservabilityAIAssistantApiClient({
   supertestUserWithCookieCredentials,
 }: {
   svlSharedConfig: Config;
-  supertestUserWithCookieCredentials?: SupertestWithRoleScope;
+  supertestUserWithCookieCredentials?: SupertestWithRoleScopeType;
 }) {
   if (supertestUserWithCookieCredentials) {
     return createObservabilityAIAssistantApiClient(supertestUserWithCookieCredentials);
@@ -40,7 +39,11 @@ export function getObservabilityAIAssistantApiClient({
   }
 }
 
-type ObservabilityAIAssistantApiClientKey = 'slsAdmin' | 'slsEditor' | 'slsUser';
+type ObservabilityAIAssistantApiClientKey =
+  | 'slsAdmin'
+  | 'slsEditor'
+  | 'slsUser'
+  | 'slsUnauthorized';
 
 export type ObservabilityAIAssistantApiClient = Record<
   ObservabilityAIAssistantApiClientKey,
@@ -48,7 +51,7 @@ export type ObservabilityAIAssistantApiClient = Record<
 >;
 
 export function createObservabilityAIAssistantApiClient(
-  st: SupertestWithRoleScope | supertest.Agent
+  st: SupertestWithRoleScopeType | supertest.Agent
 ) {
   return <TEndpoint extends ObservabilityAIAssistantAPIEndpoint>(
     options: {
@@ -195,15 +198,24 @@ export async function getObservabilityAIAssistantApiClientService({
   const svlSharedConfig = getService('config');
   const roleScopedSupertest = getService('roleScopedSupertest');
 
-  const supertestAdminWithCookieCredentials: SupertestWithRoleScope =
+  // admin user
+  const supertestAdminWithCookieCredentials: SupertestWithRoleScopeType =
     await roleScopedSupertest.getSupertestWithRoleScope('admin', {
       useCookieHeader: true,
       withInternalHeaders: true,
     });
 
-  const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
+  // editor user
+  const supertestEditorWithCookieCredentials: SupertestWithRoleScopeType =
     await roleScopedSupertest.getSupertestWithRoleScope('editor', {
       useCookieHeader: true,
+      withInternalHeaders: true,
+    });
+
+  // unauthorized user
+  const supertestUnauthorizedWithCookieCredentials: SupertestWithRoleScopeType =
+    await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
+      useCookieHeader: false,
       withInternalHeaders: true,
     });
 
@@ -221,6 +233,10 @@ export async function getObservabilityAIAssistantApiClientService({
     slsEditor: await getObservabilityAIAssistantApiClient({
       svlSharedConfig,
       supertestUserWithCookieCredentials: supertestEditorWithCookieCredentials,
+    }),
+    slsUnauthorized: await getObservabilityAIAssistantApiClient({
+      svlSharedConfig,
+      supertestUserWithCookieCredentials: supertestUnauthorizedWithCookieCredentials,
     }),
   };
 }

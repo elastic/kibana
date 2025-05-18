@@ -32,6 +32,12 @@ export function registerDeactivateRoute({
   router.put(
     {
       path: '/api/watcher/watch/{watchId}/deactivate',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         params: paramsSchema,
       },

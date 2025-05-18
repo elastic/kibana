@@ -6,19 +6,19 @@
  */
 
 import {
-  EuiButton,
-  EuiSpacer,
   EuiAccordion,
-  EuiTitle,
-  EuiPanel,
-  EuiEmptyPrompt,
+  EuiButton,
   EuiCallOut,
+  EuiEmptyPrompt,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
-import type { EntityDetailsLeftPanelTab } from '../../shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../../shared/components/left_panel/left_panel_header';
 import { UserAssetTableType } from '../../../../explore/users/store/model';
 import type { ManagedUserFields } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
@@ -42,13 +42,15 @@ const accordionStyle = css`
 export const ManagedUser = ({
   managedUser,
   contextID,
-  isDraggable,
   openDetailsPanel,
+  isPreviewMode,
+  isLinkEnabled,
 }: {
   managedUser: ManagedUserData;
   contextID: string;
-  isDraggable: boolean;
-  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel: (path: EntityDetailsPath) => void;
+  isPreviewMode?: boolean;
+  isLinkEnabled: boolean;
 }) => {
   const entraManagedUser = managedUser.data?.[ManagedUserDatasetKey.ENTRA];
   const oktaManagedUser = managedUser.data?.[ManagedUserDatasetKey.OKTA];
@@ -127,9 +129,10 @@ export const ManagedUser = ({
                       managedUser={entraManagedUser.fields}
                       tableType={UserAssetTableType.assetEntra}
                       openDetailsPanel={openDetailsPanel}
+                      isLinkEnabled={isLinkEnabled}
+                      isPreviewMode={isPreviewMode}
                     >
                       <ManagedUserTable
-                        isDraggable={isDraggable}
                         contextID={contextID}
                         managedUser={entraManagedUser.fields}
                         tableType={UserAssetTableType.assetEntra}
@@ -145,9 +148,10 @@ export const ManagedUser = ({
                       managedUser={oktaManagedUser.fields}
                       tableType={UserAssetTableType.assetOkta}
                       openDetailsPanel={openDetailsPanel}
+                      isLinkEnabled={isLinkEnabled}
+                      isPreviewMode={isPreviewMode}
                     >
                       <ManagedUserTable
-                        isDraggable={isDraggable}
                         contextID={contextID}
                         managedUser={oktaManagedUser.fields}
                         tableType={UserAssetTableType.assetOkta}
@@ -167,18 +171,13 @@ export const ManagedUser = ({
 export const ManagedUserTable = ({
   managedUser,
   contextID,
-  isDraggable,
   tableType,
 }: {
   managedUser: ManagedUserFields;
   contextID: string;
-  isDraggable: boolean;
   tableType: UserAssetTableType;
 }) => {
-  const managedUserTableColumns = useMemo(
-    () => getManagedUserTableColumns(contextID, isDraggable),
-    [isDraggable, contextID]
-  );
+  const managedUserTableColumns = useMemo(() => getManagedUserTableColumns(contextID), [contextID]);
   const managedItems = useManagedUserItems(tableType, managedUser);
 
   return (

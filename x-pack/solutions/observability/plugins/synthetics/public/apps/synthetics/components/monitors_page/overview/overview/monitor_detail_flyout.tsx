@@ -23,35 +23,37 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { FlyoutParamProps } from './types';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
-import { useOverviewStatus } from '../../hooks/use_overview_status';
-import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ClientPluginsStart } from '../../../../../../plugin';
+import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
+import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
 import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
-import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
-import { ActionsPopover } from './actions_popover';
 import {
   getMonitorAction,
   selectMonitorUpsertStatus,
+  selectOverviewState,
   selectServiceLocationsState,
   selectSyntheticsMonitor,
   selectSyntheticsMonitorError,
   selectSyntheticsMonitorLoading,
   setFlyoutConfig,
 } from '../../../../state';
-import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
-import { ConfigKey, EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
-import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
-import { MonitorStatus } from '../../../common/components/monitor_status';
+import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
+import { MonitorStatus } from '../../../common/components/monitor_status';
+import { useOverviewStatus } from '../../hooks/use_overview_status';
+import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
+import { ConfigKey, EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
+import { ActionsPopover } from './actions_popover';
+import { FlyoutParamProps } from './types';
+import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 
 interface Props {
   configId: string;
@@ -89,7 +91,7 @@ function DetailFlyoutDurationChart({
   | 'previousDurationChartFrom'
   | 'previousDurationChartTo'
 >) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
@@ -108,7 +110,7 @@ function DetailFlyoutDurationChart({
         attributes={[
           {
             seriesType: 'area',
-            color: theme?.eui?.euiColorVis1,
+            color: euiTheme.colors.vis.euiColorVis1,
             time: {
               from: currentDurationChartFrom ?? DEFAULT_DURATION_CHART_FROM,
               to: currentDurationChartTo ?? DEFAULT_CURRENT_DURATION_CHART_TO,
@@ -130,7 +132,7 @@ function DetailFlyoutDurationChart({
           },
           {
             seriesType: 'line',
-            color: theme?.eui?.euiColorVis7,
+            color: euiTheme.colors.vis.euiColorVis7,
             time: {
               from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
               to: previousDurationChartTo ?? DEFAULT_PREVIOUS_DURATION_CHART_TO,
@@ -209,7 +211,7 @@ function DetailedFlyoutHeader({
 
 export function LoadingState() {
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+    <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '100%' }}>
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner size="xl" />
       </EuiFlexItem>
@@ -369,6 +371,34 @@ export function MonitorDetailFlyout(props: Props) {
     </EuiFlyout>
   );
 }
+
+export const MaybeMonitorDetailsFlyout = ({
+  setFlyoutConfigCallback,
+}: {
+  setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+}) => {
+  const dispatch = useDispatch();
+
+  const { flyoutConfig, pageState } = useSelector(selectOverviewState);
+  const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
+  const forceRefreshCallback = useCallback(
+    () => dispatch(quietFetchOverviewStatusAction.get({ pageState })),
+    [dispatch, pageState]
+  );
+
+  return flyoutConfig?.configId && flyoutConfig?.location ? (
+    <MonitorDetailFlyout
+      configId={flyoutConfig.configId}
+      id={flyoutConfig.id}
+      location={flyoutConfig.location}
+      locationId={flyoutConfig.locationId}
+      spaceId={flyoutConfig.spaceId}
+      onClose={hideFlyout}
+      onEnabledChange={forceRefreshCallback}
+      onLocationChange={setFlyoutConfigCallback}
+    />
+  ) : null;
+};
 
 const DURATION_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.durationHeaderText', {
   defaultMessage: 'Duration',

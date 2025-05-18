@@ -21,7 +21,7 @@
           },
           "<string>) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/file/file_picker/impl/src/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,7 +42,7 @@
               },
               "<string>"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/index.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -70,7 +70,7 @@
           },
           "<Kind>"
         ],
-        "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,7 +86,7 @@
             "signature": [
               "Kind"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,7 +110,7 @@
               },
               "<unknown>) => boolean) | undefined"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -131,7 +131,7 @@
                   },
                   "<unknown>"
                 ],
-                "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -151,7 +151,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -177,7 +177,7 @@
               },
               "<unknown>[]) => void"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -198,7 +198,7 @@
                   },
                   "<unknown>[]"
                 ],
-                "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -226,7 +226,7 @@
               },
               "<unknown>[]) => void) | undefined"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -247,7 +247,7 @@
                   },
                   "<unknown>[]"
                 ],
-                "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -267,7 +267,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -283,7 +283,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -301,7 +301,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

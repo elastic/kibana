@@ -19,9 +19,10 @@ import './text_editor.scss';
 interface Props {
   field: FieldHook<string>;
   editorProps: { [key: string]: any };
+  euiFieldProps?: Record<string, any>;
 }
 
-export const TextEditor: FunctionComponent<Props> = ({ field, editorProps }) => {
+export const TextEditor: FunctionComponent<Props> = ({ field, editorProps, euiFieldProps }) => {
   const { value, helpText, setValue, label } = field;
   const { errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -32,11 +33,13 @@ export const TextEditor: FunctionComponent<Props> = ({ field, editorProps }) => 
       isInvalid={typeof errorMessage === 'string'}
       error={errorMessage}
       fullWidth
+      labelAppend={editorProps.labelAppend}
     >
       <EuiPanel
         className="pipelineProcessorsEditor__form__textEditor__panel"
         paddingSize="s"
         hasShadow={false}
+        {...euiFieldProps}
       >
         <CodeEditor value={value} onChange={setValue} {...(editorProps as any)} />
       </EuiPanel>

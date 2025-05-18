@@ -8,10 +8,10 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { Criteria, EuiTableSortingType } from '@elastic/eui';
-import { useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';
+import { useEuiTheme, useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import {
@@ -22,7 +22,6 @@ import {
 } from '@kbn/aiops-log-rate-analysis/state';
 
 import type { GroupTableItemGroup } from '@kbn/aiops-log-rate-analysis/state';
-import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { useColumns, LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE } from './use_columns';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
@@ -48,7 +47,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   barHighlightColorOverride,
   skippedColumns,
 }) => {
-  const euiTheme = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
   const allItems = useAppSelector((s) => s.logRateAnalysisResults.significantItems);
@@ -227,12 +226,12 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       selectedSignificantItem.fieldValue === significantItem.fieldValue
     ) {
       return {
-        backgroundColor: euiTheme.euiColorLightestShade,
+        backgroundColor: euiTheme.colors.lightestShade,
       };
     }
 
     return {
-      backgroundColor: euiTheme.euiColorEmptyShade,
+      backgroundColor: euiTheme.colors.emptyShade,
     };
   };
 

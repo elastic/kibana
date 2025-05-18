@@ -24,7 +24,7 @@ export const SIEM_TRANSLATION_RESULT_PARTIAL_LABEL = i18n.translate(
 export const SIEM_TRANSLATION_RESULT_UNTRANSLATABLE_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationResult.untranslatable',
   {
-    defaultMessage: 'Needs manual translation',
+    defaultMessage: 'Not translated',
   }
 );
 

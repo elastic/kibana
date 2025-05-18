@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { setup, SetupResult } from './pipeline_processors_editor.helpers';
+import { setup, setupEnvironment, SetupResult } from './pipeline_processors_editor.helpers';
 import { Pipeline } from '../../../../../common/types';
 import {
   extractProcessorDetails,
@@ -46,6 +46,7 @@ describe('Pipeline Editor', () => {
   let testBed: SetupResult;
 
   beforeAll(() => {
+    setupEnvironment();
     jest.useFakeTimers({ legacyFakeTimers: true });
   });
 
@@ -112,7 +113,7 @@ describe('Pipeline Editor', () => {
       });
 
       // Get the list of processors that are only available for platinum licenses
-      const processorsForPlatinumLicense = extractProcessorDetails(mapProcessorTypeToDescriptor)
+      const processorsForPlatinumLicense = extractProcessorDetails(mapProcessorTypeToDescriptor())
         .filter((processor) => processor.forLicenseAtLeast === 'platinum')
         .map(({ value, label, category }) => ({ label, value, category }));
 
@@ -144,7 +145,7 @@ describe('Pipeline Editor', () => {
       // Open the edit processor form for the set processor
       actions.openProcessorEditor('processors>2');
       expect(exists('editProcessorForm')).toBeTruthy();
-      form.setInputValue('editProcessorForm.valueFieldInput', 'test44');
+      form.setInputValue('editProcessorForm.textValueField.input', 'test44');
       jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       await actions.submitProcessorForm();
       const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
@@ -175,7 +176,7 @@ describe('Pipeline Editor', () => {
       // Change its type to `append` and set the missing required fields
       await actions.setProcessorType('append');
       await act(async () => {
-        find('appendValueField.input').simulate('change', [{ label: 'some_value' }]);
+        find('comboxValueField.input').simulate('change', [{ label: 'some_value' }]);
       });
       component.update();
 

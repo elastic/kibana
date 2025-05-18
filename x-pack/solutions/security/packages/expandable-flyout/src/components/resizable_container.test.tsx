@@ -20,7 +20,7 @@ const leftComponent = <div>{'left component'}</div>;
 const rightComponent = <div>{'right component'}</div>;
 
 describe('ResizableContainer', () => {
-  it('should render left and right component as well as resize button', () => {
+  it('should render right section only', () => {
     const state = {
       ...initialState,
       ui: {
@@ -37,13 +37,56 @@ describe('ResizableContainer', () => {
         <ResizableContainer
           leftComponent={leftComponent}
           rightComponent={rightComponent}
-          showPreview={false}
+          showLeft={false}
         />
       </TestProvider>
     );
 
-    expect(getByTestId(RESIZABLE_LEFT_SECTION_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RESIZABLE_BUTTON_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(RESIZABLE_RIGHT_SECTION_TEST_ID)).toBeInTheDocument();
+    const rightSection = getByTestId(RESIZABLE_RIGHT_SECTION_TEST_ID);
+    expect(rightSection).toBeInTheDocument();
+    expect(rightSection.parentElement).toHaveStyle('inline-size: 100%; block-size: auto;');
+
+    const resizeButton = getByTestId(RESIZABLE_BUTTON_TEST_ID);
+    expect(resizeButton).toBeInTheDocument();
+    expect(resizeButton).toBeDisabled();
+
+    const leftSection = getByTestId(RESIZABLE_LEFT_SECTION_TEST_ID);
+    expect(leftSection).toBeInTheDocument();
+    expect(leftSection.parentElement).toHaveStyle('inline-size: 0%; block-size: auto;');
+  });
+
+  it('should render left and right components with resize button enabled', () => {
+    const state = {
+      ...initialState,
+      ui: {
+        ...initialState.ui,
+        userSectionWidths: {
+          leftPercentage: 50,
+          rightPercentage: 50,
+        },
+      },
+    };
+
+    const { getByTestId } = render(
+      <TestProvider state={state}>
+        <ResizableContainer
+          leftComponent={leftComponent}
+          rightComponent={rightComponent}
+          showLeft={true}
+        />
+      </TestProvider>
+    );
+
+    const rightSection = getByTestId(RESIZABLE_RIGHT_SECTION_TEST_ID);
+    expect(rightSection).toBeInTheDocument();
+    expect(rightSection.parentElement).toHaveStyle('inline-size: 50%; block-size: auto;');
+
+    const resizeButton = getByTestId(RESIZABLE_BUTTON_TEST_ID);
+    expect(resizeButton).toBeInTheDocument();
+    expect(resizeButton).not.toBeDisabled();
+
+    const leftSection = getByTestId(RESIZABLE_LEFT_SECTION_TEST_ID);
+    expect(leftSection).toBeInTheDocument();
+    expect(leftSection.parentElement).toHaveStyle('inline-size: 50%; block-size: auto;');
   });
 });

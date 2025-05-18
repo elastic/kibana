@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiContextMenuItem,
   EuiFlexGroup,
@@ -119,7 +120,7 @@ export const ProcessTreeAlertsFilter = ({
   return (
     <div data-test-subj="sessionView:sessionViewAlertDetailsFilter">
       <EuiFlexGroup alignItems="center">
-        <EuiFlexItem css={filterStatus} style={{ paddingLeft: '16px' }}>
+        <EuiFlexItem css={css([filterStatus, { paddingLeft: '16px' }])}>
           <EuiText size="s" data-test-subj="sessionView:sessionViewAlertDetailsFilterStatus">
             {totalAlertsCount === filteredAlertsCount && (
               <FormattedMessage

@@ -11,8 +11,10 @@ import type { ServerError } from '@kbn/cases-plugin/public/types';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { HttpSetup } from '@kbn/core-http-browser';
+import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { ActionConnector } from '@kbn/cases-plugin/public/containers/configure/types';
 import { AIConnector } from '../connector_selector';
 import * as i18n from '../translations';
 
@@ -25,29 +27,37 @@ const QUERY_KEY = ['elastic-assistant, load-connectors'];
 export interface Props {
   http: HttpSetup;
   toasts?: IToasts;
+  inferenceEnabled?: boolean;
 }
 
-const actionTypeKey = {
-  bedrock: '.bedrock',
-  openai: '.gen-ai',
-  gemini: '.gemini',
-};
+const actionTypes = ['.bedrock', '.gen-ai', '.gemini'];
 
 export const useLoadConnectors = ({
   http,
   toasts,
+  inferenceEnabled = false,
 }: Props): UseQueryResult<AIConnector[], IHttpFetchError> => {
+  if (inferenceEnabled) {
+    actionTypes.push('.inference');
+  }
+
   return useQuery(
     QUERY_KEY,
     async () => {
       const queryResult = await loadConnectors({ http });
       return queryResult.reduce(
-        (acc: AIConnector[], connector) => [
-          ...acc,
+        async (acc: Promise<AIConnector[]>, connector) => [
+          ...(await acc),
           ...(!connector.isMissingSecrets &&
-          [actionTypeKey.bedrock, actionTypeKey.openai, actionTypeKey.gemini].includes(
-            connector.actionTypeId
-          )
+          actionTypes.includes(connector.actionTypeId) &&
+          // only include preconfigured .inference connectors
+          (connector.actionTypeId !== '.inference' ||
+            (connector.actionTypeId === '.inference' &&
+              connector.isPreconfigured &&
+              (await isInferenceEndpointExists(
+                http,
+                (connector as ActionConnector)?.config?.inferenceId
+              ))))
             ? [
                 {
                   ...connector,
@@ -61,7 +71,7 @@ export const useLoadConnectors = ({
               ]
             : []),
         ],
-        []
+        Promise.resolve([])
       );
     },
     {

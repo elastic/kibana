@@ -41,7 +41,7 @@ export interface UseDataGridColumnsCellActionsProps
   /**
    * ref to the EuiDataGrid instance
    */
-  dataGridRef: MutableRefObject<EuiDataGridRefProps | null>;
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
 }
 export type UseDataGridColumnsCellActions<
   P extends UseDataGridColumnsCellActionsProps = UseDataGridColumnsCellActionsProps
@@ -141,7 +141,7 @@ const createColumnCellAction = ({
 
     const onClick = useCallback(async () => {
       actionContext.nodeRef.current = await closeAndGetCellElement({
-        dataGrid: dataGridRef.current,
+        dataGrid: dataGridRef?.current,
         isExpanded,
         buttonRef,
       });

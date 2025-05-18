@@ -412,6 +412,26 @@
           },
           {
             "parentPluginId": "management",
+            "id": "def-public.DefinedSections.machineLearning",
+            "type": "Object",
+            "tags": [],
+            "label": "machineLearning",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "management",
+                "scope": "public",
+                "docId": "kibManagementPluginApi",
+                "section": "def-public.ManagementSection",
+                "text": "ManagementSection"
+              }
+            ],
+            "path": "src/platform/plugins/shared/management/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "management",
             "id": "def-public.DefinedSections.security",
             "type": "Object",
             "tags": [],
@@ -518,13 +538,7 @@
             "description": [],
             "signature": [
               "(crumbs: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-public.ChromeBreadcrumb",
-                "text": "ChromeBreadcrumb"
-              },
+              "ChromeBreadcrumb",
               "[]) => void"
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
@@ -539,13 +553,7 @@
                 "label": "crumbs",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-public.ChromeBreadcrumb",
-                    "text": "ChromeBreadcrumb"
-                  },
+                  "ChromeBreadcrumb",
                   "[]"
                 ],
                 "path": "src/platform/plugins/shared/management/public/types.ts",
@@ -564,13 +572,7 @@
             "label": "history",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-public.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown>"
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
@@ -585,13 +587,7 @@
             "label": "theme",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
             "deprecated": false,
@@ -609,13 +605,7 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
             "path": "src/platform/plugins/shared/management/public/types.ts",
@@ -624,7 +614,7 @@
             "references": [
               {
                 "plugin": "triggersActionsUi",
-                "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts"
+                "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/plugin.ts"
               }
             ]
           }

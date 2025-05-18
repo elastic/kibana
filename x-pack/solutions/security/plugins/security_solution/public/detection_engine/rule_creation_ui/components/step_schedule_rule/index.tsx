@@ -8,20 +8,18 @@
 import type { FC } from 'react';
 import styled from 'styled-components';
 import React, { memo } from 'react';
-import type {
-  RuleStepProps,
-  ScheduleStepRule,
-} from '../../../../detections/pages/detection_engine/rules/types';
+import type { RuleStepProps, ScheduleStepRule } from '../../../common/types';
 import { StepRuleDescription } from '../description_step';
-import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { Form, UseField } from '../../../../shared_imports';
 import type { FormHook } from '../../../../shared_imports';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { schema } from './schema';
+import { ScheduleItemField } from '../../../rule_creation/components/schedule_item_field';
 
 const StyledForm = styled(Form)`
   max-width: 235px !important;
 `;
+
 interface StepScheduleRuleProps extends RuleStepProps {
   form: FormHook<ScheduleStepRule>;
 }
@@ -43,22 +41,22 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
         <StyledForm form={form} data-test-subj="stepScheduleRule">
           <UseField
             path="interval"
-            component={ScheduleItem}
+            component={ScheduleItemField}
             componentProps={{
               idAria: 'detectionEngineStepScheduleRuleInterval',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
-              minimumValue: 1,
+              minValue: 1,
             }}
           />
           <UseField
             path="from"
-            component={ScheduleItem}
+            component={ScheduleItemField}
             componentProps={{
               idAria: 'detectionEngineStepScheduleRuleFrom',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
-              minimumValue: 1,
+              minValue: 0,
             }}
           />
         </StyledForm>

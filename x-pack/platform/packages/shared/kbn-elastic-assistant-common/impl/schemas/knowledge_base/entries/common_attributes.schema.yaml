@@ -8,7 +8,7 @@ components:
   schemas:
     InputSchema:
       type: array
-      description: Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval
+      description: Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval.
       items:
         type: object
         required:
@@ -18,13 +18,16 @@ components:
         properties:
           fieldName:
             type: string
-            description: Name of the field
+            description: Name of the field.
+            example: "title"
           fieldType:
             type: string
-            description: Type of the field
+            description: Type of the field.
+            example: "string"
           description:
             type: string
-            description: Description of the field
+            description: Description of the field.
+            example: "The title of the document."
 
     KnowledgeBaseEntryErrorSchema:
       type: object
@@ -36,44 +39,53 @@ components:
       properties:
         statusCode:
           type: number
+          description: HTTP status code of the error.
+          example: 404
         error:
           type: string
+          description: Error type or category.
+          example: "Not Found"
         message:
           type: string
+          description: Detailed error message.
+          example: "The requested Knowledge Base Entry was not found."
 
     Metadata:
       type: object
-      description: Metadata about a Knowledge Base Entry
+      description: Metadata about a Knowledge Base Entry.
       required:
         - "kbResource"
         - "source"
         - "required"
       properties:
         kbResource:
-          type: string
-          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
+          $ref: "#/components/schemas/KnowledgeBaseResource"
         source:
           type: string
-          description: Source document name or filepath
+          description: Source document name or filepath.
+          example: "/documents/example.txt"
         required:
           type: boolean
-          description: Whether this resource should always be included
+          description: Whether this resource should always be included.
+          example: true
 
     Vector:
       type: object
-      description: Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings
+      description: Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings.
       required:
         - "modelId"
         - "tokens"
       properties:
         modelId:
           type: string
-          description: ID of the model used to create the embeddings
+          description: ID of the model used to create the embeddings.
+          example: "bert-base-uncased"
         tokens:
           type: object
           additionalProperties:
             type: number
-          description: Tokens with their corresponding values
+          description: Tokens with their corresponding values.
+          example: { "token1": 0.123, "token2": 0.456 }
 
     ###########
     # Base Entry
@@ -84,7 +96,8 @@ components:
       properties:
         name:
           type: string
-          description: Name of the Knowledge Base Entry
+          description: Name of the Knowledge Base Entry.
+          example: "Example Entry"
       required:
         - name
 
@@ -94,7 +107,12 @@ components:
       properties:
         namespace:
           type: string
-          description: Kibana Space, defaults to 'default' space
+          description: Kibana Space, defaults to 'default' space.
+          example: "default"
+        global:
+          type: boolean
+          description: Whether this Knowledge Base Entry is global, defaults to false.
+          example: false
         users:
           type: array
           description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
@@ -132,17 +150,21 @@ components:
         id:
           $ref: "../../common_attributes.schema.yaml#/components/schemas/NonEmptyString"
         createdAt:
-          description: Time the Knowledge Base Entry was created
+          description: Time the Knowledge Base Entry was created.
           type: string
+          example: "2023-01-01T12:00:00Z"
         createdBy:
-          description: User who created the Knowledge Base Entry
+          description: User who created the Knowledge Base Entry.
           type: string
+          example: "admin"
         updatedAt:
-          description: Time the Knowledge Base Entry was last updated
+          description: Time the Knowledge Base Entry was last updated.
           type: string
+          example: "2023-01-02T12:00:00Z"
         updatedBy:
-          description: User who last updated the Knowledge Base Entry
+          description: User who last updated the Knowledge Base Entry.
           type: string
+          example: "editor"
       required:
         - id
         - createdAt
@@ -150,11 +172,27 @@ components:
         - updatedAt
         - updatedBy
 
+    DeleteResponseFields:
+      type: object
+      properties:
+        id:
+          $ref: "../../common_attributes.schema.yaml#/components/schemas/NonEmptyString"
+      required:
+        - id
+
     SharedResponseProps:
       x-inline: true
       allOf:
         - $ref: "#/components/schemas/BaseResponseProps"
         - $ref: "#/components/schemas/ResponseFields"
+
+    KnowledgeBaseResource:
+      description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
+      type: string
+      enum:
+        - security_labs
+        - user
+      example: "security_labs"
 
     ###########
     # Document Knowledge Base Entry
@@ -163,6 +201,7 @@ components:
       type: string
       enum:
         - document
+      example: "document"
 
     DocumentEntryRequiredFields:
       type: object
@@ -170,17 +209,18 @@ components:
         type:
           type: string
           enum: [document]
-          description: Entry type
+          description: Entry type.
+          example: "document"
         kbResource:
-          type: string
-          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
+          $ref: "#/components/schemas/KnowledgeBaseResource"
         source:
           type: string
-          description: Source document name or filepath
+          description: Source document name or filepath.
+          example: "/documents/example.txt"
         text:
           type: string
-          description: Knowledge Base Entry content
-
+          description: Knowledge Base Entry content.
+          example: "This is the content of the document."
       required:
         - type
         - kbResource
@@ -192,7 +232,8 @@ components:
       properties:
         required:
           type: boolean
-          description: Whether this resource should always be included, defaults to false
+          description: Whether this resource should always be included, defaults to false.
+          example: false
         vector:
           $ref: "#/components/schemas/Vector"
 
@@ -224,6 +265,7 @@ components:
       type: string
       enum:
         - index
+      example: "index"
 
     IndexEntryRequiredFields:
       type: object
@@ -231,19 +273,24 @@ components:
         type:
           type: string
           enum: [index]
-          description: Entry type
+          description: Entry type.
+          example: "index"
         index:
           type: string
-          description: Index or Data Stream to query for Knowledge Base content
+          description: Index or Data Stream to query for Knowledge Base content.
+          example: "knowledge_base_index"
         field:
           type: string
-          description: Field to query for Knowledge Base content
+          description: Field to query for Knowledge Base content.
+          example: "content"
         description:
           type: string
-          description: Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description
+          description: Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description.
+          example: "Query this index for general knowledge base content."
         queryDescription:
           type: string
-          description: Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema
+          description: Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema.
+          example: "Search for documents containing the specified keywords."
       required:
         - type
         - index
@@ -258,9 +305,10 @@ components:
           $ref: "#/components/schemas/InputSchema"
         outputFields:
           type: array
-          description: Fields to extract from the query result, defaults to all fields if not provided or empty
+          description: Fields to extract from the query result, defaults to all fields if not provided or empty.
           items:
             type: string
+          example: ["title", "author"]
 
     IndexEntryCreateFields:
       allOf:
@@ -300,9 +348,21 @@ components:
         - $ref: "#/components/schemas/DocumentEntryUpdateFields"
         - $ref: "#/components/schemas/IndexEntryUpdateFields"
 
+    # Don't allow passing id to the update route body
+    KnowledgeBaseEntryUpdateRouteProps:
+      discriminator:
+        propertyName: type
+      anyOf:
+        - $ref: "#/components/schemas/DocumentEntryCreateFields"
+        - $ref: "#/components/schemas/IndexEntryCreateFields"
+
     KnowledgeBaseEntryResponse:
       discriminator:
         propertyName: type
       anyOf:
         - $ref: "#/components/schemas/DocumentEntry"
         - $ref: "#/components/schemas/IndexEntry"
+
+    KnowledgeBaseEntryDeleteResponse:
+      allOf:
+        - $ref: "#/components/schemas/DeleteResponseFields"

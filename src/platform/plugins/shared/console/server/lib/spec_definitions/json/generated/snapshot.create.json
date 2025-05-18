@@ -19,7 +19,7 @@
     "patterns": [
       "_snapshot/{repository}/{snapshot}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-snapshots.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/create-snapshot-api.html",
     "availability": {
       "stack": true,
       "serverless": false

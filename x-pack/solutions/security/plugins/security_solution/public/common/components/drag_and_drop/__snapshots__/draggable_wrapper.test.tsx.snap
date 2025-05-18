@@ -17,7 +17,6 @@ exports[`DraggableWrapper rendering it renders against the snapshot 1`] = `
       },
     }
   }
-  isDraggable={true}
   render={[Function]}
 />
 `;

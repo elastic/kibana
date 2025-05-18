@@ -11,7 +11,6 @@ import { IndicatorsTable, IndicatorsTableProps } from './table';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { BUTTON_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
-import { SecuritySolutionDataViewBase } from '../../../../types';
 import { INDICATORS_FLYOUT_TITLE_TEST_ID } from '../flyout/test_ids';
 
 const stub = () => {};
@@ -24,7 +23,6 @@ const tableProps: IndicatorsTableProps = {
   indicatorCount: 0,
   isLoading: false,
   browserFields: {},
-  indexPattern: { fields: [], title: '' } as SecuritySolutionDataViewBase,
   columnSettings: {
     columnVisibility: {
       visibleColumns: [],

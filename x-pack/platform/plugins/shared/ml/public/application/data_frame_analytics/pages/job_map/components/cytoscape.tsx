@@ -8,11 +8,10 @@
 import type { CSSProperties, PropsWithChildren } from 'react';
 import React, { useState, useRef, useEffect, createContext, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import cytoscape, { type Stylesheet } from 'cytoscape';
+import cytoscape, { type StylesheetJson } from 'cytoscape';
 // @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
-import { getCytoscapeOptions } from './cytoscape_options';
-import type { EuiThemeType } from '../../../../components/color_range_legend';
+import { useCytoscapeOptions } from './cytoscape_options';
 
 cytoscape.use(dagre);
 
@@ -20,7 +19,6 @@ export const CytoscapeContext = createContext<cytoscape.Core | undefined>(undefi
 
 interface CytoscapeProps {
   elements: cytoscape.ElementDefinition[];
-  theme: EuiThemeType;
   height: number;
   itemsDeleted: boolean;
   resetCy: boolean;
@@ -37,7 +35,7 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
       setCy(cytoscape({ ...options, container: ref.current }));
     } else {
       // update styles for existing instance
-      cy.style(options.style as unknown as Stylesheet);
+      cy.style(options.style as StylesheetJson);
     }
   }, [options, cy]);
 
@@ -70,21 +68,21 @@ function getLayoutOptions(width: number, height: number) {
 export function Cytoscape({
   children,
   elements,
-  theme,
   height,
   itemsDeleted,
   resetCy,
   style,
   width,
 }: PropsWithChildren<CytoscapeProps>) {
-  const cytoscapeOptions = useMemo(() => {
+  const cytoscapeOptions = useCytoscapeOptions();
+  const cytoscapeOptionsWithElements = useMemo(() => {
     return {
-      ...getCytoscapeOptions(theme),
+      ...cytoscapeOptions,
       elements,
     };
-  }, [theme, elements]);
+  }, [cytoscapeOptions, elements]);
 
-  const [ref, cy] = useCytoscape(cytoscapeOptions);
+  const [ref, cy] = useCytoscape(cytoscapeOptionsWithElements);
 
   // Add the height to the div style. The height is a separate prop because it
   // is required and can trigger rendering when changed.
@@ -110,7 +108,7 @@ export function Cytoscape({
 
     return () => {
       if (cy) {
-        cy.removeListener('data', undefined, dataHandler as cytoscape.EventHandler);
+        cy.removeListener('data', dataHandler);
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

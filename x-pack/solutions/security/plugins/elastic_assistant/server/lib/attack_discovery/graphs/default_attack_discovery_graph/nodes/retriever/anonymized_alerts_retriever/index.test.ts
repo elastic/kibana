@@ -65,14 +65,39 @@ describe('AnonymizedAlertsRetriever', () => {
       replacement2: 'SRVWIN01',
       replacement3: 'SRVWIN02',
     };
+    const start = '2025-01-01T00:00:00.000Z';
+    const end = '2025-01-02T00:00:00.000Z';
+    const filter = {
+      bool: {
+        must: [],
+        filter: [
+          {
+            match_phrase: {
+              'user.name': 'root',
+            },
+          },
+        ],
+        should: [],
+        must_not: [
+          {
+            match_phrase: {
+              'host.name': 'foo',
+            },
+          },
+        ],
+      },
+    };
 
     const retriever = new AnonymizedAlertsRetriever({
       alertsIndexPattern: 'test-pattern',
       anonymizationFields,
+      end,
       esClient,
+      filter,
       onNewReplacements,
       replacements: mockReplacements,
       size: 10,
+      start,
     });
 
     await retriever._getRelevantDocuments('test-query');
@@ -80,10 +105,13 @@ describe('AnonymizedAlertsRetriever', () => {
     expect(getAnonymizedAlerts as jest.Mock).toHaveBeenCalledWith({
       alertsIndexPattern: 'test-pattern',
       anonymizationFields,
+      end,
       esClient,
+      filter,
       onNewReplacements,
       replacements: mockReplacements,
       size: 10,
+      start,
     });
   });
 

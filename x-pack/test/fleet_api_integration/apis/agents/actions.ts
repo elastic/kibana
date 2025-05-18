@@ -132,7 +132,7 @@ export default function (providerContext: FtrProviderContext) {
           index: '.fleet-actions',
           refresh: 'wait_for',
           id: uuidv4(),
-          body: {
+          document: {
             '@timestamp': new Date().toISOString(),
             expiration: new Date().toISOString(),
             agents: ['agent1', 'agent2'],
@@ -148,9 +148,7 @@ export default function (providerContext: FtrProviderContext) {
 
         const actionsRes = await es.search({
           index: '.fleet-actions',
-          body: {
-            sort: [{ '@timestamp': { order: 'desc' } }],
-          },
+          sort: [{ '@timestamp': { order: 'desc' as const } }],
         });
 
         const action: any = actionsRes.hits.hits[0]._source;

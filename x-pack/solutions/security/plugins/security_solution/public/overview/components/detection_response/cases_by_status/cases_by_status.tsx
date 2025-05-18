@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import type { AxisStyle, Rotation } from '@elastic/charts';
 import { ScaleType } from '@elastic/charts';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { FormattedNumber } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { BarChart } from '../../../../common/components/charts/barchart';
@@ -80,13 +80,6 @@ export const barchartConfigs = {
   customHeight: 146,
 };
 
-const barColors = {
-  empty: 'rgba(105, 112, 125, 0.1)',
-  open: '#79aad9',
-  'in-progress': '#f1d86f',
-  closed: '#d3dae6',
-};
-
 const StyledEuiFlexItem = styled(EuiFlexItem)`
   align-items: center;
   width: 70%;
@@ -97,6 +90,7 @@ const Wrapper = styled.div`
 `;
 
 const CasesByStatusComponent: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { toggleStatus, setToggleStatus } = useQueryToggle(CASES_BY_STATUS_ID);
   const { getAppUrl, navigateTo } = useNavigation();
   const { search } = useFormatUrl(SecurityPageName.case);
@@ -112,6 +106,21 @@ const CasesByStatusComponent: React.FC = () => {
   const { closed, inProgress, isLoading, open, totalCounts, updatedAt } = useCasesByStatus({
     skip: !toggleStatus,
   });
+
+  const barColors = useMemo(
+    () => ({
+      empty: euiTheme.colors.vis.euiColorVis8,
+      open: euiTheme.colors.success,
+      'in-progress': euiTheme.colors.primary,
+      closed: euiTheme.colors.borderBaseSubdued,
+    }),
+    [
+      euiTheme.colors.vis.euiColorVis8,
+      euiTheme.colors.primary,
+      euiTheme.colors.success,
+      euiTheme.colors.borderBaseSubdued,
+    ]
+  );
 
   const chartData = useMemo(
     () => [
@@ -131,7 +140,7 @@ const CasesByStatusComponent: React.FC = () => {
         color: barColors.closed,
       },
     ],
-    [closed, inProgress, open]
+    [barColors, closed, inProgress, open]
   );
 
   return (

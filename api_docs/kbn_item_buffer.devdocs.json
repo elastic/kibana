@@ -37,7 +37,7 @@
           },
           "<Item>"
         ],
-        "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+        "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,7 +51,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -72,7 +72,7 @@
                   },
                   "<Item>"
                 ],
-                "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+                "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -89,7 +89,7 @@
             "description": [
               "\nGet current buffer size."
             ],
-            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -105,7 +105,7 @@
             "signature": [
               "(item: Item) => void"
             ],
-            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -119,7 +119,7 @@
                 "signature": [
                   "Item"
                 ],
-                "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+                "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -139,7 +139,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -157,7 +157,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -175,7 +175,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -209,7 +209,7 @@
           },
           "<Item>"
         ],
-        "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+        "path": "src/platform/packages/private/kbn-item-buffer/src/timed_item_buffer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,7 +223,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -244,7 +244,7 @@
                   },
                   "<Item>"
                 ],
-                "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+                "path": "src/platform/packages/private/kbn-item-buffer/src/timed_item_buffer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -262,7 +262,7 @@
             "signature": [
               "(item: Item) => void"
             ],
-            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -276,7 +276,7 @@
                 "signature": [
                   "Item"
                 ],
-                "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+                "path": "src/platform/packages/private/kbn-item-buffer/src/timed_item_buffer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -294,7 +294,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -310,7 +310,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -326,7 +326,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -355,7 +355,7 @@
           },
           "<Item>"
         ],
-        "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+        "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -371,7 +371,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -387,7 +387,7 @@
             "signature": [
               "(items: Item[]) => void | Promise<void>"
             ],
-            "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -401,7 +401,7 @@
                 "signature": [
                   "Item[]"
                 ],
-                "path": "packages/kbn-item-buffer/src/item_buffer.ts",
+                "path": "src/platform/packages/private/kbn-item-buffer/src/item_buffer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -437,7 +437,7 @@
           },
           "<Item>"
         ],
-        "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+        "path": "src/platform/packages/private/kbn-item-buffer/src/timed_item_buffer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -453,7 +453,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/kbn-item-buffer/src/timed_item_buffer.ts",
+            "path": "src/platform/packages/private/kbn-item-buffer/src/timed_item_buffer.ts",
             "deprecated": false,
             "trackAdoption": false
           }

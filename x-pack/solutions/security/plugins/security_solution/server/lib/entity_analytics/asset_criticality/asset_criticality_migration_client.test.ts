@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { AssetCriticalityEcsMigrationClient } from './asset_criticality_migration_client';
+import { AssetCriticalityMigrationClient } from './asset_criticality_migration_client';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { ASSET_CRITICALITY_MAPPINGS_VERSIONS } from './constants';
 
 jest.mock('./asset_criticality_data_client');
 
@@ -19,12 +20,12 @@ const emptySearchResponse = {
   hits: { hits: [] },
 };
 
-describe('AssetCriticalityEcsMigrationClient', () => {
+describe('AssetCriticalityMigrationClient', () => {
   let logger: Logger;
   let auditLogger: AuditLogger | undefined;
   let esClient: ElasticsearchClient;
   let assetCriticalityDataClient: jest.Mocked<AssetCriticalityDataClient>;
-  let migrationClient: AssetCriticalityEcsMigrationClient;
+  let migrationClient: AssetCriticalityMigrationClient;
 
   beforeEach(() => {
     logger = { info: jest.fn(), error: jest.fn() } as unknown as Logger;
@@ -39,27 +40,28 @@ describe('AssetCriticalityEcsMigrationClient', () => {
 
     (AssetCriticalityDataClient as jest.Mock).mockImplementation(() => assetCriticalityDataClient);
 
-    migrationClient = new AssetCriticalityEcsMigrationClient({ logger, auditLogger, esClient });
+    migrationClient = new AssetCriticalityMigrationClient({ logger, auditLogger, esClient });
   });
 
-  describe('isEcsMappingsMigrationRequired', () => {
-    it('should return true if any index mappings do not have asset property', async () => {
+  describe('isMappingsMigrationRequired', () => {
+    it('should return true if versions are different', async () => {
       assetCriticalityDataClient.getIndexMappings.mockResolvedValue({
         index1: { mappings: { properties: {} } },
-        index2: { mappings: { properties: { asset: {} } } },
+        index2: { mappings: { properties: {}, _meta: { version: '9999' } } },
       });
 
-      const result = await migrationClient.isEcsMappingsMigrationRequired();
+      const result = await migrationClient.isMappingsMigrationRequired();
       expect(result).toBe(true);
     });
 
-    it('should return false if all index mappings have asset property', async () => {
+    it('should return false if versions are equal', async () => {
       assetCriticalityDataClient.getIndexMappings.mockResolvedValue({
-        index1: { mappings: { properties: { asset: {} } } },
-        index2: { mappings: { properties: { asset: {} } } },
+        index1: {
+          mappings: { properties: {}, _meta: { version: ASSET_CRITICALITY_MAPPINGS_VERSIONS } },
+        },
       });
 
-      const result = await migrationClient.isEcsMappingsMigrationRequired();
+      const result = await migrationClient.isMappingsMigrationRequired();
       expect(result).toBe(false);
     });
   });
@@ -83,9 +85,9 @@ describe('AssetCriticalityEcsMigrationClient', () => {
     });
   });
 
-  describe('migrateEcsMappings', () => {
+  describe('migrateMappings', () => {
     it('should call createOrUpdateIndex on assetCriticalityDataClient', async () => {
-      await migrationClient.migrateEcsMappings();
+      await migrationClient.migrateMappings();
       expect(assetCriticalityDataClient.createOrUpdateIndex).toHaveBeenCalled();
     });
   });
@@ -96,10 +98,8 @@ describe('AssetCriticalityEcsMigrationClient', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: assetCriticalityDataClient.getIndex(),
-          body: expect.objectContaining({
-            query: expect.any(Object),
-            script: expect.any(Object),
-          }),
+          query: expect.any(Object),
+          script: expect.any(Object),
         }),
         expect.any(Object)
       );

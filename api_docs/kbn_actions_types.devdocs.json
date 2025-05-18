@@ -27,7 +27,7 @@
         "tags": [],
         "label": "ActionType",
         "description": [],
-        "path": "packages/kbn-actions-types/action_types.ts",
+        "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-actions-types/action_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -49,7 +49,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-actions-types/action_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -60,7 +60,7 @@
             "tags": [],
             "label": "enabled",
             "description": [],
-            "path": "packages/kbn-actions-types/action_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -71,7 +71,7 @@
             "tags": [],
             "label": "enabledInConfig",
             "description": [],
-            "path": "packages/kbn-actions-types/action_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -82,7 +82,7 @@
             "tags": [],
             "label": "enabledInLicense",
             "description": [],
-            "path": "packages/kbn-actions-types/action_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -96,7 +96,7 @@
             "signature": [
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
             ],
-            "path": "packages/kbn-actions-types/action_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -110,7 +110,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-actions-types/action_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,7 +121,21 @@
             "tags": [],
             "label": "isSystemActionType",
             "description": [],
-            "path": "packages/kbn-actions-types/action_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/actions-types",
+            "id": "def-common.ActionType.subFeature",
+            "type": "string",
+            "tags": [],
+            "label": "subFeature",
+            "description": [],
+            "signature": [
+              "\"endpointSecurity\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -149,7 +163,7 @@
           },
           "<T[K]> : T[K]; }"
         ],
-        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+        "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -172,7 +186,7 @@
           },
           "<T>) => T"
         ],
-        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+        "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -195,7 +209,7 @@
               },
               "<T[K]> : T[K]; }"
             ],
-            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -228,7 +242,7 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+        "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -243,11 +257,38 @@
             "signature": [
               "T"
             ],
-            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
+            "path": "src/platform/packages/shared/kbn-actions-types/rewrite_request_case_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-types",
+        "id": "def-common.SUB_FEATURE",
+        "type": "number",
+        "tags": [],
+        "label": "SUB_FEATURE",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/actions-types",
+        "id": "def-common.SubFeature",
+        "type": "Type",
+        "tags": [],
+        "label": "SubFeature",
+        "description": [],
+        "signature": [
+          "\"endpointSecurity\""
+        ],
+        "path": "src/platform/packages/shared/kbn-actions-types/action_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

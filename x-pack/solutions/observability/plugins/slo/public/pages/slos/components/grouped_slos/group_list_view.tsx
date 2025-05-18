@@ -28,16 +28,14 @@ import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
-import type { SortDirection, SortField } from '../../hooks/use_url_search_state';
 import { SlosView } from '../slos_view';
-import { GroupByField } from '../slo_list_group_by';
-import { SLOView } from '../toggle_slo_view';
+import type { ViewType, GroupByField, SortDirection, SortField } from '../../types';
 import { useGroupName } from './hooks/use_group_name';
 
 interface Props {
   group: string;
   kqlQuery?: string;
-  view: SLOView;
+  view: ViewType;
   sort?: SortField;
   direction?: SortDirection;
   groupBy: GroupByField;

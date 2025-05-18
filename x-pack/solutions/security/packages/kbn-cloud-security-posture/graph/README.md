@@ -113,6 +113,6 @@ Be sure to check out provided helpers
 ## Storybook
 
 General look of the component can be checked visually running the following storybook:
-`yarn storybook cloud_security_posture_packages`
+`yarn storybook cloud_security_posture_graph`
 
 Note that all the interactions are mocked.

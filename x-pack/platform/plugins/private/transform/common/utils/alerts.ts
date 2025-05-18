@@ -22,6 +22,9 @@ export function getResultTestConfig(config: TransformHealthRuleTestsConfig) {
     notStarted: {
       enabled: config?.notStarted?.enabled ?? true,
     },
+    /**
+     * @deprecated replaced in favor of healthCheck in 8.8
+     */
     errorMessages: {
       enabled: config?.errorMessages?.enabled ?? false,
     },

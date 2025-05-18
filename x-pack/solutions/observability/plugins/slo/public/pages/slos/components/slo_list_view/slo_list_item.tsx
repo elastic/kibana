@@ -9,9 +9,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useState } from 'react';
-import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
-import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { BurnRateRuleParams } from '../../../../typings';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
@@ -42,30 +39,12 @@ export function SloListItem({
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
-  const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
-  const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
-
-  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
   const { sloDetailsUrl } = useSloFormattedSummary(slo);
-
   const { handleCreateRule } = useSloListActions({
     slo,
     setIsActionsPopoverOpen,
     setIsAddRuleFlyoutOpen,
   });
-
-  const closeDeleteModal = () => {
-    setDeleteConfirmationModalOpen(false);
-  };
-
-  const handleResetConfirm = async () => {
-    await resetSlo({ id: slo.id, name: slo.name });
-    setResetConfirmationModalOpen(false);
-  };
-
-  const handleResetCancel = () => {
-    setResetConfirmationModalOpen(false);
-  };
 
   return (
     <EuiPanel data-test-subj="sloItem" hasBorder hasShadow={false}>
@@ -114,11 +93,10 @@ export function SloListItem({
             setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
             setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
             setIsActionsPopoverOpen={setIsActionsPopoverOpen}
-            setDeleteConfirmationModalOpen={setDeleteConfirmationModalOpen}
-            setResetConfirmationModalOpen={setResetConfirmationModalOpen}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+
       <BurnRateRuleFlyout
         slo={slo}
         isAddRuleFlyoutOpen={isAddRuleFlyoutOpen}
@@ -131,19 +109,6 @@ export function SloListItem({
         setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
         refetchRules={refetchRules}
       />
-
-      {isDeleteConfirmationModalOpen ? (
-        <SloDeleteModal slo={slo} onCancel={closeDeleteModal} onSuccess={closeDeleteModal} />
-      ) : null}
-
-      {isResetConfirmationModalOpen ? (
-        <SloResetConfirmationModal
-          slo={slo}
-          onCancel={handleResetCancel}
-          onConfirm={handleResetConfirm}
-          isLoading={isResetLoading}
-        />
-      ) : null}
     </EuiPanel>
   );
 }

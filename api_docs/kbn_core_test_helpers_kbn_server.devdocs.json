@@ -24,15 +24,9 @@
           "(settings: {}, cliArgs: Partial<",
           "CliArgs",
           ">) => ",
-          {
-            "pluginId": "@kbn/core-root-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreRootServerInternalPluginApi",
-            "section": "def-server.Root",
-            "text": "Root"
-          }
+          "Root"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,7 +42,7 @@
             "signature": [
               "{}"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,7 +59,7 @@
               "CliArgs",
               ">"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -87,15 +81,9 @@
           "(settings: {}, cliArgs: Partial<",
           "CliArgs",
           ">, customKibanaVersion: string | undefined) => ",
-          {
-            "pluginId": "@kbn/core-root-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreRootServerInternalPluginApi",
-            "section": "def-server.Root",
-            "text": "Root"
-          }
+          "Root"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -111,7 +99,7 @@
             "signature": [
               "{}"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -128,7 +116,7 @@
               "CliArgs",
               ">"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -143,7 +131,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -163,15 +151,9 @@
           "(settings: Record<string, any>, cliArgs: Partial<",
           "CliArgs",
           ">, customKibanaVersion: string | undefined) => ",
-          {
-            "pluginId": "@kbn/core-root-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreRootServerInternalPluginApi",
-            "section": "def-server.Root",
-            "text": "Root"
-          }
+          "Root"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -185,7 +167,7 @@
             "signature": [
               "Record<string, any>"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -202,7 +184,7 @@
               "CliArgs",
               ">"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -217,7 +199,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -243,7 +225,7 @@
           "> | undefined; } | undefined; adjustTimeout?: ((timeout: number) => void) | undefined; }) => ",
           "TestServerlessUtils"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -254,7 +236,7 @@
             "tags": [],
             "label": "{\n  adjustTimeout,\n  kibana = {},\n}",
             "description": [],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -270,7 +252,7 @@
                   "CliArgs",
                   "> | undefined; } | undefined"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -284,7 +266,7 @@
                 "signature": [
                   "((timeout: number) => void) | undefined"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -298,7 +280,7 @@
                     "signature": [
                       "number"
                     ],
-                    "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+                    "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -334,15 +316,9 @@
             "text": "CreateTestEsClusterOptions"
           },
           "> | undefined; kbn?: { [key: string]: any; plugins?: { [key: string]: any; paths: string[]; } | undefined; } | undefined; users?: { username: string; password: string; roles: string[]; }[] | undefined; } | undefined; }) => ",
-          {
-            "pluginId": "@kbn/core-test-helpers-kbn-server",
-            "scope": "server",
-            "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-            "section": "def-server.TestUtils",
-            "text": "TestUtils"
-          }
+          "TestUtils"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -353,7 +329,7 @@
             "tags": [],
             "label": "{\n  adjustTimeout,\n  settings = {},\n}",
             "description": [],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -367,7 +343,7 @@
                 "signature": [
                   "(timeout: number) => void"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -381,7 +357,7 @@
                     "signature": [
                       "number"
                     ],
-                    "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                    "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true
@@ -407,7 +383,7 @@
                   },
                   "> | undefined; kbn?: { [key: string]: any; plugins?: { [key: string]: any; paths: string[]; } | undefined; } | undefined; users?: { username: string; password: string; roles: string[]; }[] | undefined; } | undefined"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -428,26 +404,14 @@
         ],
         "signature": [
           "(root: ",
-          {
-            "pluginId": "@kbn/core-root-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreRootServerInternalPluginApi",
-            "section": "def-server.Root",
-            "text": "Root"
-          },
+          "Root",
           ", method: ",
-          {
-            "pluginId": "@kbn/core-test-helpers-kbn-server",
-            "scope": "server",
-            "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-            "section": "def-server.HttpMethod",
-            "text": "HttpMethod"
-          },
+          "HttpMethod",
           ", path: string) => ",
           "SuperTestStatic",
           ".Test"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -459,15 +423,9 @@
             "label": "root",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
-                "text": "Root"
-              }
+              "Root"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -480,15 +438,9 @@
             "label": "method",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-test-helpers-kbn-server",
-                "scope": "server",
-                "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-                "section": "def-server.HttpMethod",
-                "text": "HttpMethod"
-              }
+              "HttpMethod"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -503,7 +455,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -521,7 +473,7 @@
         "tags": [],
         "label": "TestElasticsearchUtils",
         "description": [],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -535,7 +487,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -551,7 +503,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -565,7 +517,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -576,7 +528,7 @@
             "tags": [],
             "label": "username",
             "description": [],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -587,7 +539,7 @@
             "tags": [],
             "label": "password",
             "description": [],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -601,7 +553,7 @@
         "tags": [],
         "label": "TestKibanaUtils",
         "description": [],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -613,15 +565,9 @@
             "label": "root",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
-                "text": "Root"
-              }
+              "Root"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -635,7 +581,7 @@
             "signature": [
               "InternalCoreSetup"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -649,7 +595,7 @@
             "signature": [
               "InternalCoreStart"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -663,7 +609,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -679,7 +625,7 @@
         "tags": [],
         "label": "TestUtils",
         "description": [],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -692,16 +638,10 @@
             "description": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-test-helpers-kbn-server",
-                "scope": "server",
-                "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-                "section": "def-server.TestElasticsearchUtils",
-                "text": "TestElasticsearchUtils"
-              },
+              "TestElasticsearchUtils",
               ">"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -716,16 +656,10 @@
             "description": [],
             "signature": [
               "(abortSignal?: AbortSignal | undefined) => Promise<",
-              {
-                "pluginId": "@kbn/core-test-helpers-kbn-server",
-                "scope": "server",
-                "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-                "section": "def-server.TestKibanaUtils",
-                "text": "TestKibanaUtils"
-              },
+              "TestKibanaUtils",
               ">"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -739,7 +673,7 @@
                 "signature": [
                   "AbortSignal | undefined"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -763,7 +697,7 @@
         "signature": [
           "\"get\" | \"delete\" | \"head\" | \"post\" | \"put\" | \"patch\""
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -777,18 +711,12 @@
         "description": [],
         "signature": [
           "Pick<",
-          {
-            "pluginId": "@kbn/core-test-helpers-kbn-server",
-            "scope": "server",
-            "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-            "section": "def-server.TestElasticsearchUtils",
-            "text": "TestElasticsearchUtils"
-          },
+          "TestElasticsearchUtils",
           ", \"stop\" | \"es\"> & { getClient: () => ",
           "default",
           "; }"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -801,15 +729,9 @@
         "label": "TestServerlessKibanaUtils",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-test-helpers-kbn-server",
-            "scope": "server",
-            "docId": "kibKbnCoreTestHelpersKbnServerPluginApi",
-            "section": "def-server.TestKibanaUtils",
-            "text": "TestKibanaUtils"
-          }
+          "TestKibanaUtils"
         ],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -823,7 +745,7 @@
         "tags": [],
         "label": "request",
         "description": [],
-        "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+        "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -836,18 +758,12 @@
             "description": [],
             "signature": [
               "(root: ",
-              {
-                "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
-                "text": "Root"
-              },
+              "Root",
               ", path: string) => ",
               "SuperTestStatic",
               ".Test"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -859,15 +775,9 @@
                 "label": "root",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
-                    "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
-                    "text": "Root"
-                  }
+                  "Root"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -882,7 +792,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -899,18 +809,12 @@
             "description": [],
             "signature": [
               "(root: ",
-              {
-                "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
-                "text": "Root"
-              },
+              "Root",
               ", path: string) => ",
               "SuperTestStatic",
               ".Test"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -922,15 +826,9 @@
                 "label": "root",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
-                    "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
-                    "text": "Root"
-                  }
+                  "Root"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -945,7 +843,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -962,18 +860,12 @@
             "description": [],
             "signature": [
               "(root: ",
-              {
-                "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
-                "text": "Root"
-              },
+              "Root",
               ", path: string) => ",
               "SuperTestStatic",
               ".Test"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -985,15 +877,9 @@
                 "label": "root",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
-                    "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
-                    "text": "Root"
-                  }
+                  "Root"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1008,7 +894,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1025,18 +911,12 @@
             "description": [],
             "signature": [
               "(root: ",
-              {
-                "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
-                "text": "Root"
-              },
+              "Root",
               ", path: string) => ",
               "SuperTestStatic",
               ".Test"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1048,15 +928,9 @@
                 "label": "root",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
-                    "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
-                    "text": "Root"
-                  }
+                  "Root"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1071,7 +945,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1088,18 +962,12 @@
             "description": [],
             "signature": [
               "(root: ",
-              {
-                "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
-                "text": "Root"
-              },
+              "Root",
               ", path: string) => ",
               "SuperTestStatic",
               ".Test"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1111,15 +979,9 @@
                 "label": "root",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
-                    "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
-                    "text": "Root"
-                  }
+                  "Root"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1134,7 +996,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1151,18 +1013,12 @@
             "description": [],
             "signature": [
               "(root: ",
-              {
-                "pluginId": "@kbn/core-root-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreRootServerInternalPluginApi",
-                "section": "def-server.Root",
-                "text": "Root"
-              },
+              "Root",
               ", path: string) => ",
               "SuperTestStatic",
               ".Test"
             ],
-            "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+            "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1174,15 +1030,9 @@
                 "label": "root",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-root-server-internal",
-                    "scope": "server",
-                    "docId": "kibKbnCoreRootServerInternalPluginApi",
-                    "section": "def-server.Root",
-                    "text": "Root"
-                  }
+                  "Root"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1197,7 +1047,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
+                "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

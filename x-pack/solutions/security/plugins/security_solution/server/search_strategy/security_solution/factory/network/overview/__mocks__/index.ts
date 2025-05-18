@@ -112,78 +112,76 @@ export const formattedSearchStrategyResponse = {
           ],
           ignore_unavailable: true,
           track_total_hits: false,
-          body: {
-            aggregations: {
-              unique_flow_count: { filter: { term: { type: 'flow' } } },
-              unique_dns_count: { filter: { term: { type: 'dns' } } },
-              unique_suricata_count: { filter: { term: { 'service.type': 'suricata' } } },
-              unique_zeek_count: { filter: { term: { 'service.type': 'zeek' } } },
-              unique_socket_count: { filter: { term: { 'event.dataset': 'socket' } } },
-              unique_filebeat_count: {
-                filter: { term: { 'agent.type': 'filebeat' } },
-                aggs: {
-                  unique_netflow_count: { filter: { term: { 'input.type': 'netflow' } } },
-                  unique_panw_count: { filter: { term: { 'event.module': 'panw' } } },
-                  unique_cisco_count: { filter: { term: { 'event.module': 'cisco' } } },
-                },
-              },
-              unique_packetbeat_count: {
-                filter: { term: { 'agent.type': 'packetbeat' } },
-                aggs: { unique_tls_count: { filter: { term: { 'network.protocol': 'tls' } } } },
+          aggregations: {
+            unique_flow_count: { filter: { term: { type: 'flow' } } },
+            unique_dns_count: { filter: { term: { type: 'dns' } } },
+            unique_suricata_count: { filter: { term: { 'service.type': 'suricata' } } },
+            unique_zeek_count: { filter: { term: { 'service.type': 'zeek' } } },
+            unique_socket_count: { filter: { term: { 'event.dataset': 'socket' } } },
+            unique_filebeat_count: {
+              filter: { term: { 'agent.type': 'filebeat' } },
+              aggs: {
+                unique_netflow_count: { filter: { term: { 'input.type': 'netflow' } } },
+                unique_panw_count: { filter: { term: { 'event.module': 'panw' } } },
+                unique_cisco_count: { filter: { term: { 'event.module': 'cisco' } } },
               },
             },
-            query: {
-              bool: {
-                filter: [
-                  {
-                    bool: {
-                      must: [],
-                      filter: [
-                        { match_all: {} },
-                        {
-                          bool: {
-                            filter: [
-                              {
-                                bool: {
-                                  should: [
-                                    {
-                                      bool: {
-                                        should: [{ exists: { field: 'source.ip' } }],
-                                        minimum_should_match: 1,
-                                      },
-                                    },
-                                    {
-                                      bool: {
-                                        should: [{ exists: { field: 'destination.ip' } }],
-                                        minimum_should_match: 1,
-                                      },
-                                    },
-                                  ],
-                                  minimum_should_match: 1,
-                                },
-                              },
-                            ],
-                          },
-                        },
-                      ],
-                      should: [],
-                      must_not: [],
-                    },
-                  },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: '2020-09-13T12:54:24.685Z',
-                        lte: '2020-09-14T12:54:24.685Z',
-                        format: 'strict_date_optional_time',
-                      },
-                    },
-                  },
-                ],
-              },
+            unique_packetbeat_count: {
+              filter: { term: { 'agent.type': 'packetbeat' } },
+              aggs: { unique_tls_count: { filter: { term: { 'network.protocol': 'tls' } } } },
             },
-            size: 0,
           },
+          query: {
+            bool: {
+              filter: [
+                {
+                  bool: {
+                    must: [],
+                    filter: [
+                      { match_all: {} },
+                      {
+                        bool: {
+                          filter: [
+                            {
+                              bool: {
+                                should: [
+                                  {
+                                    bool: {
+                                      should: [{ exists: { field: 'source.ip' } }],
+                                      minimum_should_match: 1,
+                                    },
+                                  },
+                                  {
+                                    bool: {
+                                      should: [{ exists: { field: 'destination.ip' } }],
+                                      minimum_should_match: 1,
+                                    },
+                                  },
+                                ],
+                                minimum_should_match: 1,
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                    should: [],
+                    must_not: [],
+                  },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: '2020-09-13T12:54:24.685Z',
+                      lte: '2020-09-14T12:54:24.685Z',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          size: 0,
         },
         null,
         2
@@ -216,85 +214,83 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  body: {
-    aggregations: {
-      unique_flow_count: {
-        filter: {
-          term: {
-            type: 'flow',
-          },
+  aggregations: {
+    unique_flow_count: {
+      filter: {
+        term: {
+          type: 'flow',
         },
       },
-      unique_dns_count: {
-        filter: {
-          term: {
-            type: 'dns',
-          },
+    },
+    unique_dns_count: {
+      filter: {
+        term: {
+          type: 'dns',
         },
       },
-      unique_suricata_count: {
-        filter: {
-          term: {
-            'service.type': 'suricata',
-          },
+    },
+    unique_suricata_count: {
+      filter: {
+        term: {
+          'service.type': 'suricata',
         },
       },
-      unique_zeek_count: {
-        filter: {
-          term: {
-            'service.type': 'zeek',
-          },
+    },
+    unique_zeek_count: {
+      filter: {
+        term: {
+          'service.type': 'zeek',
         },
       },
-      unique_socket_count: {
-        filter: {
-          term: {
-            'event.dataset': 'socket',
-          },
+    },
+    unique_socket_count: {
+      filter: {
+        term: {
+          'event.dataset': 'socket',
         },
       },
-      unique_filebeat_count: {
-        filter: {
-          term: {
-            'agent.type': 'filebeat',
-          },
+    },
+    unique_filebeat_count: {
+      filter: {
+        term: {
+          'agent.type': 'filebeat',
         },
-        aggs: {
-          unique_netflow_count: {
-            filter: {
-              term: {
-                'input.type': 'netflow',
-              },
-            },
-          },
-          unique_panw_count: {
-            filter: {
-              term: {
-                'event.module': 'panw',
-              },
-            },
-          },
-          unique_cisco_count: {
-            filter: {
-              term: {
-                'event.module': 'cisco',
-              },
+      },
+      aggs: {
+        unique_netflow_count: {
+          filter: {
+            term: {
+              'input.type': 'netflow',
             },
           },
         },
-      },
-      unique_packetbeat_count: {
-        filter: {
-          term: {
-            'agent.type': 'packetbeat',
+        unique_panw_count: {
+          filter: {
+            term: {
+              'event.module': 'panw',
+            },
           },
         },
-        aggs: {
-          unique_tls_count: {
-            filter: {
-              term: {
-                'network.protocol': 'tls',
-              },
+        unique_cisco_count: {
+          filter: {
+            term: {
+              'event.module': 'cisco',
+            },
+          },
+        },
+      },
+    },
+    unique_packetbeat_count: {
+      filter: {
+        term: {
+          'agent.type': 'packetbeat',
+        },
+      },
+      aggs: {
+        unique_tls_count: {
+          filter: {
+            term: {
+              'network.protocol': 'tls',
             },
           },
         },

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+/* TODO: (new data view picker) remove this after new picker is enabled */
+/* eslint-disable complexity  */
+
+import { css } from '@emotion/react';
+import type { SubsetDataTableModel, TableId } from '@kbn/securitysolution-data-table';
 import {
   dataTableActions,
   DataTableComponent,
   defaultHeaders,
   getEventIdToDataMapping,
+  getTableByIdSelector,
 } from '@kbn/securitysolution-data-table';
-import type {
-  SubsetDataTableModel,
-  TableId,
-  ViewSelection,
-} from '@kbn/securitysolution-data-table';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useRef, useCallback, useMemo, useEffect, useState, useContext } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
@@ -33,9 +33,10 @@ import type {
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { InspectButton } from '../inspect';
 import type {
   ControlColumnProps,
   OnRowSelected,
@@ -47,9 +48,6 @@ import type { RowRenderer, SortColumnTimeline as Sort } from '../../../../common
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { InspectButtonContainer } from '../inspect';
-import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import { eventsViewerSelector } from './selectors';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
@@ -58,55 +56,43 @@ import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
 import {
-  useSessionViewNavigation,
   useSessionView,
+  useSessionViewNavigation,
 } from '../../../timelines/components/timeline/tabs/session/use_session_view';
-import {
-  EventsContainerLoading,
-  FullScreenContainer,
-  FullWidthFlexGroupTable,
-  ScrollableFlexItem,
-  StyledEuiPanel,
-} from './styles';
-import { getDefaultViewSelection, getCombinedFilterQuery } from './helpers';
+import { getCombinedFilterQuery } from './helpers';
 import { useTimelineEvents } from './use_timelines_events';
-import { TableContext, EmptyTable, TableLoading } from './shared';
-import type { AlertWorkflowStatus } from '../../types';
+import { EmptyTable, TableContext, TableLoading } from './shared';
 import { useQueryInspector } from '../page/manage_query';
 import type { SetQuery } from '../../containers/use_global_time/types';
 import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
-import { RightTopMenu } from './right_top_menu';
 import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
+import { globalFiltersQuerySelector, globalQuerySelector } from '../../store/inputs/selectors';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
-
-const storage = new Storage(localStorage);
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface EventsViewerProps {
+  bulkActions: boolean | BulkActionsProp;
+  cellActionsTriggerId?: string;
   defaultModel: SubsetDataTableModel;
   end: string;
   entityType?: EntityType;
-  tableId: TableId;
+  indexNames?: string[];
   leadingControlColumns: ControlColumnProps[];
-  sourcererScope: SourcererScopeName;
-  start: string;
-  showTotalCount?: boolean; // eslint-disable-line react/no-unused-prop-types
   pageFilters?: Filter[];
-  currentFilter?: AlertWorkflowStatus;
-  onRuleChange?: () => void;
   renderCellValue: React.FC<CellValueElementProps>;
   rowRenderers: RowRenderer[];
-  additionalFilters?: React.ReactNode;
-  hasCrudPermissions?: boolean;
+  sourcererScope: SourcererScopeName;
+  start: string;
+  tableId: TableId;
+  topRightMenuOptions?: React.ReactNode;
   unit?: (n: number) => string;
-  indexNames?: string[];
-  bulkActions: boolean | BulkActionsProp;
-  additionalRightMenuOptions?: React.ReactNode[];
-  cellActionsTriggerId?: string;
 }
 
 /**
@@ -115,19 +101,14 @@ export interface EventsViewerProps {
  * NOTE: As of writting, it is not used in the Case_View component
  */
 const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux> = ({
-  additionalFilters,
-  additionalRightMenuOptions,
   bulkActions,
   cellActionsTriggerId,
   clearSelected,
-  currentFilter,
   defaultModel,
   end,
   entityType = 'events',
-  hasCrudPermissions = true,
   indexNames,
   leadingControlColumns,
-  onRuleChange,
   pageFilters,
   renderCellValue,
   rowRenderers,
@@ -135,59 +116,63 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   sourcererScope,
   start,
   tableId,
+  topRightMenuOptions,
   unit = defaultUnit,
 }) => {
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
   const tableContext = useMemo(() => ({ tableId }), [tableId]);
+  const selectGlobalFiltersQuerySelector = useMemo(() => globalFiltersQuerySelector(), []);
+  const selectGlobalQuerySelector = useMemo(() => globalQuerySelector(), []);
+  const filters = useSelector(selectGlobalFiltersQuerySelector);
+  const query = useSelector(selectGlobalQuerySelector);
+  const selectTableById = useMemo(() => getTableByIdSelector(), []);
+  const {
+    columns,
+    defaultColumns,
+    deletedEventIds,
+    graphEventId, // If truthy, the graph viewer (Resolver) is showing
+    itemsPerPage,
+    itemsPerPageOptions,
+    sessionViewConfig,
+    showCheckboxes,
+    sort,
+    queryFields,
+    selectAll,
+    selectedEventIds,
+    isSelectAllChecked,
+    loadingEventIds,
+    title,
+  } = useSelector((state: State) => selectTableById(state, tableId) ?? defaultModel);
+
+  const inspectModalTitle = useMemo(() => <span data-test-subj="title">{title}</span>, [title]);
+
+  const { uiSettings, data } = useKibana().services;
 
   const {
-    filters,
-    query,
-    dataTable: {
-      columns,
-      defaultColumns,
-      deletedEventIds,
-      graphEventId, // If truthy, the graph viewer (Resolver) is showing
-      itemsPerPage,
-      itemsPerPageOptions,
-      sessionViewConfig,
-      showCheckboxes,
-      sort,
-      queryFields,
-      selectAll,
-      selectedEventIds,
-      isSelectAllChecked,
-      loadingEventIds,
-      title,
-    } = defaultModel,
-  } = useSelector((state: State) => eventsViewerSelector(state, tableId));
-
-  const {
-    uiSettings,
-    data,
-    triggersActionsUi: { getFieldBrowser },
-  } = useKibana().services;
-
-  const [tableView, setTableView] = useState<ViewSelection>(
-    getDefaultViewSelection({
-      tableId,
-      value: storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY),
-    })
-  );
-
-  const {
-    browserFields,
-    dataViewId,
-    selectedPatterns,
-    sourcererDataView,
-    dataViewId: selectedDataViewId,
-    loading: isLoadingIndexPattern,
+    browserFields: oldBrowserFields,
+    dataViewId: oldDataViewId,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
+    loading: oldIsLoadingIndexPattern,
   } = useSourcererDataView(sourcererScope);
 
-  const getFieldSpec = useGetFieldSpec(sourcererScope);
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec, status } = useDataViewSpec(sourcererScope);
+  const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
+  const experimentalBrowserFields = useBrowserFields(sourcererScope);
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIsLoadingIndexPattern;
+  const dataViewId = newDataViewPickerEnabled ? dataViewSpec.id ?? null : oldDataViewId;
+  const selectedDataViewId = newDataViewPickerEnabled ? dataViewSpec.id : oldDataViewId;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
-  const { globalFullScreen } = useGlobalFullScreen();
+  const getFieldSpec = useGetFieldSpec(sourcererScope);
 
   const editorActionsRef = useRef<FieldEditorActions>(null);
   useEffect(() => {
@@ -215,14 +200,13 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
 
+  // TODO remove this when session view is fully migrated to the flyout and the advanced settings is removed
   const { Navigation } = useSessionViewNavigation({
     scopeId: tableId,
   });
-
   const { SessionView } = useSessionView({
     scopeId: tableId,
   });
-
   const graphOverlay = useMemo(() => {
     const shouldShowOverlay =
       (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
@@ -230,6 +214,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       <GraphOverlay scopeId={tableId} SessionView={SessionView} Navigation={Navigation} />
     ) : null;
   }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
+
   const setQuery = useCallback(
     ({ id, inspect, loading, refetch }: SetQuery) =>
       dispatch(
@@ -269,7 +254,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         dataProviders: [],
         filters: globalFilters,
         from: start,
-        indexPattern: sourcererDataView,
+        dataViewSpec: sourcererDataView,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,
@@ -320,7 +305,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
       skip: !canQueryTimeline,
       sort: sortField,
       startDate: start,
-      filterStatus: currentFilter,
+      filterStatus: undefined,
     });
 
   useEffect(() => {
@@ -411,17 +396,12 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
       setSelected({
         id: tableId,
-        eventIds: getEventIdToDataMapping(
-          nonDeletedEvents,
-          eventIds,
-          queryFields,
-          hasCrudPermissions
-        ),
+        eventIds: getEventIdToDataMapping(nonDeletedEvents, eventIds, queryFields, true),
         isSelected,
         isSelectAllChecked: isSelected && selectedCount + 1 === nonDeletedEvents.length,
       });
     },
-    [setSelected, tableId, nonDeletedEvents, queryFields, hasCrudPermissions, selectedCount]
+    [setSelected, tableId, nonDeletedEvents, queryFields, selectedCount]
   );
 
   const onSelectPage: OnSelectAll = useCallback(
@@ -433,13 +413,13 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
               nonDeletedEvents,
               nonDeletedEvents.map((event) => event._id),
               queryFields,
-              hasCrudPermissions
+              true
             ),
             isSelected,
             isSelectAllChecked: isSelected,
           })
         : clearSelected({ id: tableId }),
-    [setSelected, tableId, nonDeletedEvents, queryFields, hasCrudPermissions, clearSelected]
+    [setSelected, tableId, nonDeletedEvents, queryFields, clearSelected]
   );
 
   // Sync to selectAll so parent components can select all events
@@ -460,7 +440,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         fieldBrowserOptions,
         loadingEventIds,
         onRowSelected,
-        onRuleChange,
+        onRuleChange: undefined,
         selectedEventIds,
         showCheckboxes,
         tabType: 'query',
@@ -483,7 +463,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     fieldBrowserOptions,
     loadingEventIds,
     onRowSelected,
-    onRuleChange,
     selectedEventIds,
     tableId,
     isSelectAllChecked,
@@ -500,9 +479,9 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     tableId,
     data: nonDeletedEvents,
     totalItems: totalCountMinusDeleted,
-    hasAlertsCrud: hasCrudPermissions,
+    hasAlertsCrud: true,
     showCheckboxes,
-    filterStatus: currentFilter,
+    filterStatus: undefined,
     filterQuery,
     bulkActions,
     selectedCount,
@@ -521,15 +500,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     [totalCountMinusDeleted, unit]
   );
 
-  const rowHeightsOptions: EuiDataGridRowHeightsOptions | undefined = useMemo(() => {
-    if (tableView === 'eventRenderedView') {
-      return {
-        defaultHeight: 'auto' as const,
-      };
-    }
-    return undefined;
-  }, [tableView]);
-
   const pagination = useMemo(
     () => ({
       pageIndex: pageInfo.activePage,
@@ -542,83 +512,78 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   );
 
   return (
-    <>
-      <FullScreenContainer $isFullScreen={globalFullScreen}>
-        <InspectButtonContainer>
-          <StyledEuiPanel
-            hasBorder={false}
-            hasShadow={false}
-            paddingSize="none"
-            data-test-subj="events-viewer-panel"
-            $isFullScreen={globalFullScreen}
+    <div data-test-subj="events-viewer-panel">
+      {showFullLoading && <TableLoading height="short" />}
+
+      {graphOverlay}
+
+      {canQueryTimeline && (
+        <TableContext.Provider value={tableContext}>
+          <div
+            data-timeline-id={tableId}
+            data-test-subj={`events-container-loading-${loading}`}
+            css={css`
+              position: relative;
+            `}
           >
-            {showFullLoading && <TableLoading height="short" />}
-
-            {graphOverlay}
-
-            {canQueryTimeline && (
-              <TableContext.Provider value={tableContext}>
-                <EventsContainerLoading
-                  data-timeline-id={tableId}
-                  data-test-subj={`events-container-loading-${loading}`}
-                >
-                  <RightTopMenu
-                    tableView={tableView}
-                    loading={loading}
-                    tableId={tableId}
-                    title={title}
-                    onViewChange={(selectedView) => setTableView(selectedView)}
-                    additionalFilters={additionalFilters}
-                    hasRightOffset={tableView === 'gridView' && nonDeletedEvents.length > 0}
-                    additionalMenuOptions={additionalRightMenuOptions}
-                  />
-
-                  {!hasAlerts && !loading && !graphOverlay && <EmptyTable />}
-                  {hasAlerts && (
-                    <FullWidthFlexGroupTable
-                      $visible={!graphEventId && graphOverlay == null}
-                      gutterSize="none"
-                    >
-                      <ScrollableFlexItem grow={1}>
-                        <StatefulEventContext.Provider value={activeStatefulEventContext}>
-                          <DataTableComponent
-                            cellActionsTriggerId={cellActionsTriggerId}
-                            additionalControls={alertBulkActions}
-                            unitCountText={unitCountText}
-                            browserFields={browserFields}
-                            data={nonDeletedEvents}
-                            id={tableId}
-                            loadPage={loadPage}
-                            // TODO: migrate away from deprecated type
-                            renderCellValue={
-                              renderCellValue as (
-                                props: DeprecatedCellValueElementProps
-                              ) => React.ReactNode
-                            }
-                            // TODO: migrate away from deprecated type
-                            rowRenderers={rowRenderers as unknown as DeprecatedRowRenderer[]}
-                            totalItems={totalCountMinusDeleted}
-                            bulkActions={bulkActions}
-                            fieldBrowserOptions={fieldBrowserOptions}
-                            hasCrudPermissions={hasCrudPermissions}
-                            leadingControlColumns={transformedLeadingControlColumns}
-                            pagination={pagination}
-                            isEventRenderedView={tableView === 'eventRenderedView'}
-                            rowHeightsOptions={rowHeightsOptions}
-                            getFieldBrowser={getFieldBrowser}
-                            getFieldSpec={getFieldSpec}
-                          />
-                        </StatefulEventContext.Provider>
-                      </ScrollableFlexItem>
-                    </FullWidthFlexGroupTable>
+            {!loading && !graphOverlay && (
+              <div
+                css={css`
+                  position: absolute;
+                  top: ${theme.eui.euiSizeXS};
+                  z-index: ${theme.eui.euiZLevel1 - 3};
+                  right: ${nonDeletedEvents.length > 0 ? '72px' : theme.eui.euiSizeXS};
+                `}
+              >
+                <EuiFlexGroup data-test-subj="events-viewer-updated" gutterSize="m">
+                  <EuiFlexItem grow={false}>
+                    <InspectButton title={inspectModalTitle} queryId={tableId} />
+                  </EuiFlexItem>
+                  {topRightMenuOptions && (
+                    <EuiFlexItem grow={false}>{topRightMenuOptions}</EuiFlexItem>
                   )}
-                </EventsContainerLoading>
-              </TableContext.Provider>
+                </EuiFlexGroup>
+              </div>
             )}
-          </StyledEuiPanel>
-        </InspectButtonContainer>
-      </FullScreenContainer>
-    </>
+
+            {!hasAlerts && !loading && !graphOverlay && <EmptyTable />}
+
+            {hasAlerts && (
+              <EuiFlexItem
+                css={css`
+                  display: ${!graphEventId && graphOverlay == null ? 'flex' : 'none'};
+                  overflow: auto;
+                `}
+              >
+                <StatefulEventContext.Provider value={activeStatefulEventContext}>
+                  <DataTableComponent
+                    additionalControls={alertBulkActions}
+                    browserFields={browserFields}
+                    bulkActions={bulkActions}
+                    data={nonDeletedEvents}
+                    fieldBrowserOptions={fieldBrowserOptions}
+                    id={tableId}
+                    leadingControlColumns={transformedLeadingControlColumns}
+                    loadPage={loadPage}
+                    // TODO: migrate away from deprecated type
+                    renderCellValue={
+                      renderCellValue as (props: DeprecatedCellValueElementProps) => React.ReactNode
+                    }
+                    // TODO: migrate away from deprecated type
+                    rowRenderers={rowRenderers as unknown as DeprecatedRowRenderer[]}
+                    unitCountText={unitCountText}
+                    pagination={pagination}
+                    totalItems={totalCountMinusDeleted}
+                    getFieldSpec={getFieldSpec}
+                    cellActionsTriggerId={cellActionsTriggerId}
+                  />
+                </StatefulEventContext.Provider>
+              </EuiFlexItem>
+            )}
+          </div>
+        </TableContext.Provider>
+      )}
+    </div>
   );
 };
 

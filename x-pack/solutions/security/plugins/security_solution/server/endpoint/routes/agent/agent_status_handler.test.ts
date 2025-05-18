@@ -71,9 +71,10 @@ describe('Agent Status API route handler', () => {
   });
 
   it.each`
-    agentType         | featureFlag
-    ${'sentinel_one'} | ${'responseActionsSentinelOneV1Enabled'}
-    ${'crowdstrike'}  | ${'responseActionsCrowdstrikeManualHostIsolationEnabled'}
+    agentType                        | featureFlag
+    ${'sentinel_one'}                | ${'responseActionsSentinelOneV1Enabled'}
+    ${'crowdstrike'}                 | ${'responseActionsCrowdstrikeManualHostIsolationEnabled'}
+    ${'microsoft_defender_endpoint'} | ${'responseActionsMSDefenderEndpointEnabled'}
   `(
     'should error if the $agentType feature flag ($featureFlag) is turned off',
     async ({
@@ -102,6 +103,10 @@ describe('Agent Status API route handler', () => {
 
   it.each(RESPONSE_ACTION_AGENT_TYPE)('should accept agent type of %s', async (agentType) => {
     httpRequestMock.query.agentType = agentType;
+    apiTestSetup.endpointAppContextMock.experimentalFeatures = {
+      ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
+      responseActionsMSDefenderEndpointEnabled: true,
+    };
     await apiTestSetup
       .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
@@ -113,6 +118,7 @@ describe('Agent Status API route handler', () => {
         apiTestSetup.endpointAppContextMock.service.savedObjects.createInternalScopedSoClient(),
       connectorActionsClient: (await httpHandlerContextMock.actions).getActionsClient(),
       endpointService: apiTestSetup.endpointAppContextMock.service,
+      spaceId: 'default',
     });
   });
 
@@ -148,6 +154,9 @@ describe('Agent Status API route handler', () => {
   });
 
   it('should NOT use space ID in creating SO client when feature is disabled', async () => {
+    ((await httpHandlerContextMock.securitySolution).getSpaceId as jest.Mock).mockReturnValue(
+      'foo'
+    );
     await apiTestSetup
       .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
@@ -156,7 +165,7 @@ describe('Agent Status API route handler', () => {
     expect(
       apiTestSetup.endpointAppContextMock.service.savedObjects.createInternalScopedSoClient
     ).toHaveBeenCalledWith({
-      spaceId: undefined,
+      spaceId: 'default',
     });
   });
 

@@ -6,9 +6,9 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { queryPings } from '../../queries/query_pings';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { queryPings } from '../../common/pings/query_pings';
 
 export const getPingsRouteQuerySchema = schema.object({
   from: schema.string(),

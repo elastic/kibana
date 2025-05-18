@@ -231,6 +231,65 @@
       },
       {
         "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+        "id": "def-common.IlmLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "IlmLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/index-lifecycle-management-common-shared",
+            "scope": "common",
+            "docId": "kibKbnIndexLifecycleManagementCommonSharedPluginApi",
+            "section": "def-common.IlmLocatorParams",
+            "text": "IlmLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.IlmLocatorParams.page",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "\"policies_list\" | \"policy_edit\" | \"policy_create\""
+            ],
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
+            "id": "def-common.IlmLocatorParams.policyName",
+            "type": "string",
+            "tags": [],
+            "label": "policyName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared/src/locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-lifecycle-management-common-shared",
         "id": "def-common.MigrateAction",
         "type": "Interface",
         "tags": [],

@@ -7,7 +7,7 @@
 
 import type { ActionResult as ActionConnector } from '@kbn/actions-plugin/server';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { InferenceConnectorType } from '../../common/connectors';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { getConnectorById } from './get_connector_by_id';
 
 describe('getConnectorById', () => {
@@ -68,7 +68,7 @@ describe('getConnectorById', () => {
     await expect(() =>
       getConnectorById({ actionsClient, connectorId })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Type '.tcp-pigeon' not recognized as a supported connector type"`
+      `"Connector 'tcp-pigeon-3-0' of type '.tcp-pigeon' not recognized as a supported connector"`
     );
   });
 
@@ -78,6 +78,10 @@ describe('getConnectorById', () => {
         id: 'my-id',
         name: 'My Name',
         actionTypeId: InferenceConnectorType.OpenAI,
+        config: {
+          propA: 'foo',
+          propB: 42,
+        },
       })
     );
 
@@ -87,6 +91,10 @@ describe('getConnectorById', () => {
       connectorId: 'my-id',
       name: 'My Name',
       type: InferenceConnectorType.OpenAI,
+      config: {
+        propA: 'foo',
+        propB: 42,
+      },
     });
   });
 });

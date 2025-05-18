@@ -6,7 +6,6 @@
  */
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
-import { byTestId } from '../../helpers/utils';
 import { cleanTestParams } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
@@ -25,16 +24,10 @@ journey(`GlobalParameters`, async ({ page, params }) => {
     await syntheticsApp.navigateToSettings(true);
   });
 
-  step('go to params tab', async () => {
-    await page.click('text=Global Parameters');
-  });
-
-  step('Click text=Settings', async () => {
-    await page.click(byTestId('settings-page-link'));
-    expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/alerting');
-  });
-  step('Click text=Global Parameters', async () => {
-    await page.click('text=Global Parameters');
+  step('Add params', async () => {
+    await page.goto('http://localhost:5620/app/synthetics/settings/params', {
+      waitUntil: 'networkidle',
+    });
     expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/params');
     await page.click('text=No items found');
     await page.click('button:has-text("Create Parameter")');

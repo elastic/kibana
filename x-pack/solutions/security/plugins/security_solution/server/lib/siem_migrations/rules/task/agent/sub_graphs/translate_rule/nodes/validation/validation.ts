@@ -23,21 +23,32 @@ export const getValidationNode = ({ logger }: GetValidationNodeParams): GraphNod
     const query = state.elastic_rule.query;
 
     // We want to prevent infinite loops, so we increment the iterations counter for each validation run.
-    const currentIteration = ++state.validation_errors.iterations;
+    const currentIteration = state.validation_errors.iterations + 1;
     let esqlErrors: string = '';
-    if (!isEmpty(query)) {
-      const { errors, isEsqlQueryAggregating, hasMetadataOperator } = parseEsqlQuery(query);
-      if (!isEmpty(errors)) {
-        esqlErrors = JSON.stringify(errors);
-      } else if (!isEsqlQueryAggregating && !hasMetadataOperator) {
-        esqlErrors =
-          'Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.';
+    try {
+      const sanitizedQuery = query ? removePlaceHolders(query) : '';
+      if (!isEmpty(sanitizedQuery)) {
+        const { errors, isEsqlQueryAggregating, hasMetadataOperator } =
+          parseEsqlQuery(sanitizedQuery);
+        if (!isEmpty(errors)) {
+          esqlErrors = JSON.stringify(errors);
+        } else if (!isEsqlQueryAggregating && !hasMetadataOperator) {
+          esqlErrors = `Queries that do't use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.`;
+        }
       }
+      if (esqlErrors) {
+        logger.debug(`ESQL query validation failed: ${esqlErrors}`);
+      }
+    } catch (error) {
+      esqlErrors = error.message;
+      logger.info(`Error parsing ESQL query: ${error.message}`);
     }
-    if (esqlErrors) {
-      logger.debug(`ESQL query validation failed: ${esqlErrors}`);
-    }
-
     return { validation_errors: { iterations: currentIteration, esql_errors: esqlErrors } };
   };
 };
+
+function removePlaceHolders(query: string): string {
+  return query
+    .replaceAll(/\[(macro|lookup):.*?\]/g, '') // Removes any macro or lookup placeholders
+    .replaceAll(/\n(\s*?\|\s*?\n)*/g, '\n'); // Removes any empty lines with | (pipe) alone after removing the placeholders
+}

@@ -16,12 +16,13 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   AnalyticsServiceStart,
-  CoreSetup,
   CoreStart,
   ExecutionContextStart,
   HttpStart,
   IUiSettingsClient,
   ThemeServiceStart,
+  UserProfileService,
+  NotificationsStart,
 } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -69,7 +70,7 @@ export interface AiopsAppContextValue {
   /**
    * Used for toast notifications.
    */
-  notifications: CoreSetup['notifications'];
+  notifications: NotificationsStart;
   /**
    * Used to store user settings in local storage.
    */
@@ -90,6 +91,10 @@ export interface AiopsAppContextValue {
    * Usage collection.
    */
   usageCollection?: UsageCollectionSetup;
+  /**
+   * User profile service.
+   */
+  userProfile: UserProfileService;
   /**
    * Used to create deep links to other plugins.
    */

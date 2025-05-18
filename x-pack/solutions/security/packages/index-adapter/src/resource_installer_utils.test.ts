@@ -21,42 +21,40 @@ describe('getIndexTemplate', () => {
 
     expect(indexTemplate).toEqual({
       name: defaultParams.name,
-      body: {
-        index_patterns: defaultParams.indexPatterns,
-        composed_of: defaultParams.componentTemplateRefs,
-        template: {
-          settings: {
-            hidden: true,
-            auto_expand_replicas: '0-1',
-            'index.mapping.ignore_malformed': true,
-            'index.mapping.total_fields.limit': defaultParams.totalFieldsLimit,
-          },
-          mappings: {
-            dynamic: false,
-            _meta: {
-              kibana: {
-                version: defaultParams.kibanaVersion,
-              },
-              managed: true,
-              namespace: 'default',
+      index_patterns: defaultParams.indexPatterns,
+      composed_of: defaultParams.componentTemplateRefs,
+      template: {
+        settings: {
+          hidden: true,
+          auto_expand_replicas: '0-1',
+          'index.mapping.ignore_malformed': true,
+          'index.mapping.total_fields.limit': defaultParams.totalFieldsLimit,
+        },
+        mappings: {
+          dynamic: false,
+          _meta: {
+            kibana: {
+              version: defaultParams.kibanaVersion,
             },
+            managed: true,
+            namespace: 'default',
           },
         },
-        _meta: {
-          kibana: {
-            version: defaultParams.kibanaVersion,
-          },
-          managed: true,
-          namespace: 'default',
-        },
-        priority: 7,
       },
+      _meta: {
+        kibana: {
+          version: defaultParams.kibanaVersion,
+        },
+        managed: true,
+        namespace: 'default',
+      },
+      priority: 7,
     });
   });
 
   it('should create data stream index template with given parameters and defaults', () => {
     const indexTemplate = getIndexTemplate({ ...defaultParams, isDataStream: true });
-    expect(indexTemplate.body).toEqual(
+    expect(indexTemplate).toEqual(
       expect.objectContaining({
         data_stream: { hidden: true },
       })
@@ -64,19 +62,19 @@ describe('getIndexTemplate', () => {
   });
 
   it('should create not hidden index template', () => {
-    const { body } = getIndexTemplate({ ...defaultParams, isDataStream: true, hidden: false });
+    const body = getIndexTemplate({ ...defaultParams, isDataStream: true, hidden: false });
     expect(body?.data_stream?.hidden).toEqual(false);
     expect(body?.template?.settings?.hidden).toEqual(false);
   });
 
   it('should create index template with custom namespace', () => {
-    const { body } = getIndexTemplate({ ...defaultParams, namespace: 'custom-namespace' });
+    const body = getIndexTemplate({ ...defaultParams, namespace: 'custom-namespace' });
     expect(body?._meta?.namespace).toEqual('custom-namespace');
     expect(body?.priority).toEqual(16);
   });
 
   it('should create index template with template overrides', () => {
-    const { body } = getIndexTemplate({
+    const body = getIndexTemplate({
       ...defaultParams,
       template: {
         settings: {

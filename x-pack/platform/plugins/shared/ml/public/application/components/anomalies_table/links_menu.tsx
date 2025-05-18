@@ -13,6 +13,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
+  useEuiTheme,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -80,6 +81,7 @@ interface LinksMenuProps {
 }
 
 export const LinksMenuUI = (props: LinksMenuProps) => {
+  const { euiTheme } = useEuiTheme();
   const isMounted = useMountedState();
 
   const [dataViewId, setDataViewId] = useState<string | null>(null);
@@ -195,7 +197,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   ) => {
     // Create a layer for each of the geoFields
     const initialLayers = getInitialSourceIndexFieldLayers(
-      sourceIndicesWithGeoFields[anomaly.jobId]
+      sourceIndicesWithGeoFields[anomaly.jobId],
+      euiTheme
     );
     // Widen the timerange by one bucket span on start/end to increase chances of always having data on the map
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(
@@ -785,7 +788,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       });
     }
 
-    if (application.capabilities.discover?.show && !isCategorizationAnomalyRecord) {
+    if (application.capabilities.discover_v2?.show && !isCategorizationAnomalyRecord) {
       // Add item from the start, but disable it during the URL generation.
       const isLoading = openInDiscoverUrlError === undefined && openInDiscoverUrl === undefined;
 
@@ -834,7 +837,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         );
       }
     }
-    if (application.capabilities.maps?.show) {
+    if (application.capabilities.maps_v2?.show) {
       if (anomaly.isGeoRecord === true) {
         items.push(
           <EuiContextMenuItem
@@ -878,7 +881,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
     }
 
-    if (application.capabilities.discover?.show && isCategorizationAnomalyRecord) {
+    if (application.capabilities.discover_v2?.show && isCategorizationAnomalyRecord) {
       items.push(
         <EuiContextMenuItem
           key="view_examples"

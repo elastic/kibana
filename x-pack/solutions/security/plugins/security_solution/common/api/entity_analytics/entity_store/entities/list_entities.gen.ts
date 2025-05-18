@@ -30,7 +30,7 @@ export const ListEntitiesRequestQuery = z.object({
    * An ES query to filter by.
    */
   filterQuery: z.string().optional(),
-  entities_types: ArrayFromString(EntityType),
+  entity_types: ArrayFromString(EntityType),
 });
 export type ListEntitiesRequestQueryInput = z.input<typeof ListEntitiesRequestQuery>;
 

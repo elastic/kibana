@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,7 +17,7 @@ import {
   getWindowParametersForTrigger,
   getSnappedTimestamps,
   getSnappedWindowParameters,
-  LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
+  useLogRateAnalysisBarColors,
   LOG_RATE_ANALYSIS_TYPE,
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
@@ -130,7 +130,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const barStyle = {
     rect: {
       opacity: 1,
-      fill: LOG_RATE_ANALYSIS_HIGHLIGHT_COLOR,
+      fill: useLogRateAnalysisBarColors().barHighlightColor,
     },
   };
 

@@ -518,13 +518,7 @@
             "text": "MLHttpFetchErrorBase"
           },
           "<T> extends ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IHttpFetchError",
-            "text": "IHttpFetchError"
-          },
+          "IHttpFetchError",
           "<T>"
         ],
         "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",

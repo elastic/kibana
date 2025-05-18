@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { RenderTooltipContentParams } from '@kbn/maps-plugin/public';
 import { useLayerList } from './use_layer_list';

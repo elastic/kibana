@@ -15,7 +15,7 @@ interface StylesDeps {
 }
 
 export const useStyles = ({ isDisplayedAbove }: StylesDeps) => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { size, font } = euiTheme;
@@ -44,10 +44,10 @@ export const useStyles = ({ isDisplayedAbove }: StylesDeps) => {
 
     if (isDisplayedAbove) {
       container.top = 0;
-      container.background = `linear-gradient(180deg, ${euiVars.euiColorLightestShade} 0%, transparent 100%)`;
+      container.background = `linear-gradient(180deg, ${euiTheme.colors.lightestShade} 0%, transparent 100%)`;
     } else {
       container.bottom = 0;
-      container.background = `linear-gradient(360deg, ${euiVars.euiColorLightestShade} 0%, transparent 100%)`;
+      container.background = `linear-gradient(360deg, ${euiTheme.colors.lightestShade} 0%, transparent 100%)`;
     }
 
     return {
@@ -55,7 +55,7 @@ export const useStyles = ({ isDisplayedAbove }: StylesDeps) => {
       jumpBackBadge,
       buttonStyle,
     };
-  }, [isDisplayedAbove, euiTheme, euiVars]);
+  }, [isDisplayedAbove, euiTheme]);
 
   return cached;
 };

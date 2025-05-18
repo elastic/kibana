@@ -10,6 +10,8 @@ import { render, renderHook } from '@testing-library/react';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
+import type { EuiThemeComputed } from '@elastic/eui';
+
 import type {
   NumericChartData,
   OrdinalChartData,
@@ -22,6 +24,10 @@ import {
 } from '../lib/field_histograms';
 
 import { getFieldType, getLegendText, getXScaleType, useColumnChart } from './use_column_chart';
+
+const euiThemeMock = {
+  size: { base: '16px' },
+} as EuiThemeComputed;
 
 describe('getFieldType()', () => {
   it('should return the Kibana field type for a given EUI data grid schema', () => {
@@ -103,63 +109,81 @@ describe('isUnsupportedChartData()', () => {
 
 describe('getLegendText()', () => {
   it('should return the chart legend text for unsupported chart types', () => {
-    expect(getLegendText(validUnsupportedChartData)).toBe('Chart not supported.');
+    expect(getLegendText(validUnsupportedChartData, euiThemeMock)).toBe('Chart not supported.');
   });
   it('should return the chart legend text for empty datasets', () => {
-    expect(getLegendText(validNumericChartData)).toBe('0 documents contain field.');
+    expect(getLegendText(validNumericChartData, euiThemeMock)).toBe('0 documents contain field.');
   });
   it('should return the chart legend text for boolean chart types', () => {
     const { getByText } = render(
       <>
-        {getLegendText({
-          cardinality: 2,
-          data: [
-            { key: 'true', key_as_string: 'true', doc_count: 10 },
-            { key: 'false', key_as_string: 'false', doc_count: 20 },
-          ],
-          id: 'the-id',
-          type: 'boolean',
-        })}
+        {getLegendText(
+          {
+            cardinality: 2,
+            data: [
+              { key: 'true', key_as_string: 'true', doc_count: 10 },
+              { key: 'false', key_as_string: 'false', doc_count: 20 },
+            ],
+            id: 'the-id',
+            type: 'boolean',
+          },
+          euiThemeMock
+        )}
       </>
     );
     expect(getByText('true')).toBeInTheDocument();
     expect(getByText('false')).toBeInTheDocument();
   });
   it('should return the chart legend text for ordinal chart data with less than max categories', () => {
-    expect(getLegendText({ ...validOrdinalChartData, data: [{ key: 'cat', doc_count: 10 }] })).toBe(
-      '10 categories'
-    );
+    expect(
+      getLegendText(
+        { ...validOrdinalChartData, data: [{ key: 'cat', doc_count: 10 }] },
+        euiThemeMock
+      )
+    ).toBe('10 categories');
   });
   it('should return the chart legend text for ordinal chart data with more than max categories', () => {
     expect(
-      getLegendText({
-        ...validOrdinalChartData,
-        cardinality: 30,
-        data: [{ key: 'cat', doc_count: 10 }],
-      })
+      getLegendText(
+        {
+          ...validOrdinalChartData,
+          cardinality: 30,
+          data: [{ key: 'cat', doc_count: 10 }],
+        },
+        euiThemeMock
+      )
     ).toBe('top 20 of 30 categories');
   });
   it('should return the chart legend text for numeric datasets', () => {
     expect(
-      getLegendText({
-        ...validNumericChartData,
-        data: [{ key: 1, doc_count: 10 }],
-        stats: [1, 100],
-      })
+      getLegendText(
+        {
+          ...validNumericChartData,
+          data: [{ key: 1, doc_count: 10 }],
+          stats: [1, 100],
+        },
+        euiThemeMock
+      )
     ).toBe('1 - 100');
     expect(
-      getLegendText({
-        ...validNumericChartData,
-        data: [{ key: 1, doc_count: 10 }],
-        stats: [100, 100],
-      })
+      getLegendText(
+        {
+          ...validNumericChartData,
+          data: [{ key: 1, doc_count: 10 }],
+          stats: [100, 100],
+        },
+        euiThemeMock
+      )
     ).toBe('100');
     expect(
-      getLegendText({
-        ...validNumericChartData,
-        data: [{ key: 1, doc_count: 10 }],
-        stats: [1.2345, 6.3456],
-      })
+      getLegendText(
+        {
+          ...validNumericChartData,
+          data: [{ key: 1, doc_count: 10 }],
+          stats: [1.2345, 6.3456],
+        },
+        euiThemeMock
+      )
     ).toBe('1.23 - 6.35');
   });
 });

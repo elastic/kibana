@@ -9,8 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { deleteAllAlerts, deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
   buildDocument,
-  clearLegacyDashboards,
-  clearLegacyTransforms,
   createAndSyncRuleAndAlertsFactory,
   riskEngineRouteHelpersFactory,
   waitForRiskEngineRun,
@@ -27,8 +25,6 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
 
   const cleanAllResources = async () => {
-    await clearLegacyTransforms({ es, log });
-    await clearLegacyDashboards({ supertest, log });
     await deleteAllAlerts(supertest, log, es);
     await deleteAllRules(supertest, log);
     await riskEngineRoutes.cleanUp();

@@ -12,16 +12,10 @@
         "description": [],
         "signature": [
           "(message: string, name: string, request: Request, response: Response | undefined, body: TResponseBody | undefined) => ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IHttpFetchError",
-            "text": "IHttpFetchError"
-          },
+          "IHttpFetchError",
           "<unknown>"
         ],
-        "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+        "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -35,7 +29,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -50,7 +44,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -65,7 +59,7 @@
             "signature": [
               "Request"
             ],
-            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,7 +74,7 @@
             "signature": [
               "Response | undefined"
             ],
-            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -95,7 +89,7 @@
             "signature": [
               "TResponseBody | undefined"
             ],
-            "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
+            "path": "src/core/packages/http/browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -117,140 +111,44 @@
         "description": [],
         "signature": [
           "{ basePath: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           "; staticAssets: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IStaticAssets",
-            "text": "IStaticAssets"
-          },
+          "IStaticAssets",
           "; anonymousPaths: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IAnonymousPaths",
-            "text": "IAnonymousPaths"
-          },
+          "IAnonymousPaths",
           "; externalUrl: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IExternalUrl",
-            "text": "IExternalUrl"
-          },
+          "IExternalUrl",
           "; intercept: jest.MockInstance<() => void, [interceptor: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpInterceptor",
-            "text": "HttpInterceptor"
-          },
+          "HttpInterceptor",
           "], unknown>; fetch: jest.MockInstance<Promise<unknown>, [options: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptionsWithPath",
-            "text": "HttpFetchOptionsWithPath"
-          },
+          "HttpFetchOptionsWithPath",
           "], unknown>; delete: jest.MockInstance<Promise<unknown>, [options: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptionsWithPath",
-            "text": "HttpFetchOptionsWithPath"
-          },
+          "HttpFetchOptionsWithPath",
           "], unknown>; get: jest.MockInstance<Promise<unknown>, [options: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptionsWithPath",
-            "text": "HttpFetchOptionsWithPath"
-          },
+          "HttpFetchOptionsWithPath",
           "], unknown>; head: jest.MockInstance<Promise<unknown>, [options: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptionsWithPath",
-            "text": "HttpFetchOptionsWithPath"
-          },
+          "HttpFetchOptionsWithPath",
           "], unknown>; options: jest.MockInstance<Promise<unknown>, [options: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptionsWithPath",
-            "text": "HttpFetchOptionsWithPath"
-          },
+          "HttpFetchOptionsWithPath",
           "], unknown>; patch: jest.MockInstance<Promise<unknown>, [options: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptionsWithPath",
-            "text": "HttpFetchOptionsWithPath"
-          },
+          "HttpFetchOptionsWithPath",
           "], unknown>; post: jest.MockInstance<Promise<unknown>, [options: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptionsWithPath",
-            "text": "HttpFetchOptionsWithPath"
-          },
+          "HttpFetchOptionsWithPath",
           "], unknown>; put: jest.MockInstance<Promise<unknown>, [options: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptionsWithPath",
-            "text": "HttpFetchOptionsWithPath"
-          },
+          "HttpFetchOptionsWithPath",
           "], unknown>; addLoadingCountSource: jest.MockInstance<void, [countSource$: ",
           "Observable",
           "<number>], unknown>; getLoadingCount$: jest.MockInstance<",
           "Observable",
           "<number>, [], unknown>; } & ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           " & { basePath: ",
-          {
-            "pluginId": "@kbn/core-http-browser-internal",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
-            "section": "def-public.BasePath",
-            "text": "BasePath"
-          },
+          "BasePath",
           "; anonymousPaths: jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IAnonymousPaths",
-            "text": "IAnonymousPaths"
-          },
+          "IAnonymousPaths",
           ">; }"
         ],
-        "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+        "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -264,7 +162,7 @@
         "tags": [],
         "label": "httpServiceMock",
         "description": [],
-        "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+        "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -288,7 +186,7 @@
               "HttpService",
               ">>"
             ],
-            "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -303,7 +201,7 @@
                 "signature": [
                   "{ basePath?: string | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+                "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -318,15 +216,9 @@
             "description": [],
             "signature": [
               "({ basePath, publicBaseUrl, }?: { basePath?: string | undefined; publicBaseUrl?: string | undefined; }) => ",
-              {
-                "pluginId": "@kbn/core-http-browser-mocks",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
-                "section": "def-public.HttpSetupMock",
-                "text": "HttpSetupMock"
-              }
+              "HttpSetupMock"
             ],
-            "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -341,7 +233,7 @@
                 "signature": [
                   "{ basePath?: string | undefined; publicBaseUrl?: string | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+                "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -356,15 +248,9 @@
             "description": [],
             "signature": [
               "({ basePath, publicBaseUrl, }?: { basePath?: string | undefined; publicBaseUrl?: string | undefined; }) => ",
-              {
-                "pluginId": "@kbn/core-http-browser-mocks",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserMocksPluginApi",
-                "section": "def-public.HttpSetupMock",
-                "text": "HttpSetupMock"
-              }
+              "HttpSetupMock"
             ],
-            "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -379,7 +265,7 @@
                 "signature": [
                   "{ basePath?: string | undefined; publicBaseUrl?: string | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+                "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -394,16 +280,10 @@
             "description": [],
             "signature": [
               "({ publicBaseUrl, serverBasePath, assetsHrefBase, }?: { publicBaseUrl?: string | undefined; serverBasePath?: string | undefined; assetsHrefBase?: string | undefined; }) => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IBasePath",
-                "text": "IBasePath"
-              },
+              "IBasePath",
               ">"
             ],
-            "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/browser-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -418,7 +298,7 @@
                 "signature": [
                   "{ publicBaseUrl?: string | undefined; serverBasePath?: string | undefined; assetsHrefBase?: string | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-browser-mocks/src/base_path.mock.ts",
+                "path": "src/core/packages/http/browser-mocks/src/base_path.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

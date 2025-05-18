@@ -43,17 +43,15 @@ export function useSplitFieldCardinality(
       params: {
         index: dataView.getIndexPattern(),
         size: 0,
-        body: {
-          query,
-          aggregations: {
-            fieldCount: {
-              cardinality: {
-                field: splitField,
-              },
+        query,
+        aggregations: {
+          fieldCount: {
+            cardinality: {
+              field: splitField,
             },
           },
-          ...runtimeMappings,
         },
+        ...runtimeMappings,
       },
     };
   }, [splitField, dataView, query, splitFieldsOptions]);

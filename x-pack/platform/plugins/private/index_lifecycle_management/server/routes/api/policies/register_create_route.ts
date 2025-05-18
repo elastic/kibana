@@ -16,12 +16,11 @@ async function createPolicy(
   name: string,
   policy: Omit<typeof bodySchema.type, 'name'>
 ): Promise<any> {
-  const body = { policy };
   const options = {
     ignore: [404],
   };
 
-  return client.ilm.putLifecycle({ name, body }, options);
+  return client.ilm.putLifecycle({ name, policy }, options);
 }
 
 /**
@@ -50,7 +49,16 @@ export function registerCreateRoute({
   lib: { handleEsError },
 }: RouteDependencies) {
   router.post(
-    { path: addBasePath('/policies'), validate: { body: bodySchema } },
+    {
+      path: addBasePath('/policies'),
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: { body: bodySchema },
+    },
     license.guardApiRoute(async (context, request, response) => {
       const body = request.body as typeof bodySchema.type;
       const { name, ...rest } = body;

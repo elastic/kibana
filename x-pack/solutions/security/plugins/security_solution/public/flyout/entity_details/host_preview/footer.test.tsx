@@ -7,10 +7,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPanelKey } from '../host_right';
 import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_context';
 import type { HostPreviewPanelFooterProps } from './footer';
 import { HostPreviewPanelFooter } from './footer';
+import { HostPanelKey } from '../shared/constants';
 
 jest.mock('@kbn/expandable-flyout');
 
@@ -18,7 +18,6 @@ const mockProps: HostPreviewPanelFooterProps = {
   hostName: 'test',
   contextID: 'test-host-panel',
   scopeId: 'test-scope-id',
-  isDraggable: false,
 };
 
 describe('<HostPreviewPanelFooter />', () => {

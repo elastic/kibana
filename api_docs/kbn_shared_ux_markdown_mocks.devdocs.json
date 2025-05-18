@@ -47,7 +47,7 @@
           "MarkdownProps",
           ", {}, PropArguments, {}>"
         ],
-        "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +58,7 @@
             "tags": [],
             "label": "propArguments",
             "description": [],
-            "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -69,20 +69,33 @@
                 "tags": [],
                 "label": "readOnly",
                 "description": [],
-                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-markdown-mocks",
                     "id": "def-common.MarkdownStorybookMock.propArguments.readOnly.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                        "id": "def-common.MarkdownStorybookMock.propArguments.readOnly.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-markdown-mocks",
@@ -91,7 +104,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -104,20 +117,33 @@
                 "tags": [],
                 "label": "openLinksInNewTab",
                 "description": [],
-                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-markdown-mocks",
                     "id": "def-common.MarkdownStorybookMock.propArguments.openLinksInNewTab.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                        "id": "def-common.MarkdownStorybookMock.propArguments.openLinksInNewTab.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-markdown-mocks",
@@ -126,7 +152,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -139,7 +165,7 @@
                 "tags": [],
                 "label": "placeholder",
                 "description": [],
-                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -150,18 +176,18 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-markdown-mocks",
-                        "id": "def-common.MarkdownStorybookMock.propArguments.placeholder.control.type",
+                        "id": "def-common.MarkdownStorybookMock.propArguments.placeholder.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
-                        "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -174,7 +200,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -187,7 +213,7 @@
                 "tags": [],
                 "label": "markdownContent",
                 "description": [],
-                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -198,18 +224,18 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-markdown-mocks",
-                        "id": "def-common.MarkdownStorybookMock.propArguments.markdownContent.control.type",
+                        "id": "def-common.MarkdownStorybookMock.propArguments.markdownContent.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
-                        "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -222,7 +248,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -235,7 +261,7 @@
                 "tags": [],
                 "label": "ariaLabelContent",
                 "description": [],
-                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -246,18 +272,18 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-markdown-mocks",
-                        "id": "def-common.MarkdownStorybookMock.propArguments.ariaLabelContent.control.type",
+                        "id": "def-common.MarkdownStorybookMock.propArguments.ariaLabelContent.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
-                        "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -270,7 +296,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -283,7 +309,7 @@
                 "tags": [],
                 "label": "height",
                 "description": [],
-                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -294,18 +320,18 @@
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-markdown-mocks",
-                        "id": "def-common.MarkdownStorybookMock.propArguments.height.control.type",
+                        "id": "def-common.MarkdownStorybookMock.propArguments.height.control.control",
                         "type": "string",
                         "tags": [],
-                        "label": "type",
+                        "label": "control",
                         "description": [],
-                        "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       },
@@ -316,7 +342,7 @@
                         "tags": [],
                         "label": "defaultValue",
                         "description": [],
-                        "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       },
@@ -327,7 +353,7 @@
                         "tags": [],
                         "label": "label",
                         "description": [],
-                        "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       },
@@ -341,7 +367,7 @@
                         "signature": [
                           "(string | number)[]"
                         ],
-                        "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                         "deprecated": false,
                         "trackAdoption": false
                       }
@@ -356,20 +382,33 @@
                 "tags": [],
                 "label": "enableTooltipSupport",
                 "description": [],
-                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-markdown-mocks",
                     "id": "def-common.MarkdownStorybookMock.propArguments.enableTooltipSupport.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                        "id": "def-common.MarkdownStorybookMock.propArguments.enableTooltipSupport.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-markdown-mocks",
@@ -378,7 +417,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -391,20 +430,33 @@
                 "tags": [],
                 "label": "validateLinks",
                 "description": [],
-                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-markdown-mocks",
                     "id": "def-common.MarkdownStorybookMock.propArguments.validateLinks.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                        "id": "def-common.MarkdownStorybookMock.propArguments.validateLinks.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-markdown-mocks",
@@ -413,7 +465,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -426,20 +478,33 @@
                 "tags": [],
                 "label": "enableSoftLineBreaks",
                 "description": [],
-                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-markdown-mocks",
                     "id": "def-common.MarkdownStorybookMock.propArguments.enableSoftLineBreaks.control",
-                    "type": "string",
+                    "type": "Object",
                     "tags": [],
                     "label": "control",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
-                    "trackAdoption": false
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                        "id": "def-common.MarkdownStorybookMock.propArguments.enableSoftLineBreaks.control.control",
+                        "type": "string",
+                        "tags": [],
+                        "label": "control",
+                        "description": [],
+                        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-markdown-mocks",
@@ -448,7 +513,7 @@
                     "tags": [],
                     "label": "defaultValue",
                     "description": [],
-                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -463,7 +528,7 @@
             "tags": [],
             "label": "serviceArguments",
             "description": [],
-            "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -478,7 +543,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -501,7 +566,7 @@
               " | undefined) => ",
               "MarkdownProps"
             ],
-            "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -522,7 +587,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -541,7 +606,7 @@
               "() => ",
               "MarkdownProps"
             ],
-            "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+            "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -563,9 +628,9 @@
         "label": "Params",
         "description": [],
         "signature": [
-          "{ placeholder: any; height: any; readOnly: any; ariaLabelContent: any; markdownContent: any; openLinksInNewTab: any; }"
+          "{ readOnly: any; placeholder: any; height: any; ariaLabelContent: any; markdownContent: any; openLinksInNewTab: any; }"
         ],
-        "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+        "path": "src/platform/packages/shared/shared-ux/markdown/mocks/storybook.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

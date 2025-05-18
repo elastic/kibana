@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
+import { EventKind } from '../../../flyout/document_details/shared/constants/event_kinds';
 import { StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';
@@ -41,6 +42,7 @@ import { useLinkProps } from '../use_link_props';
 import { useFormattedDate } from './use_formatted_date';
 import { PanelContentError } from './panel_content_error';
 import type { State } from '../../../common/store/types';
+import type { NodeEventOnClick } from './node_events_of_type';
 
 const StyledCubeForProcess = styled(CubeForProcess)`
   position: relative;
@@ -51,7 +53,15 @@ const nodeDetailError = i18n.translate('xpack.securitySolution.resolver.panel.no
 });
 
 // eslint-disable-next-line react/display-name
-export const NodeDetail = memo(function ({ id, nodeID }: { id: string; nodeID: string }) {
+export const NodeDetail = memo(function ({
+  id,
+  nodeID,
+  nodeEventOnClick,
+}: {
+  id: string;
+  nodeID: string;
+  nodeEventOnClick?: NodeEventOnClick;
+}) {
   const processEvent = useSelector((state: State) =>
     nodeDataModel.firstEvent(selectors.nodeDataForID(state.analyzer[id])(nodeID))
   );
@@ -62,7 +72,12 @@ export const NodeDetail = memo(function ({ id, nodeID }: { id: string; nodeID: s
   return nodeStatus === 'loading' ? (
     <PanelLoading id={id} />
   ) : processEvent ? (
-    <NodeDetailView id={id} nodeID={nodeID} processEvent={processEvent} />
+    <NodeDetailView
+      id={id}
+      nodeID={nodeID}
+      processEvent={processEvent}
+      nodeEventOnClick={nodeEventOnClick}
+    />
   ) : (
     <PanelContentError id={id} translatedErrorMessage={nodeDetailError} />
   );
@@ -78,14 +93,16 @@ export interface NodeDetailsTableView {
  * Created, PID, User/Domain, etc.
  */
 // eslint-disable-next-line react/display-name
-const NodeDetailView = memo(function ({
+export const NodeDetailView = memo(function ({
   id,
   processEvent,
   nodeID,
+  nodeEventOnClick,
 }: {
   id: string;
   processEvent: SafeResolverEvent;
   nodeID: string;
+  nodeEventOnClick?: NodeEventOnClick;
 }) {
   const processName = eventModel.processNameSafeVersion(processEvent);
   const nodeState = useSelector((state: State) =>
@@ -96,6 +113,9 @@ const NodeDetailView = memo(function ({
   });
   const eventTime = eventModel.eventTimestamp(processEvent);
   const dateTime = useFormattedDate(eventTime);
+  const isAlert = eventModel.eventKind(processEvent)[0] === EventKind.signal;
+  const documentId = eventModel.documentID(processEvent);
+  const indexName = eventModel.indexName(processEvent);
 
   const processInfoEntry: NodeDetailsTableView[] = useMemo(() => {
     const createdEntry = {
@@ -278,7 +298,16 @@ const NodeDetailView = memo(function ({
             state={nodeState}
           />
           <span data-test-subj="resolver:node-detail:title">
-            <GeneratedText>{processName}</GeneratedText>
+            {nodeEventOnClick ? (
+              <EuiLink
+                data-test-subj="resolver:node-detail:title-link"
+                onClick={nodeEventOnClick({ documentId, indexName, scopeId: id, isAlert })}
+              >
+                <GeneratedText>{processName}</GeneratedText>
+              </EuiLink>
+            ) : (
+              <GeneratedText>{processName}</GeneratedText>
+            )}
           </span>
         </StyledTitle>
       </EuiTitle>

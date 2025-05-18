@@ -9,7 +9,7 @@ import type { AgentStatus } from '@kbn/fleet-plugin/common';
 import { HostStatus } from '../../../common/endpoint/types';
 
 // For an understanding of how fleet agent status is calculated:
-// @see `x-pack/plugins/fleet/common/services/agent_status.ts`
+// @see `x-pack/platform/plugins/shared/fleet/common/services/agent_status.ts`
 const STATUS_MAPPING: ReadonlyMap<AgentStatus, HostStatus> = new Map([
   ['online', HostStatus.HEALTHY],
   ['offline', HostStatus.OFFLINE],

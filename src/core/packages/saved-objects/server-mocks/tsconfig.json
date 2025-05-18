@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/utility-types",
+    "@kbn/core-status-common",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-server-internal",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-saved-objects-base-server-mocks",
+    "@kbn/core-saved-objects-import-export-server-mocks",
+    "@kbn/core-saved-objects-migration-server-mocks"
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

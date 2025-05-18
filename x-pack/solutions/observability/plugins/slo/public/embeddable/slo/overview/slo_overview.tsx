@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React, { useEffect, useState } from 'react';
 import { Subject } from 'rxjs';
-import { SloOverviewDetails } from '../common/slo_overview_details';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
-import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
+import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../hooks/use_fetch_rules_for_slo';
-import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_card_item_badges';
-import { SloCardChart } from '../../../pages/slos/components/card_view/slo_card_item';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
+import { SloCardChart } from '../../../pages/slos/components/card_view/slo_card_item';
+import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_card_item_badges';
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+import { SloOverviewDetails } from '../common/slo_overview_details';
 
 import { SingleSloCustomInput } from './types';
 
@@ -54,7 +54,7 @@ export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }:
   });
 
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({
-    sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]] : [],
+    sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId] as [string, string]] : [],
   });
 
   const { data: historicalSummaries = [] } = useFetchHistoricalSummary({
@@ -95,11 +95,8 @@ export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }:
   const rules = rulesBySlo?.[slo?.id];
   const activeAlerts = activeAlertsBySlo.get(slo);
 
-  const hasGroupBy = Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE);
-
   const historicalSummary = historicalSummaries.find(
-    (histSummary) =>
-      histSummary.sloId === slo.id && histSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+    (histSummary) => histSummary.sloId === slo.id && histSummary.instanceId === slo.instanceId
   )?.data;
 
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
@@ -112,14 +109,7 @@ export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }:
         onClick={() => {
           setSelectedSlo(slo);
         }}
-        badges={
-          <SloCardItemBadges
-            slo={slo}
-            rules={rules}
-            activeAlerts={activeAlerts}
-            hasGroupBy={hasGroupBy}
-          />
-        }
+        badges={<SloCardItemBadges slo={slo} rules={rules} activeAlerts={activeAlerts} />}
       />
       <SloOverviewDetails slo={selectedSlo} setSelectedSlo={setSelectedSlo} />
     </div>

@@ -6,8 +6,7 @@
  */
 
 import { ALERT_WORKFLOW_TAGS } from '@kbn/rule-data-utils';
-import { act, fireEvent, render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, fireEvent, render, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
 import type {
   UseBulkAlertTagsItemsProps,

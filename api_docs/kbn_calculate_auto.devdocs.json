@@ -30,7 +30,7 @@
         "tags": [],
         "label": "calculateAuto",
         "description": [],
-        "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+        "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,7 +44,7 @@
             "signature": [
               "(buckets: number, duration: moment.Duration) => moment.Duration | undefined"
             ],
-            "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+            "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -56,7 +56,7 @@
                 "tags": [],
                 "label": "buckets",
                 "description": [],
-                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -70,7 +70,7 @@
                 "signature": [
                   "moment.Duration"
                 ],
-                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -86,7 +86,7 @@
             "signature": [
               "(buckets: number, duration: moment.Duration) => moment.Duration | undefined"
             ],
-            "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+            "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -98,7 +98,7 @@
                 "tags": [],
                 "label": "buckets",
                 "description": [],
-                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -112,7 +112,7 @@
                 "signature": [
                   "moment.Duration"
                 ],
-                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -128,7 +128,7 @@
             "signature": [
               "(buckets: number, duration: moment.Duration) => moment.Duration | undefined"
             ],
-            "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+            "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -140,7 +140,7 @@
                 "tags": [],
                 "label": "buckets",
                 "description": [],
-                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -154,7 +154,7 @@
                 "signature": [
                   "moment.Duration"
                 ],
-                "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
+                "path": "src/platform/packages/shared/kbn-calculate-auto/src/calculate_auto.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutOverview } from './overview_tab';
@@ -24,7 +24,7 @@ export default {
   },
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const context = {
     kqlBarIntegration: false,

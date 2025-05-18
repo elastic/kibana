@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const createReportingUser = async () => {
       await security.user.create(reporting.REPORTING_USER_USERNAME, {
         password: reporting.REPORTING_USER_PASSWORD,
-        roles: ['data_analyst', 'kibana_user'],
+        roles: ['data_analyst', 'kibana_admin'],
         full_name: 'a reporting user',
       });
     };

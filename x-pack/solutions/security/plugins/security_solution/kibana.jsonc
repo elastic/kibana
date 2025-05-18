@@ -19,7 +19,6 @@
       "alerting",
       "cases",
       "cloud",
-      "cloudDefend",
       "cloudSecurityPosture",
       "contentManagement",
       "dashboard",
@@ -32,10 +31,7 @@
       "features",
       "fieldFormats",
       "inspector",
-      "kubernetesSecurity",
-      "lens",
       "licensing",
-      "maps",
       "navigation",
       "ruleRegistry",
       "sessionView",
@@ -59,7 +55,9 @@
       "charts",
       "entityManager",
       "inference",
-      "discoverShared"
+      "discoverShared",
+      "productDocBase",
+      "telemetry"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -70,13 +68,14 @@
       "usageCollection",
       "lists",
       "home",
+      "lens",
       "management",
-      "telemetry",
+      "maps",
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
       "guidedOnboarding",
-      "integrationAssistant",
+      "automaticImport",
       "serverless"
     ],
     "requiredBundles": [
@@ -85,9 +84,12 @@
       "kibanaUtils",
       "kibanaReact",
       "usageCollection",
+      "lens",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "esql",
+      "maps"
     ],
     "extraPublicDirs": [
       "common"

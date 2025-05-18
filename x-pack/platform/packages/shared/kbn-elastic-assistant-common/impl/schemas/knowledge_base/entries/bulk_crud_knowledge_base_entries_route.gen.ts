@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Bulk Knowledge Base Actions API endpoint
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from '@kbn/zod';
@@ -22,6 +22,9 @@ import {
   KnowledgeBaseEntryResponse,
 } from './common_attributes.gen';
 
+/**
+ * Reason why a Knowledge Base Entry was skipped during the bulk action.
+ */
 export type KnowledgeBaseEntryBulkActionSkipReason = z.infer<
   typeof KnowledgeBaseEntryBulkActionSkipReason
 >;
@@ -33,22 +36,46 @@ export type KnowledgeBaseEntryBulkActionSkipResult = z.infer<
   typeof KnowledgeBaseEntryBulkActionSkipResult
 >;
 export const KnowledgeBaseEntryBulkActionSkipResult = z.object({
+  /**
+   * ID of the skipped Knowledge Base Entry.
+   */
   id: z.string(),
+  /**
+   * Name of the skipped Knowledge Base Entry.
+   */
   name: z.string().optional(),
   skip_reason: KnowledgeBaseEntryBulkActionSkipReason,
 });
 
 export type KnowledgeBaseEntryDetailsInError = z.infer<typeof KnowledgeBaseEntryDetailsInError>;
 export const KnowledgeBaseEntryDetailsInError = z.object({
+  /**
+   * ID of the Knowledge Base Entry that encountered an error.
+   */
   id: z.string(),
+  /**
+   * Name of the Knowledge Base Entry that encountered an error.
+   */
   name: z.string().optional(),
 });
 
 export type NormalizedKnowledgeBaseEntryError = z.infer<typeof NormalizedKnowledgeBaseEntryError>;
 export const NormalizedKnowledgeBaseEntryError = z.object({
+  /**
+   * Error message describing the issue.
+   */
   message: z.string(),
+  /**
+   * HTTP status code associated with the error.
+   */
   statusCode: z.number().int(),
+  /**
+   * Specific error code for the issue.
+   */
   err_code: z.string().optional(),
+  /**
+   * List of Knowledge Base Entries that encountered the error.
+   */
   knowledgeBaseEntries: z.array(KnowledgeBaseEntryDetailsInError),
 });
 
@@ -56,9 +83,21 @@ export type KnowledgeBaseEntryBulkCrudActionResults = z.infer<
   typeof KnowledgeBaseEntryBulkCrudActionResults
 >;
 export const KnowledgeBaseEntryBulkCrudActionResults = z.object({
+  /**
+   * List of Knowledge Base Entries that were successfully updated.
+   */
   updated: z.array(KnowledgeBaseEntryResponse),
+  /**
+   * List of Knowledge Base Entries that were successfully created.
+   */
   created: z.array(KnowledgeBaseEntryResponse),
+  /**
+   * List of IDs of Knowledge Base Entries that were successfully deleted.
+   */
   deleted: z.array(z.string()),
+  /**
+   * List of Knowledge Base Entries that were skipped during the bulk action.
+   */
   skipped: z.array(KnowledgeBaseEntryBulkActionSkipResult),
 });
 
@@ -66,9 +105,21 @@ export type KnowledgeBaseEntryBulkCrudActionSummary = z.infer<
   typeof KnowledgeBaseEntryBulkCrudActionSummary
 >;
 export const KnowledgeBaseEntryBulkCrudActionSummary = z.object({
+  /**
+   * Number of Knowledge Base Entries that failed during the bulk action.
+   */
   failed: z.number().int(),
+  /**
+   * Number of Knowledge Base Entries that were skipped during the bulk action.
+   */
   skipped: z.number().int(),
+  /**
+   * Number of Knowledge Base Entries that were successfully processed during the bulk action.
+   */
   succeeded: z.number().int(),
+  /**
+   * Total number of Knowledge Base Entries involved in the bulk action.
+   */
   total: z.number().int(),
 });
 
@@ -76,13 +127,28 @@ export type KnowledgeBaseEntryBulkCrudActionResponse = z.infer<
   typeof KnowledgeBaseEntryBulkCrudActionResponse
 >;
 export const KnowledgeBaseEntryBulkCrudActionResponse = z.object({
+  /**
+   * Indicates whether the bulk action was successful.
+   */
   success: z.boolean().optional(),
+  /**
+   * HTTP status code of the response.
+   */
   statusCode: z.number().int().optional(),
+  /**
+   * Message describing the result of the bulk action.
+   */
   message: z.string().optional(),
+  /**
+   * Total number of Knowledge Base Entries processed.
+   */
   knowledgeBaseEntriesCount: z.number().int().optional(),
   attributes: z.object({
     results: KnowledgeBaseEntryBulkCrudActionResults,
     summary: KnowledgeBaseEntryBulkCrudActionSummary,
+    /**
+     * List of errors encountered during the bulk action.
+     */
     errors: z.array(NormalizedKnowledgeBaseEntryError).optional(),
   }),
 });
@@ -90,11 +156,11 @@ export const KnowledgeBaseEntryBulkCrudActionResponse = z.object({
 export type KnowledgeBaseEntryBulkActionBase = z.infer<typeof KnowledgeBaseEntryBulkActionBase>;
 export const KnowledgeBaseEntryBulkActionBase = z.object({
   /**
-   * Query to filter Knowledge Base Entries
+   * Query to filter Knowledge Base Entries.
    */
   query: z.string().optional(),
   /**
-   * Array of Knowledge base Entry IDs
+   * Array of Knowledge Base Entry IDs.
    */
   ids: z.array(z.string()).min(1).optional(),
 });
@@ -104,7 +170,13 @@ export type PerformKnowledgeBaseEntryBulkActionRequestBody = z.infer<
 >;
 export const PerformKnowledgeBaseEntryBulkActionRequestBody = z.object({
   delete: KnowledgeBaseEntryBulkActionBase.optional(),
+  /**
+   * List of Knowledge Base Entries to create.
+   */
   create: z.array(KnowledgeBaseEntryCreateProps).optional(),
+  /**
+   * List of Knowledge Base Entries to update.
+   */
   update: z.array(KnowledgeBaseEntryUpdateProps).optional(),
 });
 export type PerformKnowledgeBaseEntryBulkActionRequestBodyInput = z.input<

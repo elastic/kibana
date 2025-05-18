@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../../../contexts/kibana/use_create_url', () => ({
-  useCreateAndNavigateToMlLink: jest.fn(),
+  useCreateAndNavigateToManagementMlLink: jest.fn(),
 }));
 
 jest.mock('../../../components/help_menu', () => ({

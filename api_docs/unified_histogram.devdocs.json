@@ -13,7 +13,7 @@
         "signature": [
           "(visContext: unknown) => boolean"
         ],
-        "path": "src/plugins/unified_histogram/public/utils/external_vis_context.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/utils/external_vis_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "src/plugins/unified_histogram/public/utils/external_vis_context.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/utils/external_vis_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -56,7 +56,7 @@
           },
           ", localStorageKeyPrefix: string) => string | undefined"
         ],
-        "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -76,7 +76,7 @@
                 "text": "Storage"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,7 +91,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -120,7 +120,7 @@
           },
           ", localStorageKeyPrefix: string) => boolean | undefined"
         ],
-        "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -140,7 +140,7 @@
                 "text": "Storage"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -155,7 +155,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -184,7 +184,7 @@
           },
           ", localStorageKeyPrefix: string) => number | undefined"
         ],
-        "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -204,7 +204,7 @@
                 "text": "Storage"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -219,7 +219,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -248,7 +248,7 @@
           },
           ", localStorageKeyPrefix: string, breakdownField: string | undefined) => false | void"
         ],
-        "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -268,7 +268,7 @@
                 "text": "Storage"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -283,7 +283,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -298,7 +298,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -327,7 +327,7 @@
           },
           ", localStorageKeyPrefix: string, chartHidden: boolean | undefined) => false | void"
         ],
-        "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -347,7 +347,7 @@
                 "text": "Storage"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -362,7 +362,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -377,7 +377,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -406,7 +406,7 @@
           },
           ", localStorageKeyPrefix: string, topPanelHeight: number | undefined) => false | void"
         ],
-        "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -426,7 +426,7 @@
                 "text": "Storage"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -441,7 +441,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -456,7 +456,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/container/utils/local_storage_utils.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/utils/local_storage_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -493,7 +493,7 @@
           },
           " & React.RefAttributes<{}>>"
         ],
-        "path": "src/plugins/unified_histogram/public/chart/lazy.tsx",
+        "path": "src/platform/plugins/shared/unified_histogram/public/chart/lazy.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -567,7 +567,7 @@
           },
           ") => void) | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"className\" | \"children\" | \"columns\" | \"timeRange\" | \"query\" | \"filters\" | \"services\" | \"table\" | \"dataView\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"externalVisContext\" | \"withDefaultActions\" | \"abortController\"> & ",
+          ", \"className\" | \"children\" | \"columns\" | \"timeRange\" | \"query\" | \"filters\" | \"services\" | \"table\" | \"dataView\" | \"container\" | \"onBrushEnd\" | \"abortController\" | \"withDefaultActions\" | \"disabledActions\" | \"onFilter\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"externalVisContext\"> & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -585,7 +585,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/unified_histogram/public/container/index.tsx",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -616,7 +616,7 @@
         "tags": [],
         "label": "BreakdownFieldSelectorProps",
         "description": [],
-        "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
+        "path": "src/platform/plugins/shared/unified_histogram/public/chart/breakdown_field_selector.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -636,7 +636,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
+            "path": "src/platform/plugins/shared/unified_histogram/public/chart/breakdown_field_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -650,7 +650,7 @@
             "signature": [
               "UnifiedHistogramBreakdownContext"
             ],
-            "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
+            "path": "src/platform/plugins/shared/unified_histogram/public/chart/breakdown_field_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -671,7 +671,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
+            "path": "src/platform/plugins/shared/unified_histogram/public/chart/breakdown_field_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -693,7 +693,7 @@
               },
               " | undefined) => void) | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
+            "path": "src/platform/plugins/shared/unified_histogram/public/chart/breakdown_field_selector.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -714,7 +714,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/unified_histogram/public/chart/breakdown_field_selector.tsx",
+                "path": "src/platform/plugins/shared/unified_histogram/public/chart/breakdown_field_selector.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -734,7 +734,7 @@
         "description": [
           "\nEmitted when the histogram loading status changes"
         ],
-        "path": "src/plugins/unified_histogram/public/types.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -774,7 +774,7 @@
               },
               " | undefined; }"
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -797,7 +797,7 @@
               },
               "<boolean | undefined> | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -813,7 +813,7 @@
         "description": [
           "\nThe services required by the Unified Histogram components"
         ],
-        "path": "src/plugins/unified_histogram/public/types.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -833,7 +833,7 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -871,7 +871,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -879,7 +879,23 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; readonly getAction: (id: string) => ",
+              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>>) => void; readonly getAction: (id: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -887,7 +903,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>; readonly getTriggerActions: (triggerId: string) => ",
+              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -895,7 +911,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -903,7 +919,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -911,7 +927,7 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -921,7 +937,7 @@
               },
               "; }"
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -933,15 +949,9 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -971,7 +981,7 @@
               },
               "; }"
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -991,7 +1001,7 @@
                 "text": "LensPublicStart"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1011,7 +1021,7 @@
                 "text": "Storage"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1031,27 +1041,21 @@
                 "text": "ExpressionsStart"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "unifiedHistogram",
             "id": "def-public.UnifiedHistogramServices.capabilities",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "capabilities",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              }
+              "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1067,7 +1071,7 @@
         "description": [
           "\nThe current state of the container"
         ],
-        "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1084,7 +1088,7 @@
               "UnifiedHistogramSuggestionContext",
               " | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1097,7 +1101,7 @@
             "description": [
               "\nWhether or not the chart is hidden"
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1120,7 +1124,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1144,7 +1148,7 @@
               },
               "> | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1167,7 +1171,7 @@
               },
               "<boolean | undefined> | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1180,7 +1184,7 @@
             "description": [
               "\nThe current time interval of the chart"
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1196,7 +1200,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1218,7 +1222,7 @@
                 "text": "UnifiedHistogramFetchStatus"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1234,7 +1238,7 @@
             "signature": [
               "number | Error | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1250,7 +1254,7 @@
         "description": [
           "\nThe options used to initialize the comntainer state"
         ],
-        "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1272,7 +1276,7 @@
                 "text": "UnifiedHistogramServices"
               }
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1288,7 +1292,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1312,7 +1316,7 @@
               },
               "> | undefined"
             ],
-            "path": "src/plugins/unified_histogram/public/container/services/state_service.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/container/services/state_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1328,7 +1332,7 @@
         "description": [
           "\nUnified Histogram type for recreating a stored Lens vis"
         ],
-        "path": "src/plugins/unified_histogram/public/types.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1341,13 +1345,7 @@
             "description": [],
             "signature": [
               "{ title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsXY\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1372,7 +1370,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1381,13 +1379,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1407,13 +1399,7 @@
                 "text": "XYState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsPie\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1438,7 +1424,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1447,13 +1433,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1467,13 +1447,7 @@
               " | undefined; }; visualization: ",
               "PieVisualizationState",
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1498,7 +1472,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1507,13 +1481,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1533,13 +1501,7 @@
                 "text": "HeatmapVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsGauge\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1564,7 +1526,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1573,13 +1535,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1599,13 +1555,7 @@
                 "text": "GaugeVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1630,7 +1580,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1639,13 +1589,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1665,13 +1609,7 @@
                 "text": "DatatableVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1696,7 +1634,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1705,13 +1643,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1731,13 +1663,7 @@
                 "text": "LegacyMetricState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: \"lnsMetric\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1762,7 +1688,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1771,13 +1697,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1797,13 +1717,7 @@
                 "text": "MetricVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; visualizationType: string; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1828,7 +1742,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1837,13 +1751,7 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -1856,7 +1764,7 @@
               "TextBasedPersistedState",
               " | undefined; }; visualization: unknown; }; }"
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1870,7 +1778,7 @@
             "signature": [
               "LensRequestData"
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1884,7 +1792,7 @@
             "signature": [
               "UnifiedHistogramSuggestionType"
             ],
-            "path": "src/plugins/unified_histogram/public/types.ts",
+            "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1900,7 +1808,7 @@
         "tags": [],
         "label": "UnifiedHistogramExternalVisContextStatus",
         "description": [],
-        "path": "src/plugins/unified_histogram/public/types.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1914,7 +1822,7 @@
         "description": [
           "\nThe fetch status of a Unified Histogram request"
         ],
-        "path": "src/plugins/unified_histogram/public/types.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1957,7 +1865,7 @@
           },
           " | undefined; }"
         ],
-        "path": "src/plugins/unified_histogram/public/types.ts",
+        "path": "src/platform/plugins/shared/unified_histogram/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1972,11 +1880,11 @@
           "\nThe API exposed by the container"
         ],
         "signature": [
-          "{ refetch: () => void; } & Pick<",
+          "{ fetch: () => void; } & Pick<",
           "UnifiedHistogramStateService",
           ", \"state$\" | \"setChartHidden\" | \"setTopPanelHeight\" | \"setTimeInterval\" | \"setTotalHits\">"
         ],
-        "path": "src/plugins/unified_histogram/public/container/container.tsx",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/container.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2033,9 +1941,9 @@
           },
           ") => void) | undefined; } & Pick<",
           "UnifiedHistogramLayoutProps",
-          ", \"className\" | \"children\" | \"columns\" | \"timeRange\" | \"query\" | \"filters\" | \"services\" | \"table\" | \"dataView\" | \"container\" | \"onBrushEnd\" | \"disabledActions\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"onFilter\" | \"externalVisContext\" | \"withDefaultActions\" | \"abortController\">"
+          ", \"className\" | \"children\" | \"columns\" | \"timeRange\" | \"query\" | \"filters\" | \"services\" | \"table\" | \"dataView\" | \"container\" | \"onBrushEnd\" | \"abortController\" | \"withDefaultActions\" | \"disabledActions\" | \"onFilter\" | \"relativeTimeRange\" | \"renderCustomChartToggleActions\" | \"externalVisContext\">"
         ],
-        "path": "src/plugins/unified_histogram/public/container/container.tsx",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/container.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2060,7 +1968,7 @@
           },
           ", \"services\"> & LayoutProps"
         ],
-        "path": "src/plugins/unified_histogram/public/container/container.tsx",
+        "path": "src/platform/plugins/shared/unified_histogram/public/container/container.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -72,10 +72,11 @@ function TimestampFallbackDisabled() {
   return null;
 }
 
-export function timestampOverrideDeserializer(defaultValue: FormData) {
+export function timestampOverrideDeserializer(_: unknown, finalDiffableRule: DiffableRule) {
   return {
-    timestampOverride: defaultValue.timestamp_override.field_name,
-    timestampOverrideFallbackDisabled: defaultValue.timestamp_override.fallback_disabled ?? false,
+    timestampOverride: finalDiffableRule.timestamp_override?.field_name,
+    timestampOverrideFallbackDisabled:
+      finalDiffableRule.timestamp_override?.fallback_disabled ?? false,
   };
 }
 

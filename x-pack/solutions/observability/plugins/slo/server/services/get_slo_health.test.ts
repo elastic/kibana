@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import { ScopedClusterClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
@@ -21,21 +20,19 @@ import { SLORepository } from './slo_repository';
 
 describe('GetSLOHealth', () => {
   let mockRepository: jest.Mocked<SLORepository>;
-  let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let getSLOHealth: GetSLOHealth;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
-    getSLOHealth = new GetSLOHealth(mockEsClient, mockScopedClusterClient, mockRepository);
+    getSLOHealth = new GetSLOHealth(mockScopedClusterClient, mockRepository);
   });
 
   it('returns the health and state', async () => {
     const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
     mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-    mockEsClient.search.mockResolvedValue({
+    mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
       took: 0,
       timed_out: false,
       _shards: {
@@ -80,7 +77,7 @@ describe('GetSLOHealth', () => {
 
   it('handles inexistant sloId', async () => {
     mockRepository.findAllByIds.mockResolvedValueOnce([]);
-    mockEsClient.search.mockResolvedValue({
+    mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
       took: 0,
       timed_out: false,
       _shards: {
@@ -110,7 +107,7 @@ describe('GetSLOHealth', () => {
     it('returns healthy when both transforms are healthy', async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-      mockEsClient.search.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
         took: 0,
         timed_out: false,
         _shards: {
@@ -167,7 +164,7 @@ describe('GetSLOHealth', () => {
     it('returns unhealthy whenever one of the transform is unhealthy', async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-      mockEsClient.search.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
         took: 0,
         timed_out: false,
         _shards: {
@@ -226,7 +223,7 @@ describe('GetSLOHealth', () => {
     it('returns stale when summaryUpdatedAt is 2 days old', async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-      mockEsClient.search.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
         took: 0,
         timed_out: false,
         _shards: {
@@ -278,7 +275,7 @@ describe('GetSLOHealth', () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
       const now = Date.now();
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-      mockEsClient.search.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
         took: 0,
         timed_out: false,
         _shards: {
@@ -330,7 +327,7 @@ describe('GetSLOHealth', () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
       const now = Date.now();
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
-      mockEsClient.search.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
         took: 0,
         timed_out: false,
         _shards: {

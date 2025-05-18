@@ -8,6 +8,8 @@
 import type { ReactWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+// Necessary until components being tested are migrated of styled-components https://github.com/elastic/kibana/issues/219037
+import 'jest-styled-components';
 
 import { FiltersGlobal } from './filters_global';
 import { TestProviders } from '../../mock/test_providers';

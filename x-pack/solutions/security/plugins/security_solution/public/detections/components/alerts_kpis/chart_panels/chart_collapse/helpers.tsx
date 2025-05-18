@@ -10,7 +10,6 @@ import type { ChartCollapseAgg, ChartCollapseData } from './types';
 import type { AlertSearchResponse } from '../../../../containers/detection_engine/alerts/types';
 import type { SummaryChartsData, SummaryChartsAgg } from '../../alerts_summary_charts_panel/types';
 import { severityLabels } from '../../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
-import { UNKNOWN_SEVERITY } from '../../severity_level_panel/translations';
 
 export const parseChartCollapseData = (
   response: AlertSearchResponse<{}, ChartCollapseAgg>
@@ -25,7 +24,7 @@ export const parseChartCollapseData = (
       return {
         key: severity.key,
         value: severity.doc_count,
-        label: severityLabels[severity.key] ?? UNKNOWN_SEVERITY,
+        label: severityLabels[severity.key],
       };
     });
     return [ret];

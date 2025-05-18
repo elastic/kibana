@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+
 /*
  * This utility function can be used to turn a TypeScript enum into a io-ts codec.
  */

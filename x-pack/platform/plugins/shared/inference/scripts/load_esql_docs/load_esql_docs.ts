@@ -6,7 +6,7 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { ESQLMessage, EditorError, getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import { ESQLMessage, EditorError } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import Fs from 'fs/promises';
 import Path from 'path';
@@ -69,7 +69,7 @@ yargs(process.argv.slice(2))
           });
           log.info(`Using connector ${connector.connectorId}`);
 
-          const chatClient = kibanaClient.createInferenceClient({
+          const inferenceClient = kibanaClient.createInferenceClient({
             connectorId: connector.connectorId,
           });
 
@@ -84,14 +84,14 @@ yargs(process.argv.slice(2))
           log.info(`Retrieving and converting documentation from ${builtDocsDir}...`);
           const extraction = await extractDocEntries({
             builtDocsDir,
-            inferenceClient: chatClient,
+            inferenceClient,
             log,
           });
 
           log.info(`Rewriting documentation...`);
           const docFiles = await generateDoc({
             extraction,
-            inferenceClient: chatClient,
+            inferenceClient,
             log,
           });
 
@@ -156,7 +156,7 @@ const findEsqlSyntaxError = async (doc: FileToWrite): Promise<SyntaxError[]> => 
   return Array.from(doc.content.matchAll(INLINE_ESQL_QUERY_REGEX)).reduce(
     async (listP, [match, query]) => {
       const list = await listP;
-      const { errors, warnings } = await validateQuery(query, getAstAndSyntaxErrors, {
+      const { errors, warnings } = await validateQuery(query, {
         // setting this to true, we don't want to validate the index / fields existence
         ignoreOnMissingCallbacks: true,
       });

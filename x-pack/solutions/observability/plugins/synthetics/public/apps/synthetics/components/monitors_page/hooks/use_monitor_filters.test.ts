@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import * as spaceHook from '../../../../../hooks/use_kibana_space';
 import * as paramHook from '../../../hooks/use_url_params';
 import * as redux from 'react-redux';
@@ -100,20 +100,17 @@ describe('useMonitorFilters', () => {
   it('should handle a combination of parameters', () => {
     spaceSpy.mockReturnValue({ space: { id: 'space3' } } as any);
     paramSpy.mockReturnValue({
-      schedules: 'daily',
       projects: ['projectA'],
       tags: ['tagB'],
       locations: ['locationC'],
       monitorTypes: 'http',
     } as any);
-    selSPy.mockReturnValue({ status: { allIds: ['id3', 'id4'] } });
 
     const { result } = renderHook(() => useMonitorFilters({ forAlerts: false }), {
       wrapper: WrappedHelper,
     });
 
     expect(result.current).toEqual([
-      { field: 'monitor.id', values: ['id3', 'id4'] },
       { field: 'monitor.project.id', values: ['projectA'] },
       { field: 'monitor.type', values: ['http'] },
       { field: 'tags', values: ['tagB'] },

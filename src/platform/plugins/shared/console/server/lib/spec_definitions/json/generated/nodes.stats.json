@@ -15,11 +15,6 @@
         "indices",
         "shards"
       ],
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
       "timeout": [
         "30s",
         "-1",

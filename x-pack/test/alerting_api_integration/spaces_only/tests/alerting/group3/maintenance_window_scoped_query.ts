@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createRule,
   createAction,
@@ -94,7 +94,7 @@ export default function maintenanceWindowScopedQueryTests({ getService }: FtrPro
       await retry.try(async () => {
         const result = await es.search<Alert>({
           index: alertAsDataIndex,
-          body: { query: { match_all: {} } },
+          query: { match_all: {} },
         });
 
         expect(result.hits.hits[0]?._source?.[ALERT_MAINTENANCE_WINDOW_IDS]).eql([

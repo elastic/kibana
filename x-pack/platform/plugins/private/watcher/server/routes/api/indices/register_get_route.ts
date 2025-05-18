@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { reduce, size } from 'lodash';
@@ -50,14 +50,12 @@ async function getIndices(dataClient: IScopedClusterClient, pattern: string, lim
   const response = await dataClient.asCurrentUser.search<unknown, { indices: IndicesAggs }>(
     {
       index: pattern,
-      body: {
-        size: 0, // no hits
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: limit,
-            },
+      size: 0, // no hits
+      aggs: {
+        indices: {
+          terms: {
+            field: '_index',
+            size: limit,
           },
         },
       },
@@ -79,6 +77,12 @@ export function registerGetRoute({ router, license, lib: { handleEsError } }: Ro
   router.post(
     {
       path: '/api/watcher/indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodySchema,
       },

@@ -13,9 +13,10 @@ export default function ({ loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./landing_page'));
     loadTestFile(require.resolve('./navigation'));
-    loadTestFile(require.resolve('./observability_logs_explorer'));
     loadTestFile(require.resolve('./dataset_quality'));
     loadTestFile(require.resolve('./discover/context_awareness'));
+    loadTestFile(require.resolve('./discover/logs'));
+    loadTestFile(require.resolve('./discover/embeddables'));
     loadTestFile(require.resolve('./onboarding'));
     loadTestFile(require.resolve('./rules/rules_list'));
     loadTestFile(require.resolve('./cases'));

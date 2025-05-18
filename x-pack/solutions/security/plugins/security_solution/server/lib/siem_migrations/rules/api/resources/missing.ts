@@ -7,13 +7,14 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { RuleMigrationResourceData } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationResourceBase } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   GetRuleMigrationResourcesMissingRequestParams,
   type GetRuleMigrationResourcesMissingResponse,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { authz } from '../util/authz';
 import { withLicense } from '../util/with_license';
 
 export const registerSiemRuleMigrationsResourceGetMissingRoute = (
@@ -24,7 +25,7 @@ export const registerSiemRuleMigrationsResourceGetMissingRoute = (
     .get({
       path: SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {
@@ -49,7 +50,7 @@ export const registerSiemRuleMigrationsResourceGetMissingRoute = (
             const options = { filters: { hasContent: false } };
             const batches = ruleMigrationsClient.data.resources.searchBatches(migrationId, options);
 
-            const missingResources: RuleMigrationResourceData[] = [];
+            const missingResources: RuleMigrationResourceBase[] = [];
             let results = await batches.next();
             while (results.length) {
               missingResources.push(...results.map(({ type, name }) => ({ type, name })));

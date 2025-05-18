@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   flex: 1;

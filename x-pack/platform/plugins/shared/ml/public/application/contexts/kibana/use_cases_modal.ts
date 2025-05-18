@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
 import { AttachmentType } from '@kbn/cases-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { useMlKibana } from './kibana_context';
 import type { MappedEmbeddableTypeOf, MlEmbeddableTypes } from '../../../embeddables';
 
@@ -15,13 +16,25 @@ import type { MappedEmbeddableTypeOf, MlEmbeddableTypes } from '../../../embedda
  * Returns a callback for opening the cases modal with provided attachment state.
  */
 export const useCasesModal = <EmbeddableType extends MlEmbeddableTypes>(
-  embeddableType: EmbeddableType
+  embeddableType: EmbeddableType,
+  title: string
 ) => {
   const {
     services: { cases },
   } = useMlKibana();
 
-  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal();
+  const successMessage = useMemo(() => {
+    return i18n.translate('xpack.ml.useCasesModal.successMessage', {
+      defaultMessage: '{title} added to case.',
+      values: { title },
+    });
+  }, [title]);
+
+  const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
+    successToaster: {
+      content: successMessage,
+    },
+  });
 
   return useCallback(
     (persistableState: Partial<Omit<MappedEmbeddableTypeOf<EmbeddableType>, 'id'>>) => {
@@ -48,7 +61,7 @@ export const useCasesModal = <EmbeddableType extends MlEmbeddableTypes>(
         ],
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [embeddableType]
+
+    [embeddableType, selectCaseModal]
   );
 };

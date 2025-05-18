@@ -8,7 +8,7 @@
 
 import { Subject } from 'rxjs';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { License } from '@kbn/licensing-plugin/common/license';
@@ -1275,6 +1275,104 @@ describe('Response actions', () => {
 
       expect(getResponseActionsClientMock).toHaveBeenCalledWith('sentinel_one', expect.anything());
       expect(httpResponseMock.ok).toHaveBeenCalled();
+    });
+  });
+
+  describe('and agent type if Microsoft Defender', () => {
+    let testSetup: HttpApiTestSetupMock;
+    let httpRequestMock: ReturnType<HttpApiTestSetupMock['createRequestMock']>;
+    let httpHandlerContextMock: HttpApiTestSetupMock['httpHandlerContextMock'];
+    let httpResponseMock: HttpApiTestSetupMock['httpResponseMock'];
+    let callHandler: () => ReturnType<RequestHandler>;
+
+    beforeEach(async () => {
+      testSetup = createHttpApiTestSetupMock();
+
+      ({ httpHandlerContextMock, httpResponseMock } = testSetup);
+      httpRequestMock = testSetup.createRequestMock();
+
+      testSetup.endpointAppContextMock.experimentalFeatures = {
+        ...testSetup.endpointAppContextMock.experimentalFeatures,
+        responseActionsMSDefenderEndpointEnabled: true,
+      };
+
+      httpHandlerContextMock.actions = Promise.resolve({
+        getActionsClient: () => sentinelOneMock.createConnectorActionsClient(),
+      } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
+
+      // Set the esClient to be used in the handler context
+      // eslint-disable-next-line require-atomic-updates
+      httpHandlerContextMock.core = Promise.resolve(
+        set(
+          await httpHandlerContextMock.core,
+          'elasticsearch.client.asInternalUser',
+          responseActionsClientMock.createConstructorOptions().esClient
+        )
+      );
+
+      httpRequestMock = testSetup.createRequestMock({
+        body: {
+          endpoint_ids: ['123-456'],
+          agent_type: 'microsoft_defender_endpoint',
+        },
+      });
+      registerResponseActionRoutes(testSetup.routerMock, testSetup.endpointAppContextMock);
+
+      (testSetup.endpointAppContextMock.service.getEndpointMetadataService as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          getMetadataForEndpoints: jest.fn().mockResolvedValue([
+            {
+              elastic: {
+                agent: {
+                  id: '123-456',
+                },
+              },
+              agent: {
+                id: '123-456',
+              },
+              host: {
+                hostname: 'test-host',
+              },
+            },
+          ]),
+        });
+
+      const handler = testSetup.getRegisteredVersionedRoute(
+        'post',
+        ISOLATE_HOST_ROUTE_V2,
+        '2023-10-31'
+      ).routeHandler as RequestHandler;
+
+      callHandler = () => handler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should use the Microsoft Defender response actions client', async () => {
+      await callHandler();
+      expect(getResponseActionsClientMock).toHaveBeenCalledWith(
+        'microsoft_defender_endpoint',
+        expect.anything()
+      );
+    });
+
+    it('should error if feature is disabled', async () => {
+      testSetup.endpointAppContextMock.experimentalFeatures = {
+        ...testSetup.endpointAppContextMock.experimentalFeatures,
+        responseActionsMSDefenderEndpointEnabled: false,
+      };
+
+      await callHandler();
+
+      expect(httpResponseMock.customError).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          message: '[request body.agent_type]: feature is disabled',
+        }),
+        statusCode: 400,
+      });
     });
   });
 });

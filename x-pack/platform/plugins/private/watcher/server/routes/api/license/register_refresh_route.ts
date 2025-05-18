@@ -17,6 +17,12 @@ export function registerRefreshRoute({ router, license }: RouteDependencies) {
   router.get(
     {
       path: '/api/watcher/license/refresh',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on license for authorization',
+        },
+      },
       validate: false,
     },
     license.guardApiRoute((ctx, request, response) => {

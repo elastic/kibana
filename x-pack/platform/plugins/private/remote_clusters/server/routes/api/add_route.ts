@@ -61,9 +61,9 @@ export const register = (deps: RouteDependencies): void => {
       }
 
       const addClusterPayload = serializeCluster(request.body as Cluster);
-      const updateClusterResponse = await clusterClient.asCurrentUser.cluster.putSettings({
-        body: addClusterPayload,
-      });
+      const updateClusterResponse = await clusterClient.asCurrentUser.cluster.putSettings(
+        addClusterPayload
+      );
       const acknowledged = get(updateClusterResponse, 'acknowledged');
       const cluster = get(updateClusterResponse, `persistent.cluster.remote.${name}`);
 
@@ -95,6 +95,12 @@ export const register = (deps: RouteDependencies): void => {
   router.post(
     {
       path: API_BASE_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
       validate: {
         body: bodyValidation,
       },

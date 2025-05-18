@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useKnowledgeBaseEntries } from './use_knowledge_base_entries';
 import { HttpSetup } from '@kbn/core/public';
 import { IToasts } from '@kbn/core-notifications-browser';
@@ -27,7 +27,7 @@ describe('useKnowledgeBaseEntries', () => {
       data: [{ id: '1', title: 'Entry 1' }],
     });
 
-    const { result, waitForNextUpdate } = renderHook(
+    const { result } = renderHook(
       () => useKnowledgeBaseEntries({ http: httpMock, enabled: true }),
       {
         wrapper: TestProviders,
@@ -35,32 +35,32 @@ describe('useKnowledgeBaseEntries', () => {
     );
     expect(result.current.fetchStatus).toEqual('fetching');
 
-    await waitForNextUpdate();
-
-    expect(result.current.data).toEqual({
-      page: 1,
-      perPage: 100,
-      total: 1,
-      data: [{ id: '1', title: 'Entry 1' }],
-    });
+    await waitFor(() =>
+      expect(result.current.data).toEqual({
+        page: 1,
+        perPage: 100,
+        total: 1,
+        data: [{ id: '1', title: 'Entry 1' }],
+      })
+    );
   });
 
   it('handles fetch error', async () => {
     const error = new Error('Fetch error');
     (httpMock.fetch as jest.Mock).mockRejectedValue(error);
 
-    const { waitForNextUpdate } = renderHook(
+    renderHook(
       () => useKnowledgeBaseEntries({ http: httpMock, toasts: toastsMock, enabled: true }),
       {
         wrapper: TestProviders,
       }
     );
 
-    await waitForNextUpdate();
-
-    expect(toastsMock.addError).toHaveBeenCalledWith(error, {
-      title: 'Error fetching Knowledge Base entries',
-    });
+    await waitFor(() =>
+      expect(toastsMock.addError).toHaveBeenCalledWith(error, {
+        title: 'Error fetching Knowledge Base entries',
+      })
+    );
   });
 
   it('does not fetch when disabled', async () => {

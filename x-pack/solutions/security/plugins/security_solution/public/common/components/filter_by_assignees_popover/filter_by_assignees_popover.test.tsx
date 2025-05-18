@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 
 import { FilterByAssigneesPopover } from './filter_by_assignees_popover';
 import { TestProviders } from '../../mock';
@@ -18,6 +18,7 @@ import { useSuggestUsers } from '../user_profiles/use_suggest_users';
 import { useLicense } from '../../hooks/use_license';
 import { useUpsellingMessage } from '../../hooks/use_upselling';
 import { FILTER_BY_ASSIGNEES_BUTTON } from './test_ids';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../user_profiles/use_get_current_user_profile');
 jest.mock('../user_profiles/use_bulk_get_user_profiles');
@@ -85,17 +86,17 @@ describe('<FilterByAssigneesPopover />', () => {
     expect(queryByTestId('euiSelectableList')).not.toBeInTheDocument();
   });
 
-  it('should render opened popover component', () => {
+  it('should render opened popover component', async () => {
     const { getByTestId } = renderFilterByAssigneesPopover();
 
-    getByTestId(FILTER_BY_ASSIGNEES_BUTTON).click();
+    await userEvent.click(getByTestId(FILTER_BY_ASSIGNEES_BUTTON));
     expect(getByTestId('euiSelectableList')).toBeInTheDocument();
   });
 
-  it('should render assignees', () => {
+  it('should render assignees', async () => {
     const { getByTestId } = renderFilterByAssigneesPopover();
 
-    getByTestId(FILTER_BY_ASSIGNEES_BUTTON).click();
+    await userEvent.click(getByTestId(FILTER_BY_ASSIGNEES_BUTTON));
 
     const assigneesList = getByTestId('euiSelectableList');
     expect(assigneesList).toHaveTextContent('User 1');
@@ -110,14 +111,14 @@ describe('<FilterByAssigneesPopover />', () => {
     const onUsersChangeMock = jest.fn();
     const { getByTestId, getByText } = renderFilterByAssigneesPopover([], onUsersChangeMock);
 
-    getByTestId(FILTER_BY_ASSIGNEES_BUTTON).click();
+    fireEvent.click(getByTestId(FILTER_BY_ASSIGNEES_BUTTON));
 
-    getByText('User 1').click();
-    getByText('User 2').click();
-    getByText('User 3').click();
-    getByText('User 3').click();
-    getByText('User 2').click();
-    getByText('User 1').click();
+    fireEvent.click(getByText('User 1'));
+    fireEvent.click(getByText('User 2'));
+    fireEvent.click(getByText('User 3'));
+    fireEvent.click(getByText('User 3'));
+    fireEvent.click(getByText('User 2'));
+    fireEvent.click(getByText('User 1'));
 
     expect(onUsersChangeMock).toHaveBeenCalledTimes(6);
     expect(onUsersChangeMock.mock.calls).toEqual([

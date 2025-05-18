@@ -8,7 +8,7 @@
 import { useNavigateToLeftPanel } from './use_navigate_to_left_panel';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useDocumentDetailsContext } from '../context';
 import { mockFlyoutApi } from '../mocks/mock_flyout_context';
 import { DocumentDetailsRightPanelKey, DocumentDetailsLeftPanelKey } from '../constants/panel_keys';
@@ -31,10 +31,10 @@ const indexName = 'indexName';
 const scopeId = 'scopeId';
 
 describe('useNavigateToLeftPanel', () => {
-  describe('newExpandableFlyoutNavigationEnabled is not enabled', () => {
+  describe('newExpandableFlyoutNavigationDisabled is true', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
       jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     });
 
@@ -83,10 +83,10 @@ describe('useNavigateToLeftPanel', () => {
     });
   });
 
-  describe('newExpandableFlyoutNavigationEnabled', () => {
+  describe('newExpandableFlyoutNavigationDisabled is false', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     });
 
     it('should enable navigation if isPreviewMode is false', () => {

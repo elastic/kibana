@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('feature controls', function () {
+    this.tags('skipCloud');
     loadTestFile(require.resolve('./remote_clusters_security'));
   });
 }

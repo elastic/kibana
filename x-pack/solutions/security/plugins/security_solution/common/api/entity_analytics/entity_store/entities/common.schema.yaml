@@ -6,10 +6,16 @@ info:
 paths: {}
 components:
   schemas:
+    EngineMetadata: 
+      type: object
+      required: 
+        - Type
+      properties:
+        Type:
+          type: string
     UserEntity:
       type: object
       required:
-        - "@timestamp"
         - user
         - entity
       properties:
@@ -21,10 +27,15 @@ components:
           required:
             - name
             - source
+            - type
           properties:
+            "EngineMetadata":
+              $ref: '#/components/schemas/EngineMetadata'
             name:
               type: string
             source:
+              type: string
+            type:
               type: string
         user:
           type: object
@@ -66,10 +77,15 @@ components:
               $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality
+        event:
+          type: object
+          properties:
+            ingested:
+              type: string
+              format: date-time
     HostEntity:
       type: object
       required:
-        - "@timestamp"
         - host
         - entity
       properties:
@@ -81,10 +97,15 @@ components:
           required:
             - name
             - source
+            - type
           properties:
+            "EngineMetadata":
+              $ref: '#/components/schemas/EngineMetadata'
             name:
               type: string
             source:
+              type: string
+            type:
               type: string
         host:
           type: object
@@ -130,8 +151,102 @@ components:
               $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality
+        event:
+          type: object
+          properties:
+            ingested:
+              type: string
+              format: date-time
+    ServiceEntity:
+      type: object
+      required:
+        - service
+        - entity
+      properties:
+        "@timestamp":
+          type: string
+          format: date-time
+        entity:
+          type: object
+          required:
+            - name
+            - source
+            - type
+          properties:
+            "EngineMetadata":
+              $ref: '#/components/schemas/EngineMetadata'
+            name:
+              type: string
+            source:
+              type: string
+            type:
+              type: string
+        service:
+          type: object
+          properties:
+            name:
+              type: string
+            risk:
+              $ref: '../../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+          required:
+            - name
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
+        event:
+          type: object
+          properties:
+            ingested:
+              type: string
+              format: date-time
 
+    # The Generic Entity definition maps more than just entity.
+    # however I don't see a reason to duplicate the definition 
+    # of all the fields just for the sake of doing. 
+    # Thus the current mapping maps entity and asset only 
+    # (used in code). If you end up needing the fields mapped 
+    # in the schema just add it.              
+    GenericEntity:
+      type: object
+      required:
+        - entity
+      properties:
+        "@timestamp":
+          type: string
+          format: date-time
+        entity:
+          type: object
+          required:
+            - id
+            - name
+            - type
+          properties:
+            "EngineMetadata":
+              $ref: '#/components/schemas/EngineMetadata'
+            id:
+              type: string
+            name:
+              type: string
+            type:
+              type: string
+            category:
+              type: string
+            source:
+              type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
     Entity:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
         - $ref: '#/components/schemas/HostEntity'
+        - $ref: '#/components/schemas/ServiceEntity'
+        - $ref: '#/components/schemas/GenericEntity'

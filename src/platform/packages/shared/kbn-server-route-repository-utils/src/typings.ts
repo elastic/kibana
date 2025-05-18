@@ -151,7 +151,7 @@ export type CreateServerRouteFactory<
     endpoint: ValidateEndpoint<TEndpoint, TRouteAccess> extends true ? TEndpoint : never;
     handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
     params?: TRouteParamsRT;
-    security?: RouteSecurity;
+    security: RouteSecurity;
   } & Required<
     {
       options?: (TRouteCreateOptions extends DefaultRouteCreateOptions ? TRouteCreateOptions : {}) &
@@ -181,7 +181,7 @@ export type ServerRoute<
 > = {
   endpoint: TEndpoint;
   handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>;
-  security?: RouteSecurity;
+  security: RouteSecurity;
 } & (TRouteParamsRT extends RouteParamsRT ? { params: TRouteParamsRT } : {}) &
   (TRouteCreateOptions extends DefaultRouteCreateOptions ? { options: TRouteCreateOptions } : {});
 
@@ -213,7 +213,7 @@ type DecodedRequestParamsOfType<TRouteParamsRT extends RouteParamsRT> =
     : never;
 
 export type EndpointOf<TServerRouteRepository extends ServerRouteRepository> =
-  keyof TServerRouteRepository;
+  keyof TServerRouteRepository & string;
 
 export type ReturnOf<
   TServerRouteRepository extends ServerRouteRepository,

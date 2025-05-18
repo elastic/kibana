@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type OpenAI from 'openai';
 
@@ -39,11 +40,15 @@ export interface InvokeAIActionParamsSchema {
   functions?: OpenAI.ChatCompletionCreateParamsNonStreaming['functions'];
   signal?: AbortSignal;
   timeout?: number;
+  telemetryMetadata?: TelemetryMetadata;
 }
 export interface RunActionParamsSchema {
   body: string;
   signal?: AbortSignal;
   timeout?: number;
+}
+export interface InferenceChatCompleteParamsSchema {
+  body: InvokeAIActionParamsSchema;
 }
 
 export interface TraceOptions {

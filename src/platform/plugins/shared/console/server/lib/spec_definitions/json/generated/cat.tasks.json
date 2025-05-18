@@ -6,11 +6,6 @@
       ],
       "h": [],
       "help": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
       "s": [],
       "v": "__flag__",
       "error_trace": "__flag__",
@@ -19,8 +14,23 @@
       "pretty": "__flag__",
       "actions": "",
       "detailed": "__flag__",
-      "node_id": "",
-      "parent_task_id": ""
+      "nodes": "",
+      "parent_task_id": "",
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "wait_for_completion": "__flag__"
     },
     "methods": [
       "GET"
